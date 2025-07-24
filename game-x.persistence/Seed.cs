@@ -13,7 +13,7 @@ public static class RoleIds
 {
     public const string Root = "99b9cfef-1e02-cac0-abf6-b87a6e95bd48";
     public const string Admin = "64856429-39cc-2cb0-427e-c6a6549cf10a";
-    public const string Staff = "3544228a-e12b-d7c9-da46-373340a7412f";
+    public const string Cs = "3544228a-e12b-d7c9-da46-373340a7412f";
     public const string User = "fe000fef-f758-c67e-2bcf-617d059487c3";
 }
 
@@ -24,7 +24,6 @@ public static class Seed
         UserManager<AppUser> userManager,
         GameXContext context)
     {
-        // 系統角色
         if (!context.Roles.Any())
         {
             var roles = new List<IdentityRole>()
@@ -43,9 +42,9 @@ public static class Seed
                 },
                 new()
                 {
-                    Id = RoleIds.Staff,
-                    Name = AppRoles.Staff,
-                    NormalizedName = AppRoles.Staff.ToUpper(),
+                    Id = RoleIds.Cs,
+                    Name = AppRoles.Cs,
+                    NormalizedName = AppRoles.Cs.ToUpper(),
                 },
                 new()
                 {
@@ -57,7 +56,6 @@ public static class Seed
             await context.Roles.AddRangeAsync(roles);
         }
 
-        // 系統用戶
         if (!userManager.Users.Any())
         {
             var users = new List<AppUser>
@@ -76,7 +74,7 @@ public static class Seed
             {
                 if (user.UserName == "admin")
                 {
-                    await userManager.CreateAsync(user, "123456aA");
+                    await userManager.CreateAsync(user, "Password123@");
                     await userManager.AddToRoleAsync(user, AppRoles.Admin);
                 }
                 else if (user.UserName == AppRoles.Root)
@@ -95,18 +93,26 @@ public static class Seed
             {
                 new()
                 {
-                    Name = AsymmetricKeyNames.GalaxyPay,
+                    Name = AsymmetricKeyNames.GameX,
                     KeyType = KeyType.Private,
                     Algorithm = AsymmetricType.ECDSA,
                     KeyValue = privateKeyPem,
-                    Description = "Galaxy Pay 系統簽名用私鑰"
+                    Description = "GameX 系統簽名用私鑰"
+                },
+                new()
+                {
+                    Name = AsymmetricKeyNames.GameX,
+                    KeyType = KeyType.Public,
+                    Algorithm = AsymmetricType.ECDSA,
+                    KeyValue = publicKeyPem,
+                    Description = "GameX 公鑰"
                 },
                 new()
                 {
                     Name = AsymmetricKeyNames.GalaxyPay,
                     KeyType = KeyType.Public,
                     Algorithm = AsymmetricType.ECDSA,
-                    KeyValue = publicKeyPem,
+                    KeyValue = "-----BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3wb6KaEwU9zFGqn6/BmH7T+Wekcs\r\nEMi2RnMWLztrnfF3Ck0O8G5s88jm0Zhq15t9W7VA0Qu3sr/6WFoZjS2c7g==\r\n-----END PUBLIC KEY-----",
                     Description = "Galaxy Pay 公鑰"
                 },
                 new()

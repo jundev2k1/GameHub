@@ -8,7 +8,7 @@ public static class RoleGroups
     public static readonly string[] OnSiteStaff =
     [
         AppRoles.Admin,
-        AppRoles.Staff
+        AppRoles.Cs
     ];
 
 }

@@ -5,7 +5,7 @@ using game_x.application.Services.Verification;
 
 namespace game_x.application.Services.Notification;
 
-public class EmailVerificationService(IEmailService emailService, IVerificationCodeService verificationCodeService) : IEmailVerificationProcessor
+public sealed class EmailVerificationService(IEmailService emailService, IVerificationCodeService verificationCodeService) : IEmailVerificationProcessor
 {
     public async Task SendVerificationEmailAsync(string email, CancellationToken ct = default)
     {

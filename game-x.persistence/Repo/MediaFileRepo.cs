@@ -13,18 +13,6 @@ public sealed class MediaFileRepo(GameXContext context) : IMediaFileRepo
             ?? throw new NotFoundException("Media file not found.");
     }
 
-    public async Task<MediaFile> FindPassportAsync(string userId, CancellationToken ct = default)
-    {
-        return await context.MediaFiles
-            .AsNoTracking()
-            .Join(context.UserPassport.Where(up => up.AppUserId == userId),
-                mf => mf.Id,
-                up => up.PassportImageId,
-                (file, user) => file)
-            .FirstOrDefaultAsync(ct)
-            ?? throw new NotFoundException("Passport not found.");
-    }
-
     public async Task<bool> IsExistAsync(int id, CancellationToken ct = default)
         => await context.MediaFiles.AsNoTracking().AnyAsync(mf => mf.Id == id, ct);
 

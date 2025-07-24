@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>galaxy_pay.application</RootNamespace>
+    <RootNamespace>game_x.application</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -25,15 +25,10 @@
     <ProjectReference Include="..\game-x.share\game-x.share.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Features\AccountManagement\Root\Commands\" />
-    <Folder Include="Features\AccountManagement\Root\Queries\" />
-    <Folder Include="Features\BankAccountManagement\Staff\Queries\" />
-    <Folder Include="Features\CounterManagement\Admin\" />
-    <Folder Include="Features\CounterManagement\Staff\" />
-    <Folder Include="Features\Dashboard\Admin\" />
-    <Folder Include="Features\HeartBeat\Staff\" />
-    <Folder Include="Features\Notification\Dtos\" />
-    <Folder Include="Features\Notification\Shared\" />
-    <Folder Include="Features\OrderManagement\Shared\Commands\" />
+    <Folder Include="Features\Accounts\Admin\Commands\" />
+    <Folder Include="Features\Accounts\Mapping\" />
+    <Folder Include="Features\Accounts\Admin\Queries\" />
+    <Folder Include="Features\Accounts\Cs\" />
+    <Folder Include="Features\Notifications\Dtos\" />
   </ItemGroup>
 </Project>

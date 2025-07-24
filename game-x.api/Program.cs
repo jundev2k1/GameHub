@@ -73,7 +73,6 @@ app.UseSerilogRequestLogging();
 
 // SignalR hub
 app.MapHub<AdminHub>(AdminHub.Path);
-app.MapHub<StoreHub>(StoreHub.Path);
 app.MapHub<ClientHub>(ClientHub.Path);
 
 using var scope = app.Services.CreateScope();

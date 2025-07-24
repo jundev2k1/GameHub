@@ -6,10 +6,10 @@ namespace game_x.application.Services.Verification;
 public static class VerificationPurposes
 {
     public const string EmailVerification = "email-verification";
-    public const string ForgotPassword = "forgot-password"; // Not logged in, use Email
+    public const string ForgotPassword = "forgot-password";
 }
 
-public class MemoryVerificationCodeService(IMemoryCache cache) : IVerificationCodeService
+public sealed class MemoryVerificationCodeService(IMemoryCache cache) : IVerificationCodeService
 {
     private static readonly TimeSpan DefaultExpiration = TimeSpan.FromMinutes(10);
 
@@ -33,7 +33,7 @@ public class MemoryVerificationCodeService(IMemoryCache cache) : IVerificationCo
 
         if (cache.TryGetValue(cacheKey, out string? storedCode) && storedCode == inputCode)
         {
-            cache.Remove(cacheKey); // Remove after successful verification
+            cache.Remove(cacheKey);
             return Task.FromResult(true);
         }
 

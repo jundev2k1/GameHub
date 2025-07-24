@@ -4,8 +4,6 @@ public interface IMediaFileRepo
 {
     Task<MediaFile> FindAsync(int id, CancellationToken ct = default);
 
-    Task<MediaFile> FindPassportAsync(string userId, CancellationToken ct = default);
-
     Task<bool> IsExistAsync(int id, CancellationToken ct = default);
 
     Task AddAsync(MediaFile file, CancellationToken ct = default);

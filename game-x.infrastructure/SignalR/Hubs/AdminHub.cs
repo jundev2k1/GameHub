@@ -1,6 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
-using game_x.application.Features.Notification.Shared.Commands.MarkAsRead;
+using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
 using game_x.share.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

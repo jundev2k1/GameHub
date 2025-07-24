@@ -4,6 +4,6 @@ public static class AppRoles
 {
     public const string Root = "root";
     public const string Admin = "admin";
-    public const string Staff = "staff"; // store-merchant
+    public const string Cs = "cs";
     public const string User = "user";
 }

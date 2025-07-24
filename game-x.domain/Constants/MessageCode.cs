@@ -172,63 +172,12 @@ public static class MessageCode
         #endregion
     }
 
-    public enum Order
-    {
-        #region ■ Message group: Success
-        /// <summary>The order has been created successfully.</summary>
-        [EnumMetadata("Order created successfully.")]
-        OrderCreated = 10250,
-        /// <summary>The order has been updated successfully.</summary>
-        [EnumMetadata("Order updated successfully.")]
-        OrderUpdated = 10251,
-        /// <summary>The order status has been changed successfully.</summary>
-        [EnumMetadata("Order status updated successfully.")]
-        OrderStatusUpdated = 10252, 
-        #endregion
-    }
-
-    public enum Staff
-    {
-        #region ■ Message group: Error
-        /// <summary>The session key does not exist.</summary>
-        [EnumMetadata("The session key does not exist.")]
-        SessionKeyNotExist = 10300,
-        /// <summary>The User has already logged in from another counter or session.</summary>
-        [EnumMetadata("You have been logged out because your account was signed in from another counter.")]
-        SessionConflict = 10301,
-        #endregion
-    }
-
     public enum BankAccount
     {
         #region ■ Message group: Error
         /// <summary>Cannot use the same currency multiple times within a single bank account.</summary>
         [EnumMetadata("Each currency can only be associated once per bank account.")]
         DuplicateCurrencyInBankAccount = 10400,
-        #endregion
-    }
-    
-    public enum Passport
-    {
-        #region ■ Message group: Error
-        /// <summary>The passport number is already in use.</summary>
-        [EnumMetadata("The passport number is already in use.")]
-        PassportNumberAlreadyExists = 10500,
-        #endregion
-    }
-    
-    public enum Counter
-    {
-        #region ■ Message group: Error
-        /// <summary>The counter is invalid, possibly due to incomplete or malformed data.</summary>
-        [EnumMetadata("The counter is invalid.")]
-        CounterInvalid = 10600,
-        /// <summary>The counter is invalid, possibly due to incomplete or malformed data.</summary>
-        [EnumMetadata("The counter not found.")]
-        CounterNotFound = 10601,
-        /// <summary>The counter is currently active and being used by another staff member.</summary>
-        [EnumMetadata("This counter is currently in use by another staff member.")]
-        CounterInUse = 10602,
         #endregion
     }
 }

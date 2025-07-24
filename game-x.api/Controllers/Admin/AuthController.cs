@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace game_x.api.Controllers.Admin;
 
 [Route("api/admin/auth")]
-public class AuthController : BaseApiController
+public sealed class AuthController : BaseApiController
 {
     [AllowAnonymous]
     [HttpPost("login")]

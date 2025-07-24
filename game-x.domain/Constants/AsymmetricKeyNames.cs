@@ -2,6 +2,7 @@
 
 public static class AsymmetricKeyNames
 {
+    public const string GameX = "GameX";
     public const string GalaxyPay = "Galaxy";
     public const string Uxm = "Uxm";
 }

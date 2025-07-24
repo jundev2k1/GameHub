@@ -1,7 +1,6 @@
-using game_x.application.Features.AccountManagement.Root.Commands.CreateAdmin;
-using game_x.application.Features.AccountManagement.Root.Commands.SoftDeleteAdmin;
-using game_x.application.Features.AccountManagement.Root.Queries.GetAdminByCriteria;
-using game_x.application.Features.AccountManagement.Root.Queries.GetAdminById;
+using game_x.application.Features.Accounts.Root.Commands.CreateAdmin;
+using game_x.application.Features.Accounts.Root.Commands.SoftDeleteAdmin;
+using game_x.application.Features.Accounts.Root.Queries.GetAdminById;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,27 +10,6 @@ namespace game_x.api.Controllers.Root;
 [Authorize(Roles = AppRoles.Root)]
 public class AdminController : BaseApiController
 {
-    [HttpGet]
-    public async Task<IActionResult> GetByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
-    {
-        var @params = HttpContext.Request.Query
-            .ToDictionary(q => q.Key, q => q.Value.FirstOrDefault());
-        var filters = QueryConverter.ToFilters(
-            filters: parameters.Filters,
-            searchText: parameters.Keyword,
-            @params!,
-            ignoreFields: ["filter", "sort"]);
-
-        var sorts = QueryConverter.ToSorts(parameters.Sorts);
-        var query = new GetAdminByCriteriaQuery(
-            filters,
-            sorts,
-            parameters.PageNumber,
-            parameters.PageSize);
-        var result = await Mediator.Send(query);
-        return ApiResponseFactory.Ok(result);
-    }
-
     [HttpGet("{userId}")]
     public async Task<IActionResult> SoftGetAdminAsync(string userId)
     {

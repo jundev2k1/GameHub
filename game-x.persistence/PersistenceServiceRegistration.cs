@@ -51,7 +51,7 @@ public static class PersistenceServiceRegistration
             options.User.RequireUniqueEmail = true;
 
             // Lock settings
-            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2); // Lock Time (2 minutes)
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30); // Lock Time (2 minutes)
             options.Lockout.MaxFailedAccessAttempts = 5;                      // Locked after the fifth incorrect password
             options.Lockout.AllowedForNewUsers = true;                        // Can new users be locked?
 

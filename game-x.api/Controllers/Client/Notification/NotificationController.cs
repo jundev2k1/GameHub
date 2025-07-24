@@ -1,4 +1,4 @@
-using game_x.application.Features.Notification.Shared.Queries.GetNotificationDetail;
+using game_x.application.Features.Notifications.Shared.Queries.GetNotificationDetail;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,7 +6,7 @@ namespace game_x.api.Controllers.Client.Notification;
 
 [Authorize(Roles = AppRoles.User)]
 [Route("/api/user/notifications")]
-public class NotificationController : BaseApiController
+public sealed class NotificationController : BaseApiController
 {
     [HttpGet("me")]
     public async Task<IActionResult> GetMyNotificationAsync()

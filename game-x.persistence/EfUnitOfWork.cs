@@ -35,7 +35,6 @@ public sealed class EfUnitOfWork(GameXContext dbContext) : IUnitOfWork
         _tx = null;
     }
 
-
     public async Task RollbackAsync(CancellationToken ct = default)
     {
         if (_tx is null) return;

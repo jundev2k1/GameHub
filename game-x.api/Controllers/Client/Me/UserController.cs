@@ -1,6 +1,6 @@
+using game_x.application.Features.Accounts.User.Commands.UserSelfUpdate;
+using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using game_x.application.Features.Auth.Commands.ChangePassword;
-using game_x.application.Features.AccountManagement.User.Commands.UserSelfUpdate;
-using game_x.application.Features.AccountManagement.User.Queries.GetSelfUser;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +8,7 @@ namespace game_x.api.Controllers.Client.Me;
 
 [Authorize(Roles = AppRoles.User)]
 [Route("api/user")]
-public class UserController : BaseApiController
+public sealed class UserController : BaseApiController
 {
     [HttpGet("me")]
     public async Task<IActionResult> GetUserDetailAsync()

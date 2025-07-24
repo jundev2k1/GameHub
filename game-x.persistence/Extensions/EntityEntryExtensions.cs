@@ -20,7 +20,7 @@ public static class EntityEntryExtensions
             .Where(p => p.Metadata.IsPrimaryKey())
             .OrderBy(p => p.Metadata.Name)
             .ToList();
-        if (!keyProps.Any()) return null;
+        if (keyProps.Count == 0) return null;
 
         var result = keyProps
             .Select(p => $"{p.Metadata.Name}:{p.CurrentValue}")
@@ -28,13 +28,16 @@ public static class EntityEntryExtensions
         return result;
     }
 
-    public static AuditAction ToAuditAction(this EntityEntry entry) => entry.State switch
+    public static AuditAction ToAuditAction(this EntityEntry entry)
     {
-        EntityState.Added => AuditAction.Created,
-        EntityState.Modified => AuditAction.Updated,
-        EntityState.Deleted => AuditAction.Deleted,
-        _ => throw new ArgumentOutOfRangeException(nameof(entry.State), "Unsupported entity state for audit action.")
-    };
+        return entry.State switch
+        {
+            EntityState.Added => AuditAction.Created,
+            EntityState.Modified => AuditAction.Updated,
+            EntityState.Deleted => AuditAction.Deleted,
+            _ => throw new ArgumentOutOfRangeException(nameof(entry.State), "Unsupported entity state for audit action.")
+        };
+    }
 
     public static string? SerializeChanges(this EntityEntry entry)
     {

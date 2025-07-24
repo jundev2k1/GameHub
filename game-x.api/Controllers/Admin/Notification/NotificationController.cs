@@ -1,12 +1,12 @@
-﻿using game_x.application.Features.Notification.Shared.Queries.GetNotificationDetail;
+﻿using game_x.application.Features.Notifications.Shared.Queries.GetNotificationDetail;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace game_x.api.Controllers.Admin.Notification;
 
 [Authorize(Roles = AppRoles.Admin)]
-[Route("/api/admin/notifications")]
-public class NotificationController : BaseApiController
+[Route("api/admin/notifications")]
+public sealed class NotificationController : BaseApiController
 {
     [HttpGet("me")]
     public async Task<IActionResult> GetMyNotificationAsync()

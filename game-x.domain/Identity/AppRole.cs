@@ -18,7 +18,6 @@ public sealed class AppRole : IReadOnlyCollection<string>
     }
 
     public static AppRole Of(params IEnumerable<string> roles) => new(roles);
-    public static string ForAuthorize(params IEnumerable<string> roles) => Of(roles).ToString();
 
     public  bool Has(string role) => _roles.Contains(role.Trim(), StringComparer.OrdinalIgnoreCase);
 
@@ -36,6 +35,6 @@ public sealed class AppRole : IReadOnlyCollection<string>
     public string[] Items => _roles.ToArray();
     public bool IsRoot => Has(AppRoles.Root);
     public bool IsAdmin => Has(AppRoles.Admin);
-    public bool IsStaff => Has(AppRoles.Staff);
+    public bool IsStaff => Has(AppRoles.Cs);
     public bool IsUser => Has(AppRoles.User);
 }

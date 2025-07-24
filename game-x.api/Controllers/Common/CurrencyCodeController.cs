@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace game_x.api.Controllers.Common;
 
-[Authorize(Roles = $"{AppRoles.Root}, {AppRoles.Admin},{AppRoles.Staff},{AppRoles.User}")]
+[Authorize(Roles = $"{AppRoles.Root}, {AppRoles.Admin},{AppRoles.Cs},{AppRoles.User}")]
 [Route("api/common")]
-public class CurrencyCodeController : BaseApiController
+public sealed class CurrencyCodeController : BaseApiController
 {
     [HttpGet("currency-codes")]
     public IActionResult GetCurrencyCode()

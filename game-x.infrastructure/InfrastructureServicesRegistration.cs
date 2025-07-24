@@ -1,37 +1,35 @@
-using System.Net.Http.Headers;
-using System.Text;
 using game_x.application.Common.Abstractions.Events;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Email;
-using game_x.application.Contract.Jobs;
+using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
+using game_x.application.Contract.Infrastructure.FileStorage;
+using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Polly;
-using game_x.infrastructure.BackgroundJobs.Jobs;
 using game_x.infrastructure.Email;
 using game_x.infrastructure.Eventing;
 using game_x.infrastructure.Extensions;
 using game_x.infrastructure.ExternalApi.Uxm;
 using game_x.infrastructure.Identity;
 using game_x.infrastructure.logger;
+using game_x.infrastructure.MediaStorage;
 using game_x.infrastructure.Polly;
 using game_x.infrastructure.Security;
 using game_x.infrastructure.Security.Asymmetric;
 using game_x.infrastructure.SignalR.Services;
+using game_x.share.Settings;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Minio;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Refit;
-using Minio;
-using game_x.infrastructure.MediaStorage;
-using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
-using game_x.application.Contract.Infrastructure.Logger;
-using game_x.application.Contract.Persistence.Identity;
-using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Infrastructure.SignalR.Services;
-using game_x.application.Contract.Infrastructure.FileStorage;
-using game_x.share.Settings;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace game_x.infrastructure;
 
@@ -79,9 +77,6 @@ public static class InfrastructureServicesRegistration
 
     private static IServiceCollection AddBackgroundJobs(this IServiceCollection services)
     {
-        services.AddScoped<IRecurringJob, DashboardStatisticJob>();
-        services.AddScoped<IRecurringJob, SessionCleanupJob>();
-
         return services;
     }
 
@@ -89,7 +84,6 @@ public static class InfrastructureServicesRegistration
     {
         services.AddSingleton<IClientHubService, ClientHubService>();
         services.AddSingleton<IAdminHubService, AdminHubService>();
-        services.AddSingleton<IStoreHubService, StoreHubService>();
 
         return services;
     }

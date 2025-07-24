@@ -2,12 +2,11 @@
 using game_x.application.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 
 namespace game_x.api.Middleware;
 
-public class ExceptionMiddleware(RequestDelegate next, IAppLogger<ExceptionMiddleware> logger)
+public sealed class ExceptionMiddleware(RequestDelegate next, IAppLogger<ExceptionMiddleware> logger)
 {
     public async Task InvokeAsync(HttpContext httpContext)
     {

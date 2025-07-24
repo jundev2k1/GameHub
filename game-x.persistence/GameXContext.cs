@@ -19,14 +19,7 @@ public sealed class GameXContext(
 {
     public DbSet<AppUser> AppUser { get; set; }
     public DbSet<AppUserRole> AppUserRole { get; set; }
-    public DbSet<UserPassport> UserPassport { get; set; }
     public DbSet<AsymmetricKey> AsymmetricKey { get; set; }
-    public DbSet<Order> Orders { get; set; }
-    public DbSet<Counter> Counters { get; set; }
-    public DbSet<CounterToken> CounterTokens { get; set; }
-    public DbSet<StaffCounter> StaffCounters { get; set; }
-    public DbSet<StaffUser> StaffUsers { get; set; }
-    public DbSet<StaffExtension> StaffExtension { get; set; }
     public DbSet<BankAccount> BankAccounts { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<MediaFile> MediaFiles { get; set; }
