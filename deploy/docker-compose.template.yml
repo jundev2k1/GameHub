@@ -1,0 +1,113 @@
+services:
+  game-x.api:
+    container_name: game-x.api
+    image: ${DOCKER_IMAGE}
+    restart: always
+    ports:
+      - ${API_PORT}:8080
+    networks:
+      - default
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+      - ConnectionStrings__HangfireConnection=${HANGFIREDB_CONNECTION_STRING}
+
+      - HangfireSettings__Key=${HANGFIRE_KEY}
+
+      - JwtSettings__DurationInMinutes=${JWT_EXPIRED_MINUTES}
+      - JwtSettings__Key=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__Provider=${JWT_PROVIDER}
+      - JwtSettings__Version=${JWT_VERSION}
+
+      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
+
+      - UxmSettings__Host=${UXM_HOST}
+      - GalaxySettings__MerchantNumber=${GALAXY_MERCHANTNUMBER}
+
+      - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
+      - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
+      - MinioSettings__AccessKey=${Minio_AccessKey}
+      - MinioSettings__SecretKey=${Minio_SecretKey}
+      - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
+      - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
+
+      - RecurringJobSettings__DashboardStatisticJob=${RecurringJob_DashboardStatisticJob}
+      - RecurringJobSettings__SessionCleanUpJob=${RecurringJob_SessionCleanUpJob}
+
+      - EngageLabSettings__BaseUrl=${EngageLab_BaseUrl}
+      - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
+      - EngageLabSettings__ApiKey=${EngageLab_ApiKey}
+      - EngageLabSettings__From=${EngageLab_From}
+  # ========================
+  # PostgreSQL Service
+  # ========================
+  postgres:
+    container_name: game-x.pg
+    image: postgres:16.2-alpine
+    restart: always
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - game-x.pg-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      PGDATA: /var/lib/postgresql/data
+    command: >
+      bash -c "
+        docker-entrypoint.sh postgres &
+        while ! pg_isready -U $$POSTGRES_USER; do sleep 1; done
+        createdb -U $$POSTGRES_USER HangfireDb --echo || true
+        wait"
+  # ========================
+  # seq server
+  # ========================
+  seq:
+    image: datalust/seq:latest
+    container_name: game-x.seq
+    networks:
+      - default
+    restart: always
+    ports:
+      - "5341:80"
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINUSERNAME=admin
+      - SEQ_FIRSTRUN_ADMINPASSWORD=admin1234
+    volumes:
+      - game-x.seq-data:/data
+  # ========================
+  # minio server
+  # ========================
+  minio:
+    image: minio/minio:latest
+    container_name: game-x.minio
+    networks:
+      - default  
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${Minio_AccessKey}
+      MINIO_ROOT_PASSWORD: ${Minio_SecretKey}
+    volumes:
+      - game-x.minio-data:/data
+    command: server --console-address ":9001" /data
+# ========================
+# Volumes
+# ========================
+volumes:
+  game-x.pg-data:
+  game-x.seq-data:
+  game-x.minio-data:
+# ========================
+# Networks
+# ========================
+networks:
+  default:
+    external: true
+    name: game-x-network

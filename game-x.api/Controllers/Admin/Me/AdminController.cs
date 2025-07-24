@@ -1,0 +1,17 @@
+using game_x.application.Features.Auth.Commands.ChangePassword;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace game_x.api.Controllers.Admin.Me;
+
+[Authorize(Roles = AppRoles.Admin)]
+[Route("api/admin")]
+public class AdminController : BaseApiController
+{
+    [HttpPut("me/password")]
+    public async Task<IActionResult> ChangePasswordAsync(ChangePasswordCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+}

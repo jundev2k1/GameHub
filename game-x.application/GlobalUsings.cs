@@ -1,0 +1,11 @@
+﻿global using FluentValidation;
+global using game_x.application.Common.Abstractions.CQRS;
+global using game_x.application.Common.Abstractions.Events;
+global using game_x.application.Common.Makers;
+global using game_x.application.Exceptions;
+global using game_x.domain.Constants;
+global using game_x.domain.Entities;
+global using game_x.domain.Enum;
+global using game_x.domain.ValueObjects;
+global using Mapster;
+global using MediatR;

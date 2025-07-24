@@ -1,0 +1,196 @@
+# =====================================
+# Git Flow + Docker Compose 自動部署
+# =====================================
+# --- Git 分支對應環境規則 ---
+# - develop           ➜ Dev 環境（提供同事聯調）
+# - release/x.y.z     ➜ Demo 環境（QA 測試）
+# - main + Tag vX.Y.Z ➜ Production 環境（正式上線）
+#
+# --- 需要在 GitLab → CI/CD → Variables 中設定以下變數 ---
+# ➤ HARBOR_REGISTRY                              # 例如：registry.uxm-pay.com
+# ➤ HARBOR_USERNAME                              # Harbor 登入帳號
+# ➤ HARBOR_PASSWORD                              # Harbor 登入密碼或 Token
+# ➤ GITLAB_RUNNER_SSH_PRIVATE_KEY                # gitlab runner 的 SSH 私鑰
+# ➤ DEV_SERVER, DEMO_SERVER, PROD_SERVER         # 各環境的目標伺服器 IP / Host
+# ➤ DEV_SSH_PORT, DEMO_SSH_PORT, PROD_SSH_PORT   # 對應的 SSH Port
+
+# --- Image 命名規則 ---
+# Dev：       uxm/api-dev:develop        # 固定 develop tag
+# Demo：      uxm/api-demo:release-x-y-z # 使用 release 分支名當作 tag
+# Production：uxm/api-prod:v1.2.3        # 使用 Git Tag 當作 tag（CI_COMMIT_TAG）
+
+stages:
+  - build
+  - build and push
+  - deploy
+
+.default_tags: &default_tags
+  tags:
+    - dls
+
+.build_variables: &build_variables
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_FILE_API: game-x.api/Dockerfile
+  DOTNET_PROJECT_API: game-x.api/game-x.api.csproj
+  PROJECT_NAME_API_DEV: game-x/api-dev
+  PROJECT_NAME_API_DEMO: game-x/api-demo
+  PROJECT_NAME_API_PROD: game-x/api-prod
+
+.dotnet_restore_build: &dotnet_restore_build
+  - dotnet restore "$DOTNET_PROJECT_API"
+  - dotnet build "$DOTNET_PROJECT_API" -c Release
+
+.build_services: &build_services
+  - name: docker:dind
+    command:
+      - /bin/sh
+      - -c
+      - |
+        dockerd-entrypoint.sh || exit
+
+# ✅ 共用 Build Script
+.build_script: &build_script
+  - apk add --no-cache git openssh-client
+  - echo "$HARBOR_PASSWORD" | docker login $HARBOR_REGISTRY -u $HARBOR_USERNAME --password-stdin
+  - CI_IMAGE_API=$HARBOR_REGISTRY/$PROJECT_NAME_API:$TAG_NAME
+  - unset DOCKER_HOST
+  - docker build -t $CI_IMAGE_API -f $DOCKER_FILE_API .
+  - docker push $CI_IMAGE_API
+
+# ✅ 共用 Deploy Script
+.deploy_before_script: &deploy_before_script
+  - eval $(ssh-agent -s)
+  - echo "$GITLAB_RUNNER_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan -p $SSH_PORT $SERVER >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+
+.deploy_script: &deploy_script # 設定環境變數
+  - echo "🖥️  部署 game-x 開始..."
+  - CI_IMAGE_API=$HARBOR_REGISTRY/$PROJECT_NAME_API:$TAG_NAME
+
+  # 遠端創建資料夾，並修正權限
+  - |
+    echo "📂 建立資料夾結構..."
+    ssh "$DEPLOY_HOST@$SERVER" <<'EOF'
+      set -e
+      mkdir -p /home/dls/game-x
+    EOF
+
+  # 上傳檔案
+  - echo "📤 上傳檔案..."
+  - scp deploy/docker-compose.template.yml "$DEPLOY_HOST@$SERVER:/home/dls/game-x/"
+  - scp deploy/env.template "$DEPLOY_HOST@$SERVER:/home/dls/game-x/"
+
+    # SSH 連接
+  - |
+    echo "📤 ssh 連接"  
+    ssh -p $SSH_PORT "$DEPLOY_HOST@$SERVER" 'bash -s' <<EOF
+    set -e
+    cd /home/dls/game-x
+    echo "🧹 清除所有 UTF-8 BOM..."
+    find . -type f \( -name "*.hcl" -o -name "*.json" -o -name "*.sh" -o -name "*.conf" -o -name "*.env" \) | while read -r file; do
+      if [[ \$(head -c 3 "\$file" | xxd -p) == "efbbbf" ]]; then
+        echo "🚫 移除 BOM: \$file"
+        sed -i '1s/^\xEF\xBB\xBF//' "\$file"
+      fi
+    done
+
+    echo "🔧 更新 .env 中 DOCKER_IMAGE..."
+    sed -i "s|^DOCKER_IMAGE=.*|DOCKER_IMAGE=$CI_IMAGE_API|" .env
+
+    echo "🔁 啟動服務"
+    mv docker-compose.template.yml docker-compose.yml
+    echo "$HARBOR_PASSWORD" | docker login $HARBOR_REGISTRY -u $HARBOR_USERNAME --password-stdin
+    docker-compose pull
+    docker-compose up -d
+
+    echo "🧹 清理殘留 Docker Images"
+    docker image prune -af
+    EOF
+
+# =====================================
+# ✅ 各環境部署區塊
+# =====================================
+# 🟢 Dev
+build_only:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:9.0
+  <<: *default_tags
+  variables:
+    GIT_DEPTH: 0              # ❗避免 shallow clone 問題
+    GIT_STRATEGY: clone       # ❗避免 fetch 錯誤，強制用 clone
+    <<: *build_variables
+  script:
+    - echo "✅ 開始 build 階段"
+    - echo "👀 目前目錄內容："
+    - ls -la
+    - echo "📦 Git 狀態："
+    - git status || true
+    - echo "🛠️ 還原與編譯"
+    - *dotnet_restore_build
+  only:
+    - /^feature\//
+
+dev_docker_build:
+  stage: build and push
+  image: docker
+  <<: *default_tags
+  variables:
+    <<: *build_variables
+    TAG_NAME: develop
+    PROJECT_NAME_API: game-x/api-dev
+  services: *build_services
+  script:
+    - *build_script
+  only:
+    - develop
+
+deploy_dev:
+  stage: deploy
+  <<: *default_tags
+  variables:
+    SERVER: $DEV_SERVER
+    SSH_PORT: $DEV_SSH_PORT
+    DEPLOY_HOST: dls
+    ENVIRONMENT: dev
+    TAG_NAME: develop
+    PROJECT_NAME_API: game-x/api-dev
+  before_script: *deploy_before_script
+  script:
+    - *deploy_script
+  only:
+    - develop
+
+# 🟡 Demo / Release
+release_docker_build:
+  stage: build and push
+  image: docker
+  <<: *default_tags
+  variables:
+    <<: *build_variables
+    TAG_NAME: $CI_COMMIT_REF_SLUG
+    PROJECT_NAME_API: game-x/api-demo
+  services: *build_services
+  script:
+    - *build_script
+  only:
+    - /^release\//
+
+deploy_demo:
+  stage: deploy
+  <<: *default_tags
+  variables:
+    SERVER: $DEMO_SERVER
+    SSH_PORT: $DEMO_SSH_PORT
+    DEPLOY_HOST: dls
+    ENVIRONMENT: demo
+    TAG_NAME: $CI_COMMIT_REF_SLUG
+    PROJECT_NAME_API: game-x/api-demo
+  before_script: *deploy_before_script
+  script:
+    - *deploy_script
+  only:
+    - /^release\//

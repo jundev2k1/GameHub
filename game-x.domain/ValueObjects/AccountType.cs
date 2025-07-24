@@ -1,0 +1,39 @@
+﻿using System.Reflection;
+
+namespace game_x.domain.ValueObjects;
+
+public sealed class AccountType
+{
+    public string Value { get; }
+
+    private AccountType(string value) => Value = value;
+
+    public static AccountType Of(string value)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(value, nameof(value));
+
+        var upper = value.ToUpperInvariant();
+        if (!IsValid(upper))
+            throw new ArgumentException($"AccountType '{value}' is invalid.");
+
+        return new AccountType(upper);
+    }
+
+    public static bool IsValid(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        var upper = value.ToUpperInvariant();
+        var isExist = typeof(BankAccountType).GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Any(f => f.GetValue(null)?.ToString() == upper);
+        return isExist;
+    }
+
+    public override bool Equals(object? obj) =>
+        (obj != null) && (obj is AccountType type) && (Value == type.Value);
+
+    public override int GetHashCode() => Value.GetHashCode();
+
+    public override string ToString() => Value;
+}

@@ -1,0 +1,17 @@
+﻿using game_x.application.Features.Auth.Commands.Login.RootLogin;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace game_x.api.Controllers.Root;
+
+[Route("api/root/auth")]
+public class AuthController : BaseApiController
+{
+    [AllowAnonymous]
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(RootLoginCommand command)
+    {
+        var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result, MessageCode.System.LoginSuccess);
+    }
+}
