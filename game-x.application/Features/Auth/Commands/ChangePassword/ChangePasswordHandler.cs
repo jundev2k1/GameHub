@@ -1,7 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.domain.Identity;
 
 namespace game_x.application.Features.Auth.Commands.ChangePassword;
 
@@ -23,7 +22,7 @@ public sealed class ChangePasswordHandler(
         return Unit.Value;
     }
 
-    private async Task ChangePasswordAsync(AppUser user, string password, string newPassword)
+    private async Task ChangePasswordAsync(User user, string password, string newPassword)
     {
         var isValidPassword = await authService.IsValidPasswordAsync(user, password);
         if (!isValidPassword) throw new BadRequestException(MessageCode.User.UserChangePasswordFail);

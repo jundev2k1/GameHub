@@ -7,7 +7,7 @@ public class UserDto
     public string UserName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public bool IsNew { get; set; }
-    public AppUserStatus? Status { get; set; }
+    public domain.Enum.UserStatus? Status { get; set; }
     public string? PassportNumber { get; set; }
     public string? CountryCode { get; set; }
     public string CreatedById { get; set; } = string.Empty;

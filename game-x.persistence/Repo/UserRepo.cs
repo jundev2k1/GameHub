@@ -6,15 +6,15 @@ using Microsoft.AspNetCore.Identity;
 
 namespace game_x.persistence.Repo;
 
-public sealed class UserRepo(GameXContext context, UserManager<AppUser> userManager) : IUserRepo
+public sealed class UserRepo(GameXContext context, UserManager<User> userManager) : IUserRepo
 {
-    public async Task<AppUser[]> GetUserByRole(string roleName, CancellationToken ct = default)
+    public async Task<User[]> GetUserByRole(string roleName, CancellationToken ct = default)
     {
         var result = await userManager.GetUsersInRoleAsync(roleName);
         return [.. result];
     }
 
-    public async Task<AppUser> GetUserByIdAsync(string userId, CancellationToken ct = default)
+    public async Task<User> GetUserByIdAsync(string userId, CancellationToken ct = default)
     {
         var targetUser = await userManager.FindByIdAsync(userId)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
@@ -25,7 +25,7 @@ public sealed class UserRepo(GameXContext context, UserManager<AppUser> userMana
         return targetUser;
     }
 
-    public async Task<AppUser> GetUserByEmailAsync(string email, CancellationToken ct = default)
+    public async Task<User> GetUserByEmailAsync(string email, CancellationToken ct = default)
     {
         var targetUser = await userManager.FindByEmailAsync(email)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
@@ -36,7 +36,7 @@ public sealed class UserRepo(GameXContext context, UserManager<AppUser> userMana
         return targetUser;
     }
 
-    public async Task<AppUser[]> GetAdminUsers(CancellationToken ct = default)
+    public async Task<User[]> GetAdminUsers(CancellationToken ct = default)
     {
         var users = await userManager.GetUsersInRoleAsync(AppRoles.Admin);
         return [.. users];
@@ -48,7 +48,7 @@ public sealed class UserRepo(GameXContext context, UserManager<AppUser> userMana
     public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.PhoneNumber == phoneNumber && !u.IsDeleted, ct);
 
-    public async Task AddUserAsync(AppUser user, string rawPassword, AppRole role, CancellationToken ct = default)
+    public async Task AddUserAsync(User user, string rawPassword, AppRole role, CancellationToken ct = default)
     {
         var userResult = await userManager.CreateAsync(user, rawPassword);
         if (!userResult.Succeeded)
@@ -64,9 +64,9 @@ public sealed class UserRepo(GameXContext context, UserManager<AppUser> userMana
         throw new BadRequestException($"Failed to add user to role: {roleError}");
     }
 
-    public async Task UpdateAsync(string userId, Action<AppUser> updateAction, CancellationToken ct = default)
+    public async Task UpdateAsync(string userId, Action<User> updateAction, CancellationToken ct = default)
     {
-        var targetUser = await context.AppUser
+        var targetUser = await context.AppUsers
             .FirstOrDefaultAsync(user => user.Id == userId, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 

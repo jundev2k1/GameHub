@@ -19,7 +19,7 @@ public sealed class RoleRepo(GameXContext context) : IRoleRepo
     public async Task<bool> IsValidUserAsync(string userId, string role, CancellationToken ct = default)
     {
         var lowerRole = role.ToLowerInvariant();
-        return await context.AppUserRole
+        return await context.AppUserRoles
             .AnyAsync(r => r.User.Id == userId && r.Role.Name == lowerRole && !r.User.IsDeleted, ct);
     }
 }

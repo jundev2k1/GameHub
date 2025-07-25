@@ -7,7 +7,7 @@ public class UserDetailDto
     public required string UserName { get; set; }
     public required string Email { get; set; }
     public required bool IsNew { get; set; }
-    public AppUserStatus Status { get; set; }
+    public domain.Enum.UserStatus Status { get; set; }
     public string? CountryCode { get; set; }
     public required string[] Roles { get; set; } = [];
     public required string CreatedById { get; set; }

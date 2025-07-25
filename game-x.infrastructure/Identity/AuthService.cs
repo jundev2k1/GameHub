@@ -1,16 +1,17 @@
 ﻿using FluentValidation.Results;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Exceptions;
+using game_x.domain.Entities;
 using game_x.share.Extensions;
 using Microsoft.AspNetCore.Identity;
 
 namespace game_x.infrastructure.Identity;
 
 public sealed class AuthService(
-    UserManager<AppUser> userManager,
-    SignInManager<AppUser> signInManager) : IAuthService
+    UserManager<User> userManager,
+    SignInManager<User> signInManager) : IAuthService
 {
-    public async Task<AppUser> TryLoginAsync(
+    public async Task<User> TryLoginAsync(
         string userName,
         string password,
         bool rememberMe = false,
@@ -32,22 +33,22 @@ public sealed class AuthService(
         return targetUser;
     }
 
-    public async Task<AppRole> GetRolesAsync(AppUser user)
+    public async Task<AppRole> GetRolesAsync(User user)
     {
         var roles = await userManager.GetRolesAsync(user);
         return AppRole.Of(roles);
     }
 
-    public async Task<bool> IsValidPasswordAsync(AppUser user, string rawPassword, CancellationToken ct = default)
+    public async Task<bool> IsValidPasswordAsync(User user, string rawPassword, CancellationToken ct = default)
         => await userManager.CheckPasswordAsync(user, rawPassword);
 
-    public async Task<string> GeneratePasswordResetTokenAsync(AppUser user, CancellationToken ct = default)
+    public async Task<string> GeneratePasswordResetTokenAsync(User user, CancellationToken ct = default)
     {
         var result = await userManager.GeneratePasswordResetTokenAsync(user);
         return result;
     }
 
-    public async Task ResetPasswordAsync(AppUser user, string token, string newPassword, CancellationToken ct = default)
+    public async Task ResetPasswordAsync(User user, string token, string newPassword, CancellationToken ct = default)
     {
         var result = await userManager.ResetPasswordAsync(user, token, newPassword);
         if (!result.Succeeded)
@@ -59,7 +60,7 @@ public sealed class AuthService(
         }
     }
 
-    public async Task ChangePasswordAsync(AppUser user, string oldPassword, string newPassword, CancellationToken ct = default)
+    public async Task ChangePasswordAsync(User user, string oldPassword, string newPassword, CancellationToken ct = default)
     {
         var result = await userManager.ChangePasswordAsync(user, oldPassword, newPassword);
         if (!result.Succeeded)

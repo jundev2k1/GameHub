@@ -1,6 +1,6 @@
 ﻿namespace game_x.domain.Enum;
 
-public enum NotificationMessageKey
+public enum NotificationMessageKey : short
 {
     // Enum group key: Broadcast
 

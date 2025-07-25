@@ -6,8 +6,7 @@ public sealed class EntityName
 
     private EntityName(string value) => Value = value;
 
-    public static EntityName User => Of(nameof(AppUser));
-    public static EntityName BankAccount => Of(nameof(Entities.BankAccount));
+    public static EntityName User => Of(nameof(Entities.User));
     public static EntityName MediaFile => Of(nameof(Entities.MediaFile));
 
     public static EntityName Of(string value)
@@ -21,8 +20,7 @@ public sealed class EntityName
     }
 
     private static readonly string[] ValidValues = [
-        nameof(AppUser),
-        nameof(Entities.BankAccount),
+        nameof(Entities.User),
         nameof(Entities.MediaFile)];
 
     public override bool Equals(object? obj) =>

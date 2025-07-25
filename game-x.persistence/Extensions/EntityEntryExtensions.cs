@@ -8,9 +8,9 @@ namespace game_x.persistence.Extensions;
 public static class EntityEntryExtensions
 {
     private static readonly string[] _ignoreFields = [
-        nameof(AppUser.ConcurrencyStamp),
-        nameof(AppUser.SecurityStamp),
-        nameof(AppUser.LockoutEnd),
+        nameof(User.ConcurrencyStamp),
+        nameof(User.SecurityStamp),
+        nameof(User.LockoutEnd),
         nameof(BaseEntity<object>.CreatedAt),
         nameof(BaseEntity<object>.UpdatedAt)];
 

@@ -1,5 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.domain.Constants;
+using game_x.domain.Enum;
 using Microsoft.AspNetCore.Identity;
 
 namespace game_x.persistence;
@@ -21,58 +22,40 @@ public static class Seed
 {
     public static async Task SeedData(
         IAsymmetricCryptoService cryptoService,
-        UserManager<AppUser> userManager,
+        UserManager<User> userManager,
         GameXContext context)
     {
         if (!context.Roles.Any())
         {
-            var roles = new List<IdentityRole>()
+            var roles = new List<Role>()
             {
-                new()
-                {
-                    Id = RoleIds.Root,
-                    Name = AppRoles.Root,
-                    NormalizedName = AppRoles.Root.ToUpper(),
-                },
-                new()
-                {
-                    Id = RoleIds.Admin,
-                    Name = AppRoles.Admin,
-                    NormalizedName = AppRoles.Admin.ToUpper(),
-                },
-                new()
-                {
-                    Id = RoleIds.Cs,
-                    Name = AppRoles.Cs,
-                    NormalizedName = AppRoles.Cs.ToUpper(),
-                },
-                new()
-                {
-                    Id = RoleIds.User,
-                    Name = AppRoles.User,
-                    NormalizedName = AppRoles.User.ToUpper(),
-                }
+                Role.Create(AppRoles.Root, RoleIds.Root),
+                Role.Create(AppRoles.Admin, RoleIds.Admin),
+                Role.Create(AppRoles.Cs, RoleIds.Cs),
+                Role.Create(AppRoles.User, RoleIds.User),
             };
             await context.Roles.AddRangeAsync(roles);
         }
 
         if (!userManager.Users.Any())
         {
-            var users = new List<AppUser>
+            static User CreateSeedUser(string id, string userName, string email)
             {
-                new()
-                {
-                    Id = UserIds.Root,
-                    Email = "root@example.com",
-                    UserName = AppRoles.Root,
-                    EmailConfirmed = true,
-                    PhoneNumberConfirmed = true,
-                },
-            };
+                var user = User.Create(userName, email);
+                user.Id = id;
+                user.ConfirmEmail();
+                user.ConfirmPhoneNumber();
+                return user;
+            }
 
+            var users = new List<User>
+            {
+                // Seed: root user
+                CreateSeedUser(UserIds.Root, AppRoles.Root, "root@example.com"),
+            };
             foreach (var user in users)
             {
-                if (user.UserName == "admin")
+                if (user.UserName == AppRoles.Admin)
                 {
                     await userManager.CreateAsync(user, "Password123@");
                     await userManager.AddToRoleAsync(user, AppRoles.Admin);
@@ -85,44 +68,36 @@ public static class Seed
             }
         }
 
-        if (!context.AsymmetricKey.Any())
+        if (!context.AsymmetricKeys.Any())
         {
             var (publicKeyPem, privateKeyPem) = cryptoService.GenerateKeyPair();
 
-            context.AsymmetricKey.AddRange(new List<AsymmetricKey>
+            context.AsymmetricKeys.AddRange(new List<AsymmetricKey>
             {
-                new()
-                {
-                    Name = AsymmetricKeyNames.GameX,
-                    KeyType = KeyType.Private,
-                    Algorithm = AsymmetricType.ECDSA,
-                    KeyValue = privateKeyPem,
-                    Description = "GameX 系統簽名用私鑰"
-                },
-                new()
-                {
-                    Name = AsymmetricKeyNames.GameX,
-                    KeyType = KeyType.Public,
-                    Algorithm = AsymmetricType.ECDSA,
-                    KeyValue = publicKeyPem,
-                    Description = "GameX 公鑰"
-                },
-                new()
-                {
-                    Name = AsymmetricKeyNames.GalaxyPay,
-                    KeyType = KeyType.Public,
-                    Algorithm = AsymmetricType.ECDSA,
-                    KeyValue = "-----BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3wb6KaEwU9zFGqn6/BmH7T+Wekcs\r\nEMi2RnMWLztrnfF3Ck0O8G5s88jm0Zhq15t9W7VA0Qu3sr/6WFoZjS2c7g==\r\n-----END PUBLIC KEY-----",
-                    Description = "Galaxy Pay 公鑰"
-                },
-                new()
-                {
-                    Name = AsymmetricKeyNames.Uxm,
-                    KeyType = KeyType.Public,
-                    Algorithm = AsymmetricType.ECDSA,
-                    KeyValue = "-----BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEm1PhAmoUuAmQANNJFJov1Dra6kXt\r\nMM7OcxKGd0qtCZgNT375AasOYAKqxlhGZHX8ohfIF+Pa1bfbysSujYKGRw==\r\n-----END PUBLIC KEY-----",
-                    Description = "Uxm 公鑰"
-                }
+                AsymmetricKey.Create(
+                    name: AsymmetricKeyNames.GameX,
+                    keyType: AsymmetricKeyType.Private,
+                    algorithm: AsymmetricType.ECDSA,
+                    value: privateKeyPem,
+                    desc: "GameX 系統簽名用私鑰"),
+                AsymmetricKey.Create(
+                    name: AsymmetricKeyNames.GameX,
+                    keyType: AsymmetricKeyType.Public,
+                    algorithm: AsymmetricType.ECDSA,
+                    value: publicKeyPem,
+                    desc: "GameX 公鑰"),
+                AsymmetricKey.Create(
+                    name: AsymmetricKeyNames.GalaxyPay,
+                    keyType: AsymmetricKeyType.Public,
+                    algorithm: AsymmetricType.ECDSA,
+                    value: "----- BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3wb6KaEwU9zFGqn6/BmH7T+Wekcs\r\nEMi2RnMWLztrnfF3Ck0O8G5s88jm0Zhq15t9W7VA0Qu3sr/6WFoZjS2c7g==\r\n-----END PUBLIC KEY-----",
+                    desc: "Galaxy Pay 公鑰"),
+                AsymmetricKey.Create(
+                    name: AsymmetricKeyNames.Uxm,
+                    keyType: AsymmetricKeyType.Public,
+                    algorithm: AsymmetricType.ECDSA,
+                    value: "----- BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEm1PhAmoUuAmQANNJFJov1Dra6kXt\r\nMM7OcxKGd0qtCZgNT375AasOYAKqxlhGZHX8ohfIF+Pa1bfbysSujYKGRw==\r\n-----END PUBLIC KEY-----",
+                    desc: "Uxm 公鑰"),
             });
 
             await context.SaveChangesAsync();

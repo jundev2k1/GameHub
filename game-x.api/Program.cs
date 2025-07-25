@@ -3,7 +3,7 @@ using game_x.api.Middleware;
 using game_x.application;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.domain.Identity;
+using game_x.domain.Entities;
 using game_x.infrastructure;
 using game_x.infrastructure.BackgroundJobs.Scheduling;
 using game_x.infrastructure.SignalR.Hubs;
@@ -87,7 +87,7 @@ try
 
     await context.Database.MigrateAsync();
 
-    var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+    var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
     var asymmetricCryptoService = serviceProvider.GetRequiredService<IAsymmetricCryptoService>();
     await Seed.SeedData(asymmetricCryptoService, userManager, context);
 }

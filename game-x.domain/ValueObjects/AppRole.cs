@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Reflection;
 
-namespace game_x.domain.Identity;
+namespace game_x.domain.ValueObjects;
 
 public sealed class AppRole : IReadOnlyCollection<string>
 {

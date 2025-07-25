@@ -6,7 +6,7 @@ public sealed class AuditLogConfig : IEntityTypeConfiguration<AuditLog>
 {
     public void Configure(EntityTypeBuilder<AuditLog> builder)
     {
-        builder.ToTable("audit_log");
+        builder.ToTable("audit_logs");
         builder.HasKey(al => al.Id);
 
         builder.Property(al => al.Id)
@@ -57,11 +57,6 @@ public sealed class AuditLogConfig : IEntityTypeConfiguration<AuditLog>
             .HasColumnName("snapshot_after")
             .HasColumnType("jsonb")
             .IsRequired(false);
-
-        builder.Property(al => al.CreatedAt)
-            .HasColumnName("created_at")
-            .HasColumnType("timestamp with time zone")
-            .IsRequired();
 
         builder.Ignore(al => al.UpdatedAt);
 

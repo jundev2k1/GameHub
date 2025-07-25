@@ -1,6 +1,6 @@
 namespace game_x.domain.Enum;
 
-public enum CryptoType
+public enum CryptoType : short
 {
     Trc20Usdt = 1,
     Erc20Usdt = 2,

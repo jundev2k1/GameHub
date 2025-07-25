@@ -1,4 +1,5 @@
-﻿using game_x.persistence.Interceptors;
+﻿using game_x.persistence.Extensions;
+using game_x.persistence.Interceptors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
@@ -8,19 +9,18 @@ public sealed class GameXContext(
     DbContextOptions<GameXContext> options,
     IEnumerable<ISaveChangesInterceptor> interceptors)
     : IdentityDbContext<
-        AppUser,
+        User,
         IdentityRole,
         string,
         IdentityUserClaim<string>,
-        AppUserRole,
+        UserRole,
         IdentityUserLogin<string>,
         IdentityRoleClaim<string>,
         IdentityUserToken<string>>(options)
 {
-    public DbSet<AppUser> AppUser { get; set; }
-    public DbSet<AppUserRole> AppUserRole { get; set; }
-    public DbSet<AsymmetricKey> AsymmetricKey { get; set; }
-    public DbSet<BankAccount> BankAccounts { get; set; }
+    public DbSet<User> AppUsers { get; set; }
+    public DbSet<UserRole> AppUserRoles { get; set; }
+    public DbSet<AsymmetricKey> AsymmetricKeys { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<MediaFile> MediaFiles { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
@@ -29,21 +29,7 @@ public sealed class GameXContext(
     {
         builder.ApplyConfigurationsFromAssembly(typeof(GameXContext).Assembly);
         base.OnModelCreating(builder);
-
-        builder.Entity<AppUserRole>(ur =>
-        {
-            ur.HasKey(k => new { k.UserId, k.RoleId });
-
-            ur.HasOne(r => r.Role)
-              .WithMany()
-              .HasForeignKey(r => r.RoleId)
-              .IsRequired();
-
-            ur.HasOne(r => r.User)
-              .WithMany(u => u.UserRoles)
-              .HasForeignKey(r => r.UserId)
-              .IsRequired();
-        });
+        builder.ApplyAuditColumnsConfiguration();
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

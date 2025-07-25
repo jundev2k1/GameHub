@@ -15,7 +15,11 @@ public static class PersistenceServiceRegistration
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContext<GameXContext>(options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")))
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        services
+            .AddDbContext<GameXContext>(options => options
+                .UseNpgsql(connectionString)
+                .UseSnakeCaseNamingConvention())
             .AddJwtAuth(configuration)
             .AddIdentity()
             .AddRepos()
@@ -32,7 +36,7 @@ public static class PersistenceServiceRegistration
     /// </summary>
     private static IServiceCollection AddIdentity(this IServiceCollection services)
     {
-        services.AddIdentity<AppUser, IdentityRole>()
+        services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<GameXContext>()
             .AddDefaultTokenProviders();
 

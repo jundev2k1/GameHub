@@ -1,10 +1,8 @@
-﻿using game_x.domain.Identity;
-
-namespace game_x.application.Contract.Infrastructure.Security;
+﻿namespace game_x.application.Contract.Infrastructure.Security;
 
 public interface IJwtTokenGenerator
 {
-    Task<JwtTokenDto> GenerateToken(AppUser user);
+    Task<JwtTokenDto> GenerateToken(User user);
 }
 
 public class JwtTokenDto

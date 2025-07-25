@@ -1,5 +1,4 @@
 ﻿using game_x.application.Contract.Persistence.Repo;
-using game_x.domain.Identity;
 
 namespace game_x.application.Features.Accounts.Root.Commands.CreateAdmin;
 
@@ -9,11 +8,7 @@ public sealed class CreateAdminCommandHandler(
 {
     public async Task<Unit> Handle(CreateAdminCommand request, CancellationToken ct = default)
     {
-        var newUser = new AppUser
-        {
-            UserName = request.Username,
-            EmailConfirmed = false,
-        };
+        var newUser = domain.Entities.User.Create(request.Username, string.Empty);
         await userRepo.AddUserAsync(
             user: newUser,
             rawPassword: request.Password,

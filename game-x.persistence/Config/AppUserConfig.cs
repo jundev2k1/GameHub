@@ -2,18 +2,10 @@
 
 namespace game_x.persistence.Config;
 
-public class AppUserConfig : IEntityTypeConfiguration<AppUser>
+public class AppUserConfig : IEntityTypeConfiguration<User>
 {
-    public void Configure(EntityTypeBuilder<AppUser> builder)
+    public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.Property(c => c.CreatedAt)
-            .HasColumnName("created_at")
-            .HasColumnType("timestamp with time zone")
-            .IsRequired();
-
-        builder.Property(c => c.UpdatedAt)
-            .HasColumnName("updated_at")
-            .HasColumnType("timestamp with time zone")
-            .IsRequired();
+        builder.ToTable("users");
     }
 }
