@@ -8,6 +8,11 @@ public class AppUserConfig : IEntityTypeConfiguration<User>
     {
         builder.ToTable("users");
 
+        builder.Property(u => u.Nickname)
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue(string.Empty);
+
         builder.Property(u => u.IsDeleted)
             .IsRequired()
             .HasDefaultValue(false);

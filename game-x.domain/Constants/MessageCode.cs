@@ -166,18 +166,12 @@ public static class MessageCode
         #endregion
 
         #region ■ Message group: Success
+        /// <summary>User registration completed successfully. Typically used after the user has registered and any post-registration actions (such as sending verification email) have been triggered.</summary>
+        [EnumMetadata("User registered successfully.")]
+        UserRegistSuccess = 10150,
         /// <summary>The user's password has been changed successfully. Typically used after completing a password update or reset process.</summary>
         [EnumMetadata("Password changed successfully.")]
-        UserChangePasswordSuccess = 10150
-        #endregion
-    }
-
-    public enum BankAccount
-    {
-        #region ■ Message group: Error
-        /// <summary>Cannot use the same currency multiple times within a single bank account.</summary>
-        [EnumMetadata("Each currency can only be associated once per bank account.")]
-        DuplicateCurrencyInBankAccount = 10400,
+        UserChangePasswordSuccess = 10151,
         #endregion
     }
 }
