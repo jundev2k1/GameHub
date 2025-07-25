@@ -9,7 +9,7 @@ public sealed class QrCodeController : BaseApiController
 {
     [Authorize(Roles = AppRoles.User)]
     [HttpPost("identify")]
-    public async Task<IActionResult> GenerateQrCode()
+    public async Task<IActionResult> GenerateQrCodeAsync()
     {
         var result = await Mediator.Send(new GenerateSelfUserQrCodeCommand());
         return ApiResponseFactory.Ok(result);

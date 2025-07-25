@@ -34,13 +34,13 @@ public sealed class GetAuditCriteriaByAdminValidator : AbstractValidator<GetAudi
 
     private void ValidateFilterField(QueryFilter filter, ValidationContext<GetAuditCriteriaByAdminQuery> context)
     {
-        if (_allowFields.All(f => f.ToLower() != filter.Field.ToLower()))
+        if (_allowFields.All(f => f.ToLowerInvariant() != filter.Field.ToLowerInvariant()))
             context.AddFailure($"Filter field '{filter.Field}' is not allowed.");
     }
 
     private void ValidateSortField(QuerySort sort, ValidationContext<GetAuditCriteriaByAdminQuery> context)
     {
-        if (_allowFields.All(f => f.ToLower() != sort.Field.ToLower()))
+        if (_allowFields.All(f => f.ToLowerInvariant() != sort.Field.ToLowerInvariant()))
             context.AddFailure($"Sort field '{sort.Field}' is not allowed.");
     }
 }

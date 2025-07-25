@@ -6,6 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Features\Notifications\Dtos\**" />
+    <EmbeddedResource Remove="Features\Notifications\Dtos\**" />
+    <None Remove="Features\Notifications\Dtos\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="Features\UserManagement\User\Commands\CreateUserCommand.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -29,6 +34,5 @@
     <Folder Include="Features\Accounts\Mapping\" />
     <Folder Include="Features\Accounts\Admin\Queries\" />
     <Folder Include="Features\Accounts\Cs\" />
-    <Folder Include="Features\Notifications\Dtos\" />
   </ItemGroup>
 </Project>

@@ -1,10 +1,10 @@
-using game_x.application.Features.Auth.Commands.Login.AdminLogin;
+﻿using game_x.application.Features.Auth.Commands.Login.AdminLogin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace game_x.api.Controllers.Admin;
+namespace game_x.api.Controllers.Cs;
 
-[Route("api/admin/auth")]
+[Route("api/cs/auth")]
 public sealed class AuthController : BaseApiController
 {
     [AllowAnonymous]

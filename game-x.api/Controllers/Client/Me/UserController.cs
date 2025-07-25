@@ -17,7 +17,7 @@ public sealed class UserController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPut("me/password")]
+    [HttpPatch("me/password")]
     public async Task<IActionResult> ChangePasswordAsync(ChangePasswordCommand command)
     {
         await Mediator.Send(command);

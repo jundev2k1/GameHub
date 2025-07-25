@@ -1,14 +1,11 @@
 using game_x.api;
-using game_x.api.Middleware;
 using game_x.application;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.domain.Entities;
 using game_x.infrastructure;
 using game_x.infrastructure.BackgroundJobs.Scheduling;
-using game_x.infrastructure.SignalR.Hubs;
 using game_x.persistence;
-using game_x.share.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -26,9 +23,6 @@ builder.Host.UseSerilog((context, services, loggerConfig) =>
         .WriteTo.Console();
 });
 
-// Env
-builder.Services.Configure<EngageLabSettings>(builder.Configuration.GetSection("EngageLabSettings"));
-
 // Add services to the container.
 builder.Services
     .AddApiServices(builder.Configuration)
@@ -39,37 +33,7 @@ builder.Services
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Game X");
-        options.RoutePrefix = string.Empty;
-    });
-}
-
-// Middlwware
-app.UseMiddleware<ExceptionMiddleware>();
-app.UseMiddleware<AuditSourceMiddleware>();
-
-// cores
-app.UseCors("AllowSpecificOrigin");
-
-// healthz
-app.MapHealthChecks("/healthz");
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.UseSerilogRequestLogging();
-
-// SignalR hub
-app.MapHub<AdminHub>(AdminHub.Path);
-app.MapHub<ClientHub>(ClientHub.Path);
+app.UseApplicationPipeline();
 
 using var scope = app.Services.CreateScope();
 var serviceProvider = scope.ServiceProvider;
@@ -77,10 +41,10 @@ var serviceProvider = scope.ServiceProvider;
 // Hang fire
 HangfireRecurringJobRegistration.RegisterRecurringJobs(serviceProvider);
 
+// Seed data
 try
 {
     var context = serviceProvider.GetRequiredService<GameXContext>();
-
     await context.Database.MigrateAsync();
 
     var userManager = serviceProvider.GetRequiredService<UserManager<User>>();

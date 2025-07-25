@@ -1,7 +1,6 @@
 ﻿using FluentValidation.Results;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Exceptions;
-using game_x.domain.Entities;
 using game_x.share.Extensions;
 using Microsoft.AspNetCore.Identity;
 

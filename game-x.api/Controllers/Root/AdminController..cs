@@ -8,7 +8,7 @@ namespace game_x.api.Controllers.Root;
 
 [Route("api/root/admins")]
 [Authorize(Roles = AppRoles.Root)]
-public class AdminController : BaseApiController
+public sealed class AdminController : BaseApiController
 {
     [HttpGet("{userId}")]
     public async Task<IActionResult> SoftGetAdminAsync(string userId)

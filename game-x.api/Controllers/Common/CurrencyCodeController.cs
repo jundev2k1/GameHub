@@ -9,7 +9,7 @@ namespace game_x.api.Controllers.Common;
 public sealed class CurrencyCodeController : BaseApiController
 {
     [HttpGet("currency-codes")]
-    public IActionResult GetCurrencyCode()
+    public IActionResult GetCurrencyCodeAsync()
     {
         return ApiResponseFactory.Ok(CurrencyCodeProvider.All());
     }

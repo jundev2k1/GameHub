@@ -8,7 +8,7 @@ namespace game_x.api.Controllers.Common;
 public sealed class CountryController : BaseApiController
 {
     [HttpGet("countries")]
-    public IActionResult GetAllCountries([FromQuery] string? search = null)
+    public IActionResult GetAllCountriesAsync([FromQuery] string? search = null)
     {
         var countries = search.IsNotNullOrEmpty()
             ? [.. CountryInfo.AllCountries.Where(c => c.CountryName.Contains(search!, StringComparison.OrdinalIgnoreCase))]

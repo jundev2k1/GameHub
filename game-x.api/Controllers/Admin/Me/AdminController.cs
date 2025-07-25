@@ -8,7 +8,7 @@ namespace game_x.api.Controllers.Admin.Me;
 [Route("api/admin")]
 public sealed class AdminController : BaseApiController
 {
-    [HttpPut("me/password")]
+    [HttpPatch("me/password")]
     public async Task<IActionResult> ChangePasswordAsync(ChangePasswordCommand command)
     {
         await Mediator.Send(command);

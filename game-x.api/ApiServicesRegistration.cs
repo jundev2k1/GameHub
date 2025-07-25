@@ -18,11 +18,13 @@ public static class ApiServicesRegistration
 
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowSpecificOrigin", builder => builder
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials()
-            .WithOrigins(corsOrigins));
+            options.AddPolicy(
+                "AllowSpecificOrigin",
+                builder => builder
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+                    .WithOrigins(corsOrigins));
         });
 
         services.AddHttpContextAccessor();
@@ -35,7 +37,7 @@ public static class ApiServicesRegistration
 
         return services;
     }
-    
+
     public static IServiceCollection AddSwaggerServices(this IServiceCollection services)
     {
         services.AddSwaggerGen(c =>

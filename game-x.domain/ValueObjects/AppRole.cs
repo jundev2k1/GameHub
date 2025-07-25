@@ -32,9 +32,9 @@ public sealed class AppRole : IReadOnlyCollection<string>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public int Count => _roles.Count;
-    public string[] Items => _roles.ToArray();
+    public string[] Items => [.. _roles];
     public bool IsRoot => Has(AppRoles.Root);
     public bool IsAdmin => Has(AppRoles.Admin);
-    public bool IsStaff => Has(AppRoles.Cs);
+    public bool IsCs => Has(AppRoles.Cs);
     public bool IsUser => Has(AppRoles.User);
 }
