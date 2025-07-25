@@ -2,8 +2,10 @@
 
 namespace game_x.domain.Entities;
 
-public class UserRole : IdentityUserRole<string>
+public class UserRole : IdentityUserRole<string>, IEntity
 {
-    public virtual IdentityRole Role { get; set; } = default!;
-    public virtual User User { get; set; } = default!;
+    public Role Role { get; set; } = default!;
+    public User User { get; set; } = default!;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }

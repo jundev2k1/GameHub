@@ -1,6 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.domain.Constants;
-using game_x.domain.Enum;
 using Microsoft.AspNetCore.Identity;
 
 namespace game_x.persistence;

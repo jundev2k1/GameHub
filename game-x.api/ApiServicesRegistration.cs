@@ -1,4 +1,6 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using game_x.api.Middleware;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Models;
 
 namespace game_x.api;
 
@@ -26,6 +28,10 @@ public static class ApiServicesRegistration
         services.AddHttpContextAccessor();
         services.AddEndpointsApiExplorer();
         services.AddDataProtection();
+        services.AddSwaggerServices();
+        services.AddControllers();
+        services.AddOpenApi();
+        services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthGateMiddleware>();
 
         return services;
     }

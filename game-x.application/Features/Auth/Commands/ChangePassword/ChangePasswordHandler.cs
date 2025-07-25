@@ -14,7 +14,6 @@ public sealed class ChangePasswordHandler(
     {
         var userId = userAccessor.GetUserId();
         var user = await userRepo.GetUserByIdAsync(userId, ct);
-        if (user.IsNew) user.IsNew = false;
 
         await ChangePasswordAsync(user, request.Password, request.NewPassword);
         await unitOfWork.SaveChangesAsync(ct);

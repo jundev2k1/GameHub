@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace game_x.domain.Entities;
 
-public class User : IdentityUser, IEntity<string>, IAuditable
+public class User : IdentityUser, IEntity, IAuditable
 {
     public ICollection<UserRole> UserRoles { get; set; } = [];
     public bool IsDeleted { get; set; }
-    public bool IsNew { get; set; } = true;
     public string? CountryCode { get; set; }
     public UserStatus Status { get; set; } = UserStatus.Active;
     public DateTime CreatedAt { get; set; }
@@ -25,7 +23,7 @@ public class User : IdentityUser, IEntity<string>, IAuditable
         if (!email.IsNullOrWhiteSpace() && !IsEmail(email))
             throw new ArgumentException("Email ({email}) wrong format.", email);
 
-        if (phoneNumber.IsNullOrEmpty() && !IsPhoneNumber(phoneNumber))
+        if (!phoneNumber.IsNullOrWhiteSpace() && !IsPhoneNumber(phoneNumber))
             throw new ArgumentException("Phone number ({phoneNumber}) wrong format.", phoneNumber);
 
         return new User()

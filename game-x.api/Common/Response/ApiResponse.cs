@@ -1,6 +1,4 @@
-﻿using game_x.domain.Enum;
-
-namespace game_x.api.Common.Response;
+﻿namespace game_x.api.Common.Response;
 
 public sealed class ApiResponse<T>
 {

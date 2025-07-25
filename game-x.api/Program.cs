@@ -9,7 +9,6 @@ using game_x.infrastructure.BackgroundJobs.Scheduling;
 using game_x.infrastructure.SignalR.Hubs;
 using game_x.persistence;
 using game_x.share.Settings;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -31,14 +30,11 @@ builder.Host.UseSerilog((context, services, loggerConfig) =>
 builder.Services.Configure<EngageLabSettings>(builder.Configuration.GetSection("EngageLabSettings"));
 
 // Add services to the container.
-builder.Services.AddApiServices(builder.Configuration);
-builder.Services.AddSwaggerServices();
-builder.Services.AddApplicationServices();
-builder.Services.AddPersistenceServices(builder.Configuration);
-builder.Services.AddInfrastructureServicesServices(builder.Configuration);
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
-builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthGateMiddleware>();
+builder.Services
+    .AddApiServices(builder.Configuration)
+    .AddApplicationServices()
+    .AddPersistenceServices(builder.Configuration)
+    .AddInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
 

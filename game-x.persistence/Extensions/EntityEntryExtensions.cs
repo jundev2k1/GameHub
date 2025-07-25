@@ -1,5 +1,4 @@
-﻿using game_x.domain.Enum;
-using game_x.share.Extensions;
+﻿using game_x.share.Extensions;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Text.Json;
 

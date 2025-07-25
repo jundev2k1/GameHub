@@ -1,5 +1,4 @@
-﻿using game_x.domain.Enum;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace game_x.persistence.Config;
 
@@ -20,7 +19,7 @@ public sealed class AsymmetricKeyConfig : IEntityTypeConfiguration<AsymmetricKey
 
         builder.Property(ak => ak.KeyType)
             .IsRequired()
-            .HasConversion<AsymmetricKeyType>();
+            .HasConversion<short>();
 
         builder.Property(ak => ak.Algorithm)
             .IsRequired()

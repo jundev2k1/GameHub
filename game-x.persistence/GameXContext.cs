@@ -10,7 +10,7 @@ public sealed class GameXContext(
     IEnumerable<ISaveChangesInterceptor> interceptors)
     : IdentityDbContext<
         User,
-        IdentityRole,
+        Role,
         string,
         IdentityUserClaim<string>,
         UserRole,
@@ -27,9 +27,12 @@ public sealed class GameXContext(
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        builder.ApplyConfigurationsFromAssembly(typeof(GameXContext).Assembly);
         base.OnModelCreating(builder);
+        builder.ApplyConfigurationsFromAssembly(typeof(GameXContext).Assembly);
         builder.ApplyAuditColumnsConfiguration();
+
+        // Set table name to snake case for identities
+        builder.UseSnakeCaseIdentityTableNames();
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

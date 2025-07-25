@@ -36,7 +36,7 @@ public static class PersistenceServiceRegistration
     /// </summary>
     private static IServiceCollection AddIdentity(this IServiceCollection services)
     {
-        services.AddIdentity<User, IdentityRole>()
+        services.AddIdentity<User, Role>()
             .AddEntityFrameworkStores<GameXContext>()
             .AddDefaultTokenProviders();
 
@@ -55,7 +55,7 @@ public static class PersistenceServiceRegistration
             options.User.RequireUniqueEmail = true;
 
             // Lock settings
-            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30); // Lock Time (2 minutes)
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30); // Lock Time (30 minutes)
             options.Lockout.MaxFailedAccessAttempts = 5;                      // Locked after the fifth incorrect password
             options.Lockout.AllowedForNewUsers = true;                        // Can new users be locked?
 

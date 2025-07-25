@@ -35,7 +35,7 @@ namespace game_x.infrastructure;
 
 public static class InfrastructureServicesRegistration
 {
-    public static IServiceCollection AddInfrastructureServicesServices(
+    public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSignalR();

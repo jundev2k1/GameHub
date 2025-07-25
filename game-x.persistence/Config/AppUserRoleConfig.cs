@@ -7,16 +7,19 @@ public sealed class AppUserRoleConfig : IEntityTypeConfiguration<UserRole>
     public void Configure(EntityTypeBuilder<UserRole> builder)
     {
         builder.ToTable("user_roles");
-        builder.HasKey(k => new { k.UserId, k.RoleId });
+
+        builder.HasKey(r => new { r.UserId, r.RoleId });
 
         builder.HasOne(r => r.Role)
-          .WithMany()
+          .WithMany(ur => ur.UserRoles)
           .HasForeignKey(r => r.RoleId)
-          .IsRequired();
+          .IsRequired()
+          .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(r => r.User)
           .WithMany(u => u.UserRoles)
           .HasForeignKey(r => r.UserId)
-          .IsRequired();
+          .IsRequired()
+          .OnDelete(DeleteBehavior.Cascade);
     }
 }

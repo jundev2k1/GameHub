@@ -1,5 +1,4 @@
-﻿using game_x.domain.Enum;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace game_x.persistence.Config;
 

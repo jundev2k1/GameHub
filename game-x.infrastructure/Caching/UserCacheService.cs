@@ -1,5 +1,4 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
-using game_x.domain.Enum;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 

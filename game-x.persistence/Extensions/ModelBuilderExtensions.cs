@@ -1,4 +1,6 @@
-﻿namespace game_x.persistence.Extensions;
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace game_x.persistence.Extensions;
 
 public static class ModelBuilderExtensions
 {
@@ -7,7 +9,7 @@ public static class ModelBuilderExtensions
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (entityType.ClrType.GetInterfaces().Any(i =>
-                    i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntity)))
+                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntity)))
             {
                 var createdAtProperty = entityType.FindProperty(nameof(IEntity.CreatedAt));
                 if (createdAtProperty != null)
@@ -26,5 +28,14 @@ public static class ModelBuilderExtensions
                 }
             }
         }
+    }
+
+    public static void UseSnakeCaseIdentityTableNames(this ModelBuilder builder)
+    {
+        builder.Entity<IdentityUserClaim<string>>(b => b.ToTable("user_claims"));
+        builder.Entity<IdentityUserLogin<string>>(b => b.ToTable("user_logins"));
+        builder.Entity<IdentityUserToken<string>>(b => b.ToTable("user_tokens"));
+        builder.Entity<Role>(b => b.ToTable("roles"));
+        builder.Entity<IdentityRoleClaim<string>>(b => b.ToTable("role_claims"));
     }
 }

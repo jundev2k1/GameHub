@@ -2,10 +2,11 @@
 
 namespace game_x.domain.Entities;
 
-public class Role : IdentityRole, IEntity<string>
+public class Role : IdentityRole, IEntity
 {
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public ICollection<UserRole> UserRoles { get; set; } = [];
 
     public static Role Create(string name, string? id = null)
     {
