@@ -1,6 +1,6 @@
 using game_x.application.Features.Accounts.User.Commands.UserSelfUpdate;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
-using game_x.application.Features.Auth.Commands.ChangePassword;
+using game_x.application.Features.Auth.Shared.Commands.ChangePassword;
 
 namespace game_x.api.Controllers.Client.Me;
 

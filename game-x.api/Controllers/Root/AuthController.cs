@@ -1,4 +1,4 @@
-﻿using game_x.application.Features.Auth.Commands.Login.RootLogin;
+﻿using game_x.application.Features.Auth.Root.Commands.RootLogin;
 
 namespace game_x.api.Controllers.Root;
 

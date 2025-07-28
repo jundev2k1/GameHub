@@ -1,5 +1,5 @@
-using game_x.application.Features.Auth.Commands.Login.UserLogin;
-using game_x.application.Features.Auth.Commands.Register.Client;
+using game_x.application.Features.Auth.Client.Commands.UserLogin;
+using game_x.application.Features.Auth.Client.Commands.Register.Client;
 
 namespace game_x.api.Controllers.Client;
 

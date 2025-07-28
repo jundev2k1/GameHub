@@ -1,4 +1,4 @@
-﻿using game_x.application.Features.Auth.Commands.Login.AdminLogin;
+﻿using game_x.application.Features.Auth.Cs.Commands.CsLogin;
 
 namespace game_x.api.Controllers.Cs;
 
@@ -7,7 +7,7 @@ public sealed class AuthController : BaseApiController
 {
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<IActionResult> LoginAsync(AdminLoginCommand command)
+    public async Task<IActionResult> LoginAsync(CsLoginCommand command)
     {
         var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result, MessageCode.System.LoginSuccess);
