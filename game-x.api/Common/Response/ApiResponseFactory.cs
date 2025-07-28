@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Net;
+﻿using System.Net;
 
 namespace game_x.api.Common.Response;
 
@@ -18,7 +17,7 @@ public static class ApiResponseFactory
         => Build<object?>(null, code ?? MessageCode.System.NoContent, (int)HttpStatusCode.OK);
 
     // ------ ERROR --------
-    public static ApiResponse<object?> Error(Enum code, string? message = null, int? statusCode = (int)HttpStatusCode.BadRequest)
+    public static ApiResponse<object?> Error(Enum code, string? message = null, int? statusCode = (int)HttpStatusCode.BadRequest, object? errorDetail = null )
     {
         var response = new ApiResponse<object?>
         {
@@ -26,7 +25,8 @@ public static class ApiResponseFactory
             Success = false,
             MessageCode = Convert.ToInt32(code),
             Message = message ?? code.ToMessage(),
-            StatusCode = statusCode ?? code.ToHttpStatus()
+            StatusCode = statusCode ?? code.ToHttpStatus(),
+            ErrorDetail = errorDetail
         };
         return response;
     }
@@ -40,7 +40,8 @@ public static class ApiResponseFactory
             Success = true,
             MessageCode = Convert.ToInt32(code),
             Message = code.ToMessage(),
-            StatusCode = statusCode
+            StatusCode = statusCode,
+            ErrorDetail = null
         };
 
         return new ObjectResult(response) { StatusCode = statusCode };

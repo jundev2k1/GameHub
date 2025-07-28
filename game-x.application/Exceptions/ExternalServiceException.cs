@@ -3,6 +3,7 @@
 public sealed class ExternalServiceException : Exception
 {
     public Enum ErrorCode { get; set; } = MessageCode.System.DependencyFailure;
+    public object? ErrorDetail { get; set; }
 
     public ExternalServiceException()
         : base("External service error.") { }
@@ -10,15 +11,17 @@ public sealed class ExternalServiceException : Exception
     public ExternalServiceException(string message)
         : base(message) { }
 
-    public ExternalServiceException(Enum? errorCode)
+    public ExternalServiceException(Enum? errorCode, object? errorDetail = null)
     {
         ErrorCode = errorCode ?? MessageCode.System.DependencyFailure;
+        ErrorDetail = errorDetail;
     }
 
-    public ExternalServiceException(string message, Enum? errorCode = null)
+    public ExternalServiceException(string message, Enum? errorCode = null, object? errorDetail = null)
         : base(message)
     {
         ErrorCode = errorCode ?? MessageCode.System.DependencyFailure;
+        ErrorDetail = errorDetail;
     }
 
     public ExternalServiceException(string message, Exception innerException)

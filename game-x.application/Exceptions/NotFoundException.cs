@@ -5,6 +5,7 @@ namespace game_x.application.Exceptions;
 public sealed class NotFoundException : Exception
 {
     public Enum ErrorCode { get; set; } = MessageCode.System.ResourceNotFound;
+    public object? ErrorDetail { get; set; }
     
     public NotFoundException(): base(MessageCode.System.ResourceNotFound.ToMessage()) { }
 
@@ -17,13 +18,15 @@ public sealed class NotFoundException : Exception
     {
     }
     
-    public NotFoundException(Enum errorCode) : base(errorCode.ToMessage())
+    public NotFoundException(Enum errorCode, object? errorDetail = null) : base(errorCode.ToMessage())
     {
         ErrorCode = errorCode;
+        ErrorDetail = errorDetail;
     }
 
-    public NotFoundException(Enum errorCode, string message) : base(message)
+    public NotFoundException(Enum errorCode, string message, object? errorDetail = null) : base(message)
     {
         ErrorCode = errorCode;
+        ErrorDetail = errorDetail;
     }
 }

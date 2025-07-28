@@ -9,16 +9,19 @@ public sealed class UserLoginHandler(
 {
     public async Task<UserLoginResult> Handle(UserLoginCommand request, CancellationToken ct = default)
     {
-        var loginUser = await authService.TryLoginAsync(request.UserName, request.Password);
+        var loginUser = await authService.TryLoginAsync(request.Email, request.Password);
         var (isValid, errorCode) = loginUser.CheckValidUser();
         if (!isValid) throw new ForbiddenException(errorCode!);
 
         var roles = await authService.GetRolesAsync(loginUser);
         if (!roles.IsUser) throw new ForbiddenException();
 
+        if(!loginUser.EmailConfirmed)
+            throw new BadRequestException(MessageCode.User.UserNotConfirmed);
+        
         var tokenInfo = await jwtTokenGenerator.GenerateToken(loginUser);
         return new UserLoginResult(
-            UserName: loginUser.UserName!,
+            Email: loginUser.Email!,
             UserId: loginUser.Id,
             Token: tokenInfo.Token,
             ExpiresAt: tokenInfo.ExpiresAt,

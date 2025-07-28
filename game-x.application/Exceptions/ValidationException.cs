@@ -4,6 +4,7 @@ namespace game_x.application.Exceptions;
 
 public sealed class ValidationException : Exception
 {
+    public object? ErrorDetail { get; set; }
     public ValidationException()
         : base("One or more validation failures have occurred.")
     {
