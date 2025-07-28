@@ -43,10 +43,13 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
     }
 
     public async Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default)
-        => await userManager.Users.AnyAsync(u => u.Email == email && !u.IsDeleted, ct);
+        => await userManager.Users.AnyAsync(u => u.Email != null && u.Email.ToLower() == email.ToLower() && !u.IsDeleted, ct);
 
     public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.PhoneNumber == phoneNumber && !u.IsDeleted, ct);
+
+    public async Task<bool> IsExistNicknameAsync(string nickname, CancellationToken ct = default)
+        => await userManager.Users.AnyAsync(u => (u.Nickname.ToLower() == nickname.ToLower()) && !u.IsDeleted, ct);
 
     public async Task AddUserAsync(User user, string rawPassword, AppRole role, CancellationToken ct = default)
     {

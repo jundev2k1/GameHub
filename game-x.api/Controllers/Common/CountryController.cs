@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
 namespace game_x.api.Controllers.Common;
 
 [Authorize(Roles = $"{AppRoles.Root},{AppRoles.Admin},{AppRoles.Cs},{AppRoles.User}")]

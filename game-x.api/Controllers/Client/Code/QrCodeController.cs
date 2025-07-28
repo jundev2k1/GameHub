@@ -1,6 +1,4 @@
 using game_x.application.Features.Accounts.User.Commands.GenerateSelfUserQrCode;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace game_x.api.Controllers.Client.Code;
 

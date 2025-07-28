@@ -14,6 +14,8 @@ public interface IUserRepo
 
     Task<bool> IsExistPhoneNumberAsync(string phoneNumber, CancellationToken ct = default);
 
+    Task<bool> IsExistNicknameAsync(string nickname, CancellationToken ct = default);
+
     Task AddUserAsync(User user, string rawPassword, AppRole role, CancellationToken ct = default);
 
     Task UpdateAsync(string userId, Action<User> updateAction, CancellationToken ct = default);

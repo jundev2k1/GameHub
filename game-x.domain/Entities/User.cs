@@ -5,6 +5,7 @@ namespace game_x.domain.Entities;
 
 public class User : IdentityUser, IEntity, IAuditable
 {
+    public string Nickname { get; set; } = string.Empty;
     public ICollection<UserRole> UserRoles { get; set; } = [];
     public bool IsDeleted { get; set; }
     public string? CountryCode { get; set; }
@@ -15,6 +16,7 @@ public class User : IdentityUser, IEntity, IAuditable
     public static User Create(
         string userName,
         string email,
+        string nickName = "",
         string phoneNumber = "",
         string countryCode = "",
         UserStatus status = UserStatus.Active,
@@ -30,6 +32,7 @@ public class User : IdentityUser, IEntity, IAuditable
         {
             UserName = userName,
             Email = email,
+            Nickname = nickName,
             PhoneNumber = phoneNumber,
             CountryCode = countryCode,
             Status = status,
