@@ -5,8 +5,9 @@ using game_x.application.Services.Verification;
 
 namespace game_x.application.Services.Notification;
 
-public sealed class EmailVerificationService(IEmailService emailService, IVerificationCodeService verificationCodeService)
-    : IEmailVerificationProcessor
+public sealed class EmailVerificationService(
+    IEmailService emailService,
+    IVerificationCodeService verificationCodeService) : IEmailVerificationProcessor
 {
     public void SendVerificationEmail(string email)
     {
