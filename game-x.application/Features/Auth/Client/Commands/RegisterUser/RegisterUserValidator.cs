@@ -1,6 +1,6 @@
 ﻿using game_x.application.Extensions;
 
-namespace game_x.application.Features.Auth.Commands.Register.RegisterUser;
+namespace game_x.application.Features.Auth.Client.Commands.RegisterUser;
 
 public sealed class RegisterUserValidator : AbstractValidator<RegisterUserCommand>
 {

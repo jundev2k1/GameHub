@@ -1,6 +1,6 @@
 ﻿using game_x.application.Extensions;
 
-namespace game_x.application.Features.Auth.Commands.Verify.VerifyEmailUser;
+namespace game_x.application.Features.Auth.Client.Commands.VerifyEmailUser;
 
 public sealed class VerifyEmailUserValidator : AbstractValidator<VerifyEmailUserCommand>
 {

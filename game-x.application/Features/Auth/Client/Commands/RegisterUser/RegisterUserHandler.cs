@@ -1,11 +1,7 @@
 ﻿using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserCreated;
 
-<<<<<<<< HEAD:game-x.application/Features/Auth/Commands/Register/RegisterUser/RegisterUserHandler.cs
-namespace game_x.application.Features.Auth.Commands.Register.RegisterUser;
-========
-namespace game_x.application.Features.Auth.Client.Commands.Register.Client;
->>>>>>>> 2e8dcb08b813dd652b6d058688d6ad8c4fed68a9:game-x.application/Features/Auth/Client/Commands/Register/Client/RegistUserHandler.cs
+namespace game_x.application.Features.Auth.Client.Commands.RegisterUser;
 
 public sealed class RegisterUserHandler(
     IUnitOfWork unitOfWork,

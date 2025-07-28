@@ -169,6 +169,12 @@ public static class MessageCode
         /// <summary>The nickname is existed.</summary>
         [EnumMetadata("The nickname is already in use.")]
         NicknameAlreadyExists = 10113,
+        /// <summary>Too many failed attempts. The verification process is temporarily locked.</summary>
+        [EnumMetadata("Too many failed attempts. Please try again later.")]
+        VerifyTooManyFailedAttempts = 10114,
+        /// <summary>You must wait before requesting a new verification code.</summary>
+        [EnumMetadata("Please wait before requesting a new verification code.")]
+        VerifyResendCooldown = 10115,
         #endregion
 
         #region ■ Message group: Success

@@ -1,4 +1,4 @@
-﻿namespace game_x.infrastructure.Caching;
+﻿namespace game_x.application.Contract.Infrastructure.Caching;
 
 public interface ISpamProtectionCacheService
 {

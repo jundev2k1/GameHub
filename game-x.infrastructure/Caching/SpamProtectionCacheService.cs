@@ -1,10 +1,13 @@
-﻿using game_x.share.Settings;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.share.Settings;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
 namespace game_x.infrastructure.Caching;
 
-public sealed class SpamProtectionCacheService(IMemoryCache cache, IOptions<SpamProtectionSettings> spamSetting) : CacheService(cache), ISpamProtectionCacheService
+public sealed class SpamProtectionCacheService(
+    IMemoryCache cache,
+    IOptions<SpamProtectionSettings> spamSetting) : CacheService(cache), ISpamProtectionCacheService
 {
     #region ■ Resend limiter
     private static string GetResendKey(string email) => $"spam-protection:verify-code:resend:{email}";

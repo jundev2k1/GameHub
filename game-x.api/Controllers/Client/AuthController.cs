@@ -1,9 +1,7 @@
-using game_x.application.Features.Auth.Commands.Login.UserLogin;
-using game_x.application.Features.Auth.Commands.Register.RegisterUser;
-using game_x.application.Features.Auth.Commands.ResendCode.ResendCodeUser;
-using game_x.application.Features.Auth.Commands.Verify.VerifyEmailUser;
+using game_x.application.Features.Auth.Client.Commands.RegisterUser;
+using game_x.application.Features.Auth.Client.Commands.ResendCodeUser;
 using game_x.application.Features.Auth.Client.Commands.UserLogin;
-using game_x.application.Features.Auth.Client.Commands.Register.Client;
+using game_x.application.Features.Auth.Client.Commands.VerifyEmailUser;
 
 namespace game_x.api.Controllers.Client;
 
