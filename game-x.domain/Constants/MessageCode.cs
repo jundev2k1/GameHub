@@ -163,6 +163,9 @@ public static class MessageCode
         /// <summary>The phone number is existed.</summary>
         [EnumMetadata("The phone number is already in use.")]
         PhoneAlreadyExists = 10112,
+        /// <summary>The nick name is existed.</summary>
+        [EnumMetadata("The nickname is already in use.")]
+        NicknameAlreadyExists = 10113,
         #endregion
 
         #region ■ Message group: Success

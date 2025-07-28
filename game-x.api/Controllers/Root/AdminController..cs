@@ -1,8 +1,6 @@
 using game_x.application.Features.Accounts.Root.Commands.CreateAdmin;
 using game_x.application.Features.Accounts.Root.Commands.SoftDeleteAdmin;
 using game_x.application.Features.Accounts.Root.Queries.GetAdminById;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace game_x.api.Controllers.Root;
 
