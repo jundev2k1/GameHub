@@ -1,4 +1,4 @@
-﻿namespace game_x.application.Features.Auth.Commands.Login.CsLogin;
+﻿namespace game_x.application.Features.Auth.Cs.Commands.CsLogin;
 
 public sealed class CsLoginValidator : AbstractValidator<CsLoginCommand>
 {

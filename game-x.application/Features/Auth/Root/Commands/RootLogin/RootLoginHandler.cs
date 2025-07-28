@@ -1,7 +1,7 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
 
-namespace game_x.application.Features.Auth.Commands.Login.RootLogin;
+namespace game_x.application.Features.Auth.Root.Commands.RootLogin;
 
 public sealed class RootLoginHandler(
     IJwtTokenGenerator jwtTokenGenerator,

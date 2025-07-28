@@ -1,6 +1,6 @@
 using game_x.application.Extensions;
 
-namespace game_x.application.Features.Auth.Commands.ChangePassword;
+namespace game_x.application.Features.Auth.Shared.Commands.ChangePassword;
 
 public sealed class ChangePasswordValidator : AbstractValidator<ChangePasswordCommand>
 {

@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
 
-namespace game_x.application.Features.Auth.Commands.Login.UserLogin;
+namespace game_x.application.Features.Auth.Client.Commands.UserLogin;
 
 public sealed class UserLoginHandler(
     IJwtTokenGenerator jwtTokenGenerator,

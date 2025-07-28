@@ -1,4 +1,4 @@
-using game_x.application.Features.Auth.Commands.Login.AdminLogin;
+using game_x.application.Features.Auth.Admin.Commands.AdminLogin;
 
 namespace game_x.api.Controllers.Admin;
 

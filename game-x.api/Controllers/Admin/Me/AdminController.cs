@@ -1,4 +1,4 @@
-using game_x.application.Features.Auth.Commands.ChangePassword;
+using game_x.application.Features.Auth.Shared.Commands.ChangePassword;
 
 namespace game_x.api.Controllers.Admin.Me;
 

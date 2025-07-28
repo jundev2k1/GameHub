@@ -1,4 +1,4 @@
-namespace game_x.application.Features.Auth.Commands.Login.AdminLogin;
+namespace game_x.application.Features.Auth.Admin.Commands.AdminLogin;
 
 public sealed class AdminLoginValidator : AbstractValidator<AdminLoginCommand>
 {

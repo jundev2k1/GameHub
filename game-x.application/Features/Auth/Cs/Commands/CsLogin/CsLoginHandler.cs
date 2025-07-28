@@ -1,7 +1,7 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
 
-namespace game_x.application.Features.Auth.Commands.Login.CsLogin;
+namespace game_x.application.Features.Auth.Cs.Commands.CsLogin;
 
 public sealed class CsLoginHandler(
     IAuthService authService,

@@ -2,7 +2,7 @@ using game_x.application.Features.Accounts.Root.Commands.CreateAdmin;
 using game_x.application.Features.Accounts.Root.Commands.SoftDeleteAdmin;
 using game_x.application.Features.Accounts.Root.Queries.GetAdminById;
 
-namespace game_x.api.Controllers.Root;
+namespace game_x.api.Controllers.Root.Admin;
 
 [Route("api/root/admins")]
 [Authorize(Roles = AppRoles.Root)]

@@ -1,4 +1,4 @@
-﻿namespace game_x.application.Features.Auth.Commands.Login.CsLogin;
+﻿namespace game_x.application.Features.Auth.Cs.Commands.CsLogin;
 
 public record CsLoginCommand(string UserName, string Password) : ICommand<CsLoginResult>;
 

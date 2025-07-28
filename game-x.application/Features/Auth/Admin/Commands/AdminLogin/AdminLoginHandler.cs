@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
 
-namespace game_x.application.Features.Auth.Commands.Login.AdminLogin;
+namespace game_x.application.Features.Auth.Admin.Commands.AdminLogin;
 
 public sealed class AdminLoginHandler(
     IJwtTokenGenerator jwtTokenGenerator,

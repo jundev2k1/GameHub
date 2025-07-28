@@ -1,4 +1,4 @@
-namespace game_x.application.Features.Auth.Commands.Login.UserLogin;
+namespace game_x.application.Features.Auth.Client.Commands.UserLogin;
 
 public sealed class UserLoginValidator : AbstractValidator<UserLoginCommand>
 {

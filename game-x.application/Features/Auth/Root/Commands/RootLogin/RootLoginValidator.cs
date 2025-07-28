@@ -1,4 +1,4 @@
-﻿namespace game_x.application.Features.Auth.Commands.Login.RootLogin;
+﻿namespace game_x.application.Features.Auth.Root.Commands.RootLogin;
 
 public sealed class RootLoginValidator : AbstractValidator<RootLoginCommand>
 {

@@ -2,7 +2,7 @@
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Features.Auth.Commands.ChangePassword;
+namespace game_x.application.Features.Auth.Shared.Commands.ChangePassword;
 
 public sealed class ChangePasswordHandler(
     IUnitOfWork unitOfWork,
