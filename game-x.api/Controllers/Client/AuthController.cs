@@ -1,5 +1,6 @@
 using game_x.application.Features.Auth.Commands.Login.UserLogin;
 using game_x.application.Features.Auth.Commands.Register.RegisterUser;
+using game_x.application.Features.Auth.Commands.Verify.VerifyEmailUser;
 
 namespace game_x.api.Controllers.Client;
 
@@ -19,5 +20,12 @@ public sealed class AuthController : BaseApiController
     {
         var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result, MessageCode.User.UserRegistSuccess);
+    }
+
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmailAsync(VerifyEmailUserCommand command)
+    {
+        var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
     }
 }

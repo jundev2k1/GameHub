@@ -175,6 +175,9 @@ public static class MessageCode
         /// <summary>The user's password has been changed successfully. Typically used after completing a password update or reset process.</summary>
         [EnumMetadata("Password changed successfully.")]
         UserChangePasswordSuccess = 10151,
+        /// <summary>The user's email has been verified successfully. Typically used after completing an email verify process.</summary>
+        [EnumMetadata("Email verified successfully.")]
+        EmailVerifySuccess = 10152,
         #endregion
     }
 }
