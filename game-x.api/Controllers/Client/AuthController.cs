@@ -18,6 +18,6 @@ public sealed class AuthController : BaseApiController
     public async Task<IActionResult> RegisterAsync(RegistUserCommand command)
     {
         var result = await Mediator.Send(command);
-        return ApiResponseFactory.Ok(result, MessageCode.User.UserRegistSuccess);
+        return ApiResponseFactory.Ok(result, MessageCode.User.UserRegisterSuccess);
     }
 }

@@ -115,17 +115,20 @@ public static class MessageCode
         /// <summary>Indicates that the email has been sent successfully. Typically used after triggering a mail-sending operation to an external SMTP or provider.</summary>
         [EnumMetadata("Email sent successfully.")]
         EmailSendSuccess = 10060,
-        /// <summary>Indicates that the image was uploaded successfully.Typically used after uploading avatars, product images, or other media files.</summary>
+        /// <summary>
+        ///     Indicates that the image was uploaded successfully.
+        ///     Typically used after uploading avatars, product images, or other media files.
+        /// </summary>
         [EnumMetadata("Image uploaded successfully.")]
         ImageUploadSuccess = 10061,
-        #endregion
+        #endregion 
     }
 
     public enum User
     {
         #region ■ Message group: Error
         /// <summary>The account has been locked, possibly due to multiple failed login attempts or other security reasons.</summary>
-        [EnumMetadata("The account is locked.")]
+        [EnumMetadata("Your account has been locked. Please try again later.")]
         UserLocked = 10100,
         /// <summary>The account is not allowed to sign in, possibly due to being unverified or other restrictions.</summary>
         [EnumMetadata("This account is not allowed to sign in.")]
@@ -134,7 +137,7 @@ public static class MessageCode
         [EnumMetadata("Two-factor authentication is required.")]
         UserRequiresTwoFactor = 10102,
         /// <summary>Invalid username or password. Typically used for login failures.</summary>
-        [EnumMetadata("Invalid credentials.")]
+        [EnumMetadata("Incorrect email or password.")]
         UserInvalidCredentials = 10103,
         /// <summary>The Email has not been confirmed. Usually used in post-registration verification processes.</summary>
         [EnumMetadata("The email address is not confirmed.")]
@@ -163,7 +166,7 @@ public static class MessageCode
         /// <summary>The phone number is existed.</summary>
         [EnumMetadata("The phone number is already in use.")]
         PhoneAlreadyExists = 10112,
-        /// <summary>The nick name is existed.</summary>
+        /// <summary>The nickname is existed.</summary>
         [EnumMetadata("The nickname is already in use.")]
         NicknameAlreadyExists = 10113,
         #endregion
@@ -171,7 +174,7 @@ public static class MessageCode
         #region ■ Message group: Success
         /// <summary>User registration completed successfully. Typically used after the user has registered and any post-registration actions (such as sending verification email) have been triggered.</summary>
         [EnumMetadata("User registered successfully.")]
-        UserRegistSuccess = 10150,
+        UserRegisterSuccess = 10150,
         /// <summary>The user's password has been changed successfully. Typically used after completing a password update or reset process.</summary>
         [EnumMetadata("Password changed successfully.")]
         UserChangePasswordSuccess = 10151,

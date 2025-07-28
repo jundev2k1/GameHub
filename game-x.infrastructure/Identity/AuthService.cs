@@ -16,12 +16,15 @@ public sealed class AuthService(
         bool rememberMe = false,
         bool shouldLockout = true)
     {
-        var targetUser = await userManager.FindByNameAsync(userName)
-            ?? throw new NotFoundException(MessageCode.User.UserNotFound, $"Username ({userName}) is not found.");
-
+        var targetUser = await userManager.FindByNameAsync(userName) 
+            ?? throw new BadRequestException(MessageCode.User.UserInvalidCredentials, $"Username ({userName}) is not found.");
+        
         var loginResult = await signInManager.PasswordSignInAsync(userName, password, rememberMe, shouldLockout);
         if (loginResult.IsLockedOut)
-            throw new BadRequestException(MessageCode.User.UserLocked);
+        {
+            var errorDetail = new { lockoutEnd = targetUser.LockoutEnd };
+            throw new BadRequestException(MessageCode.User.UserLocked, errorDetail: errorDetail );
+        }
         if (loginResult.IsNotAllowed)
             throw new BadRequestException(MessageCode.User.UserNotAllowed);
         if (loginResult.RequiresTwoFactor)
