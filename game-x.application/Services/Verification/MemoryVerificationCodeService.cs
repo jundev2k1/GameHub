@@ -1,4 +1,4 @@
-using game_x.application.Contract.Infrastructure.Services.VerificationCode;
+﻿using game_x.application.Contract.Infrastructure.Services.VerificationCode;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace game_x.application.Services.Verification;
@@ -13,31 +13,31 @@ public sealed class MemoryVerificationCodeService(IMemoryCache cache) : IVerific
 {
     private static readonly TimeSpan DefaultExpiration = TimeSpan.FromMinutes(10);
 
-    public Task<string> GenerateCodeAsync(string email, string purpose, TimeSpan? expiresIn = null)
+    public string GenerateCode(string email, string purpose, TimeSpan? expiresIn = null)
     {
-        var code = new Random().Next(100000, 999999).ToString();
+        var code = new Random()
+            .Next(0, 100000000)
+            .ToString("D8");
         var cacheKey = GetCacheKey(email, purpose);
-
         var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = expiresIn ?? DefaultExpiration
         };
 
         cache.Set(cacheKey, code, options);
-        return Task.FromResult(code);
+        return code;
     }
 
-    public Task<bool> VerifyCodeAsync(string email, string purpose, string inputCode)
+    public bool VerifyCode(string email, string purpose, string inputCode)
     {
         var cacheKey = GetCacheKey(email, purpose);
-
         if (cache.TryGetValue(cacheKey, out string? storedCode) && storedCode == inputCode)
         {
             cache.Remove(cacheKey);
-            return Task.FromResult(true);
+            return true;
         }
 
-        return Task.FromResult(false);
+        return false;
     }
 
     private static string GetCacheKey(string userId, string purpose)
