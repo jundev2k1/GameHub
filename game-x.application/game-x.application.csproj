@@ -38,6 +38,5 @@
     <Folder Include="Features\Auth\Cs\Commands\" />
     <Folder Include="Features\Auth\Root\Commands\" />
     <Folder Include="Features\Auth\Shared\Commands\" />
-    <Folder Include="Features\Auth\Client\Commands\" />
   </ItemGroup>
 </Project>

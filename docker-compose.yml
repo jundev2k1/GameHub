@@ -16,29 +16,33 @@ services:
   
       - HangfireSettings__Key=${HANGFIRE_KEY}
  
+      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
+
+      - UxmSettings__Host=${UXM_HOST}
+      - GameXSettings__MerchantNumber=${GAMEX_MERCHANTNUMBER}
+
       - JwtSettings__DurationInMinutes=${JWT_EXPIRED_MINUTES}
       - JwtSettings__Key=${JWT_SECRET}
       - JwtSettings__Issuer=${JWT_ISSUER}
       - JwtSettings__Audience=${JWT_AUDIENCE}
       - JwtSettings__Provider=${JWT_PROVIDER}
       - JwtSettings__Version=${JWT_VERSION}
- 
-      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
- 
-      - UxmSettings__Host=${UXM_HOST}
-      - GalaxySettings__MerchantNumber=${GALAXY_MERCHANTNUMBER}
 
       - EngageLabSettings__BaseUrl=${EngageLab_BaseUrl}
       - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
       - EngageLabSettings__ApiKey=${EngageLab_ApiKey}
       - EngageLabSettings__From=${EngageLab_From}
-      
+
       - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
       - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
       - MinioSettings__AccessKey=${Minio_AccessKey}
       - MinioSettings__SecretKey=${Minio_SecretKey}
       - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
       - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
+
+      - SpamProtectionSettings__MaxVerifyAttempts=${SpamProtection_MaxVerifyAttempts}
+      - SpamProtectionSettings__VerifyLockMinutes=${SpamProtection_VerifyLockMinutes}
+      - SpamProtectionSettings__VerifySlidingMinutes=${SpamProtection_VerifySlidingMinutes}
 
       - RecurringJobSettings__DashboardStatisticJob=${RecurringJob_DashboardStatisticJob}
 

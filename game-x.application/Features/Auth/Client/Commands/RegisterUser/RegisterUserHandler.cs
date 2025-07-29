@@ -1,11 +1,14 @@
 ﻿using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnUserCreated;
 
-namespace game_x.application.Features.Auth.Client.Commands.Register.Client;
+namespace game_x.application.Features.Auth.Client.Commands.RegisterUser;
 
-public sealed class RegistUserHandler(IUnitOfWork unitOfWork, IUserRepo userRepo)
-    : ICommandHandler<RegistUserCommand, RegistUserResult>
+public sealed class RegisterUserHandler(
+    IUnitOfWork unitOfWork,
+    IUserRepo userRepo,
+    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<RegisterUserCommand, RegisterUserResult>
 {
-    public async Task<RegistUserResult> Handle(RegistUserCommand request, CancellationToken ct = default)
+    public async Task<RegisterUserResult> Handle(RegisterUserCommand request, CancellationToken ct = default)
     {
         var isExistMail = await userRepo.IsExistEmailAsync(request.Email, ct);
         if (isExistMail) throw new BadRequestException(MessageCode.User.EmailAlreadyExists);
@@ -24,6 +27,7 @@ public sealed class RegistUserHandler(IUnitOfWork unitOfWork, IUserRepo userRepo
             userId = registUser.Id;
         }, ct);
 
-        return new RegistUserResult(userId);
+        await eventDispatcher.Publish(new OnUserCreatedEvent(request.Email), ct);
+        return new RegisterUserResult(userId);
     }
 }

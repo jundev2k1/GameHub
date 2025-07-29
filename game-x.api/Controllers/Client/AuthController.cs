@@ -1,5 +1,7 @@
+using game_x.application.Features.Auth.Client.Commands.RegisterUser;
+using game_x.application.Features.Auth.Client.Commands.ResendCodeUser;
 using game_x.application.Features.Auth.Client.Commands.UserLogin;
-using game_x.application.Features.Auth.Client.Commands.Register.Client;
+using game_x.application.Features.Auth.Client.Commands.VerifyEmailUser;
 
 namespace game_x.api.Controllers.Client;
 
@@ -15,9 +17,23 @@ public sealed class AuthController : BaseApiController
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> RegisterAsync(RegistUserCommand command)
+    public async Task<IActionResult> RegisterAsync(RegisterUserCommand command)
     {
         var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result, MessageCode.User.UserRegisterSuccess);
+    }
+
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmailAsync(VerifyEmailUserCommand command)
+    {
+        var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
+    }
+
+    [HttpPost("resend-code")]
+    public async Task<IActionResult> ResendCode(ResendCodeUserCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.Ok(MessageCode.System.EmailSendSuccess);
     }
 }

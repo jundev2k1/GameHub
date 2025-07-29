@@ -75,4 +75,11 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
 
         updateAction?.Invoke(targetUser);
     }
+    public async Task UpdateByEmailAsync(string email, Action<User> updateAction, CancellationToken ct = default)
+    {
+        var targetUser = await userManager.FindByEmailAsync(email)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+
+        updateAction?.Invoke(targetUser);
+    }
 }

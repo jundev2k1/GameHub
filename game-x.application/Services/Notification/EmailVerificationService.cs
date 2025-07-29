@@ -5,12 +5,20 @@ using game_x.application.Services.Verification;
 
 namespace game_x.application.Services.Notification;
 
-public sealed class EmailVerificationService(IEmailService emailService, IVerificationCodeService verificationCodeService) : IEmailVerificationProcessor
+public sealed class EmailVerificationService(
+    IEmailService emailService,
+    IVerificationCodeService verificationCodeService) : IEmailVerificationProcessor
 {
-    public async Task SendVerificationEmailAsync(string email, CancellationToken ct = default)
+    public void SendVerificationEmail(string email)
     {
-        var code = await verificationCodeService
-            .GenerateCodeAsync(email, VerificationPurposes.EmailVerification, TimeSpan.FromMinutes(10));
-        await emailService.SendVerificationEmailAsync(email, code);
+        var code = verificationCodeService
+            .GenerateCode(email, VerificationPurposes.EmailVerification, TimeSpan.FromMinutes(10));
+        emailService.SendVerificationEmailAsync(email, code);
+    }
+
+    public bool VerifyEmail(string email, string code)
+    {
+        var result = verificationCodeService.VerifyCode(email, VerificationPurposes.EmailVerification, code);
+        return result;
     }
 }
