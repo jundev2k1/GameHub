@@ -95,9 +95,10 @@ namespace game_x.persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "text", nullable: false),
-                    is_deleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    nickname = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: ""),
                     country_code = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false, defaultValue: ""),
                     status = table.Column<short>(type: "smallint", nullable: false, defaultValue: (short)1),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -162,7 +163,7 @@ namespace game_x.persistence.Migrations
                 {
                     table.PrimaryKey("pk_audit_logs", x => x.id);
                     table.ForeignKey(
-                        name: "fk_audit_logs_users_changed_by_user_id",
+                        name: "fk_audit_logs_asp_net_users_changed_by_user_id",
                         column: x => x.changed_by_user_id,
                         principalTable: "users",
                         principalColumn: "id",
@@ -184,6 +185,49 @@ namespace game_x.persistence.Migrations
                     table.PrimaryKey("pk_user_claims", x => x.id);
                     table.ForeignKey(
                         name: "fk_user_claims_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "user_kycs",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    public_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<string>(type: "text", nullable: false),
+                    full_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    date_of_birth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    residential_address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    id_number = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    front_image_id = table.Column<int>(type: "integer", nullable: true),
+                    back_image_id = table.Column<int>(type: "integer", nullable: true),
+                    status = table.Column<short>(type: "smallint", nullable: false),
+                    rejection_reason = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true),
+                    submitted_at = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    date_reviewed = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    reviewed_by = table.Column<string>(type: "text", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_user_kycs", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_user_kycs_media_files_back_image_id",
+                        column: x => x.back_image_id,
+                        principalTable: "media_files",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_user_kycs_media_files_front_image_id",
+                        column: x => x.front_image_id,
+                        principalTable: "media_files",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_user_kycs_users_user_id",
                         column: x => x.user_id,
                         principalTable: "users",
                         principalColumn: "id",
@@ -315,6 +359,22 @@ namespace game_x.persistence.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_user_kycs_back_image_id",
+                table: "user_kycs",
+                column: "back_image_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_kycs_front_image_id",
+                table: "user_kycs",
+                column: "front_image_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_kycs_user_id",
+                table: "user_kycs",
+                column: "user_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "ix_user_logins_user_id",
                 table: "user_logins",
                 column: "user_id");
@@ -346,9 +406,6 @@ namespace game_x.persistence.Migrations
                 name: "audit_logs");
 
             migrationBuilder.DropTable(
-                name: "media_files");
-
-            migrationBuilder.DropTable(
                 name: "notifications");
 
             migrationBuilder.DropTable(
@@ -358,6 +415,9 @@ namespace game_x.persistence.Migrations
                 name: "user_claims");
 
             migrationBuilder.DropTable(
+                name: "user_kycs");
+
+            migrationBuilder.DropTable(
                 name: "user_logins");
 
             migrationBuilder.DropTable(
@@ -365,6 +425,9 @@ namespace game_x.persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "user_tokens");
+
+            migrationBuilder.DropTable(
+                name: "media_files");
 
             migrationBuilder.DropTable(
                 name: "roles");
