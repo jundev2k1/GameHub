@@ -8,23 +8,34 @@ public sealed class UserLoginValidatorTests
     private readonly UserLoginValidator _validator = new();
 
     [Theory]
-    [InlineData("", "validPassword", nameof(UserLoginCommand.Email))]
-    [InlineData(null, "validPassword", nameof(UserLoginCommand.Email))]
-    [InlineData("email@example.com", "", nameof(UserLoginCommand.Password))]
-    [InlineData("email@example.com", null, nameof(UserLoginCommand.Password))]
-    [InlineData("", "", nameof(UserLoginCommand.Email))]
-    public void Should_HaveValidationError_When_FieldIsEmpty(
-        string? email,
-        string? password,
-        string expectedInvalidProperty)
+    [InlineData("")]
+    [InlineData("not-an-email")]
+    [InlineData("user@")]
+    public void Validate_InvalidEmail_HasValidationError(string? badEmail)
     {
-        var command = new UserLoginCommand(email!, password!);
+        var command = new UserLoginCommand(badEmail!, "validPassword");
+        
+        var result = _validator.TestValidate(command);
+        
+        result
+            .ShouldHaveValidationErrorFor(c => c.Email)
+            .WithErrorMessage("Email format is invalid");
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
+    public void Validate_InvalidPassword_HasValidationError(string? password)
+    {
+        var command = new UserLoginCommand("email@example.com", password!);
 
         var result = _validator.TestValidate(command);
 
-        result.ShouldHaveValidationErrorFor(expectedInvalidProperty);
+        result
+            .ShouldHaveValidationErrorFor(c => c.Password)
+            .WithErrorMessage("Password is required.");
     }
-
+    
     [Fact]
     public void Should_NotHaveValidationError_When_InputIsValid()
     {

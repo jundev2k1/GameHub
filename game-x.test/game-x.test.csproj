@@ -35,6 +35,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\game-x.application\game-x.application.csproj" />
+      <ProjectReference Include="..\game-x.infrastructure\game-x.infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
