@@ -28,18 +28,14 @@
       <Folder Include="IntegrationTests\" />
       <Folder Include="StressTests\" />
       <Folder Include="UnitTests\Application\Auth\Admin\" />
-      <Folder Include="UnitTests\Application\Auth\Client\" />
       <Folder Include="UnitTests\Application\Auth\Cs\" />
-      <Folder Include="UnitTests\Application\Auth\Login\AdminLogin\" />
-      <Folder Include="UnitTests\Application\Auth\Login\CsLogin\" />
-      <Folder Include="UnitTests\Application\Auth\Login\RootLogin\" />
-      <Folder Include="UnitTests\Application\Auth\Login\UserLogin\" />
       <Folder Include="UnitTests\Application\Auth\Root\" />
       <Folder Include="UnitTests\Domain\" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\game-x.application\game-x.application.csproj" />
+      <ProjectReference Include="..\game-x.infrastructure\game-x.infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
