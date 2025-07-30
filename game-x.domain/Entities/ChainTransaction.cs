@@ -23,6 +23,45 @@ public sealed class ChainTransaction: BaseEntity<int>
     public string Meta { get; set; } = "{}";
     public string? Note { get; set; }
     
+    public static ChainTransaction Create(
+        string userId,
+        string orderNumber,
+        decimal amount,
+        int cryptoTokenId,
+        ChainTransactionType type,
+        ChainTransactionStatus status,
+        decimal? fee = null,
+        string? fromAddress = null,
+        string? toAddress = null,
+        string? transactionHash = null,
+        string? note = null
+        )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
+
+        if (amount <= 0)
+            throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
+   
+        if (fee is < 0)
+            throw new ArgumentException("Fee must be equal or greater than zero.", nameof(fee));
+        
+        var order = new ChainTransaction
+        {
+            UserId = userId,
+            OrderNumber = orderNumber,
+            TransactionHash = transactionHash,
+            FromAddress = fromAddress,
+            ToAddress = toAddress,
+            Type = type,
+            Amount = amount,
+            Fee = fee ?? 0,
+            CryptoTokenId = cryptoTokenId,
+            Status = status,
+            Note = note,
+        };
+        return order;
+    }
+    
     [NotMapped]
     public ChainTransactionMeta MetaObject
     {
