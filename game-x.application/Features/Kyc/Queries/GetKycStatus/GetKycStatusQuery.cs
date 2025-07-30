@@ -1,5 +1,7 @@
-﻿namespace game_x.application.Features.Kyc.Queries.GetKycStatus;
+﻿using game_x.application.Features.Kyc.Dtos;
 
-public record GetKycStatusQuery() : IQuery<GetKycStatusResult>;
+namespace game_x.application.Features.Kyc.Queries.GetKycStatus;
 
-public record GetKycStatusResult();
+public record GetKycStatusQuery : IQuery<GetKycStatusResult>;
+
+public record GetKycStatusResult(KycStatus Status, string RejectionReason, DateTime SubmittedAt, ReviewerInfoDto? ReviewedBy);

@@ -12,7 +12,7 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    [Migration("20250730022413_InitMigration")]
+    [Migration("20250730034903_InitMigration")]
     partial class InitMigration
     {
         /// <inheritdoc />
@@ -628,9 +628,9 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("residential_address");
 
-                    b.Property<string>("ReviewedBy")
+                    b.Property<string>("ReviewedById")
                         .HasColumnType("text")
-                        .HasColumnName("reviewed_by");
+                        .HasColumnName("reviewed_by_id");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint")
@@ -661,6 +661,9 @@ namespace game_x.persistence.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("ix_user_kycs_code");
+
+                    b.HasIndex("ReviewedById")
+                        .HasDatabaseName("ix_user_kycs_reviewed_by_id");
 
                     b.HasIndex("UserId")
                         .IsUnique()
@@ -758,6 +761,12 @@ namespace game_x.persistence.Migrations
                         .HasForeignKey("FrontImageId")
                         .HasConstraintName("fk_user_kycs_media_files_front_image_id");
 
+                    b.HasOne("game_x.domain.Entities.User", "ReviewedBy")
+                        .WithMany()
+                        .HasForeignKey("ReviewedById")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_user_kycs_users_reviewed_by_id");
+
                     b.HasOne("game_x.domain.Entities.User", "User")
                         .WithOne("UserKyc")
                         .HasForeignKey("game_x.domain.Entities.UserKyc", "UserId")
@@ -768,6 +777,8 @@ namespace game_x.persistence.Migrations
                     b.Navigation("BackImage");
 
                     b.Navigation("FrontImage");
+
+                    b.Navigation("ReviewedBy");
 
                     b.Navigation("User");
                 });

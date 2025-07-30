@@ -60,13 +60,18 @@ public class UserKycConfig : IEntityTypeConfiguration<UserKyc>
             .IsRequired(false)
             .HasColumnType("timestamp with time zone");
 
-        builder.Property(uk => uk.ReviewedBy)
+        builder.Property(uk => uk.ReviewedById)
             .IsRequired(false);
 
         builder.HasOne(uk => uk.User)
             .WithOne(u => u.UserKyc)
-            .HasForeignKey<UserKyc>(x => x.UserId)
+            .HasForeignKey<UserKyc>(uk => uk.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(uk => uk.ReviewedBy)
+            .WithMany()
+            .HasForeignKey(uk => uk.ReviewedById)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(uk => uk.PublicId).IsUnique();
     }

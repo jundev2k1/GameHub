@@ -209,7 +209,7 @@ namespace game_x.persistence.Migrations
                     rejection_reason = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true),
                     submitted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     date_reviewed = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    reviewed_by = table.Column<string>(type: "text", nullable: true),
+                    reviewed_by_id = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -226,6 +226,12 @@ namespace game_x.persistence.Migrations
                         column: x => x.front_image_id,
                         principalTable: "media_files",
                         principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_user_kycs_users_reviewed_by_id",
+                        column: x => x.reviewed_by_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "fk_user_kycs_users_user_id",
                         column: x => x.user_id,
@@ -379,6 +385,11 @@ namespace game_x.persistence.Migrations
                 name: "ix_user_kycs_front_image_id",
                 table: "user_kycs",
                 column: "front_image_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_kycs_reviewed_by_id",
+                table: "user_kycs",
+                column: "reviewed_by_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_user_kycs_user_id",

@@ -1,10 +1,15 @@
-﻿namespace game_x.application.Features.Kyc.Queries.GetKycStatus;
+﻿using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Persistence.Repo;
 
-public sealed class GetKycStatusHandler : IQueryHandler<GetKycStatusQuery, GetKycStatusResult>
+namespace game_x.application.Features.Kyc.Queries.GetKycStatus;
+
+public sealed class GetKycStatusHandler(IUserRepo userRepo, IUserAccessor userAccessor)
+    : IQueryHandler<GetKycStatusQuery, GetKycStatusResult>
 {
     public async Task<GetKycStatusResult> Handle(GetKycStatusQuery request, CancellationToken ct = default)
     {
-        await Task.CompletedTask;
-        return new GetKycStatusResult();
+        var userId = userAccessor.GetUserId();
+        var targetUser = await userRepo.GetKycProfile(userId, ct);
+        return targetUser.Adapt<GetKycStatusResult>();
     }
 }

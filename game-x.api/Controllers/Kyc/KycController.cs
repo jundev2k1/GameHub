@@ -12,8 +12,9 @@ public sealed class KycController : BaseApiController
 {
     [Authorize(Roles = AppRoles.User)]
     [HttpGet("status")]
-    public async Task<IActionResult> GetKycStatusAsync(GetKycStatusQuery query)
+    public async Task<IActionResult> GetKycStatusAsync()
     {
+        var query = new GetKycStatusQuery();
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }

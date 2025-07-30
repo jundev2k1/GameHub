@@ -22,7 +22,8 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
 
     public DateTime? SubmittedAt { get; private set; }
     public DateTime? DateReviewed { get; private set; }
-    public string? ReviewedBy { get; private set; }
+    public string? ReviewedById { get; private set; }
+    public User? ReviewedBy { get; private set; }
 
     public static UserKyc Create(
         string userId,
@@ -59,7 +60,7 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
             throw new InvalidOperationException("Can only approve KYC in UnderReview status.");
 
         Status = KycStatus.Approved;
-        ReviewedBy = adminId;
+        ReviewedById = adminId;
         RejectionReason = null;
     }
 
@@ -72,7 +73,7 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
             throw new ArgumentException("Rejection reason is required.");
 
         Status = KycStatus.Rejected;
-        ReviewedBy = adminId;
+        ReviewedById = adminId;
         RejectionReason = reason;
     }
 
@@ -88,7 +89,7 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
         Status = KycStatus.UnderReview;
         SubmittedAt = DateTime.UtcNow;
         DateReviewed = null;
-        ReviewedBy = null;
+        ReviewedById = null;
         RejectionReason = null;
     }
 }
