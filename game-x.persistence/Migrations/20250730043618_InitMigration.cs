@@ -210,6 +210,7 @@ namespace game_x.persistence.Migrations
                     submitted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     date_reviewed = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     reviewed_by_id = table.Column<string>(type: "text", nullable: true),
+                    reject_details = table.Column<string>(type: "jsonb", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },

@@ -23,4 +23,6 @@ public interface IUserRepo
     Task UpdateAsync(string userId, Action<User> updateAction, CancellationToken ct = default);
 
     Task UpdateByEmailAsync(string email, Action<User> updateAction, CancellationToken ct = default);
+
+    Task UpdateKycAsync(string userId, Action<UserKyc> updateAction, CancellationToken ct = default);
 }

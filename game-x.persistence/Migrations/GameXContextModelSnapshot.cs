@@ -614,6 +614,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("code")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<string>("RejectDetails")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("reject_details");
+
                     b.Property<string>("RejectionReason")
                         .HasMaxLength(4000)
                         .HasColumnType("character varying(4000)")

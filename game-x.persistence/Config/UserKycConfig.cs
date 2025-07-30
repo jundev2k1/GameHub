@@ -63,6 +63,10 @@ public class UserKycConfig : IEntityTypeConfiguration<UserKyc>
         builder.Property(uk => uk.ReviewedById)
             .IsRequired(false);
 
+        builder.Property(uk => uk.RejectDetails)
+            .IsRequired(false)
+            .HasColumnType("jsonb");
+
         builder.HasOne(uk => uk.User)
             .WithOne(u => u.UserKyc)
             .HasForeignKey<UserKyc>(uk => uk.UserId)

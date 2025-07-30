@@ -92,4 +92,13 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
 
         updateAction?.Invoke(targetUser);
     }
+
+    public async Task UpdateKycAsync(string userId, Action<UserKyc> updateAction, CancellationToken ct = default)
+    {
+        var targetKyc = await context.UserKycs
+            .FirstOrDefaultAsync(uk => uk.UserId == userId && !uk.User.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+
+        updateAction?.Invoke(targetKyc);
+    }
 }

@@ -12,7 +12,7 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    [Migration("20250730034903_InitMigration")]
+    [Migration("20250730043618_InitMigration")]
     partial class InitMigration
     {
         /// <inheritdoc />
@@ -616,6 +616,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("code")
                         .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("RejectDetails")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("reject_details");
 
                     b.Property<string>("RejectionReason")
                         .HasMaxLength(4000)

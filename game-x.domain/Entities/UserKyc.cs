@@ -24,6 +24,7 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
     public DateTime? DateReviewed { get; private set; }
     public string? ReviewedById { get; private set; }
     public User? ReviewedBy { get; private set; }
+    public string? RejectDetails { get; private set; }
 
     public static UserKyc Create(
         string userId,
@@ -57,30 +58,34 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
     public void Approve(string adminId)
     {
         if (Status != KycStatus.UnderReview)
-            throw new InvalidOperationException("Can only approve KYC in UnderReview status.");
+            throw new ArgumentException("Can only approve KYC in UnderReview status.");
 
         Status = KycStatus.Approved;
         ReviewedById = adminId;
         RejectionReason = null;
     }
 
-    public void Reject(string adminId, string reason)
+    public void Reject(string adminId, string? reason, string? details = "")
     {
         if (Status != KycStatus.UnderReview)
-            throw new InvalidOperationException("Can only reject KYC in UnderReview status.");
+            throw new ArgumentException("Can only reject KYC in UnderReview status.");
 
         if (string.IsNullOrWhiteSpace(reason))
             throw new ArgumentException("Rejection reason is required.");
 
+        if (details.IsNotNullOrEmpty() && !JsonHelper.IsJson(details!))
+            throw new ArgumentException("Reject details must be an array object json.");
+
         Status = KycStatus.Rejected;
         ReviewedById = adminId;
         RejectionReason = reason;
+        RejectDetails = details;
     }
 
     public void Resubmit(string fullName, DateTime dob, string address, string idNumber)
     {
         if (Status != KycStatus.Rejected)
-            throw new InvalidOperationException("Only rejected KYC can be resubmitted.");
+            throw new ArgumentException("Only rejected KYC can be resubmitted.");
 
         FullName = fullName;
         DateOfBirth = dob.ToUniversalTime();
