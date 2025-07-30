@@ -1,5 +1,12 @@
-﻿namespace game_x.infrastructure.ExternalApi.Uxm;
+﻿using game_x.share.ExternalApi.Uxm.Dtos;
+using Refit;
+
+namespace game_x.infrastructure.ExternalApi.Uxm;
 
 public interface IUxmApi
 {
+    /// <summary>Uxm API: Merchant Member Usdt Withdrawal</summary>
+    [Post("/v1/order/tron/usdt/withdrawal")]
+    Task<ApiResponse<SecureResponse<UxmWithdrawalOrderResponseData>>> CreateProxyWithdrawalOrderAsync(
+        [Body] SecureRequest<UxmWithdrawalOrderRequest> request);
 }
