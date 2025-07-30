@@ -7,8 +7,8 @@ namespace game_x.infrastructure.ExternalApi.Uxm;
 
 public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : IUxmService
 {
-    public async Task<SecureResponse<CreateOrderBuyResponseData>> CreateProxyBuyOrderAsync(
-        SecureRequest<CreateOrderBuyRequestData> data)
+    public async Task<SecureResponse<CreateChainTransactionDepositResponseData>> CreateProxyChainTransactionDepositAsync(
+        SecureRequest<CreateChainTransactionDepositRequestData> data)
     {
         try
         {
@@ -16,7 +16,7 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
             //     $"Create order request: MerchantOrderId={data.Data.MerchantOrderId}, Amount={data.Data.FiatAmount}"
             //     );
 
-            var response = await uxmApi.CreateProxyBuyOrderAsync(data);
+            var response = await uxmApi.CreateProxyChainTransactionDepositAsync(data);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
                 logger.LogError($"Response failed: Status={response.StatusCode}");

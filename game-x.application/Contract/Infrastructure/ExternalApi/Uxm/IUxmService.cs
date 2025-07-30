@@ -5,7 +5,7 @@ namespace game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 
 public interface IUxmService
 {
-    Task<SecureResponse<CreateOrderBuyResponseData>> CreateProxyBuyOrderAsync(
-        SecureRequest<CreateOrderBuyRequestData> data);
+    Task<SecureResponse<CreateChainTransactionDepositResponseData>> CreateProxyChainTransactionDepositAsync(
+        SecureRequest<CreateChainTransactionDepositRequestData> data);
 
 }
