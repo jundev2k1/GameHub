@@ -334,6 +334,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("transaction_hash");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
