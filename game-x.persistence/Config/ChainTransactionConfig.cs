@@ -57,6 +57,10 @@ public sealed class ChainTransactionConfig : IEntityTypeConfiguration<ChainTrans
             .HasColumnType("timestamp with time zone")
             .IsRequired();
         
+        builder.Property(x => x.Type)
+            .HasColumnName("type")
+            .IsRequired();
+        
         builder.Property(x => x.Status)
             .HasColumnName("status")
             .IsRequired()

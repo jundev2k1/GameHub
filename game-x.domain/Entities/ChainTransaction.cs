@@ -18,6 +18,7 @@ public sealed class ChainTransaction: BaseEntity<int>
     public int CryptoTokenId { get; set; }
     public CryptoToken CryptoToken { get; set; } = null!;
     public DateTime ConfirmedAt { get; set; } = DateTime.UtcNow;
+    public ChainTransactionType Type { get; set; }
     public ChainTransactionStatus Status { get; set; } = ChainTransactionStatus.Pending;
     public string Meta { get; set; } = "{}";
     public string? Note { get; set; }
