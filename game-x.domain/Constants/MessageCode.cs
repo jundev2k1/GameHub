@@ -189,4 +189,40 @@ public static class MessageCode
         EmailVerifySuccess = 10152,
         #endregion
     }
+    
+    public enum Trace
+    {
+        #region ■ Message group: Error
+        /// <summary>Transaction order not found.</summary>
+        [EnumMetadata("Transaction order not found.")]
+        TradeNotFound = 10200,
+        /// <summary>The current status of the order does not allow this operation.</summary>
+        [EnumMetadata("The current status of the order does not allow this operation.")]
+        InvalidTradeStatus = 10201,
+        /// <summary>The transaction does not belong to the currently logged-in user.</summary>
+        [EnumMetadata("The transaction does not belong to the currently logged-in user.")]
+        TradeOwnershipInvalid = 10202,
+        /// <summary>The order has expired.</summary>
+        [EnumMetadata("The order has expired.")]
+        TradeExpired = 10203,
+        /// <summary>The order has been accepted but is missing a bank account.</summary>
+        [EnumMetadata("The order has been accepted but is missing a bank account.")]
+        TradeMissingBankAccountAfterAccept = 10204,
+        /// <summary>Error occurred while generating the order number.</summary>
+        [EnumMetadata("Error occurred while generating the order number.")]
+        TradeGenerationFailed = 10205,
+        /// <summary>The order has been accepted but is missing a bank account.</summary>
+        [EnumMetadata("Payment proof has not been uploaded.")]
+        TradePaymentProofNotUploaded = 10206,
+        /// <summary>Invalid transaction type.</summary>
+        [EnumMetadata("Invalid transaction type.")]
+        InvalidTradeType = 10207,
+        /// <summary>The order is not linked to an EntryCode.</summary>
+        [EnumMetadata("The order is not linked to an EntryCode.")]
+        TradeMissingEntryCode = 10208,
+        /// <summary>The EntryCode has not been used or has not expired, no revival needed.</summary>
+        [EnumMetadata("The EntryCode has not been used or has not expired, no revival needed.")]
+        EntryCodeNotEligibleForRevive = 10209,
+        #endregion
+    }
 }

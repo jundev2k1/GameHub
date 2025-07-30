@@ -88,4 +88,12 @@ public class User : IdentityUser, IEntity, IAuditable
 
         return (true, null);
     }
+    
+    private bool Has(string roleName) 
+        => UserRoles.Any(r => r.Role.Name == roleName);
+    
+    public bool IsRoot => Has(AppRoles.Root);
+    public bool IsAdmin => Has(AppRoles.Admin);
+    public bool IsCs => Has(AppRoles.Cs);
+    public bool IsUser => Has(AppRoles.User);
 }

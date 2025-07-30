@@ -9,4 +9,8 @@ public interface IUxmApi
     Task<ApiResponse<SecureResponse<CreateChainTransactionDepositResponseData>>> CreateProxyChainTransactionDepositAsync(
     [Body] SecureRequest<CreateChainTransactionDepositRequestData> request);
 
+    /// <summary>Uxm API: Merchant Member Usdt Withdrawal</summary>
+    [Post("/v1/order/tron/usdt/withdrawal")]
+    Task<ApiResponse<SecureResponse<UxmWithdrawalOrderResponseData>>> CreateProxyWithdrawalOrderAsync(
+        [Body] SecureRequest<UxmWithdrawalOrderRequest> request);
 }
