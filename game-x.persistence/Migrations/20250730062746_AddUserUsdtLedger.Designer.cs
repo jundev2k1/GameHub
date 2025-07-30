@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -11,9 +12,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250730062746_AddUserUsdtLedger")]
+    partial class AddUserUsdtLedger
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -906,9 +909,8 @@ namespace game_x.persistence.Migrations
                         .HasConstraintName("fk_user_usdt_ledgers_chain_transactions_chain_transaction_id");
 
                     b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany("UserUsdtLedgers")
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_user_usdt_ledgers_users_user_id");
 
                     b.Navigation("ChainTransaction");
@@ -926,8 +928,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("ChainTransactions");
 
                     b.Navigation("UserRoles");
-
-                    b.Navigation("UserUsdtLedgers");
                 });
 #pragma warning restore 612, 618
         }

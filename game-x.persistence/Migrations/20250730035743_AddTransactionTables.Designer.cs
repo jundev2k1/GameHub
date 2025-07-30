@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -11,9 +12,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250730035743_AddTransactionTables")]
+    partial class AddTransactionTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -733,79 +736,6 @@ namespace game_x.persistence.Migrations
                     b.ToTable("user_roles", (string)null);
                 });
 
-            modelBuilder.Entity("game_x.domain.Entities.UserUsdtLedger", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("ChainTransactionId")
-                        .HasColumnType("integer")
-                        .HasColumnName("chain_transaction_id");
-
-                    b.Property<decimal>("ChangeAmount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("change_amount");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("FlowType")
-                        .HasColumnType("integer")
-                        .HasColumnName("flow_type");
-
-                    b.Property<string>("Meta")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("jsonb")
-                        .HasDefaultValue("{}")
-                        .HasColumnName("meta");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("SourceId")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("")
-                        .HasColumnName("source_id");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("timestamp");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("text")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_user_usdt_ledgers");
-
-                    b.HasIndex("ChainTransactionId")
-                        .HasDatabaseName("ix_user_usdt_ledgers_chain_transaction_id");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_user_usdt_ledgers_public_id");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_user_usdt_ledgers_user_id");
-
-                    b.ToTable("user_usdt_ledgers", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("game_x.domain.Entities.Role", null)
@@ -898,24 +828,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("game_x.domain.Entities.UserUsdtLedger", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.ChainTransaction", "ChainTransaction")
-                        .WithMany()
-                        .HasForeignKey("ChainTransactionId")
-                        .HasConstraintName("fk_user_usdt_ledgers_chain_transactions_chain_transaction_id");
-
-                    b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany("UserUsdtLedgers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_user_usdt_ledgers_users_user_id");
-
-                    b.Navigation("ChainTransaction");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("game_x.domain.Entities.Role", b =>
                 {
                     b.Navigation("UserRoles");
@@ -926,8 +838,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("ChainTransactions");
 
                     b.Navigation("UserRoles");
-
-                    b.Navigation("UserUsdtLedgers");
                 });
 #pragma warning restore 612, 618
         }
