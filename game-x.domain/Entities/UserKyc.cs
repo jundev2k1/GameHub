@@ -1,8 +1,8 @@
 ﻿namespace game_x.domain.Entities;
 
-public sealed class UserKyc : BaseEntity<int>
+public sealed class UserKyc : BaseEntity<int>, IAuditable
 {
-    public Guid PublicId { get; private set; }
+    public Guid PublicId { get; private set; } = Guid.NewGuid();
 
     public string UserId { get; private set; } = string.Empty;
     public User User { get; private set; } = default!;
@@ -35,7 +35,7 @@ public sealed class UserKyc : BaseEntity<int>
         {
             UserId = userId,
             FullName = fullName,
-            DateOfBirth = dateOfBirth,
+            DateOfBirth = dateOfBirth.ToUniversalTime(),
             ResidentialAddress = address,
             IdNumber = idNumber,
             Status = KycStatus.NotSubmitted,
@@ -46,16 +46,11 @@ public sealed class UserKyc : BaseEntity<int>
 
     public void UploadBackImage(MediaFile file) => BackImage = file;
 
-    public (bool IsSuccess, System.Enum? MessageCode) Submit()
+    public void Submit()
     {
-        if (FrontImageId is null || BackImageId is null)
-            return (false, MessageCode.System.InvalidParameters);
-
         Status = KycStatus.UnderReview;
         SubmittedAt = DateTime.UtcNow;
         RejectionReason = null;
-
-        return (true, null);
     }
 
     public void Approve(string adminId)
@@ -87,7 +82,7 @@ public sealed class UserKyc : BaseEntity<int>
             throw new InvalidOperationException("Only rejected KYC can be resubmitted.");
 
         FullName = fullName;
-        DateOfBirth = dob;
+        DateOfBirth = dob.ToUniversalTime();
         ResidentialAddress = address;
         IdNumber = idNumber;
         Status = KycStatus.UnderReview;

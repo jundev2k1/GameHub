@@ -8,62 +8,66 @@ public class UserKycConfig : IEntityTypeConfiguration<UserKyc>
     {
         builder.ToTable("user_kycs");
 
-        builder.HasKey(x => x.Id);
-        builder.HasIndex(x => x.UserId).IsUnique();
+        builder.HasKey(uk => uk.Id);
+        builder.HasIndex(uk => uk.UserId).IsUnique();
 
-        builder.Property(m => m.Id)
+        builder.Property(uk => uk.Id)
             .IsRequired()
             .ValueGeneratedOnAdd();
 
-        builder.Property(m => m.PublicId)
+        builder.Property(uk => uk.PublicId)
+            .HasColumnName("code")
+            .IsRequired()
+            .HasDefaultValueSql("gen_random_uuid()");
+
+        builder.Property(uk => uk.UserId)
             .IsRequired();
 
-        builder.Property(x => x.UserId)
-            .IsRequired();
-
-        builder.Property(x => x.FullName)
+        builder.Property(uk => uk.FullName)
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(x => x.DateOfBirth)
+        builder.Property(uk => uk.DateOfBirth)
             .IsRequired();
 
-        builder.Property(x => x.ResidentialAddress)
+        builder.Property(uk => uk.ResidentialAddress)
             .IsRequired()
             .HasMaxLength(255);
 
-        builder.Property(x => x.IdNumber)
+        builder.Property(uk => uk.IdNumber)
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.Property(x => x.FrontImageId)
+        builder.Property(uk => uk.FrontImageId)
             .IsRequired(false);
 
-        builder.Property(x => x.BackImageId)
+        builder.Property(uk => uk.BackImageId)
             .IsRequired(false);
 
-        builder.Property(x => x.Status)
+        builder.Property(uk => uk.Status)
             .HasConversion<short>()
             .IsRequired();
 
-        builder.Property(x => x.RejectionReason)
+        builder.Property(uk => uk.RejectionReason)
             .IsRequired(false)
             .HasMaxLength(4000);
 
-        builder.Property(x => x.SubmittedAt)
+        builder.Property(uk => uk.SubmittedAt)
             .IsRequired(false)
-            .HasColumnType("timestamp");
+            .HasColumnType("timestamp with time zone");
 
-        builder.Property(x => x.DateReviewed)
+        builder.Property(uk => uk.DateReviewed)
             .IsRequired(false)
-            .HasColumnType("timestamp");
+            .HasColumnType("timestamp with time zone");
 
-        builder.Property(x => x.ReviewedBy)
+        builder.Property(uk => uk.ReviewedBy)
             .IsRequired(false);
 
-        builder.HasOne(x => x.User)
+        builder.HasOne(uk => uk.User)
             .WithOne(u => u.UserKyc)
             .HasForeignKey<UserKyc>(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(uk => uk.PublicId).IsUnique();
     }
 }

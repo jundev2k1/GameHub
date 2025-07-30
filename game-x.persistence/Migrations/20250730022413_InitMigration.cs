@@ -153,6 +153,7 @@ namespace game_x.persistence.Migrations
                     entity_id = table.Column<string>(type: "text", nullable: false, defaultValue: ""),
                     action = table.Column<short>(type: "smallint", nullable: false),
                     changed_by_user_id = table.Column<string>(type: "text", nullable: true),
+                    changed_by_id = table.Column<string>(type: "text", nullable: true),
                     source = table.Column<string>(type: "text", nullable: false),
                     changes = table.Column<string>(type: "jsonb", nullable: true),
                     snapshot_before = table.Column<string>(type: "jsonb", nullable: true),
@@ -163,11 +164,10 @@ namespace game_x.persistence.Migrations
                 {
                     table.PrimaryKey("pk_audit_logs", x => x.id);
                     table.ForeignKey(
-                        name: "fk_audit_logs_asp_net_users_changed_by_user_id",
-                        column: x => x.changed_by_user_id,
+                        name: "fk_audit_logs_user_changed_by_id",
+                        column: x => x.changed_by_id,
                         principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
@@ -197,7 +197,7 @@ namespace game_x.persistence.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    public_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    code = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
                     user_id = table.Column<string>(type: "text", nullable: false),
                     full_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     date_of_birth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -207,8 +207,8 @@ namespace game_x.persistence.Migrations
                     back_image_id = table.Column<int>(type: "integer", nullable: true),
                     status = table.Column<short>(type: "smallint", nullable: false),
                     rejection_reason = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true),
-                    submitted_at = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    date_reviewed = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    submitted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    date_reviewed = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     reviewed_by = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -307,9 +307,15 @@ namespace game_x.persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_audit_logs_changed_by_user_id",
+                name: "ix_audit_logs_changed_by_id",
                 table: "audit_logs",
-                column: "changed_by_user_id");
+                column: "changed_by_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_audit_logs_code",
+                table: "audit_logs",
+                column: "code",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_notifications_code",
@@ -362,6 +368,12 @@ namespace game_x.persistence.Migrations
                 name: "ix_user_kycs_back_image_id",
                 table: "user_kycs",
                 column: "back_image_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_kycs_code",
+                table: "user_kycs",
+                column: "code",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_user_kycs_front_image_id",

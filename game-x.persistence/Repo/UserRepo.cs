@@ -70,6 +70,7 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
     public async Task UpdateAsync(string userId, Action<User> updateAction, CancellationToken ct = default)
     {
         var targetUser = await context.AppUsers
+            .Include(u => u.UserKyc)
             .FirstOrDefaultAsync(user => user.Id == userId, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 

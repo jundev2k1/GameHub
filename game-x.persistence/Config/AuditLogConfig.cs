@@ -60,9 +60,6 @@ public sealed class AuditLogConfig : IEntityTypeConfiguration<AuditLog>
 
         builder.Ignore(al => al.UpdatedAt);
 
-        builder.HasOne(al => al.ChangedBy)
-            .WithMany()
-            .HasForeignKey(al => al.ChangedByUserId)
-            .OnDelete(DeleteBehavior.SetNull);
+        builder.HasIndex(al => al.PublicId).IsUnique();
     }
 }

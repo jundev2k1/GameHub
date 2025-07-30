@@ -210,6 +210,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("action");
 
+                    b.Property<string>("ChangedById")
+                        .HasColumnType("text")
+                        .HasColumnName("changed_by_id");
+
                     b.Property<string>("ChangedByUserId")
                         .HasColumnType("text")
                         .HasColumnName("changed_by_user_id");
@@ -256,8 +260,12 @@ namespace game_x.persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_audit_logs");
 
-                    b.HasIndex("ChangedByUserId")
-                        .HasDatabaseName("ix_audit_logs_changed_by_user_id");
+                    b.HasIndex("ChangedById")
+                        .HasDatabaseName("ix_audit_logs_changed_by_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_audit_logs_code");
 
                     b.ToTable("audit_logs", (string)null);
                 });
@@ -581,7 +589,7 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("date_of_birth");
 
                     b.Property<DateTime?>("DateReviewed")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("date_reviewed");
 
                     b.Property<int?>("FrontImageId")
@@ -601,8 +609,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("id_number");
 
                     b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("public_id");
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("RejectionReason")
                         .HasMaxLength(4000)
@@ -624,7 +634,7 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("status");
 
                     b.Property<DateTime?>("SubmittedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("submitted_at");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -644,6 +654,10 @@ namespace game_x.persistence.Migrations
 
                     b.HasIndex("FrontImageId")
                         .HasDatabaseName("ix_user_kycs_front_image_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_kycs_code");
 
                     b.HasIndex("UserId")
                         .IsUnique()
@@ -723,9 +737,8 @@ namespace game_x.persistence.Migrations
                 {
                     b.HasOne("game_x.domain.Entities.User", "ChangedBy")
                         .WithMany()
-                        .HasForeignKey("ChangedByUserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_audit_logs_asp_net_users_changed_by_user_id");
+                        .HasForeignKey("ChangedById")
+                        .HasConstraintName("fk_audit_logs_user_changed_by_id");
 
                     b.Navigation("ChangedBy");
                 });

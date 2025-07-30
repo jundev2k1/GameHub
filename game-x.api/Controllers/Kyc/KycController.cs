@@ -1,4 +1,6 @@
-﻿using game_x.application.Features.Kyc.Commands._1_SubmitKyc;
+﻿using game_x.api.Dtos;
+using game_x.application.Common.Files;
+using game_x.application.Features.Kyc.Commands._1_SubmitKyc;
 using game_x.application.Features.Kyc.Commands._2_DecisionKyc;
 using game_x.application.Features.Kyc.Commands._3_ResubmitKyc;
 using game_x.application.Features.Kyc.Queries.GetKycStatus;
@@ -18,8 +20,13 @@ public sealed class KycController : BaseApiController
 
     [Authorize(Roles = AppRoles.User)]
     [HttpPost("submit")]
-    public async Task<IActionResult> SubmitKycAsync(SubmitKycCommand command)
+    public async Task<IActionResult> SubmitKycAsync([FromForm]SubmitKycRequest formData)
     {
+        var command = formData.Adapt<SubmitKycCommand>() with
+        {
+            FrontImage = FileUpload.FromFormFile(formData.FrontPhoto),
+            BackImage = FileUpload.FromFormFile(formData.BackPhoto),
+        };
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
     }

@@ -89,4 +89,9 @@ public class User : IdentityUser, IEntity, IAuditable
 
         return (true, null);
     }
+
+    public void AddUserKyc(UserKyc kycProfile)
+    {
+        UserKyc = kycProfile;
+    }
 }
