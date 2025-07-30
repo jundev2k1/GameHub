@@ -101,6 +101,27 @@ public static class Seed
 
             await context.SaveChangesAsync();
         }
+        
+        // Cryptocurrency
+        if (!context.CryptoTokens.Any())
+        {
+            var cryptoTokens = new List<CryptoToken>
+            {
+                new()
+                {
+                    Symbol = CryptoTokenSymbol.Usdt,
+                    Network = NetworkType.Tron,
+                    ContractAddress = "trc20-ContractAddress"
+                },
+                new()
+                {
+                    Symbol = CryptoTokenSymbol.Usdt,
+                    Network = NetworkType.Ethereum,
+                    ContractAddress = "erc20-ContractAddress"
+                },
+            };
+            await context.CryptoTokens.AddRangeAsync(cryptoTokens);
+        }
 
         await context.SaveChangesAsync();
     }
