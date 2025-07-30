@@ -13,21 +13,21 @@ public sealed class ChainTransactionConfig : IEntityTypeConfiguration<ChainTrans
         builder.HasIndex(x => x.PublicId).IsUnique();
         builder.HasIndex(x => x.TransactionHash).IsUnique();
 
-        builder.Property(al => al.PublicId)
+        builder.Property(x => x.PublicId)
             .HasColumnName("public_id")
             .IsRequired()
             .HasDefaultValueSql("gen_random_uuid()");
         
-        builder.Property(al => al.UserId)
+        builder.Property(x => x.UserId)
             .HasColumnName("user_id")
             .IsRequired(false);
 
-        builder.Property(al => al.OrderNumber)
+        builder.Property(x => x.OrderNumber)
             .HasColumnName("order_number")
             .IsRequired()
             .HasDefaultValue(string.Empty);
         
-        builder.Property(al => al.TransactionHash)
+        builder.Property(x => x.TransactionHash)
             .HasColumnName("transaction_hash")
             .HasMaxLength(100)
             .IsRequired(false);
@@ -36,39 +36,39 @@ public sealed class ChainTransactionConfig : IEntityTypeConfiguration<ChainTrans
             .HasColumnName("from_address")
             .IsRequired(false);
         
-        builder.Property(al => al.ToAddress)
+        builder.Property(x => x.ToAddress)
             .HasColumnName("to_address")
             .IsRequired(false);
         
-        builder.Property(al => al.Amount)
+        builder.Property(x => x.Amount)
             .HasColumnName("amount")
             .IsRequired();
         
-        builder.Property(al => al.Fee)
+        builder.Property(x => x.Fee)
             .HasColumnName("fee")
             .IsRequired();
         
-        builder.Property(al => al.CryptoTokenId)
+        builder.Property(x => x.CryptoTokenId)
             .HasColumnName("crypto_token_id")
             .IsRequired();
         
-        builder.Property(o => o.ConfirmedAt)
+        builder.Property(x => x.ConfirmedAt)
             .HasColumnName("confirmed_at")
             .HasColumnType("timestamp with time zone")
             .IsRequired();
         
-        builder.Property(al => al.Status)
+        builder.Property(x => x.Status)
             .HasColumnName("status")
             .IsRequired()
             .HasDefaultValue(ChainTransactionStatus.Pending);
         
-        builder.Property(al => al.Meta)
+        builder.Property(x => x.Meta)
             .HasColumnName("meta")
             .HasColumnType("jsonb")
             .IsRequired()
             .HasDefaultValue("{}");
         
-        builder.Property(al => al.Note)
+        builder.Property(x => x.Note)
             .HasColumnName("note")
             .IsRequired(false);
         
@@ -77,9 +77,9 @@ public sealed class ChainTransactionConfig : IEntityTypeConfiguration<ChainTrans
             .HasForeignKey(x => x.CryptoTokenId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(t => t.User)
+        builder.HasOne(x => x.User)
             .WithMany(u => u.ChainTransactions)
-            .HasForeignKey(t => t.UserId)
+            .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }
