@@ -11,7 +11,7 @@ public sealed class GetAuditCriteriaByAdminValidator : AbstractValidator<GetAudi
         nameof(AuditLog.EntityName),
         nameof(AuditLog.EntityId),
         nameof(AuditLog.Action),
-        nameof(AuditLog.ChangedByUserId),
+        nameof(AuditLog.ChangedById),
         nameof(AuditLog.Source),
         nameof(AuditLog.CreatedAt)
     };
