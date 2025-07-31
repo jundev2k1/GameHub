@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using System.Transactions;
 
-namespace game_x.application.Features.ChainTransactionManagement.Client.Commands.Trade.Deposit;
+namespace game_x.application.Features.ChainTransactionManagement.Client.Commands.TronUsdtDeposit;
 
 public sealed class CreateDepositChainTransactionHandler(
     IUxmService uxmService,
@@ -21,9 +21,9 @@ public sealed class CreateDepositChainTransactionHandler(
     IUserAccessor userAccessor,
     IConfiguration configuration
     //IApplicationEventDispatcher eventDispatcher
-    ) : ICommandHandler<CreateDepositChainTransactionCommand, CreateChainTransactionResponseDto>
+    ) : ICommandHandler<TronUsdtDepositCommand, CreateChainTransactionResponseDto>
 {
-    public async Task<CreateChainTransactionResponseDto> Handle(CreateDepositChainTransactionCommand request, CancellationToken ct)
+    public async Task<CreateChainTransactionResponseDto> Handle(TronUsdtDepositCommand request, CancellationToken ct)
 
     {
         await unitOfWork.BeginTransactionAsync(ct);
@@ -69,7 +69,7 @@ public sealed class CreateDepositChainTransactionHandler(
         }
 
     }
-    private async Task<ChainTransaction> CreateLocalChainTransaction(CreateDepositChainTransactionCommand request, CancellationToken ct = default)
+    private async Task<ChainTransaction> CreateLocalChainTransaction(TronUsdtDepositCommand request, CancellationToken ct = default)
     {
         // var ownerUser = await userRepo.GetUserByIdAsync(request.MemberId, ct);
         //var role = await authService.GetRolesAsync(ownerUser);
@@ -91,7 +91,7 @@ public sealed class CreateDepositChainTransactionHandler(
         return transaction;
     }
     private async Task<SecureRequest<CreateChainTransactionDepositRequestData>> CreateUxmRequest(
-        CreateDepositChainTransactionCommand request,
+        TronUsdtDepositCommand request,
  Guid publicId,
         CancellationToken ct = default)
     {
