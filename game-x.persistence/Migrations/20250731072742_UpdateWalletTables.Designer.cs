@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -11,9 +12,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250731072742_UpdateWalletTables")]
+    partial class UpdateWalletTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1193,21 +1196,45 @@ namespace game_x.persistence.Migrations
 
             modelBuilder.Entity("game_x.domain.Entities.ChainTransaction", b =>
                 {
-                b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
-                    .WithMany()
-                    .HasForeignKey("CryptoTokenId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired()
-                    .HasConstraintName("fk_chain_transactions_crypto_tokens_crypto_token_id");
+                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
+                        .WithMany()
+                        .HasForeignKey("CryptoTokenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_chain_transactions_crypto_tokens_crypto_token_id");
 
-                b.HasOne("game_x.domain.Entities.User", "User")
-                    .WithMany("ChainTransactions")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("fk_chain_transactions_user_user_id");
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("ChainTransactions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_chain_transactions_user_user_id");
 
-                b.Navigation("CryptoToken");
-=========
+                    b.Navigation("CryptoToken");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.UserBalance", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
+                        .WithMany()
+                        .HasForeignKey("CryptoTokenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_balances_crypto_tokens_crypto_token_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("UserBalances")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_balances_user_user_id");
+
+                    b.Navigation("CryptoToken");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.UserKyc", b =>
                 {
                     b.HasOne("game_x.domain.Entities.MediaFile", "BackImage")
@@ -1300,9 +1327,12 @@ namespace game_x.persistence.Migrations
 
             modelBuilder.Entity("game_x.domain.Entities.User", b =>
                 {
-<<<<<<<<< Temporary merge branch 1
+                    b.Navigation("BalanceTransferLogs");
+
                     b.Navigation("ChainTransactions");
-=========
+
+                    b.Navigation("UserBalances");
+
                     b.Navigation("UserKyc")
                         .IsRequired();
 

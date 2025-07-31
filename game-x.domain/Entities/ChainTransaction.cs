@@ -4,7 +4,7 @@ using game_x.domain.Shared;
 
 namespace game_x.domain.Entities;
 
-public sealed class ChainTransaction: BaseEntity<int>
+public sealed class ChainTransaction: BaseEntity<int>, IAuditable
 {
     public Guid PublicId { get; set; }
     public string? UserId { get; set; }

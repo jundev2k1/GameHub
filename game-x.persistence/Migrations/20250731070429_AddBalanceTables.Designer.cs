@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -11,9 +12,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250731070429_AddBalanceTables")]
+    partial class AddBalanceTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1057,60 +1060,6 @@ namespace game_x.persistence.Migrations
                     b.ToTable("user_usdt_ledgers", (string)null);
                 });
 
-            modelBuilder.Entity("game_x.domain.Entities.Wallet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("Network")
-                        .HasColumnType("integer")
-                        .HasColumnName("network");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("text")
-                        .HasColumnName("user_id");
-
-                    b.Property<string>("WalletAddress")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("wallet_address");
-
-                    b.HasKey("Id")
-                        .HasName("pk_wallets");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_wallets_public_id");
-
-                    b.HasIndex("WalletAddress")
-                        .IsUnique()
-                        .HasDatabaseName("ix_wallets_wallet_address");
-
-                    b.HasIndex("UserId", "Network")
-                        .IsUnique()
-                        .HasDatabaseName("ix_wallets_user_id_network");
-
-                    b.ToTable("wallets", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("game_x.domain.Entities.Role", null)
@@ -1193,21 +1142,45 @@ namespace game_x.persistence.Migrations
 
             modelBuilder.Entity("game_x.domain.Entities.ChainTransaction", b =>
                 {
-                b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
-                    .WithMany()
-                    .HasForeignKey("CryptoTokenId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired()
-                    .HasConstraintName("fk_chain_transactions_crypto_tokens_crypto_token_id");
+                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
+                        .WithMany()
+                        .HasForeignKey("CryptoTokenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_chain_transactions_crypto_tokens_crypto_token_id");
 
-                b.HasOne("game_x.domain.Entities.User", "User")
-                    .WithMany("ChainTransactions")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("fk_chain_transactions_user_user_id");
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("ChainTransactions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_chain_transactions_user_user_id");
 
-                b.Navigation("CryptoToken");
-=========
+                    b.Navigation("CryptoToken");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.UserBalance", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
+                        .WithMany()
+                        .HasForeignKey("CryptoTokenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_balances_crypto_tokens_crypto_token_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("UserBalances")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_balances_asp_net_users_user_id");
+
+                    b.Navigation("CryptoToken");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.UserKyc", b =>
                 {
                     b.HasOne("game_x.domain.Entities.MediaFile", "BackImage")
@@ -1276,19 +1249,9 @@ namespace game_x.persistence.Migrations
                         .WithMany("UserUsdtLedgers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_user_usdt_ledgers_user_user_id");
+                        .HasConstraintName("fk_user_usdt_ledgers_users_user_id");
 
                     b.Navigation("ChainTransaction");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.Wallet", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany("Wallets")
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("fk_wallets_users_user_id");
 
                     b.Navigation("User");
                 });
@@ -1300,17 +1263,18 @@ namespace game_x.persistence.Migrations
 
             modelBuilder.Entity("game_x.domain.Entities.User", b =>
                 {
-<<<<<<<<< Temporary merge branch 1
+                    b.Navigation("BalanceTransferLogs");
+
                     b.Navigation("ChainTransactions");
-=========
+
+                    b.Navigation("UserBalances");
+
                     b.Navigation("UserKyc")
                         .IsRequired();
 
                     b.Navigation("UserRoles");
 
                     b.Navigation("UserUsdtLedgers");
-
-                    b.Navigation("Wallets");
                 });
 #pragma warning restore 612, 618
         }
