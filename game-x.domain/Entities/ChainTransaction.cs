@@ -4,7 +4,7 @@ using game_x.domain.Shared;
 
 namespace game_x.domain.Entities;
 
-public sealed class ChainTransaction : BaseEntity<int>
+public sealed class ChainTransaction: BaseEntity<int>
 {
     public Guid PublicId { get; set; }
     public string? UserId { get; set; }
@@ -22,7 +22,7 @@ public sealed class ChainTransaction : BaseEntity<int>
     public ChainTransactionStatus Status { get; set; } = ChainTransactionStatus.Pending;
     public string Meta { get; set; } = "{}";
     public string? Note { get; set; }
-
+    
     public static ChainTransaction Create(
         string userId,
         string orderNumber,
@@ -41,10 +41,10 @@ public sealed class ChainTransaction : BaseEntity<int>
 
         if (amount <= 0)
             throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
-
+   
         if (fee is < 0)
             throw new ArgumentException("Fee must be equal or greater than zero.", nameof(fee));
-
+        
         var order = new ChainTransaction
         {
             UserId = userId,
@@ -61,14 +61,14 @@ public sealed class ChainTransaction : BaseEntity<int>
         };
         return order;
     }
-
+    
     [NotMapped]
     public ChainTransactionMeta MetaObject
     {
         get => JsonSerializer.Deserialize<ChainTransactionMeta>(Meta) ?? new();
         set => Meta = JsonSerializer.Serialize(value, JsonOptions.NoEscape);
     }
-
+    
     public void UpdateMeta(Action<ChainTransactionMeta> updater)
     {
         var meta = MetaObject;

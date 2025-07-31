@@ -11,6 +11,8 @@ public class User : IdentityUser, IEntity, IAuditable
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public ICollection<ChainTransaction> ChainTransactions { get; set; } = [];
+    public ICollection<UserUsdtLedger> UserUsdtLedgers { get; set; } = [];
 
     public UserKyc UserKyc { get; set; } = default!;
     public ICollection<UserRole> UserRoles { get; set; } = [];
@@ -89,6 +91,14 @@ public class User : IdentityUser, IEntity, IAuditable
 
         return (true, null);
     }
+    
+    private bool Has(string roleName) 
+        => UserRoles.Any(r => r.Role.Name == roleName);
+    
+    public bool IsRoot => Has(AppRoles.Root);
+    public bool IsAdmin => Has(AppRoles.Admin);
+    public bool IsCs => Has(AppRoles.Cs);
+    public bool IsUser => Has(AppRoles.User);
 
     public void AddUserKyc(UserKyc kycProfile)
     {
