@@ -21,7 +21,7 @@ public sealed class KycController : BaseApiController
 
     [Authorize(Roles = AppRoles.User)]
     [HttpPost("submit")]
-    public async Task<IActionResult> SubmitKycAsync([FromForm]SubmitKycRequest formData)
+    public async Task<IActionResult> SubmitKycAsync([FromForm] SubmitKycRequest formData)
     {
         var command = formData.Adapt<SubmitKycCommand>() with
         {
@@ -41,9 +41,18 @@ public sealed class KycController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPost("resubmit")]
-    public async Task<IActionResult> ResubmitAsync(ResubmitKycCommand command)
+    [HttpPatch("resubmit")]
+    public async Task<IActionResult> ResubmitAsync([FromForm] ReSubmitKycRequest formData)
     {
+        var command = formData.Adapt<ResubmitKycCommand>() with
+        {
+            FrontImage = formData.FrontPhoto != null
+                ? FileUpload.FromFormFile(formData.FrontPhoto)
+                : null,
+            BackImage = formData.BackPhoto!= null
+                ? FileUpload.FromFormFile(formData.BackPhoto)
+                : null
+        };
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
     }

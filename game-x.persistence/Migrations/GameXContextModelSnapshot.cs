@@ -755,11 +755,13 @@ namespace game_x.persistence.Migrations
                     b.HasOne("game_x.domain.Entities.MediaFile", "BackImage")
                         .WithMany()
                         .HasForeignKey("BackImageId")
+                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_user_kycs_media_files_back_image_id");
 
                     b.HasOne("game_x.domain.Entities.MediaFile", "FrontImage")
                         .WithMany()
                         .HasForeignKey("FrontImageId")
+                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_user_kycs_media_files_front_image_id");
 
                     b.HasOne("game_x.domain.Entities.User", "ReviewedBy")

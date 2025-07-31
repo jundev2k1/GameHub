@@ -72,6 +72,16 @@ public class UserKycConfig : IEntityTypeConfiguration<UserKyc>
             .HasForeignKey<UserKyc>(uk => uk.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(uk => uk.FrontImage)
+            .WithMany()
+            .HasForeignKey(uk => uk.FrontImageId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(uk => uk.BackImage)
+            .WithMany()
+            .HasForeignKey(uk => uk.BackImageId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.HasOne(uk => uk.ReviewedBy)
             .WithMany()
             .HasForeignKey(uk => uk.ReviewedById)

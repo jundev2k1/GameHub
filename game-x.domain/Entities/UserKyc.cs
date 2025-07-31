@@ -63,6 +63,7 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
         Status = KycStatus.Approved;
         ReviewedById = adminId;
         RejectionReason = null;
+        DateReviewed = DateTime.UtcNow;
     }
 
     public void Reject(string adminId, string? reason, string? details = "")
@@ -73,28 +74,30 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
         if (string.IsNullOrWhiteSpace(reason))
             throw new ArgumentException("Rejection reason is required.");
 
-        if (details.IsNotNullOrEmpty() && !JsonHelper.IsJson(details!))
+        if (details.IsNotNullOrEmpty() && !JsonHelper.IsJsonArray(details!))
             throw new ArgumentException("Reject details must be an array object json.");
 
         Status = KycStatus.Rejected;
         ReviewedById = adminId;
         RejectionReason = reason;
         RejectDetails = details;
+        DateReviewed = DateTime.UtcNow;
     }
 
-    public void Resubmit(string fullName, DateTime dob, string address, string idNumber)
+    public void Resubmit(string? fullName, DateTime? dob, string? address, string? idNumber)
     {
-        if (Status != KycStatus.Rejected)
+        if (Status != KycStatus.Rejected && Status != KycStatus.UnderReview)
             throw new ArgumentException("Only rejected KYC can be resubmitted.");
 
-        FullName = fullName;
-        DateOfBirth = dob.ToUniversalTime();
-        ResidentialAddress = address;
-        IdNumber = idNumber;
+        FullName = fullName ?? FullName;
+        DateOfBirth = dob?.ToUniversalTime() ?? DateOfBirth;
+        ResidentialAddress = address ?? ResidentialAddress;
+        IdNumber = idNumber ?? IdNumber;
         Status = KycStatus.UnderReview;
         SubmittedAt = DateTime.UtcNow;
         DateReviewed = null;
         ReviewedById = null;
         RejectionReason = null;
+        RejectDetails = null;
     }
 }

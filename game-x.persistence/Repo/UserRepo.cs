@@ -96,6 +96,8 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
     public async Task UpdateKycAsync(string userId, Action<UserKyc> updateAction, CancellationToken ct = default)
     {
         var targetKyc = await context.UserKycs
+            .Include(uk => uk.FrontImage)
+            .Include(uk => uk.BackImage)
             .FirstOrDefaultAsync(uk => uk.UserId == userId && !uk.User.IsDeleted, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 

@@ -221,12 +221,14 @@ namespace game_x.persistence.Migrations
                         name: "fk_user_kycs_media_files_back_image_id",
                         column: x => x.back_image_id,
                         principalTable: "media_files",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "fk_user_kycs_media_files_front_image_id",
                         column: x => x.front_image_id,
                         principalTable: "media_files",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "fk_user_kycs_users_reviewed_by_id",
                         column: x => x.reviewed_by_id,
