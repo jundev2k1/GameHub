@@ -29,6 +29,7 @@ public sealed class GameXContext(
     public DbSet<ChainTransaction> ChainTransactions { get; set; }
     public DbSet<UserBalance> UserBalances { get; set; }
     public DbSet<UserUsdtLedger> UserUsdtLedgers { get; set; }
+    public DbSet<BalanceTransferLog> BalanceTransferLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
