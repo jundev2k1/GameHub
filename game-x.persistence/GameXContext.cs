@@ -20,6 +20,7 @@ public sealed class GameXContext(
 {
     public DbSet<User> AppUsers { get; set; }
     public DbSet<UserRole> AppUserRoles { get; set; }
+    public DbSet<UserKyc> UserKycs { get; set; }
     public DbSet<AsymmetricKey> AsymmetricKeys { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<MediaFile> MediaFiles { get; set; }

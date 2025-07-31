@@ -2,7 +2,7 @@
 
 namespace game_x.persistence.Config;
 
-public sealed class AppUserRoleConfig : IEntityTypeConfiguration<UserRole>
+public sealed class UserRoleConfig : IEntityTypeConfiguration<UserRole>
 {
     public void Configure(EntityTypeBuilder<UserRole> builder)
     {

@@ -6,14 +6,12 @@ namespace game_x.domain.Entities;
 public class User : IdentityUser, IEntity, IAuditable
 {
     public string Nickname { get; set; } = string.Empty;
-    public ICollection<UserRole> UserRoles { get; set; } = [];
-    public bool IsDeleted { get; set; }
     public string? CountryCode { get; set; }
     public UserStatus Status { get; set; } = UserStatus.Active;
+    public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public ICollection<ChainTransaction> ChainTransactions { get; set; } = [];
-    public ICollection<UserUsdtLedger> UserUsdtLedgers { get; set; } = [];
+
     public static User Create(
         string userName,
         string email,
@@ -88,12 +86,4 @@ public class User : IdentityUser, IEntity, IAuditable
 
         return (true, null);
     }
-    
-    private bool Has(string roleName) 
-        => UserRoles.Any(r => r.Role.Name == roleName);
-    
-    public bool IsRoot => Has(AppRoles.Root);
-    public bool IsAdmin => Has(AppRoles.Admin);
-    public bool IsCs => Has(AppRoles.Cs);
-    public bool IsUser => Has(AppRoles.User);
 }

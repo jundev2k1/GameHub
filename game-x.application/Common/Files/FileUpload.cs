@@ -10,6 +10,7 @@ public sealed class FileUpload
 
     public Stream Content { get; init; } = default!;
     public string FileName { get; init; } = default!;
+    public string Extension { get; init; } = default!;
     public string ContentType { get; init; } = default!;
     public long Length { get; init; }
 
@@ -25,6 +26,7 @@ public sealed class FileUpload
         {
             Content = file.OpenReadStream(),
             FileName = file.FileName,
+            Extension = Path.GetExtension(file.FileName),
             ContentType = file.ContentType,
             Length = file.Length
         };
