@@ -12,8 +12,8 @@ public sealed class ObjectName
     public string Extension => Path.GetExtension(Value);
 
     // Factories
-    public static ObjectName Passport(string userId, string fileName)
-        => Of($"user-passport/{userId:N}/{fileName}");
+    public static ObjectName KycProfile(string userId, string fileName)
+        => Of($"user-kyc/{userId:N}/{fileName}");
 
     public static ObjectName Of(string value)
     {
@@ -30,7 +30,7 @@ public sealed class ObjectName
 
     // Constants
     private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] ValidPrefixValues = ["user-passport"];
+    private static readonly string[] ValidPrefixValues = ["user-kyc"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>

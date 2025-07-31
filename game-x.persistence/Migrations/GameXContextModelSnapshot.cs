@@ -210,6 +210,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("action");
 
+                    b.Property<string>("ChangedById")
+                        .HasColumnType("text")
+                        .HasColumnName("changed_by_id");
+
                     b.Property<string>("ChangedByUserId")
                         .HasColumnType("text")
                         .HasColumnName("changed_by_user_id");
@@ -256,8 +260,12 @@ namespace game_x.persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_audit_logs");
 
-                    b.HasIndex("ChangedByUserId")
-                        .HasDatabaseName("ix_audit_logs_changed_by_user_id");
+                    b.HasIndex("ChangedById")
+                        .HasDatabaseName("ix_audit_logs_changed_by_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_audit_logs_code");
 
                     b.ToTable("audit_logs", (string)null);
                 });
@@ -710,6 +718,112 @@ namespace game_x.persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.UserKyc", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BackImageId")
+                        .HasColumnType("integer")
+                        .HasColumnName("back_image_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_of_birth");
+
+                    b.Property<DateTime?>("DateReviewed")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_reviewed");
+
+                    b.Property<int?>("FrontImageId")
+                        .HasColumnType("integer")
+                        .HasColumnName("front_image_id");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("full_name");
+
+                    b.Property<string>("IdNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("id_number");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("RejectDetails")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("reject_details");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("rejection_reason");
+
+                    b.Property<string>("ResidentialAddress")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("residential_address");
+
+                    b.Property<string>("ReviewedById")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_by_id");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_kycs");
+
+                    b.HasIndex("BackImageId")
+                        .HasDatabaseName("ix_user_kycs_back_image_id");
+
+                    b.HasIndex("FrontImageId")
+                        .HasDatabaseName("ix_user_kycs_front_image_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_kycs_code");
+
+                    b.HasIndex("ReviewedById")
+                        .HasDatabaseName("ix_user_kycs_reviewed_by_id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_kycs_user_id");
+
+                    b.ToTable("user_kycs", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.UserRole", b =>
                 {
                     b.Property<string>("UserId")
@@ -854,11 +968,46 @@ namespace game_x.persistence.Migrations
                 {
                     b.HasOne("game_x.domain.Entities.User", "ChangedBy")
                         .WithMany()
-                        .HasForeignKey("ChangedByUserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_audit_logs_users_changed_by_user_id");
+                        .HasForeignKey("ChangedById")
+                        .HasConstraintName("fk_audit_logs_user_changed_by_id");
 
                     b.Navigation("ChangedBy");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.UserKyc", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.MediaFile", "BackImage")
+                        .WithMany()
+                        .HasForeignKey("BackImageId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_user_kycs_media_files_back_image_id");
+
+                    b.HasOne("game_x.domain.Entities.MediaFile", "FrontImage")
+                        .WithMany()
+                        .HasForeignKey("FrontImageId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_user_kycs_media_files_front_image_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "ReviewedBy")
+                        .WithMany()
+                        .HasForeignKey("ReviewedById")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_user_kycs_users_reviewed_by_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithOne("UserKyc")
+                        .HasForeignKey("game_x.domain.Entities.UserKyc", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_kycs_users_user_id");
+
+                    b.Navigation("BackImage");
+
+                    b.Navigation("FrontImage");
+
+                    b.Navigation("ReviewedBy");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.ChainTransaction", b =>
@@ -928,6 +1077,9 @@ namespace game_x.persistence.Migrations
             modelBuilder.Entity("game_x.domain.Entities.User", b =>
                 {
                     b.Navigation("ChainTransactions");
+
+                    b.Navigation("UserKyc")
+                        .IsRequired();
 
                     b.Navigation("UserRoles");
 

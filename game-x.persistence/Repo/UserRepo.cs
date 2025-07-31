@@ -42,6 +42,15 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
         return [.. users];
     }
 
+    public async Task<UserKyc> GetKycProfile(string userId, CancellationToken ct = default)
+    {
+        return await context.UserKycs
+            .Include(uk => uk.User)
+            .Include(uk => uk.ReviewedBy)
+            .FirstOrDefaultAsync(u => u.UserId == userId && !u.User.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+    }
+
     public async Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.Email != null && u.Email.ToLower() == email.ToLower() && !u.IsDeleted, ct);
 
@@ -70,6 +79,7 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
     public async Task UpdateAsync(string userId, Action<User> updateAction, CancellationToken ct = default)
     {
         var targetUser = await context.AppUsers
+            .Include(u => u.UserKyc)
             .FirstOrDefaultAsync(user => user.Id == userId, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
@@ -81,5 +91,16 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
         updateAction?.Invoke(targetUser);
+    }
+
+    public async Task UpdateKycAsync(string userId, Action<UserKyc> updateAction, CancellationToken ct = default)
+    {
+        var targetKyc = await context.UserKycs
+            .Include(uk => uk.FrontImage)
+            .Include(uk => uk.BackImage)
+            .FirstOrDefaultAsync(uk => uk.UserId == userId && !uk.User.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+
+        updateAction?.Invoke(targetKyc);
     }
 }
