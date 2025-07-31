@@ -12,6 +12,9 @@ public class User : IdentityUser, IEntity, IAuditable
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
+    public UserKyc UserKyc { get; set; } = default!;
+    public ICollection<UserRole> UserRoles { get; set; } = [];
+
     public static User Create(
         string userName,
         string email,
@@ -85,5 +88,10 @@ public class User : IdentityUser, IEntity, IAuditable
             return (false, MessageCode.User.UserDisabled);
 
         return (true, null);
+    }
+
+    public void AddUserKyc(UserKyc kycProfile)
+    {
+        UserKyc = kycProfile;
     }
 }
