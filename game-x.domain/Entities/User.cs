@@ -15,6 +15,7 @@ public class User : IdentityUser, IEntity, IAuditable
     public ICollection<UserUsdtLedger> UserUsdtLedgers { get; set; } = [];
     public ICollection<UserBalance> UserBalances { get; set; } = [];
     public ICollection<BalanceTransferLog> BalanceTransferLogs { get; set; } = [];
+    public ICollection<Wallet> Wallets { get; set; } = [];
 
     public UserKyc UserKyc { get; set; } = null!;
     public ICollection<UserRole> UserRoles { get; set; } = [];
