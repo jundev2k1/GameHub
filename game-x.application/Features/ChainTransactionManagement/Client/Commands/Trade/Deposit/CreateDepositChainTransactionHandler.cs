@@ -79,11 +79,12 @@ public sealed class CreateDepositChainTransactionHandler(
 
 
         var transaction = ChainTransaction.Create(
+            userId: userId,
         orderNumber: "string",
+         cryptoTokenId: 1,
         amount: request.amount,
-        fee: 1,
-        cryptoTokenId: 1,
-        userId: userId
+        type: ChainTransactionType.Deposit,
+        status: ChainTransactionStatus.Pending
         );
 
         await chainTransactionRepo.AddAsync(transaction, ct);

@@ -52,4 +52,8 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
 
         return (userAmount, pendingFee);
     }
+    public async Task AddAsync(ChainTransaction chainTransaction, CancellationToken ct = default)
+    {
+        await context.ChainTransactions.AddAsync(chainTransaction, ct);
+    }
 }
