@@ -9,7 +9,7 @@ public sealed class GetKycStatusHandler(IUserRepo userRepo, IUserAccessor userAc
     public async Task<GetKycStatusResult> Handle(GetKycStatusQuery request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
-        var targetUser = await userRepo.GetKycProfile(userId, ct);
+        var targetUser = await userRepo.GetKycProfileAsync(userId, ct);
         return targetUser.Adapt<GetKycStatusResult>();
     }
 }

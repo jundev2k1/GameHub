@@ -98,8 +98,6 @@ public static class Seed
                     value: "----- BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEm1PhAmoUuAmQANNJFJov1Dra6kXt\r\nMM7OcxKGd0qtCZgNT375AasOYAKqxlhGZHX8ohfIF+Pa1bfbysSujYKGRw==\r\n-----END PUBLIC KEY-----",
                     desc: "Uxm 公鑰"),
             });
-
-            await context.SaveChangesAsync();
         }
 
         await context.SaveChangesAsync();
