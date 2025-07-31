@@ -175,6 +175,9 @@ public static class MessageCode
         /// <summary>You must wait before requesting a new verification code.</summary>
         [EnumMetadata("Please wait before requesting a new verification code.")]
         VerifyResendCooldown = 10115,
+        /// <summary>The current KYC status does not allow this action.</summary>
+        [EnumMetadata("KYC status is invalid for this action.")]
+        KycInvalidStatus = 10116,
         #endregion
 
         #region ■ Message group: Success

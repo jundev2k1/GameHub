@@ -6,12 +6,14 @@ namespace game_x.domain.Entities;
 public class User : IdentityUser, IEntity, IAuditable
 {
     public string Nickname { get; set; } = string.Empty;
-    public ICollection<UserRole> UserRoles { get; set; } = [];
-    public bool IsDeleted { get; set; }
     public string? CountryCode { get; set; }
     public UserStatus Status { get; set; } = UserStatus.Active;
+    public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    public UserKyc UserKyc { get; set; } = default!;
+    public ICollection<UserRole> UserRoles { get; set; } = [];
 
     public static User Create(
         string userName,
@@ -86,5 +88,10 @@ public class User : IdentityUser, IEntity, IAuditable
             return (false, MessageCode.User.UserDisabled);
 
         return (true, null);
+    }
+
+    public void AddUserKyc(UserKyc kycProfile)
+    {
+        UserKyc = kycProfile;
     }
 }
