@@ -12,7 +12,7 @@ namespace game_x.persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
+migrationBuilder.CreateTable(
                 name: "user_usdt_ledgers",
                 columns: table => new
                 {

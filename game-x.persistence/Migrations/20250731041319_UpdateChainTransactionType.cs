@@ -5,7 +5,7 @@
 namespace game_x.persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateChainTransaction : Migration
+    public partial class UpdateChainTransactionType : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

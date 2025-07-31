@@ -974,6 +974,26 @@ namespace game_x.persistence.Migrations
                     b.Navigation("ChangedBy");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.ChainTransaction", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
+                        .WithMany()
+                        .HasForeignKey("CryptoTokenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_chain_transactions_crypto_tokens_crypto_token_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("ChainTransactions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_chain_transactions_user_user_id");
+
+                    b.Navigation("CryptoToken");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.UserKyc", b =>
                 {
                     b.HasOne("game_x.domain.Entities.MediaFile", "BackImage")
@@ -1006,26 +1026,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("FrontImage");
 
                     b.Navigation("ReviewedBy");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.ChainTransaction", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
-                        .WithMany()
-                        .HasForeignKey("CryptoTokenId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_chain_transactions_crypto_tokens_crypto_token_id");
-
-                    b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany("ChainTransactions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_chain_transactions_user_user_id");
-
-                    b.Navigation("CryptoToken");
 
                     b.Navigation("User");
                 });
