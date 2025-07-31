@@ -13,8 +13,10 @@ public class User : IdentityUser, IEntity, IAuditable
     public DateTime UpdatedAt { get; set; }
     public ICollection<ChainTransaction> ChainTransactions { get; set; } = [];
     public ICollection<UserUsdtLedger> UserUsdtLedgers { get; set; } = [];
+    public ICollection<UserBalance> UserBalances { get; set; } = [];
+    public ICollection<BalanceTransferLog> BalanceTransferLogs { get; set; } = [];
 
-    public UserKyc UserKyc { get; set; } = default!;
+    public UserKyc UserKyc { get; set; } = null!;
     public ICollection<UserRole> UserRoles { get; set; } = [];
 
     public static User Create(

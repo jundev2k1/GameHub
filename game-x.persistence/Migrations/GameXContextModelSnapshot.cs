@@ -266,6 +266,80 @@ namespace game_x.persistence.Migrations
                     b.ToTable("audit_logs", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.BalanceTransferLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("CryptoTokenId")
+                        .HasColumnType("integer")
+                        .HasColumnName("crypto_token_id");
+
+                    b.Property<decimal>("Fee")
+                        .HasColumnType("numeric")
+                        .HasColumnName("fee");
+
+                    b.Property<string>("FromUserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("from_user_id");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("ToUserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("to_user_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_balance_transfer_logs");
+
+                    b.HasIndex("CryptoTokenId")
+                        .HasDatabaseName("ix_balance_transfer_logs_crypto_token_id");
+
+                    b.HasIndex("FromUserId")
+                        .HasDatabaseName("ix_balance_transfer_logs_from_user_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_balance_transfer_logs_public_id");
+
+                    b.HasIndex("ToUserId")
+                        .HasDatabaseName("ix_balance_transfer_logs_to_user_id");
+
+                    b.ToTable("balance_transfer_logs", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.ChainTransaction", b =>
                 {
                     b.Property<int>("Id")
@@ -714,6 +788,69 @@ namespace game_x.persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.UserBalance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("CryptoTokenId")
+                        .HasColumnType("integer")
+                        .HasColumnName("crypto_token_id");
+
+                    b.Property<decimal>("FrozenAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("frozen_amount");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_balances");
+
+                    b.HasIndex("CryptoTokenId")
+                        .HasDatabaseName("ix_user_balances_crypto_token_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_balances_public_id");
+
+                    b.HasIndex("UserId", "CryptoTokenId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_balances_user_id_crypto_token_id");
+
+                    b.ToTable("user_balances", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.UserKyc", b =>
                 {
                     b.Property<int>("Id")
@@ -970,6 +1107,36 @@ namespace game_x.persistence.Migrations
                     b.Navigation("ChangedBy");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.BalanceTransferLog", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
+                        .WithMany()
+                        .HasForeignKey("CryptoTokenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_balance_transfer_logs_crypto_tokens_crypto_token_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "FromUser")
+                        .WithMany("BalanceTransferLogs")
+                        .HasForeignKey("FromUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_balance_transfer_logs_asp_net_users_from_user_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "ToUser")
+                        .WithMany()
+                        .HasForeignKey("ToUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_balance_transfer_logs_asp_net_users_to_user_id");
+
+                    b.Navigation("CryptoToken");
+
+                    b.Navigation("FromUser");
+
+                    b.Navigation("ToUser");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.ChainTransaction", b =>
                 {
                     b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
@@ -984,6 +1151,27 @@ namespace game_x.persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_chain_transactions_user_user_id");
+
+                    b.Navigation("CryptoToken");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.UserBalance", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
+                        .WithMany()
+                        .HasForeignKey("CryptoTokenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_balances_crypto_tokens_crypto_token_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("UserBalances")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_balances_asp_net_users_user_id");
 
                     b.Navigation("CryptoToken");
 
@@ -1072,7 +1260,11 @@ namespace game_x.persistence.Migrations
 
             modelBuilder.Entity("game_x.domain.Entities.User", b =>
                 {
+                    b.Navigation("BalanceTransferLogs");
+
                     b.Navigation("ChainTransactions");
+
+                    b.Navigation("UserBalances");
 
                     b.Navigation("UserKyc")
                         .IsRequired();
