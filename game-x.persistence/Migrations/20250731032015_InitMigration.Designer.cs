@@ -12,7 +12,7 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    [Migration("20250730094215_InitMigration")]
+    [Migration("20250731032015_InitMigration")]
     partial class InitMigration
     {
         /// <inheritdoc />
