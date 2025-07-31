@@ -152,7 +152,6 @@ namespace game_x.persistence.Migrations
                     entity_name = table.Column<string>(type: "text", nullable: false),
                     entity_id = table.Column<string>(type: "text", nullable: false, defaultValue: ""),
                     action = table.Column<short>(type: "smallint", nullable: false),
-                    changed_by_user_id = table.Column<string>(type: "text", nullable: true),
                     changed_by_id = table.Column<string>(type: "text", nullable: true),
                     source = table.Column<string>(type: "text", nullable: false),
                     changes = table.Column<string>(type: "jsonb", nullable: true),

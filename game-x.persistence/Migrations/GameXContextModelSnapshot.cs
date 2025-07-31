@@ -214,10 +214,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("changed_by_id");
 
-                    b.Property<string>("ChangedByUserId")
-                        .HasColumnType("text")
-                        .HasColumnName("changed_by_user_id");
-
                     b.Property<string>("Changes")
                         .HasColumnType("jsonb")
                         .HasColumnName("changes");
