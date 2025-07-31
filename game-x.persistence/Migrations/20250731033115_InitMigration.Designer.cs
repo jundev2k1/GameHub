@@ -12,7 +12,7 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    [Migration("20250731032015_InitMigration")]
+    [Migration("20250731033115_InitMigration")]
     partial class InitMigration
     {
         /// <inheritdoc />
@@ -216,10 +216,6 @@ namespace game_x.persistence.Migrations
                     b.Property<string>("ChangedById")
                         .HasColumnType("text")
                         .HasColumnName("changed_by_id");
-
-                    b.Property<string>("ChangedByUserId")
-                        .HasColumnType("text")
-                        .HasColumnName("changed_by_user_id");
 
                     b.Property<string>("Changes")
                         .HasColumnType("jsonb")
