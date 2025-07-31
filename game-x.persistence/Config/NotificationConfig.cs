@@ -24,7 +24,6 @@ public sealed class NotificationConfig : IEntityTypeConfiguration<Notification>
             .HasConversion<short>();
 
         builder.Property(n => n.UserId)
-            .HasColumnName("user_id")
             .IsRequired()
             .HasDefaultValue(string.Empty);
 
