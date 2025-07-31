@@ -27,6 +27,7 @@ public sealed class GameXContext(
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<CryptoToken> CryptoTokens { get; set; }
     public DbSet<ChainTransaction> ChainTransactions { get; set; }
+    public DbSet<UserBalance> UserBalances { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
