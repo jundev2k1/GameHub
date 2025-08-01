@@ -14,5 +14,24 @@ public sealed class UserBalance: BaseEntity<int>, IAuditable
     public decimal TotalAmount => Amount + FrozenAmount; //  Additional support for backend queries and reporting
 
     [Timestamp]
-    public uint Version { get; set; }
+    public uint? Version { get; set; }
+    
+    public static UserBalance Create(
+        string userId,
+        int cryptoTokenId,
+        decimal amount
+    )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
+        
+        var userBalance = new UserBalance
+        {
+            UserId = userId,
+            Amount = amount,
+            CryptoTokenId = cryptoTokenId,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        return userBalance;
+    }
 }

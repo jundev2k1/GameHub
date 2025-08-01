@@ -37,7 +37,6 @@ public sealed class UserBalanceConfig: IEntityTypeConfiguration<UserBalance>
         
         builder.Property(x => x.Version)
             .HasColumnName("version")
-            .IsRequired()
             .IsRowVersion();
         
         builder.HasOne(x => x.CryptoToken)

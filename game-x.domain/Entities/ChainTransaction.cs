@@ -45,7 +45,7 @@ public sealed class ChainTransaction: BaseEntity<int>, IAuditable
         if (fee is < 0)
             throw new ArgumentException("Fee must be equal or greater than zero.", nameof(fee));
         
-        var order = new ChainTransaction
+        var chainTransaction = new ChainTransaction
         {
             UserId = userId,
             OrderNumber = orderNumber,
@@ -59,7 +59,7 @@ public sealed class ChainTransaction: BaseEntity<int>, IAuditable
             Status = status,
             Note = note,
         };
-        return order;
+        return chainTransaction;
     }
     
     [NotMapped]
