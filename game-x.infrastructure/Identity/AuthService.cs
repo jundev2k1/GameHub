@@ -44,7 +44,7 @@ public sealed class AuthService(
     public async Task<bool> IsValidPasswordAsync(User user, string rawPassword, CancellationToken ct = default)
         => await userManager.CheckPasswordAsync(user, rawPassword);
 
-    public async Task<string> GeneratePasswordResetTokenAsync(User user, CancellationToken ct = default)
+    public async Task<string> GeneratePasswordResetTokenAsync(User user)
     {
         var result = await userManager.GeneratePasswordResetTokenAsync(user);
         return result;
@@ -62,7 +62,7 @@ public sealed class AuthService(
         }
     }
 
-    public async Task ChangePasswordAsync(User user, string oldPassword, string newPassword, CancellationToken ct = default)
+    public async Task ChangePasswordAsync(User user, string oldPassword, string newPassword)
     {
         var result = await userManager.ChangePasswordAsync(user, oldPassword, newPassword);
         if (!result.Succeeded)

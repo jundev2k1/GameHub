@@ -4,16 +4,16 @@ using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Extensions;
 
-namespace game_x.application.Features.Auth.Client.Commands.ChangePasswordUser;
+namespace game_x.application.Features.Auth.Client.Commands.ResetPasswordUser;
 
-public sealed class ChangePasswordUserHandler(
+public sealed class ResetPasswordUserHandler(
     IUserAccessor userAccessor,
     IAuthService authService,
     IUserRepo userRepo,
     IUnitOfWork unitOfWork,
-    IResetTokenCacheService resetTokenCache) : ICommandHandler<ChangePasswordUserCommand>
+    IResetTokenCacheService resetTokenCache) : ICommandHandler<ResetPasswordUserCommand>
 {
-    public async Task<Unit> Handle(ChangePasswordUserCommand request, CancellationToken ct = default)
+    public async Task<Unit> Handle(ResetPasswordUserCommand request, CancellationToken ct = default)
     {
         var tokenEmail = resetTokenCache.GetEmailByToken(request.Token);
         if (tokenEmail.IsNullOrWhiteSpace())
@@ -26,10 +26,6 @@ public sealed class ChangePasswordUserHandler(
         if (!role.IsUser)
             throw new ForbiddenException();
 
-        // Check if Email is not confirm
-        if (!targetUser.EmailConfirmed)
-            throw new BadRequestException(MessageCode.User.UserNotConfirmed);
-
         // Check if Email from token in cache is valid
         if (targetUser.Email != tokenEmail)
             throw new BadRequestException(MessageCode.System.InvalidOrMissingToken);
@@ -37,11 +33,18 @@ public sealed class ChangePasswordUserHandler(
         // Handle change password
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            // Case: Change password
-            await authService.ChangePasswordAsync(
+            // Case: Reset password
+            await authService.ResetPasswordAsync(
                 targetUser,
-                request.OldPassword.Trim(),
-                request.NewPassword.Trim(), ct);
+                request.Token,
+                request.Password.Trim(), ct);
+            if (targetUser.EmailConfirmed) return;
+
+            // Case: Confirm email if user not confirmed
+            await userRepo.UpdateAsync(
+                userId,
+                user => user.ConfirmEmail(),
+                ct);
         }, ct);
 
         // Remove token after change password successfully

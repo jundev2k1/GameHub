@@ -41,7 +41,7 @@ public sealed class VerifyEmailForResetPasswordHandler(
         if (!role.IsUser) throw new ForbiddenException();
 
         // 4. Confirm user's email if not already confirmed
-        var token = Guid.NewGuid().ToString("N");
+        var token = await authService.GeneratePasswordResetTokenAsync(targetUser);
         resetTokenCache.StoreToken(token, request.Email, TimeSpan.FromMinutes(30));
 
         // 5. Reset failed attempt counter on success
