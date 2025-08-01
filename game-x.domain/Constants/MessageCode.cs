@@ -79,6 +79,9 @@ public static class MessageCode
         /// <summary>A resource with the same value already exists.</summary>
         [EnumMetadata("A resource with the same value already exists.")]
         DuplicateValue = 10023,
+        /// <summary>The provided token is invalid or missing.</summary>
+        [EnumMetadata("The token is invalid or does not exist.")]
+        InvalidOrMissingToken = 10024,
         #endregion
 
         #region ■ Message group: Success

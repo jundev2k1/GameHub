@@ -34,9 +34,7 @@
     <Folder Include="Features\Accounts\Mapping\" />
     <Folder Include="Features\Accounts\Admin\Queries\" />
     <Folder Include="Features\Accounts\Cs\" />
-    <Folder Include="Features\Auth\Admin\Commands\" />
     <Folder Include="Features\Auth\Cs\Commands\" />
     <Folder Include="Features\Auth\Root\Commands\" />
-    <Folder Include="Features\Auth\Shared\Commands\" />
   </ItemGroup>
 </Project>
