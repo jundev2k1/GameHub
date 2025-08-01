@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -11,9 +12,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250801062439_RemoveWalletTable")]
+    partial class RemoveWalletTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1249,16 +1252,6 @@ namespace game_x.persistence.Migrations
                         .HasConstraintName("fk_user_usdt_ledgers_user_user_id");
 
                     b.Navigation("ChainTransaction");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.Wallet", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany("Wallets")
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("fk_wallets_users_user_id");
 
                     b.Navigation("User");
                 });

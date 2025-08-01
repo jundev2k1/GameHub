@@ -13,9 +13,12 @@ public class User : IdentityUser, IEntity, IAuditable
     public DateTime UpdatedAt { get; set; }
     public ICollection<ChainTransaction> ChainTransactions { get; set; } = [];
     public ICollection<UserUsdtLedger> UserUsdtLedgers { get; set; } = [];
+    
+    /// <summary>
+    ///     The user's balance in all currencies in the system
+    /// </summary>
     public ICollection<UserBalance> UserBalances { get; set; } = [];
     public ICollection<BalanceTransferLog> BalanceTransferLogs { get; set; } = [];
-    public ICollection<Wallet> Wallets { get; set; } = [];
 
     public UserKyc UserKyc { get; set; } = null!;
     public ICollection<UserRole> UserRoles { get; set; } = [];

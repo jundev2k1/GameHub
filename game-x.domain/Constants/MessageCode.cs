@@ -193,7 +193,7 @@ public static class MessageCode
         #endregion
     }
     
-    public enum Trace
+    public enum Transaction
     {
         #region ■ Message group: Error
         /// <summary>Transaction order not found.</summary>
@@ -226,6 +226,45 @@ public static class MessageCode
         /// <summary>The EntryCode has not been used or has not expired, no revival needed.</summary>
         [EnumMetadata("The EntryCode has not been used or has not expired, no revival needed.")]
         EntryCodeNotEligibleForRevive = 10209,
+        /// <summary>Transaction order not found.</summary>
+        [EnumMetadata("Chain transaction not found.")]
+        ChainTransactionNotFound = 10210,
+        #endregion
+    }
+    
+    public enum Accounting
+    {
+        #region ■ Message group: Error
+        /// <summary>Insufficient balance.</summary>
+        [EnumMetadata("Insufficient balance.")]
+        InsufficientBalance = 10300,
+        /// <summary>Bank account does not belong to the currently logged-in user.</summary>
+        [EnumMetadata("Bank account does not belong to the currently logged-in user.")]
+        BankAccountOwnershipInvalid = 10301,
+        /// <summary>No available bank account (e.g., none created or no default account set).</summary>
+        [EnumMetadata("No available bank account (e.g., none created or no default account set).")]
+        NoAvailableBankAccount = 10302,
+        /// <summary>Balance data not found.</summary>
+        [EnumMetadata("Balance data not found.")]
+        BalanceNotFound = 10303,
+        /// <summary>Invalid balance state (e.g., balance becomes negative after deduction).</summary>
+        [EnumMetadata("Invalid balance state (e.g., balance becomes negative after deduction).")]
+        BalanceCorrupted = 10304,
+        /// <summary>Specified wallet does not exist (e.g., no wallet found for the user or merchant).</summary>
+        [EnumMetadata("Specified wallet does not exist (e.g., no wallet found for the user or merchant).")]
+        WalletNotFound = 10305,
+        /// <summary>Cannot withdraw to a system wallet.</summary>
+        [EnumMetadata("Cannot withdraw to a system wallet.")]
+        CannotWithdrawToSystemWallet = 10306,
+        #endregion
+    }
+    
+    public enum Crypto
+    {
+        #region ■ Message group: Error
+        /// <summary>CryptoToken configuration not found.</summary>
+        [EnumMetadata("CryptoToken configuration not found.")]
+        CryptoTokenNotFound = 10300,
         #endregion
     }
 }
