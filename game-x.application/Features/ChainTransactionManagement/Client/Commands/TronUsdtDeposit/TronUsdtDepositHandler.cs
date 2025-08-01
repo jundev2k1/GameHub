@@ -1,6 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.ChainTransactionManagement.Dtos;
 using game_x.share.ExternalApi.Uxm.Dtos;
@@ -81,7 +80,7 @@ public sealed class CreateDepositChainTransactionHandler(
         var transaction = ChainTransaction.Create(
             userId: userId,
         orderNumber: "string",
-         cryptoTokenId: 1,
+        cryptoTokenId: 1,
         amount: request.amount,
         type: ChainTransactionType.Deposit,
         status: ChainTransactionStatus.Pending

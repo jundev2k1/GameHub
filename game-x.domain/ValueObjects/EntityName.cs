@@ -9,6 +9,7 @@ public sealed class EntityName
     public static EntityName User => Of(nameof(Entities.User));
     public static EntityName MediaFile => Of(nameof(Entities.MediaFile));
     public static EntityName UserKyc => Of(nameof(Entities.UserKyc));
+    public static EntityName ChainTransaction => Of(nameof(Entities.ChainTransaction));
 
     public static EntityName Of(string value)
     {
@@ -23,7 +24,8 @@ public sealed class EntityName
     private static readonly string[] ValidValues = [
         nameof(Entities.User),
         nameof(Entities.MediaFile),
-        nameof(Entities.UserKyc)];
+        nameof(Entities.UserKyc),
+        nameof(Entities.ChainTransaction)];
 
     public override bool Equals(object? obj) =>
         (obj != null) && (obj is EntityName type) && (Value == type.Value);
