@@ -9,16 +9,16 @@ public sealed class EmailVerificationService(
     IEmailService emailService,
     IVerificationCodeService verificationCodeService) : IEmailVerificationProcessor
 {
-    public void SendVerificationEmail(string email)
+    public void SendVerificationEmail(string email, string purpose)
     {
         var code = verificationCodeService
-            .GenerateCode(email, VerificationPurposes.EmailVerification, TimeSpan.FromMinutes(10));
+            .GenerateCode(email, purpose, TimeSpan.FromMinutes(10));
         emailService.SendVerificationEmailAsync(email, code);
     }
 
-    public bool VerifyEmail(string email, string code)
+    public bool VerifyEmail(string email, string code, string purpose)
     {
-        var result = verificationCodeService.VerifyCode(email, VerificationPurposes.EmailVerification, code);
+        var result = verificationCodeService.VerifyCode(email, purpose, code);
         return result;
     }
 }

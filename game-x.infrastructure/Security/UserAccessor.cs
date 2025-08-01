@@ -1,4 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Exceptions;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
@@ -10,13 +11,13 @@ public class UserAccessor(IHttpContextAccessor httpContextAccessor)
     public string GetUserId()
     {
         return httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException("No user found");
+            ?? throw new UnauthorizedException("No user found");
     }
 
     public ClaimsPrincipal GetClaimsPrincipal()
     {
         return httpContextAccessor.HttpContext?.User
-            ?? throw new UnauthorizedAccessException("No active user context");
+            ?? throw new UnauthorizedException("No active user context");
     }
 
     public AppRole GetRoles()

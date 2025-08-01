@@ -1,7 +1,12 @@
 using game_x.application.Features.Auth.Client.Commands.RegisterUser;
 using game_x.application.Features.Auth.Client.Commands.ResendCodeUser;
 using game_x.application.Features.Auth.Client.Commands.UserLogin;
-using game_x.application.Features.Auth.Client.Commands.VerifyEmailUser;
+using game_x.application.Features.Auth.Client.Commands.VerifyEmailForRegistration;
+using game_x.application.Features.Auth.Client.Commands.VerifyEmailForPasswordReset;
+using game_x.api.Dtos;
+using game_x.api.Enums;
+using game_x.application.Exceptions;
+using game_x.application.Services.Verification;
 
 namespace game_x.api.Controllers.Client;
 
@@ -24,15 +29,34 @@ public sealed class AuthController : BaseApiController
     }
 
     [HttpPost("verify-email")]
-    public async Task<IActionResult> VerifyEmailAsync(VerifyEmailUserCommand command)
+    public async Task<IActionResult> VerifyEmailAsync(VerifyEmailRequest request)
     {
-        var result = await Mediator.Send(command);
-        return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
+        if (request.Purpose == EmailVerificationPurpose.AccountActivation)
+        {
+            var result = await Mediator.Send(new VerifyEmailForRegistrationCommand(request.Email, request.Code));
+            return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
+        }
+
+        if (request.Purpose == EmailVerificationPurpose.ChangePassword)
+        {
+            var result = await Mediator.Send(new VerifyEmailForPasswordResetCommand(request.Email, request.Code));
+            return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
+        }
+
+        throw new BadRequestException(MessageCode.System.InvalidParameters);
     }
 
     [HttpPost("resend-code")]
-    public async Task<IActionResult> ResendCode(ResendCodeUserCommand command)
+    public async Task<IActionResult> ResendCode(ResendCodeRequest request)
     {
+        var purpose = request.Purpose switch
+        {
+            EmailVerificationPurpose.AccountActivation => VerificationPurposes.EmailVerification,
+            EmailVerificationPurpose.PasswordReset => VerificationPurposes.ForgotPassword,
+            EmailVerificationPurpose.ChangePassword => VerificationPurposes.ChangePassword,
+            _ => throw new BadRequestException(),
+        };
+        var command = request.Adapt<ResendCodeUserCommand>() with { Purpose = purpose };
         await Mediator.Send(command);
         return ApiResponseFactory.Ok(MessageCode.System.EmailSendSuccess);
     }
