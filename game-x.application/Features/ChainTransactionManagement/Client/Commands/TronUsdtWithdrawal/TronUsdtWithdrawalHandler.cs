@@ -1,5 +1,6 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
@@ -7,7 +8,6 @@ using game_x.application.Features.ChainTransactionManagement.Mapping;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.Uxm.Dtos;
 using game_x.share.Settings;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace game_x.application.Features.ChainTransactionManagement.Client.Commands.TronUsdtWithdrawal;
@@ -22,7 +22,7 @@ public sealed class TronUsdtWithdrawalHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     IUserBalanceRepo userBalanceRepo,
     // IApplicationEventDispatcher eventDispatcher,
-    ILogger logger,
+    IAppLogger<ChainTransaction> logger,
     IOptions<GameXSettings> galaxySettings,
     IAsymmetricKeyCacheService asymmetricKeyCacheService) : ICommandHandler<TronUsdtWithdrawalCommand, Unit>
 {
