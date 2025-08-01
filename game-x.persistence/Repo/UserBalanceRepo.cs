@@ -1,4 +1,6 @@
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Exceptions;
+using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
@@ -31,5 +33,20 @@ public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo
         var userFrozenAmount = userList.SelectMany(u => u.UserBalances).Sum(b => b.FrozenAmount);
 
         return (userAmount,  userFrozenAmount);
+    }
+    
+    public async Task PatchUpdateAsync(Guid publicId, Action<UserBalance> updateAction, CancellationToken ct = default)
+    {
+        var userBalance = await context.UserBalances
+            .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
+            ?? throw new NotFoundException(MessageCode.Accounting.BalanceNotFound);
+
+        updateAction.Invoke(userBalance);
+    }
+    
+    public async Task PutUpdateAsync(Guid publicId, UserBalance userBalance, CancellationToken ct = default)
+    {
+        context.Entry(userBalance).State = EntityState.Modified;
+        await context.SaveChangesAsync(ct);
     }
 }

@@ -30,6 +30,8 @@ using Newtonsoft.Json.Serialization;
 using Refit;
 using System.Net.Http.Headers;
 using System.Text;
+using game_x.application.Contract.Infrastructure.Services.Wallet;
+using game_x.infrastructure.Services.Wallet;
 
 namespace game_x.infrastructure;
 
@@ -68,6 +70,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAsymmetricCryptoService, AsymmetricCryptoService>();
         services.AddScoped<IUxmService, UxmService>();
+        services.AddScoped<IUserBalanceService, UserBalanceService>();
         services.AddScoped<IEmailService, EngageLabEmailService>();
         services.AddScoped<IHttpPolicyService, HttpPolicyService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
