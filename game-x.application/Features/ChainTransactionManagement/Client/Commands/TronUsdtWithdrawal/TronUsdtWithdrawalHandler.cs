@@ -33,14 +33,14 @@ public sealed class TronUsdtWithdrawalHandler(
         try
         {
             var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(userId, request.Amount, ct);
-            
+
             // Create ChainTransaction (not yet submitted)
             var chainTransaction = await CreateWithdrawalChainTransaction(request, userId, feeAmount, token.Id, ct);
-            
+
             await FreezeBalanceAndCreateTxLogAsync(chainTransaction, balance, totalAmount, ct);
-            
+
             await SendWithdrawalAsync(request, chainTransaction, balance, ct);
-            
+
             return Unit.Value;
         }
         catch (BadRequestException)
@@ -54,16 +54,16 @@ public sealed class TronUsdtWithdrawalHandler(
             throw new BadRequestException("Order creation failed.");
         }
     }
-   
+
     private async Task<ChainTransaction> CreateWithdrawalChainTransaction(
-        TronUsdtWithdrawalCommand request, 
-        string userId, 
+        TronUsdtWithdrawalCommand request,
+        string userId,
         decimal feeAmount,
         int tokenId,
         CancellationToken ct = default)
     {
         var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(chainTransactionRepo, ct);
-        
+
         var chainTransaction = ChainTransaction.Create(
             type: ChainTransactionType.Withdrawal,
             userId: userId,
@@ -79,13 +79,13 @@ public sealed class TronUsdtWithdrawalHandler(
 
         return chainTransaction;
     }
-    
+
     private async Task<(CryptoToken Token, UserBalance Balance, decimal FeeAmount, decimal TotalAmount)>
         ResolveBalanceInfoAsync(string userId, decimal amount, CancellationToken ct)
     {
         const NetworkType network = NetworkType.Tron;
         const string symbol = CryptoTokenSymbol.Usdt;
-        
+
         var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(symbol, network, ct)
                     ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
 
@@ -100,7 +100,7 @@ public sealed class TronUsdtWithdrawalHandler(
 
         return (token, balance, feeAmount, totalAmount);
     }
-    
+
     private async Task FreezeBalanceAndCreateTxLogAsync(ChainTransaction chainTransaction, UserBalance balance, decimal totalAmount, CancellationToken ct)
     {
         await unitOfWork.BeginTransactionAsync(ct);
@@ -120,18 +120,18 @@ public sealed class TronUsdtWithdrawalHandler(
             throw;
         }
     }
-    
+
     private async Task SendWithdrawalAsync(
         TronUsdtWithdrawalCommand request,
-        ChainTransaction chainTransaction, 
-        UserBalance balance, 
+        ChainTransaction chainTransaction,
+        UserBalance balance,
         CancellationToken ct)
-    {     
+    {
         try
         {
             var gameXPrivateKey = asymmetricKeyCacheService.GameXPrivateKey;
             var merchantNumber = galaxySettings.Value.MerchantNumber;
-        
+
             // Create UXM request data
             var requestData = request.ToUxmWithdrawalOrderRequestData(merchantNumber);
             var uxmRequest = new SecureRequest<UxmWithdrawalOrderRequest>
@@ -139,7 +139,7 @@ public sealed class TronUsdtWithdrawalHandler(
                 Data = requestData,
                 Signature = asymmetricCryptoService.Sign(gameXPrivateKey, requestData)
             };
-            
+
             await uxmService.CreateWithdrawalOrderAsync(uxmRequest);
         }
         catch (Exception ex)
@@ -155,7 +155,7 @@ public sealed class TronUsdtWithdrawalHandler(
             throw new BadRequestException(MessageCode.System.InvalidOperation, ex.Message);
         }
     }
-    
+
     private async Task TryRefundFrozenBalanceAsync(ChainTransaction chainTransaction, UserBalance balance, CancellationToken ct)
     {
         const int maxRetries = 3;

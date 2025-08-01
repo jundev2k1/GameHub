@@ -8,6 +8,6 @@ public interface IUxmService
     Task<SecureResponse<CreateChainTransactionDepositResponseData>> CreateProxyChainTransactionDepositAsync(
         SecureRequest<CreateChainTransactionDepositRequestData> data);
 
-    // Task<SecureResponse<UxmWithdrawalOrderResponseData>> CreateWithdrawalOrderAsync(
-    //     SecureRequest<UxmWithdrawalOrderRequest> data);
+    Task<SecureResponse<UxmWithdrawalOrderResponseData>> CreateWithdrawalOrderAsync(
+        SecureRequest<UxmWithdrawalOrderRequest> data);
 }

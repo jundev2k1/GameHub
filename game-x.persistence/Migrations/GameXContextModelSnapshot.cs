@@ -1253,16 +1253,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("game_x.domain.Entities.Wallet", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany("Wallets")
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("fk_wallets_users_user_id");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("game_x.domain.Entities.Role", b =>
                 {
                     b.Navigation("UserRoles");

@@ -31,17 +31,35 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
         return await context.ChainTransactions.FirstOrDefaultAsync(x => x.OrderNumber == orderNumber, ct);
     }
 
-
-    public async Task AddAsync(ChainTransaction chainTransaction, CancellationToken ct = default)
+    public async Task<(decimal txLogUserFrozenAmount, decimal chainTxLogpendingFee)> GetTxLogSummaryAsync(CancellationToken ct)
     {
-        await context.ChainTransactions.AddAsync(chainTransaction, ct);
+        // Only retrieve pending withdrawals
+        var pendingWithdrawals = await context.ChainTransactions
+            .Where(x => x.Status == ChainTransactionStatus.Pending && x.Type == ChainTransactionType.Withdrawal)
+            .Include(x => x.User!)
+            .ThenInclude(u => u.UserRoles)
+            .ThenInclude(r => r.Role)
+            .ToListAsync(ct);
+
+        var confirmedWithdrawals = await context.ChainTransactions
+            .Where(x => x.Status == ChainTransactionStatus.Completed && x.Type == ChainTransactionType.Withdrawal)
+            .ToListAsync(ct);
+
+        var userAmount = pendingWithdrawals
+            .Where(x => x.User is { IsUser: true }).Sum(x => x.Amount);
+
+        // Expected vs. Realized Fees
+        var pendingFee = pendingWithdrawals.Sum(x => x.Fee);
+        var confirmedFee = confirmedWithdrawals.Sum(x => x.Fee);
+
+        return (userAmount, pendingFee);
     }
 
     public async Task AddAsync(ChainTransaction chainTransaction, CancellationToken ct = default)
     {
         await context.ChainTransactions.AddAsync(chainTransaction, ct);
     }
-    
+
     public async Task UpdateAsync(Guid chainTransactionId, Action<ChainTransaction> updateAction, CancellationToken ct = default)
     {
         var chainTransaction = await context.ChainTransactions

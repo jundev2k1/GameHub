@@ -7,6 +7,31 @@ namespace game_x.infrastructure.ExternalApi.Uxm;
 
 public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : IUxmService
 {
+    public async Task<SecureResponse<UxmWithdrawalOrderResponseData>> CreateWithdrawalOrderAsync(
+      SecureRequest<UxmWithdrawalOrderRequest> data)
+    {
+        try
+        {
+            logger.LogInformation(
+                $"Create order request: MerchantOrderId={data.Data.OrderNumber}, Amount={data.Data.Amount}");
+
+            var response = await uxmApi.CreateProxyWithdrawalOrderAsync(data);
+            if (!response.IsSuccessStatusCode || response.Content == null)
+            {
+                logger.LogError($"Response failed: Status={response.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            logger.LogInformation($"Order created successfully: OrderUid={response.Content.Data.OrderUid}");
+            return response.Content;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex.Message);
+            throw;
+        }
+    }
+
     public async Task<SecureResponse<CreateChainTransactionDepositResponseData>> CreateProxyChainTransactionDepositAsync(
         SecureRequest<CreateChainTransactionDepositRequestData> data)
     {
