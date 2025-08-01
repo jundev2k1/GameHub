@@ -10,7 +10,7 @@ public interface IUserRepo
 
     Task<User[]> GetAdminUsers(CancellationToken ct = default);
 
-    Task<UserKyc> GetKycProfile(string userId, CancellationToken ct = default);
+    Task<UserKyc> GetKycProfileAsync(string userId, CancellationToken ct = default);
 
     Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default);
 
