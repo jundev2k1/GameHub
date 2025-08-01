@@ -14,44 +14,44 @@ public sealed class VerifyEmailForChangePasswordHandler(
     IUserAccessor userAccessor,
     ISpamProtectionCacheService spamProtection,
     IResetTokenCacheService resetTokenCache)
-    : ICommandHandler<VerifyEmailForChangePasswordCommand, VerifyEmailForPasswordResetResult>
+    : ICommandHandler<VerifyEmailForChangePasswordCommand, VerifyEmailForChangePasswordResult>
 {
-    public async Task<VerifyEmailForPasswordResetResult> Handle(VerifyEmailForChangePasswordCommand request, CancellationToken ct = default)
+    public async Task<VerifyEmailForChangePasswordResult> Handle(VerifyEmailForChangePasswordCommand request, CancellationToken ct = default)
     {
-        // 1. Check if email is temporarily locked due to too many failed attempts
-        var isLocked = await spamProtection.IsVerifyLockedAsync(request.Email);
+        var userId = userAccessor.GetUserId();
+        // 1. Validate the valid user and check role user
+        var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
+        var role = await authService.GetRolesAsync(targetUser);
+        if (!role.IsUser) throw new ForbiddenException();
+
+        if (!targetUser.EmailConfirmed)
+            throw new BadRequestException(MessageCode.User.UserNotConfirmed);
+
+        // 2. Check if email is temporarily locked due to too many failed attempts
+        var isLocked = await spamProtection.IsVerifyLockedAsync(targetUser.Email!);
         if (isLocked)
         {
-            var retryTime = await spamProtection.GetVerifyRetryAfterAsync(request.Email);
+            var retryTime = await spamProtection.GetVerifyRetryAfterAsync(targetUser.Email!);
             var retrySeconds = (int)retryTime.Value.TotalSeconds;
             throw new BadRequestException(
                 MessageCode.User.VerifyTooManyFailedAttempts,
                 new { Cooldown = retrySeconds });
         }
 
-        // 2. Validate the provided verification code
-        var isValid = emailVerification.VerifyEmail(request.Email, request.Code, VerificationPurposes.ForgotPassword);
+        // 3. Validate the provided verification code
+        var isValid = emailVerification.VerifyEmail(targetUser.Email!, request.Code, VerificationPurposes.ChangePassword);
         if (!isValid)
         {
-            await spamProtection.RegisterVerifyFailureAsync(request.Email);
+            await spamProtection.RegisterVerifyFailureAsync(targetUser.Email!);
             throw new BadRequestException(MessageCode.System.InvalidVerifyCode);
         }
 
-        // 3. Validate the valid user and check role user
-        var userId = userAccessor.GetUserId();
-        var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
-        if (!targetUser.EmailConfirmed)
-            throw new BadRequestException(MessageCode.User.UserNotConfirmed);
-
-        var role = await authService.GetRolesAsync(targetUser);
-        if (!role.IsUser) throw new ForbiddenException();
-
         // 4. Confirm user's email if not already confirmed
         var token = Guid.NewGuid().ToString("N");
-        resetTokenCache.StoreToken(token, request.Email, TimeSpan.FromMinutes(30));
+        resetTokenCache.StoreToken(token, targetUser.Email!, TimeSpan.FromMinutes(30));
 
         // 5. Reset failed attempt counter on success
-        await spamProtection.ResetVerifyAttemptAsync(request.Email);
-        return new VerifyEmailForPasswordResetResult(token);
+        await spamProtection.ResetVerifyAttemptAsync(targetUser.Email!);
+        return new VerifyEmailForChangePasswordResult(token, DateTime.UtcNow.AddMinutes(30));
     }
 }

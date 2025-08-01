@@ -1,7 +1,5 @@
 ﻿namespace game_x.application.Features.Auth.Client.Commands.VerifyEmailForChangePassword;
 
-public record VerifyEmailForChangePasswordCommand(
-    string Email,
-    string Code) : ICommand<VerifyEmailForPasswordResetResult>;
+public record VerifyEmailForChangePasswordCommand(string Code) : ICommand<VerifyEmailForChangePasswordResult>;
 
-public record VerifyEmailForPasswordResetResult(string Token);
+public record VerifyEmailForChangePasswordResult(string Token, DateTime ExpireTime);

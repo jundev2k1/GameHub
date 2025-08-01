@@ -2,11 +2,12 @@ using game_x.application.Features.Auth.Client.Commands.RegisterUser;
 using game_x.application.Features.Auth.Client.Commands.ResendCodeUser;
 using game_x.application.Features.Auth.Client.Commands.UserLogin;
 using game_x.application.Features.Auth.Client.Commands.VerifyEmailForRegistration;
-using game_x.application.Features.Auth.Client.Commands.VerifyEmailForPasswordReset;
+using game_x.application.Features.Auth.Client.Commands.VerifyEmailForChangePassword;
 using game_x.api.Dtos;
 using game_x.api.Enums;
 using game_x.application.Exceptions;
 using game_x.application.Services.Verification;
+using game_x.application.Features.Auth.Client.Commands.VerifyEmailForResetPassword;
 
 namespace game_x.api.Controllers.Client;
 
@@ -37,9 +38,15 @@ public sealed class AuthController : BaseApiController
             return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
         }
 
+        if (request.Purpose == EmailVerificationPurpose.PasswordReset)
+        {
+            var result = await Mediator.Send(new VerifyEmailForResetPasswordCommand(request.Email, request.Code));
+            return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
+        }
+
         if (request.Purpose == EmailVerificationPurpose.ChangePassword)
         {
-            var result = await Mediator.Send(new VerifyEmailForPasswordResetCommand(request.Email, request.Code));
+            var result = await Mediator.Send(new VerifyEmailForChangePasswordCommand(request.Code));
             return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
         }
 
