@@ -41,7 +41,7 @@ public sealed class ChangePasswordUserHandler(
             await authService.ChangePasswordAsync(
                 targetUser,
                 request.OldPassword.Trim(),
-                request.NewPassword.Trim(), ct);
+                request.NewPassword.Trim());
         }, ct);
 
         // Remove token after change password successfully
