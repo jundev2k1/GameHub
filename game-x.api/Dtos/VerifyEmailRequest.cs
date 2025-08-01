@@ -2,4 +2,4 @@
 
 namespace game_x.api.Dtos;
 
-public record VerifyEmailRequest(string Email, string Code, EmailVerificationPurpose Purpose);
+public record VerifyEmailRequest(string? Email, string Code, EmailVerificationPurpose Purpose);

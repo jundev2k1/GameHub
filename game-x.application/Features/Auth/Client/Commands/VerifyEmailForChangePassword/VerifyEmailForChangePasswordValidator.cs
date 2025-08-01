@@ -1,6 +1,4 @@
-﻿using game_x.application.Extensions;
-
-namespace game_x.application.Features.Auth.Client.Commands.VerifyEmailForChangePassword;
+﻿namespace game_x.application.Features.Auth.Client.Commands.VerifyEmailForChangePassword;
 
 public sealed class VerifyEmailForChangePasswordValidator : AbstractValidator<VerifyEmailForChangePasswordCommand>
 {

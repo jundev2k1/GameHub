@@ -46,6 +46,9 @@ public sealed class AuthController : BaseApiController
 
         if (request.Purpose == EmailVerificationPurpose.ChangePassword)
         {
+            if (request.Email != null)
+                throw new BadRequestException("Change password does not need to be passing 'Email' parameter.");
+
             var result = await Mediator.Send(new VerifyEmailForChangePasswordCommand(request.Code));
             return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
         }
