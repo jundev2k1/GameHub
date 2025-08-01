@@ -19,11 +19,6 @@ public class User : IdentityUser, IEntity, IAuditable
     /// </summary>
     public ICollection<UserBalance> UserBalances { get; set; } = [];
     public ICollection<BalanceTransferLog> BalanceTransferLogs { get; set; } = [];
-    
-    /// <summary>
-    ///     User's wallet on each blockchain (e.g., TRON, ETH)
-    /// </summary>
-    public ICollection<Wallet> Wallets { get; set; } = [];
 
     public UserKyc UserKyc { get; set; } = null!;
     public ICollection<UserRole> UserRoles { get; set; } = [];
