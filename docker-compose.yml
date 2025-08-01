@@ -1,4 +1,3 @@
-
 services:
   game-x.api:
     image: ${DOCKER_REGISTRY-}gamexapi
@@ -9,66 +8,34 @@ services:
     networks:
       - default
     ports:
-      - ${API_PORT}:8080
+      - 5111:8080
     environment:
       - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
       - ConnectionStrings__HangfireConnection=${HANGFIREDB_CONNECTION_STRING}
   
       - HangfireSettings__Key=${HANGFIRE_KEY}
  
-      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
-
-      - UxmSettings__Host=${UXM_HOST}
-      - GameXSettings__MerchantNumber=${GAMEX_MERCHANTNUMBER}
-
       - JwtSettings__DurationInMinutes=${JWT_EXPIRED_MINUTES}
       - JwtSettings__Key=${JWT_SECRET}
       - JwtSettings__Issuer=${JWT_ISSUER}
       - JwtSettings__Audience=${JWT_AUDIENCE}
       - JwtSettings__Provider=${JWT_PROVIDER}
       - JwtSettings__Version=${JWT_VERSION}
-
+ 
+      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
+ 
+      - UxmSettings__Host=${UXM_HOST}
+        
       - EngageLabSettings__BaseUrl=${EngageLab_BaseUrl}
       - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
       - EngageLabSettings__ApiKey=${EngageLab_ApiKey}
       - EngageLabSettings__From=${EngageLab_From}
 
-      - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
-      - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
-      - MinioSettings__AccessKey=${Minio_AccessKey}
-      - MinioSettings__SecretKey=${Minio_SecretKey}
-      - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
-      - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
-
-      - SpamProtectionSettings__MaxVerifyAttempts=${SpamProtection_MaxVerifyAttempts}
-      - SpamProtectionSettings__VerifyLockMinutes=${SpamProtection_VerifyLockMinutes}
-      - SpamProtectionSettings__VerifySlidingMinutes=${SpamProtection_VerifySlidingMinutes}
-
       - RecurringJobSettings__DashboardStatisticJob=${RecurringJob_DashboardStatisticJob}
-
-  minio:
-    container_name: game-x.minio
-    image: minio/minio:latest
-    restart: always
-    ports:
-    - "9000:9000"
-    - "9001:9001"
-    volumes:
-    - game-x.minio-data:/data
-    environment:
-      MINIO_ROOT_USER: ${Minio_AccessKey}
-      MINIO_ROOT_PASSWORD: ${Minio_SecretKey}
-    command: server --console-address ":9001" /data
-    networks:
-    - default
-
 # ========================
 # Networks
 # ========================
-volumes:
-  game-x.minio-data:
-
 networks:
   default:
     external: true
-    name: game-x-network
+    name: game-x
