@@ -13,6 +13,9 @@ public sealed class DecisionKycHandler(
         var adminId = userAccessor.GetUserId();
         await userRepo.UpdateKycAsync(request.UserId, targetKyc =>
         {
+            if (targetKyc.Status != KycStatus.UnderReview)
+                throw new BadRequestException(MessageCode.User.KycInvalidStatus);
+
             if (request.Status == KycStatus.Approved)
                 targetKyc.Approve(adminId);
             else if (request.Status == KycStatus.Rejected)
