@@ -1,3 +1,4 @@
+using EFCore.BulkExtensions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.domain.Constants;
@@ -33,6 +34,22 @@ public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo
         var userFrozenAmount = userList.SelectMany(u => u.UserBalances).Sum(b => b.FrozenAmount);
 
         return (userAmount,  userFrozenAmount);
+    }
+    
+    public async Task BulkInsertAsync(IEnumerable<UserBalance> userBalances)
+    {
+        var list = userBalances?.ToList();
+        if (list is null || list.Count == 0)
+            return;
+
+        var config = new BulkConfig
+        {
+            PreserveInsertOrder = true,
+            SetOutputIdentity = true,
+            PropertiesToExcludeOnUpdate = [nameof(UserBalance.Version)]
+        };
+
+        await context.BulkInsertAsync(list, config);
     }
     
     public async Task PatchUpdateAsync(Guid publicId, Action<UserBalance> updateAction, CancellationToken ct = default)

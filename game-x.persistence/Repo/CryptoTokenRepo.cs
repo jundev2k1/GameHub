@@ -4,6 +4,11 @@ namespace game_x.persistence.Repo;
 
 public sealed class CryptoTokenRepo(GameXContext context): ICryptoTokenRepo
 {
+    public async Task<IReadOnlyList<CryptoToken>> GetAsync()
+    {
+        return await context.CryptoTokens.AsNoTracking().ToListAsync();
+    }
+    
     public IQueryable<CryptoToken> Query()
     {
         return context.CryptoTokens;

@@ -37,7 +37,7 @@ public sealed class TronUsdtWithdrawalHandler(
             // Create ChainTransaction (not yet submitted)
             var chainTransaction = await CreateWithdrawalChainTransaction(request, userId, feeAmount, token.Id, ct);
 
-            await FreezeBalanceAndCreateTxLogAsync(chainTransaction, balance, totalAmount, ct);
+            await FreezeBalanceAndCreateChainTransactionAsync(chainTransaction, balance, totalAmount, ct);
 
             await SendWithdrawalAsync(request, chainTransaction, balance, ct);
 
@@ -101,7 +101,11 @@ public sealed class TronUsdtWithdrawalHandler(
         return (token, balance, feeAmount, totalAmount);
     }
 
-    private async Task FreezeBalanceAndCreateTxLogAsync(ChainTransaction chainTransaction, UserBalance balance, decimal totalAmount, CancellationToken ct)
+    private async Task FreezeBalanceAndCreateChainTransactionAsync(
+        ChainTransaction chainTransaction,
+        UserBalance balance,
+        decimal totalAmount,
+        CancellationToken ct)
     {
         await unitOfWork.BeginTransactionAsync(ct);
 
@@ -180,8 +184,14 @@ public sealed class TronUsdtWithdrawalHandler(
             {
                 await unitOfWork.RollbackAsync(ct);
 
-                logger.LogError("[TronWithdrawal] ❌ 第 {Attempt} Balance compensation failed，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}, Err={ex}",
-                    attempt, chainTransaction?.UserId, chainTransaction?.CryptoTokenId, chainTransaction?.OrderNumber, refundAmount, ex);
+                logger.LogError(
+                    "[TronWithdrawal] ❌ 第 {Attempt} Balance compensation failed，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}, Err={ex}",
+                    attempt,
+                    chainTransaction?.UserId ?? string.Empty,
+                    chainTransaction?.CryptoTokenId ?? 0,
+                    chainTransaction?.OrderNumber ?? string.Empty,
+                    refundAmount,
+                    ex);
 
                 await Task.Delay(200, ct); // Retry after a short delay
             }
@@ -189,6 +199,9 @@ public sealed class TronUsdtWithdrawalHandler(
 
         logger.LogError(
             "[TronWithdrawal] ❌ Compensation failure exceeds the maximum number of retries，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}",
-            chainTransaction?.UserId, chainTransaction?.CryptoTokenId, chainTransaction?.OrderNumber, refundAmount);
+            chainTransaction?.UserId ?? string.Empty,
+            chainTransaction?.CryptoTokenId ?? 0,
+            chainTransaction?.OrderNumber ?? string.Empty,
+            refundAmount);
     }
 }
