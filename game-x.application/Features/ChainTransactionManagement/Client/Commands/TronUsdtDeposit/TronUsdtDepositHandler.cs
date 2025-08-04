@@ -101,7 +101,7 @@ public sealed class CreateDepositChainTransactionHandler(
 
 
         // Get merchant number from configuration
-        var merchantNumber = configuration.GetValue<string>("GalaxySettings:MerchantNumber")
+        var merchantNumber = configuration.GetValue<string>("GameXSettings:MerchantNumber")
             ?? throw new Exception("MerchantNumber is not yet configured.");
 
         // Line ~58: Create request data
@@ -125,4 +125,3 @@ public sealed class CreateDepositChainTransactionHandler(
     }
 
 }
-
