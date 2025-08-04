@@ -1,20 +1,5 @@
-version: "3.8"
 
 services:
-  gamex_pg:
-    image: postgres:15
-    container_name: gamex_pg
-    restart: always
-    ports:
-      - 5433:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    networks:
-      - gamex-pg
-
   game-x.api:
     image: ${DOCKER_REGISTRY-}gamexapi
     container_name: game-x.api
@@ -22,33 +7,68 @@ services:
       context: .
       dockerfile: game-x.api/Dockerfile
     networks:
-      - gamex-pg
-    depends_on:
-      - gamex_pg
+      - default
     ports:
-      - 5111:8080
+      - ${API_PORT}:8080
     environment:
-      - ConnectionStrings__DefaultConnection=Server=gamex_pg;Port=5432;User Id=postgres;Password=postgres;Database=gamex;SSLMode=Disable;Trust Server Certificate=true;
-      - ConnectionStrings__HangfireConnection=Server=gamex_pg;Port=5432;User Id=postgres;Password=postgres;Database=hangfire;SSLMode=Disable;Trust Server Certificate=true;
-      - API_PORT=${API_PORT}
-      - HANGFIRE_KEY=${HANGFIRE_KEY}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_ISSUER=${JWT_ISSUER}
-      - JWT_AUDIENCE=${JWT_AUDIENCE}
-      - JWT_PROVIDER=${JWT_PROVIDER}
-      - JWT_VERSION=${JWT_VERSION}
-      - JWT_EXPIRED_MINUTES=${JWT_EXPIRED_MINUTES}
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-      - UXM_HOST=${UXM_HOST}
-      - GALAXY_MERCHANTNUMBER=${GALAXY_MERCHANTNUMBER}
-      - EngageLab_BaseUrl=${EngageLab_BaseUrl}
-      - EngageLab_ApiUser=${EngageLab_ApiUser}
-      - EngageLab_ApiKey=${EngageLab_ApiKey}
-      - EngageLab_From=${EngageLab_From}
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - RecurringJob_DashboardStatisticJob=${RecurringJob_DashboardStatisticJob}
-      - RecurringJob_SessionCleanUpJob=${RecurringJob_SessionCleanUpJob}
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+      - ConnectionStrings__HangfireConnection=${HANGFIREDB_CONNECTION_STRING}
+  
+      - HangfireSettings__Key=${HANGFIRE_KEY}
+ 
+      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
+
+      - UxmSettings__Host=${UXM_HOST}
+      - GameXSettings__MerchantNumber=${GAMEX_MERCHANTNUMBER}
+
+      - JwtSettings__DurationInMinutes=${JWT_EXPIRED_MINUTES}
+      - JwtSettings__Key=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__Provider=${JWT_PROVIDER}
+      - JwtSettings__Version=${JWT_VERSION}
+
+      - EngageLabSettings__BaseUrl=${EngageLab_BaseUrl}
+      - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
+      - EngageLabSettings__ApiKey=${EngageLab_ApiKey}
+      - EngageLabSettings__From=${EngageLab_From}
+
+      - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
+      - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
+      - MinioSettings__AccessKey=${Minio_AccessKey}
+      - MinioSettings__SecretKey=${Minio_SecretKey}
+      - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
+      - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
+
+      - SpamProtectionSettings__MaxVerifyAttempts=${SpamProtection_MaxVerifyAttempts}
+      - SpamProtectionSettings__VerifyLockMinutes=${SpamProtection_VerifyLockMinutes}
+      - SpamProtectionSettings__VerifySlidingMinutes=${SpamProtection_VerifySlidingMinutes}
+
+      - RecurringJobSettings__DashboardStatisticJob=${RecurringJob_DashboardStatisticJob}
+
+  minio:
+    container_name: game-x.minio
+    image: minio/minio:latest
+    restart: always
+    ports:
+    - "9000:9000"
+    - "9001:9001"
+    volumes:
+    - game-x.minio-data:/data
+    environment:
+      MINIO_ROOT_USER: ${Minio_AccessKey}
+      MINIO_ROOT_PASSWORD: ${Minio_SecretKey}
+    command: server --console-address ":9001" /data
+    networks:
+    - default
+
+# ========================
+# Networks
+# ========================
+volumes:
+  game-x.minio-data:
 
 networks:
-  gamex-pg:
-    driver: bridge
+  default:
+    external: true
+    name: game-x-network
