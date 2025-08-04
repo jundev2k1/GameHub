@@ -36,7 +36,7 @@ public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo
         return (userAmount,  userFrozenAmount);
     }
     
-    public async Task BulkInsertAsync(IEnumerable<UserBalance> userBalances)
+    public async Task BulkInsertAsync(IEnumerable<UserBalance>? userBalances)
     {
         var list = userBalances?.ToList();
         if (list is null || list.Count == 0)
@@ -61,9 +61,9 @@ public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo
         updateAction.Invoke(userBalance);
     }
     
-    public async Task PutUpdateAsync(Guid publicId, UserBalance userBalance, CancellationToken ct = default)
+    public async Task PutUpdateAsync(UserBalance ub, CancellationToken ct = default)
     {
-        context.Entry(userBalance).State = EntityState.Modified;
+        context.Entry(ub).State = EntityState.Modified;
         await context.SaveChangesAsync(ct);
     }
 }

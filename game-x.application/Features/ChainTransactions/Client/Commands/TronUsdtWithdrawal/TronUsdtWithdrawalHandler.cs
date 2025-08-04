@@ -4,13 +4,13 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.ChainTransactionManagement.Mapping;
+using game_x.application.Features.ChainTransactions.Mapping;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.Uxm.Dtos;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 
-namespace game_x.application.Features.ChainTransactionManagement.Client.Commands.TronUsdtWithdrawal;
+namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWithdrawal;
 
 public sealed class TronUsdtWithdrawalHandler(
     IUxmService uxmService,
@@ -29,30 +29,19 @@ public sealed class TronUsdtWithdrawalHandler(
     public async Task<Unit> Handle(TronUsdtWithdrawalCommand request, CancellationToken ct)
     {
         string userId = userAccessor.GetUserId();
-        await unitOfWork.BeginTransactionAsync(ct);
-        try
-        {
-            var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(userId, request.Amount, ct);
+        int minimumAmount = 10;
+        if(request.Amount < minimumAmount)
+            throw new BadRequestException(MessageCode.Accounting.InvalidAmount);
+        var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(userId, request.Amount, ct);
             
-            // Create ChainTransaction (not yet submitted)
-            var chainTransaction = await CreateWithdrawalChainTransaction(request, userId, feeAmount, token.Id, ct);
+        // Create ChainTransaction (not yet submitted)
+        var chainTransaction = await CreateWithdrawalChainTransaction(request, userId, feeAmount, token.Id, ct);
             
-            await FreezeBalanceAndCreateChainTransactionAsync(chainTransaction, balance, totalAmount, ct);
+        await FreezeBalanceAndCreateChainTransactionAsync(chainTransaction, balance, totalAmount, ct);
             
-            await SendWithdrawalAsync(request, chainTransaction, balance, ct);
+        await SendWithdrawalAsync(request, chainTransaction, balance, ct);
             
-            return Unit.Value;
-        }
-        catch (BadRequestException)
-        {
-            await unitOfWork.RollbackAsync(ct);
-            throw new BadRequestException("Invalid signature.");
-        }
-        catch
-        {
-            await unitOfWork.RollbackAsync(ct);
-            throw new BadRequestException("Order creation failed.");
-        }
+        return Unit.Value;
     }
    
     private async Task<ChainTransaction> CreateWithdrawalChainTransaction(
@@ -74,7 +63,6 @@ public sealed class TronUsdtWithdrawalHandler(
             cryptoTokenId: tokenId,
             fromAddress: "",
             toAddress: request.To,
-            transactionHash: "",
             note: request.Note);
 
         return chainTransaction;
@@ -107,22 +95,12 @@ public sealed class TronUsdtWithdrawalHandler(
         decimal totalAmount, 
         CancellationToken ct)
     {
-        await unitOfWork.BeginTransactionAsync(ct);
-
-        try
+        await unitOfWork.WithTransactionAsync( async () =>
         {
             await chainTransactionRepo.AddAsync(chainTransaction, ct);
-
             userBalanceService.Freeze(balance, totalAmount);
-            await userBalanceRepo.PutUpdateAsync(balance.PublicId, balance, ct);
-
-            await unitOfWork.CommitAsync(ct);
-        }
-        catch
-        {
-            await unitOfWork.RollbackAsync(ct);
-            throw;
-        }
+            await userBalanceRepo.PutUpdateAsync(balance, ct);
+        }, ct);
     }
     
     private async Task SendWithdrawalAsync(
@@ -156,7 +134,7 @@ public sealed class TronUsdtWithdrawalHandler(
 
             await TryRefundFrozenBalanceAsync(chainTransaction, balance, ct);
 
-            throw new BadRequestException(MessageCode.System.InvalidOperation, ex.Message);
+            throw;
         }
     }
     
@@ -175,7 +153,7 @@ public sealed class TronUsdtWithdrawalHandler(
                 await unitOfWork.BeginTransactionAsync(ct);
 
                 userBalanceService.Unfreeze(balance, refundAmount);
-                await userBalanceRepo.PutUpdateAsync(balance.PublicId, balance, ct);
+                await userBalanceRepo.PutUpdateAsync(balance, ct);
 
                 await unitOfWork.CommitAsync(ct);
                 return;

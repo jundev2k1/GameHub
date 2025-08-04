@@ -38,6 +38,6 @@
     <Folder Include="Features\Auth\Cs\Commands\" />
     <Folder Include="Features\Auth\Root\Commands\" />
     <Folder Include="Features\Auth\Shared\Commands\" />
-    <Folder Include="Features\ChainTransactionManagement\Client\Queries\" />
+    <Folder Include="Features\ChainTransactions\Client\Queries\" />
   </ItemGroup>
 </Project>

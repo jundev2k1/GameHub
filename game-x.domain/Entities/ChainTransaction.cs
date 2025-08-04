@@ -10,7 +10,6 @@ public sealed class ChainTransaction: BaseEntity<int>, IAuditable
     public string? UserId { get; set; }
     public User? User { get; set; }
     public string OrderNumber { get; set; } = string.Empty;
-    public string? TransactionHash { get; set; }
     public string? FromAddress { get; set; }
     public string? ToAddress { get; set; }
     public decimal Amount { get; set; }
@@ -33,7 +32,6 @@ public sealed class ChainTransaction: BaseEntity<int>, IAuditable
         decimal? fee = null,
         string? fromAddress = null,
         string? toAddress = null,
-        string? transactionHash = null,
         string? note = null
         )
     {
@@ -49,7 +47,6 @@ public sealed class ChainTransaction: BaseEntity<int>, IAuditable
         {
             UserId = userId,
             OrderNumber = orderNumber,
-            TransactionHash = transactionHash,
             FromAddress = fromAddress,
             ToAddress = toAddress,
             Type = type,

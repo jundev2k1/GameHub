@@ -1,4 +1,4 @@
-namespace game_x.application.Features.ChainTransactionManagement.Client.Commands.TronUsdtWithdrawal;
+namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWithdrawal;
 
 public record TronUsdtWithdrawalCommand(
     string To,

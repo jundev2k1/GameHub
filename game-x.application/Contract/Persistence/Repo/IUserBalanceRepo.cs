@@ -9,5 +9,5 @@ public interface IUserBalanceRepo
     Task<(decimal totalUserAmount, decimal totalUserForzenAmount)> GetTotalUserAndAgentAvailableBalanceAsync(CancellationToken ct);
     Task BulkInsertAsync(IEnumerable<UserBalance> userBalances);
     Task PatchUpdateAsync(Guid publicId, Action<UserBalance> updateAction, CancellationToken ct = default);
-    Task PutUpdateAsync(Guid publicId, UserBalance userBalance, CancellationToken ct = default);
+    Task PutUpdateAsync(UserBalance userBalance, CancellationToken ct = default);
 }
