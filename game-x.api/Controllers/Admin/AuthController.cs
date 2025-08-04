@@ -7,7 +7,7 @@ public sealed class AuthController : BaseApiController
 {
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<IActionResult> LoginAsync(AdminLoginCommand command)
+    public async Task<IActionResult> LoginAsync(LoginAdminCommand command)
     {
         var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result, MessageCode.System.LoginSuccess);
