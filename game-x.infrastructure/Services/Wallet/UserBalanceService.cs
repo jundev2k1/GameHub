@@ -1,8 +1,9 @@
+using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 
 namespace game_x.infrastructure.Services.Wallet;
 
-public sealed class UserBalanceService: IUserBalanceService
+public sealed class UserBalanceService : IUserBalanceService, IServices
 {
     public void Freeze(UserBalance balance, decimal amount)
     {

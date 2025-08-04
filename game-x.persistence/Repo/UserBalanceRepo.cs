@@ -1,11 +1,12 @@
 using EFCore.BulkExtensions;
+using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
-public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo
+public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo, IRepository
 {
     public IQueryable<UserBalance> Query()
     {

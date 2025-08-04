@@ -1,4 +1,4 @@
-﻿using FluentValidation.Results;
+﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Exceptions;
 using game_x.share.Extensions;
@@ -8,7 +8,7 @@ namespace game_x.infrastructure.Identity;
 
 public sealed class AuthService(
     UserManager<User> userManager,
-    SignInManager<User> signInManager) : IAuthService
+    SignInManager<User> signInManager) : IAuthService, IServices
 {
     public async Task<User> TryLoginAsync(
         string userName,

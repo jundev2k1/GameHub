@@ -1,4 +1,5 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Persistence.Repo;
 using game_x.persistence.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -120,7 +121,7 @@ public static class PersistenceServiceRegistration
     private static IServiceCollection AddRepos(this IServiceCollection services)
     {
         services.Scan(scan => scan.FromApplicationDependencies()
-            .AddClasses(c => c.Where(t => t.Name.EndsWith("Repo")))
+            .AddClasses(c => c.AssignableTo<IRepository>())
             .AsImplementedInterfaces()
             .WithScopedLifetime());
         return services;

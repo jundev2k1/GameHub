@@ -1,5 +1,5 @@
-﻿using game_x.application.Contract.Infrastructure.Security;
-using game_x.domain.Entities;
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.share.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -11,7 +11,7 @@ using System.Text;
 namespace game_x.infrastructure.Security;
 public class JwtTokenGenerator(
     UserManager<User> userManager,
-    IOptions<JwtSettings> jwtOptions) : IJwtTokenGenerator
+    IOptions<JwtSettings> jwtOptions) : IJwtTokenGenerator, IServices
 {
     public async Task<JwtTokenDto> GenerateToken(User user)
     {

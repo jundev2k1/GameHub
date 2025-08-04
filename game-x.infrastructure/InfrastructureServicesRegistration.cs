@@ -1,24 +1,18 @@
+using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Events;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Email;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Logger;
-using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Infrastructure.SignalR.Services;
-using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Polly;
+using game_x.infrastructure.Caching;
 using game_x.infrastructure.Email;
 using game_x.infrastructure.Eventing;
 using game_x.infrastructure.Extensions;
 using game_x.infrastructure.ExternalApi.Uxm;
-using game_x.infrastructure.Identity;
 using game_x.infrastructure.logger;
 using game_x.infrastructure.MediaStorage;
-using game_x.infrastructure.Polly;
-using game_x.infrastructure.Security;
-using game_x.infrastructure.Security.Asymmetric;
-using game_x.infrastructure.SignalR.Services;
 using game_x.share.Settings;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -30,15 +24,14 @@ using Newtonsoft.Json.Serialization;
 using Refit;
 using System.Net.Http.Headers;
 using System.Text;
-using game_x.application.Contract.Infrastructure.Services.Wallet;
-using game_x.infrastructure.Services.Wallet;
 
 namespace game_x.infrastructure;
 
 public static class InfrastructureServicesRegistration
 {
     public static IServiceCollection AddInfrastructureServices(
-        this IServiceCollection services, IConfiguration configuration)
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddSignalR();
         services.AutoBindSettings(configuration, typeof(BaseSettings).Assembly)
@@ -64,16 +57,16 @@ public static class InfrastructureServicesRegistration
         // Builders
         services.AddScoped(typeof(ICriteriaBuilder<>), typeof(CriteriaBuilder<>));
 
-        // Services
-        services.AddScoped<IUserAccessor, UserAccessor>();
-        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IAsymmetricCryptoService, AsymmetricCryptoService>();
-        services.AddScoped<IUxmService, UxmService>();
-        services.AddScoped<IUserBalanceService, UserBalanceService>();
+        // Add external services
         services.AddScoped<IEmailService, EngageLabEmailService>();
-        services.AddScoped<IHttpPolicyService, HttpPolicyService>();
+        services.AddScoped<IUxmService, UxmService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
+
+        // Add services DI
+        services.Scan(scan => scan.FromApplicationDependencies()
+            .AddClasses(c => c.AssignableTo<IServices>().Where(t => !t.IsAbstract))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
         return services;
     }
@@ -85,8 +78,10 @@ public static class InfrastructureServicesRegistration
 
     private static IServiceCollection AddHubServices(this IServiceCollection services)
     {
-        services.AddSingleton<IClientHubService, ClientHubService>();
-        services.AddSingleton<IAdminHubService, AdminHubService>();
+        services.Scan(scan => scan.FromApplicationDependencies()
+            .AddClasses(c => c.AssignableTo<IHubServices>().Where(t => !t.IsAbstract))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
         return services;
     }
@@ -94,7 +89,7 @@ public static class InfrastructureServicesRegistration
     private static IServiceCollection AddCacheServices(this IServiceCollection services)
     {
         services.Scan(scan => scan.FromApplicationDependencies()
-            .AddClasses(c => c.Where(t => t.Name.EndsWith("CacheService")))
+            .AddClasses(c => c.AssignableTo<CacheService>().Where(t => !t.IsAbstract))
             .AsImplementedInterfaces()
             .WithScopedLifetime());
         return services;

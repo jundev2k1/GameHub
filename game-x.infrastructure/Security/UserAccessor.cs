@@ -1,12 +1,13 @@
-﻿using game_x.application.Contract.Infrastructure.Security;
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace game_x.infrastructure.Security;
 
-public class UserAccessor(IHttpContextAccessor httpContextAccessor)
-    : IUserAccessor
+public sealed class UserAccessor(IHttpContextAccessor httpContextAccessor)
+    : IUserAccessor, IServices
 {
     public string GetUserId()
     {
