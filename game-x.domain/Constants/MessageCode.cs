@@ -181,6 +181,9 @@ public static class MessageCode
         /// <summary>The current KYC status does not allow this action.</summary>
         [EnumMetadata("KYC status is invalid for this action.")]
         KycInvalidStatus = 10116,
+        /// <summary>Password reset failed. Typically used when the reset token is invalid, expired, or the reset process could not be completed.</summary>
+        [EnumMetadata("Password reset failed.")]
+        UserResetPasswordFailed = 10117,
         #endregion
 
         #region ■ Message group: Success
@@ -193,6 +196,9 @@ public static class MessageCode
         /// <summary>The user's email has been verified successfully. Typically used after completing an email verify process.</summary>
         [EnumMetadata("Email verified successfully.")]
         EmailVerifySuccess = 10152,
+        /// <summary>Password reset completed successfully. Typically used after a user has reset their password via the forgot password flow.</summary>
+        [EnumMetadata("Password reset successfully.")]
+        UserResetPasswordSuccess = 10153,
         #endregion
     }
 }

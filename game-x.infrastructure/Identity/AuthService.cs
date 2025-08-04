@@ -58,7 +58,9 @@ public sealed class AuthService(
             var errorMessage = result.Errors
                 .Select(e => e.Description)
                 .JoinToString(", ");
-            throw new BadRequestException(MessageCode.User.UserChangePasswordFail, errorMessage);
+            throw new BadRequestException(
+                MessageCode.User.UserResetPasswordFailed, errorMessage,
+                errorMessage);
         }
     }
 
@@ -67,11 +69,12 @@ public sealed class AuthService(
         var result = await userManager.ChangePasswordAsync(user, oldPassword, newPassword);
         if (!result.Succeeded)
         {
-            var errors = result.Errors.Select(e => new ValidationFailure("Identity", e.Description));
+            var errorMessage = result.Errors
+                .Select(e => e.Description)
+                .JoinToString(", ");
             throw new BadRequestException(
-                "Failed to change password",
-                new ValidationResult(errors),
-                MessageCode.User.UserChangePasswordFail);
+                MessageCode.User.UserChangePasswordFail,
+                errorMessage);
         }
     }
 }

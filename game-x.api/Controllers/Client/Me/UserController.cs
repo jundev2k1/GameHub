@@ -1,3 +1,4 @@
+using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Commands.UserSelfUpdate;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using game_x.application.Features.Auth.Client.Commands.ChangePasswordUser;
@@ -18,6 +19,9 @@ public sealed class UserController : BaseApiController
     [HttpPatch("me/password")]
     public async Task<IActionResult> ChangePasswordAsync(ChangePasswordUserCommand command)
     {
+        if (command.OldPassword.Trim() == command.NewPassword.Trim())
+            throw new BadRequestException();
+
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent(MessageCode.User.UserChangePasswordSuccess);
     }

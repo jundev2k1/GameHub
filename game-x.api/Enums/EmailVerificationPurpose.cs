@@ -4,5 +4,5 @@ public enum EmailVerificationPurpose
 {
     AccountActivation = 0,
     PasswordReset = 1,
-    ChangePassword = 2,
+    PasswordChange = 2,
 }

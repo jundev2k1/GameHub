@@ -7,7 +7,6 @@ using game_x.share.Extensions;
 namespace game_x.application.Features.Auth.Client.Commands.ResetPasswordUser;
 
 public sealed class ResetPasswordUserHandler(
-    IUserAccessor userAccessor,
     IAuthService authService,
     IUserRepo userRepo,
     IUnitOfWork unitOfWork,
@@ -20,15 +19,10 @@ public sealed class ResetPasswordUserHandler(
             throw new BadRequestException(MessageCode.System.InvalidOrMissingToken);
 
         // Validate user information from access token
-        var userId = userAccessor.GetUserId();
-        var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
+        var targetUser = await userRepo.GetUserByEmailAsync(tokenEmail!, ct);
         var role = await authService.GetRolesAsync(targetUser);
         if (!role.IsUser)
             throw new ForbiddenException();
-
-        // Check if Email from token in cache is valid
-        if (targetUser.Email != tokenEmail)
-            throw new BadRequestException(MessageCode.System.InvalidOrMissingToken);
 
         // Handle change password
         await unitOfWork.WithTransactionAsync(async () =>
@@ -42,7 +36,7 @@ public sealed class ResetPasswordUserHandler(
 
             // Case: Confirm email if user not confirmed
             await userRepo.UpdateAsync(
-                userId,
+                targetUser.Id,
                 user => user.ConfirmEmail(),
                 ct);
         }, ct);

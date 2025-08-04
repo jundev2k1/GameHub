@@ -3,6 +3,7 @@ using game_x.api.Enums;
 using game_x.application.Exceptions;
 using game_x.application.Features.Auth.Client.Commands.RegisterUser;
 using game_x.application.Features.Auth.Client.Commands.ResendCodeUser;
+using game_x.application.Features.Auth.Client.Commands.ResetPasswordUser;
 using game_x.application.Features.Auth.Client.Commands.UserLogin;
 using game_x.application.Features.Auth.Client.Commands.VerifyEmailForChangePassword;
 using game_x.application.Features.Auth.Client.Commands.VerifyEmailForRegistration;
@@ -31,6 +32,14 @@ public sealed class AuthController : BaseApiController
     }
 
     [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPasswordAsync(ResetPasswordUserCommand command)
+    {
+        var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result, MessageCode.User.UserResetPasswordSuccess);
+    }
+
+    [AllowAnonymous]
     [HttpPost("verify-email")]
     public async Task<IActionResult> VerifyEmailAsync(VerifyEmailRequest request)
     {
@@ -46,7 +55,7 @@ public sealed class AuthController : BaseApiController
             return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
         }
 
-        if (request.Purpose == EmailVerificationPurpose.ChangePassword)
+        if (request.Purpose == EmailVerificationPurpose.PasswordChange)
         {
             if (request.Email != null)
                 throw new BadRequestException("Change password does not need to be passing 'Email' parameter.");
@@ -66,7 +75,7 @@ public sealed class AuthController : BaseApiController
         {
             EmailVerificationPurpose.AccountActivation => VerificationPurposes.EmailVerification,
             EmailVerificationPurpose.PasswordReset => VerificationPurposes.ForgotPassword,
-            EmailVerificationPurpose.ChangePassword => VerificationPurposes.ChangePassword,
+            EmailVerificationPurpose.PasswordChange => VerificationPurposes.ChangePassword,
             _ => throw new BadRequestException(),
         };
         var command = request.Adapt<ResendCodeUserCommand>() with { Purpose = purpose };
