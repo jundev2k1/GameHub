@@ -1,5 +1,4 @@
 ﻿using game_x.api.Middleware;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
