@@ -1,11 +1,12 @@
-﻿using game_x.application.Contract.Infrastructure.Logger;
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Polly;
 using Polly;
 using Polly.Extensions.Http;
 
 namespace game_x.infrastructure.Polly;
 
-public class HttpPolicyService(IAppLogger<HttpPolicyService> logger) : IHttpPolicyService
+public class HttpPolicyService(IAppLogger<HttpPolicyService> logger) : IHttpPolicyService, IServices
 {
     public IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
     {

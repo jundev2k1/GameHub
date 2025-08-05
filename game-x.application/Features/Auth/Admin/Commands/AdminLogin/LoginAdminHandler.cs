@@ -3,11 +3,11 @@ using game_x.application.Contract.Persistence.Identity;
 
 namespace game_x.application.Features.Auth.Admin.Commands.AdminLogin;
 
-public sealed class AdminLoginHandler(
+public sealed class LoginAdminHandler(
     IJwtTokenGenerator jwtTokenGenerator,
-    IAuthService authService) : ICommandHandler<AdminLoginCommand, AdminLoginResult>
+    IAuthService authService) : ICommandHandler<LoginAdminCommand, AdminLoginResult>
 {
-    public async Task<AdminLoginResult> Handle(AdminLoginCommand request, CancellationToken ct)
+    public async Task<AdminLoginResult> Handle(LoginAdminCommand request, CancellationToken ct)
     {
         var loginUser = await authService.TryLoginAsync(request.UserName, request.Password);
         var (isValid, errorCode) = loginUser.CheckValidUser();

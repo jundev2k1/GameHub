@@ -1,9 +1,10 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 
 namespace game_x.persistence.Repo;
 
-public sealed class MediaFileRepo(GameXContext context) : IMediaFileRepo
+public sealed class MediaFileRepo(GameXContext context) : IMediaFileRepo, IRepository
 {
     public async Task<MediaFile> FindAsync(int id, CancellationToken ct = default)
     {

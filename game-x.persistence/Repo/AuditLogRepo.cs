@@ -1,10 +1,11 @@
-﻿using game_x.application.Common.Abstractions.Pagination;
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 
 namespace game_x.persistence.Repo;
 
-public sealed class AuditLogRepo(GameXContext context) : IAuditLogRepo
+public sealed class AuditLogRepo(GameXContext context) : IAuditLogRepo, IRepository
 {
     public async Task<PaginationResult<AuditLog>> GetByCriteriaAsync(Func<IQueryable<AuditLog>, IQueryable<AuditLog>>? queryBuilder = null, int page = 1, int pageSize = 20, CancellationToken ct = default)
     {

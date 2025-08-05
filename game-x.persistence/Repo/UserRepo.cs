@@ -1,3 +1,4 @@
+using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.domain.Constants;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace game_x.persistence.Repo;
 
-public sealed class UserRepo(GameXContext context, UserManager<User> userManager) : IUserRepo
+public sealed class UserRepo(GameXContext context, UserManager<User> userManager) : IUserRepo, IRepository
 {
     public async Task<User[]> GetUserByRole(string roleName, CancellationToken ct = default)
     {
@@ -87,6 +88,7 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
 
         updateAction?.Invoke(targetUser);
     }
+
     public async Task UpdateByEmailAsync(string email, Action<User> updateAction, CancellationToken ct = default)
     {
         var targetUser = await userManager.FindByEmailAsync(email)

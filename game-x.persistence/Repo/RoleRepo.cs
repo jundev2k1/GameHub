@@ -1,3 +1,4 @@
+using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.UserRole.Dtos;
 using game_x.domain.Constants;
@@ -5,7 +6,7 @@ using Mapster;
 
 namespace game_x.persistence.Repo;
 
-public sealed class RoleRepo(GameXContext context) : IRoleRepo
+public sealed class RoleRepo(GameXContext context) : IRoleRepo, IRepository
 {
     public async Task<List<RoleDto>> GetAllAsync()
     {

@@ -1,4 +1,5 @@
-﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace game_x.infrastructure.SignalR.Services;
 
 public sealed class AdminHubService(IHubContext<AdminHub, IAdminHub> hubContext)
-    : IAdminHubService
+    : IAdminHubService, IHubServices
 {
     public async Task SendNotificationToAdminAsync(string adminId, NotificationDto message)
     {
