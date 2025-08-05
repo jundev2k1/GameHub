@@ -11,6 +11,8 @@ public sealed class EntityName
     public static EntityName UserKyc => Of(nameof(Entities.UserKyc));
     public static EntityName ChainTransaction => Of(nameof(Entities.ChainTransaction));
 
+    public static EntityName UserBalance => Of(nameof(Entities.UserBalance));
+
     public static EntityName Of(string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace("EntityName cannot be null or empty.", nameof(value));
@@ -25,7 +27,8 @@ public sealed class EntityName
         nameof(Entities.User),
         nameof(Entities.MediaFile),
         nameof(Entities.UserKyc),
-        nameof(Entities.ChainTransaction)];
+        nameof(Entities.ChainTransaction),
+        nameof(Entities.UserBalance)];
 
     public override bool Equals(object? obj) =>
         (obj != null) && (obj is EntityName type) && (Value == type.Value);

@@ -18,7 +18,8 @@ public sealed class CreateDepositChainTransactionHandler(
     IAsymmetricKeyRepo asymmetricKeyRepo,
     IAsymmetricCryptoService asymmetricCryptoService,
     IUserAccessor userAccessor,
-    IConfiguration configuration
+    IConfiguration configuration,
+    IUserBalanceRepo userBalanceRepo
     //IApplicationEventDispatcher eventDispatcher
     ) : ICommandHandler<TronUsdtDepositCommand, CreateChainTransactionResponseDto>
 {
@@ -28,17 +29,28 @@ public sealed class CreateDepositChainTransactionHandler(
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
-
+            var userId = userAccessor.GetUserId();
 
 
             var localChainTransaction = await CreateLocalChainTransaction(request, ct);
-
+            await unitOfWork.SaveChangesAsync(ct);
             // 1. Gọi API UXM
             var uxmRequest = await CreateUxmRequest(request, localChainTransaction.PublicId, ct);
             var apiResponse = await uxmService.CreateProxyChainTransactionDepositAsync(uxmRequest);
             // if (!apiResponse.IsSuccessStatusCode || apiResponse.Content == null)
             //     throw new BadRequestException("UXM API failed.");
             var result = apiResponse;
+
+            // cập nhật status khi gọi dc uxm
+            await chainTransactionRepo.UpdateAsync(
+                localChainTransaction.PublicId,
+                tx =>
+                {
+                    tx.Status = ChainTransactionStatus.Approved;
+                    tx.UpdatedAt = DateTime.UtcNow;
+                },
+                ct
+            );
 
             // 2. Xác minh chữ ký từ UXM
             var uxmPublicKey = await asymmetricKeyRepo
@@ -49,6 +61,10 @@ public sealed class CreateDepositChainTransactionHandler(
 
             if (!isValid)
                 throw new BadRequestException("Invalid signature from UXM.");
+
+
+
+            await UpdateUserBalanceAsync(userId, (int)CryptoType.Trc20Usdt, request.amount, ct);
 
             // 6. Commit local Order to Galaxy Pay DB
             await unitOfWork.CommitAsync(ct);
@@ -91,7 +107,7 @@ public sealed class CreateDepositChainTransactionHandler(
     }
     private async Task<SecureRequest<CreateChainTransactionDepositRequestData>> CreateUxmRequest(
         TronUsdtDepositCommand request,
- Guid publicId,
+        Guid publicId,
         CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
@@ -108,7 +124,7 @@ public sealed class CreateDepositChainTransactionHandler(
         var requestData = new CreateChainTransactionDepositRequestData(
             merchantNumber,
             request.amount,
-          publicId.ToString(),
+            publicId.ToString(),
             userId,
             request.remark
         );
@@ -123,5 +139,18 @@ public sealed class CreateDepositChainTransactionHandler(
             Signature = signature
         };
     }
+
+    private async Task UpdateUserBalanceAsync(string userId, int cryptoTokenId, decimal amount, CancellationToken ct)
+    {
+        var balance = await userBalanceRepo
+            .GetByUserIdAndTokenIdAsync(userId, cryptoTokenId, ct);
+
+        if (balance == null)
+            throw new NotFoundException("UserBalance not found.");
+
+        balance.Amount += amount;
+        balance.UpdatedAt = DateTime.UtcNow;
+    }
+
 
 }
