@@ -1,3 +1,4 @@
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Context;
@@ -5,12 +6,13 @@ using game_x.share.Context;
 namespace game_x.application.Features.ChainTransactions.Callback;
 
 public sealed class UpdateChainTransactionCallbackHandler(
-    IAsymmetricKeyRepo asymmetricKeyRepo,
+    //IAsymmetricKeyRepo asymmetricKeyRepo,
     IAsymmetricCryptoService asymmetricCryptoService,
     IUnitOfWork unitOfWork,
     // IOrderRepo orderRepo,
     IChainTransactionRepo chainTransactionRepo,
-    IApplicationEventDispatcher eventDispatcher)
+    IApplicationEventDispatcher eventDispatcher,
+     IAsymmetricKeyCacheService asymmetricKeyCacheService)
     : ICommandHandler<UpdateChainTransactionCallbackCommand, UpdateChainTransactionCallbackResult>
 {
     public async Task<UpdateChainTransactionCallbackResult> Handle(UpdateChainTransactionCallbackCommand request,
@@ -18,11 +20,14 @@ public sealed class UpdateChainTransactionCallbackHandler(
     {
         // 1. Verify UXM signature
         var (requestData, signature) = request;
-        var uxmPublicKey = await asymmetricKeyRepo
-            .GetByCompositeKeyAsync(AsymmetricKeyNames.Uxm, AsymmetricKeyType.Public, AsymmetricType.ECDSA, ct);
+        // var uxmPublicKey = await asymmetricKeyRepo
+        //     .GetByCompositeKeyAsync(AsymmetricKeyNames.Uxm, AsymmetricKeyType.Public, AsymmetricType.ECDSA, ct);
+
+        var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
+
         if (uxmPublicKey is null) throw new NotFoundException("UXM Public Key is not found.");
 
-        var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey.KeyValue, requestData, signature);
+        var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, requestData, signature);
         if (!isValid) throw new BadRequestException("Invalid signature.");
 
         // 2. Update Order Status returns from callback

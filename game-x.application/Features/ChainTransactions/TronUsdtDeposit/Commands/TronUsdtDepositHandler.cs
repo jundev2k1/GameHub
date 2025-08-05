@@ -1,4 +1,5 @@
-﻿using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.ChainTransactions.TronUsdtDeposit.Dtos;
@@ -15,11 +16,12 @@ public sealed class CreateDepositChainTransactionHandler(
      // IUserRepo userRepo,
      // IAuthService authService,
      IUnitOfWork unitOfWork,
-    IAsymmetricKeyRepo asymmetricKeyRepo,
+    //IAsymmetricKeyRepo asymmetricKeyRepo,
     IAsymmetricCryptoService asymmetricCryptoService,
     IUserAccessor userAccessor,
     IConfiguration configuration,
-    IUserBalanceRepo userBalanceRepo
+    IUserBalanceRepo userBalanceRepo,
+    IAsymmetricKeyCacheService asymmetricKeyCacheService
     //IApplicationEventDispatcher eventDispatcher
     ) : ICommandHandler<TronUsdtDepositCommand, CreateChainTransactionResponseDto>
 {
@@ -52,12 +54,14 @@ public sealed class CreateDepositChainTransactionHandler(
                 ct
             );
 
+            var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
             // 2. Xác minh chữ ký từ UXM
-            var uxmPublicKey = await asymmetricKeyRepo
-                .GetByCompositeKeyAsync(AsymmetricKeyNames.Uxm, AsymmetricKeyType.Public, AsymmetricType.ECDSA, ct);
+            // var uxmPublicKey = await asymmetricKeyRepo
+            //     .GetByCompositeKeyAsync(AsymmetricKeyNames.Uxm, AsymmetricKeyType.Public, AsymmetricType.ECDSA, ct);
 
             var isValid = asymmetricCryptoService
-                .VerifySignature(uxmPublicKey.KeyValue, result.Data, result.Signature);
+                // .VerifySignature(uxmPublicKey.KeyValue, result.Data, result.Signature);
+                .VerifySignature(uxmPublicKey, result.Data, result.Signature);
 
             if (!isValid)
                 throw new BadRequestException("Invalid signature from UXM.");
@@ -112,8 +116,12 @@ public sealed class CreateDepositChainTransactionHandler(
     {
         var userId = userAccessor.GetUserId();
         // Line ~50: Get Galaxy Pay private key
-        var privateKeyPem = await asymmetricKeyRepo
-            .GetByCompositeKeyAsync(AsymmetricKeyNames.GameX, AsymmetricKeyType.Private, AsymmetricType.ECDSA, ct);
+
+        var privateKeyPem = asymmetricKeyCacheService.GameXPrivateKey;
+
+
+        // var privateKeyPem = await asymmetricKeyRepo
+        //     .GetByCompositeKeyAsync(AsymmetricKeyNames.GameX, AsymmetricKeyType.Private, AsymmetricType.ECDSA, ct);
 
 
         // Get merchant number from configuration
@@ -130,7 +138,8 @@ public sealed class CreateDepositChainTransactionHandler(
         );
 
         // Line ~64: Generate signature
-        var signature = asymmetricCryptoService.Sign(privateKeyPem.KeyValue, requestData);
+        //  var signature = asymmetricCryptoService.Sign(privateKeyPem.KeyValue, requestData);
+        var signature = asymmetricCryptoService.Sign(privateKeyPem, requestData);
 
         // Line ~66: Return secure request
         return new SecureRequest<CreateChainTransactionDepositRequestData>
