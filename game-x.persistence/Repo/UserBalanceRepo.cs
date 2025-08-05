@@ -6,7 +6,7 @@ using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
-public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo, IRepository
+public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IRepository
 {
     public IQueryable<UserBalance> Query()
     {
@@ -34,9 +34,9 @@ public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo, IRe
 
         var userFrozenAmount = userList.SelectMany(u => u.UserBalances).Sum(b => b.FrozenAmount);
 
-        return (userAmount,  userFrozenAmount);
+        return (userAmount, userFrozenAmount);
     }
-    
+
     public async Task BulkInsertAsync(IEnumerable<UserBalance>? userBalances)
     {
         var list = userBalances?.ToList();
@@ -52,12 +52,12 @@ public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo, IRe
 
         await context.BulkInsertAsync(list, config);
     }
-    
+
     public async Task CreateAsync(UserBalance userBalance)
     {
         await context.AddAsync(userBalance);
     }
-    
+
     public async Task PatchUpdateAsync(Guid publicId, Action<UserBalance> updateAction, CancellationToken ct = default)
     {
         var userBalance = await context.UserBalances
@@ -66,7 +66,7 @@ public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo, IRe
 
         updateAction.Invoke(userBalance);
     }
-    
+
     public async Task PutUpdateAsync(UserBalance ub, CancellationToken ct = default)
     {
         context.Entry(ub).State = EntityState.Modified;

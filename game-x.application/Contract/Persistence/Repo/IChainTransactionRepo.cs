@@ -8,6 +8,7 @@ public interface IChainTransactionRepo
     Task<ChainTransaction?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct);
     Task<(decimal txLogUserFrozenAmount, decimal chainTxLogpendingFee)> GetTxLogSummaryAsync(CancellationToken ct);
     Task AddAsync(ChainTransaction chainTransaction, CancellationToken ct = default);
+    Task UpdateAsync(Guid chainTransactionId, Action<ChainTransaction> updateAction, CancellationToken ct = default);
     Task PatchUpdateAsync(Guid publicId, Action<ChainTransaction> updateAction, CancellationToken ct = default);
     Task PutUpdateAsync(ChainTransaction chain, CancellationToken ct = default);
 }
