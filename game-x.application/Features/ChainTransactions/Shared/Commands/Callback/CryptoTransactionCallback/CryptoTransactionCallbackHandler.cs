@@ -3,31 +3,25 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Context;
 
-namespace game_x.application.Features.ChainTransactions.Callback;
+namespace game_x.application.Features.ChainTransactions.Shared.Commands.Callback.CryptoTransactionCallback;
 
-public sealed class UpdateChainTransactionCallbackHandler(
-    //IAsymmetricKeyRepo asymmetricKeyRepo,
+public sealed class CryptoTransactionCallbackHandler(
     IAsymmetricCryptoService asymmetricCryptoService,
     IUnitOfWork unitOfWork,
-    // IOrderRepo orderRepo,
     IChainTransactionRepo chainTransactionRepo,
     IApplicationEventDispatcher eventDispatcher,
      IAsymmetricKeyCacheService asymmetricKeyCacheService)
-    : ICommandHandler<UpdateChainTransactionCallbackCommand, UpdateChainTransactionCallbackResult>
+    : ICommandHandler<CryptoTransactionCallbackCommand, CryptoTransactionCallbackResult>
 {
-    public async Task<UpdateChainTransactionCallbackResult> Handle(UpdateChainTransactionCallbackCommand request,
+    public async Task<CryptoTransactionCallbackResult> Handle(CryptoTransactionCallbackCommand request,
         CancellationToken ct = default)
     {
-        // 1. Verify UXM signature
         var (requestData, signature) = request;
-        // var uxmPublicKey = await asymmetricKeyRepo
-        //     .GetByCompositeKeyAsync(AsymmetricKeyNames.Uxm, AsymmetricKeyType.Public, AsymmetricType.ECDSA, ct);
-
+        
+        // 1. Verify UXM signature
         var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
-
-        if (uxmPublicKey is null) throw new NotFoundException("UXM Public Key is not found.");
-
-        var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, requestData, signature);
+        var isValid =
+            asymmetricCryptoService.VerifySignature(uxmPublicKey, requestData, signature);
         if (!isValid) throw new BadRequestException("Invalid signature.");
 
         // 2. Update Order Status returns from callback
@@ -60,7 +54,7 @@ public sealed class UpdateChainTransactionCallbackHandler(
         // 3. Publish Order Completed event
         // await eventDispatcher.Publish(new OnChainTransactionCompletedEvent(updateOrder!), ct);
 
-        return new UpdateChainTransactionCallbackResult(
+        return new CryptoTransactionCallbackResult(
             $"Order ({requestData.OrderUid}) updated successfully.");
     }
 }

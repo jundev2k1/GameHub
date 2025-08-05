@@ -1,8 +1,5 @@
 ﻿using game_x.share.ExternalApi.Uxm.Dtos;
-using game_x.api.Controllers;
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
-using game_x.application.Features.ChainTransactions.Callback;
+using game_x.application.Features.ChainTransactions.Shared.Commands.Callback.CryptoTransactionCallback;
 
 namespace game_x.api.Controllers.Callback;
 
@@ -12,7 +9,7 @@ public class ChainTransactionCallbackController : BaseApiController
     [HttpPost("crypto")]
     public async Task<IActionResult> CryptoCallback(SecureRequest<CryptoCallbackRequest> request)
     {
-        var command = new UpdateChainTransactionCallbackCommand(
+        var command = new CryptoTransactionCallbackCommand(
             Data: request.Data,
             Signature: request.Signature);
         var result = await Mediator.Send(command);
