@@ -1,9 +1,11 @@
+using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Infrastructure.Services.UserUsdtLedger;
 using game_x.application.Contract.Persistence.Repo;
 
 namespace game_x.infrastructure.Services.UserUsdtLedger;
 
-public sealed class UserUsdtLedgerService(IUserUsdtLedgerRepo userUsdtLedgerRepo ) : IUserUsdtLedgerService
+public sealed class UserUsdtLedgerService
+    (IUserUsdtLedgerRepo userUsdtLedgerRepo ) : IUserUsdtLedgerService, IServices
 {
     public async Task CreateForChainTransactionAsync(ChainTransaction chainTransaction)
     {
