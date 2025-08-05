@@ -3,10 +3,10 @@ using game_x.application.Features.ChainTransactions.Shared.Commands.Callback.Cry
 
 namespace game_x.api.Controllers.Callback;
 
-[Route("callback")]
+[Route("api/callback")]
 public class ChainTransactionCallbackController : BaseApiController
 {
-    [HttpPost("crypto")]
+    [HttpPost("crypto-transaction")]
     public async Task<IActionResult> CryptoCallback(SecureRequest<CryptoCallbackRequest> request)
     {
         var command = new CryptoTransactionCallbackCommand(
