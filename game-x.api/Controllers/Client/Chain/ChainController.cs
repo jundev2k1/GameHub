@@ -1,5 +1,5 @@
-using game_x.application.Features.ChainTransactionManagement.Client.Commands.TronUsdtDeposit;
 using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWithdrawal;
+using game_x.application.Features.ChainTransactions.TronUsdtDeposit.Commands;
 
 namespace game_x.api.Controllers.Client.Chain;
 

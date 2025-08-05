@@ -6,7 +6,7 @@ using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
-public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo
+public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IRepository
 {
     public IQueryable<UserBalance> Query()
     {
@@ -37,7 +37,7 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo
         return (userAmount, userFrozenAmount);
     }
 
-    public async Task BulkInsertAsync(IEnumerable<UserBalance> userBalances)
+    public async Task BulkInsertAsync(IEnumerable<UserBalance>? userBalances)
     {
         var list = userBalances?.ToList();
         if (list is null || list.Count == 0)
@@ -53,6 +53,11 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo
         await context.BulkInsertAsync(list, config);
     }
 
+    public async Task CreateAsync(UserBalance userBalance)
+    {
+        await context.AddAsync(userBalance);
+    }
+
     public async Task PatchUpdateAsync(Guid publicId, Action<UserBalance> updateAction, CancellationToken ct = default)
     {
         var userBalance = await context.UserBalances
@@ -62,24 +67,9 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo
         updateAction.Invoke(userBalance);
     }
 
-    public async Task PutUpdateAsync(Guid publicId, UserBalance userBalance, CancellationToken ct = default)
+    public async Task PutUpdateAsync(UserBalance ub, CancellationToken ct = default)
     {
         context.Entry(ub).State = EntityState.Modified;
         await context.SaveChangesAsync(ct);
     }
-
-    public async Task IncreaseBalanceAsync(string userId, int cryptoTokenId, decimal amount, CancellationToken ct = default)
-    {
-        var balance = await context.UserBalances
-            .FirstOrDefaultAsync(x => x.UserId == userId && x.CryptoTokenId == cryptoTokenId, ct);
-
-        if (balance is null)
-        {
-            throw new NotFoundException($"UserBalance not found for user {userId} with token {cryptoTokenId}");
-        }
-
-        balance.Amount += amount;
-        await context.SaveChangesAsync(ct);
-    }
-
 }

@@ -1,5 +1,5 @@
 
-namespace game_x.application.Features.ChainTransactionManagement.Client.Commands.TronUsdtDeposit;
+namespace game_x.application.Features.ChainTransactions.TronUsdtDeposit.Commands;
 
 public sealed class TronUsdtDepositValidator : AbstractValidator<TronUsdtDepositCommand>
 {

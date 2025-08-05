@@ -1,7 +1,8 @@
-﻿using game_x.application.Features.ChainTransactionManagement.Shared.Commands.Callback.Crypto;
-using game_x.share.ExternalApi.Uxm.Dtos;
+﻿using game_x.share.ExternalApi.Uxm.Dtos;
 using game_x.api.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using game_x.application.Features.ChainTransactions.Callback;
 
 namespace game_x.api.Controllers.Callback;
 

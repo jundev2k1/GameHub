@@ -5,7 +5,7 @@ using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
-public sealed class ChainTransactionRepo(GameXContext context) : IChainTransactionRepo
+public sealed class ChainTransactionRepo(GameXContext context) : IChainTransactionRepo, IRepository
 {
     public IQueryable<ChainTransaction> Query()
     {
@@ -58,7 +58,7 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
         await context.ChainTransactions.AddAsync(chainTransaction, ct);
     }
 
-    public async Task UpdateAsync(Guid chainTransactionId, Action<ChainTransaction> updateAction, CancellationToken ct = default)
+    public async Task PatchUpdateAsync(Guid publicId, Action<ChainTransaction> updateAction, CancellationToken ct = default)
     {
         var chainTransaction = await context.ChainTransactions
             .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
@@ -71,5 +71,13 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
     {
         context.Entry(chain).State = EntityState.Modified;
         await context.SaveChangesAsync(ct);
+    }
+    public async Task UpdateAsync(Guid chainTransactionId, Action<ChainTransaction> updateAction, CancellationToken ct = default)
+    {
+        var chainTransaction = await context.ChainTransactions
+            .FirstOrDefaultAsync(c => c.PublicId == chainTransactionId, ct)
+            ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionNotFound);
+
+        updateAction.Invoke(chainTransaction);
     }
 }

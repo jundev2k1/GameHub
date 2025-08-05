@@ -1,6 +1,7 @@
-﻿using game_x.share.ExternalApi.Uxm.Dtos;
 
-namespace game_x.application.Features.ChainTransactionManagement.Shared.Commands.Callback.Crypto;
+using game_x.share.ExternalApi.Uxm.Dtos;
+
+namespace game_x.application.Features.ChainTransactions.Callback;
 
 public record UpdateChainTransactionCallbackCommand(CryptoCallbackRequest Data, string Signature) : ICommand<UpdateChainTransactionCallbackResult>;
 

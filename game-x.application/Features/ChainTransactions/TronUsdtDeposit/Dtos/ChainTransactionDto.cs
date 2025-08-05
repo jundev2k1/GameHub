@@ -1,4 +1,4 @@
-﻿namespace game_x.application.Features.ChainTransactionManagement.Dtos;
+namespace game_x.application.Features.ChainTransactions.TronUsdtDeposit.Dtos;
 
 public class ChainTransactionDto
 {
@@ -20,3 +20,4 @@ public class ChainTransactionDto
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
+

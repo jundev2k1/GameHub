@@ -1,4 +1,4 @@
-﻿namespace game_x.application.Features.ChainTransactionManagement.Dtos;
+namespace game_x.application.Features.ChainTransactions.TronUsdtDeposit.Dtos;
 
 public sealed class CreateChainTransactionResponseDto
 {

@@ -1,13 +1,13 @@
 ﻿using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.ChainTransactionManagement.Dtos;
+using game_x.application.Features.ChainTransactions.TronUsdtDeposit.Dtos;
 using game_x.share.ExternalApi.Uxm.Dtos;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using System.Transactions;
 
-namespace game_x.application.Features.ChainTransactionManagement.Client.Commands.TronUsdtDeposit;
+namespace game_x.application.Features.ChainTransactions.TronUsdtDeposit.Commands;
 
 public sealed class CreateDepositChainTransactionHandler(
     IUxmService uxmService,

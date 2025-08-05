@@ -1,8 +1,8 @@
-﻿using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Context;
 
-namespace game_x.application.Features.ChainTransactionManagement.Shared.Commands.Callback.Crypto;
+namespace game_x.application.Features.ChainTransactions.Callback;
 
 public sealed class UpdateChainTransactionCallbackHandler(
     IAsymmetricKeyRepo asymmetricKeyRepo,
