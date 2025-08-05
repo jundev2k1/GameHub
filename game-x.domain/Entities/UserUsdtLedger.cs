@@ -15,6 +15,8 @@ public sealed class UserUsdtLedger: BaseEntity<int>
     public string SourceId { get; set; } = string.Empty; // Raw Record ID
     public decimal ChangeAmount { get; set; }    // Current Transaction Amount Change
 
+    public decimal BalanceAfter { get; set; }    // balance after change
+    
     // Associated raw data
     public int? ChainTransactionId { get; set; }
     public ChainTransaction? ChainTransaction { get; set; }

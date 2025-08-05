@@ -52,6 +52,11 @@ public sealed class UserBalanceRepo(GameXContext context): IUserBalanceRepo
         await context.BulkInsertAsync(list, config);
     }
     
+    public async Task CreateAsync(UserBalance userBalance)
+    {
+        await context.AddAsync(userBalance);
+    }
+    
     public async Task PatchUpdateAsync(Guid publicId, Action<UserBalance> updateAction, CancellationToken ct = default)
     {
         var userBalance = await context.UserBalances

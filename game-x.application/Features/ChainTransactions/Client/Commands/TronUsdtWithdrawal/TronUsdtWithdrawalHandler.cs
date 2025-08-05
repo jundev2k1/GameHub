@@ -126,7 +126,7 @@ public sealed class TronUsdtWithdrawalHandler(
         }
         catch (Exception ex)
         {
-            await chainTransactionRepo.UpdateAsync(chainTransaction.PublicId, x =>
+            await chainTransactionRepo.PatchUpdateAsync(chainTransaction.PublicId, x =>
             {
                 x.Status = ChainTransactionStatus.Failed;
                 x.UpdateMeta(m => m.ErrorMessage = ex.Message);
@@ -163,7 +163,7 @@ public sealed class TronUsdtWithdrawalHandler(
                 await unitOfWork.RollbackAsync(ct);
 
                 logger.LogError(
-                    "[TronWithdrawal] ❌ 第 {Attempt} Balance compensation failed，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}, Err={ex}",
+                    "[TronWithdrawal] ❌ No. {Attempt} Balance compensation failed，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}, Err={ex}",
                     attempt, 
                     chainTransaction?.UserId ?? string.Empty, 
                     chainTransaction?.CryptoTokenId ?? 0, 

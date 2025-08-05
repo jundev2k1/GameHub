@@ -28,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="..\game-x.domain\game-x.domain.csproj" />
     <ProjectReference Include="..\game-x.share\game-x.share.csproj" />
+    <ProjectReference Include="..\UUPP.Bus\UUPP.Bus.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Features\Accounts\Admin\Commands\" />
@@ -39,5 +40,6 @@
     <Folder Include="Features\Auth\Root\Commands\" />
     <Folder Include="Features\Auth\Shared\Commands\" />
     <Folder Include="Features\ChainTransactions\Client\Queries\" />
+    <Folder Include="Services\UserUsdtLedger\" />
   </ItemGroup>
 </Project>

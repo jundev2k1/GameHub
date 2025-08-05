@@ -11,6 +11,13 @@ public sealed class ChainTransactionRepo(GameXContext context): IChainTransactio
         return context.ChainTransactions;
     }
 
+    public async Task<ChainTransaction?> GetByIdAsync(Guid publicId, CancellationToken ct = default)
+    {
+        return await context.ChainTransactions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.PublicId == publicId, ct);
+    }
+    
     public async Task<bool> ExistsByOrderNoAsync(string otcOrderNo, CancellationToken ct)
     {
         return await context.ChainTransactions.AnyAsync(cl => cl.OrderNumber == otcOrderNo, ct);
@@ -50,12 +57,18 @@ public sealed class ChainTransactionRepo(GameXContext context): IChainTransactio
         await context.ChainTransactions.AddAsync(chainTransaction, ct);
     }
     
-    public async Task UpdateAsync(Guid chainTransactionId, Action<ChainTransaction> updateAction, CancellationToken ct = default)
+    public async Task PatchUpdateAsync(Guid publicId, Action<ChainTransaction> updateAction, CancellationToken ct = default)
     {
         var chainTransaction = await context.ChainTransactions
-            .FirstOrDefaultAsync(c => c.PublicId == chainTransactionId, ct)
+            .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
             ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionNotFound);
 
         updateAction.Invoke(chainTransaction);
+    }
+    
+    public async Task PutUpdateAsync(ChainTransaction chain, CancellationToken ct = default)
+    {
+        context.Entry(chain).State = EntityState.Modified;
+        await context.SaveChangesAsync(ct);
     }
 }

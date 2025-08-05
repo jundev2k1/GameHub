@@ -16,4 +16,9 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync();
     }
+    
+    public async Task AddAsync(UserUsdtLedger userUsdtLedger, CancellationToken ct = default)
+    {
+        await context.UserUsdtLedgers.AddAsync(userUsdtLedger, ct);
+    }
 }
