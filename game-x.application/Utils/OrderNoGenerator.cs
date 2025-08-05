@@ -32,6 +32,6 @@ public static class OrderNoGenerator
             if (!exists) return candidate;
         }
 
-        throw new BadRequestException(MessageCode.Transaction.TradeGenerationFailed, "OTC訂單號建立失敗");
+        throw new BadRequestException(MessageCode.Transaction.TradeGenerationFailed, "Failed to create OTC order number");
     }
 }

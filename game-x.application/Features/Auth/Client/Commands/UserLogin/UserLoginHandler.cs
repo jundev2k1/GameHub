@@ -23,6 +23,7 @@ public sealed class UserLoginHandler(
         return new UserLoginResult(
             Email: loginUser.Email!,
             UserId: loginUser.Id,
+            Nickname: loginUser.Nickname,
             Token: tokenInfo.Token,
             ExpiresAt: tokenInfo.ExpiresAt,
             Roles: roles.Items);

@@ -1,6 +1,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
+using game_x.application.Features.UserWallet.Dtos;
 using game_x.share.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,7 @@ public interface IClientHub
     /// </summary>
     /// <param name="orderInfo">The order information that was updated.</param>
     Task OrderUpdated(ClientOrderStatusDto orderInfo);
+    Task BalanceUpdated(List<WalletsBaseDto> dto);
 }
 
 [Authorize(Roles = AppRoles.User)]

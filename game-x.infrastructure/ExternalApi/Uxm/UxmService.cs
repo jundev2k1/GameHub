@@ -12,23 +12,21 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
     {
         try
         {
-            logger.LogInformation(
-                $"Create order request: MerchantOrderId={data.Data.OrderNumber}, Amount={data.Data.Amount}");
-
+            logger.LogInformation("Send withdrawal request to UXM: to = {To}, amount = {Amount}, order = {OtcOrderNumber}", data.Data.To, data.Data.Amount, data.Data.OtcOrderNumber);
+     
             var response = await uxmApi.CreateProxyWithdrawalOrderAsync(data);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
                 logger.LogError($"Response failed: Status={response.StatusCode}");
                 throw new ExternalServiceException();
             }
-
-            logger.LogInformation($"Order created successfully: OrderUid={response.Content.Data.OrderUid}");
+            logger.LogInformation("Withdrawal request successful，order: {order}", data.Data.OtcOrderNumber);
             return response.Content;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message);
-            throw;
+            logger.LogError("Failed to send withdrawal request to UXM: {Ex}", ex);
+            throw new BadRequestException(MessageCode.System.DependencyFailure);
         }
     }
 

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace game_x.domain.Entities;
 
-public sealed class UserBalance: BaseEntity<int>, IAuditable
+public sealed class UserBalance: BaseEntity<int>
 {
     public Guid PublicId { get; set; }
     public string UserId { get; set; } = String.Empty;

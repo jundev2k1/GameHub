@@ -1,6 +1,7 @@
 ﻿using game_x.api.Middleware;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace game_x.api;
 
@@ -31,7 +32,15 @@ public static class ApiServicesRegistration
         services.AddEndpointsApiExplorer();
         services.AddDataProtection();
         services.AddSwaggerServices();
-        services.AddControllers();
+
+        // Add controllers, configure to automatically convert Enum int type to string type for API request/response
+        services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(
+                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false)
+            );
+        });
+
         services.AddOpenApi();
         services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthGateMiddleware>();
 

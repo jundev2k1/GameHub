@@ -1,4 +1,5 @@
 using EFCore.BulkExtensions;
+using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.domain.Constants;
@@ -63,7 +64,7 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo
 
     public async Task PutUpdateAsync(Guid publicId, UserBalance userBalance, CancellationToken ct = default)
     {
-        context.Entry(userBalance).State = EntityState.Modified;
+        context.Entry(ub).State = EntityState.Modified;
         await context.SaveChangesAsync(ct);
     }
 

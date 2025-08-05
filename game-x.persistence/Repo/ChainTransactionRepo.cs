@@ -1,3 +1,4 @@
+using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.domain.Constants;
@@ -11,19 +12,16 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
         return context.ChainTransactions;
     }
 
-    public async Task<bool> ExistsAsync(string hash, CancellationToken ct)
+    public async Task<ChainTransaction?> GetByIdAsync(Guid publicId, CancellationToken ct = default)
     {
-        return await context.ChainTransactions.AnyAsync(x => x.TransactionHash == hash, ct);
+        return await context.ChainTransactions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.PublicId == publicId, ct);
     }
 
     public async Task<bool> ExistsByOrderNoAsync(string otcOrderNo, CancellationToken ct)
     {
         return await context.ChainTransactions.AnyAsync(cl => cl.OrderNumber == otcOrderNo, ct);
-    }
-
-    public async Task<ChainTransaction?> GetByHashAsync(string hash, CancellationToken ct)
-    {
-        return await context.ChainTransactions.FirstOrDefaultAsync(x => x.TransactionHash == hash, ct);
     }
 
     public async Task<ChainTransaction?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct)
@@ -63,9 +61,15 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
     public async Task UpdateAsync(Guid chainTransactionId, Action<ChainTransaction> updateAction, CancellationToken ct = default)
     {
         var chainTransaction = await context.ChainTransactions
-            .FirstOrDefaultAsync(c => c.PublicId == chainTransactionId, ct)
+            .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
             ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionNotFound);
 
         updateAction.Invoke(chainTransaction);
+    }
+
+    public async Task PutUpdateAsync(ChainTransaction chain, CancellationToken ct = default)
+    {
+        context.Entry(chain).State = EntityState.Modified;
+        await context.SaveChangesAsync(ct);
     }
 }

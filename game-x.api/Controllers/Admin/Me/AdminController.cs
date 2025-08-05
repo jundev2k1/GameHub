@@ -1,4 +1,4 @@
-using game_x.application.Features.Auth.Shared.Commands.ChangePassword;
+using game_x.application.Features.Auth.Admin.Commands.ChangePasswordAdmin;
 
 namespace game_x.api.Controllers.Admin.Me;
 
@@ -7,7 +7,7 @@ namespace game_x.api.Controllers.Admin.Me;
 public sealed class AdminController : BaseApiController
 {
     [HttpPatch("me/password")]
-    public async Task<IActionResult> ChangePasswordAsync(ChangePasswordCommand command)
+    public async Task<IActionResult> ChangePasswordAsync(ChangePasswordAdminCommand command)
     {
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();

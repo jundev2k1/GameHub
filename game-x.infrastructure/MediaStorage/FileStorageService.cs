@@ -1,7 +1,7 @@
 ﻿using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Logger;
-using game_x.share.Settings;
 using game_x.share.Extensions;
+using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 using Minio;
 using Minio.DataModel;

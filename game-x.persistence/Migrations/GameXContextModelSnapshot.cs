@@ -407,11 +407,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("to_address");
 
-                    b.Property<string>("TransactionHash")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("transaction_hash");
-
                     b.Property<int>("Type")
                         .HasColumnType("integer")
                         .HasColumnName("type");
@@ -433,10 +428,6 @@ namespace game_x.persistence.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("ix_chain_transactions_public_id");
-
-                    b.HasIndex("TransactionHash")
-                        .IsUnique()
-                        .HasDatabaseName("ix_chain_transactions_transaction_hash");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_chain_transactions_user_id");
@@ -992,6 +983,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("BalanceAfter")
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance_after");
 
                     b.Property<int?>("ChainTransactionId")
                         .HasColumnType("integer")

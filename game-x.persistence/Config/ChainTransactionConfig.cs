@@ -11,7 +11,6 @@ public sealed class ChainTransactionConfig : IEntityTypeConfiguration<ChainTrans
         builder.HasKey(x => x.Id);
         
         builder.HasIndex(x => x.PublicId).IsUnique();
-        builder.HasIndex(x => x.TransactionHash).IsUnique();
 
         builder.Property(x => x.PublicId)
             .HasColumnName("public_id")
@@ -26,11 +25,6 @@ public sealed class ChainTransactionConfig : IEntityTypeConfiguration<ChainTrans
             .HasColumnName("order_number")
             .IsRequired()
             .HasDefaultValue(string.Empty);
-        
-        builder.Property(x => x.TransactionHash)
-            .HasColumnName("transaction_hash")
-            .HasMaxLength(100)
-            .IsRequired(false);
         
         builder.Property(al => al.FromAddress)
             .HasColumnName("from_address")

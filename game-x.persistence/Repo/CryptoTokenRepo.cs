@@ -1,8 +1,9 @@
+using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 
 namespace game_x.persistence.Repo;
 
-public sealed class CryptoTokenRepo(GameXContext context): ICryptoTokenRepo
+public sealed class CryptoTokenRepo(GameXContext context): ICryptoTokenRepo, IRepository
 {
     public async Task<IReadOnlyList<CryptoToken>> GetAsync()
     {

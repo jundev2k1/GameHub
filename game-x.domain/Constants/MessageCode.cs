@@ -79,6 +79,9 @@ public static class MessageCode
         /// <summary>A resource with the same value already exists.</summary>
         [EnumMetadata("A resource with the same value already exists.")]
         DuplicateValue = 10023,
+        /// <summary>The provided token is invalid or missing.</summary>
+        [EnumMetadata("The token is invalid or does not exist.")]
+        InvalidOrMissingToken = 10024,
         #endregion
 
         #region ■ Message group: Success
@@ -178,6 +181,9 @@ public static class MessageCode
         /// <summary>The current KYC status does not allow this action.</summary>
         [EnumMetadata("KYC status is invalid for this action.")]
         KycInvalidStatus = 10116,
+        /// <summary>Password reset failed. Typically used when the reset token is invalid, expired, or the reset process could not be completed.</summary>
+        [EnumMetadata("Password reset failed.")]
+        UserResetPasswordFailed = 10117,
         #endregion
 
         #region ■ Message group: Success
@@ -190,6 +196,9 @@ public static class MessageCode
         /// <summary>The user's email has been verified successfully. Typically used after completing an email verify process.</summary>
         [EnumMetadata("Email verified successfully.")]
         EmailVerifySuccess = 10152,
+        /// <summary>Password reset completed successfully. Typically used after a user has reset their password via the forgot password flow.</summary>
+        [EnumMetadata("Password reset successfully.")]
+        UserResetPasswordSuccess = 10153,
         #endregion
     }
     
@@ -238,24 +247,30 @@ public static class MessageCode
         /// <summary>Insufficient balance.</summary>
         [EnumMetadata("Insufficient balance.")]
         InsufficientBalance = 10300,
+        /// <summary>Insufficient frozen balance.</summary>
+        [EnumMetadata("Insufficient frozen balance.")]
+        InsufficientFrozenBalance = 10301,
         /// <summary>Bank account does not belong to the currently logged-in user.</summary>
         [EnumMetadata("Bank account does not belong to the currently logged-in user.")]
-        BankAccountOwnershipInvalid = 10301,
+        BankAccountOwnershipInvalid = 10302,
         /// <summary>No available bank account (e.g., none created or no default account set).</summary>
         [EnumMetadata("No available bank account (e.g., none created or no default account set).")]
-        NoAvailableBankAccount = 10302,
+        NoAvailableBankAccount = 10303,
         /// <summary>Balance data not found.</summary>
         [EnumMetadata("Balance data not found.")]
-        BalanceNotFound = 10303,
+        BalanceNotFound = 10304,
         /// <summary>Invalid balance state (e.g., balance becomes negative after deduction).</summary>
         [EnumMetadata("Invalid balance state (e.g., balance becomes negative after deduction).")]
-        BalanceCorrupted = 10304,
+        BalanceCorrupted = 10305,
         /// <summary>Specified wallet does not exist (e.g., no wallet found for the user or merchant).</summary>
         [EnumMetadata("Specified wallet does not exist (e.g., no wallet found for the user or merchant).")]
-        WalletNotFound = 10305,
+        WalletNotFound = 10306,
         /// <summary>Cannot withdraw to a system wallet.</summary>
         [EnumMetadata("Cannot withdraw to a system wallet.")]
-        CannotWithdrawToSystemWallet = 10306,
+        CannotWithdrawToSystemWallet = 10307,
+        /// <summary>The amount must be at least 10 USDT.</summary>
+        [EnumMetadata("Invalid amount.")]
+        InvalidAmount = 10308,
         #endregion
     }
     

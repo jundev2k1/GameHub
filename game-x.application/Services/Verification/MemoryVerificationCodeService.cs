@@ -7,6 +7,7 @@ public static class VerificationPurposes
 {
     public const string EmailVerification = "email-verification";
     public const string ForgotPassword = "forgot-password";
+    public const string ChangePassword = "change-password";
 }
 
 public sealed class MemoryVerificationCodeService(IEmailCacheService emailCache) : IVerificationCodeService
