@@ -7,11 +7,13 @@ public static class ChainTransactionMapping
 {
     public static UxmWithdrawalOrderRequest ToUxmWithdrawalOrderRequestData(
         this TronUsdtWithdrawalCommand command,
-        string merchantNumber)
+        string merchantNumber,
+        string orderNumber)
     {
         var result = command.Adapt<UxmWithdrawalOrderRequest>();
         return result with {
             MerchantNumber = merchantNumber,
+            OrderNumber = orderNumber
         };
     }
 }

@@ -115,7 +115,7 @@ public sealed class TronUsdtWithdrawalHandler(
             var merchantNumber = galaxySettings.Value.MerchantNumber;
         
             // Create UXM request data
-            var requestData = request.ToUxmWithdrawalOrderRequestData(merchantNumber);
+            var requestData = request.ToUxmWithdrawalOrderRequestData(merchantNumber, chainTransaction.OrderNumber);
             var uxmRequest = new SecureRequest<UxmWithdrawalOrderRequest>
             {
                 Data = requestData,

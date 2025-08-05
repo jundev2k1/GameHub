@@ -2,13 +2,11 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.ChainTransactions.TronUsdtDeposit.Dtos;
+using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.share.ExternalApi.Uxm.Dtos;
 using Microsoft.Extensions.Configuration;
-using System.Text.Json;
-using System.Transactions;
 
-namespace game_x.application.Features.ChainTransactions.TronUsdtDeposit.Commands;
+namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtDeposit;
 
 public sealed class CreateDepositChainTransactionHandler(
     IUxmService uxmService,
@@ -32,8 +30,7 @@ public sealed class CreateDepositChainTransactionHandler(
         try
         {
             var userId = userAccessor.GetUserId();
-
-
+            
             var localChainTransaction = await CreateLocalChainTransaction(request, ct);
             await unitOfWork.SaveChangesAsync(ct);
             // 1. Gọi API UXM
@@ -68,7 +65,7 @@ public sealed class CreateDepositChainTransactionHandler(
 
 
 
-            await UpdateUserBalanceAsync(userId, (int)CryptoType.Trc20Usdt, request.amount, ct);
+            await UpdateUserBalanceAsync(userId, (int)CryptoType.Trc20Usdt, request.Amount, ct);
 
             // 6. Commit local Order to Galaxy Pay DB
             await unitOfWork.CommitAsync(ct);
@@ -101,7 +98,7 @@ public sealed class CreateDepositChainTransactionHandler(
             userId: userId,
         orderNumber: "string",
         cryptoTokenId: 1,
-        amount: request.amount,
+        amount: request.Amount,
         type: ChainTransactionType.Deposit,
         status: ChainTransactionStatus.Pending
         );
@@ -131,10 +128,10 @@ public sealed class CreateDepositChainTransactionHandler(
         // Line ~58: Create request data
         var requestData = new CreateChainTransactionDepositRequestData(
             merchantNumber,
-            request.amount,
+            request.Amount,
             publicId.ToString(),
             userId,
-            request.remark
+            request.Note
         );
 
         // Line ~64: Generate signature

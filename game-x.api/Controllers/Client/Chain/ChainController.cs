@@ -1,5 +1,5 @@
 using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWithdrawal;
-using game_x.application.Features.ChainTransactions.TronUsdtDeposit.Commands;
+using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtDeposit;
 
 namespace game_x.api.Controllers.Client.Chain;
 
@@ -8,7 +8,6 @@ namespace game_x.api.Controllers.Client.Chain;
 public sealed class ChainController : BaseApiController
 {
     [HttpPost("tron/usdt/withdrawal")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> SendWithdrawVerificationCode(TronUsdtWithdrawalCommand command, CancellationToken ct)
     {
         var result = await Mediator.Send(command, ct);
@@ -16,7 +15,6 @@ public sealed class ChainController : BaseApiController
     }
 
     [HttpPost("tron/usdt/deposit")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> CreateDepositTransactionAsync(TronUsdtDepositCommand command, CancellationToken ct)
     {
         var result = await Mediator.Send(command, ct);
