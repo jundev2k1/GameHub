@@ -1,3 +1,5 @@
+using game_x.application.Features.Accounts.Dtos;
+
 namespace game_x.application.Contract.Persistence.Repo;
 
 public interface IUserRepo
@@ -9,6 +11,8 @@ public interface IUserRepo
     Task<User> GetUserByEmailAsync(string email, CancellationToken ct = default);
 
     Task<User[]> GetAdminUsers(CancellationToken ct = default);
+
+    Task<UserDetailDto> GetUserDetailAsync(string userId, CancellationToken ct = default);
 
     Task<UserKyc> GetKycProfileAsync(string userId, CancellationToken ct = default);
 

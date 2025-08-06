@@ -1,7 +1,9 @@
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.application.Features.Accounts.Dtos;
 using game_x.domain.Constants;
 using game_x.share.Extensions;
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 
 namespace game_x.persistence.Repo;
@@ -40,6 +42,21 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
     {
         var users = await userManager.GetUsersInRoleAsync(AppRoles.Admin);
         return [.. users];
+    }
+
+    public async Task<UserDetailDto> GetUserDetailAsync(string userId, CancellationToken ct = default)
+    {
+        var targetUser = await context.Users
+            .AsNoTracking()
+            .Include(u => u.UserKyc)
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
+            ?? throw new NotFoundException();
+        var result = targetUser.Adapt<UserDetailDto>();
+        var roles = targetUser.UserRoles?.Select(u => u.Role?.Name ?? string.Empty) ?? [];
+        result.Roles = AppRole.Of(roles);
+        return result.Adapt<UserDetailDto>();
     }
 
     public async Task<UserKyc> GetKycProfileAsync(string userId, CancellationToken ct = default)

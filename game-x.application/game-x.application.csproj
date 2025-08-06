@@ -31,7 +31,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Features\Accounts\Admin\Commands\" />
-    <Folder Include="Features\Accounts\Mapping\" />
     <Folder Include="Features\Accounts\Admin\Queries\" />
     <Folder Include="Features\Accounts\Cs\" />
     <Folder Include="Features\Auth\Cs\Commands\" />

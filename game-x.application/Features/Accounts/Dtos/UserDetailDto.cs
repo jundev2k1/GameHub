@@ -1,15 +1,18 @@
-namespace game_x.application.Features.Accounts.Dtos;
+﻿namespace game_x.application.Features.Accounts.Dtos;
 
-public class UserDetailDto
+public sealed class UserDetailDto
 {
-    public required string Id { get; set; }
-    public required string PhoneNumber { get; set; }
-    public required string UserName { get; set; }
-    public required string Email { get; set; }
-    public required bool IsNew { get; set; }
-    public domain.Enum.UserStatus Status { get; set; }
-    public string? CountryCode { get; set; }
-    public required string[] Roles { get; set; } = [];
-    public required string CreatedById { get; set; }
-    public required string CreatedByName { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Nickname { get; set; } = string.Empty;
+    public string? FullName { get; set; } = string.Empty;
+    public DateTime? DateOfBirth { get; set; }
+    public string? ResidentialAddress { get; set; } = string.Empty;
+    public bool IsEmailConfirmed { get; set; }
+    public bool IsKycConfirmed { get; set; }
+    public bool IsBankConfirmed { get; set; }
+    public AppRole Roles { get; set; } = default!;
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }

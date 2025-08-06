@@ -1,6 +1,4 @@
-﻿using game_x.application.Features.Kyc.Dtos;
-using game_x.application.Features.Kyc.Queries.GetKycProfile;
-using game_x.application.Features.Kyc.Queries.GetKycStatus;
+﻿using game_x.application.Features.Kyc.Queries.GetKycProfile;
 
 namespace game_x.application.Features.Kyc.Mapping;
 
