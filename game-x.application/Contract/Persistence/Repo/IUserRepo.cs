@@ -12,6 +12,8 @@ public interface IUserRepo
 
     Task<UserKyc> GetKycProfileAsync(string userId, CancellationToken ct = default);
 
+    Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync(string userId, CancellationToken ct = default);
+
     Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default);
 
     Task<bool> IsExistPhoneNumberAsync(string phoneNumber, CancellationToken ct = default);

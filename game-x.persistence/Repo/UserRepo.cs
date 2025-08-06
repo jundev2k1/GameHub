@@ -45,12 +45,25 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
     public async Task<UserKyc> GetKycProfileAsync(string userId, CancellationToken ct = default)
     {
         return await context.UserKycs
+            .AsNoTracking()
             .Include(uk => uk.User)
             .Include(uk => uk.ReviewedBy)
             .Include(uk => uk.FrontImage)
             .Include(uk => uk.BackImage)
             .FirstOrDefaultAsync(u => u.UserId == userId && !u.User.IsDeleted, ct)
             ?? throw new NotFoundException();
+    }
+
+    public async Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync (string userId, CancellationToken ct = default)
+    {
+        var profile = await context.UserKycs
+            .AsNoTracking()
+            .Where(u => u.UserId == userId && !u.User.IsDeleted)
+            .Select(u => Tuple.Create(u.Status, u.RejectionReason))
+            .FirstOrDefaultAsync(ct);
+        return profile != null
+            ? (profile.Item1, profile.Item2)
+            : (KycStatus.NotSubmitted, null);
     }
 
     public async Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default)
