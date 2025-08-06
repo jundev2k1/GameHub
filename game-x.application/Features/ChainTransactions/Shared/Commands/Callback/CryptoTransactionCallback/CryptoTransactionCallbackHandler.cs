@@ -20,9 +20,9 @@ public sealed class CryptoTransactionCallbackHandler(
         
         // 1. Verify UXM signature
         var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
-        var isValid =
-            asymmetricCryptoService.VerifySignature(uxmPublicKey, requestData, signature);
-        if (!isValid) throw new BadRequestException("Invalid signature.");
+        var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, requestData, signature);
+        if (!isValid)
+            throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");;
 
         // 2. Update Order Status returns from callback
         ChainTransaction? updateChainTransaction = null;
@@ -37,7 +37,7 @@ public sealed class CryptoTransactionCallbackHandler(
 
             // Update status to wait for reviewing by admin
             order.UpdateStatus(ChainTransactionStatus.Completed);
-
+            order.Hash = requestData.Hash;
             // Set order for event publishing (Send real-time message to staff and all the admin)
             updateChainTransaction = order;
         }, ct);

@@ -100,7 +100,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
             var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
             var isValid =
                 asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
-            if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed);
+            if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
         }
         catch (Exception ex)
         {
