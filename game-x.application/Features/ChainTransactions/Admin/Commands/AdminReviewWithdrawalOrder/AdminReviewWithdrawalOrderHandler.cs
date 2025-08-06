@@ -60,7 +60,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     private async Task HandleApproveTransactionAsync(ChainTransaction transaction, CancellationToken ct)
     {
         await chainTransactionRepo
-            .UpdateAsync(transaction.PublicId, updatedOrder => 
+            .PatchUpdateAsync(transaction.PublicId, updatedOrder => 
                 updatedOrder.UpdateStatus(ChainTransactionStatus.Approved), ct);
         
         await SendUxmWithdrawalOrderAsync(transaction, ct);
@@ -72,7 +72,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
             async () =>
             {
                 await chainTransactionRepo
-                    .UpdateAsync(transaction.PublicId, updatedOrder => 
+                    .PatchUpdateAsync(transaction.PublicId, updatedOrder => 
                         updatedOrder.UpdateStatus(ChainTransactionStatus.Rejected), ct);
 
                 await TryRefundFrozenBalanceAsync(transaction, ct);

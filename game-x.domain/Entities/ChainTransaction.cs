@@ -82,9 +82,12 @@ public sealed class ChainTransaction : BaseEntity<int>, IAuditable
         Status = status;
     }
     
-    public void UpdateHash(string hash)
+    public void UpdateUxmResponse(string orderUid, string hash, decimal actualAmount, DateTime? confirmedAt)
     {
+        OrderUid = orderUid;
         Hash = hash;
+        Amount = actualAmount;
+        ConfirmedAt = confirmedAt ?? DateTime.UtcNow;
     }
 }
 

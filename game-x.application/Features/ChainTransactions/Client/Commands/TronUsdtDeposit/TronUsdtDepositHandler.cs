@@ -41,7 +41,7 @@ public sealed class CreateDepositChainTransactionHandler(
             var result = apiResponse;
 
             // cập nhật status khi gọi dc uxm
-            await chainTransactionRepo.UpdateAsync(
+            await chainTransactionRepo.PatchUpdateAsync(
                 localChainTransaction.PublicId,
                 tx =>
                 {

@@ -18,43 +18,72 @@ public sealed class CryptoTransactionCallbackHandler(
     {
         var (requestData, signature) = request;
         
-        // 1. Verify UXM signature
+        // Verify UXM signature
         var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
         var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, requestData, signature);
         if (!isValid)
             throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");;
 
-        // 2. Update Order Status returns from callback
-        ChainTransaction? updateChainTransaction = null;
+        ChainTransaction? transaction = 
+            await chainTransactionRepo.GetByOrderNumberAsync(requestData.OrderNumber ?? string.Empty, ct);
+        
+        if(transaction == null)
+            throw new NotFoundException(MessageCode.Transaction.TradeNotFound,
+                $"Transaction with order number '{requestData.OrderNumber}' not found.");
+            
+        // Anti-spam request if the Transaction has already been updated
+        if (transaction.Status == ChainTransactionStatus.Completed)
+            throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
 
-        Guid orderUid = Guid.Parse(requestData.OrderUid);
-
-        await chainTransactionRepo.UpdateAsync(orderUid, order =>
+        await unitOfWork.WithTransactionAsync(async () =>
         {
-            // Anti-spam request if the Order has already been updated
-            //   if (order.Status.Value == OrderStatus.Completed.Value)
-            //      throw new Exception("Unable to update completed order.");
-
-            // Update status to wait for reviewing by admin
-            order.UpdateStatus(ChainTransactionStatus.Completed);
-            order.Hash = requestData.Hash;
+            await chainTransactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
+            {
+                order.UpdateStatus(ChainTransactionStatus.Completed);
+                order.UpdateUxmResponse(
+                    actualAmount: requestData.ActualAmount,
+                    orderUid: requestData.OrderUid ?? string.Empty,
+                    hash: requestData?.Hash ?? string.Empty,
+                    confirmedAt: requestData?.ConfirmedAt
+                );
+            }, ct);
+            
+            switch (transaction.Type)
+            {
+                case ChainTransactionType.Deposit:
+                    await HandleDepositTransactionAsync(transaction, ct);
+                    break;
+                case ChainTransactionType.Withdrawal:
+                    await HandleWithdrawalTransactionAsync(transaction, ct);
+                    break;
+                default:
+                    throw new BadRequestException(MessageCode.System.InvalidParameters);
+            }
+            
             // Set order for event publishing (Send real-time message to staff and all the admin)
-            updateChainTransaction = order;
         }, ct);
-
+        
         // Ensure the audit log records the order status updated by the external API
         using (AuditSourceContext.Use(AuditSource.External))
         {
             await unitOfWork.SaveChangesAsync(ct);
         }
-
-        if (updateChainTransaction is null)
-            throw new NotFoundException($"Order ({requestData.OrderUid}) update failed.");
-
-        // 3. Publish Order Completed event
-        // await eventDispatcher.Publish(new OnChainTransactionCompletedEvent(updateOrder!), ct);
-
+ 
         return new CryptoTransactionCallbackResult(
             $"Order ({requestData.OrderUid}) updated successfully.");
+    }
+    
+    private async Task HandleDepositTransactionAsync(ChainTransaction transaction, CancellationToken ct)
+    {
+        await unitOfWork.WithTransactionAsync(
+            async () =>
+            {
+                
+            }, ct);
+    }
+    
+    private async Task HandleWithdrawalTransactionAsync(ChainTransaction transaction, CancellationToken ct)
+    {
+        
     }
 }
