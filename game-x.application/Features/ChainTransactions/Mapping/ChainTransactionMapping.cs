@@ -6,14 +6,14 @@ namespace game_x.application.Features.ChainTransactions.Mapping;
 public static class ChainTransactionMapping
 {
     public static UxmWithdrawalOrderRequest ToUxmWithdrawalOrderRequestData(
-        this TronUsdtWithdrawalCommand command,
-        string merchantNumber,
-        string orderNumber)
+        this ChainTransaction transaction,
+        string merchantNumber)
     {
-        var result = command.Adapt<UxmWithdrawalOrderRequest>();
+        var result = transaction.Adapt<UxmWithdrawalOrderRequest>();
         return result with {
             MerchantNumber = merchantNumber,
-            OrderNumber = orderNumber
+            OrderNumber = transaction.OrderNumber,
+            Amount =  transaction.Amount,
         };
     }
 }
