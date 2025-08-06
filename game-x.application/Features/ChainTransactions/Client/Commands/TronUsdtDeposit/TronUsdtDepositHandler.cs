@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.ChainTransactions.Dtos;
+using game_x.application.Utils;
 using game_x.share.ExternalApi.Uxm.Dtos;
 using Microsoft.Extensions.Configuration;
 
@@ -69,9 +70,11 @@ public sealed class CreateDepositChainTransactionHandler(
         var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(symbol, network, ct)
             ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
 
+        var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(chainTransactionRepo, ct);
+
         var transaction = ChainTransaction.Create(
             userId: userId,
-            orderNumber: string.Empty, // Will be updated after UXM call
+            orderNumber: orderNumber,
             cryptoTokenId: token.Id,
             amount: request.Amount,
             type: ChainTransactionType.Deposit,
@@ -127,13 +130,13 @@ public sealed class CreateDepositChainTransactionHandler(
         dynamic result,
         CancellationToken ct)
     {
-        await chainTransactionRepo.UpdateAsync(
+        await chainTransactionRepo.PatchUpdateAsync(
             publicId,
             tx =>
             {
                 tx.Status = ChainTransactionStatus.Approved;
                 tx.UpdatedAt = DateTime.UtcNow;
-                tx.OrderNumber = result.Data.OrderUid;
+                tx.OrderUid = result.Data.OrderUid;
                 tx.ToAddress = result.Data.To;
                 tx.Amount = result.Data.Amount;
             },
