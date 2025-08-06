@@ -10,6 +10,9 @@ public sealed class ChainTransaction : BaseEntity<int>, IAuditable
     public string? UserId { get; set; }
     public User? User { get; set; }
     public string OrderNumber { get; set; } = string.Empty;
+    
+    /// <summary>Transaction Hash: Hash value of blockchain transaction</summary>
+    public string? Hash { get; set; }
     public string? FromAddress { get; set; }
     public string? ToAddress { get; set; }
     public decimal Amount { get; set; }
@@ -76,6 +79,11 @@ public sealed class ChainTransaction : BaseEntity<int>, IAuditable
     public void UpdateStatus(ChainTransactionStatus status)
     {
         Status = status;
+    }
+    
+    public void UpdateHash(string hash)
+    {
+        Hash = hash;
     }
 }
 
