@@ -82,6 +82,9 @@ public static class MessageCode
         /// <summary>The provided token is invalid or missing.</summary>
         [EnumMetadata("The token is invalid or does not exist.")]
         InvalidOrMissingToken = 10024,
+        /// <summary>The current status of the entity is invalid.</summary>
+        [EnumMetadata("The current status of the entity is invalid.")]
+        InvalidCurrentStatus = 10025,
         #endregion
 
         #region ■ Message group: Success
