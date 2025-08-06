@@ -1,5 +1,6 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Context;
 
@@ -10,6 +11,8 @@ public sealed class CryptoTransactionCallbackHandler(
     IUnitOfWork unitOfWork,
     IChainTransactionRepo chainTransactionRepo,
     IApplicationEventDispatcher eventDispatcher,
+    IUserBalanceService userBalanceService,
+    IUserBalanceRepo userBalanceRepo,
      IAsymmetricKeyCacheService asymmetricKeyCacheService)
     : ICommandHandler<CryptoTransactionCallbackCommand, CryptoTransactionCallbackResult>
 {
@@ -35,6 +38,10 @@ public sealed class CryptoTransactionCallbackHandler(
         if (transaction.Status == ChainTransactionStatus.Completed)
             throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
 
+        UserBalance? balance = transaction.User?.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId);
+        if (balance == null)
+            throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+        
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await chainTransactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
@@ -51,10 +58,10 @@ public sealed class CryptoTransactionCallbackHandler(
             switch (transaction.Type)
             {
                 case ChainTransactionType.Deposit:
-                    await HandleDepositTransactionAsync(transaction, ct);
+                    await HandleDepositTransactionAsync(transaction, balance, ct);
                     break;
                 case ChainTransactionType.Withdrawal:
-                    await HandleWithdrawalTransactionAsync(transaction, ct);
+                    await HandleWithdrawalTransactionAsync(transaction, balance, ct);
                     break;
                 default:
                     throw new BadRequestException(MessageCode.System.InvalidParameters);
@@ -73,7 +80,7 @@ public sealed class CryptoTransactionCallbackHandler(
             $"Order ({requestData.OrderUid}) updated successfully.");
     }
     
-    private async Task HandleDepositTransactionAsync(ChainTransaction transaction, CancellationToken ct)
+    private async Task HandleDepositTransactionAsync(ChainTransaction transaction, UserBalance balance, CancellationToken ct)
     {
         await unitOfWork.WithTransactionAsync(
             async () =>
@@ -82,8 +89,10 @@ public sealed class CryptoTransactionCallbackHandler(
             }, ct);
     }
     
-    private async Task HandleWithdrawalTransactionAsync(ChainTransaction transaction, CancellationToken ct)
+    private async Task HandleWithdrawalTransactionAsync(ChainTransaction transaction, UserBalance balance, CancellationToken ct)
     {
-        
+        // Update the user's balance after a successful withdrawal
+        userBalanceService.FinalizeFrozen(balance, transaction.Amount);
+        await userBalanceRepo.PutUpdateAsync(balance, ct);
     }
 }
