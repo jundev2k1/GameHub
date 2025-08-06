@@ -30,15 +30,15 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
         }
     }
 
-    public async Task<SecureResponse<CreateChainTransactionDepositResponseData>> CreateProxyChainTransactionDepositAsync(
-        SecureRequest<CreateChainTransactionDepositRequestData> data)
+    public async Task<SecureResponse<UxmDepositOrderResponseData>> CreateDepositOrderAsync(
+        SecureRequest<UxmDepositOrderRequestData> data)
     {
         try
         {
-            // logger.LogInformation(
-            //     $"Create order request: MerchantOrderId={data.Data.MerchantOrderId}, Amount={data.Data.FiatAmount}");
+            logger.LogInformation(
+                $"Create order request: MerchantNumber={data.Data.MerchantNumber}, Amount={data.Data.Amount}");
 
-            var response = await uxmApi.CreateProxyChainTransactionDepositAsync(data);
+            var response = await uxmApi.CreateProxyDepositOrderAsync(data);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
                 logger.LogError($"Response failed: Status={response.StatusCode}");

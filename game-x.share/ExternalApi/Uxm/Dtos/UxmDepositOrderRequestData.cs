@@ -1,6 +1,6 @@
 ﻿namespace game_x.share.ExternalApi.Uxm.Dtos;
 
-public record CreateChainTransactionDepositRequestData(
+public record UxmDepositOrderRequestData(
     string MerchantNumber,
     decimal Amount,
     string OrderNumber,

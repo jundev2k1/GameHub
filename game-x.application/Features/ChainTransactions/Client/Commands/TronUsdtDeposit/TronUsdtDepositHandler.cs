@@ -35,7 +35,7 @@ public sealed class CreateDepositChainTransactionHandler(
             await unitOfWork.SaveChangesAsync(ct);
             // 1. Gọi API UXM
             var uxmRequest = await CreateUxmRequest(request, localChainTransaction.PublicId, ct);
-            var apiResponse = await uxmService.CreateProxyChainTransactionDepositAsync(uxmRequest);
+            var apiResponse = await uxmService.CreateDepositOrderAsync(uxmRequest);
             // if (!apiResponse.IsSuccessStatusCode || apiResponse.Content == null)
             //     throw new BadRequestException("UXM API failed.");
             var result = apiResponse;
@@ -106,7 +106,7 @@ public sealed class CreateDepositChainTransactionHandler(
         await chainTransactionRepo.AddAsync(transaction, ct);
         return transaction;
     }
-    private async Task<SecureRequest<CreateChainTransactionDepositRequestData>> CreateUxmRequest(
+    private async Task<SecureRequest<UxmDepositOrderRequestData>> CreateUxmRequest(
         TronUsdtDepositCommand request,
         Guid publicId,
         CancellationToken ct = default)
@@ -126,7 +126,7 @@ public sealed class CreateDepositChainTransactionHandler(
             ?? throw new Exception("MerchantNumber is not yet configured.");
 
         // Line ~58: Create request data
-        var requestData = new CreateChainTransactionDepositRequestData(
+        var requestData = new UxmDepositOrderRequestData(
             merchantNumber,
             request.Amount,
             publicId.ToString(),
@@ -139,7 +139,7 @@ public sealed class CreateDepositChainTransactionHandler(
         var signature = asymmetricCryptoService.Sign(privateKeyPem, requestData);
 
         // Line ~66: Return secure request
-        return new SecureRequest<CreateChainTransactionDepositRequestData>
+        return new SecureRequest<UxmDepositOrderRequestData>
         {
             Data = requestData,
             Signature = signature

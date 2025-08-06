@@ -1,6 +1,6 @@
 ﻿namespace game_x.share.ExternalApi.Uxm.Dtos;
 
-public record CreateChainTransactionDepositResponseData(
+public record UxmDepositOrderResponseData(
 
     string OrderUid,
     decimal Amount,
