@@ -10,12 +10,19 @@ public sealed class ChainTransactionConfig : IEntityTypeConfiguration<ChainTrans
         
         builder.HasKey(x => x.Id);
         
+        builder.HasIndex(x => x.Hash).IsUnique();
+        builder.HasIndex(x => x.OrderNumber).IsUnique();
         builder.HasIndex(x => x.PublicId).IsUnique();
 
         builder.Property(x => x.PublicId)
             .HasColumnName("public_id")
             .IsRequired()
             .HasDefaultValueSql("gen_random_uuid()");
+        
+        builder.Property(o => o.OrderUid)
+            .HasColumnName("order_uid")
+            .IsRequired()
+            .HasDefaultValue(string.Empty);
         
         builder.Property(x => x.UserId)
             .HasColumnName("user_id")
@@ -25,6 +32,10 @@ public sealed class ChainTransactionConfig : IEntityTypeConfiguration<ChainTrans
             .HasColumnName("order_number")
             .IsRequired()
             .HasDefaultValue(string.Empty);
+        
+        builder.Property(x => x.Hash)
+            .HasColumnName("hash")
+            .IsRequired(false);
         
         builder.Property(al => al.FromAddress)
             .HasColumnName("from_address")

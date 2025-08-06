@@ -7,8 +7,9 @@ public interface IChainTransactionRepo
     Task<bool> ExistsByOrderNoAsync(string otcOrderNo, CancellationToken ct);
     Task<ChainTransaction?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct);
     Task<(decimal txLogUserFrozenAmount, decimal chainTxLogpendingFee)> GetTxLogSummaryAsync(CancellationToken ct);
-    Task AddAsync(ChainTransaction chainTransaction, CancellationToken ct = default);
-    Task UpdateAsync(Guid chainTransactionId, Action<ChainTransaction> updateAction, CancellationToken ct = default);
+    Task AddAsync(ChainTransaction transaction, CancellationToken ct = default);
+    /// <summary>Only update the fields that are passed in.</summary>
     Task PatchUpdateAsync(Guid publicId, Action<ChainTransaction> updateAction, CancellationToken ct = default);
-    Task PutUpdateAsync(ChainTransaction chain, CancellationToken ct = default);
+    /// <summary>Override all data of the record.</summary>
+    Task PutUpdateAsync(ChainTransaction transaction, CancellationToken ct = default);
 }

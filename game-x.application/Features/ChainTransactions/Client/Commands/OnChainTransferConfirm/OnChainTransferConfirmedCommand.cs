@@ -1,6 +1,6 @@
 ﻿namespace game_x.application.Features.ChainTransactions.Client.Commands.OnChainTransferConfirm;
 
-public class OnChainTransferConfirmedCommand : IRequest<Unit>
+public class OnChainTransferConfirmedCommand : ICommand<Unit>
 {
     public required Guid PublicId { get; set; }
     public required string OrderNumber { get; set; }

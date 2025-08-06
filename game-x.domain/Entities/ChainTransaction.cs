@@ -7,9 +7,13 @@ namespace game_x.domain.Entities;
 public sealed class ChainTransaction : BaseEntity<int>, IAuditable
 {
     public Guid PublicId { get; set; }
+    public string OrderUid { get; set; } = string.Empty;
     public string? UserId { get; set; }
     public User? User { get; set; }
     public string OrderNumber { get; set; } = string.Empty;
+    
+    /// <summary>Transaction Hash: Hash value of blockchain transaction</summary>
+    public string? Hash { get; set; }
     public string? FromAddress { get; set; }
     public string? ToAddress { get; set; }
     public decimal Amount { get; set; }
@@ -76,6 +80,14 @@ public sealed class ChainTransaction : BaseEntity<int>, IAuditable
     public void UpdateStatus(ChainTransactionStatus status)
     {
         Status = status;
+    }
+    
+    public void UpdateUxmResponse(string orderUid, string hash, decimal actualAmount, DateTime? confirmedAt)
+    {
+        OrderUid = orderUid;
+        Hash = hash;
+        Amount = actualAmount;
+        ConfirmedAt = confirmedAt ?? DateTime.UtcNow;
     }
 }
 
