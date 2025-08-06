@@ -11,121 +11,85 @@ namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdt
 public sealed class CreateDepositChainTransactionHandler(
     IUxmService uxmService,
     IChainTransactionRepo chainTransactionRepo,
-     // IUserRepo userRepo,
-     // IAuthService authService,
-     IUnitOfWork unitOfWork,
-    //IAsymmetricKeyRepo asymmetricKeyRepo,
+    IUnitOfWork unitOfWork,
     IAsymmetricCryptoService asymmetricCryptoService,
     IUserAccessor userAccessor,
     IConfiguration configuration,
-    IUserBalanceRepo userBalanceRepo,
-    IAsymmetricKeyCacheService asymmetricKeyCacheService
-    //IApplicationEventDispatcher eventDispatcher
-    ) : ICommandHandler<TronUsdtDepositCommand, CreateChainTransactionResponseDto>
+    IAsymmetricKeyCacheService asymmetricKeyCacheService,
+    ICryptoTokenRepo cryptoTokenRepo
+) : ICommandHandler<TronUsdtDepositCommand, CreateChainTransactionResponseDto>
 {
     public async Task<CreateChainTransactionResponseDto> Handle(TronUsdtDepositCommand request, CancellationToken ct)
-
     {
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
             var userId = userAccessor.GetUserId();
-            
-            var localChainTransaction = await CreateLocalChainTransaction(request, ct);
+
+            // 1. Tạo local chain transaction
+            var localTransaction = await CreateLocalChainTransaction(request, userId, ct);
             await unitOfWork.SaveChangesAsync(ct);
-            // 1. Gọi API UXM
-            var uxmRequest = await CreateUxmRequest(request, localChainTransaction.PublicId, ct);
+
+            // 2. Gọi UXM API
+            var uxmRequest = CreateUxmRequest(request, localTransaction.PublicId, userId);
             var apiResponse = await uxmService.CreateDepositOrderAsync(uxmRequest);
-            // if (!apiResponse.IsSuccessStatusCode || apiResponse.Content == null)
-            //     throw new BadRequestException("UXM API failed.");
-            var result = apiResponse;
 
-            // cập nhật status khi gọi dc uxm
-            await chainTransactionRepo.UpdateAsync(
-                localChainTransaction.PublicId,
-                tx =>
-                {
-                    tx.Status = ChainTransactionStatus.Approved;
-                    tx.UpdatedAt = DateTime.UtcNow;
-                },
-                ct
-            );
+            // 3. Verify signature từ UXM
+            ValidateUxmResponse(apiResponse);
 
-            var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
-            // 2. Xác minh chữ ký từ UXM
-            // var uxmPublicKey = await asymmetricKeyRepo
-            //     .GetByCompositeKeyAsync(AsymmetricKeyNames.Uxm, AsymmetricKeyType.Public, AsymmetricType.ECDSA, ct);
+            // 4. Cập nhật chain transaction
+            await UpdateChainTransaction(localTransaction.PublicId, apiResponse, ct);
 
-            var isValid = asymmetricCryptoService
-                // .VerifySignature(uxmPublicKey.KeyValue, result.Data, result.Signature);
-                .VerifySignature(uxmPublicKey, result.Data, result.Signature);
-
-            if (!isValid)
-                throw new BadRequestException("Invalid signature from UXM.");
-
-
-
-            await UpdateUserBalanceAsync(userId, (int)CryptoType.Trc20Usdt, request.Amount, ct);
-
-            // 6. Commit local Order to Galaxy Pay DB
+            // 5. Commit transaction
             await unitOfWork.CommitAsync(ct);
-            // 3. Trả về kết quả (ví dụ trả thẳng data)
+
             return new CreateChainTransactionResponseDto
             {
-                OrderUid = result.Data.OrderUid,
-                Amount = result.Data.Amount,
-                To = result.Data.To
+                OrderUid = apiResponse.Data.OrderUid,
+                Amount = apiResponse.Data.Amount,
+                To = apiResponse.Data.To
             };
-
         }
         catch
         {
             await unitOfWork.RollbackAsync(ct);
             throw;
         }
-
     }
-    private async Task<ChainTransaction> CreateLocalChainTransaction(TronUsdtDepositCommand request, CancellationToken ct = default)
+
+    private async Task<ChainTransaction> CreateLocalChainTransaction(
+        TronUsdtDepositCommand request,
+        string userId,
+        CancellationToken ct)
     {
-        // var ownerUser = await userRepo.GetUserByIdAsync(request.MemberId, ct);
-        //var role = await authService.GetRolesAsync(ownerUser);
-        //if (!role.IsUser) throw new ForbiddenException("Only user can create sell order.");
+        // Get crypto token dynamically like withdrawal logic
+        const NetworkType network = NetworkType.Tron;
+        const string symbol = CryptoTokenSymbol.Usdt;
 
-        var userId = userAccessor.GetUserId();
-
+        var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(symbol, network, ct)
+            ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
 
         var transaction = ChainTransaction.Create(
             userId: userId,
-        orderNumber: "string",
-        cryptoTokenId: 1,
-        amount: request.Amount,
-        type: ChainTransactionType.Deposit,
-        status: ChainTransactionStatus.Pending
+            orderNumber: string.Empty, // Will be updated after UXM call
+            cryptoTokenId: token.Id,
+            amount: request.Amount,
+            type: ChainTransactionType.Deposit,
+            status: ChainTransactionStatus.Pending
         );
 
         await chainTransactionRepo.AddAsync(transaction, ct);
         return transaction;
     }
-    private async Task<SecureRequest<UxmDepositOrderRequestData>> CreateUxmRequest(
+
+    private SecureRequest<UxmDepositOrderRequestData> CreateUxmRequest(
         TronUsdtDepositCommand request,
         Guid publicId,
-        CancellationToken ct = default)
+        string userId)
     {
-        var userId = userAccessor.GetUserId();
-        // Line ~50: Get Galaxy Pay private key
-
-        var privateKeyPem = asymmetricKeyCacheService.GameXPrivateKey;
-
-
-        // var privateKeyPem = await asymmetricKeyRepo
-        //     .GetByCompositeKeyAsync(AsymmetricKeyNames.GameX, AsymmetricKeyType.Private, AsymmetricType.ECDSA, ct);
-
-
-        // Get merchant number from configuration
         var merchantNumber = configuration.GetValue<string>("GameXSettings:MerchantNumber")
-            ?? throw new Exception("MerchantNumber is not yet configured.");
+            ?? throw new InvalidOperationException("MerchantNumber is not configured.");
 
-        // Line ~58: Create request data
         var requestData = new UxmDepositOrderRequestData(
             merchantNumber,
             request.Amount,
@@ -134,11 +98,11 @@ public sealed class CreateDepositChainTransactionHandler(
             request.Note
         );
 
-        // Line ~64: Generate signature
-        //  var signature = asymmetricCryptoService.Sign(privateKeyPem.KeyValue, requestData);
-        var signature = asymmetricCryptoService.Sign(privateKeyPem, requestData);
+        var signature = asymmetricCryptoService.Sign(
+            asymmetricKeyCacheService.GameXPrivateKey,
+            requestData
+        );
 
-        // Line ~66: Return secure request
         return new SecureRequest<UxmDepositOrderRequestData>
         {
             Data = requestData,
@@ -146,17 +110,34 @@ public sealed class CreateDepositChainTransactionHandler(
         };
     }
 
-    private async Task UpdateUserBalanceAsync(string userId, int cryptoTokenId, decimal amount, CancellationToken ct)
+    private void ValidateUxmResponse(dynamic apiResponse)
     {
-        var balance = await userBalanceRepo
-            .GetByUserIdAndTokenIdAsync(userId, cryptoTokenId, ct);
+        var isValid = asymmetricCryptoService.VerifySignature(
+            asymmetricKeyCacheService.UxmPublicKey,
+            apiResponse.Data,
+            apiResponse.Signature
+        );
 
-        if (balance == null)
-            throw new NotFoundException("UserBalance not found.");
-
-        balance.Amount += amount;
-        balance.UpdatedAt = DateTime.UtcNow;
+        if (!isValid)
+            throw new BadRequestException("Invalid signature from UXM.");
     }
 
-
+    private async Task UpdateChainTransaction(
+        Guid publicId,
+        dynamic result,
+        CancellationToken ct)
+    {
+        await chainTransactionRepo.UpdateAsync(
+            publicId,
+            tx =>
+            {
+                tx.Status = ChainTransactionStatus.Approved;
+                tx.UpdatedAt = DateTime.UtcNow;
+                tx.OrderNumber = result.Data.OrderUid;
+                tx.ToAddress = result.Data.To;
+                tx.Amount = result.Data.Amount;
+            },
+            ct
+        );
+    }
 }
