@@ -11,12 +11,18 @@ public sealed class ChainTransactionConfig : IEntityTypeConfiguration<ChainTrans
         builder.HasKey(x => x.Id);
         
         builder.HasIndex(x => x.Hash).IsUnique();
+        builder.HasIndex(x => x.OrderNumber).IsUnique();
         builder.HasIndex(x => x.PublicId).IsUnique();
 
         builder.Property(x => x.PublicId)
             .HasColumnName("public_id")
             .IsRequired()
             .HasDefaultValueSql("gen_random_uuid()");
+        
+        builder.Property(o => o.OrderUid)
+            .HasColumnName("order_uid")
+            .IsRequired()
+            .HasDefaultValue(string.Empty);
         
         builder.Property(x => x.UserId)
             .HasColumnName("user_id")

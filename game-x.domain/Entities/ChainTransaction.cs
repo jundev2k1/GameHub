@@ -7,6 +7,7 @@ namespace game_x.domain.Entities;
 public sealed class ChainTransaction : BaseEntity<int>, IAuditable
 {
     public Guid PublicId { get; set; }
+    public string OrderUid { get; set; } = string.Empty;
     public string? UserId { get; set; }
     public User? User { get; set; }
     public string OrderNumber { get; set; } = string.Empty;
