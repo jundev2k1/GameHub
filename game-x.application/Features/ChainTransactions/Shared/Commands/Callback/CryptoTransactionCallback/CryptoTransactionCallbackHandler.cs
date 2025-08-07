@@ -58,7 +58,7 @@ public sealed class CryptoTransactionCallbackHandler(
             switch (transaction.Type)
             {
                 case ChainTransactionType.Deposit:
-                    await HandleDepositTransactionAsync(transaction, balance, ct);
+                    await HandleDepositTransactionAsync(requestData, balance, ct);
                     break;
                 case ChainTransactionType.Withdrawal:
                     await HandleWithdrawalTransactionAsync(transaction, balance, ct);
@@ -80,13 +80,15 @@ public sealed class CryptoTransactionCallbackHandler(
             $"Order ({requestData.OrderUid}) updated successfully.");
     }
     
-    private async Task HandleDepositTransactionAsync(ChainTransaction transaction, UserBalance balance, CancellationToken ct)
+    private async Task HandleDepositTransactionAsync(dynamic requestData, UserBalance balance, CancellationToken ct)
     {
-        await unitOfWork.WithTransactionAsync(
-            async () =>
-            {
-                
-            }, ct);
+        // Check actualAmount is positive
+        if (requestData.ActualAmount <= 0)
+            throw new BadRequestException(MessageCode.System.InvalidParameters, "Actual amount must be greater than 0.");
+        
+        // Add actualAmount to user balance
+        userBalanceService.AddAmount(balance, requestData.ActualAmount);
+        await userBalanceRepo.PutUpdateAsync(balance, ct);
     }
     
     private async Task HandleWithdrawalTransactionAsync(ChainTransaction transaction, UserBalance balance, CancellationToken ct)

@@ -37,4 +37,11 @@ public sealed class UserBalanceService : IUserBalanceService, IServices
 
         balance.FrozenAmount -= amount;
     }
+
+    public void AddAmount(UserBalance balance, decimal amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amount, nameof(amount));
+        
+        balance.Amount += amount;
+    }
 }
