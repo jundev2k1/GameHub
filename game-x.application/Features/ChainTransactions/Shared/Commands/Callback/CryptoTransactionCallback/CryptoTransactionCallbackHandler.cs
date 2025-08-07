@@ -16,7 +16,7 @@ public sealed class CryptoTransactionCallbackHandler(
     IUserBalanceService userBalanceService,
     IUserBalanceRepo userBalanceRepo,
      IAsymmetricKeyCacheService asymmetricKeyCacheService,
-    IUserUsdtLedgerService  userUsdtLedgerService)
+    IUserUsdtLedgerService userUsdtLedgerService)
     : ICommandHandler<CryptoTransactionCallbackCommand, CryptoTransactionCallbackResult>
 {
     public async Task<CryptoTransactionCallbackResult> Handle(CryptoTransactionCallbackCommand request,
