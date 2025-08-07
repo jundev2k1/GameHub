@@ -21,5 +21,6 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
     public async Task AddAsync(UserUsdtLedger userUsdtLedger, CancellationToken ct = default)
     {
         await context.UserUsdtLedgers.AddAsync(userUsdtLedger, ct);
+        await context.SaveChangesAsync(ct);
     }
 }

@@ -1,5 +1,6 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Infrastructure.Services.UserUsdtLedger;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUxmTransactionCallback;
@@ -14,7 +15,8 @@ public sealed class CryptoTransactionCallbackHandler(
     IApplicationEventDispatcher eventDispatcher,
     IUserBalanceService userBalanceService,
     IUserBalanceRepo userBalanceRepo,
-     IAsymmetricKeyCacheService asymmetricKeyCacheService)
+     IAsymmetricKeyCacheService asymmetricKeyCacheService,
+    IUserUsdtLedgerService  userUsdtLedgerService)
     : ICommandHandler<CryptoTransactionCallbackCommand, CryptoTransactionCallbackResult>
 {
     public async Task<CryptoTransactionCallbackResult> Handle(CryptoTransactionCallbackCommand request,
@@ -59,14 +61,17 @@ public sealed class CryptoTransactionCallbackHandler(
             switch (transaction.Type)
             {
                 case ChainTransactionType.Deposit:
-                    await HandleDepositTransactionAsync(requestData, balance, ct);
+                    userBalanceService.AddAmount(balance, requestData.ActualAmount);
                     break;
                 case ChainTransactionType.Withdrawal:
-                    await HandleWithdrawalTransactionAsync(transaction, balance, ct);
+                    userBalanceService.FinalizeFrozen(balance, requestData.ActualAmount);
                     break;
                 default:
                     throw new BadRequestException(MessageCode.System.InvalidParameters);
             }
+            await userBalanceRepo.PutUpdateAsync(balance, ct);
+            
+            await userUsdtLedgerService.CreateForChainTransactionAsync(transaction);
             
             await eventDispatcher.Publish(new OnUxmTransactionCallbackEvent(transaction), ct);
         }, ct);
@@ -79,19 +84,5 @@ public sealed class CryptoTransactionCallbackHandler(
  
         return new CryptoTransactionCallbackResult(
             $"Order ({requestData.OrderUid}) updated successfully.");
-    }
-    
-    private async Task HandleDepositTransactionAsync(dynamic requestData, UserBalance balance, CancellationToken ct)
-    {
-        // Update the user's balance after a successful deposit
-        userBalanceService.AddAmount(balance, requestData.ActualAmount);
-        await userBalanceRepo.PutUpdateAsync(balance, ct);
-    }
-    
-    private async Task HandleWithdrawalTransactionAsync(ChainTransaction transaction, UserBalance balance, CancellationToken ct)
-    {
-        // Update the user's balance after a successful withdrawal
-        userBalanceService.FinalizeFrozen(balance, transaction.Amount);
-        await userBalanceRepo.PutUpdateAsync(balance, ct);
     }
 }
