@@ -35,7 +35,7 @@ public sealed class OnTransactionCreatedHandler(
                 adminUser.Id,
                 NotificationType.Order,
                 NotificationSeverity.Success,
-                JsonSerializer.Serialize(transaction.Adapt<ChainTransactionDto>()));
+                JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
             await notificationRepo.AddNotificationAsync(notification, ct);
 
             // Send notification to all the admin
