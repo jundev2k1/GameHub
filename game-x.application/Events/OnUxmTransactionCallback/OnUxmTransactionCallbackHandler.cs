@@ -90,6 +90,7 @@ public sealed class OnUxmTransactionCallbackHandler(
         var userId = transaction?.UserId;
         if (userId != null)
         {
+            // Send a notification to update the transaction history
             UserUsdtLedger? userLedger = await userUsdtLedgerRepo.GetDetailByTransactionIdAsync(transaction!.Id);
             if (userLedger != null)
             {
