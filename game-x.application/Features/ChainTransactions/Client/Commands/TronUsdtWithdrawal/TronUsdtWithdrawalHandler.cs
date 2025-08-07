@@ -28,10 +28,19 @@ public sealed class TronUsdtWithdrawalHandler(
         var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(userId, request.Amount, ct);
 
         var transaction = await CreateWithdrawalChainTransaction(request, userId, feeAmount, token.Id, ct);
-            
-        await FreezeBalanceAndCreateChainTransactionAsync(transaction, balance, totalAmount, ct);
         
-        await eventDispatcher.Publish(new OnTransactionCreatedEvent(transaction), ct);
+        await unitOfWork.WithTransactionAsync( async () =>
+        {
+            await chainTransactionRepo.AddAsync(transaction, ct);
+            
+            userBalanceService.Freeze(balance, totalAmount);
+            await userBalanceRepo.PutUpdateAsync(balance, ct);
+
+            var createdTransaction = await chainTransactionRepo.GetByIdAsync(transaction.PublicId, ct)
+                ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
+            
+            await eventDispatcher.Publish(new OnTransactionCreatedEvent(createdTransaction), ct);
+        }, ct);
         
         return Unit.Value;
     }
@@ -97,19 +106,5 @@ public sealed class TronUsdtWithdrawalHandler(
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
         return (token, balance, feeAmount, totalAmount);
-    }
-    
-    private async Task FreezeBalanceAndCreateChainTransactionAsync(
-        ChainTransaction chainTransaction, 
-        UserBalance balance, 
-        decimal totalAmount, 
-        CancellationToken ct)
-    {
-        await unitOfWork.WithTransactionAsync( async () =>
-        {
-            await chainTransactionRepo.AddAsync(chainTransaction, ct);
-            userBalanceService.Freeze(balance, totalAmount);
-            await userBalanceRepo.PutUpdateAsync(balance, ct);
-        }, ct);
     }
 }

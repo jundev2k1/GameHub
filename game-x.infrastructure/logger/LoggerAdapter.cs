@@ -8,7 +8,7 @@ public class LoggerAdapter<T> : IAppLogger<T>
     private readonly ILogger<T> _logger;
     private string TypeName { get; set; }
 
-    private const string ServicePrefix = "<galaxy.api> →";
+    private const string ServicePrefix = "<game-x.api> →";
 
     public LoggerAdapter(ILoggerFactory loggerFactory)
     {
