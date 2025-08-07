@@ -14,6 +14,8 @@ public static class ChainTransactionMapping
             MerchantNumber = merchantNumber,
             OrderNumber = transaction.OrderNumber,
             Amount =  transaction.Amount,
+            To = transaction.ToAddress ?? string.Empty,
+            Remark = transaction.Note ?? string.Empty
         };
     }
 }

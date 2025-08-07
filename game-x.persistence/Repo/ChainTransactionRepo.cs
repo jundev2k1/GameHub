@@ -67,6 +67,7 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
             ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionNotFound);
 
         updateAction.Invoke(chainTransaction);
+        await context.SaveChangesAsync(ct);
     }
 
     public async Task PutUpdateAsync(ChainTransaction transaction, CancellationToken ct = default)

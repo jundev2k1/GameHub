@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnWithdrawalOrderReviewed;
 using game_x.application.Features.ChainTransactions.Mapping;
 using game_x.share.Extensions;
 using game_x.share.ExternalApi.Uxm.Dtos;
@@ -53,7 +54,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
                 throw new BadRequestException(MessageCode.System.InvalidParameters);
         }
         
-        // await eventDispatcher.Publish(new OnOrderApprovedEvent(transaction!), ct);
+        await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(transaction), ct);
         return Unit.Value;
     }
 

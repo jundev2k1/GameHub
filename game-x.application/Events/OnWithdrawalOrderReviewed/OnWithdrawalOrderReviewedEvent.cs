@@ -1,0 +1,3 @@
+namespace game_x.application.Events.OnWithdrawalOrderReviewed;
+
+public record OnWithdrawalOrderReviewedEvent(ChainTransaction Transaction) : IApplicationEvent;

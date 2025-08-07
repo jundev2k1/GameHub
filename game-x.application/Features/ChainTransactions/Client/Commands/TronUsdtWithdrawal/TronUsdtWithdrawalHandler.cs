@@ -1,6 +1,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnTransactionCreated;
 using game_x.application.Utils;
 
 namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWithdrawal;
@@ -21,12 +22,13 @@ public sealed class TronUsdtWithdrawalHandler(
         if(request.Amount < minimumAmount)
             throw new BadRequestException(MessageCode.Accounting.InvalidAmount);
         var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(userId, request.Amount, ct);
+
+        var transaction = await CreateWithdrawalChainTransaction(request, userId, feeAmount, token.Id, ct);
             
-        // Create ChainTransaction (not yet submitted)
-        var chainTransaction = await CreateWithdrawalChainTransaction(request, userId, feeAmount, token.Id, ct);
-            
-        await FreezeBalanceAndCreateChainTransactionAsync(chainTransaction, balance, totalAmount, ct);
-            
+        await FreezeBalanceAndCreateChainTransactionAsync(transaction, balance, totalAmount, ct);
+        
+        await eventDispatcher.Publish(new OnTransactionCreatedEvent(transaction), ct);
+        
         return Unit.Value;
     }
    
