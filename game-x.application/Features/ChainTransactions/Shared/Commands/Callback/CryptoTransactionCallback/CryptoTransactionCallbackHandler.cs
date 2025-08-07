@@ -83,11 +83,7 @@ public sealed class CryptoTransactionCallbackHandler(
     
     private async Task HandleDepositTransactionAsync(dynamic requestData, UserBalance balance, CancellationToken ct)
     {
-        // Check actualAmount is positive
-        if (requestData.ActualAmount <= 0)
-            throw new BadRequestException(MessageCode.System.InvalidParameters, "Actual amount must be greater than 0.");
-        
-        // Add actualAmount to user balance
+        // Update the user's balance after a successful deposit
         userBalanceService.AddAmount(balance, requestData.ActualAmount);
         await userBalanceRepo.PutUpdateAsync(balance, ct);
     }
