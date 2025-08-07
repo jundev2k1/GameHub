@@ -21,7 +21,7 @@ public sealed class KycController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpGet("status")]
+    [HttpGet("me/status")]
     public async Task<IActionResult> GetKycStatusAsync()
     {
         var query = new GetKycStatusQuery();
@@ -30,7 +30,7 @@ public sealed class KycController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPost("submit")]
+    [HttpPost("me/submit")]
     public async Task<IActionResult> SubmitKycAsync([FromForm] SubmitKycRequest formData)
     {
         var command = formData.Adapt<SubmitKycCommand>() with
@@ -51,7 +51,7 @@ public sealed class KycController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPatch("resubmit")]
+    [HttpPatch("me/resubmit")]
     public async Task<IActionResult> ResubmitAsync([FromForm] ReSubmitKycRequest formData)
     {
         var command = formData.Adapt<ResubmitKycCommand>() with
