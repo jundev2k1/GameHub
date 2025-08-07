@@ -13,7 +13,6 @@ public record GetKycProfileResult(
     string BackImageName,
     string BackImageUrl,
     KycStatus Status,
-    string StatusInfo,
     string? RejectionReason,
     string? RejectDetails,
     DateTime SubmittedAt,

@@ -9,6 +9,7 @@ namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdt
 public sealed class TronUsdtWithdrawalHandler(
     IUserBalanceService userBalanceService,
     IUnitOfWork unitOfWork,
+    IUserRepo userRepo,
     IUserAccessor userAccessor,
     IChainTransactionRepo chainTransactionRepo,
     ICryptoTokenRepo cryptoTokenRepo,
@@ -21,17 +22,47 @@ public sealed class TronUsdtWithdrawalHandler(
         int minimumAmount = 10;
         if(request.Amount < minimumAmount)
             throw new BadRequestException(MessageCode.Accounting.InvalidAmount);
+
+        await ValidateKyc(userId, ct);
+        
         var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(userId, request.Amount, ct);
 
         var transaction = await CreateWithdrawalChainTransaction(request, userId, feeAmount, token.Id, ct);
-            
-        await FreezeBalanceAndCreateChainTransactionAsync(transaction, balance, totalAmount, ct);
         
-        await eventDispatcher.Publish(new OnTransactionCreatedEvent(transaction), ct);
+        await unitOfWork.WithTransactionAsync( async () =>
+        {
+            await chainTransactionRepo.AddAsync(transaction, ct);
+            
+            userBalanceService.Freeze(balance, totalAmount);
+            await userBalanceRepo.PutUpdateAsync(balance, ct);
+
+            var createdTransaction = await chainTransactionRepo.GetByIdAsync(transaction.PublicId, ct)
+                ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
+            
+            await eventDispatcher.Publish(new OnTransactionCreatedEvent(createdTransaction), ct);
+        }, ct);
         
         return Unit.Value;
     }
    
+    private async Task ValidateKyc(
+        string userId, 
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var userKyc = await userRepo.GetKycProfileAsync(userId, ct)
+                ?? throw new Exception();
+        
+            if(userKyc.Status != KycStatus.Approved)
+                throw new Exception();
+        }
+        catch
+        {
+            throw new BadRequestException(MessageCode.User.KycInvalid);
+        }
+    }
+    
     private async Task<ChainTransaction> CreateWithdrawalChainTransaction(
         TronUsdtWithdrawalCommand request, 
         string userId, 
@@ -75,19 +106,5 @@ public sealed class TronUsdtWithdrawalHandler(
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
         return (token, balance, feeAmount, totalAmount);
-    }
-    
-    private async Task FreezeBalanceAndCreateChainTransactionAsync(
-        ChainTransaction chainTransaction, 
-        UserBalance balance, 
-        decimal totalAmount, 
-        CancellationToken ct)
-    {
-        await unitOfWork.WithTransactionAsync( async () =>
-        {
-            await chainTransactionRepo.AddAsync(chainTransaction, ct);
-            userBalanceService.Freeze(balance, totalAmount);
-            await userBalanceRepo.PutUpdateAsync(balance, ct);
-        }, ct);
     }
 }

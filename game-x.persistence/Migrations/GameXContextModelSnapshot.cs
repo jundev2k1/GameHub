@@ -500,10 +500,6 @@ namespace game_x.persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_crypto_tokens");
 
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_crypto_tokens_public_id");
-
                     b.HasIndex("Symbol", "Network")
                         .IsUnique()
                         .HasDatabaseName("ix_crypto_tokens_symbol_network");
