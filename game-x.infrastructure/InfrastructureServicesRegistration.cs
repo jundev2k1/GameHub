@@ -13,6 +13,7 @@ using game_x.infrastructure.Email;
 using game_x.infrastructure.Eventing;
 using game_x.infrastructure.Extensions;
 using game_x.infrastructure.ExternalApi.GameProvider;
+using game_x.infrastructure.ExternalApi.GameProvider.Intercepters;
 using game_x.infrastructure.ExternalApi.Uxm;
 using game_x.infrastructure.logger;
 using game_x.infrastructure.MediaStorage;
@@ -148,6 +149,7 @@ public static class InfrastructureServicesRegistration
             })
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
+        services.AddTransient<CustomApiResponseHandler>();
         services.AddRefitClient<IGameProviderApi>()
             .ConfigureHttpClient(c =>
             {
@@ -157,8 +159,9 @@ public static class InfrastructureServicesRegistration
                     ?? throw new InvalidOperationException("GameProviderSettings:ApiToken not configured");
                 c.BaseAddress = new Uri(baseUrl);
                 c.Timeout = TimeSpan.FromSeconds(5);
-                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
+                c.DefaultRequestHeaders.Add("Authorization", apiToken);
             })
+            .AddHttpMessageHandler<CustomApiResponseHandler>()
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
         return services;

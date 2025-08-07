@@ -9,14 +9,15 @@ public sealed class LoginGameHandler(IGameProviderService gameProvider) : IComma
     {
         var externalRequest = new LoginRequest
         {
-            Account = "game_123",
-            Passwd = "Aa123456",
+            Account = "20250807102055575",
+            Passwd = "Pw12312",
             Gamecode = request.GameCode,
             Address = request.Address,
             Locale = request.Locale,
             ReturnUrl = request.ReturnUrl,
         };
-        var result = await gameProvider.LoginAsync(externalRequest, request.Language, request.IpAddress!);
+        var ipTest = "https://home.tichluyvang.com";
+        var result = await gameProvider.LoginAsync(externalRequest, request.Language, ipTest!);
         return new LoginGameResult(result.Url);
     }
 }
