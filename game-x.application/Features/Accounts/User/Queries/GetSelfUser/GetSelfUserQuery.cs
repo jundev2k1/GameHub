@@ -6,7 +6,6 @@ public record GetSelfUserResult(
     string UserId,
     string Email,
     string Nickname,
-    UserStatus Status,
     bool IsKycConfirmed,
     bool IsBankConfirmed,
     string[] Roles);
