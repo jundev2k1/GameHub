@@ -7,14 +7,14 @@ namespace game_x.api.Controllers.Client.Chain;
 [Route("/api/user")]
 public sealed class ChainController : BaseApiController
 {
-    [HttpPost("tron/usdt/withdrawal")]
+    [HttpPost("withdrawal")]
     public async Task<IActionResult> SendWithdrawVerificationCode(TronUsdtWithdrawalCommand command, CancellationToken ct)
     {
         var result = await Mediator.Send(command, ct);
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPost("tron/usdt/deposit")]
+    [HttpPost("deposit")]
     public async Task<IActionResult> CreateDepositTransactionAsync(TronUsdtDepositCommand command, CancellationToken ct)
     {
         var result = await Mediator.Send(command, ct);

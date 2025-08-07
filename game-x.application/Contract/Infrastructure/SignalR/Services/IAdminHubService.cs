@@ -4,9 +4,9 @@ namespace game_x.application.Contract.Infrastructure.SignalR.Services;
 
 public interface IAdminHubService
 {
-    Task SendNotificationToAdminAsync(string adminId, NotificationDto message);
+    Task SendNotificationAsync(string adminId, NotificationDto message);
 
     Task SendNotificationToAllAsync(NotificationDto message);
 
-    Task SendOrderStatusToAdminAsync(string adminId, AdminOrderStatusDto orderInfo);
+    Task SendTransactionToAdminAsync(string adminId, AdminTransactionDto transaction);
 }

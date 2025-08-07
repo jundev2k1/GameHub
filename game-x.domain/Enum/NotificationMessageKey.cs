@@ -11,10 +11,11 @@ public enum NotificationMessageKey : short
     Job_OrderCreated = 300,
 
     // Enum group key: Order module
-    Order_Created = 400,
-    Order_CreatedFail = 401,
-    Order_Completed = 402,
-
-    Order_Approved = 403
+    Transaction_Created = 400,
+    Transaction_Failed = 401,
+    Transaction_Completed = 402,
+    Transaction_Approved = 403,
+    Transaction_Rejected = 404,
+    Transaction_Reviewed = 405,
     // Enum group key: ...
 }

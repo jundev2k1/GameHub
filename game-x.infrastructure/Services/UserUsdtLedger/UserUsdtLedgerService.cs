@@ -7,29 +7,29 @@ namespace game_x.infrastructure.Services.UserUsdtLedger;
 public sealed class UserUsdtLedgerService
     (IUserUsdtLedgerRepo userUsdtLedgerRepo ) : IUserUsdtLedgerService, IServices
 {
-    public async Task CreateForChainTransactionAsync(ChainTransaction chainTransaction)
+    public async Task CreateForChainTransactionAsync(ChainTransaction transaction)
     {
-        var flowType = chainTransaction.Type == ChainTransactionType.Deposit ? UsdtFlowType.Deposit : UsdtFlowType.Withdrawal;
+        var flowType = transaction.Type == ChainTransactionType.Deposit ? UsdtFlowType.Deposit : UsdtFlowType.Withdrawal;
 
         decimal changeAmount = flowType switch
         {
-            UsdtFlowType.Deposit => chainTransaction.Amount + chainTransaction.Fee,
-            UsdtFlowType.Withdrawal => -(chainTransaction.Amount + chainTransaction.Fee),
+            UsdtFlowType.Deposit => transaction.Amount + transaction.Fee,
+            UsdtFlowType.Withdrawal => -(transaction.Amount + transaction.Fee),
             _ => throw new InvalidOperationException($"Unsupported flow type: {flowType}")
         };
 
-        var previousLedger = await userUsdtLedgerRepo.GetLatestLedgerAsync(chainTransaction.UserId!);
+        var previousLedger = await userUsdtLedgerRepo.GetLatestLedgerAsync(transaction.UserId!);
         var previousBalance = previousLedger?.BalanceAfter ?? 0;
 
         var ledger = new domain.Entities.UserUsdtLedger
         {
-            UserId = chainTransaction.UserId!,
-            Timestamp = chainTransaction.ConfirmedAt,
+            UserId = transaction.UserId!,
+            Timestamp = transaction.ConfirmedAt,
             FlowType = flowType,
             SourceId = "",
             ChangeAmount = changeAmount,
             BalanceAfter = previousBalance + changeAmount,
-            ChainTransactionId = chainTransaction.Id,
+            ChainTransactionId = transaction.Id,
             MetaObject = new UserUsdtLedgerMeta
             {
                 CounterpartyUserId = null,

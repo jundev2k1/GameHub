@@ -10,4 +10,7 @@ public interface IUserBalanceService
 
     // Complete the order and deduct the frozen amount
     void FinalizeFrozen(UserBalance balance, decimal amount);
+    
+    // Add amount to user's balance
+    void AddAmount(UserBalance balance, decimal amount);
 }

@@ -12,6 +12,11 @@ public sealed class CryptoTokenConfig : IEntityTypeConfiguration<CryptoToken>
         
         builder.HasIndex(t => new { t.Symbol, t.Network }).IsUnique();
         
+        builder.Property(x => x.PublicId)
+            .HasColumnName("public_id")
+            .IsRequired()
+            .HasDefaultValueSql("gen_random_uuid()");
+        
         builder.Property(x => x.Symbol)
             .HasColumnName("symbol")
             .IsRequired()

@@ -9,7 +9,7 @@ namespace game_x.infrastructure.SignalR.Services;
 public sealed class AdminHubService(IHubContext<AdminHub, IAdminHub> hubContext)
     : IAdminHubService, IHubServices
 {
-    public async Task SendNotificationToAdminAsync(string adminId, NotificationDto message)
+    public async Task SendNotificationAsync(string adminId, NotificationDto message)
     {
         await hubContext.Clients.Group($"admin-{adminId}").ReceiveNotification(message);
     }
@@ -19,8 +19,8 @@ public sealed class AdminHubService(IHubContext<AdminHub, IAdminHub> hubContext)
         await hubContext.Clients.All.ReceiveNotification(message);
     }
 
-    public async Task SendOrderStatusToAdminAsync(string adminId, AdminOrderStatusDto orderInfo)
+    public async Task SendTransactionToAdminAsync(string adminId, AdminTransactionDto transaction)
     {
-        await hubContext.Clients.Group($"admin-{adminId}").OrderUpdated(orderInfo);
+        await hubContext.Clients.Group($"admin-{adminId}").TransactionUpdated(transaction);
     }
 }

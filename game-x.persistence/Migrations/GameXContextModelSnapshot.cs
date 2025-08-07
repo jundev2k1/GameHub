@@ -373,6 +373,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("from_address");
 
+                    b.Property<string>("Hash")
+                        .HasColumnType("text")
+                        .HasColumnName("hash");
+
                     b.Property<string>("Meta")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -390,6 +394,13 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("text")
                         .HasDefaultValue("")
                         .HasColumnName("order_number");
+
+                    b.Property<string>("OrderUid")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("")
+                        .HasColumnName("order_uid");
 
                     b.Property<Guid>("PublicId")
                         .ValueGeneratedOnAdd()
@@ -424,6 +435,14 @@ namespace game_x.persistence.Migrations
 
                     b.HasIndex("CryptoTokenId")
                         .HasDatabaseName("ix_chain_transactions_crypto_token_id");
+
+                    b.HasIndex("Hash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_chain_transactions_hash");
+
+                    b.HasIndex("OrderNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ix_chain_transactions_order_number");
 
                     b.HasIndex("PublicId")
                         .IsUnique()
@@ -460,6 +479,12 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(1)
                         .HasColumnName("network");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("Symbol")
                         .IsRequired()

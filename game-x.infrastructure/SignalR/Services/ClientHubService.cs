@@ -15,12 +15,12 @@ public sealed class ClientHubService(IHubContext<ClientHub, IClientHub> hubConte
         await hubContext.Clients.Group($"member-{memberId}").ReceiveNotification(message);
     }
 
-    public async Task SendToMemberAsync(string memberId, ClientOrderStatusDto orderInfo)
+    public async Task SendTransactionToMemberAsync(string memberId, ClientTransactionDto transaction)
     {
-        await hubContext.Clients.Group($"member-{memberId}").OrderUpdated(orderInfo);
+        await hubContext.Clients.Group($"member-{memberId}").TransactionUpdated(transaction);
     }
     
-    public async Task PushBalanceUpdateAsync(string userId, List<WalletsBaseDto> balance)
+    public async Task SendBalanceToMemberAsync(string userId, ClientBalanceDto balance)
     {
         await hubContext.Clients.Group($"member-{userId}").BalanceUpdated(balance);
     }
