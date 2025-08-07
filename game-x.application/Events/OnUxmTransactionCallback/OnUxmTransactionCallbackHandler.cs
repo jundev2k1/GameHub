@@ -16,6 +16,7 @@ public sealed class OnUxmTransactionCallbackHandler(
     IChainTransactionRepo chainTransactionRepo,
     IUserBalanceRepo userBalanceRepo,
     IUserUsdtLedgerService userUsdtLedgerService,
+    IUserUsdtLedgerRepo userUsdtLedgerRepo,
     IUserRepo userRepo,
     INotificationRepo notificationRepo,
     IAdminHubService adminHubService,
@@ -89,18 +90,21 @@ public sealed class OnUxmTransactionCallbackHandler(
         var userId = transaction?.UserId;
         if (userId != null)
         {
-            var notification = Notification.Create(
-                NotificationMessageKey.Transaction_Completed,
-                userId,
-                NotificationType.Transaction,
-                NotificationSeverity.Success,
-                JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
-            await notificationRepo.AddNotificationAsync(notification, ct);
-
-            // Send notification to all the admin
-            await clientHubService.SendNotificationToMemberAsync(
-                userId,
-                notification.Adapt<NotificationDto>());
+            UserUsdtLedger? userLedger = await userUsdtLedgerRepo.GetDetailByTransactionIdAsync(transaction!.Id);
+            if (userLedger != null)
+            {
+                var notification = Notification.Create(
+                    NotificationMessageKey.UserLedger_Created,
+                    userId,
+                    NotificationType.UserLedger,
+                    NotificationSeverity.Success,
+                    JsonSerializer.Serialize(userLedger));
+                await notificationRepo.AddNotificationAsync(notification, ct);
+                
+                await clientHubService.SendNotificationToMemberAsync(
+                    userId,
+                    notification.Adapt<NotificationDto>());
+            }
         
             await clientHubService.SendBalanceToMemberAsync(
                 userId,
