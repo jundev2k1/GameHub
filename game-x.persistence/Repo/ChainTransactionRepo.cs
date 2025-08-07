@@ -16,6 +16,8 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
     {
         return await context.ChainTransactions
             .AsNoTracking()
+            .Include(t => t.User!)
+                .ThenInclude(u => u.UserBalances)
             .FirstOrDefaultAsync(x => x.PublicId == publicId, ct);
     }
 
