@@ -6,11 +6,10 @@ namespace game_x.api.Controllers.Admin.Chain;
 [Route("/api/admin")]
 public sealed class ChainController : BaseApiController
 {
-    [HttpPost("tron/usdt/withdrawal/{orderId}/review")]
-    public async Task<IActionResult> ReviewWithdrawalOrderAsync(Guid orderId, AdminReviewWithdrawalOrderCommand command, CancellationToken ct)
+    [HttpPost("withdrawal/{orderId}/review")]
+    public async Task<IActionResult> ReviewWithdrawalOrderAsync(Guid orderId, [FromBody] AdminReviewWithdrawalOrderCommand command, CancellationToken ct)
     {
-        command.OrderId = orderId;
-        var result = await Mediator.Send(command, ct);
+        var result = await Mediator.Send(command with {OrderId = orderId}, ct);
         return ApiResponseFactory.Ok(result);
     }
 }

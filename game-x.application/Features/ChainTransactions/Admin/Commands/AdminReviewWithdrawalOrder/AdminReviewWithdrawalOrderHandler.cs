@@ -44,10 +44,10 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         switch (request.OrderStatus)
         {
             case ChainTransactionStatus.Approved:
-                await HandleRejectTransactionAsync(transaction, ct);
+                await HandleApproveTransactionAsync(transaction, ct);
                 break;
             case ChainTransactionStatus.Rejected:
-                await HandleApproveTransactionAsync(transaction, ct);
+                await HandleRejectTransactionAsync(transaction, ct);
                 break;
             default:
                 throw new BadRequestException(MessageCode.System.InvalidParameters);

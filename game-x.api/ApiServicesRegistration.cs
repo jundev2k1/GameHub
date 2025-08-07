@@ -33,7 +33,8 @@ public static class ApiServicesRegistration
         services.AddDataProtection();
         services.AddSwaggerServices();
 
-        // Add controllers, configure to automatically convert Enum int type to string type for API request/response
+        // Add controllers,
+        // Configure to automatically convert an Enum int type to a string type for API request/response
         services.AddControllers().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.Converters.Add(
