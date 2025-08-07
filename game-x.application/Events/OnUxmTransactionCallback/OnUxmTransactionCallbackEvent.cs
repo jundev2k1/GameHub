@@ -1,0 +1,3 @@
+namespace game_x.application.Events.OnUxmTransactionCallback;
+
+public record OnUxmTransactionCallbackEvent(ChainTransaction Transaction): IApplicationEvent;

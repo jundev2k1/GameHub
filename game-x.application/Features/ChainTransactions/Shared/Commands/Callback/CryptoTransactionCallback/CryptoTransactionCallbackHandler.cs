@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnUxmTransactionCallback;
 using game_x.share.Context;
 
 namespace game_x.application.Features.ChainTransactions.Shared.Commands.Callback.CryptoTransactionCallback;
@@ -25,7 +26,7 @@ public sealed class CryptoTransactionCallbackHandler(
         var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
         var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, requestData, signature);
         if (!isValid)
-            throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");;
+            throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
 
         ChainTransaction? transaction = 
             await chainTransactionRepo.GetByOrderNumberAsync(requestData.OrderNumber ?? string.Empty, ct);
@@ -50,8 +51,8 @@ public sealed class CryptoTransactionCallbackHandler(
                 order.UpdateUxmResponse(
                     actualAmount: requestData.ActualAmount,
                     orderUid: requestData.OrderUid ?? string.Empty,
-                    hash: requestData?.Hash ?? string.Empty,
-                    confirmedAt: requestData?.ConfirmedAt
+                    hash: requestData.Hash ?? string.Empty,
+                    confirmedAt: requestData.ConfirmedAt
                 );
             }, ct);
             
@@ -67,7 +68,7 @@ public sealed class CryptoTransactionCallbackHandler(
                     throw new BadRequestException(MessageCode.System.InvalidParameters);
             }
             
-            // Set order for event publishing (Send real-time message to staff and all the admin)
+            await eventDispatcher.Publish(new OnUxmTransactionCallbackEvent(transaction), ct);
         }, ct);
         
         // Ensure the audit log records the order status updated by the external API

@@ -18,8 +18,8 @@ public interface IClientHub
     ///     Notify that an order has been updated.
     /// </summary>
     /// <param name="orderInfo">The order information that was updated.</param>
-    Task OrderUpdated(ClientOrderStatusDto orderInfo);
-    Task BalanceUpdated(List<WalletsBaseDto> dto);
+    Task TransactionUpdated(ClientTransactionDto orderInfo);
+    Task BalanceUpdated(ClientBalanceDto dto);
 }
 
 [Authorize(Roles = AppRoles.User)]

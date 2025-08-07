@@ -16,8 +16,8 @@ public interface IAdminHub
     /// <summary>
     ///     Notify that an order has been updated.
     /// </summary>
-    /// <param name="orderInfo">The order information that was updated.</param>
-    Task OrderUpdated(AdminOrderStatusDto orderInfo);
+    /// <param name="transaction">The transaction information that was updated.</param>
+    Task TransactionUpdated(AdminTransactionDto transaction);
 }
 
 [Authorize(Roles = AppRoles.Admin)]
