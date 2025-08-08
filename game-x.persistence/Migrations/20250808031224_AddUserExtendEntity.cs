@@ -20,7 +20,7 @@ namespace game_x.persistence.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     user_id = table.Column<string>(type: "text", nullable: false, defaultValue: ""),
                     urex_gp_account = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: ""),
-                    urex_gp_password = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: ""),
+                    urex_gp_password = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: false, defaultValue: ""),
                     urex_gp_nickname = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: ""),
                     urex_gp_rebateset = table.Column<decimal>(type: "numeric", nullable: false, defaultValue: 0m),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),

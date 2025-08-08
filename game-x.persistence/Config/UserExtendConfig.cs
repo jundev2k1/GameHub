@@ -27,7 +27,7 @@ public class UserExtendConfig : IEntityTypeConfiguration<UserExtend>
         builder.Property(urex => urex.GameProviderPassword)
             .HasColumnName("urex_gp_password")
             .IsRequired()
-            .HasMaxLength(50)
+            .HasMaxLength(4000)
             .HasDefaultValue(string.Empty);
 
         builder.Property(urex => urex.GameProviderNickname)

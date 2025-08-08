@@ -874,8 +874,8 @@ namespace game_x.persistence.Migrations
                     b.Property<string>("GameProviderPassword")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
                         .HasDefaultValue("")
                         .HasColumnName("urex_gp_password");
 

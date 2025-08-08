@@ -1,6 +1,6 @@
 ﻿namespace game_x.domain.Entities;
 
-public sealed class UserExtend : BaseEntity<int>, IEntity, IAuditable
+public sealed class UserExtend : BaseEntity<int>, IEntity
 {
     public string UserId { get; private set; } = string.Empty;
     public User User { get; private set; } = default!;
