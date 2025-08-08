@@ -99,7 +99,7 @@ public sealed class OnUxmTransactionCallbackHandler(
                     userId,
                     NotificationType.UserLedger,
                     NotificationSeverity.Success,
-                    JsonSerializer.Serialize(userLedger));
+                    JsonSerializer.Serialize(userLedger.Adapt<UserUsdtLedgerNotificationDto>()));
                 await notificationRepo.AddNotificationAsync(notification, ct);
                 
                 await clientHubService.SendNotificationToMemberAsync(
@@ -121,7 +121,7 @@ public sealed class OnUxmTransactionCallbackHandler(
         var adminUsers = await userRepo.GetAdminUsers(ct);
 
         foreach (var adminUser in adminUsers)
-        {
+        { 
             var notification = Notification.Create(
                 NotificationMessageKey.Transaction_Completed,
                 adminUser.Id,
