@@ -1,0 +1,49 @@
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace game_x.persistence.Config;
+
+public class UserExtendConfig : IEntityTypeConfiguration<UserExtend>
+{
+    public void Configure(EntityTypeBuilder<UserExtend> builder)
+    {
+        builder.ToTable("user_extends");
+
+        builder.HasKey(urex => urex.Id);
+
+        builder.Property(urex => urex.Id)
+            .IsRequired()
+            .ValueGeneratedOnAdd();
+
+        builder.Property(urex => urex.UserId)
+            .IsRequired()
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(urex => urex.GameProviderAccount)
+            .HasColumnName("urex_gp_account")
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(urex => urex.GameProviderPassword)
+            .HasColumnName("urex_gp_password")
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(urex => urex.GameProviderNickname)
+            .HasColumnName("urex_gp_nickname")
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(urex => urex.GameProviderRebateset)
+            .HasColumnName("urex_gp_rebateset")
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.HasOne(urex => urex.User)
+            .WithOne(u => u.UserExtend)
+            .HasForeignKey<UserExtend>(urex => urex.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
