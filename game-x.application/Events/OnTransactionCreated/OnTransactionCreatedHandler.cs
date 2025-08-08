@@ -29,13 +29,12 @@ public sealed class OnTransactionCreatedHandler(
 
         foreach (var adminUser in adminUsers)
         {
-            // Create notification
             var notification = Notification.Create(
                 NotificationMessageKey.Transaction_Created,
                 adminUser.Id,
-                NotificationType.Order,
+                NotificationType.Transaction,
                 NotificationSeverity.Success,
-                JsonSerializer.Serialize(transaction.Adapt<ChainTransactionDto>()));
+                JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
             await notificationRepo.AddNotificationAsync(notification, ct);
 
             // Send notification to all the admin

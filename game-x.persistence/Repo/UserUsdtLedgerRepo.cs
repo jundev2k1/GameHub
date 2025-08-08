@@ -18,6 +18,13 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
             .FirstOrDefaultAsync();
     }
     
+    public async Task<UserUsdtLedger?> GetDetailByTransactionIdAsync(int transactionId)
+    {
+        return await context.UserUsdtLedgers
+            .Where(x => x.ChainTransactionId == transactionId)
+            .FirstOrDefaultAsync();
+    }
+    
     public async Task AddAsync(UserUsdtLedger userUsdtLedger, CancellationToken ct = default)
     {
         await context.UserUsdtLedgers.AddAsync(userUsdtLedger, ct);

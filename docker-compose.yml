@@ -19,7 +19,11 @@ services:
       - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
 
       - UxmSettings__Host=${UXM_HOST}
-      - GameXSettings__MerchantNumber=${GAMEX_MERCHANTNUMBER}
+
+      - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
+      - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}
+      - GameProviderSettings__AesKey=${GAMEPROVIDER_AESKEY}
+      - GameProviderSettings__Iv=${GAMEPROVIDER_IV}
 
       - JwtSettings__DurationInMinutes=${JWT_EXPIRED_MINUTES}
       - JwtSettings__Key=${JWT_SECRET}

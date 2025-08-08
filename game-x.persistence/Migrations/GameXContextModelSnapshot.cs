@@ -867,6 +867,56 @@ namespace game_x.persistence.Migrations
                     b.ToTable("user_balances", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.UserExtend", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("GameProviderAccount")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("")
+                        .HasColumnName("urex_gp_account");
+
+                    b.Property<string>("GameProviderNickname")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("")
+                        .HasColumnName("urex_gp_nickname");
+
+                    b.Property<string>("GameProviderPassword")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("urex_gp_password");
+
+                    b.Property<decimal>("GameProviderRebateset")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("urex_gp_rebateset");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_extends");
+
+                    b.ToTable("user_extends", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.UserKyc", b =>
                 {
                     b.Property<int>("Id")
@@ -1198,6 +1248,18 @@ namespace game_x.persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.UserExtend", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithOne("UserExtend")
+                        .HasForeignKey("game_x.domain.Entities.UserExtend", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_extends_users_id");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.UserKyc", b =>
                 {
                     b.HasOne("game_x.domain.Entities.MediaFile", "BackImage")
@@ -1286,8 +1348,9 @@ namespace game_x.persistence.Migrations
 
                     b.Navigation("UserBalances");
 
-                    b.Navigation("UserKyc")
-                        .IsRequired();
+                    b.Navigation("UserExtend");
+
+                    b.Navigation("UserKyc");
 
                     b.Navigation("UserRoles");
 

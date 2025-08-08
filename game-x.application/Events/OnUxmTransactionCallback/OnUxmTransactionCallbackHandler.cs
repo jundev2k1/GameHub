@@ -1,3 +1,4 @@
+using System.Text.Json;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Services.UserUsdtLedger;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
@@ -15,6 +16,10 @@ public sealed class OnUxmTransactionCallbackHandler(
     IChainTransactionRepo chainTransactionRepo,
     IUserBalanceRepo userBalanceRepo,
     IUserUsdtLedgerService userUsdtLedgerService,
+    IUserUsdtLedgerRepo userUsdtLedgerRepo,
+    IUserRepo userRepo,
+    INotificationRepo notificationRepo,
+    IAdminHubService adminHubService,
     IAppLogger<ChainTransaction> logger) : IApplicationEventHandler<OnUxmTransactionCallbackEvent>
 {
     public async Task Handle(OnUxmTransactionCallbackEvent @event, CancellationToken ct = default)
@@ -64,8 +69,8 @@ public sealed class OnUxmTransactionCallbackHandler(
                 
                 await userUsdtLedgerService.CreateForChainTransactionAsync(transaction);
                 
-                if(transaction.UserId != null)
-                    await SendToMember(transaction.UserId, balance, ct);
+                await SendToMember(balance, transaction, ct);
+                await SendToAdmin(transaction, ct);
             }, ct);
             
             // Ensure the audit log records the order status updated by the external API
@@ -80,13 +85,63 @@ public sealed class OnUxmTransactionCallbackHandler(
         }
     }
 
-    private async Task SendToMember(string userId, UserBalance balance, CancellationToken ct)
+    private async Task SendToMember(UserBalance balance, ChainTransaction transaction, CancellationToken ct)
     {
-        await clientHubService.SendBalanceToMemberAsync(
-            userId,
-            new ClientBalanceDto(
-                BalanceId: balance.PublicId,
-                Amount: balance.Amount,
-                FrozenAmount: balance.FrozenAmount));
+        var userId = transaction?.UserId;
+        if (userId != null)
+        {
+            // Send a notification to update the transaction history
+            UserUsdtLedger? userLedger = await userUsdtLedgerRepo.GetDetailByTransactionIdAsync(transaction!.Id);
+            if (userLedger != null)
+            {
+                var notification = Notification.Create(
+                    NotificationMessageKey.UserLedger_Created,
+                    userId,
+                    NotificationType.UserLedger,
+                    NotificationSeverity.Success,
+                    JsonSerializer.Serialize(userLedger.Adapt<UserUsdtLedgerNotificationDto>()));
+                await notificationRepo.AddNotificationAsync(notification, ct);
+                
+                await clientHubService.SendNotificationToMemberAsync(
+                    userId,
+                    notification.Adapt<NotificationDto>());
+            }
+        
+            await clientHubService.SendBalanceToMemberAsync(
+                userId,
+                new ClientBalanceDto(
+                    BalanceId: balance.PublicId,
+                    Amount: balance.Amount,
+                    FrozenAmount: balance.FrozenAmount));
+        }
+    }
+    
+    private async Task SendToAdmin(ChainTransaction transaction, CancellationToken ct)
+    {
+        var adminUsers = await userRepo.GetAdminUsers(ct);
+
+        foreach (var adminUser in adminUsers)
+        { 
+            var notification = Notification.Create(
+                NotificationMessageKey.Transaction_Completed,
+                adminUser.Id,
+                NotificationType.Transaction,
+                NotificationSeverity.Success,
+                JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
+            await notificationRepo.AddNotificationAsync(notification, ct);
+
+            // Send notification to all the admin
+            await adminHubService.SendNotificationAsync(
+                adminUser.Id,
+                notification.Adapt<NotificationDto>());
+
+            // Send transaction to all the admin
+            await adminHubService.SendTransactionToAdminAsync(
+                adminUser.Id,
+                new AdminTransactionDto(
+                    TransactionId: transaction.PublicId,
+                    Status: transaction.Status.ToString(),
+                    Type: transaction.Type.ToString()));
+        }
     }
 }

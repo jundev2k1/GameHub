@@ -18,7 +18,8 @@ public class User : IdentityUser, IEntity, IAuditable
     public ICollection<UserBalance> UserBalances { get; set; } = [];
     public ICollection<BalanceTransferLog> BalanceTransferLogs { get; set; } = [];
 
-    public UserKyc UserKyc { get; set; } = null!;
+    public UserExtend? UserExtend { get; set; }
+    public UserKyc? UserKyc { get; set; }
     public ICollection<UserRole> UserRoles { get; set; } = [];
 
     public static User Create(
@@ -103,6 +104,11 @@ public class User : IdentityUser, IEntity, IAuditable
     public bool IsAdmin => Has(AppRoles.Admin);
     public bool IsCs => Has(AppRoles.Cs);
     public bool IsUser => Has(AppRoles.User);
+
+    public void AddUserExtend(UserExtend userExtend)
+    {
+        UserExtend = userExtend;
+    }
 
     public void AddUserKyc(UserKyc kycProfile)
     {

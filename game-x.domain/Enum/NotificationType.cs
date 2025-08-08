@@ -9,4 +9,5 @@ public enum NotificationType : short
     Order = 4,
     User = 5,
     Transaction = 6,
+    UserLedger = 7,
 }

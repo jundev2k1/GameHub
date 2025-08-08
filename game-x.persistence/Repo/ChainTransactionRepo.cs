@@ -32,6 +32,7 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
         return await context.ChainTransactions
             .Include(t => t.User!)
                 .ThenInclude(u => u.UserBalances)
+            .Include(t => t.CryptoToken)
             .FirstOrDefaultAsync(x => x.OrderNumber == orderNumber, ct);
     }
 
