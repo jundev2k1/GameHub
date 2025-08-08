@@ -32,7 +32,7 @@ public sealed class CreateDepositChainTransactionHandler(
             await unitOfWork.SaveChangesAsync(ct);
 
             // 2. Call UXM API
-            var uxmRequest = CreateUxmRequest(request, localTransaction.PublicId, userId);
+            var uxmRequest = CreateUxmRequest(request, localTransaction.OrderNumber, userId);
             var apiResponse = await uxmService.CreateDepositOrderAsync(uxmRequest);
 
             // 3. Verify signature from UXM
@@ -87,7 +87,7 @@ public sealed class CreateDepositChainTransactionHandler(
 
     private SecureRequest<UxmDepositOrderRequestData> CreateUxmRequest(
         TronUsdtDepositCommand request,
-        Guid publicId,
+        string orderNumber,
         string userId)
     {
         var merchantNumber = configuration.GetValue<string>("GameXSettings:MerchantNumber")
@@ -96,7 +96,7 @@ public sealed class CreateDepositChainTransactionHandler(
         var requestData = new UxmDepositOrderRequestData(
             merchantNumber,
             request.Amount,
-            publicId.ToString(),
+            orderNumber,
             userId,
             request.Note
         );
