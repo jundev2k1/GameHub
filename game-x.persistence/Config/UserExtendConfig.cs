@@ -11,12 +11,7 @@ public class UserExtendConfig : IEntityTypeConfiguration<UserExtend>
         builder.HasKey(urex => urex.Id);
 
         builder.Property(urex => urex.Id)
-            .IsRequired()
-            .ValueGeneratedOnAdd();
-
-        builder.Property(urex => urex.UserId)
-            .IsRequired()
-            .HasDefaultValue(string.Empty);
+            .IsRequired();
 
         builder.Property(urex => urex.GameProviderAccount)
             .HasColumnName("urex_gp_account")
@@ -43,7 +38,7 @@ public class UserExtendConfig : IEntityTypeConfiguration<UserExtend>
 
         builder.HasOne(urex => urex.User)
             .WithOne(u => u.UserExtend)
-            .HasForeignKey<UserExtend>(urex => urex.UserId)
+            .HasForeignKey<UserExtend>(urex => urex.Id)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

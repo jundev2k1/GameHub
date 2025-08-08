@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -16,9 +15,7 @@ namespace game_x.persistence.Migrations
                 name: "user_extends",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    user_id = table.Column<string>(type: "text", nullable: false, defaultValue: ""),
+                    id = table.Column<string>(type: "text", nullable: false),
                     urex_gp_account = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: ""),
                     urex_gp_password = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: false, defaultValue: ""),
                     urex_gp_nickname = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: ""),
@@ -30,18 +27,12 @@ namespace game_x.persistence.Migrations
                 {
                     table.PrimaryKey("pk_user_extends", x => x.id);
                     table.ForeignKey(
-                        name: "fk_user_extends_users_user_id",
-                        column: x => x.user_id,
+                        name: "fk_user_extends_users_id",
+                        column: x => x.id,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_user_extends_user_id",
-                table: "user_extends",
-                column: "user_id",
-                unique: true);
         }
 
         /// <inheritdoc />

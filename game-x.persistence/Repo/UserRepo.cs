@@ -19,7 +19,10 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
 
     public async Task<User> GetUserByIdAsync(string userId, CancellationToken ct = default)
     {
-        var targetUser = await userManager.FindByIdAsync(userId)
+        var targetUser = await context.Users
+            .Include(u => u.UserKyc)
+            .Include(u => u.UserExtend)
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
         var (isActive, errorCode) = targetUser.CheckValidUser();
@@ -50,6 +53,7 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
         var targetUser = await context.Users
             .AsNoTracking()
             .Include(u => u.UserKyc)
+            .Include(u => u.UserExtend)
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)

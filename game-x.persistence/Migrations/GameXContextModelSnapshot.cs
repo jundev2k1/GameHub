@@ -844,12 +844,9 @@ namespace game_x.persistence.Migrations
 
             modelBuilder.Entity("game_x.domain.Entities.UserExtend", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -889,19 +886,8 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id")
                         .HasName("pk_user_extends");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_user_extends_user_id");
 
                     b.ToTable("user_extends", (string)null);
                 });
@@ -1241,10 +1227,10 @@ namespace game_x.persistence.Migrations
                 {
                     b.HasOne("game_x.domain.Entities.User", "User")
                         .WithOne("UserExtend")
-                        .HasForeignKey("game_x.domain.Entities.UserExtend", "UserId")
+                        .HasForeignKey("game_x.domain.Entities.UserExtend", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_user_extends_users_user_id");
+                        .HasConstraintName("fk_user_extends_users_id");
 
                     b.Navigation("User");
                 });

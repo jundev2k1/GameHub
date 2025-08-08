@@ -7,7 +7,6 @@ public record LoginGameCommand(
     string Locale,
     string Address,
     string ReturnUrl,
-    string Language,
     [property: JsonIgnore]string? IpAddress) : ICommand<LoginGameResult>;
 
 public record LoginGameResult(string EmbededLink);
