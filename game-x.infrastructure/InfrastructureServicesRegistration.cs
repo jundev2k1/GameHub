@@ -2,17 +2,23 @@ using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Events;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Email;
+using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Polly;
 using game_x.infrastructure.Caching;
 using game_x.infrastructure.Email;
 using game_x.infrastructure.Eventing;
 using game_x.infrastructure.Extensions;
+using game_x.infrastructure.ExternalApi.GameProvider;
+using game_x.infrastructure.ExternalApi.GameProvider.Intercepters;
 using game_x.infrastructure.ExternalApi.Uxm;
 using game_x.infrastructure.logger;
 using game_x.infrastructure.MediaStorage;
+using game_x.infrastructure.Security.Asymmetric;
+using game_x.infrastructure.Security.Encryption;
 using game_x.share.Settings;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -60,7 +66,12 @@ public static class InfrastructureServicesRegistration
         // Add external services
         services.AddScoped<IEmailService, EngageLabEmailService>();
         services.AddScoped<IUxmService, UxmService>();
+        services.AddScoped<IGameProviderService, GameProviderService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
+
+        // Add security services
+        services.AddSingleton<IAsymmetricCryptoService, AsymmetricCryptoService>();
+        services.AddSingleton<IGameAesEncryptor, GameAesEncryptor>();
 
         // Add services DI
         services.Scan(scan => scan.FromApplicationDependencies()
@@ -109,17 +120,18 @@ public static class InfrastructureServicesRegistration
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
         // EngageLab API
-        services.AddRefitClient<IEngageLabEmailApi>(new RefitSettings
-        {
-            ContentSerializer = new NewtonsoftJsonContentSerializer(new JsonSerializerSettings
+        services
+            .AddRefitClient<IEngageLabEmailApi>(new RefitSettings
             {
-                ContractResolver = new DefaultContractResolver
+                ContentSerializer = new NewtonsoftJsonContentSerializer(new JsonSerializerSettings
                 {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                },
-                NullValueHandling = NullValueHandling.Ignore
+                    ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new SnakeCaseNamingStrategy()
+                    },
+                    NullValueHandling = NullValueHandling.Ignore
+                })
             })
-        })
             .ConfigureHttpClient(c =>
             {
                 var baseUrl = configuration["EngageLabSettings:BaseUrl"]
@@ -134,7 +146,23 @@ public static class InfrastructureServicesRegistration
                 c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
                 c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 c.Timeout = TimeSpan.FromSeconds(10);
-            }).AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
+            })
+            .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
+
+        services.AddTransient<CustomApiResponseHandler>();
+        services.AddRefitClient<IGameProviderApi>()
+            .ConfigureHttpClient(c =>
+            {
+                var baseUrl = configuration["GameProviderSettings:Host"]
+                    ?? throw new InvalidOperationException("GameProviderSettings:Host not configured");
+                var apiToken = configuration["GameProviderSettings:ApiToken"]
+                    ?? throw new InvalidOperationException("GameProviderSettings:ApiToken not configured");
+                c.BaseAddress = new Uri(baseUrl);
+                c.Timeout = TimeSpan.FromSeconds(5);
+                c.DefaultRequestHeaders.Add("Authorization", apiToken);
+            })
+            .AddHttpMessageHandler<CustomApiResponseHandler>()
+            .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
         return services;
     }
