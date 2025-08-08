@@ -1,4 +1,5 @@
 ﻿using game_x.application.Features.Games.Commands.LoginGame;
+using game_x.application.Features.Games.Queries.WalletGame;
 
 namespace game_x.api.Controllers.Client.Game;
 
@@ -12,6 +13,14 @@ public sealed class GameController : BaseApiController
         var ipAddress = HttpContext.Connection.RemoteIpAddress.ToStringOrEmpty();
         var command = request with { IpAddress = ipAddress };
         var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpGet("me/wallet")]
+    public async Task<IActionResult> GetWalletAsync()
+    {
+        var query = new GetWalletGameQuery();
+        var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
 }

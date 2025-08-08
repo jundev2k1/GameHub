@@ -1,4 +1,5 @@
-﻿using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
@@ -9,7 +10,8 @@ public sealed class LoginGameHandler(
     IUserAccessor userAccessor,
     IUserRepo userRepo,
     IGameProviderService gameProvider,
-    IGameAesEncryptor aesEncryptor) : ICommandHandler<LoginGameCommand, LoginGameResult>
+    IGameAesEncryptor aesEncryptor,
+    IGameProviderCacheService gameProviderCache) : ICommandHandler<LoginGameCommand, LoginGameResult>
 {
     public async Task<LoginGameResult> Handle(LoginGameCommand request, CancellationToken ct = default)
     {
@@ -22,6 +24,7 @@ public sealed class LoginGameHandler(
         if (!targetUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
+        gameProviderCache.Language = request.Locale;
         var externalRequest = new LoginRequest
         {
             Account = targetUser.UserExtend.GameProviderAccount,
@@ -31,7 +34,7 @@ public sealed class LoginGameHandler(
             Locale = request.Locale,
             ReturnUrl = request.ReturnUrl,
         };
-        var result = await gameProvider.LoginAsync(externalRequest, request.Locale, request.IpAddress!);
+        var result = await gameProvider.LoginAsync(externalRequest, request.IpAddress!);
         return new LoginGameResult(result.Url);
     }
 }

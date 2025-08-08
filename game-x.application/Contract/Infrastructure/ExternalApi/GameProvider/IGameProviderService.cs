@@ -1,11 +1,14 @@
 ﻿using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
+using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 
 namespace game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 
 public interface IGameProviderService
 {
-    Task<LoginResponse> LoginAsync(LoginRequest data, string language, string ip);
+    Task<LoginResponse> LoginAsync(LoginRequest data, string ip);
 
-    Task<RegisterResponse> RegisterAsync(RegisterRequest data, string language);
+    Task<RegisterResponse> RegisterAsync(RegisterRequest data);
+
+    Task<WalletResponse> GetWalletAsync(WalletRequest data);
 }

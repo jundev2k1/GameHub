@@ -72,7 +72,7 @@ public sealed class RegisterUserHandler(
             Alias = nickName,
             Rebateset = 0M,
         };
-        await gameProvider.RegisterAsync(request, "zh-Hant");
+        await gameProvider.RegisterAsync(request);
         return (account, password, 0M);
     }
 }
