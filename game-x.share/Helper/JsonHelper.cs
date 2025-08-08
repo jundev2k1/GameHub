@@ -1,4 +1,5 @@
 ﻿using game_x.share.Extensions;
+using Newtonsoft.Json;
 using System.Text.Json;
 
 namespace game_x.share.Helper;
@@ -33,6 +34,25 @@ public static class JsonHelper
         }
         catch
         {
+            return false;
+        }
+    }
+
+    public static bool TryParseJson<T>(string json, out T? result) where T : class
+    {
+        var settings = new JsonSerializerSettings
+        {
+            MissingMemberHandling = MissingMemberHandling.Error
+        };
+
+        try
+        {
+            result = JsonConvert.DeserializeObject<T>(json, settings);
+            return true;
+        }
+        catch
+        {
+            result = default;
             return false;
         }
     }

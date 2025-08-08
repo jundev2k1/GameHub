@@ -10,12 +10,15 @@ public enum NotificationMessageKey : short
     // Enum group key: background job
     Job_OrderCreated = 300,
 
-    // Enum group key: Order module
+    // Enum group key: Transaction module
     Transaction_Created = 400,
     Transaction_Failed = 401,
     Transaction_Completed = 402,
     Transaction_Approved = 403,
     Transaction_Rejected = 404,
     Transaction_Reviewed = 405,
+    
+    // Enum group key: UserLedger module
+    UserLedger_Created = 500,
     // Enum group key: ...
 }

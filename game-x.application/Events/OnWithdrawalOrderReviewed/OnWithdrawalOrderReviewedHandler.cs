@@ -24,7 +24,7 @@ public sealed class OnWithdrawalOrderReviewedHandler(
             transaction.UserId,
             NotificationType.Transaction,
             NotificationSeverity.Success,
-            JsonSerializer.Serialize(transaction.Adapt<ChainTransactionDto>()));
+            JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
         await notificationRepo.AddNotificationAsync(notification, ct);
 
         if (transaction.UserId != null)
