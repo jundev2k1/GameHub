@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -11,9 +12,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250808063810_AddUserExtendEntity")]
+    partial class AddUserExtendEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -373,10 +376,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("from_address");
 
-                    b.Property<string>("Hash")
-                        .HasColumnType("text")
-                        .HasColumnName("hash");
-
                     b.Property<string>("Meta")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -394,13 +393,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("text")
                         .HasDefaultValue("")
                         .HasColumnName("order_number");
-
-                    b.Property<string>("OrderUid")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("")
-                        .HasColumnName("order_uid");
 
                     b.Property<Guid>("PublicId")
                         .ValueGeneratedOnAdd()
@@ -435,14 +427,6 @@ namespace game_x.persistence.Migrations
 
                     b.HasIndex("CryptoTokenId")
                         .HasDatabaseName("ix_chain_transactions_crypto_token_id");
-
-                    b.HasIndex("Hash")
-                        .IsUnique()
-                        .HasDatabaseName("ix_chain_transactions_hash");
-
-                    b.HasIndex("OrderNumber")
-                        .IsUnique()
-                        .HasDatabaseName("ix_chain_transactions_order_number");
 
                     b.HasIndex("PublicId")
                         .IsUnique()
@@ -479,12 +463,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(1)
                         .HasColumnName("network");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id")
-                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("Symbol")
                         .IsRequired()

@@ -1,5 +1,4 @@
-﻿using game_x.application.Common.Abstractions;
-using game_x.application.Contract.Infrastructure.Security;
+﻿using game_x.application.Contract.Infrastructure.Security;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
@@ -7,7 +6,7 @@ using System.Security.Cryptography;
 
 namespace game_x.infrastructure.Security.Asymmetric;
 
-public class AsymmetricCryptoService : IAsymmetricCryptoService, IServices
+public class AsymmetricCryptoService : IAsymmetricCryptoService
 {
     public (string PublicKeyPem, string PrivateKeyPem) GenerateKeyPair()
     {
