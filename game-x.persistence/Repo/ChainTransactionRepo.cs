@@ -29,7 +29,10 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
 
     public async Task<ChainTransaction?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct)
     {
-        return await context.ChainTransactions.FirstOrDefaultAsync(x => x.OrderNumber == orderNumber, ct);
+        return await context.ChainTransactions
+            .Include(t => t.User!)
+                .ThenInclude(u => u.UserBalances)
+            .FirstOrDefaultAsync(x => x.OrderNumber == orderNumber, ct);
     }
 
     public async Task<(decimal txLogUserFrozenAmount, decimal chainTxLogpendingFee)> GetTxLogSummaryAsync(CancellationToken ct)

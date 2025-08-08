@@ -27,18 +27,18 @@ public sealed class CreateDepositChainTransactionHandler(
         {
             var userId = userAccessor.GetUserId();
 
-            // 1. Tạo local chain transaction
+            // 1. Create local chain transaction
             var localTransaction = await CreateLocalChainTransaction(request, userId, ct);
             await unitOfWork.SaveChangesAsync(ct);
 
-            // 2. Gọi UXM API
+            // 2. Call UXM API
             var uxmRequest = CreateUxmRequest(request, localTransaction.PublicId, userId);
             var apiResponse = await uxmService.CreateDepositOrderAsync(uxmRequest);
 
-            // 3. Verify signature từ UXM
+            // 3. Verify signature from UXM
             ValidateUxmResponse(apiResponse);
 
-            // 4. Cập nhật chain transaction
+            // 4. Update chain transaction
             await UpdateChainTransaction(localTransaction.PublicId, apiResponse, ct);
 
             // 5. Commit transaction
