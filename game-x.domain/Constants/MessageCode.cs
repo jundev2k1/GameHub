@@ -244,6 +244,9 @@ public static class MessageCode
         /// <summary>Transaction order not found.</summary>
         [EnumMetadata("Chain transaction not found.")]
         ChainTransactionNotFound = 10210,
+        /// <summary>Transaction history not found.</summary>
+        [EnumMetadata("Transaction history not found.")]
+        ChainTransactionHistoryNotFound = 10211,
         #endregion
     }
     
