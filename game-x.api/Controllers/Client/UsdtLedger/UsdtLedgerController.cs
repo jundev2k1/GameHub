@@ -6,7 +6,7 @@ using game_x.application.Features.ChainTransactions.Client.Queries.GetUsdtLedger
 namespace game_x.api.Controllers.Client.UsdtLedger;
 
 [Authorize(Roles = AppRoles.User)]
-[Route("/api/usdt-ledgers")]
+[Route("/api/user/usdt-ledgers")]
 public class UsdtLedgerController : BaseApiController
 {
     /// <summary>
