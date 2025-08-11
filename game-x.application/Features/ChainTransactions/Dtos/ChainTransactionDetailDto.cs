@@ -4,7 +4,6 @@ public class ChainTransactionDetailDto
 {
     public Guid Id { get; set; }
     public string? UserId { get; set; }
-    public string OrderNumber { get; set; } = string.Empty;
     public string? Hash { get; set; }
     public string? FromAddress { get; set; }
     public string? ToAddress { get; set; }
