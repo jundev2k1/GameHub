@@ -3,10 +3,10 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.ChainTransactions.Client.Queries.GetUsdtLedgerCriteriaByUser;
 using game_x.application.Features.ChainTransactions.Client.Queries.GetUsdtLedgerDetail;
 
-namespace game_x.api.Controllers.Common;
+namespace game_x.api.Controllers.Client.UsdtLedger;
 
 [Authorize(Roles = AppRoles.User)]
-[Route("/api/user/usdt-ledgers")]
+[Route("/api/usdt-ledgers")]
 public class UsdtLedgerController : BaseApiController
 {
     /// <summary>

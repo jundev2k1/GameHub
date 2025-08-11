@@ -22,7 +22,6 @@ public sealed class MapsterConfig : IRegister
         
         cfg.NewConfig<UserBalance, GetSelfUserBalanceResult>()
             .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
-            ;
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId);
     }
 }
