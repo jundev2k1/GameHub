@@ -24,7 +24,8 @@ public sealed class ResubmitKycHandler(
                     request.FullName,
                     request.DateOfBirth,
                     request.Address,
-                    request.IdNumber);
+                    request.IdNumber,
+                    request.Type);
                 updateKyc = targetKyc;
             }, ct);
 

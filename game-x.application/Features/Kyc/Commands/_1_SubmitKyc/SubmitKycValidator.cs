@@ -1,4 +1,5 @@
 ﻿using game_x.application.Common.Files;
+using game_x.application.Extensions;
 
 namespace game_x.application.Features.Kyc.Commands._1_SubmitKyc;
 
@@ -21,7 +22,8 @@ public sealed class SubmitKycValidator : AbstractValidator<SubmitKycCommand>
 
         RuleFor(x => x.IdNumber)
             .NotEmpty().WithMessage($"{nameof(SubmitKycCommand.IdNumber)} must be not empty.")
-            .MaximumLength(20).WithMessage($"{nameof(SubmitKycCommand.IdNumber)} must be not greater than 20 characters.");
+            .MaximumLength(20).WithMessage($"{nameof(SubmitKycCommand.IdNumber)} must be not greater than 20 characters.")
+            .IsNumber(nameof(SubmitKycCommand.IdNumber));
 
         RuleFor(x => x.FrontImage)
             .Must(BeAValidFileType).WithMessage("Invalid file type.")

@@ -38,6 +38,10 @@ public class UserKycConfig : IEntityTypeConfiguration<UserKyc>
             .HasMaxLength(50)
             .IsRequired();
 
+        builder.Property(uk => uk.KycType)
+            .HasConversion<short>()
+            .IsRequired();
+
         builder.Property(uk => uk.FrontImageId)
             .IsRequired(false);
 

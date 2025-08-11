@@ -5,5 +5,6 @@ public record SubmitKycRequest(
     DateTime DateOfBirth,
     string Address,
     string IdNumber,
+    KycType Type,
     IFormFile FrontPhoto,
     IFormFile BackPhoto);

@@ -11,6 +11,7 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
     public DateTime DateOfBirth { get; private set; }
     public string ResidentialAddress { get; private set; } = string.Empty;
     public string IdNumber { get; private set; } = string.Empty;
+    public KycType KycType { get; private set; }
 
     public int? FrontImageId { get; private set; }
     public MediaFile? FrontImage { get; private set; } = default!;
@@ -31,7 +32,8 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
         string fullName,
         DateTime dateOfBirth,
         string address,
-        string idNumber)
+        string idNumber,
+        KycType type)
     {
         return new UserKyc
         {
@@ -41,6 +43,7 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
             ResidentialAddress = address,
             IdNumber = idNumber,
             Status = KycStatus.NotSubmitted,
+            KycType = type,
         };
     }
 
@@ -84,7 +87,7 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
         DateReviewed = DateTime.UtcNow;
     }
 
-    public void Resubmit(string? fullName, DateTime? dob, string? address, string? idNumber)
+    public void Resubmit(string? fullName, DateTime? dob, string? address, string? idNumber, KycType? type)
     {
         if (Status != KycStatus.Rejected && Status != KycStatus.UnderReview)
             throw new ArgumentException("Only rejected KYC can be resubmitted.");
@@ -93,6 +96,7 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
         DateOfBirth = dob?.ToUniversalTime() ?? DateOfBirth;
         ResidentialAddress = address ?? ResidentialAddress;
         IdNumber = idNumber ?? IdNumber;
+        KycType = type ?? KycType;
         Status = KycStatus.UnderReview;
         SubmittedAt = DateTime.UtcNow;
         DateReviewed = null;
