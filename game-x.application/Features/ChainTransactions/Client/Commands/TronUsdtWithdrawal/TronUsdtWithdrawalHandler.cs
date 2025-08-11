@@ -25,7 +25,7 @@ public sealed class TronUsdtWithdrawalHandler(
 
         await ValidateKyc(userId, ct);
         
-        var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(userId, request.Amount, ct);
+        var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(userId, request.Amount, request.CryptoTokenId, ct);
 
         var transaction = await CreateWithdrawalChainTransaction(request, userId, feeAmount, token.Id, ct);
         
@@ -87,16 +87,15 @@ public sealed class TronUsdtWithdrawalHandler(
     }
     
     private async Task<(CryptoToken Token, UserBalance Balance, decimal FeeAmount, decimal TotalAmount)>
-        ResolveBalanceInfoAsync(string userId, decimal amount, CancellationToken ct)
+        ResolveBalanceInfoAsync(string userId, decimal amount, Guid cryptoTokenId, CancellationToken ct)
     {
-        const NetworkType network = NetworkType.Tron;
-        const string symbol = CryptoTokenSymbol.Usdt;
-        
-        var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(symbol, network, ct)
-                    ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
+        var token = await cryptoTokenRepo.GetByIdAsync(cryptoTokenId, ct);
 
+        if (token.Status != CryptoTokenStatus.Active)
+            throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
+                
         var balance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
-                      ?? throw new BadRequestException(MessageCode.Accounting.WalletNotFound);
+            ?? throw new BadRequestException(MessageCode.Accounting.WalletNotFound);
 
         decimal feeAmount = 3m;
         decimal totalAmount = amount + feeAmount;

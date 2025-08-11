@@ -9,5 +9,8 @@ public sealed class TronUsdtWithdrawalValidator : AbstractValidator<TronUsdtWith
         RuleFor(x => x.To)
             .NotEmpty()
             .WithMessage($"{nameof(TronUsdtWithdrawalCommand.To)} is required.");
+        RuleFor(x => x.CryptoTokenId)
+            .NotEmpty()
+            .WithMessage($"{nameof(TronUsdtWithdrawalCommand.CryptoTokenId)} is required.");
     }
 }

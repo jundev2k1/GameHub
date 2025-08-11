@@ -63,13 +63,10 @@ public sealed class CreateDepositChainTransactionHandler(
         string userId,
         CancellationToken ct)
     {
-        // Get crypto token dynamically like withdrawal logic
-        const NetworkType network = NetworkType.Tron;
-        const string symbol = CryptoTokenSymbol.Usdt;
-
-        var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(symbol, network, ct)
-            ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
-
+        var token = await cryptoTokenRepo.GetByIdAsync(request.CryptoTokenId, ct);
+        if(token.Status != CryptoTokenStatus.Active)
+            throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
+        
         var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(chainTransactionRepo, ct);
 
         var transaction = ChainTransaction.Create(

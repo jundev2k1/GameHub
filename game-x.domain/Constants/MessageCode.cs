@@ -289,6 +289,9 @@ public static class MessageCode
         /// <summary>CryptoToken configuration not found.</summary>
         [EnumMetadata("CryptoToken configuration not found.")]
         CryptoTokenNotFound = 10300,
+        /// <summary>CryptoToken configuration not found.</summary>
+        [EnumMetadata("CryptoToken is unsupported.")]
+        CryptoTokenUnsupported = 10301,
         #endregion
     }
 }
