@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Exceptions;
 using FluentAssertions;
+using game_x.application.Common.Abstractions.Events;
 using game_x.domain.Constants;
 using game_x.domain.Entities;
 using game_x.domain.Enum;
@@ -15,13 +16,15 @@ public sealed class UserLoginHandlerTests
 {
     private readonly Mock<IJwtTokenGenerator> _jwtTokenGeneratorMock = new();
     private readonly Mock<IAuthService> _authServiceMock = new();
+    private readonly Mock<IApplicationEventDispatcher> _eventDispatcherMock = new();
     private readonly UserLoginHandler _handler;
 
     public UserLoginHandlerTests()
     {
         _handler = new UserLoginHandler(
             jwtTokenGenerator: _jwtTokenGeneratorMock.Object, 
-            authService: _authServiceMock.Object);
+            authService: _authServiceMock.Object,
+            eventDispatcher: _eventDispatcherMock.Object);
     }
 
     [Fact]

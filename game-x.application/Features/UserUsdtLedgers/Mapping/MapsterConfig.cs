@@ -25,6 +25,12 @@ public sealed class MapsterConfig : IRegister
         
         cfg.NewConfig<UserUsdtLedger, UserUsdtLedgerDto>()
             .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.ChainTransactionId, src => src.ChainTransaction != null ? src.ChainTransaction.PublicId : Guid.Empty);
+            .Map(dest => dest.ChainTransactionId, src => src.ChainTransaction != null ? src.ChainTransaction.PublicId : Guid.Empty);        
+        
+        cfg.NewConfig<UserUsdtLedger, UserUsdtLedgerDetailDto>()
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.ChainTransactionId, src => src.ChainTransaction != null ? src.ChainTransaction.PublicId : Guid.Empty)
+            .Map(dest => dest.Amount, src => src.ChainTransaction != null ? src.ChainTransaction.Amount : 0)
+            .Map(dest => dest.Fee, src => src.ChainTransaction != null ? src.ChainTransaction.Fee : 0);
     }
 }

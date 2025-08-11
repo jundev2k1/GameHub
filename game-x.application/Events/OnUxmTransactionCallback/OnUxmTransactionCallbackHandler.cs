@@ -43,6 +43,9 @@ public sealed class OnUxmTransactionCallbackHandler(
             
             await unitOfWork.WithTransactionAsync(async () =>
             {
+                // Create transaction history before updating transaction
+                await userUsdtLedgerService.CreateForChainTransactionAsync(transaction);
+                
                 await chainTransactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
                 {
                     order.UpdateStatus(ChainTransactionStatus.Completed);
@@ -66,8 +69,6 @@ public sealed class OnUxmTransactionCallbackHandler(
                         throw new BadRequestException(MessageCode.System.InvalidParameters);
                 }
                 await userBalanceRepo.PutUpdateAsync(balance, ct);
-                
-                await userUsdtLedgerService.CreateForChainTransactionAsync(transaction);
                 
                 await SendToMember(balance, transaction, ct);
                 await SendToAdmin(transaction, ct);

@@ -12,7 +12,7 @@ public interface IUserUsdtLedgerRepo
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default);
-    Task<UserUsdtLedger> GetLatestLedgerAsync(string userId);
+    Task<UserUsdtLedger?> GetLatestLedgerAsync(string userId);
     Task<UserUsdtLedger> GetDetailByUserAsync(string userId, Guid ledgerId, CancellationToken ct = default);
     Task<UserUsdtLedger> GetDetailByIdAsync(Guid ledgerId, CancellationToken ct = default);
     Task<UserUsdtLedger> GetDetailByIdAsync(int ledgerId, CancellationToken ct = default);
