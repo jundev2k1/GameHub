@@ -1,4 +1,5 @@
 ﻿using game_x.application.Features.Games.Commands.GameWallet.Deposit;
+using game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
 using game_x.application.Features.Games.Commands.LoginGame;
 using game_x.application.Features.Games.Queries.WalletGame;
 
@@ -27,6 +28,15 @@ public sealed class GameController : BaseApiController
 
     [HttpPost("wallet/deposit")]
     public async Task<IActionResult> DepositAsync(WalletDepositCommand request)
+    {
+        var ipAddress = HttpContext.Connection.RemoteIpAddress.ToStringOrEmpty();
+        var command = request with { IpAddress = ipAddress };
+        var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpPost("wallet/withdrawal")]
+    public async Task<IActionResult> WithdrawalAsync(WalletWithdrawalCommand request)
     {
         var ipAddress = HttpContext.Connection.RemoteIpAddress.ToStringOrEmpty();
         var command = request with { IpAddress = ipAddress };

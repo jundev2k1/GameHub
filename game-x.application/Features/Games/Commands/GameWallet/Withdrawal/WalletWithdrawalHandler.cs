@@ -1,18 +1,18 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
+using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
 
-namespace game_x.application.Features.Games.Commands.GameWallet.Deposit;
+namespace game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
 
-public sealed class WalletDepositHandler(
+public sealed class WalletWithdrawalHandler(
     IUserAccessor userAccessor,
     IUserRepo userRepo,
     IUserBalanceRepo userBalanceRepo,
     ICryptoTokenRepo cryptoTokenRepo,
-    IGameProviderService gameProvider) : ICommandHandler<WalletDepositCommand, WalletDepositResponse>
+    IGameProviderService gameProvider) : ICommandHandler<WalletWithdrawalCommand, WalletWithdrawalResponse>
 {
-    public async Task<WalletDepositResponse> Handle(WalletDepositCommand request, CancellationToken ct = default)
+    public async Task<WalletWithdrawalResponse> Handle(WalletWithdrawalCommand request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
         var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
@@ -21,15 +21,14 @@ public sealed class WalletDepositHandler(
 
         if (!targetUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
-        var depositRequest = new DepositRequest
+        var withdrawalRequest = new WithdrawalRequest
         {
             Account = targetUser.UserExtend.GameProviderAccount,
             Quota = request.Quota,
             Sno = GenerateTransactionId()
-
         };
 
-        var result = await gameProvider.WalletDepositAsync(depositRequest, request.IpAddress!);
+        var result = await gameProvider.WalletWithdrawalAsync(withdrawalRequest, request.IpAddress!);
 
         if (result.issuccess)
         {
@@ -42,11 +41,8 @@ public sealed class WalletDepositHandler(
             var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
             if (userBalance == null)
                 throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
-
-            if (userBalance.Amount < request.Quota)
-                throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
-
-            userBalance.Amount -= request.Quota;
+                
+            userBalance.Amount += request.Quota;
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
         }
 

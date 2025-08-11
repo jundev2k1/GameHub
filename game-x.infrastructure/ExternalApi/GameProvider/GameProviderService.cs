@@ -8,6 +8,7 @@ using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
+using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
 using Newtonsoft.Json;
 
 namespace game_x.infrastructure.ExternalApi.GameProvider;
@@ -174,6 +175,43 @@ public sealed class GameProviderService(
         catch (Exception ex)
         {
             logger.LogError("Failed to send deposit request to GameProvider: {Ex}", ex);
+            throw;
+        }
+    }
+    public async Task<WalletWithdrawalResponse> WalletWithdrawalAsync(WithdrawalRequest data, string ip)
+    {
+        try
+        {
+            logger.LogInformation("Send deposit request to GameProvider: account = {Account}, quota = {Quota}, sno = {Sno}", data.Account, data.Quota, data.Sno);
+
+            var json = JsonConvert.SerializeObject(data);
+            var request = aesEncryptor.Encrypt(json);
+            var bodyPayload = new PayloadRequest
+            {
+                Data = request,
+            };
+
+            var result = await gameApi.WithdrawalAsync(bodyPayload, gameProviderCache.Language);
+            if (!result.IsSuccessStatusCode || result.Content == null)
+            {
+                logger.LogError($"Response failed: Status={result.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            var resJson = aesEncryptor.Decrypt(result.Content.Data);
+            var response = JsonConvert.DeserializeObject<WalletWithdrawalResponse>(resJson);
+            if (!response!.issuccess)
+            {
+                // logger.LogError($"Response failed: Code={response.ErrorCode} - Message={response.ErrorMessage}");
+                throw new ExternalServiceException();
+            }
+
+            logger.LogInformation("Withdrawal request successful, Isuccess: {success}", response.issuccess.ToString());
+            return response!;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to send withdrawal request to GameProvider: {Ex}", ex);
             throw;
         }
     }

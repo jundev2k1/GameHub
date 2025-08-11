@@ -28,4 +28,9 @@ public interface IGameProviderApi
     Task<ApiResponse<PayloadRequest>> DepositAsync(
         [Body] PayloadRequest request,
         [Header("Language")] string language);
+
+    [Post("/v1/wallet/withdrawal")]
+    Task<ApiResponse<PayloadRequest>> WithdrawalAsync(
+        [Body] PayloadRequest request,
+        [Header("Language")] string language);
 }
