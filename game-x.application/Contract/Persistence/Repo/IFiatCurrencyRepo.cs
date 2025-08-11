@@ -7,4 +7,6 @@ public interface IFiatCurrencyRepo
     Task<FiatCurrency> GetByIdAsync(Guid id, CancellationToken ct = default);
 
     Task<FiatCurrency> GetByIdAsync(int id, CancellationToken ct = default);
+
+    Task<FiatCurrency> GetByCodeAsync(CurrencyUnit code, CancellationToken ct = default);
 }

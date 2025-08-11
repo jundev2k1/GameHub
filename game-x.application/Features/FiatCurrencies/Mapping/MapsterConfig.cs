@@ -7,7 +7,7 @@ public sealed class MapsterConfig : IRegister
     public void Register(TypeAdapterConfig cfg)
     {
         cfg.NewConfig<FiatCurrency, FiatCurrencyDto>()
-            .Map(src => src.Id, dest => dest.PublicId)
-            .Map(src => src.Code, dest => dest.Code.Value);
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Code, src => src.Code.Value);
     }
 }

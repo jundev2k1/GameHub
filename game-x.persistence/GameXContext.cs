@@ -31,6 +31,7 @@ public sealed class GameXContext(
     public DbSet<UserUsdtLedger> UserUsdtLedgers { get; set; }
     public DbSet<BalanceTransferLog> BalanceTransferLogs { get; set; }
     public DbSet<FiatCurrency> FiatCurrencies { get; set; }
+    public DbSet<UserBankAccount> UserBankAccounts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -117,6 +117,8 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
     {
         var targetUser = await context.AppUsers
             .Include(u => u.UserKyc)
+            .Include(u => u.UserBankAccounts)
+            .ThenInclude(uba => uba.FiatCurrency)
             .FirstOrDefaultAsync(user => user.Id == userId, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 

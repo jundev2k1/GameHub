@@ -31,4 +31,13 @@ public sealed class FiatCurrencyRepo(GameXContext context) : IFiatCurrencyRepo, 
             ?? throw new NotFoundException(nameof(FiatCurrency), id);
         return result;
     }
+
+    public async Task<FiatCurrency> GetByCodeAsync(CurrencyUnit code, CancellationToken ct = default)
+    {
+        var result = await context.FiatCurrencies
+            .AsNoTracking()
+            .FirstOrDefaultAsync(fc => fc.Code.Equals(code) && fc.IsActive, ct)
+            ?? throw new NotFoundException(nameof(FiatCurrency), code.Value);
+        return result;
+    }
 }

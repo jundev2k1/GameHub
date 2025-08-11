@@ -190,6 +190,15 @@ public static class MessageCode
         /// <summary>User has not verified KYC.</summary>
         [EnumMetadata("User has not verified KYC.")]
         KycInvalid = 10118,
+        /// <summary>Bank account already exists.</summary>
+        [EnumMetadata("Bank account already exists.")]
+        BankAccountAlreadyExists = 10119,
+        /// <summary>Invalid bank account.</summary>
+        [EnumMetadata("Invalid bank account.")]
+        BankAccountInvalid = 10120,
+        /// <summary>Bank account is not verified.</summary>
+        [EnumMetadata("Bank account is not verified.")]
+        BankAccountNotVerified = 10121,
         #endregion
 
         #region ■ Message group: Success
