@@ -8,6 +8,7 @@ public record GetKycProfileResult(
     DateTime DateOfBirth,
     string ResidentialAddress,
     string IdNumber,
+    KycType Type,
     string FrontImageName,
     string FrontImageUrl,
     string BackImageName,
