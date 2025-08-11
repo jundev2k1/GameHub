@@ -87,11 +87,11 @@ public sealed class OnUxmTransactionCallbackHandler(
 
     private async Task SendToMember(UserBalance balance, ChainTransaction transaction, CancellationToken ct)
     {
-        var userId = transaction?.UserId;
+        var userId = transaction.UserId;
         if (userId != null)
         {
             // Send a notification to update the transaction history
-            UserUsdtLedger? userLedger = await userUsdtLedgerRepo.GetDetailByTransactionIdAsync(transaction!.Id);
+            UserUsdtLedger? userLedger = await userUsdtLedgerRepo.GetDetailByTransactionIdAsync(transaction.Id);
             if (userLedger != null)
             {
                 var notification = Notification.Create(
@@ -130,12 +130,10 @@ public sealed class OnUxmTransactionCallbackHandler(
                 JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
             await notificationRepo.AddNotificationAsync(notification, ct);
 
-            // Send notification to all the admin
             await adminHubService.SendNotificationAsync(
                 adminUser.Id,
                 notification.Adapt<NotificationDto>());
 
-            // Send transaction to all the admin
             await adminHubService.SendTransactionToAdminAsync(
                 adminUser.Id,
                 new AdminTransactionDto(
