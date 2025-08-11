@@ -1,4 +1,4 @@
-using game_x.application.Common;
+using game_x.application.Features.FiatCurrencies.Queries.GetFiatCurrencies;
 
 namespace game_x.api.Controllers.Common;
 
@@ -7,8 +7,9 @@ namespace game_x.api.Controllers.Common;
 public sealed class CurrencyCodeController : BaseApiController
 {
     [HttpGet("currency-codes")]
-    public IActionResult GetCurrencyCodeAsync()
+    public async Task<IActionResult> GetCurrencyCodeAsync()
     {
-        return ApiResponseFactory.Ok(CurrencyCodeProvider.All());
+        var result = await Mediator.Send(new GetFiatCurrenciesQuery());
+        return ApiResponseFactory.Ok(result);
     }
 }
