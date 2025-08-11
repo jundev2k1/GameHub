@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
 using game_x.share.ExternalApi.GameProvider.Dtos;
+using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
@@ -115,15 +116,23 @@ public sealed class GameProviderService(
             }
 
             var resJson = aesEncryptor.Decrypt(result.Content.Data);
-            var response = JsonConvert.DeserializeObject<WalletResponse>(resJson);
-            if (!response!.IsSuccess)
+            logger.LogInformation("Full wallet response: {response}", resJson);
+            var gameProviderResponse = JsonConvert.DeserializeObject<GameProviderWalletResponse>(resJson);
+            if (!gameProviderResponse!.issuccess)
             {
-                logger.LogError($"Response failed: Code={response.ErrorCode} - Message={response.ErrorMessage}");
+                logger.LogError("Response failed from GameProvider");
                 throw new ExternalServiceException();
             }
 
+            var response = new WalletResponse
+            {
+                IsSuccess = true,
+                Currency = gameProviderResponse.data.currency,
+                Quota = gameProviderResponse.data.quota
+            };
+
             logger.LogInformation("Get wallet request successful，Quota: {quota}, Currency: {currency}", response.Quota.ToString(), response.Currency);
-            return response!;
+            return response;
         }
         catch (Exception ex)
         {
@@ -131,4 +140,42 @@ public sealed class GameProviderService(
             throw;
         }
     }
+    public async Task<WalletDepositResponse> WalletDepositAsync(DepositRequest data, string ip)
+    {
+        try
+        {
+            logger.LogInformation("Send deposit request to GameProvider: account = {Account}, quota = {Quota}, sno = {Sno}", data.Account, data.Quota, data.Sno);
+
+            var json = JsonConvert.SerializeObject(data);
+            var request = aesEncryptor.Encrypt(json);
+            var bodyPayload = new PayloadRequest
+            {
+                Data = request,
+            };
+
+            var result = await gameApi.DepositAsync(bodyPayload, gameProviderCache.Language);
+            if (!result.IsSuccessStatusCode || result.Content == null)
+            {
+                logger.LogError($"Response failed: Status={result.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            var resJson = aesEncryptor.Decrypt(result.Content.Data);
+            var response = JsonConvert.DeserializeObject<WalletDepositResponse>(resJson);
+            if (!response!.issuccess)
+            {
+                // logger.LogError($"Response failed: Code={response.ErrorCode} - Message={response.ErrorMessage}");
+                throw new ExternalServiceException();
+            }
+
+            logger.LogInformation("Deposit request successful, Isuccess: {success}", response.issuccess.ToString());
+            return response!;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to send deposit request to GameProvider: {Ex}", ex);
+            throw;
+        }
+    }
+
 }

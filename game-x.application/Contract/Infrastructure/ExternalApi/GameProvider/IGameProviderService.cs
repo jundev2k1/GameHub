@@ -1,4 +1,5 @@
-﻿using game_x.share.ExternalApi.GameProvider.Dtos.Login;
+﻿using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
+using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 
@@ -11,4 +12,7 @@ public interface IGameProviderService
     Task<RegisterResponse> RegisterAsync(RegisterRequest data);
 
     Task<WalletResponse> GetWalletAsync(WalletRequest data);
+
+    Task<WalletDepositResponse> WalletDepositAsync(DepositRequest data, string ip);
+
 }
