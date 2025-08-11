@@ -4,17 +4,11 @@ public class ChainTransactionDto
 {
     public Guid Id { get; set; }
     public string? UserId { get; set; }
-    public string OrderNumber { get; set; } = string.Empty;
-    public string? Hash { get; set; }
-    public string? FromAddress { get; set; }
-    public string? ToAddress { get; set; }
     public decimal Amount { get; set; }
     public decimal Fee { get; set; }
     public Guid CryptoTokenId { get; set; }
-    public DateTime ConfirmedAt { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public string? Note { get; set; }
-    public ChainTransactionMeta? Meta { get; set; }
+    public ChainTransactionType Type { get; set; }
+    public ChainTransactionStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

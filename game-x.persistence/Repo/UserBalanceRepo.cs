@@ -13,6 +13,15 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
         return context.UserBalances;
     }
 
+    public async Task<IEnumerable<UserBalance>> GetBalancesByUserIdAsync(string userId, CancellationToken ct = default)
+    {
+        return await context.UserBalances
+            .AsNoTracking()
+            .Include(item => item.CryptoToken)
+            .Where(x => x.UserId == userId)
+            .ToListAsync(ct);
+    }
+    
     public async Task<UserBalance?> GetByUserIdAndTokenIdAsync(string userId, int cryptoTokenId, CancellationToken ct = default)
     {
         return await context.UserBalances

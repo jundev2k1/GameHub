@@ -15,6 +15,13 @@ public sealed class CryptoTokenRepo(GameXContext context): ICryptoTokenRepo, IRe
         return context.CryptoTokens;
     }
 
+    public async Task<IEnumerable<CryptoToken>> GetCryptoTokenListAsync(CancellationToken ct = default)
+    {
+        return await context.CryptoTokens
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+    
     public async Task<CryptoToken?> GetBySymbolAndNetworkAsync(string symbol, NetworkType network, CancellationToken ct = default)
     {
         return await context.CryptoTokens.AsNoTracking()

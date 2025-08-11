@@ -3,9 +3,8 @@ namespace game_x.application.Contract.Persistence.Repo;
 public interface IUserBalanceRepo
 {
     IQueryable<UserBalance> Query();
-
+    Task<IEnumerable<UserBalance>> GetBalancesByUserIdAsync(string userId, CancellationToken ct = default);
     Task<UserBalance?> GetByUserIdAndTokenIdAsync(string userId, int cryptoTokenId, CancellationToken ct = default);
-
     Task<(decimal totalUserAmount, decimal totalUserForzenAmount)> GetTotalUserAndAgentAvailableBalanceAsync(CancellationToken ct);
     Task CreateAsync(UserBalance userBalance);
     Task BulkInsertAsync(IEnumerable<UserBalance> userBalances);
