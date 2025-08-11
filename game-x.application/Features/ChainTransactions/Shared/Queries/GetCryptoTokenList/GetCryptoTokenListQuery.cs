@@ -6,4 +6,5 @@ public record CryptoTokenDto(
     Guid Id,
     string Symbol,
     NetworkType Network,
-    string ContractAddress);
+    string ContractAddress,
+    CryptoTokenStatus Status);

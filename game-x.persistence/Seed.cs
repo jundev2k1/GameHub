@@ -109,13 +109,15 @@ public static class Seed
                 {
                     Symbol = CryptoTokenSymbol.Usdt,
                     Network = NetworkType.Tron,
-                    ContractAddress = "trc20-ContractAddress"
+                    ContractAddress = "trc20-ContractAddress",
+                    Status = CryptoTokenStatus.Active,
                 },
                 new()
                 {
                     Symbol = CryptoTokenSymbol.Usdt,
                     Network = NetworkType.Ethereum,
-                    ContractAddress = "erc20-ContractAddress"
+                    ContractAddress = "erc20-ContractAddress",
+                    Status = CryptoTokenStatus.Inactive
                 },
             };
             await context.CryptoTokens.AddRangeAsync(cryptoTokens);
