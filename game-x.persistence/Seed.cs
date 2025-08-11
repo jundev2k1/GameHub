@@ -121,6 +121,18 @@ public static class Seed
             await context.CryptoTokens.AddRangeAsync(cryptoTokens);
         }
 
+        if (!context.FiatCurrencies.Any())
+        {
+            var fiatCurrencies = new List<FiatCurrency>
+            {
+                FiatCurrency.Create(CurrencyUnit.Of("TWD"), "New Taiwan Dollar", "TWD", string.Empty, false),
+                FiatCurrency.Create(CurrencyUnit.Of("USD"), "US Dollar", "USD", string.Empty, false),
+                FiatCurrency.Create(CurrencyUnit.Of("CNY"), "Chinese Yuan", "CNY", string.Empty),
+                FiatCurrency.Create(CurrencyUnit.Of("VND"), "Vietnamese Dong", "VND", string.Empty),
+            };
+            await context.FiatCurrencies.AddRangeAsync(fiatCurrencies);
+        }
+
         await context.SaveChangesAsync();
     }
 }
