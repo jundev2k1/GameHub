@@ -36,8 +36,7 @@ public sealed class TronUsdtWithdrawalHandler(
             userBalanceService.Freeze(balance, totalAmount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
 
-            var createdTransaction = await chainTransactionRepo.GetByIdAsync(transaction.PublicId, ct)
-                ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
+            var createdTransaction = await chainTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
             
             await eventDispatcher.Publish(new OnTransactionCreatedEvent(createdTransaction), ct);
         }, ct);
