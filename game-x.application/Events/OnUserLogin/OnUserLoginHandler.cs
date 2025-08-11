@@ -8,7 +8,8 @@ public sealed class OnUserLoginHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     IUserUsdtLedgerRepo userUsdtLedgerRepo,
     IUserRepo userRepo,
-    IAppLogger<ChainTransaction> logger)
+    IUserBalanceRepo userBalanceRepo,
+    IAppLogger<ChainTransaction> logger): IApplicationEventHandler<OnUserLoginEvent>
 {
     private static readonly ConcurrentDictionary<string, byte> ProcessingUsers = new();
     
@@ -40,8 +41,7 @@ public sealed class OnUserLoginHandler(
             if (token == null) return;
 
             // Get the user's current USDT balance
-            var usdtBalance = user.UserBalances
-                .FirstOrDefault(b => b.CryptoTokenId == token.Id);
+            var usdtBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(user.Id, token.Id, ct);
             if (usdtBalance == null) return;
 
             var initLedger = new UserUsdtLedger

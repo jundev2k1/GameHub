@@ -22,8 +22,8 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
     {
         var query = context.UserUsdtLedgers
             .AsNoTracking()
-            .Include(o => o.ChainTransaction)
-            .Where(o => o.UserId == userId)
+            .Include(x => x.ChainTransaction)
+            .Where(x => x.UserId == userId && x.FlowType != UsdtFlowType.Init)
             .AsQueryable();
 
         if (queryBuilder != null)
