@@ -1,4 +1,5 @@
 ﻿using game_x.application.Common.Files;
+using game_x.application.Extensions;
 using game_x.application.Features.Kyc.Commands._1_SubmitKyc;
 
 namespace game_x.application.Features.Kyc.Commands._3_ResubmitKyc;
@@ -25,6 +26,7 @@ public sealed class ResubmitKycValidator : AbstractValidator<ResubmitKycCommand>
         RuleFor(x => x.IdNumber)
             .NotEmpty().WithMessage($"{nameof(SubmitKycCommand.IdNumber)} must be not empty.")
             .MaximumLength(20).WithMessage($"{nameof(SubmitKycCommand.IdNumber)} must be not greater than 20 characters.")
+            .IsNumber(nameof(SubmitKycCommand.IdNumber))
             .When(x => x.IdNumber is not null);
 
         RuleFor(x => x.FrontImage)

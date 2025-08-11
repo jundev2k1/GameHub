@@ -30,7 +30,8 @@ public sealed class SubmitKycHandler(
                     fullName: request.FullName.Trim(),
                     dateOfBirth: request.DateOfBirth,
                     address: request.Address,
-                    idNumber: request.IdNumber);
+                    idNumber: request.IdNumber,
+                    type: request.Type);
                 userKyc.UploadFrontImage(CreateMediaFile(request.FrontImage, frontObjectName));
                 userKyc.UploadBackImage(CreateMediaFile(request.BackImage, backObjectName));
                 userKyc.Submit();

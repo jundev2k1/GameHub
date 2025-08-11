@@ -7,5 +7,6 @@ public record SubmitKycCommand(
     DateTime DateOfBirth,
     string Address,
     string IdNumber,
+    KycType Type,
     FileUpload FrontImage,
     FileUpload BackImage) : ICommand;
