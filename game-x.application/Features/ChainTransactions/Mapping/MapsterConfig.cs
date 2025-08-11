@@ -1,4 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionCriteriaByAdmin;
+using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.application.Features.ChainTransactions.Shared.Queries.GetCryptoTokenList;
 
 namespace game_x.application.Features.ChainTransactions.Mapping;
@@ -26,6 +28,14 @@ public sealed class MapsterConfig : IRegister
                 Meta = src.Meta,
                 CryptoTokenId = src.CryptoToken.PublicId
             });
+        
+        cfg.NewConfig<ChainTransaction, ChainTransactionDto>()
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId);
+        
+        cfg.NewConfig<ChainTransaction, ChainTransactionDetailDto>()
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId);
         
         cfg.NewConfig<CryptoToken, CryptoTokenDto>()
             .Map(dest => dest.Id, src => src.PublicId);

@@ -1,4 +1,5 @@
 using game_x.application.Common.Abstractions;
+using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.domain.Constants;
@@ -12,14 +13,43 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
         return context.ChainTransactions;
     }
 
-    public async Task<ChainTransaction?> GetByIdAsync(Guid publicId, CancellationToken ct = default)
+    public async Task<PaginationResult<ChainTransaction>> GetTransactionByCriteriaAsync(
+        Func<IQueryable<ChainTransaction>, IQueryable<ChainTransaction>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.ChainTransactions
+            .AsNoTracking()
+            .Include(x => x.CryptoToken)
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<ChainTransaction>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
+    
+    public async Task<ChainTransaction> GetByIdAsync(Guid publicId, CancellationToken ct = default)
     {
         return await context.ChainTransactions
             .AsNoTracking()
             .Include(t => t.User!)
                 .ThenInclude(u => u.UserBalances)
             .Include(t => t.CryptoToken)
-            .FirstOrDefaultAsync(x => x.PublicId == publicId, ct);
+            .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
+            ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
 
     public async Task<bool> ExistsByOrderNoAsync(string otcOrderNo, CancellationToken ct)
