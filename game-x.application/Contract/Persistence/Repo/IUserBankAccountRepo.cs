@@ -8,5 +8,6 @@ public interface IUserBankAccountRepo
 
     Task<UserBankAccount> GetByCodeAsync(Guid id, CancellationToken ct = default);
 
+    Task UpdateAsync(Guid id, Action<UserBankAccount> updateAction, CancellationToken ct = default);
     Task UpdateAsync(string userId, CurrencyUnit currencyCode, Action<UserBankAccount> updateAction, CancellationToken ct = default);
 }

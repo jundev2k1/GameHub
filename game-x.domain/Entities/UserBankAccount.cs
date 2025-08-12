@@ -90,11 +90,12 @@ public sealed class UserBankAccount : BaseEntity<int>, IAuditable
         DateReviewed = DateTime.UtcNow;
     }
 
-    public void Reject(string reason, string details)
+    public void Reject(string reviewedById, string reason, string details)
     {
         if (Status != UserBankAccountStatus.UnderReview)
             throw new ArgumentException("Can only approve KYC in UnderReview status.");
 
+        ReviewedById = reviewedById;
         RejectionReason = reason;
         RejectDetails = details;
         Status = UserBankAccountStatus.Rejected;

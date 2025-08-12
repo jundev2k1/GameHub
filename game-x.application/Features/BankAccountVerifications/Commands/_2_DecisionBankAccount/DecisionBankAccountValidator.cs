@@ -6,9 +6,6 @@ public sealed class DecisionBankAccountValidator : AbstractValidator<DecisionBan
 {
     public DecisionBankAccountValidator()
     {
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage($"{nameof(DecisionBankAccountCommand.UserId)} must be not empty.");
-
         RuleFor(x => x.Status)
             .IsInEnum().WithMessage($"{nameof(DecisionBankAccountCommand.Status)} must be in enum.")
             .Must(BeValidStatus).WithMessage($"{nameof(DecisionBankAccountCommand.Status)} is invalid status.");
@@ -22,14 +19,14 @@ public sealed class DecisionBankAccountValidator : AbstractValidator<DecisionBan
             .WithMessage($"{nameof(DecisionBankAccountCommand.Details)} must be not empty.");
     }
 
-    private bool BeValidStatus(KycStatus @enum)
+    private bool BeValidStatus(UserBankAccountStatus @enum)
     {
-        return @enum == KycStatus.Approved || @enum == KycStatus.Rejected;
+        return @enum == UserBankAccountStatus.Approved || @enum == UserBankAccountStatus.Rejected;
     }
 
-    private static bool BeRequiredField(KycStatus status, string? input)
+    private static bool BeRequiredField(UserBankAccountStatus status, string? input)
     {
-        return status != KycStatus.Rejected
-            || (status == KycStatus.Rejected && input.IsNotNullOrEmpty());
+        return status != UserBankAccountStatus.Rejected
+            || (status == UserBankAccountStatus.Rejected && input.IsNotNullOrEmpty());
     }
 }

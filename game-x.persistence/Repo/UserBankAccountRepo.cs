@@ -1,6 +1,7 @@
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
@@ -30,6 +31,18 @@ public sealed class UserBankAccountRepo(GameXContext context) : IUserBankAccount
         return result;
     }
 
+    public async Task UpdateAsync(Guid id, Action<UserBankAccount> updateAction, CancellationToken ct = default)
+    {
+        var targetItem = await context.UserBankAccounts
+            .Include(uba => uba.Image)
+            .FirstOrDefaultAsync(uba =>
+                uba.PublicId == id
+                && uba.User.IsDeleted == false
+                && uba.User.Status == UserStatus.Active, ct)
+            ?? throw new NotFoundException(nameof(UserBankAccount), id);
+
+        updateAction(targetItem);
+    }
     public async Task UpdateAsync(string userId, CurrencyUnit currencyCode, Action<UserBankAccount> updateAction, CancellationToken ct = default)
     {
         var targetItem = await context.UserBankAccounts
