@@ -6,17 +6,18 @@ namespace game_x.application.Features.BankAccountVerifications.Queries.GetBankAc
 
 public sealed class GetBankAccountProfileHandler(
     IUserAccessor userAccessor,
-    IUserRepo userRepo,
+    IUserBankAccountRepo userBankAccountRepo,
     IFileStorageService fileStorage) : IQueryHandler<GetBankAccountProfileQuery, GetBankAccountProfileResult>
 {
     public async Task<GetBankAccountProfileResult> Handle(GetBankAccountProfileQuery request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
-        var targetProfile = await userRepo.GetKycProfileAsync(userId, ct);
+        var targetBankAccount = await userBankAccountRepo
+            .GetByCurencyCodeAsync(userId, CurrencyUnit.Of(request.Code), ct);
 
-        var result = targetProfile.Adapt<GetBankAccountProfileResult>() with
+        var result = targetBankAccount.Adapt<GetBankAccountProfileResult>() with
         {
-            ImageUrl = await GetImageUrl(targetProfile.FrontImage),
+            ImageUrl = await GetImageUrl(targetBankAccount.Image),
         };
         return result;
     }

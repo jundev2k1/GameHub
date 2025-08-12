@@ -4,6 +4,7 @@ using game_x.application.Exceptions;
 using game_x.application.Features.BankAccountVerifications.Commands._1_SubmitBankAccount;
 using game_x.application.Features.BankAccountVerifications.Commands._2_DecisionBankAccount;
 using game_x.application.Features.BankAccountVerifications.Commands._3_ResubmitBankAccount;
+using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountProfile;
 using game_x.domain.ValueObjects;
 
 namespace game_x.api.Controllers.BankAccountVerification;
@@ -11,6 +12,14 @@ namespace game_x.api.Controllers.BankAccountVerification;
 [Route("api/bank-account-verifications")]
 public sealed class BankAccountVerificationController : BaseApiController
 {
+    [HttpGet("me/{currency}")]
+    public async Task<IActionResult> GetBankAccountProfileAsync(string currency)
+    {
+        var query = new GetBankAccountProfileQuery(currency);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
     [Authorize(Roles = AppRoles.User)]
     [HttpPost]
     public async Task<IActionResult> SubmitAsync([FromForm] SubmitBankAccountRequest request)

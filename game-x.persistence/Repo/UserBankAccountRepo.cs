@@ -19,7 +19,7 @@ public sealed class UserBankAccountRepo(GameXContext context) : IUserBankAccount
         return result;
     }
 
-    public async Task<UserBankAccount> GetByCodeAsync(Guid id, CancellationToken ct = default)
+    public async Task<UserBankAccount> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         var result = await context.UserBankAccounts
             .AsNoTracking()
@@ -28,6 +28,22 @@ public sealed class UserBankAccountRepo(GameXContext context) : IUserBankAccount
                 && uba.User.IsDeleted == false
                 && uba.FiatCurrency.IsActive, ct)
             ?? throw new NotFoundException(nameof(UserBankAccount), id);
+        return result;
+    }
+
+    public async Task<UserBankAccount> GetByCurencyCodeAsync(string userId, CurrencyUnit curencyCode, CancellationToken ct = default)
+    {
+        var result = await context.UserBankAccounts
+            .AsNoTracking()
+            .Include(uba => uba.Image)
+            .Include(uba => uba.FiatCurrency)
+            .Include(uba => uba.ReviewedBy)
+            .FirstOrDefaultAsync(uba => uba.UserId == userId
+                && uba.FiatCurrency.Code == curencyCode
+                && uba.User.Status == UserStatus.Active
+                && uba.User.IsDeleted == false
+                && uba.FiatCurrency.IsActive, ct)
+            ?? throw new NotFoundException(nameof(UserBankAccount), curencyCode.Value);
         return result;
     }
 

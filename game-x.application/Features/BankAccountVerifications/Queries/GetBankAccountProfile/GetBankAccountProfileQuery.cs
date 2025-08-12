@@ -1,6 +1,6 @@
 ﻿namespace game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountProfile;
 
-public record GetBankAccountProfileQuery : IQuery<GetBankAccountProfileResult>;
+public record GetBankAccountProfileQuery(string Code) : IQuery<GetBankAccountProfileResult>;
 
 public record GetBankAccountProfileResult(
     Guid Id,
