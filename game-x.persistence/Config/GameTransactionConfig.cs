@@ -10,7 +10,7 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
 
         builder.HasKey(x => x.Id);
 
-        builder.HasIndex(x => x.Sno).IsUnique();
+        builder.HasIndex(x => x.G598Sno).IsUnique();
         builder.HasIndex(x => x.PublicId).IsUnique();
 
         builder.Property(x => x.PublicId)
@@ -18,8 +18,8 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
             .IsRequired()
             .HasDefaultValueSql("gen_random_uuid()");
 
-        builder.Property(x => x.Sno)
-            .HasColumnName("sno")
+        builder.Property(x => x.G598Sno)
+            .HasColumnName("g598_sno")
             .IsRequired()
             .HasMaxLength(30);
 
@@ -28,16 +28,10 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
 
         builder.Property(x => x.GamePlatform)
             .HasColumnName("game_platform")
-            .HasMaxLength(100)
             .IsRequired();
 
         builder.Property(x => x.Type)
             .HasColumnName("type")
-            .IsRequired();
-
-        builder.Property(x => x.Status)
-            .HasColumnName("status")
-            .HasDefaultValue(GameTransactionStatus.Pending)
             .IsRequired();
 
         builder.Property(x => x.Amount)

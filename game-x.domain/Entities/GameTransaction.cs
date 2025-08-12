@@ -5,7 +5,7 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
     public Guid PublicId { get; set; }
 
     /// <summary>Unique transaction number sent to game platform (max 30 chars).</summary>
-    public string Sno { get; set; } = string.Empty;
+    public string G598Sno { get; set; } = string.Empty;
 
     public string? UserId { get; set; }
     public User? User { get; set; }
@@ -13,23 +13,20 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
     /// <summary>Deposit or Withdrawal.</summary>
     public GameTransactionType Type { get; set; }
 
-    public GameTransactionStatus Status { get; set; } = GameTransactionStatus.Pending;
-
     /// <summary>Amount transferred.</summary>
     public decimal Amount { get; set; }
 
-    /// <summary>Game platform ID or name.</summary>
-    public string GamePlatform { get; set; } = string.Empty;
+    /// <summary>Game platform.</summary>
+    public GamePlatform GamePlatform { get; set; }
 
     public string? Note { get; set; }
 
     public static GameTransaction Create(
         string userId,
-        string sno,
+        string g598sno,
         decimal amount,
-        string gamePlatform,
+        GamePlatform gamePlatform,
         GameTransactionType type,
-        GameTransactionStatus status,
         string? note = null
     )
     {
@@ -41,15 +38,14 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
 
         return new GameTransaction
         {
+            PublicId = Guid.NewGuid(),
             UserId = userId,
-            Sno = sno,
+            G598Sno = g598sno,
             Amount = amount,
             GamePlatform = gamePlatform,
             Type = type,
-            Status = status,
             Note = note
         };
     }
 
-    public void UpdateStatus(GameTransactionStatus status) => Status = status;
 }

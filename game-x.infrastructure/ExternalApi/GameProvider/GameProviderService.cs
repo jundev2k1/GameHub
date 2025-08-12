@@ -162,12 +162,20 @@ public sealed class GameProviderService(
             }
 
             var resJson = aesEncryptor.Decrypt(result.Content.Data);
-            var response = JsonConvert.DeserializeObject<WalletDepositResponse>(resJson);
-            if (!response!.issuccess)
+            logger.LogInformation("Full deposit response: {response}", resJson);
+            
+            var dynamicResponse = JsonConvert.DeserializeObject<dynamic>(resJson);
+            bool isSuccess = dynamicResponse.issuccess;
+            
+            if (!isSuccess)
             {
-                // logger.LogError($"Response failed: Code={response.ErrorCode} - Message={response.ErrorMessage}");
-                throw new ExternalServiceException();
+                string errorCode = dynamicResponse.errorcode ?? "Unknown";
+                string errorMessage = dynamicResponse.errormessage ?? "Unknown error";
+                logger.LogError("Deposit response failed: Code={ErrorCode} - Message={ErrorMessage}", errorCode, errorMessage);
+                return new WalletDepositResponse(false, null, errorCode, errorMessage);
             }
+            
+            var response = JsonConvert.DeserializeObject<WalletDepositResponse>(resJson);
 
             logger.LogInformation("Deposit request successful, Isuccess: {success}", response.issuccess.ToString());
             return response!;
@@ -199,12 +207,20 @@ public sealed class GameProviderService(
             }
 
             var resJson = aesEncryptor.Decrypt(result.Content.Data);
-            var response = JsonConvert.DeserializeObject<WalletWithdrawalResponse>(resJson);
-            if (!response!.issuccess)
+            logger.LogInformation("Full withdrawal response: {response}", resJson);
+            
+            var dynamicResponse = JsonConvert.DeserializeObject<dynamic>(resJson);
+            bool isSuccess = dynamicResponse.issuccess;
+            
+            if (!isSuccess)
             {
-                // logger.LogError($"Response failed: Code={response.ErrorCode} - Message={response.ErrorMessage}");
-                throw new ExternalServiceException();
+                string errorCode = dynamicResponse.errorcode ?? "Unknown";
+                string errorMessage = dynamicResponse.errormessage ?? "Unknown error";
+                logger.LogError("Withdrawal response failed: Code={ErrorCode} - Message={ErrorMessage}", errorCode, errorMessage);
+                return new WalletWithdrawalResponse(false, null, errorCode, errorMessage);
             }
+            
+            var response = JsonConvert.DeserializeObject<WalletWithdrawalResponse>(resJson);
 
             logger.LogInformation("Withdrawal request successful, Isuccess: {success}", response.issuccess.ToString());
             return response!;

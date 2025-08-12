@@ -28,10 +28,7 @@ public sealed class WalletDepositHandler(
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
         // Check balance first
-        const NetworkType network = NetworkType.Tron;
-        const string symbol = CryptoTokenSymbol.Usdt;
-
-        var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(symbol, network, ct)
+        var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct)
             ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
 
         var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
@@ -41,20 +38,19 @@ public sealed class WalletDepositHandler(
         if (userBalance.Amount < request.Quota)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
-        var sno = await snoGenerator.GenerateAsync("DP", ct);
-
-        var gameProviderUrl = configuration.GetValue<string>("GameProviderSettings:Host")
-            ?? throw new InvalidOperationException("Host is not configured.");
+        // var sno = await snoGenerator.GenerateAsync("DP", ct);
+        var sno = "111";
 
         // Create pending transaction first
         var gameTransaction = GameTransaction.Create(
             userId,
             sno,
             request.Quota,
-            gameProviderUrl,
-            GameTransactionType.Deposit,
-            GameTransactionStatus.Pending
+            GamePlatform.G598,
+            GameTransactionType.Deposit
         );
+
+
         await gameTransactionRepo.AddAsync(gameTransaction, ct);
         await unitOfWork.SaveChangesAsync(ct);
 
@@ -68,8 +64,8 @@ public sealed class WalletDepositHandler(
         var result = await gameProvider.WalletDepositAsync(depositRequest, request.IpAddress!);
 
         // Update transaction status based on result
-        gameTransaction.UpdateStatus(result.issuccess ? GameTransactionStatus.Completed : GameTransactionStatus.Failed);
-        await gameTransactionRepo.UpdateAsync(gameTransaction, ct);
+        // gameTransaction.UpdateStatus(result.issuccess ? GameTransactionStatus.Completed : GameTransactionStatus.Failed);
+        // await gameTransactionRepo.UpdateAsync(gameTransaction, ct);
 
         if (result.issuccess)
         {
@@ -77,6 +73,7 @@ public sealed class WalletDepositHandler(
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
         }
 
+        await unitOfWork.SaveChangesAsync(ct);
         return result;
     }
 

@@ -27,7 +27,6 @@ public static class ApplicationServiceRegistration
 
         services.AddScoped<IVerificationCodeService, MemoryVerificationCodeService>();
         services.AddScoped<IEmailVerificationProcessor, EmailVerificationService>();
-        services.AddScoped<GameTransactionSnoGenerator>();
 
         return services;
     }

@@ -16,9 +16,4 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
         return entity;
     }
 
-    public Task<GameTransaction> UpdateAsync(GameTransaction entity, CancellationToken ct = default)
-    {
-        context.GameTransactions.Update(entity);
-        return Task.FromResult(entity);
-    }
 }

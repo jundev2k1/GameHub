@@ -27,8 +27,8 @@ public sealed class WalletWithdrawalHandler(
         if (!targetUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
-        if (request.Quota <= 0)
-            throw new BadRequestException("Amount must be greater than zero.");
+        // if (request.Quota <= 0)
+        //     throw new BadRequestException("Amount must be greater than zero.");
 
         var sno = await snoGenerator.GenerateAsync("WT", ct);
 
@@ -64,10 +64,7 @@ public sealed class WalletWithdrawalHandler(
 
             if (result.issuccess)
             {
-                const NetworkType network = NetworkType.Tron;
-                const string symbol = CryptoTokenSymbol.Usdt;
-
-                var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(symbol, network, ct)
+                var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct)
                     ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
 
                 var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
