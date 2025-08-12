@@ -1,6 +1,7 @@
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Commands.UserSelfUpdate;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
+using game_x.application.Features.Accounts.User.Queries.GetSelfVerificationStatusList;
 using game_x.application.Features.Auth.Client.Commands.ChangePasswordUser;
 
 namespace game_x.api.Controllers.Client.Me;
@@ -13,6 +14,13 @@ public sealed class UserController : BaseApiController
     public async Task<IActionResult> GetUserDetailAsync()
     {
         var result = await Mediator.Send(new GetSelfUserQuery());
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpGet("me/verification-statues")]
+    public async Task<IActionResult> GetUserVerificationListAsync()
+    {
+        var result = await Mediator.Send(new GetSelfVerificationStatusListQuery());
         return ApiResponseFactory.Ok(result);
     }
 

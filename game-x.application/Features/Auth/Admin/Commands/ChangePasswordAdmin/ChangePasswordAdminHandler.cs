@@ -21,7 +21,7 @@ public sealed class ChangePasswordAdminHandler(
         return Unit.Value;
     }
 
-    private async Task ChangePasswordAsync(User user, string password, string newPassword)
+    private async Task ChangePasswordAsync(domain.Entities.User user, string password, string newPassword)
     {
         var isValidPassword = await authService.IsValidPasswordAsync(user, password);
         if (!isValidPassword) throw new BadRequestException(MessageCode.User.UserChangePasswordFail);

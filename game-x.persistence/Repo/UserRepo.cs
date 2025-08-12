@@ -2,6 +2,7 @@ using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.Dtos;
+using game_x.application.Features.Accounts.User.Dtos;
 using game_x.domain.Constants;
 using game_x.share.Extensions;
 using Mapster;
@@ -86,6 +87,22 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
         return profile != null
             ? (profile.Item1, profile.Item2)
             : (KycStatus.NotSubmitted, null);
+    }
+
+    public async Task<VerificationStatusDto[]> GetVerificationStatusList(string userId, CancellationToken ct = default)
+    {
+        var user = await context.Users
+            .AsNoTracking()
+            .Include(u => u.UserKyc)
+            .Include(u => u.UserBankAccounts)
+            .ThenInclude(uba => uba.FiatCurrency)
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+        var kycStatus = user.UserKyc.Adapt<VerificationStatusDto>();
+        var bankAccountStatues = user.UserBankAccounts
+            .Select(uba => uba.Adapt<VerificationStatusDto>())
+            .ToArray();
+        return [kycStatus, ..bankAccountStatues];
     }
 
     public async Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default)
