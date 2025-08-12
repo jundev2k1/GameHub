@@ -1,9 +1,9 @@
 
 namespace game_x.application.Utils;
 
-public sealed class G598SnoGenerator
+internal sealed class GameProviderUtils
 {
-    public string Generate()
+    public static string SnoGenerate()
     {
         // Format: GX_ (3) + yyyyMMddHHmmss (14) + 10 random digits = 27 chars total
         var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");

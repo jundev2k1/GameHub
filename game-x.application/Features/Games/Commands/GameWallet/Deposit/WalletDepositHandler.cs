@@ -37,12 +37,7 @@ public sealed class WalletDepositHandler(
         if (userBalance.Amount < request.Quota)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
-        var sno = new G598SnoGenerator().Generate();
-
-        // Check if transaction already exists (idempotency)
-        var snoExists = await gameTransactionRepo.SnoExistsAsync(sno, ct);
-        if (snoExists)
-            throw new BadRequestException("Transaction already processed.");
+        var sno = GameProviderUtils.SnoGenerate();
 
         var depositRequest = new DepositRequest
         {
@@ -53,28 +48,30 @@ public sealed class WalletDepositHandler(
 
         var result = await gameProvider.WalletDepositAsync(depositRequest, request.IpAddress!);
 
-        if (result.issuccess)
-        {
-            try
-            {
-                var gameTransaction = GameTransaction.Create(
-                    userId,
-                    sno,
-                    request.Quota,
-                    GamePlatform.G598,
-                    GameTransactionType.Deposit
-                );
+        if (!result.issuccess)
+            throw new BadRequestException(MessageCode.Accounting.CannotDepositToSystemWallet);
 
-                await gameTransactionRepo.AddAsync(gameTransaction, ct);
-                userBalance.Amount -= request.Quota;
-                await userBalanceRepo.PutUpdateAsync(userBalance, ct);
-                await unitOfWork.SaveChangesAsync(ct);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+        try
+        {
+            var gameTransaction = GameTransaction.Create(
+                userId,
+                sno,
+                request.Quota,
+                GamePlatform.G598,
+                GameTransactionType.Deposit
+            );
+
+            await gameTransactionRepo.AddAsync(gameTransaction, ct);
+            userBalance.Amount -= request.Quota;
+            await userBalanceRepo.PutUpdateAsync(userBalance, ct);
+            await unitOfWork.SaveChangesAsync(ct);
         }
+        catch (Exception ex)
+        {
+            // TODO: Implement rollback mechanism for game provider transaction
+            throw new InvalidOperationException($"Failed to create local transaction. Game provider deposit may need manual rollback. SNO: {sno}", ex);
+        }
+
         return result;
     }
 }

@@ -6,7 +6,7 @@ public sealed class WalletWithdrawalValidator : AbstractValidator<WalletWithdraw
     {
         RuleFor(x => x.Quota)
             .NotEmpty().WithMessage($"{nameof(WalletWithdrawalCommand.Quota)} is required.")
-            .GreaterThanOrEqualTo(1).WithMessage($"{nameof(WalletWithdrawalCommand.Quota)} must be greater than zero.");
+            .GreaterThanOrEqualTo(0).WithMessage($"{nameof(WalletWithdrawalCommand.Quota)} must be greater than zero.");
 
     }
 }

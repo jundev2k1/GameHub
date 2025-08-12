@@ -5,11 +5,6 @@ namespace game_x.persistence.Repo;
 
 public sealed class GameTransactionRepo(GameXContext context) : IGameTransactionRepo
 {
-    public async Task<bool> SnoExistsAsync(string sno, CancellationToken ct = default)
-    {
-        return await context.GameTransactions.AnyAsync(x => x.G598Sno == sno, ct);
-    }
-
     public async Task<GameTransaction> AddAsync(GameTransaction entity, CancellationToken ct = default)
     {
         await context.GameTransactions.AddAsync(entity, ct);

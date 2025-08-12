@@ -25,12 +25,7 @@ public sealed class WalletWithdrawalHandler(
         if (!targetUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
-        var sno = new G598SnoGenerator().Generate();
-
-        // Check if transaction already exists (idempotency)
-        var snoExists = await gameTransactionRepo.SnoExistsAsync(sno, ct);
-        if (snoExists)
-            throw new BadRequestException("Transaction already processed.");
+        var sno = GameProviderUtils.SnoGenerate();
 
         var withdrawalRequest = new WithdrawalRequest
         {
@@ -41,35 +36,37 @@ public sealed class WalletWithdrawalHandler(
 
         var result = await gameProvider.WalletWithdrawalAsync(withdrawalRequest, request.IpAddress!);
 
-        if (result.issuccess)
+        if (!result.issuccess)
+            throw new BadRequestException(MessageCode.Accounting.CannotWithdrawToSystemWallet);
+
+        try
         {
-            try
-            {
-                var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct)
-                    ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
+            var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct)
+                ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
 
-                var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
-                if (userBalance == null)
-                    throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+            var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
+            if (userBalance == null)
+                throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
-                var gameTransaction = GameTransaction.Create(
-                    userId,
-                    sno,
-                    request.Quota,
-                    GamePlatform.G598,
-                    GameTransactionType.Withdrawal
-                );
+            var gameTransaction = GameTransaction.Create(
+                userId,
+                sno,
+                request.Quota,
+                GamePlatform.G598,
+                GameTransactionType.Withdrawal
+            );
 
-                await gameTransactionRepo.AddAsync(gameTransaction, ct);
-                userBalance.Amount += request.Quota;
-                await userBalanceRepo.PutUpdateAsync(userBalance, ct);
-                await unitOfWork.SaveChangesAsync(ct);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await gameTransactionRepo.AddAsync(gameTransaction, ct);
+            userBalance.Amount += request.Quota;
+            await userBalanceRepo.PutUpdateAsync(userBalance, ct);
+            await unitOfWork.SaveChangesAsync(ct);
         }
+        catch (Exception ex)
+        {
+            // TODO: Implement rollback mechanism for game provider transaction
+            throw new InvalidOperationException($"Failed to create local transaction. Game provider withdrawal may need manual rollback. SNO: {sno}", ex);
+        }
+
         return result;
     }
 }

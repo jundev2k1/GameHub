@@ -6,7 +6,7 @@ public sealed class WalletDepositValidator : AbstractValidator<WalletDepositComm
     {
         RuleFor(x => x.Quota)
             .NotEmpty().WithMessage($"{nameof(WalletDepositCommand.Quota)} is required.")
-            .GreaterThanOrEqualTo(1).WithMessage($"{nameof(WalletDepositCommand.Quota)} must be greater than zero.");
+            .GreaterThanOrEqualTo(0).WithMessage($"{nameof(WalletDepositCommand.Quota)} must be greater than zero.");
 
     }
 }
