@@ -10,7 +10,14 @@ public interface IChainTransactionRepo
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default);
+    Task<PaginationResult<ChainTransaction>> GetOngoingTransactionCriteriaByUserAsync(
+        string userId,
+        Func<IQueryable<ChainTransaction>, IQueryable<ChainTransaction>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
     Task<ChainTransaction> GetByIdAsync(Guid publicId, CancellationToken ct = default);
+    Task<ChainTransaction> GetOngoingTransactionDetailByUserAsync(string userId, Guid publicId, CancellationToken ct = default);
     Task<bool> ExistsByOrderNoAsync(string otcOrderNo, CancellationToken ct);
     Task<ChainTransaction?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct);
     Task<(decimal txLogUserFrozenAmount, decimal chainTxLogpendingFee)> GetTxLogSummaryAsync(CancellationToken ct);

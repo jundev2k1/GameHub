@@ -56,6 +56,7 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
     {
         return await context.UserUsdtLedgers
             .Where(x => x.ChainTransactionId == transactionId)
+            .Include(x => x.ChainTransaction)
             .FirstOrDefaultAsync()
                ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionHistoryNotFound);
     }
