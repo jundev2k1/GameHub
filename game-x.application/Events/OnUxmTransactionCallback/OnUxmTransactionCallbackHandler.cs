@@ -111,6 +111,12 @@ public sealed class OnUxmTransactionCallbackHandler(
                     BalanceId: balance.PublicId,
                     Amount: balance.Amount,
                     FrozenAmount: balance.FrozenAmount));
+        
+            await clientHubService.SendLedgerToMemberAsync(
+                userId,
+                new ClientLedgerDto(
+                    LedgerId: userLedger.PublicId,
+                    Status: userLedger.StatusAtEvent));
         }
     }
     
