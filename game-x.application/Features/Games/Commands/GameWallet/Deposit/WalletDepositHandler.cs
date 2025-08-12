@@ -1,8 +1,8 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
-using Microsoft.Extensions.Configuration;
 
 namespace game_x.application.Features.Games.Commands.GameWallet.Deposit;
 
@@ -11,9 +11,8 @@ public sealed class WalletDepositHandler(
     IUserRepo userRepo,
     IUserBalanceRepo userBalanceRepo,
     ICryptoTokenRepo cryptoTokenRepo,
-    IConfiguration configuration,
     IGameTransactionRepo gameTransactionRepo,
-    Utils.GameTransactionSnoGenerator snoGenerator,
+
     IUnitOfWork unitOfWork,
     IGameProviderService gameProvider) : ICommandHandler<WalletDepositCommand, WalletDepositResponse>
 {
@@ -38,21 +37,12 @@ public sealed class WalletDepositHandler(
         if (userBalance.Amount < request.Quota)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
-        // var sno = await snoGenerator.GenerateAsync("DP", ct);
-        var sno = "111";
+        var sno = new G598SnoGenerator().Generate();
 
-        // Create pending transaction first
-        var gameTransaction = GameTransaction.Create(
-            userId,
-            sno,
-            request.Quota,
-            GamePlatform.G598,
-            GameTransactionType.Deposit
-        );
-
-
-        await gameTransactionRepo.AddAsync(gameTransaction, ct);
-        await unitOfWork.SaveChangesAsync(ct);
+        // Check if transaction already exists (idempotency)
+        var snoExists = await gameTransactionRepo.SnoExistsAsync(sno, ct);
+        if (snoExists)
+            throw new BadRequestException("Transaction already processed.");
 
         var depositRequest = new DepositRequest
         {
@@ -63,19 +53,28 @@ public sealed class WalletDepositHandler(
 
         var result = await gameProvider.WalletDepositAsync(depositRequest, request.IpAddress!);
 
-        // Update transaction status based on result
-        // gameTransaction.UpdateStatus(result.issuccess ? GameTransactionStatus.Completed : GameTransactionStatus.Failed);
-        // await gameTransactionRepo.UpdateAsync(gameTransaction, ct);
-
         if (result.issuccess)
         {
-            userBalance.Amount -= request.Quota;
-            await userBalanceRepo.PutUpdateAsync(userBalance, ct);
-        }
+            try
+            {
+                var gameTransaction = GameTransaction.Create(
+                    userId,
+                    sno,
+                    request.Quota,
+                    GamePlatform.G598,
+                    GameTransactionType.Deposit
+                );
 
-        await unitOfWork.SaveChangesAsync(ct);
+                await gameTransactionRepo.AddAsync(gameTransaction, ct);
+                userBalance.Amount -= request.Quota;
+                await userBalanceRepo.PutUpdateAsync(userBalance, ct);
+                await unitOfWork.SaveChangesAsync(ct);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         return result;
     }
-
-
 }

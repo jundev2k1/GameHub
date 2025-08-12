@@ -19,12 +19,11 @@ namespace game_x.persistence.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     public_id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
-                    sno = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    g598_sno = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
                     user_id = table.Column<string>(type: "text", nullable: true),
                     type = table.Column<int>(type: "integer", nullable: false),
-                    status = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    game_platform = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    game_platform = table.Column<int>(type: "integer", nullable: false),
                     note = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -41,15 +40,15 @@ namespace game_x.persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "ix_game_transactions_public_id",
+                name: "ix_game_transactions_g598sno",
                 table: "game_transactions",
-                column: "public_id",
+                column: "g598_sno",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_game_transactions_sno",
+                name: "ix_game_transactions_public_id",
                 table: "game_transactions",
-                column: "sno",
+                column: "public_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(

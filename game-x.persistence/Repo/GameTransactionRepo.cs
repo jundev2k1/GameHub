@@ -7,7 +7,7 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
 {
     public async Task<bool> SnoExistsAsync(string sno, CancellationToken ct = default)
     {
-        return await context.GameTransactions.AnyAsync(x => x.Sno == sno, ct);
+        return await context.GameTransactions.AnyAsync(x => x.G598Sno == sno, ct);
     }
 
     public async Task<GameTransaction> AddAsync(GameTransaction entity, CancellationToken ct = default)
@@ -15,5 +15,4 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
         await context.GameTransactions.AddAsync(entity, ct);
         return entity;
     }
-
 }

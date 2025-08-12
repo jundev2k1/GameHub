@@ -1,4 +1,3 @@
-
 namespace game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
 
 public sealed class WalletWithdrawalValidator : AbstractValidator<WalletWithdrawalCommand>

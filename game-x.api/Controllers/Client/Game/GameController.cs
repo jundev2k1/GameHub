@@ -26,7 +26,7 @@ public sealed class GameController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPost("wallet/deposit")]
+    [HttpPost("me/wallet/deposit")]
     public async Task<IActionResult> DepositAsync(WalletDepositCommand request)
     {
         var ipAddress = HttpContext.Connection.RemoteIpAddress.ToStringOrEmpty();
@@ -35,7 +35,7 @@ public sealed class GameController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPost("wallet/withdrawal")]
+    [HttpPost("me/wallet/withdrawal")]
     public async Task<IActionResult> WithdrawalAsync(WalletWithdrawalCommand request)
     {
         var ipAddress = HttpContext.Connection.RemoteIpAddress.ToStringOrEmpty();

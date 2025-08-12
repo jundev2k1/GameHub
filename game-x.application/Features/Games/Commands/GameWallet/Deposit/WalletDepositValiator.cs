@@ -1,4 +1,3 @@
-
 namespace game_x.application.Features.Games.Commands.GameWallet.Deposit;
 
 public sealed class WalletDepositValidator : AbstractValidator<WalletDepositCommand>
@@ -7,7 +6,7 @@ public sealed class WalletDepositValidator : AbstractValidator<WalletDepositComm
     {
         RuleFor(x => x.Quota)
             .NotEmpty().WithMessage($"{nameof(WalletDepositCommand.Quota)} is required.")
-            .GreaterThanOrEqualTo(1).WithMessage($"{nameof(WalletDepositCommand.Quota)} must be at least 1.");
+            .GreaterThanOrEqualTo(1).WithMessage($"{nameof(WalletDepositCommand.Quota)} must be greater than zero.");
 
     }
 }

@@ -12,7 +12,7 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    [Migration("20250812022344_gametransaction")]
+    [Migration("20250812070339_gametransaction")]
     partial class gametransaction
     {
         /// <inheritdoc />
@@ -527,10 +527,14 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("GamePlatform")
+                    b.Property<string>("G598Sno")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("g598_sno");
+
+                    b.Property<int>("GamePlatform")
+                        .HasColumnType("integer")
                         .HasColumnName("game_platform");
 
                     b.Property<string>("Note")
@@ -542,18 +546,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
                         .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Sno")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)")
-                        .HasColumnName("sno");
-
-                    b.Property<int>("Status")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("status");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer")
@@ -570,13 +562,13 @@ namespace game_x.persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_game_transactions");
 
+                    b.HasIndex("G598Sno")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_transactions_g598sno");
+
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("ix_game_transactions_public_id");
-
-                    b.HasIndex("Sno")
-                        .IsUnique()
-                        .HasDatabaseName("ix_game_transactions_sno");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_game_transactions_user_id");

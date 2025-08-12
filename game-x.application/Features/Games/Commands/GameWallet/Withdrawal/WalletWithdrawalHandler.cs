@@ -1,8 +1,8 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
-using Microsoft.Extensions.Configuration;
 
 namespace game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
 
@@ -11,9 +11,7 @@ public sealed class WalletWithdrawalHandler(
     IUserRepo userRepo,
     IUserBalanceRepo userBalanceRepo,
     ICryptoTokenRepo cryptoTokenRepo,
-    IConfiguration configuration,
     IGameTransactionRepo gameTransactionRepo,
-    Utils.GameTransactionSnoGenerator snoGenerator,
     IUnitOfWork unitOfWork,
     IGameProviderService gameProvider) : ICommandHandler<WalletWithdrawalCommand, WalletWithdrawalResponse>
 {
@@ -27,25 +25,12 @@ public sealed class WalletWithdrawalHandler(
         if (!targetUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
-        // if (request.Quota <= 0)
-        //     throw new BadRequestException("Amount must be greater than zero.");
+        var sno = new G598SnoGenerator().Generate();
 
-        var sno = await snoGenerator.GenerateAsync("WT", ct);
-
-        var gameProviderUrl = configuration.GetValue<string>("GameProviderSettings:Host")
-            ?? throw new InvalidOperationException("Host is not configured.");
-
-        // Create pending transaction first
-        var gameTransaction = GameTransaction.Create(
-            userId,
-            sno,
-            request.Quota,
-            gameProviderUrl,
-            GameTransactionType.Withdrawal,
-            GameTransactionStatus.Pending
-        );
-        await gameTransactionRepo.AddAsync(gameTransaction, ct);
-        await unitOfWork.SaveChangesAsync(ct);
+        // Check if transaction already exists (idempotency)
+        var snoExists = await gameTransactionRepo.SnoExistsAsync(sno, ct);
+        if (snoExists)
+            throw new BadRequestException("Transaction already processed.");
 
         var withdrawalRequest = new WithdrawalRequest
         {
@@ -54,15 +39,11 @@ public sealed class WalletWithdrawalHandler(
             Sno = sno
         };
 
-        try
+        var result = await gameProvider.WalletWithdrawalAsync(withdrawalRequest, request.IpAddress!);
+
+        if (result.issuccess)
         {
-            var result = await gameProvider.WalletWithdrawalAsync(withdrawalRequest, request.IpAddress!);
-
-            // Update transaction status based on result
-            gameTransaction.UpdateStatus(result.issuccess ? GameTransactionStatus.Completed : GameTransactionStatus.Failed);
-            await gameTransactionRepo.UpdateAsync(gameTransaction, ct);
-
-            if (result.issuccess)
+            try
             {
                 var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct)
                     ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
@@ -71,23 +52,24 @@ public sealed class WalletWithdrawalHandler(
                 if (userBalance == null)
                     throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
+                var gameTransaction = GameTransaction.Create(
+                    userId,
+                    sno,
+                    request.Quota,
+                    GamePlatform.G598,
+                    GameTransactionType.Withdrawal
+                );
+
+                await gameTransactionRepo.AddAsync(gameTransaction, ct);
                 userBalance.Amount += request.Quota;
                 await userBalanceRepo.PutUpdateAsync(userBalance, ct);
+                await unitOfWork.SaveChangesAsync(ct);
             }
-
-            await unitOfWork.SaveChangesAsync(ct);
-            return result;
+            catch (Exception)
+            {
+                throw;
+            }
         }
-        catch
-        {
-            // Mark transaction as failed if any error occurs
-            gameTransaction.UpdateStatus(GameTransactionStatus.Failed);
-            await gameTransactionRepo.UpdateAsync(gameTransaction, ct);
-            await unitOfWork.SaveChangesAsync(ct);
-            throw;
-        }
+        return result;
     }
-
-
 }
-
