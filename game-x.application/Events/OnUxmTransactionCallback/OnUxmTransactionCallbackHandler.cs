@@ -43,9 +43,6 @@ public sealed class OnUxmTransactionCallbackHandler(
             
             await unitOfWork.WithTransactionAsync(async () =>
             {
-                // Create transaction history before updating transaction
-                await userUsdtLedgerService.CreateForChainTransactionAsync(transaction);
-                
                 await chainTransactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
                 {
                     order.UpdateStatus(ChainTransactionStatus.Completed);
@@ -56,6 +53,9 @@ public sealed class OnUxmTransactionCallbackHandler(
                         confirmedAt: @event.ConfirmedAt
                     );
                 }, ct);
+                
+                // Create transaction history before updating balance
+                await userUsdtLedgerService.CreateForChainTransactionAsync(transaction);
                 
                 switch (transaction.Type)
                 {
@@ -92,21 +92,18 @@ public sealed class OnUxmTransactionCallbackHandler(
         if (userId != null)
         {
             // Send a notification to update the transaction history
-            UserUsdtLedger? userLedger = await userUsdtLedgerRepo.GetDetailByTransactionIdAsync(transaction.Id);
-            if (userLedger != null)
-            {
-                var notification = Notification.Create(
-                    NotificationMessageKey.UserLedger_Created,
-                    userId,
-                    NotificationType.UserLedger,
-                    NotificationSeverity.Success,
-                    JsonSerializer.Serialize(userLedger.Adapt<UserUsdtLedgerNotificationDto>()));
-                await notificationRepo.AddNotificationAsync(notification, ct);
+            UserUsdtLedger userLedger = await userUsdtLedgerRepo.GetDetailByTransactionIdAsync(transaction.Id);
+            var notification = Notification.Create(
+                NotificationMessageKey.UserLedger_Created,
+                userId,
+                NotificationType.UserLedger,
+                NotificationSeverity.Success,
+                JsonSerializer.Serialize(userLedger.Adapt<UserUsdtLedgerNotificationDto>()));
+            await notificationRepo.AddNotificationAsync(notification, ct);
                 
-                await clientHubService.SendNotificationToMemberAsync(
-                    userId,
-                    notification.Adapt<NotificationDto>());
-            }
+            await clientHubService.SendNotificationToMemberAsync(
+                userId,
+                notification.Adapt<NotificationDto>());
         
             await clientHubService.SendBalanceToMemberAsync(
                 userId,

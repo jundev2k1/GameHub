@@ -16,6 +16,7 @@ public sealed class UserUsdtLedger: BaseEntity<int>
     public decimal ChangeAmount { get; set; }    // Current Transaction Amount Change
 
     public decimal BalanceAfter { get; set; }    // balance after change
+    public string? StatusAtEvent { get; set; } // Status at the time the event takes place
     
     // Associated raw data
     public int? ChainTransactionId { get; set; }

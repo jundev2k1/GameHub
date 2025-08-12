@@ -288,10 +288,10 @@ public static class MessageCode
         #region ■ Message group: Error
         /// <summary>CryptoToken configuration not found.</summary>
         [EnumMetadata("CryptoToken configuration not found.")]
-        CryptoTokenNotFound = 10300,
+        CryptoTokenNotFound = 10400,
         /// <summary>CryptoToken configuration not found.</summary>
         [EnumMetadata("CryptoToken is unsupported.")]
-        CryptoTokenUnsupported = 10301,
+        CryptoTokenUnsupported = 10401,
         #endregion
     }
 }

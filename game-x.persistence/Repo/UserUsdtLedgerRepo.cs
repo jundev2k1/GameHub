@@ -23,6 +23,7 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
         var query = context.UserUsdtLedgers
             .AsNoTracking()
             .Include(x => x.ChainTransaction)
+            .ThenInclude(x => x!.CryptoToken)
             .Where(x => x.UserId == userId && x.FlowType != UsdtFlowType.Init)
             .AsQueryable();
 
@@ -64,6 +65,7 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
         return await context.UserUsdtLedgers
             .AsNoTracking()
             .Include(x => x.ChainTransaction)
+                .ThenInclude(x => x!.CryptoToken)
             .FirstOrDefaultAsync(x => x.UserId == userId && x.PublicId == ledgerId, ct)
                ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionHistoryNotFound);
     }
