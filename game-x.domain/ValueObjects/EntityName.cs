@@ -10,7 +10,7 @@ public sealed class EntityName
     public static EntityName MediaFile => Of(nameof(Entities.MediaFile));
     public static EntityName UserKyc => Of(nameof(Entities.UserKyc));
     public static EntityName ChainTransaction => Of(nameof(Entities.ChainTransaction));
-
+    public static EntityName GameTransaction => Of(nameof(Entities.GameTransaction));
     public static EntityName UserBalance => Of(nameof(Entities.UserBalance));
 
     public static EntityName Of(string value)
@@ -28,6 +28,7 @@ public sealed class EntityName
         nameof(Entities.MediaFile),
         nameof(Entities.UserKyc),
         nameof(Entities.ChainTransaction),
+        nameof(Entities.GameTransaction),
         nameof(Entities.UserBalance)];
 
     public override bool Equals(object? obj) =>

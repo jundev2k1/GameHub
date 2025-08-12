@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Services.EmailProcessor;
 using game_x.application.Contract.Infrastructure.Services.VerificationCode;
 using game_x.application.Services.Notification;
 using game_x.application.Services.Verification;
+using game_x.application.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -23,10 +24,11 @@ public static class ApplicationServiceRegistration
         });
 
         services.AddMemoryCache();
-    
+
         services.AddScoped<IVerificationCodeService, MemoryVerificationCodeService>();
         services.AddScoped<IEmailVerificationProcessor, EmailVerificationService>();
-        
+        services.AddScoped<GameTransactionSnoGenerator>();
+
         return services;
     }
 }
