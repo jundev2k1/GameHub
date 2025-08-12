@@ -14,6 +14,8 @@ public sealed class ObjectName
     // Factories
     public static ObjectName KycProfile(string userId, string fileName)
         => Of($"user-kyc/{userId:N}/{fileName}");
+    public static ObjectName BankAccountProfile(string userId, string fileName)
+        => Of($"user-bank-account/{userId:N}/{fileName}");
 
     public static ObjectName Of(string value)
     {

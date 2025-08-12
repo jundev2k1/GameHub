@@ -61,11 +61,19 @@ public sealed class UserBankAccount : BaseEntity<int>, IAuditable
         RejectDetails = null;
     }
 
-    public void ReSubmit()
+    public void ReSubmit(
+        string? bankName,
+        string? bankCode,
+        string? accountName,
+        string? accountNumber)
     {
         if ((Status != UserBankAccountStatus.Rejected) && (Status != UserBankAccountStatus.UnderReview))
             throw new InvalidOperationException("Can only resubmit in Rejected status.");
 
+        BankName = bankName ?? BankName;
+        BankCode = bankCode ?? BankCode;
+        AccountName = accountName ?? AccountName;
+        AccountNumber = accountNumber ?? AccountNumber;
         Status = UserBankAccountStatus.UnderReview;
         SubmittedAt = DateTime.UtcNow;
         RejectionReason = null;

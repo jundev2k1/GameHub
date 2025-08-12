@@ -30,9 +30,10 @@ public sealed class UserBankAccountRepo(GameXContext context) : IUserBankAccount
         return result;
     }
 
-    public async Task Update(string userId, CurrencyUnit currencyCode, Action<UserBankAccount> updateAction, CancellationToken ct = default)
+    public async Task UpdateAsync(string userId, CurrencyUnit currencyCode, Action<UserBankAccount> updateAction, CancellationToken ct = default)
     {
         var targetItem = await context.UserBankAccounts
+            .Include(uba => uba.Image)
             .FirstOrDefaultAsync(uba =>
                 uba.UserId == userId
                 && uba.User.IsDeleted == false

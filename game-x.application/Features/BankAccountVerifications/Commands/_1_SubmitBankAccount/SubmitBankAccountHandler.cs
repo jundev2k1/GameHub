@@ -59,7 +59,7 @@ public sealed class SubmitBankAccountHandler(
     private async Task<ObjectName> UploadFiles(FileUpload file, string userId, CancellationToken ct)
     {
         var newFileName = Guid.NewGuid().ToString() + file.Extension;
-        var objectName = ObjectName.KycProfile(userId, newFileName);
+        var objectName = ObjectName.BankAccountProfile(userId, newFileName);
         await fileStorage.UploadFileAsync(file.Content, BucketName.User, objectName, MimeType.Of(file.ContentType), ct);
         return objectName;
     }

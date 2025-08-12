@@ -7,7 +7,7 @@ namespace game_x.application.Features.BankAccountVerifications.Commands._3_Resub
 
 public sealed class ResubmitBankAccountHandler(
     IUnitOfWork unitOfWork,
-    IUserRepo userRepo,
+    IUserBankAccountRepo bankAccountRepo,
     IUserAccessor userAccessor,
     IMediaFileRepo mediaFileRepo,
     IFileStorageService fileStorage) : ICommandHandler<ResubmitBankAccountCommand>
@@ -17,37 +17,36 @@ public sealed class ResubmitBankAccountHandler(
         var userId = userAccessor.GetUserId();
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            UserKyc? updateKyc = null;
-            await userRepo.UpdateKycAsync(userId, targetKyc =>
+            UserBankAccount? updateBankAccount = null;
+            await bankAccountRepo.UpdateAsync(userId, CurrencyUnit.Of(request.CurrencyCode), targetBankAccount =>
             {
-                targetKyc.Resubmit(
-                    request.FullName,
-                    request.DateOfBirth,
-                    request.Address,
-                    request.IdNumber,
-                    request.Type);
-                updateKyc = targetKyc;
+                if ((targetBankAccount.Status != UserBankAccountStatus.Rejected)
+                    && (targetBankAccount.Status != UserBankAccountStatus.UnderReview))
+                    throw new BadRequestException(MessageCode.User.BankAccountStatusInvalid);
+
+                targetBankAccount.ReSubmit(
+                    request.BankName,
+                    request.BankCode,
+                    request.AccountName,
+                    request.AccountNumber);
+                updateBankAccount = targetBankAccount;
             }, ct);
 
-            if (request.FrontImage != null)
-                await ReupImage(updateKyc, request.FrontImage, true, ct);
-
-            if (request.BackImage != null)
-                await ReupImage(updateKyc, request.BackImage, false, ct);
+            if (request.Image != null)
+                await ReupImage(updateBankAccount, request.Image, ct);
         }, ct);
 
         return Unit.Value;
     }
 
     private async Task ReupImage(
-        UserKyc? targetKyc,
+        UserBankAccount? targetBankAccount,
         FileUpload file,
-        bool isFront,
         CancellationToken ct)
     {
-        if (targetKyc == null) return;
+        if (targetBankAccount == null) return;
 
-        var oldFile = isFront ? targetKyc.FrontImage : targetKyc.BackImage;
+        var oldFile = targetBankAccount.Image;
         if (oldFile == null) return;
 
         var newFile = MediaFile.Create(
@@ -58,10 +57,7 @@ public sealed class ResubmitBankAccountHandler(
             sizeBytes: Convert.ToInt32(file.Length));
 
         // Update new image information
-        if (isFront)
-            targetKyc.UploadFrontImage(newFile);
-        else
-            targetKyc.UploadBackImage(newFile);
+        targetBankAccount.UploadImage(newFile);
 
         // Upload new image, overwrite old file
         await fileStorage.UploadFileAsync(

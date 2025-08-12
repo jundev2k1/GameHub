@@ -199,6 +199,9 @@ public static class MessageCode
         /// <summary>Bank account is not verified.</summary>
         [EnumMetadata("Bank account is not verified.")]
         BankAccountNotVerified = 10121,
+        /// <summary>Invalid bank account status.</summary>
+        [EnumMetadata("Invalid bank account status.")]
+        BankAccountStatusInvalid = 10122,
         #endregion
 
         #region ■ Message group: Success

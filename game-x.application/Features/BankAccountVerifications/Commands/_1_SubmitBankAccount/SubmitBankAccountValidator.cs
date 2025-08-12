@@ -9,15 +9,15 @@ public sealed class SubmitBankAccountValidator : AbstractValidator<SubmitBankAcc
     {
         RuleFor(x => x.BankName)
             .NotEmpty().WithMessage($"{nameof(SubmitBankAccountCommand.BankName)} must be not empty.")
-            .MaximumLength(50).WithMessage($"{nameof(SubmitBankAccountCommand.BankName)} must be not greater than 50 characters.");
+            .MaximumLength(255).WithMessage($"{nameof(SubmitBankAccountCommand.BankName)} must be not greater than 255 characters.");
 
         RuleFor(x => x.BankCode)
             .NotEmpty().WithMessage($"{nameof(SubmitBankAccountCommand.BankCode)} must be not empty.")
-            .MaximumLength(30).WithMessage($"{nameof(SubmitBankAccountCommand.BankCode)} must be not greater than 30 characters.");
+            .MaximumLength(50).WithMessage($"{nameof(SubmitBankAccountCommand.BankCode)} must be not greater than 50 characters.");
 
         RuleFor(x => x.AccountName)
             .NotEmpty().WithMessage($"{nameof(SubmitBankAccountCommand.AccountName)} must be not empty.")
-            .MaximumLength(30).WithMessage($"{nameof(SubmitBankAccountCommand.AccountName)} must be not greater than 30 characters.");
+            .MaximumLength(255).WithMessage($"{nameof(SubmitBankAccountCommand.AccountName)} must be not greater than 255 characters.");
         
         RuleFor(x => x.AccountNumber)
             .NotEmpty().WithMessage($"{nameof(SubmitBankAccountCommand.AccountNumber)} must be not empty.")

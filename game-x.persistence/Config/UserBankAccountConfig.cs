@@ -47,9 +47,8 @@ public sealed class UserBankAccountConfig : IEntityTypeConfiguration<UserBankAcc
             .HasConversion<short>();
 
         builder.Property(uba => uba.RejectionReason)
-            .IsRequired()
-            .HasMaxLength(4000)
-            .HasDefaultValue(true);
+            .IsRequired(false)
+            .HasMaxLength(4000);
 
         builder.Property(uba => uba.SubmittedAt)
             .IsRequired(false)
