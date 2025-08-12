@@ -10,7 +10,11 @@ public record UserUsdtLedgerDetailDto(
     decimal Fee,
     decimal ChangeAmount,
     decimal BalanceAfter,
-    Guid ChainTransactionId,
+    Guid? ChainTransactionId,
+    ChainTransactionStatus? ChainTransactionStatus,
+    NetworkType? Network,
+    string StatusAtEvent,
+    string? Symbol,
     string Meta,
     DateTime CreatedAt,
     DateTime UpdatedAt);

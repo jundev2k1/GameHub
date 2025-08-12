@@ -25,12 +25,18 @@ public sealed class MapsterConfig : IRegister
         
         cfg.NewConfig<UserUsdtLedger, UserUsdtLedgerDto>()
             .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.ChainTransactionId, src => src.ChainTransaction != null ? src.ChainTransaction.PublicId : Guid.Empty);        
+            .Map(dest => dest.ChainTransactionId, src => src.ChainTransaction != null ? src.ChainTransaction.PublicId : Guid.Empty)
+            .Map(dest => dest.ChainTransactionStatus, src => src.ChainTransaction!.Status)
+            .Map(dest => dest.Network, src => src.ChainTransaction!.CryptoToken.Network)
+            .Map(dest => dest.Symbol, src => src.ChainTransaction!.CryptoToken.Symbol);        
         
         cfg.NewConfig<UserUsdtLedger, UserUsdtLedgerDetailDto>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.ChainTransactionId, src => src.ChainTransaction != null ? src.ChainTransaction.PublicId : Guid.Empty)
             .Map(dest => dest.Amount, src => src.ChainTransaction != null ? src.ChainTransaction.Amount : 0)
-            .Map(dest => dest.Fee, src => src.ChainTransaction != null ? src.ChainTransaction.Fee : 0);
+            .Map(dest => dest.Fee, src => src.ChainTransaction != null ? src.ChainTransaction.Fee : 0)
+            .Map(dest => dest.ChainTransactionStatus, src => src.ChainTransaction!.Status)
+            .Map(dest => dest.Network, src => src.ChainTransaction!.CryptoToken.Network)
+            .Map(dest => dest.Symbol, src => src.ChainTransaction!.CryptoToken.Symbol);
     }
 }

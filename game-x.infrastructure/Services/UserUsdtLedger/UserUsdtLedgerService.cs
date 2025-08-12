@@ -30,6 +30,7 @@ public sealed class UserUsdtLedgerService
             ChangeAmount = changeAmount,
             BalanceAfter = previousBalance + changeAmount,
             ChainTransactionId = transaction.Id,
+            StatusAtEvent = transaction.Status.ToString().ToLower(),
             MetaObject = new UserUsdtLedgerMeta
             {
                 CounterpartyUserId = null,

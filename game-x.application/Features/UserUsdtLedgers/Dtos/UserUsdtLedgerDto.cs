@@ -8,5 +8,9 @@ public record UserUsdtLedgerDto(
     decimal ChangeAmount,
     decimal BalanceAfter,
     Guid ChainTransactionId,
+    ChainTransactionStatus ChainTransactionStatus,
+    string StatusAtEvent,
+    NetworkType? Network,
+    string? Symbol,
     DateTime CreatedAt,
     DateTime UpdatedAt);
