@@ -41,7 +41,7 @@ public sealed class UserController : BaseApiController
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
-    
+
     [HttpGet("balances")]
     public async Task<IActionResult> GetUserBalanceAsync()
     {
