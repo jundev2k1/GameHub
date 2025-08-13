@@ -4,9 +4,11 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
 using game_x.share.ExternalApi.GameProvider.Dtos;
+using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
+using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
 using Newtonsoft.Json;
 
 namespace game_x.infrastructure.ExternalApi.GameProvider;
@@ -115,15 +117,23 @@ public sealed class GameProviderService(
             }
 
             var resJson = aesEncryptor.Decrypt(result.Content.Data);
-            var response = JsonConvert.DeserializeObject<WalletResponse>(resJson);
-            if (!response!.IsSuccess)
+            logger.LogInformation("Full wallet response: {response}", resJson);
+            var gameProviderResponse = JsonConvert.DeserializeObject<GameProviderWalletResponse>(resJson);
+            if (!gameProviderResponse!.issuccess)
             {
-                logger.LogError($"Response failed: Code={response.ErrorCode} - Message={response.ErrorMessage}");
+                logger.LogError("Response failed from GameProvider");
                 throw new ExternalServiceException();
             }
 
+            var response = new WalletResponse
+            {
+                IsSuccess = true,
+                Currency = gameProviderResponse.data.currency,
+                Quota = gameProviderResponse.data.quota
+            };
+
             logger.LogInformation("Get wallet request successful，Quota: {quota}, Currency: {currency}", response.Quota.ToString(), response.Currency);
-            return response!;
+            return response;
         }
         catch (Exception ex)
         {
@@ -131,4 +141,104 @@ public sealed class GameProviderService(
             throw;
         }
     }
+    public async Task<GameDepositResponse> DepositWalletAsync(GameDepositRequest data)
+    {
+        try
+        {
+            logger.LogInformation("Send deposit request to GameProvider: account = {Account}, quota = {Quota}, sno = {Sno}", data.Account, data.Quota, data.Sno);
+
+            var json = JsonConvert.SerializeObject(data);
+            var request = aesEncryptor.Encrypt(json);
+            var bodyPayload = new PayloadRequest
+            {
+                Data = request,
+            };
+
+            var result = await gameApi.DepositAsync(bodyPayload, gameProviderCache.Language);
+            if (!result.IsSuccessStatusCode || result.Content == null)
+            {
+                logger.LogError($"Response failed: Status={result.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            var resJson = aesEncryptor.Decrypt(result.Content.Data);
+            logger.LogInformation("Full deposit response: {response}", resJson);
+
+            var gameDepositResponse = JsonConvert.DeserializeObject<GameDepositResponse>(resJson);
+            if (gameDepositResponse == null)
+            {
+                logger.LogError("Failed to deserialize deposit response");
+                throw new ExternalServiceException();
+            }
+
+            if (!gameDepositResponse.IsSuccess)
+            {
+                logger.LogError("Deposit response failed: Code={ErrorCode} - Message={ErrorMessage}",
+                    gameDepositResponse.ErrorCode ?? "Unknown",
+                    gameDepositResponse.ErrorMessage ?? "Unknown error");
+            }
+            else
+            {
+                logger.LogInformation("Deposit request successful");
+            }
+
+            return gameDepositResponse;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to send deposit request to GameProvider: {Ex}", ex);
+            throw;
+        }
+    }
+
+    public async Task<GameWithdrawalResponse> WithdrawalWalletAsync(GameWithdrawalRequest data)
+    {
+        try
+        {
+            logger.LogInformation("Send withdrawal request to GameProvider: account = {Account}, quota = {Quota}, sno = {Sno}", data.Account, data.Quota, data.Sno);
+
+            var json = JsonConvert.SerializeObject(data);
+            var request = aesEncryptor.Encrypt(json);
+            var bodyPayload = new PayloadRequest
+            {
+                Data = request,
+            };
+
+            var result = await gameApi.WithdrawalAsync(bodyPayload, gameProviderCache.Language);
+            if (!result.IsSuccessStatusCode || result.Content == null)
+            {
+                logger.LogError($"Response failed: Status={result.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            var resJson = aesEncryptor.Decrypt(result.Content.Data);
+            logger.LogInformation("Full withdrawal response: {response}", resJson);
+
+            var gameWithdrawalResponse = JsonConvert.DeserializeObject<GameWithdrawalResponse>(resJson);
+            if (gameWithdrawalResponse == null)
+            {
+                logger.LogError("Failed to deserialize withdrawal response");
+                throw new ExternalServiceException();
+            }
+
+            if (!gameWithdrawalResponse.IsSuccess)
+            {
+                logger.LogError("Withdrawal response failed: Code={ErrorCode} - Message={ErrorMessage}",
+                    gameWithdrawalResponse.ErrorCode ?? "Unknown",
+                    gameWithdrawalResponse.ErrorMessage ?? "Unknown error");
+            }
+            else
+            {
+                logger.LogInformation("Withdrawal request successful");
+            }
+
+            return gameWithdrawalResponse;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to send withdrawal request to GameProvider: {Ex}", ex);
+            throw;
+        }
+    }
+
 }
