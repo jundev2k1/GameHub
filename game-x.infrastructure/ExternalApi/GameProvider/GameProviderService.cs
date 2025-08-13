@@ -141,7 +141,7 @@ public sealed class GameProviderService(
             throw;
         }
     }
-    public async Task<ResponseBase> DepositWalletAsync(GameDepositRequest data, string ip)
+    public async Task<GameDepositResponse> DepositWalletAsync(GameDepositRequest data)
     {
         try
         {
@@ -172,21 +172,21 @@ public sealed class GameProviderService(
                 string errorCode = dynamicResponse.errorcode ?? "Unknown";
                 string errorMessage = dynamicResponse.errormessage ?? "Unknown error";
                 logger.LogError("Deposit response failed: Code={ErrorCode} - Message={ErrorMessage}", errorCode, errorMessage);
-                return new ResponseBase { IsSuccess = false, ErrorCode = errorCode, ErrorMessage = errorMessage };
+                return new GameDepositResponse { IsSuccess = false, ErrorCode = errorCode, ErrorMessage = errorMessage };
             }
 
             var response = JsonConvert.DeserializeObject<ResponseBase>(resJson);
 
             logger.LogInformation("Deposit request successful, Isuccess: {success}", response.IsSuccess.ToString());
-            return new ResponseBase { IsSuccess = response.IsSuccess };
+            return new GameDepositResponse { IsSuccess = response.IsSuccess };
         }
         catch (Exception ex)
         {
             logger.LogError("Failed to send deposit request to GameProvider: {Ex}", ex);
-            return new ResponseBase { IsSuccess = false };
+            return new GameDepositResponse { IsSuccess = false };
         }
     }
-    public async Task<ResponseBase> WithdrawalWalletAsync(GameWithdrawalRequest data, string ip)
+    public async Task<GameWithdrawalResponse> WithdrawalWalletAsync(GameWithdrawalRequest data)
     {
         try
         {
@@ -217,18 +217,18 @@ public sealed class GameProviderService(
                 string errorCode = dynamicResponse.errorcode ?? "Unknown";
                 string errorMessage = dynamicResponse.errormessage ?? "Unknown error";
                 logger.LogError("Withdrawal response failed: Code={ErrorCode} - Message={ErrorMessage}", errorCode, errorMessage);
-                return new ResponseBase { IsSuccess = false, ErrorCode = errorCode, ErrorMessage = errorMessage };
+                return new GameWithdrawalResponse { IsSuccess = false, ErrorCode = errorCode, ErrorMessage = errorMessage };
             }
 
             var response = JsonConvert.DeserializeObject<ResponseBase>(resJson);
 
             logger.LogInformation("Withdrawal request successful, Isuccess: {success}", response.IsSuccess.ToString());
-            return new ResponseBase { IsSuccess = response.IsSuccess };
+            return new GameWithdrawalResponse { IsSuccess = response.IsSuccess };
         }
         catch (Exception ex)
         {
             logger.LogError("Failed to send withdrawal request to GameProvider: {Ex}", ex);
-            return new ResponseBase { IsSuccess = false };
+            return new GameWithdrawalResponse { IsSuccess = false };
         }
     }
 

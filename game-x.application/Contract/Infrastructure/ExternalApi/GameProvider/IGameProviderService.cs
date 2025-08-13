@@ -15,9 +15,9 @@ public interface IGameProviderService
 
     Task<WalletResponse> GetWalletAsync(WalletRequest data);
 
-    Task<ResponseBase> WalletDepositAsync(GameDepositRequest data, string ip);
+    Task<GameDepositResponse> DepositWalletAsync(GameDepositRequest data);
 
-    Task<ResponseBase> WalletWithdrawalAsync(GameWithdrawalRequest data, string ip);
+    Task<GameWithdrawalResponse> WithdrawalWalletAsync(GameWithdrawalRequest data);
 
 
 }

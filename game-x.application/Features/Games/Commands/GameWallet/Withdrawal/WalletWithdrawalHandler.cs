@@ -1,9 +1,9 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.Games.Dtos;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
+using MediatR;
 
 namespace game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
 
@@ -14,9 +14,9 @@ public sealed class WalletWithdrawalHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     IGameTransactionRepo gameTransactionRepo,
     IUnitOfWork unitOfWork,
-    IGameProviderService gameProvider) : ICommandHandler<WalletWithdrawalCommand, GameTransactionResponse>
+    IGameProviderService gameProvider) : IRequestHandler<WalletWithdrawalCommand>
 {
-    public async Task<GameTransactionResponse> Handle(WalletWithdrawalCommand request, CancellationToken ct = default)
+    public async Task Handle(WalletWithdrawalCommand request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
         var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
@@ -35,7 +35,7 @@ public sealed class WalletWithdrawalHandler(
             Sno = sno
         };
 
-        var result = await gameProvider.WalletWithdrawalAsync(withdrawalRequest, request.IpAddress!);
+        var result = await gameProvider.WithdrawalWalletAsync(withdrawalRequest);
 
         if (!result.IsSuccess)
             throw new BadRequestException(MessageCode.Accounting.CannotWithdrawToSystemWallet);
@@ -64,10 +64,7 @@ public sealed class WalletWithdrawalHandler(
         }
         catch (Exception ex)
         {
-            // TODO: Implement rollback mechanism for game provider transaction
             throw new InvalidOperationException($"Failed to create local transaction. Game provider withdrawal may need manual rollback. SNO: {sno}", ex);
         }
-
-        return new GameTransactionResponse();
     }
 }

@@ -1,6 +1,6 @@
 namespace game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
 
-public class GameDepositRequest
+public sealed class GameDepositRequest
 {
     public string Account { get; set; } = string.Empty;
     public decimal Quota { get; set; }
