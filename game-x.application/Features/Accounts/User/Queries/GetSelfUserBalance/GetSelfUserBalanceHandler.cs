@@ -10,6 +10,6 @@ public sealed class GetSelfUserBalanceHandler(IUserBalanceRepo userBalanceRepo, 
     {
         var userId = userAccessor.GetUserId();
         var balances = await userBalanceRepo.GetBalancesByUserIdAsync(userId, ct);
-        return balances.Select(item => item.Adapt<GetSelfUserBalanceResult>());
+        return balances.Adapt<IEnumerable<GetSelfUserBalanceResult>>();
     }
 }

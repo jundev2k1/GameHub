@@ -1,6 +1,7 @@
 ﻿using game_x.application.Features.Accounts.User.Dtos;
+using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 
-namespace game_x.application.Features.User.Mapping;
+namespace game_x.application.Features.Accounts.User.Mapping;
 
 public sealed class MapsterConfig : IRegister
 {
@@ -12,14 +13,12 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<UserBankAccountStatus, VerificationStatus>()
             .MapWith(src => (VerificationStatus)src);
 
-        cfg.NewConfig<UserKyc?, VerificationStatusDto>()
+        cfg.NewConfig<UserKyc, VerificationStatusDto>()
             .Map(dest => dest.Type, src => VerificationStatusType.Kyc)
-            .Map(dest => dest.Status, src => src == null
-                ? VerificationStatus.NotSubmitted
-                : src.Status.Adapt<VerificationStatus>())
-            .Map(dest => dest.IsVerified, src => (src != null) && (src.Status == KycStatus.Approved))
-            .Map(dest => dest.RejectionReason, src => src != null ? src.RejectionReason : null)
-            .Map(dest => dest.RejectDetails, src => src != null ? src.RejectDetails : null);
+            .Map(dest => dest.Status, src => src.Status.Adapt<VerificationStatus>())
+            .Map(dest => dest.IsVerified, src => src.Status == KycStatus.Approved)
+            .Map(dest => dest.RejectionReason, src => src.RejectionReason)
+            .Map(dest => dest.RejectDetails, src => src.RejectDetails);
 
         cfg.NewConfig<UserBankAccount, VerificationStatusDto>()
             .Map(dest => dest.CurrencyCode, src => src.FiatCurrency.Code.Value)
@@ -28,5 +27,11 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.IsVerified, src => (src != null) && (src.Status == UserBankAccountStatus.Approved))
             .Map(dest => dest.RejectionReason, src => src.RejectionReason)
             .Map(dest => dest.RejectDetails, src => src.RejectDetails);
+        
+        cfg.NewConfig<UserBalance, GetSelfUserBalanceResult>()
+            .Map(d => d.Id, s => s.PublicId)
+            .Map(d => d.CryptoTokenId, s => s.CryptoToken.PublicId)
+            .Map(d => d.Symbol, s => s.CryptoToken.Symbol)
+            .Map(d => d.Network,s=>  s.CryptoToken.Network);
     }
 }

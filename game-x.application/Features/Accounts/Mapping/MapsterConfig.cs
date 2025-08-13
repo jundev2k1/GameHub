@@ -16,12 +16,9 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.ResidentialAddress, src => src.UserKyc != null ? src.UserKyc.ResidentialAddress : string.Empty)
             .Map(dest => dest.DateOfBirth, src => src.UserKyc != null ? src.UserKyc.DateOfBirth : (DateTime?)null)
             .Map(dest => dest.IsKycConfirmed, src => src.UserKyc != null && src.UserKyc.Status == KycStatus.Approved);
+        
         cfg.NewConfig<UserDetailDto, GetSelfUserResult>()
             .Map(dest => dest.UserId, src => src.UserId)
             .Map(dest => dest.Roles, src => src.Roles.Items);
-        
-        cfg.NewConfig<UserBalance, GetSelfUserBalanceResult>()
-            .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId);
     }
 }

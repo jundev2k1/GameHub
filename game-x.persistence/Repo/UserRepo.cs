@@ -77,7 +77,7 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             ?? throw new NotFoundException();
     }
 
-    public async Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync (string userId, CancellationToken ct = default)
+    public async Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync(string userId, CancellationToken ct = default)
     {
         var profile = await context.UserKycs
             .AsNoTracking()
@@ -98,11 +98,39 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             .ThenInclude(uba => uba.FiatCurrency)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
-        var kycStatus = user.UserKyc.Adapt<VerificationStatusDto>();
-        var bankAccountStatues = user.UserBankAccounts
-            .Select(uba => uba.Adapt<VerificationStatusDto>())
+        var supportedCurrencies = await context.FiatCurrencies
+            .AsNoTracking()
+            .Where(fc => fc.IsActive)
+            .ToListAsync(ct);
+
+        var kycStatus = user.UserKyc != null
+            ? user.UserKyc.Adapt<VerificationStatusDto>()
+            : new VerificationStatusDto
+            {
+                Type = VerificationStatusType.Kyc,
+                IsVerified = false,
+            };
+
+        var bankAccountStatuses = supportedCurrencies
+            .GroupJoin(
+                user.UserBankAccounts,
+                fc => fc.Id,
+                uba => uba.FiatCurrency.Id,
+                (fc, ubas) =>
+                {
+                    var uba = ubas.FirstOrDefault();
+                    if (uba != null) return uba.Adapt<VerificationStatusDto>();
+
+                    var defaultValue = new VerificationStatusDto
+                    {
+                        CurrencyCode = fc.Code.Value,
+                        Type = VerificationStatusType.BankAccount,
+                        IsVerified = false,
+                    };
+                    return defaultValue;
+                })
             .ToArray();
-        return [kycStatus, ..bankAccountStatues];
+        return [kycStatus, .. bankAccountStatuses];
     }
 
     public async Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default)

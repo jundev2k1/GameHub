@@ -6,8 +6,8 @@ public sealed class VerificationStatusDto
     public VerificationStatusType Type { get; set; }
     public VerificationStatus Status { get; set; }
     public bool IsVerified { get; set; }
-    public string? RejectionReason { get; set; } = string.Empty;
-    public string? RejectDetails { get; set; } = string.Empty;
+    public string? RejectionReason { get; set; }
+    public string? RejectDetails { get; set; }
 }
 
 public enum VerificationStatusType
