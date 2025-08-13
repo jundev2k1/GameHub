@@ -14,7 +14,7 @@ public class ChainTransactionDetailDto
     public string Symbol { get; set; } = string.Empty;
     public NetworkType Network { get; set; }
     public DateTime ConfirmedAt { get; set; }
-    public string Status { get; set; } = string.Empty;
+    public ChainTransactionStatus Status { get; set; }
     public string? Note { get; set; }
     public string? Meta { get; set; }
     public DateTime CreatedAt { get; set; }
