@@ -141,7 +141,7 @@ public sealed class GameProviderService(
             throw;
         }
     }
-    public async Task<ResponseBase> WalletDepositAsync(GameDepositRequest data, string ip)
+    public async Task<ResponseBase> DepositWalletAsync(GameDepositRequest data, string ip)
     {
         try
         {
@@ -186,7 +186,7 @@ public sealed class GameProviderService(
             return new ResponseBase { IsSuccess = false };
         }
     }
-    public async Task<ResponseBase> WalletWithdrawalAsync(GameWithdrawalRequest data, string ip)
+    public async Task<ResponseBase> WithdrawalWalletAsync(GameWithdrawalRequest data, string ip)
     {
         try
         {
