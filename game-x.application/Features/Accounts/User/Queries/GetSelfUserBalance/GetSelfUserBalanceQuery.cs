@@ -2,10 +2,14 @@ namespace game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 
 public record GetSelfUserBalanceQuery : IQuery<IEnumerable<GetSelfUserBalanceResult>>;
 
-public record GetSelfUserBalanceResult(
-    Guid Id,
-    string UserId,
-    string CryptoTokenId,
-    decimal Amount,
-    decimal FrozenAmount,
-    decimal TotalAmount);
+public class GetSelfUserBalanceResult
+{
+    public Guid Id { get; set; }
+    public string? UserId { get; set; }
+    public Guid CryptoTokenId { get; set; }
+    public string Symbol { get; set; } = string.Empty;
+    public NetworkType NetWork { get; set; }
+    public decimal Amount { get; set; }
+    public decimal FrozenAmount { get; set; }
+    public decimal TotalAmount { get; set; }
+}

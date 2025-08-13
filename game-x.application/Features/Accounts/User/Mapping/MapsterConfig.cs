@@ -1,6 +1,7 @@
 ﻿using game_x.application.Features.Accounts.User.Dtos;
+using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 
-namespace game_x.application.Features.User.Mapping;
+namespace game_x.application.Features.Accounts.User.Mapping;
 
 public sealed class MapsterConfig : IRegister
 {
@@ -28,5 +29,11 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.IsVerified, src => (src != null) && (src.Status == UserBankAccountStatus.Approved))
             .Map(dest => dest.RejectionReason, src => src.RejectionReason)
             .Map(dest => dest.RejectDetails, src => src.RejectDetails);
+        
+        cfg.NewConfig<UserBalance, GetSelfUserBalanceResult>()
+            .Map(d => d.Id, s => s.PublicId)
+            .Map(d => d.CryptoTokenId, s => s.CryptoToken.PublicId)
+            .Map(d => d.Symbol, s => s.CryptoToken.Symbol)
+            .Map(d => d.NetWork,s=>  s.CryptoToken.Network);
     }
 }

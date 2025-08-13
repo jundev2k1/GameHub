@@ -23,7 +23,7 @@ public static class ChainTransactionMapping
     public static PaginationResult<ChainTransactionDto> ToSearchResult(this PaginationResult<ChainTransaction> data)
     {
         var result = new PaginationResult<ChainTransactionDto>(
-            items: [.. data.Items.Select(item => item.Adapt<ChainTransactionDto>())],
+            items: [.. data.Items.Adapt<IEnumerable<ChainTransactionDto>>()],
             totalItems: data.TotalItems,
             totalPages: data.TotalPages,
             pageIndex: data.PageNumber,

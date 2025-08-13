@@ -1,4 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionCriteriaByAdmin;
 using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.application.Features.ChainTransactions.Shared.Queries.GetCryptoTokenList;
