@@ -44,7 +44,7 @@ public sealed class KycController : BaseApiController
 
     [Authorize(Roles = AppRoles.Admin)]
     [HttpPost("decision")]
-    public async Task<IActionResult> DecisionAsync(DecisionKycCommand command)
+    public async Task<IActionResult> DecideAsync(DecisionKycCommand command)
     {
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();

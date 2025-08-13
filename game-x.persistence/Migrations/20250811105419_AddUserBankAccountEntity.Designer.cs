@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -11,9 +12,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250811105419_AddUserBankAccountEntity")]
+    partial class AddUserBankAccountEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -485,10 +488,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
                         .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
 
                     b.Property<string>("Symbol")
                         .IsRequired()
@@ -1007,8 +1006,11 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("reject_details");
 
                     b.Property<string>("RejectionReason")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(4000)
                         .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("True")
                         .HasColumnName("rejection_reason");
 
                     b.Property<string>("ReviewedById")
@@ -1295,12 +1297,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("text")
                         .HasDefaultValue("")
                         .HasColumnName("source_id");
-
-                    b.Property<string>("StatusAtEvent")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("")
-                        .HasColumnName("status_at_event");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone")
