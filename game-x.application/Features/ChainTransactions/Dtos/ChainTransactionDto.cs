@@ -7,6 +7,8 @@ public class ChainTransactionDto
     public decimal Amount { get; set; }
     public decimal Fee { get; set; }
     public Guid CryptoTokenId { get; set; }
+    public string Symbol { get; set; } = string.Empty;
+    public NetworkType Network { get; set; }
     public ChainTransactionType Type { get; set; }
     public ChainTransactionStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
