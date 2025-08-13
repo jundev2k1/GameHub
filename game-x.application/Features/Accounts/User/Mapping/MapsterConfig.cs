@@ -34,6 +34,6 @@ public sealed class MapsterConfig : IRegister
             .Map(d => d.Id, s => s.PublicId)
             .Map(d => d.CryptoTokenId, s => s.CryptoToken.PublicId)
             .Map(d => d.Symbol, s => s.CryptoToken.Symbol)
-            .Map(d => d.NetWork,s=>  s.CryptoToken.Network);
+            .Map(d => d.Network,s=>  s.CryptoToken.Network);
     }
 }
