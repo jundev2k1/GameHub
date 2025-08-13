@@ -18,7 +18,7 @@ public sealed class UserController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpGet("me/verification-statues")]
+    [HttpGet("verification-statues")]
     public async Task<IActionResult> GetUserVerificationListAsync()
     {
         var result = await Mediator.Send(new GetSelfVerificationStatusListQuery());
