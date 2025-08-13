@@ -2,6 +2,7 @@ using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Commands.UserSelfUpdate;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
+using game_x.application.Features.Accounts.User.Queries.GetSelfVerificationStatusList;
 using game_x.application.Features.Auth.Client.Commands.ChangePasswordUser;
 
 namespace game_x.api.Controllers.Client.Me;
@@ -10,10 +11,17 @@ namespace game_x.api.Controllers.Client.Me;
 [Route("api/user/me")]
 public sealed class UserController : BaseApiController
 {
-    [HttpGet()]
+    [HttpGet]
     public async Task<IActionResult> GetUserDetailAsync()
     {
         var result = await Mediator.Send(new GetSelfUserQuery());
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpGet("me/verification-statues")]
+    public async Task<IActionResult> GetUserVerificationListAsync()
+    {
+        var result = await Mediator.Send(new GetSelfVerificationStatusListQuery());
         return ApiResponseFactory.Ok(result);
     }
 
@@ -27,7 +35,7 @@ public sealed class UserController : BaseApiController
         return ApiResponseFactory.NoContent(MessageCode.User.UserChangePasswordSuccess);
     }
 
-    [HttpPut()]
+    [HttpPut]
     public async Task<IActionResult> UpdateUserAsync(UserSelfUpdateCommand command)
     {
         await Mediator.Send(command);

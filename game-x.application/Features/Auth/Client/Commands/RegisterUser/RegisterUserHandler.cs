@@ -4,6 +4,7 @@ using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserCreated;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
+using UserEntity = game_x.domain.Entities.User;
 
 namespace game_x.application.Features.Auth.Client.Commands.RegisterUser;
 
@@ -27,7 +28,7 @@ public sealed class RegisterUserHandler(
         var userId = string.Empty;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            var registerUser = User.Create(
+            var registerUser = UserEntity.Create(
                 userName: request.Email,
                 email: request.Email,
                 nickName: request.Nickname);
@@ -48,7 +49,7 @@ public sealed class RegisterUserHandler(
         return new RegisterUserResult(userId);
     }
 
-    private async Task CreateUserBalancesAsync(User user)
+    private async Task CreateUserBalancesAsync(UserEntity user)
     {
         var activeTokens = await cryptoTokenRepo.GetAsync();
 
