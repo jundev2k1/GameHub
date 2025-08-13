@@ -4,9 +4,9 @@ public sealed class WalletDepositValidator : AbstractValidator<WalletDepositComm
 {
     public WalletDepositValidator()
     {
-        RuleFor(x => x.Quota)
-            .NotEmpty().WithMessage($"{nameof(WalletDepositCommand.Quota)} is required.")
-            .GreaterThanOrEqualTo(0).WithMessage($"{nameof(WalletDepositCommand.Quota)} must be greater than zero.");
+        RuleFor(x => x.Amount)
+            .NotEmpty().WithMessage($"{nameof(WalletDepositCommand.Amount)} is required.")
+            .GreaterThanOrEqualTo(0).WithMessage($"{nameof(WalletDepositCommand.Amount)} must be greater than zero.");
 
     }
 }

@@ -34,7 +34,7 @@ public sealed class WalletDepositHandler(
         if (userBalance == null)
             throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
-        if (userBalance.Amount < request.Quota)
+        if (userBalance.Amount < request.Amount)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
         var sno = GameProviderUtils.SnoGenerate();
@@ -42,7 +42,7 @@ public sealed class WalletDepositHandler(
         var depositRequest = new GameDepositRequest
         {
             Account = targetUser.UserExtend.GameProviderAccount,
-            Quota = request.Quota,
+            Quota = request.Amount,
             Sno = sno
         };
 
@@ -56,13 +56,13 @@ public sealed class WalletDepositHandler(
             var gameTransaction = GameTransaction.Create(
                 userId,
                 sno,
-                request.Quota,
+                request.Amount,
                 GamePlatform.G598,
                 GameTransactionType.Deposit
             );
 
             await gameTransactionRepo.AddAsync(gameTransaction, ct);
-            userBalance.Amount -= request.Quota;
+            userBalance.Amount -= request.Amount;
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
             await unitOfWork.SaveChangesAsync(ct);
         }

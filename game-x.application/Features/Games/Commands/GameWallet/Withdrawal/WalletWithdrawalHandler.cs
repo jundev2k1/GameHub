@@ -31,7 +31,7 @@ public sealed class WalletWithdrawalHandler(
         var withdrawalRequest = new GameWithdrawalRequest
         {
             Account = targetUser.UserExtend.GameProviderAccount,
-            Quota = request.Quota,
+            Quota = request.Amount,
             Sno = sno
         };
 
@@ -52,13 +52,13 @@ public sealed class WalletWithdrawalHandler(
             var gameTransaction = GameTransaction.Create(
                 userId,
                 sno,
-                request.Quota,
+                request.Amount,
                 GamePlatform.G598,
                 GameTransactionType.Withdrawal
             );
 
             await gameTransactionRepo.AddAsync(gameTransaction, ct);
-            userBalance.Amount += request.Quota;
+            userBalance.Amount += request.Amount;
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
             await unitOfWork.SaveChangesAsync(ct);
         }

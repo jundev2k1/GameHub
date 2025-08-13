@@ -4,4 +4,4 @@ using MediatR;
 namespace game_x.application.Features.Games.Commands.GameWallet.Deposit;
 
 public record WalletDepositCommand(
-    decimal Quota) : IRequest;
+    decimal Amount) : IRequest;
