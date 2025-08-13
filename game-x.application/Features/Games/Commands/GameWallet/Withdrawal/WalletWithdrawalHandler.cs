@@ -1,6 +1,7 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Games.Dtos;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
 
@@ -13,9 +14,9 @@ public sealed class WalletWithdrawalHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     IGameTransactionRepo gameTransactionRepo,
     IUnitOfWork unitOfWork,
-    IGameProviderService gameProvider) : ICommandHandler<WalletWithdrawalCommand, WalletWithdrawalResponse>
+    IGameProviderService gameProvider) : ICommandHandler<WalletWithdrawalCommand, GameTransactionResponse>
 {
-    public async Task<WalletWithdrawalResponse> Handle(WalletWithdrawalCommand request, CancellationToken ct = default)
+    public async Task<GameTransactionResponse> Handle(WalletWithdrawalCommand request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
         var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
@@ -27,7 +28,7 @@ public sealed class WalletWithdrawalHandler(
 
         var sno = GameProviderUtils.SnoGenerate();
 
-        var withdrawalRequest = new WithdrawalRequest
+        var withdrawalRequest = new GameWithdrawalRequest
         {
             Account = targetUser.UserExtend.GameProviderAccount,
             Quota = request.Quota,
@@ -36,7 +37,7 @@ public sealed class WalletWithdrawalHandler(
 
         var result = await gameProvider.WalletWithdrawalAsync(withdrawalRequest, request.IpAddress!);
 
-        if (!result.issuccess)
+        if (!result.IsSuccess)
             throw new BadRequestException(MessageCode.Accounting.CannotWithdrawToSystemWallet);
 
         try
@@ -67,6 +68,6 @@ public sealed class WalletWithdrawalHandler(
             throw new InvalidOperationException($"Failed to create local transaction. Game provider withdrawal may need manual rollback. SNO: {sno}", ex);
         }
 
-        return result;
+        return new GameTransactionResponse();
     }
 }

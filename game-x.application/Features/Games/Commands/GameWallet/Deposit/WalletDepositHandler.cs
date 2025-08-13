@@ -1,6 +1,7 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Games.Dtos;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
 
@@ -14,9 +15,9 @@ public sealed class WalletDepositHandler(
     IGameTransactionRepo gameTransactionRepo,
 
     IUnitOfWork unitOfWork,
-    IGameProviderService gameProvider) : ICommandHandler<WalletDepositCommand, WalletDepositResponse>
+    IGameProviderService gameProvider) : ICommandHandler<WalletDepositCommand, GameTransactionResponse>
 {
-    public async Task<WalletDepositResponse> Handle(WalletDepositCommand request, CancellationToken ct = default)
+    public async Task<GameTransactionResponse> Handle(WalletDepositCommand request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
         var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
@@ -39,7 +40,7 @@ public sealed class WalletDepositHandler(
 
         var sno = GameProviderUtils.SnoGenerate();
 
-        var depositRequest = new DepositRequest
+        var depositRequest = new GameDepositRequest
         {
             Account = targetUser.UserExtend.GameProviderAccount,
             Quota = request.Quota,
@@ -48,7 +49,7 @@ public sealed class WalletDepositHandler(
 
         var result = await gameProvider.WalletDepositAsync(depositRequest, request.IpAddress!);
 
-        if (!result.issuccess)
+        if (!result.IsSuccess)
             throw new BadRequestException(MessageCode.Accounting.CannotDepositToSystemWallet);
 
         try
@@ -72,6 +73,6 @@ public sealed class WalletDepositHandler(
             throw new InvalidOperationException($"Failed to create local transaction. Game provider deposit may need manual rollback. SNO: {sno}", ex);
         }
 
-        return result;
+        return new GameTransactionResponse();
     }
 }
