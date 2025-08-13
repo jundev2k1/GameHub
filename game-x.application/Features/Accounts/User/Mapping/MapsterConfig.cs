@@ -15,16 +15,12 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<UserKyc, VerificationStatusDto>()
             .Map(dest => dest.Type, src => VerificationStatusType.Kyc)
             .Map(dest => dest.Status, src => src.Status.Adapt<VerificationStatus>())
-            .Map(dest => dest.IsVerified, src => src.Status == KycStatus.Approved)
-            .Map(dest => dest.RejectionReason, src => src.RejectionReason)
-            .Map(dest => dest.RejectDetails, src => src.RejectDetails);
+            .Map(dest => dest.IsVerified, src => src.Status == KycStatus.Approved);
 
         cfg.NewConfig<UserBankAccount, VerificationStatusDto>()
             .Map(dest => dest.CurrencyCode, src => src.FiatCurrency.Code.Value)
             .Map(dest => dest.Type, src => VerificationStatusType.BankAccount)
             .Map(dest => dest.Status, src => src.Status.Adapt<VerificationStatus>())
-            .Map(dest => dest.IsVerified, src => (src != null) && (src.Status == UserBankAccountStatus.Approved))
-            .Map(dest => dest.RejectionReason, src => src.RejectionReason)
-            .Map(dest => dest.RejectDetails, src => src.RejectDetails);
+            .Map(dest => dest.IsVerified, src => (src != null) && (src.Status == UserBankAccountStatus.Approved));
     }
 }
