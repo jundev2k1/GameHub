@@ -9,6 +9,7 @@ public class ChainTransactionDetailDto
     public string? ToAddress { get; set; }
     public decimal Amount { get; set; }
     public decimal Fee { get; set; }
+    public ChainTransactionType Type { get; set; }
     public Guid CryptoTokenId { get; set; }
     public string Symbol { get; set; } = string.Empty;
     public NetworkType Network { get; set; }
