@@ -11,6 +11,7 @@ public sealed class RefreshToken : BaseEntity<long>
     public string JwtId { get; private set; } = string.Empty;
     public DateTime ExpiresAt { get; private set; }
     public DateTime? RevokedAt { get; private set; }
+    public string? ReplacedByToken { get; private set; }
 
     public string IpAddress { get; private set; } = string.Empty;
     public string UserAgent { get; private set; } = string.Empty;

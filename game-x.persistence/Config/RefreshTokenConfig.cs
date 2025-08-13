@@ -26,6 +26,18 @@ public sealed class RefreshTokenConfig : IEntityTypeConfiguration<RefreshToken>
         builder.Property(rt => rt.JwtId)
             .IsRequired();
 
+        builder.Property(rt => rt.ExpiresAt)
+            .HasColumnType("timestamp with time zone")
+            .IsRequired();
+
+        builder.Property(rt => rt.RevokedAt)
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
+
+        builder.Property(rt => rt.ReplacedByToken)
+            .IsRequired(false)
+            .HasMaxLength(512);
+
         builder.Property(rt => rt.UserAgent)
             .HasMaxLength(512)
             .IsRequired()
@@ -45,9 +57,6 @@ public sealed class RefreshTokenConfig : IEntityTypeConfiguration<RefreshToken>
             .HasDefaultValue(string.Empty);
 
         builder.Property(rt => rt.CreatedAt)
-            .IsRequired();
-
-        builder.Property(rt => rt.ExpiresAt)
             .IsRequired();
 
         builder.Ignore(rt => rt.UpdatedAt);
