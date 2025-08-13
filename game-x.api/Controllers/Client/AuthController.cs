@@ -34,7 +34,7 @@ public sealed class AuthController : BaseApiController
 
     [AllowAnonymous]
     [HttpPost("refresh-token")]
-    public async Task<ActionResult> RefreshTokenAsync(RefreshTokenCommand command)
+    public async Task<IActionResult> RefreshTokenAsync(RefreshTokenCommand command)
     {
         var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result);
