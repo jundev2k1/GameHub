@@ -12,7 +12,7 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    [Migration("20250812070339_gametransaction")]
+    [Migration("20250813035627_gametransaction")]
     partial class gametransaction
     {
         /// <inheritdoc />
@@ -529,26 +529,29 @@ namespace game_x.persistence.Migrations
 
                     b.Property<string>("G598Sno")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("g598_sno");
 
-                    b.Property<int>("GamePlatform")
-                        .HasColumnType("integer")
+                    b.Property<short>("GamePlatform")
+                        .HasColumnType("smallint")
                         .HasColumnName("game_platform");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
                         .HasColumnName("note");
 
                     b.Property<Guid>("PublicId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("public_id")
+                        .HasColumnName("code")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint")
                         .HasColumnName("type");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -556,6 +559,7 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("user_id");
 
@@ -1306,6 +1310,7 @@ namespace game_x.persistence.Migrations
                         .WithMany("GameTransactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired()
                         .HasConstraintName("fk_game_transactions_user_user_id");
 
                     b.Navigation("User");

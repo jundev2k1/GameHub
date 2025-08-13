@@ -8,42 +8,46 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
     {
         builder.ToTable("game_transactions");
 
-        builder.HasKey(x => x.Id);
+        builder.HasKey(gt => gt.Id);
 
-        builder.HasIndex(x => x.G598Sno).IsUnique();
-        builder.HasIndex(x => x.PublicId).IsUnique();
+        builder.HasIndex(gt => gt.G598Sno).IsUnique();
+        builder.HasIndex(gt => gt.PublicId).IsUnique();
 
-        builder.Property(x => x.PublicId)
-            .HasColumnName("public_id")
+        builder.Property(gt => gt.Id)
+            .IsRequired()
+            .ValueGeneratedOnAdd();
+
+        builder.Property(gt => gt.PublicId)
+            .HasColumnName("code")
             .IsRequired()
             .HasDefaultValueSql("gen_random_uuid()");
 
-        builder.Property(x => x.G598Sno)
+        builder.Property(gt => gt.G598Sno)
             .HasColumnName("g598_sno")
             .IsRequired()
-            .HasMaxLength(30);
+            .HasMaxLength(50);
 
-        builder.Property(x => x.UserId)
-            .HasColumnName("user_id");
-
-        builder.Property(x => x.GamePlatform)
-            .HasColumnName("game_platform")
+        builder.Property(gt => gt.UserId)
             .IsRequired();
 
-        builder.Property(x => x.Type)
-            .HasColumnName("type")
+        builder.Property(gt => gt.GamePlatform)
+            .HasConversion<short>()
             .IsRequired();
 
-        builder.Property(x => x.Amount)
-            .HasColumnName("amount")
+        builder.Property(gt => gt.Type)
+            .HasConversion<short>()
             .IsRequired();
 
-        builder.Property(x => x.Note)
-            .HasColumnName("note");
+        builder.Property(gt => gt.Amount)
+            .IsRequired();
 
-        builder.HasOne(x => x.User)
+        builder.Property(gt => gt.Note)
+            .HasMaxLength(4000)
+            .HasDefaultValue(string.Empty);
+
+        builder.HasOne(gt => gt.User)
             .WithMany(u => u.GameTransactions)
-            .HasForeignKey(x => x.UserId)
+            .HasForeignKey(gt => gt.UserId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

@@ -18,13 +18,13 @@ namespace game_x.persistence.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    public_id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
-                    g598_sno = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
-                    user_id = table.Column<string>(type: "text", nullable: true),
-                    type = table.Column<int>(type: "integer", nullable: false),
+                    code = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    g598_sno = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    user_id = table.Column<string>(type: "text", nullable: false),
+                    type = table.Column<short>(type: "smallint", nullable: false),
                     amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    game_platform = table.Column<int>(type: "integer", nullable: false),
-                    note = table.Column<string>(type: "text", nullable: true),
+                    game_platform = table.Column<short>(type: "smallint", nullable: false),
+                    note = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true, defaultValue: ""),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -48,7 +48,7 @@ namespace game_x.persistence.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_game_transactions_public_id",
                 table: "game_transactions",
-                column: "public_id",
+                column: "code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
