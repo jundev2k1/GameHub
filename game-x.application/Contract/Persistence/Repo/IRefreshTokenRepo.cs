@@ -2,9 +2,13 @@
 
 public interface IRefreshTokenRepo
 {
-    Task<RefreshToken?> GetValidTokenAsync(string tokenHash, CancellationToken ct = default);
+    Task<RefreshToken[]> GetActiveTokensAsync(CancellationToken ct = default);
 
-    Task AddAsync(RefreshToken token, CancellationToken ct = default);
+    Task<RefreshToken?> FindActiveByTokenHashAsync(string tokenHash, CancellationToken ct = default);
 
-    Task RevokeByIdAsync(Guid publicId, CancellationToken ct = default);
+    Task<RefreshToken?> FindByIdAsync(Guid publicId, CancellationToken ct = default);
+
+    Task AddRangeAsync(IEnumerable<RefreshToken> tokens, CancellationToken ct = default);
+
+    Task BulkRevokeAsync(IEnumerable<Guid> publicIds, DateTime revokedAtUtc, CancellationToken ct = default);
 }

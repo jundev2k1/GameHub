@@ -20,7 +20,7 @@ public sealed class RefreshToken : BaseEntity<long>
 
     public static RefreshToken Create(
         string userId,
-        string rawToken,
+        string tokenHash,
         string jwtId,
         DateTime expiresAt,
         string ipAddress,
@@ -31,7 +31,7 @@ public sealed class RefreshToken : BaseEntity<long>
         return new RefreshToken
         {
             UserId = userId,
-            TokenHash = HashHelper.Sha256(rawToken),
+            TokenHash = tokenHash,
             JwtId = jwtId,
             ExpiresAt = expiresAt.ToUniversalTime(),
             CreatedAt = DateTime.UtcNow,
