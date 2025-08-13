@@ -1,5 +1,6 @@
 ﻿using game_x.application.Features.Accounts.Dtos;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
+using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 using UserEntity = game_x.domain.Entities.User;
 
 namespace game_x.application.Features.Accounts.Mapping;
@@ -18,5 +19,9 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<UserDetailDto, GetSelfUserResult>()
             .Map(dest => dest.UserId, src => src.UserId)
             .Map(dest => dest.Roles, src => src.Roles.Items);
+        
+        cfg.NewConfig<UserBalance, GetSelfUserBalanceResult>()
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId);
     }
 }

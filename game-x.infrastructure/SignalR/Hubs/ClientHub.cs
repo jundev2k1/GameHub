@@ -14,12 +14,13 @@ public interface IClientHub
 {
     Task ReceiveNotification(NotificationDto message);
 
-    /// <summary>
-    ///     Notify that an order has been updated.
-    /// </summary>
+    /// <summary>Notify that an order has been updated.</summary>
     /// <param name="orderInfo">The order information that was updated.</param>
     Task TransactionUpdated(ClientTransactionDto orderInfo);
+    /// <summary>Notify that user balance has been updated.</summary>
     Task BalanceUpdated(ClientBalanceDto dto);
+    /// <summary>Notify that a transaction history has been updated.</summary>
+    Task LedgerUpdated(ClientLedgerDto dto);
 }
 
 [Authorize(Roles = AppRoles.User)]

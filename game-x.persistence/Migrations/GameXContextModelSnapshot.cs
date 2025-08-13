@@ -486,6 +486,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("public_id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
                     b.Property<string>("Symbol")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -1291,6 +1295,12 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("text")
                         .HasDefaultValue("")
                         .HasColumnName("source_id");
+
+                    b.Property<string>("StatusAtEvent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("")
+                        .HasColumnName("status_at_event");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone")

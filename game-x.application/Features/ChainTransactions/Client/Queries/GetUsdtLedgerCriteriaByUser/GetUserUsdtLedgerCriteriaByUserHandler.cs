@@ -1,0 +1,32 @@
+using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Common.Filters;
+using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.UserUsdtLedgers.Dtos;
+using game_x.application.Features.UserUsdtLedgers.Mapping;
+
+namespace game_x.application.Features.ChainTransactions.Client.Queries.GetUsdtLedgerCriteriaByUser;
+
+public sealed class GetUserUsdtLedgerCriteriaByUserHandler(
+    IUserAccessor userAccessor,
+    ICriteriaBuilder<UserUsdtLedger> builder, 
+    IUserUsdtLedgerRepo userUsdtLedgerRepo)
+    : IQueryHandler<GetUserUsdtLedgerCriteriaByUserQuery, PaginationResult<UserUsdtLedgerDto>>
+{
+    public async Task<PaginationResult<UserUsdtLedgerDto>> Handle(GetUserUsdtLedgerCriteriaByUserQuery request, CancellationToken ct = default)
+    {
+        var userId = userAccessor.GetUserId();
+        var items = await userUsdtLedgerRepo.GetUsdtLedgerUserByCriteriaAsync(
+            userId,
+            query => builder.Apply(
+                query,
+                request.Filters,
+                request.Sorts),
+            request.PageIndex ?? 1,
+            request.PageSize ?? 20,
+            ct);
+        
+        var result = items.ToSearchResult();
+        return result;
+    }
+}
