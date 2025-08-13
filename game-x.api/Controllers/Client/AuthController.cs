@@ -1,6 +1,7 @@
 using game_x.api.Dtos;
 using game_x.api.Enums;
 using game_x.application.Exceptions;
+using game_x.application.Features.Auth.Client.Commands.RefreshToken;
 using game_x.application.Features.Auth.Client.Commands.RegisterUser;
 using game_x.application.Features.Auth.Client.Commands.ResendCodeUser;
 using game_x.application.Features.Auth.Client.Commands.ResetPasswordUser;
@@ -29,6 +30,14 @@ public sealed class AuthController : BaseApiController
     {
         var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result, MessageCode.User.UserRegisterSuccess);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("refresh-token")]
+    public async Task<ActionResult> RefreshTokenAsync(RefreshTokenCommand command)
+    {
+        var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result);
     }
 
     [AllowAnonymous]
