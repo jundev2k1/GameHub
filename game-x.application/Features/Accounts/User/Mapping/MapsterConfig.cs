@@ -1,6 +1,6 @@
 ﻿using game_x.application.Features.Accounts.User.Dtos;
 
-namespace game_x.application.Features.User.Mapping;
+namespace game_x.application.Features.Accounts.User.Mapping;
 
 public sealed class MapsterConfig : IRegister
 {
