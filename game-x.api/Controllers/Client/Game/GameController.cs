@@ -27,16 +27,16 @@ public sealed class GameController : BaseApiController
     }
 
     [HttpPost("me/wallet/deposit")]
-    public async Task<IActionResult> DepositAsync(WalletDepositCommand request)
+    public async Task<IActionResult> DepositAsync(WalletDepositCommand command)
     {
-        await Mediator.Send(request);
-        return ApiResponseFactory.Ok(new { });
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
     }
 
     [HttpPost("me/wallet/withdrawal")]
-    public async Task<IActionResult> WithdrawalAsync(WalletWithdrawalCommand request)
+    public async Task<IActionResult> WithdrawalAsync(WalletWithdrawalCommand command)
     {
-        await Mediator.Send(request);
-        return ApiResponseFactory.Ok(new { });
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
     }
 }

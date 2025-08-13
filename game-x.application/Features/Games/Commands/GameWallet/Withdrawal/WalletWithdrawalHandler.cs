@@ -1,9 +1,11 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
 
@@ -14,9 +16,9 @@ public sealed class WalletWithdrawalHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     IGameTransactionRepo gameTransactionRepo,
     IUnitOfWork unitOfWork,
-    IGameProviderService gameProvider) : IRequestHandler<WalletWithdrawalCommand>
+    IGameProviderService gameProvider) : ICommandHandler<WalletWithdrawalCommand>
 {
-    public async Task Handle(WalletWithdrawalCommand request, CancellationToken ct = default)
+    public async Task<Unit> Handle(WalletWithdrawalCommand command, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
         var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
@@ -31,14 +33,21 @@ public sealed class WalletWithdrawalHandler(
         var withdrawalRequest = new GameWithdrawalRequest
         {
             Account = targetUser.UserExtend.GameProviderAccount,
-            Quota = request.Amount,
+            Quota = command.Amount,
             Sno = sno
         };
 
         var result = await gameProvider.WithdrawalWalletAsync(withdrawalRequest);
 
         if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == "010")
+            {
+                throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
+            }
+
             throw new BadRequestException(MessageCode.Accounting.CannotWithdrawToSystemWallet);
+        }
 
         try
         {
@@ -52,13 +61,13 @@ public sealed class WalletWithdrawalHandler(
             var gameTransaction = GameTransaction.Create(
                 userId,
                 sno,
-                request.Amount,
+                command.Amount,
                 GamePlatform.G598,
                 GameTransactionType.Withdrawal
             );
 
             await gameTransactionRepo.AddAsync(gameTransaction, ct);
-            userBalance.Amount += request.Amount;
+            userBalance.Amount += command.Amount;
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
             await unitOfWork.SaveChangesAsync(ct);
         }
@@ -66,5 +75,7 @@ public sealed class WalletWithdrawalHandler(
         {
             throw new InvalidOperationException($"Failed to create local transaction. Game provider withdrawal may need manual rollback. SNO: {sno}", ex);
         }
+
+        return Unit.Value;
     }
 }

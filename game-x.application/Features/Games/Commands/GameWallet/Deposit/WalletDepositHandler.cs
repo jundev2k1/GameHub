@@ -14,9 +14,9 @@ public sealed class WalletDepositHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     IGameTransactionRepo gameTransactionRepo,
     IUnitOfWork unitOfWork,
-    IGameProviderService gameProvider) : IRequestHandler<WalletDepositCommand>
+    IGameProviderService gameProvider) : ICommandHandler<WalletDepositCommand>
 {
-    public async Task Handle(WalletDepositCommand request, CancellationToken ct = default)
+    public async Task<Unit> Handle(WalletDepositCommand command, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
         var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
@@ -34,7 +34,7 @@ public sealed class WalletDepositHandler(
         if (userBalance == null)
             throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
-        if (userBalance.Amount < request.Amount)
+        if (userBalance.Amount < command.Amount)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
         var sno = GameProviderUtils.SnoGenerate();
@@ -42,7 +42,7 @@ public sealed class WalletDepositHandler(
         var depositRequest = new GameDepositRequest
         {
             Account = targetUser.UserExtend.GameProviderAccount,
-            Quota = request.Amount,
+            Quota = command.Amount,
             Sno = sno
         };
 
@@ -56,13 +56,13 @@ public sealed class WalletDepositHandler(
             var gameTransaction = GameTransaction.Create(
                 userId,
                 sno,
-                request.Amount,
+                command.Amount,
                 GamePlatform.G598,
                 GameTransactionType.Deposit
             );
 
             await gameTransactionRepo.AddAsync(gameTransaction, ct);
-            userBalance.Amount -= request.Amount;
+            userBalance.Amount -= command.Amount;
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
             await unitOfWork.SaveChangesAsync(ct);
         }
@@ -70,5 +70,7 @@ public sealed class WalletDepositHandler(
         {
             throw new InvalidOperationException($"Failed to create local transaction. Game provider deposit may need manual rollback. SNO: {sno}", ex);
         }
+
+        return Unit.Value;
     }
 }
