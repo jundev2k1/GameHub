@@ -62,7 +62,7 @@ public sealed class WalletDepositHandler(
             );
 
             await gameTransactionRepo.AddAsync(gameTransaction, ct);
-            userBalance.Amount -= command.Amount;
+            userBalance.AdjustAmount(command.Amount, false);
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
             await unitOfWork.SaveChangesAsync(ct);
         }

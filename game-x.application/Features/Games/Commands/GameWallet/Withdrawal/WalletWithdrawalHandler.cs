@@ -41,17 +41,16 @@ public sealed class WalletWithdrawalHandler(
 
         if (!result.IsSuccess)
         {
-            if (result.ErrorCode == "010")
-            {
+            if (result.ErrorCode == GameMessage.InsufficientBalance)
                 throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
-            }
 
             throw new BadRequestException(MessageCode.Accounting.CannotWithdrawToSystemWallet);
         }
 
         try
         {
-            var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct)
+            var token = await cryptoTokenRepo
+                .GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct)
                 ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
 
             var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
@@ -63,11 +62,10 @@ public sealed class WalletWithdrawalHandler(
                 sno,
                 command.Amount,
                 GamePlatform.G598,
-                GameTransactionType.Withdrawal
-            );
+                GameTransactionType.Withdrawal);
 
             await gameTransactionRepo.AddAsync(gameTransaction, ct);
-            userBalance.Amount += command.Amount;
+            userBalance.AdjustAmount(command.Amount, true);
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
             await unitOfWork.SaveChangesAsync(ct);
         }
