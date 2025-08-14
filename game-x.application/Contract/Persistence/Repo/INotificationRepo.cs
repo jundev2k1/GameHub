@@ -2,7 +2,7 @@
 
 public interface INotificationRepo
 {
-    Task<Notification[]> GetNotificationByUserIdAsync(string userId, CancellationToken ct = default);
+    Task<Notification[]> GetNotificationByUserIdAsync(string userId, int pageSize = 20, CancellationToken ct = default);
 
     Task<Notification> GetNotificationIdAsync(Guid notificationId, CancellationToken ct = default);
 

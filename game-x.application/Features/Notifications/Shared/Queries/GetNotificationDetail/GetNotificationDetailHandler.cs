@@ -10,8 +10,11 @@ public sealed class GetNotificationDetailHandler(INotificationRepo notificationR
     public async Task<NotificationDto[]> Handle(GetNotificationDetailQuery request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
+        var pageSize = request.PageSize > 0 && request.PageSize <= 500
+            ? request.PageSize
+            : 10;
         var notifications = await notificationRepo
-            .GetNotificationByUserIdAsync(userId, ct);
+            .GetNotificationByUserIdAsync(userId, pageSize, ct);
 
         var result = notifications
             .Select(n => n.Adapt<NotificationDto>())
