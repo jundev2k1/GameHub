@@ -21,12 +21,14 @@ public interface IClientHub
     Task BalanceUpdated(ClientBalanceDto dto);
     /// <summary>Notify that a transaction history has been updated.</summary>
     Task LedgerUpdated(ClientLedgerDto dto);
+    Task UserKycUpdated(UserKycDto dto);
+    Task UserBankAccountUpdated(UserBankAccountDto dto);
 }
 
 [Authorize(Roles = AppRoles.User)]
 public sealed class ClientHub(
-    ISender sender, 
-    ILogger<ClientHub> logger, 
+    ISender sender,
+    ILogger<ClientHub> logger,
     IUserAccessor userAccessor) : Hub<IClientHub>
 {
     public const string Path = "/hubs/client-service";
@@ -46,7 +48,7 @@ public sealed class ClientHub(
         logger.LogInformation($"User disconnected: {Context.UserIdentifier}");
         await base.OnDisconnectedAsync(exception);
     }
-    
+
     public async Task MarkNotificationAsRead(Guid notificationId)
     {
         var adminUserId = userAccessor.GetUserId();
