@@ -26,9 +26,26 @@ public class UserUsdtLedgerConfig: IEntityTypeConfiguration<UserUsdtLedger>
             .HasColumnType("timestamp with time zone")
             .IsRequired();
         
+        builder.Property(x => x.FlowType)
+            .HasColumnName("flow_type")
+            .IsRequired();
+        
         builder.Property(x => x.SourceId)
             .HasColumnName("source_id")
             .IsRequired()
+            .HasDefaultValue(string.Empty);
+        
+        builder.Property(x => x.ChangeAmount)
+            .HasColumnName("change_amount")
+            .IsRequired();
+        
+        builder.Property(x => x.BalanceAfter)
+            .HasColumnName("balance_after")
+            .IsRequired();
+        
+        builder.Property(x => x.StatusAtEvent)
+            .HasColumnName("status_at_event")
+            .IsRequired(false)
             .HasDefaultValue(string.Empty);
         
         builder.Property(x => x.ChainTransactionId)

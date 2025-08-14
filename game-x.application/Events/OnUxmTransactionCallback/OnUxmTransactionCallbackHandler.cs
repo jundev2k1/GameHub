@@ -54,6 +54,9 @@ public sealed class OnUxmTransactionCallbackHandler(
                     );
                 }, ct);
                 
+                // Create transaction history before updating balance
+                await userUsdtLedgerService.CreateForChainTransactionAsync(transaction);
+                
                 switch (transaction.Type)
                 {
                     case ChainTransactionType.Deposit:
@@ -66,8 +69,6 @@ public sealed class OnUxmTransactionCallbackHandler(
                         throw new BadRequestException(MessageCode.System.InvalidParameters);
                 }
                 await userBalanceRepo.PutUpdateAsync(balance, ct);
-                
-                await userUsdtLedgerService.CreateForChainTransactionAsync(transaction);
                 
                 await SendToMember(balance, transaction, ct);
                 await SendToAdmin(transaction, ct);
@@ -87,25 +88,22 @@ public sealed class OnUxmTransactionCallbackHandler(
 
     private async Task SendToMember(UserBalance balance, ChainTransaction transaction, CancellationToken ct)
     {
-        var userId = transaction?.UserId;
+        var userId = transaction.UserId;
         if (userId != null)
         {
             // Send a notification to update the transaction history
-            UserUsdtLedger? userLedger = await userUsdtLedgerRepo.GetDetailByTransactionIdAsync(transaction!.Id);
-            if (userLedger != null)
-            {
-                var notification = Notification.Create(
-                    NotificationMessageKey.UserLedger_Created,
-                    userId,
-                    NotificationType.UserLedger,
-                    NotificationSeverity.Success,
-                    JsonSerializer.Serialize(userLedger.Adapt<UserUsdtLedgerNotificationDto>()));
-                await notificationRepo.AddNotificationAsync(notification, ct);
+            UserUsdtLedger userLedger = await userUsdtLedgerRepo.GetDetailByTransactionIdAsync(transaction.Id);
+            var notification = Notification.Create(
+                NotificationMessageKey.UserLedger_Created,
+                userId,
+                NotificationType.UserLedger,
+                NotificationSeverity.Success,
+                JsonSerializer.Serialize(userLedger.Adapt<UserUsdtLedgerNotificationDto>()));
+            await notificationRepo.AddNotificationAsync(notification, ct);
                 
-                await clientHubService.SendNotificationToMemberAsync(
-                    userId,
-                    notification.Adapt<NotificationDto>());
-            }
+            await clientHubService.SendNotificationToMemberAsync(
+                userId,
+                notification.Adapt<NotificationDto>());
         
             await clientHubService.SendBalanceToMemberAsync(
                 userId,
@@ -113,6 +111,12 @@ public sealed class OnUxmTransactionCallbackHandler(
                     BalanceId: balance.PublicId,
                     Amount: balance.Amount,
                     FrozenAmount: balance.FrozenAmount));
+        
+            await clientHubService.SendLedgerToMemberAsync(
+                userId,
+                new ClientLedgerDto(
+                    LedgerId: userLedger.PublicId,
+                    Status: userLedger.StatusAtEvent));
         }
     }
     
@@ -130,12 +134,10 @@ public sealed class OnUxmTransactionCallbackHandler(
                 JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
             await notificationRepo.AddNotificationAsync(notification, ct);
 
-            // Send notification to all the admin
             await adminHubService.SendNotificationAsync(
                 adminUser.Id,
                 notification.Adapt<NotificationDto>());
 
-            // Send transaction to all the admin
             await adminHubService.SendTransactionToAdminAsync(
                 adminUser.Id,
                 new AdminTransactionDto(

@@ -1,11 +1,13 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
+using game_x.application.Events.OnUserLogin;
 
 namespace game_x.application.Features.Auth.Client.Commands.UserLogin;
 
 public sealed class UserLoginHandler(
     IJwtTokenGenerator jwtTokenGenerator,
-    IAuthService authService) : ICommandHandler<UserLoginCommand, UserLoginResult>
+    IAuthService authService,
+    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<UserLoginCommand, UserLoginResult>
 {
     public async Task<UserLoginResult> Handle(UserLoginCommand request, CancellationToken ct = default)
     {
@@ -18,6 +20,8 @@ public sealed class UserLoginHandler(
 
         if(!loginUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
+        
+        await eventDispatcher.Publish(new OnUserLoginEvent(loginUser.Id), ct);
         
         var tokenInfo = await jwtTokenGenerator.GenerateToken(loginUser);
         return new UserLoginResult(

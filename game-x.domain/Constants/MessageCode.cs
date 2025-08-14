@@ -190,6 +190,18 @@ public static class MessageCode
         /// <summary>User has not verified KYC.</summary>
         [EnumMetadata("User has not verified KYC.")]
         KycInvalid = 10118,
+        /// <summary>Bank account already exists.</summary>
+        [EnumMetadata("Bank account already exists.")]
+        BankAccountAlreadyExists = 10119,
+        /// <summary>Invalid bank account.</summary>
+        [EnumMetadata("Invalid bank account.")]
+        BankAccountInvalid = 10120,
+        /// <summary>Bank account is not verified.</summary>
+        [EnumMetadata("Bank account is not verified.")]
+        BankAccountNotVerified = 10121,
+        /// <summary>Invalid bank account status.</summary>
+        [EnumMetadata("Invalid bank account status.")]
+        BankAccountStatusInvalid = 10122,
         #endregion
 
         #region ■ Message group: Success
@@ -244,6 +256,9 @@ public static class MessageCode
         /// <summary>Transaction order not found.</summary>
         [EnumMetadata("Chain transaction not found.")]
         ChainTransactionNotFound = 10210,
+        /// <summary>Transaction history not found.</summary>
+        [EnumMetadata("Transaction history not found.")]
+        ChainTransactionHistoryNotFound = 10211,
         #endregion
     }
 
@@ -288,7 +303,10 @@ public static class MessageCode
         #region ■ Message group: Error
         /// <summary>CryptoToken configuration not found.</summary>
         [EnumMetadata("CryptoToken configuration not found.")]
-        CryptoTokenNotFound = 10300,
+        CryptoTokenNotFound = 10400,
+        /// <summary>CryptoToken configuration not found.</summary>
+        [EnumMetadata("CryptoToken is unsupported.")]
+        CryptoTokenUnsupported = 10401,
         #endregion
     }
 }

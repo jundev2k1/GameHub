@@ -2,6 +2,7 @@ using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.Dtos;
+using game_x.application.Features.Accounts.User.Dtos;
 using game_x.domain.Constants;
 using game_x.share.Extensions;
 using Mapster;
@@ -76,7 +77,7 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             ?? throw new NotFoundException();
     }
 
-    public async Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync (string userId, CancellationToken ct = default)
+    public async Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync(string userId, CancellationToken ct = default)
     {
         var profile = await context.UserKycs
             .AsNoTracking()
@@ -86,6 +87,50 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
         return profile != null
             ? (profile.Item1, profile.Item2)
             : (KycStatus.NotSubmitted, null);
+    }
+
+    public async Task<VerificationStatusDto[]> GetVerificationStatusList(string userId, CancellationToken ct = default)
+    {
+        var user = await context.Users
+            .AsNoTracking()
+            .Include(u => u.UserKyc)
+            .Include(u => u.UserBankAccounts)
+            .ThenInclude(uba => uba.FiatCurrency)
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+        var supportedCurrencies = await context.FiatCurrencies
+            .AsNoTracking()
+            .Where(fc => fc.IsActive)
+            .ToListAsync(ct);
+
+        var kycStatus = user.UserKyc != null
+            ? user.UserKyc.Adapt<VerificationStatusDto>()
+            : new VerificationStatusDto
+            {
+                Type = VerificationStatusType.Kyc,
+                IsVerified = false,
+            };
+
+        var bankAccountStatuses = supportedCurrencies
+            .GroupJoin(
+                user.UserBankAccounts,
+                fc => fc.Id,
+                uba => uba.FiatCurrency.Id,
+                (fc, ubas) =>
+                {
+                    var uba = ubas.FirstOrDefault();
+                    if (uba != null) return uba.Adapt<VerificationStatusDto>();
+
+                    var defaultValue = new VerificationStatusDto
+                    {
+                        CurrencyCode = fc.Code.Value,
+                        Type = VerificationStatusType.BankAccount,
+                        IsVerified = false,
+                    };
+                    return defaultValue;
+                })
+            .ToArray();
+        return [kycStatus, .. bankAccountStatuses];
     }
 
     public async Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default)
@@ -117,6 +162,8 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
     {
         var targetUser = await context.AppUsers
             .Include(u => u.UserKyc)
+            .Include(u => u.UserBankAccounts)
+            .ThenInclude(uba => uba.FiatCurrency)
             .FirstOrDefaultAsync(user => user.Id == userId, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 

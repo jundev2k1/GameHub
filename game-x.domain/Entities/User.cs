@@ -22,6 +22,7 @@ public class User : IdentityUser, IEntity, IAuditable
     public UserExtend? UserExtend { get; set; }
     public UserKyc? UserKyc { get; set; }
     public ICollection<UserRole> UserRoles { get; set; } = [];
+    public ICollection<UserBankAccount> UserBankAccounts { get; set; } = [];
 
     public static User Create(
         string userName,
@@ -114,5 +115,13 @@ public class User : IdentityUser, IEntity, IAuditable
     public void AddUserKyc(UserKyc kycProfile)
     {
         UserKyc = kycProfile;
+    }
+
+    public void AddUserBankAccount(UserBankAccount bankAccount)
+    {
+        if (UserBankAccounts.Any(uba => uba.CurrencyId.Equals(bankAccount.CurrencyId)))
+            throw new ArgumentException("User already has a bank account for this currency.", nameof(bankAccount));
+
+        UserBankAccounts.Add(bankAccount);
     }
 }

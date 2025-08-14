@@ -14,6 +14,8 @@ public sealed class ObjectName
     // Factories
     public static ObjectName KycProfile(string userId, string fileName)
         => Of($"user-kyc/{userId:N}/{fileName}");
+    public static ObjectName BankAccountProfile(string userId, string fileName)
+        => Of($"user-bank-account/{userId:N}/{fileName}");
 
     public static ObjectName Of(string value)
     {
@@ -30,7 +32,7 @@ public sealed class ObjectName
 
     // Constants
     private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] ValidPrefixValues = ["user-kyc"];
+    private static readonly string[] ValidPrefixValues = ["user-kyc", "user-bank-account"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>

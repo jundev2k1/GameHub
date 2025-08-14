@@ -1,4 +1,5 @@
-using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWithdrawal;
+using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.share.ExternalApi.Uxm.Dtos;
 
 namespace game_x.application.Features.ChainTransactions.Mapping;
@@ -17,5 +18,17 @@ public static class ChainTransactionMapping
             To = transaction.ToAddress ?? string.Empty,
             Remark = transaction.Note ?? string.Empty
         };
+    }
+    
+    public static PaginationResult<ChainTransactionDto> ToSearchResult(this PaginationResult<ChainTransaction> data)
+    {
+        var result = new PaginationResult<ChainTransactionDto>(
+            items: [.. data.Items.Adapt<IEnumerable<ChainTransactionDto>>()],
+            totalItems: data.TotalItems,
+            totalPages: data.TotalPages,
+            pageIndex: data.PageNumber,
+            pageSize: data.PageSize
+        );
+        return result;
     }
 }

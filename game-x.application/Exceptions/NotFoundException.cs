@@ -6,8 +6,8 @@ public sealed class NotFoundException : Exception
 {
     public Enum ErrorCode { get; set; } = MessageCode.System.ResourceNotFound;
     public object? ErrorDetail { get; set; }
-    
-    public NotFoundException(): base(MessageCode.System.ResourceNotFound.ToMessage()) { }
+
+    public NotFoundException() : base(MessageCode.System.ResourceNotFound.ToMessage()) { }
 
     public NotFoundException(string message) : base(message) { }
 
@@ -17,7 +17,7 @@ public sealed class NotFoundException : Exception
     public NotFoundException(string name, object key) : base($"{name} ({key}) was not found")
     {
     }
-    
+
     public NotFoundException(Enum errorCode, object? errorDetail = null) : base(errorCode.ToMessage())
     {
         ErrorCode = errorCode;

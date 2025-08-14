@@ -109,16 +109,30 @@ public static class Seed
                 {
                     Symbol = CryptoTokenSymbol.Usdt,
                     Network = NetworkType.Tron,
-                    ContractAddress = "trc20-ContractAddress"
+                    ContractAddress = "trc20-ContractAddress",
+                    Status = CryptoTokenStatus.Active,
                 },
                 new()
                 {
                     Symbol = CryptoTokenSymbol.Usdt,
                     Network = NetworkType.Ethereum,
-                    ContractAddress = "erc20-ContractAddress"
+                    ContractAddress = "erc20-ContractAddress",
+                    Status = CryptoTokenStatus.Inactive
                 },
             };
             await context.CryptoTokens.AddRangeAsync(cryptoTokens);
+        }
+
+        if (!context.FiatCurrencies.Any())
+        {
+            var fiatCurrencies = new List<FiatCurrency>
+            {
+                FiatCurrency.Create(CurrencyUnit.Of("TWD"), "New Taiwan Dollar", "NT$", string.Empty, false),
+                FiatCurrency.Create(CurrencyUnit.Of("USD"), "US Dollar", "$", string.Empty, false),
+                FiatCurrency.Create(CurrencyUnit.Of("CNY"), "Chinese Yuan", "¥", string.Empty),
+                FiatCurrency.Create(CurrencyUnit.Of("VND"), "Vietnamese Dong", "₫", string.Empty),
+            };
+            await context.FiatCurrencies.AddRangeAsync(fiatCurrencies);
         }
 
         await context.SaveChangesAsync();
