@@ -2,4 +2,4 @@
 
 namespace game_x.application.Features.Notifications.Shared.Queries.GetNotificationDetail;
 
-public record GetNotificationDetailQuery : IQuery<NotificationDto[]>;
+public record GetNotificationDetailQuery(int PageSize = 20) : IQuery<NotificationDto[]>;

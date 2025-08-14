@@ -6,11 +6,13 @@ namespace game_x.persistence.Repo;
 
 public sealed class NotificationRepo(GameXContext context) : INotificationRepo, IRepository
 {
-    public async Task<Notification[]> GetNotificationByUserIdAsync(string userId, CancellationToken ct = default)
+    public async Task<Notification[]> GetNotificationByUserIdAsync(string userId, int pageSize = 20, CancellationToken ct = default)
     {
         var result = await context.Notifications
             .AsNoTracking()
             .Where(n => (n.UserId == null) || (n.UserId == userId))
+            .OrderByDescending(n => n.CreatedAt)
+            .Take(pageSize)
             .ToArrayAsync(ct);
         return result;
     }
