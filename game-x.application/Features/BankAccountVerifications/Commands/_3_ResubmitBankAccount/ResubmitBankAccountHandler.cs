@@ -20,8 +20,7 @@ public sealed class ResubmitBankAccountHandler(
             UserBankAccount? updateBankAccount = null;
             await bankAccountRepo.UpdateAsync(userId, CurrencyUnit.Of(request.CurrencyCode), targetBankAccount =>
             {
-                if ((targetBankAccount.Status != UserBankAccountStatus.Rejected)
-                    && (targetBankAccount.Status != UserBankAccountStatus.UnderReview))
+                if (targetBankAccount.Status == UserBankAccountStatus.NotSubmitted)
                     throw new BadRequestException(MessageCode.User.BankAccountStatusInvalid);
 
                 targetBankAccount.ReSubmit(

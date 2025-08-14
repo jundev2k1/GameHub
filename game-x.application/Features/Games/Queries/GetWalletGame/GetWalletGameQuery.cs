@@ -2,4 +2,4 @@
 
 public record GetWalletGameQuery : ICommand<GetWalletGameResult>;
 
-public record GetWalletGameResult(string Currency, decimal Quota);
+public record GetWalletGameResult(decimal Amount);

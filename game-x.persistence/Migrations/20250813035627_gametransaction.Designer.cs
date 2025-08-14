@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -11,9 +12,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250813035627_gametransaction")]
+    partial class gametransaction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -486,10 +489,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("public_id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
-
                     b.Property<string>("Symbol")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -579,74 +578,6 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_game_transactions_user_id");
 
                     b.ToTable("game_transactions", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.FiatCurrency", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("code");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasDefaultValue("")
-                        .HasColumnName("description");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasDefaultValue("")
-                        .HasColumnName("name");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Symbol")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)")
-                        .HasDefaultValue("")
-                        .HasColumnName("symbol");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_fiat_currencies");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_fiat_currencies_public_id");
-
-                    b.ToTable("fiat_currencies", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.MediaFile", b =>
@@ -789,103 +720,6 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_notifications_user_id");
 
                     b.ToTable("notifications", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.RefreshToken", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("DeviceInfo")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasDefaultValue("")
-                        .HasColumnName("device_info");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("expires_at");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)")
-                        .HasDefaultValue("")
-                        .HasColumnName("ip_address");
-
-                    b.Property<string>("JwtId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("jwt_id");
-
-                    b.Property<string>("Location")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasDefaultValue("")
-                        .HasColumnName("location");
-
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id");
-
-                    b.Property<string>("ReplacedByToken")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("replaced_by_token");
-
-                    b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("revoked_at");
-
-                    b.Property<string>("TokenHash")
-                        .IsRequired()
-                        .HasMaxLength(88)
-                        .HasColumnType("character varying(88)")
-                        .HasColumnName("token_hash");
-
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasDefaultValue("")
-                        .HasColumnName("user_agent");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_refresh_tokens");
-
-                    b.HasIndex("JwtId")
-                        .HasDatabaseName("ix_refresh_tokens_jwt_id");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_refresh_tokens_public_id");
-
-                    b.HasIndex("TokenHash")
-                        .IsUnique()
-                        .HasDatabaseName("ix_refresh_tokens_token_hash");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_refresh_tokens_user_id");
-
-                    b.ToTable("refresh_tokens", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.Role", b =>
@@ -1104,127 +938,6 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_user_balances_user_id_crypto_token_id");
 
                     b.ToTable("user_balances", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.UserBankAccount", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AccountName")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasDefaultValue("")
-                        .HasColumnName("account_name");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasDefaultValue("")
-                        .HasColumnName("account_number");
-
-                    b.Property<string>("BankCode")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasDefaultValue("")
-                        .HasColumnName("bank_code");
-
-                    b.Property<string>("BankName")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasDefaultValue("")
-                        .HasColumnName("bank_name");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("CurrencyId")
-                        .HasColumnType("integer")
-                        .HasColumnName("currency_id");
-
-                    b.Property<DateTime?>("DateReviewed")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date_reviewed");
-
-                    b.Property<int?>("ImageId")
-                        .HasColumnType("integer")
-                        .HasColumnName("image_id");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("RejectDetails")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("reject_details");
-
-                    b.Property<string>("RejectionReason")
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasColumnName("rejection_reason");
-
-                    b.Property<string>("ReviewedById")
-                        .HasColumnType("text")
-                        .HasColumnName("reviewed_by_id");
-
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
-
-                    b.Property<DateTime?>("SubmittedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("submitted_at");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_user_bank_accounts");
-
-                    b.HasIndex("CurrencyId")
-                        .HasDatabaseName("ix_user_bank_accounts_currency_id");
-
-                    b.HasIndex("ImageId")
-                        .HasDatabaseName("ix_user_bank_accounts_image_id");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_user_bank_accounts_public_id");
-
-                    b.HasIndex("ReviewedById")
-                        .HasDatabaseName("ix_user_bank_accounts_reviewed_by_id");
-
-                    b.HasIndex("Status")
-                        .HasDatabaseName("ix_user_bank_accounts_status");
-
-                    b.HasIndex("SubmittedAt")
-                        .HasDatabaseName("ix_user_bank_accounts_submitted_at");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_user_bank_accounts_user_id");
-
-                    b.ToTable("user_bank_accounts", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.UserExtend", b =>
@@ -1463,12 +1176,6 @@ namespace game_x.persistence.Migrations
                         .HasDefaultValue("")
                         .HasColumnName("source_id");
 
-                    b.Property<string>("StatusAtEvent")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("")
-                        .HasColumnName("status_at_event");
-
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp");
@@ -1609,18 +1316,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("game_x.domain.Entities.RefreshToken", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_refresh_tokens_user_user_id");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("game_x.domain.Entities.UserBalance", b =>
                 {
                     b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
@@ -1638,42 +1333,6 @@ namespace game_x.persistence.Migrations
                         .HasConstraintName("fk_user_balances_user_user_id");
 
                     b.Navigation("CryptoToken");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.UserBankAccount", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.FiatCurrency", "FiatCurrency")
-                        .WithMany()
-                        .HasForeignKey("CurrencyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_bank_accounts_fiat_currencies_currency_id");
-
-                    b.HasOne("game_x.domain.Entities.MediaFile", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_user_bank_accounts_media_files_image_id");
-
-                    b.HasOne("game_x.domain.Entities.User", "ReviewedBy")
-                        .WithMany()
-                        .HasForeignKey("ReviewedById")
-                        .HasConstraintName("fk_user_bank_accounts_asp_net_users_reviewed_by_id");
-
-                    b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany("UserBankAccounts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_bank_accounts_asp_net_users_user_id");
-
-                    b.Navigation("FiatCurrency");
-
-                    b.Navigation("Image");
-
-                    b.Navigation("ReviewedBy");
 
                     b.Navigation("User");
                 });
@@ -1779,8 +1438,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("GameTransactions");
 
                     b.Navigation("UserBalances");
-
-                    b.Navigation("UserBankAccounts");
 
                     b.Navigation("UserExtend");
 

@@ -32,7 +32,7 @@ public sealed class ObjectName
 
     // Constants
     private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] ValidPrefixValues = ["user-kyc"];
+    private static readonly string[] ValidPrefixValues = ["user-kyc", "user-bank-account"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>

@@ -1,4 +1,6 @@
-﻿using game_x.application.Features.Games.Commands.LoginGame;
+﻿using game_x.application.Features.Games.Commands.GameWallet.Deposit;
+using game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
+using game_x.application.Features.Games.Commands.LoginGame;
 using game_x.application.Features.Games.Queries.WalletGame;
 
 namespace game_x.api.Controllers.Client.Game;
@@ -22,5 +24,19 @@ public sealed class GameController : BaseApiController
         var query = new GetWalletGameQuery();
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpPost("me/wallet/deposit")]
+    public async Task<IActionResult> DepositAsync(WalletDepositCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
+    [HttpPost("me/wallet/withdrawal")]
+    public async Task<IActionResult> WithdrawalAsync(WalletWithdrawalCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
     }
 }

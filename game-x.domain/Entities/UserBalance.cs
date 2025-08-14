@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace game_x.domain.Entities;
 
-public sealed class UserBalance: BaseEntity<int>
+public sealed class UserBalance : BaseEntity<int>
 {
     public Guid PublicId { get; set; }
     public string UserId { get; set; } = String.Empty;
@@ -15,7 +15,7 @@ public sealed class UserBalance: BaseEntity<int>
 
     [Timestamp]
     public uint? Version { get; set; }
-    
+
     public static UserBalance Create(
         string userId,
         int cryptoTokenId,
@@ -23,7 +23,7 @@ public sealed class UserBalance: BaseEntity<int>
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
-        
+
         var userBalance = new UserBalance
         {
             UserId = userId,
@@ -33,5 +33,13 @@ public sealed class UserBalance: BaseEntity<int>
             UpdatedAt = DateTime.UtcNow
         };
         return userBalance;
+    }
+
+    public void AdjustAmount(decimal amount, bool isIncrease)
+    {
+        if (isIncrease)
+            Amount += amount;
+        else
+            Amount -= amount;
     }
 }
