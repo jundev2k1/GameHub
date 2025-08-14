@@ -55,12 +55,17 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             .AsNoTracking()
             .Include(u => u.UserKyc)
             .Include(u => u.UserExtend)
+            .Include(u => u.UserBankAccounts)
+            .Include(u => u.UserBalances)
+            .ThenInclude(ub => ub.CryptoToken)
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException();
         var result = targetUser.Adapt<UserDetailDto>();
-        var roles = targetUser.UserRoles?.Select(u => u.Role?.Name ?? string.Empty) ?? [];
+        var roles = targetUser.UserRoles?
+            .Select(u => u.Role?.Name ?? string.Empty)
+            .Where(name => name.IsNotNullOrEmpty()) ?? [];
         result.Roles = AppRole.Of(roles);
         return result.Adapt<UserDetailDto>();
     }
