@@ -67,7 +67,7 @@ public sealed class UserBankAccount : BaseEntity<int>, IAuditable
         string? accountName,
         string? accountNumber)
     {
-        if ((Status != UserBankAccountStatus.Rejected) && (Status != UserBankAccountStatus.UnderReview))
+        if (Status == UserBankAccountStatus.NotSubmitted)
             throw new InvalidOperationException("Can only resubmit in Rejected status.");
 
         BankName = bankName ?? BankName;
