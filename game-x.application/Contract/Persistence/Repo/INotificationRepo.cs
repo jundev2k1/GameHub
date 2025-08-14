@@ -2,7 +2,18 @@
 
 public interface INotificationRepo
 {
-    Task<Notification[]> GetNotificationByUserIdAsync(string userId, int pageSize = 20, CancellationToken ct = default);
+    Task<Notification[]> GetNotificationByUserIdAsync(
+        string userId,
+        int pageNo = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
+
+    Task<Notification[]> GetAdjacentNotificationsAsync(
+        string userId,
+        Guid currentNotificationId,
+        bool isNext = true,
+        int pageSize = 20,
+        CancellationToken ct = default);
 
     Task<Notification> GetNotificationIdAsync(Guid notificationId, CancellationToken ct = default);
 
