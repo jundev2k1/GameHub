@@ -10,4 +10,5 @@ public enum NotificationType : short
     User = 5,
     Transaction = 6,
     UserLedger = 7,
+    UserBalance = 8,
 }
