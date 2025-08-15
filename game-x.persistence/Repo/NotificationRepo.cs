@@ -4,7 +4,7 @@ using game_x.application.Exceptions;
 
 namespace game_x.persistence.Repo;
 
-public sealed class NotificationRepo(GameXContext context) : INotificationRepo, IRepository
+public sealed class NotificationRepo(GameXContext context, IUnitOfWork unitOfWork) : INotificationRepo, IRepository
 {
     public async Task<Notification[]> GetNotificationByUserIdAsync(
         string userId,
@@ -56,6 +56,47 @@ public sealed class NotificationRepo(GameXContext context) : INotificationRepo, 
     public async Task AddNotificationAsync(Notification notification, CancellationToken ct = default)
     {
         await context.Notifications.AddAsync(notification, ct);
+    }
+
+    public async Task MarkAllAsReadAsync(string userId, CancellationToken ct = default)
+    {
+        var batchSize = 100;
+        int skip = 0;
+        List<Notification> batch;
+
+        do
+        {
+            batch = await context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .OrderBy(n => n.Id)
+                .Skip(skip)
+                .Take(batchSize)
+                .ToListAsync(ct);
+
+            if (batch.Count > 0)
+            {
+                await unitOfWork.BeginTransactionAsync(ct);
+
+                try
+                {
+                    foreach (var notification in batch)
+                    {
+                        notification.MarkAsRead();
+                    }
+
+                    await context.SaveChangesAsync(ct);
+                    await unitOfWork.CommitAsync(ct);
+                }
+                catch
+                {
+                    await unitOfWork.RollbackAsync(ct);
+                    throw;
+                }
+            }
+
+            skip += batchSize;
+        }
+        while (batch.Count == batchSize);
     }
 
     public async Task MarkAsReadAsync(Guid notificationId, string userId, CancellationToken ct = default)

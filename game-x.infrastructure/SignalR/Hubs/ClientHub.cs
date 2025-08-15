@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
-using game_x.application.Features.UserWallet.Dtos;
 using game_x.share.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -53,6 +53,13 @@ public sealed class ClientHub(
     {
         var adminUserId = userAccessor.GetUserId();
         var command = new MarkAsReadCommand(notificationId, adminUserId);
+        await sender.Send(command);
+    }
+
+    public async Task MarkAllNotificationsAsRead()
+    {
+        var adminUserId = userAccessor.GetUserId();
+        var command = new MarkAllAsReadCommand(adminUserId);
         await sender.Send(command);
     }
 }
