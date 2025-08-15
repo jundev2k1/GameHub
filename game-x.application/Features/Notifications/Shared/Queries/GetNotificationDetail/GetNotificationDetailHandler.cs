@@ -11,7 +11,7 @@ public sealed class GetNotificationDetailHandler(INotificationRepo notificationR
     {
         var userId = userAccessor.GetUserId();
         var notifications = await notificationRepo
-            .GetNotificationByUserIdAsync(userId, ct);
+            .GetNotificationByUserIdAsync(userId, request.PageNo, request.PageSize, ct);
 
         var result = notifications
             .Select(n => n.Adapt<NotificationDto>())

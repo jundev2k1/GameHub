@@ -7,9 +7,9 @@ namespace game_x.api.Controllers.Admin.Notification;
 public sealed class NotificationController : BaseApiController
 {
     [HttpGet("me")]
-    public async Task<IActionResult> GetMyNotificationAsync()
+    public async Task<IActionResult> GetMyNotificationAsync(int page = 1, int pageSize = 20)
     {
-        var result = await Mediator.Send(new GetNotificationDetailQuery());
+        var result = await Mediator.Send(new GetNotificationDetailQuery(page, pageSize));
         return ApiResponseFactory.Ok(result);
     }
 }
