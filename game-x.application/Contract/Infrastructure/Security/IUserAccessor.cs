@@ -9,4 +9,10 @@ public interface IUserAccessor
     ClaimsPrincipal GetClaimsPrincipal();
 
     AppRole GetRoles();
+
+    string GetIpAddress();
+
+    public string GetUserAgent();
+
+    public string GetDeviceInfo();
 }

@@ -12,7 +12,7 @@ public sealed class RefreshTokenDto
     public DateTime? RevokedAt { get; set; }
     public string? ReplacedByToken { get; set; }
 
-    public RefreshTokenState State { get; set; }
+    public SyncState State { get; set; } = SyncState.NotSynced;
 
     public string IpAddress { get; set; } = string.Empty;
     public string UserAgent { get; set; } = string.Empty;
@@ -21,9 +21,8 @@ public sealed class RefreshTokenDto
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
-public enum RefreshTokenState
+public enum SyncState
 {
-    Active,
-    Revoked,
-    Expired
+    NotSynced,
+    Synced
 }

@@ -9,4 +9,5 @@ public class JwtTokenDto
 {
     public string Token { get; set; } = default!;
     public DateTime ExpiresAt { get; set; }
+    public string JwtId { get; set; } = string.Empty;
 }

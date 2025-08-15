@@ -49,7 +49,8 @@ public class JwtTokenGenerator(
         return new JwtTokenDto
         {
             Token = new JwtSecurityTokenHandler().WriteToken(token),
-            ExpiresAt = expires
+            ExpiresAt = expires,
+            JwtId = jti
         };
     }
 }

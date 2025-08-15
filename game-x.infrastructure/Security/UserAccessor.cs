@@ -29,4 +29,26 @@ public sealed class UserAccessor(IHttpContextAccessor httpContextAccessor)
             .ToList() ?? [];
         return AppRole.Of(roles);
     }
+
+    public string GetIpAddress()
+    {
+        var ip = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+        if (string.IsNullOrWhiteSpace(ip))
+            ip = httpContextAccessor.HttpContext?.Request?.Headers["X-Forwarded-For"].FirstOrDefault();
+        return ip ?? "unknown";
+    }
+
+    public string GetUserAgent()
+    {
+        return httpContextAccessor.HttpContext?.Request?.Headers.UserAgent.ToString() ?? "unknown";
+    }
+
+    public string GetDeviceInfo()
+    {
+        var userAgent = GetUserAgent();
+        if (userAgent.Contains("Mobile", StringComparison.OrdinalIgnoreCase)) return "Mobile";
+        if (userAgent.Contains("Windows", StringComparison.OrdinalIgnoreCase)) return "Windows PC";
+        if (userAgent.Contains("Macintosh", StringComparison.OrdinalIgnoreCase)) return "MacOS";
+        return "Other";
+    }
 }

@@ -36,7 +36,6 @@ public sealed class RefreshTokenManagerCacheService(
             ?? throw new NotFoundException("Token not found or has been revoked");
 
         tokenToRevoke.RevokedAt = DateTime.UtcNow;
-        tokenToRevoke.State = RefreshTokenState.Revoked;
         DataSource = [.. tokens];
     }
 

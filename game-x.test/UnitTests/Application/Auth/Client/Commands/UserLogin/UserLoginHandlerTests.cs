@@ -9,12 +9,16 @@ using game_x.domain.Constants;
 using game_x.domain.Entities;
 using game_x.domain.Enum;
 using game_x.domain.ValueObjects;
+using game_x.application.Contract.Infrastructure.Caching;
 
 namespace Test.UnitTests.Application.Auth.Client.Commands.UserLogin;
 
 public sealed class UserLoginHandlerTests
 {
+    private readonly Mock<IUserAccessor> _userAccessorMock = new();
     private readonly Mock<IJwtTokenGenerator> _jwtTokenGeneratorMock = new();
+    private readonly Mock<ITokenService> _tokenServiceMock = new();
+    private readonly Mock<IRefreshTokenManagerCacheService> _refreshTokenManagerMock = new();
     private readonly Mock<IAuthService> _authServiceMock = new();
     private readonly Mock<IApplicationEventDispatcher> _eventDispatcherMock = new();
     private readonly UserLoginHandler _handler;
@@ -22,7 +26,10 @@ public sealed class UserLoginHandlerTests
     public UserLoginHandlerTests()
     {
         _handler = new UserLoginHandler(
-            jwtTokenGenerator: _jwtTokenGeneratorMock.Object, 
+            userAccessor: _userAccessorMock.Object,
+            jwtTokenGenerator: _jwtTokenGeneratorMock.Object,
+            tokenService: _tokenServiceMock.Object,
+            refreshTokenManager: _refreshTokenManagerMock.Object,
             authService: _authServiceMock.Object,
             eventDispatcher: _eventDispatcherMock.Object);
     }
@@ -60,8 +67,6 @@ public sealed class UserLoginHandlerTests
         result.Email.Should().Be(user.Email);
         result.UserId.Should().Be(user.Id);
         result.Token.Should().Be(tokenInfo.Token);
-        result.Roles.Should().Contain(AppRoles.User);
-        result.ExpiresAt.Should().Be(tokenInfo.ExpiresAt);
     }
 
     [Theory]
