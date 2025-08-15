@@ -23,5 +23,12 @@ public enum NotificationMessageKey : short
 
     // Enum group key: Transaction module
     Balance_Updated = 600,
+
+    // Enum group key: UserBankAccount module
+    UserBankAccount_updated = 700,
+
+    // Enum group key: UserKyc module
+    UserKyc_updated = 800,
+
     // Enum group key: ...
 }

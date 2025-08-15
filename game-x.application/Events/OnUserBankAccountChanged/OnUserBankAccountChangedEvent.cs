@@ -1,0 +1,3 @@
+namespace game_x.application.Events.OnUserBankAccountChanged;
+
+public record OnUserBankAccountChangedEvent(UserBankAccount UserBankAccount) : IApplicationEvent;
