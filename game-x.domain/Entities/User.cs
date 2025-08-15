@@ -22,6 +22,10 @@ public class User : IdentityUser, IEntity, IAuditable
     public UserKyc? UserKyc { get; set; }
     public ICollection<UserRole> UserRoles { get; set; } = [];
     public ICollection<UserBankAccount> UserBankAccounts { get; set; } = [];
+    public ICollection<SocialLink> RequestedLinks { get; set; } = [];
+    public ICollection<SocialLink> ReceivedRequests { get; set; } = [];
+    public ICollection<SocialLink> BlocksByMe { get; set; } = [];
+    public ICollection<SocialLink> BlocksToMe { get; set; } = [];
 
     public static User Create(
         string userName,
