@@ -1,39 +1,38 @@
 using System.Text.Json;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Accounts.User.Dtos;
 
 namespace game_x.application.Events.OnVerifyUpdated;
 
-public sealed class OnUserBankAccountChangedHandler(
+public sealed class OnVerifyUpdatedHandler(
     IUnitOfWork unitOfWork,
     INotificationRepo notificationRepo,
-    IClientHubService clientHubService) : IApplicationEventHandler<OnUserBankAccountChangedEvent>
+    IClientHubService clientHubService) : IApplicationEventHandler<OnVerifyUpdatedEvent>
 {
-    public async Task Handle(OnUserBankAccountChangedEvent @event, CancellationToken ct = default)
+    public async Task Handle(OnVerifyUpdatedEvent @event, CancellationToken ct = default)
     {
-        var targetBalance = @event.UserBankAccount;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await SendToMember(targetBalance, ct);
+            await SendToMember(@event.UserId, @event.VerificationStatus, ct);
         }, ct);
     }
 
-    private async Task SendToMember(UserBankAccount bankAccount, CancellationToken ct)
+    private async Task SendToMember(string userId, VerificationStatusDto verificationDto, CancellationToken ct)
     {
+        // Create notification for verification update
         var notification = Notification.Create(
-            NotificationMessageKey.Balance_Updated,
-            bankAccount.UserId,
-            NotificationType.UserBalance,
+            NotificationMessageKey.User_VerifyStatus_Changed,
+            userId,
+            NotificationType.Info,
             NotificationSeverity.Info,
-            JsonSerializer.Serialize(bankAccount.Adapt<ClientBalanceDto>()));
+            JsonSerializer.Serialize(verificationDto));
         await notificationRepo.AddNotificationAsync(notification, ct);
 
-        await clientHubService.SendBalanceToMemberAsync(
-            bankAccount.UserId,
-            new ClientBalanceDto(
-                BalanceId: bankAccount.PublicId,
-                Amount: bankAccount.Amount,
-                FrozenAmount: bankAccount.FrozenAmount));
+        await clientHubService.SendVerifyUpdateAsync(
+            userId,
+            verificationDto);
     }
 }

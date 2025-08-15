@@ -25,7 +25,7 @@ public enum NotificationMessageKey : short
     Balance_Updated = 600,
 
     // Enum group key: UserBankAccount - UserKyc module
-    Verify_Updated = 700,
+    User_VerifyStatus_Changed = 700,
 
     // Enum group key: ...
 }

@@ -1,6 +1,7 @@
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.UserWallet.Dtos;
 using game_x.infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -30,13 +31,13 @@ public sealed class ClientHubService(IHubContext<ClientHub, IClientHub> hubConte
         await hubContext.Clients.Group($"member-{userId}").LedgerUpdated(ledger);
     }
 
-    public async Task SendUserKcyToMemberAsync(string userId, UserKycDto userKyc)
+    public async Task SendVerifyUpdateAsync(string userId, VerificationStatusDto verificationStatus)
     {
-        await hubContext.Clients.Group($"member-{userId}").UserKycUpdated(userKyc);
+        await hubContext.Clients.Group($"member-{userId}").UserVerifyUpdated(verificationStatus);
     }
 
-    public async Task SendUserBankAccountToMemberAsync(string userId, UserBankAccountDto userBankAccount)
-    {
-        await hubContext.Clients.Group($"member-{userId}").UserBankAccountUpdated(userBankAccount);
-    }
+    // public async Task SendUserBankAccountToMemberAsync(string userId, UserBankAccountDto userBankAccount)
+    // {
+    //     await hubContext.Clients.Group($"member-{userId}").UserBankAccountUpdated(userBankAccount);
+    // }
 }

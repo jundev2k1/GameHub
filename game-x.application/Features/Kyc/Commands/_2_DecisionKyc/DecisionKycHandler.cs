@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Accounts.User.Dtos;
 
 namespace game_x.application.Features.Kyc.Commands._2_DecisionKyc;
 
@@ -28,12 +29,14 @@ public sealed class DecisionKycHandler(
         }, ct);
         await unitOfWork.SaveChangesAsync(ct);
 
-        await clientHubService.SendUserKcyToMemberAsync(
+        await clientHubService.SendVerifyUpdateAsync(
             request.UserId,
-            new UserKycDto(
-                Status: request.Status,
-                Reason: request.Reason,
-                Details: request.Details));
+            new VerificationStatusDto
+            {
+                CurrencyCode = string.Empty,
+                Type = VerificationStatusType.Kyc,
+                Status = (VerificationStatus)(int)request.Status
+            });
 
         return Unit.Value;
     }
