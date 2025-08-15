@@ -19,14 +19,24 @@ public sealed class ClientHubService(IHubContext<ClientHub, IClientHub> hubConte
     {
         await hubContext.Clients.Group($"member-{memberId}").TransactionUpdated(transaction);
     }
-    
+
     public async Task SendBalanceToMemberAsync(string userId, ClientBalanceDto balance)
     {
         await hubContext.Clients.Group($"member-{userId}").BalanceUpdated(balance);
     }
-    
+
     public async Task SendLedgerToMemberAsync(string userId, ClientLedgerDto ledger)
     {
         await hubContext.Clients.Group($"member-{userId}").LedgerUpdated(ledger);
+    }
+
+    public async Task SendUserKcyToMemberAsync(string userId, UserKycDto userKyc)
+    {
+        await hubContext.Clients.Group($"member-{userId}").UserKycUpdated(userKyc);
+    }
+
+    public async Task SendUserBankAccountToMemberAsync(string userId, UserBankAccountDto userBankAccount)
+    {
+        await hubContext.Clients.Group($"member-{userId}").UserBankAccountUpdated(userBankAccount);
     }
 }

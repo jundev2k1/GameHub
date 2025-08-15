@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
-using game_x.application.Features.UserWallet.Dtos;
 using game_x.share.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -21,12 +21,14 @@ public interface IClientHub
     Task BalanceUpdated(ClientBalanceDto dto);
     /// <summary>Notify that a transaction history has been updated.</summary>
     Task LedgerUpdated(ClientLedgerDto dto);
+    Task UserKycUpdated(UserKycDto dto);
+    Task UserBankAccountUpdated(UserBankAccountDto dto);
 }
 
 [Authorize(Roles = AppRoles.User)]
 public sealed class ClientHub(
-    ISender sender, 
-    ILogger<ClientHub> logger, 
+    ISender sender,
+    ILogger<ClientHub> logger,
     IUserAccessor userAccessor) : Hub<IClientHub>
 {
     public const string Path = "/hubs/client-service";
@@ -46,11 +48,18 @@ public sealed class ClientHub(
         logger.LogInformation($"User disconnected: {Context.UserIdentifier}");
         await base.OnDisconnectedAsync(exception);
     }
-    
+
     public async Task MarkNotificationAsRead(Guid notificationId)
     {
         var adminUserId = userAccessor.GetUserId();
         var command = new MarkAsReadCommand(notificationId, adminUserId);
+        await sender.Send(command);
+    }
+
+    public async Task MarkAllNotificationsAsRead()
+    {
+        var adminUserId = userAccessor.GetUserId();
+        var command = new MarkAllAsReadCommand(adminUserId);
         await sender.Send(command);
     }
 }

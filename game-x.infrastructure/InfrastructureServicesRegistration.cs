@@ -30,6 +30,8 @@ using Newtonsoft.Json.Serialization;
 using Refit;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace game_x.infrastructure;
 
@@ -39,7 +41,12 @@ public static class InfrastructureServicesRegistration
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddSignalR();
+        services.AddSignalR()
+            .AddJsonProtocol(options =>
+            {
+                options.PayloadSerializerOptions.Converters.Add(
+                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
+            });
         services.AutoBindSettings(configuration, typeof(BaseSettings).Assembly)
             .AddHangfireServices(configuration)
             .AddExternalApiServices(configuration)
@@ -198,21 +205,21 @@ public static class InfrastructureServicesRegistration
     }
 
     private static IServiceCollection AddMinioServices(this IServiceCollection services, IConfiguration configuration)
-     {
-         services.AddMinio(options =>
-         {
-             var endpoint = configuration["MinioSettings:InternalEndpoint"]
-                 ?? throw new InvalidOperationException("MinioSettings:InternalEndpoint is not configured");
-             var accessKey = configuration["MinioSettings:AccessKey"]
-                 ?? throw new InvalidOperationException("MinioSettings:AccessKey is not configured");
-             var secretKey = configuration["MinioSettings:SecretKey"]
-                 ?? throw new InvalidOperationException("MinioSettings:SecretKey is not configured");
- 
-             options.WithEndpoint(endpoint);
-             options.WithCredentials(accessKey, secretKey);
-             options.WithSSL(false);
-             options.Build();
-         });
-         return services;
-     }
+    {
+        services.AddMinio(options =>
+        {
+            var endpoint = configuration["MinioSettings:InternalEndpoint"]
+                ?? throw new InvalidOperationException("MinioSettings:InternalEndpoint is not configured");
+            var accessKey = configuration["MinioSettings:AccessKey"]
+                ?? throw new InvalidOperationException("MinioSettings:AccessKey is not configured");
+            var secretKey = configuration["MinioSettings:SecretKey"]
+                ?? throw new InvalidOperationException("MinioSettings:SecretKey is not configured");
+
+            options.WithEndpoint(endpoint);
+            options.WithCredentials(accessKey, secretKey);
+            options.WithSSL(false);
+            options.Build();
+        });
+        return services;
+    }
 }

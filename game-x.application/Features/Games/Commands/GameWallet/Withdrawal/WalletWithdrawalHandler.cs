@@ -1,11 +1,11 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
-using MediatR;
-using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
 
@@ -16,6 +16,7 @@ public sealed class WalletWithdrawalHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     IGameTransactionRepo gameTransactionRepo,
     IUnitOfWork unitOfWork,
+    IClientHubService clientHubService,
     IGameProviderService gameProvider) : ICommandHandler<WalletWithdrawalCommand>
 {
     public async Task<Unit> Handle(WalletWithdrawalCommand command, CancellationToken ct = default)
@@ -28,6 +29,13 @@ public sealed class WalletWithdrawalHandler(
         if (!targetUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
+        var token = await cryptoTokenRepo
+            .GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct)
+            ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
+
+        var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
+        if (userBalance == null)
+            throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
         var sno = GameProviderUtils.SnoGenerate();
 
         var withdrawalRequest = new GameWithdrawalRequest
@@ -49,14 +57,6 @@ public sealed class WalletWithdrawalHandler(
 
         try
         {
-            var token = await cryptoTokenRepo
-                .GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct)
-                ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
-
-            var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
-            if (userBalance == null)
-                throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
-
             var gameTransaction = GameTransaction.Create(
                 userId,
                 sno,
@@ -73,6 +73,13 @@ public sealed class WalletWithdrawalHandler(
         {
             throw new InvalidOperationException($"Failed to create local transaction. Game provider withdrawal may need manual rollback. SNO: {sno}", ex);
         }
+
+        await clientHubService.SendBalanceToMemberAsync(
+            userId,
+            new ClientBalanceDto(
+                BalanceId: userBalance.PublicId,
+                Amount: userBalance.Amount,
+                FrozenAmount: userBalance.FrozenAmount));
 
         return Unit.Value;
     }
