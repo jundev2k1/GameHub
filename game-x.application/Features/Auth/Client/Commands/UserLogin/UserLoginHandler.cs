@@ -28,11 +28,11 @@ public sealed class UserLoginHandler(
         if (!loginUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
-        _ = eventDispatcher.Publish(new OnUserLoginEvent(loginUser.Id), ct);
-
         var tokenInfo = await jwtTokenGenerator.GenerateToken(loginUser);
         var refreshToken = tokenService.GenerateRefreshToken(loginUser.Id);
         CreateRefreshToken(loginUser.Id, refreshToken, tokenInfo.JwtId);
+
+        _ = eventDispatcher.Publish(new OnUserLoginEvent(loginUser.Id), ct);
 
         return new UserLoginResult(
             Email: loginUser.Email!,

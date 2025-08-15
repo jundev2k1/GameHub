@@ -4,9 +4,9 @@ public sealed class RefreshTokenValidator : AbstractValidator<RefreshTokenComman
 {
     public RefreshTokenValidator()
     {
-        RuleFor(x => x.ExpiredAccessToken)
+        RuleFor(x => x.AccessToken)
             .NotEmpty()
-            .WithMessage($"{nameof(RefreshTokenCommand.ExpiredAccessToken)} is required.");
+            .WithMessage($"{nameof(RefreshTokenCommand.AccessToken)} is required.");
 
         RuleFor(x => x.RefreshToken)
             .NotEmpty()

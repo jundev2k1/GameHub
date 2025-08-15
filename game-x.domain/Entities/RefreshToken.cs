@@ -18,6 +18,10 @@ public sealed class RefreshToken : BaseEntity<long>
     public string? DeviceInfo { get; private set; }
     public string? Location { get; private set; }
 
+    public bool IsActive => RevokedAt == null && DateTime.UtcNow < ExpiresAt;
+
+    public bool IsRevoked => RevokedAt != null;
+
     public static RefreshToken Create(
         string userId,
         string tokenHash,
@@ -44,13 +48,16 @@ public sealed class RefreshToken : BaseEntity<long>
 
     public void Revoke()
     {
-        if (IsRevoked())
+        if (IsRevoked)
             throw new InvalidOperationException("Refresh token already revoked.");
 
         RevokedAt = DateTime.UtcNow;
     }
 
-    public bool IsActive() => RevokedAt == null && DateTime.UtcNow < ExpiresAt;
-
-    public bool IsRevoked() => RevokedAt != null;
+    public void ReplaceWith(string newTokenHash)
+    {
+        if (IsRevoked)
+            throw new InvalidOperationException("Cannot replace a revoked token.");
+        ReplacedByToken = newTokenHash;
+    }
 }

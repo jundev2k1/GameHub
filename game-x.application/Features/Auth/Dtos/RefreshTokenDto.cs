@@ -13,6 +13,9 @@ public sealed class RefreshTokenDto
     public string? ReplacedByToken { get; set; }
 
     public SyncState State { get; set; } = SyncState.NotSynced;
+    public bool IsSynced => State == SyncState.Synced;
+    public bool IsRevoked => RevokedAt.HasValue;
+    public bool IsExpired => ExpiresAt < DateTime.UtcNow;
 
     public string IpAddress { get; set; } = string.Empty;
     public string UserAgent { get; set; } = string.Empty;
