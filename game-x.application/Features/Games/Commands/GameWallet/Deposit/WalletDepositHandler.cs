@@ -16,7 +16,7 @@ public sealed class WalletDepositHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     IGameTransactionRepo gameTransactionRepo,
     IUnitOfWork unitOfWork,
-      IApplicationEventDispatcher eventDispatcher,
+    IApplicationEventDispatcher eventDispatcher,
     IGameProviderService gameProvider) : ICommandHandler<WalletDepositCommand>
 {
     public async Task<Unit> Handle(WalletDepositCommand command, CancellationToken ct = default)

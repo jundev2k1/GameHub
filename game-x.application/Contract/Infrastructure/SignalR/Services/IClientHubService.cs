@@ -12,4 +12,5 @@ public interface IClientHubService
     Task SendBalanceToMemberAsync(string userId, ClientBalanceDto balances);
     Task SendLedgerToMemberAsync(string userId, ClientLedgerDto ledger);
     Task SendVerifyUpdateAsync(string userId, VerificationStatusDto verificationStatus);
+    Task SendWalletsToMemberAsync(string userId, ClientWalletsDto wallets);
 }

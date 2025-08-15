@@ -1,14 +1,19 @@
 using System.Text.Json;
+using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using game_x.application.Features.ChainTransactions.Dtos;
+using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 
 namespace game_x.application.Events.OnUserBalanceChanged;
 
 public sealed class OnUserBalanceChangedHandler(
     IUnitOfWork unitOfWork,
     INotificationRepo notificationRepo,
+    IUserRepo userRepo,
+    IGameProviderService gameProviderService,
     IClientHubService clientHubService) : IApplicationEventHandler<OnUserBalanceChangedEvent>
 {
     public async Task Handle(OnUserBalanceChangedEvent @event, CancellationToken ct = default)
@@ -22,19 +27,54 @@ public sealed class OnUserBalanceChangedHandler(
 
     private async Task SendToMember(UserBalance balance, CancellationToken ct)
     {
+        // Get user details with all balances
+        var userDetail = await userRepo.GetUserDetailAsync(balance.UserId, ct);
+        var gameBalance = await GetExternalWallet(userDetail.UserExtendInfo.GameProviderAccount);
+
+        // Create site balances from user balances
+        var siteBalances = userDetail.Balances.Select(b => new ClientCryptoBalanceDto(
+            Amount: b.Amount,
+            FrozenAmount: b.FrozenAmount,
+            TotalAmount: b.TotalAmount,
+            Network: b.Network.ToString(),
+            Symbol: b.Symbol
+        )).ToArray();
+
+        var walletsData = new ClientWalletsDto(
+            SiteBalances: siteBalances,
+            GameBalance: gameBalance
+        );
+
+        var notificationData = new
+        {
+            Wallets = walletsData,
+            UpdatedBalance = balance.Adapt<ClientBalanceDto>()
+        };
+
         var notification = Notification.Create(
             NotificationMessageKey.Balance_Updated,
             balance.UserId,
             NotificationType.UserBalance,
             NotificationSeverity.Info,
-            JsonSerializer.Serialize(balance.Adapt<ClientBalanceDto>()));
+            JsonSerializer.Serialize(walletsData));
         await notificationRepo.AddNotificationAsync(notification, ct);
 
-        await clientHubService.SendBalanceToMemberAsync(
+        await clientHubService.SendWalletsToMemberAsync(
             balance.UserId,
-            new ClientBalanceDto(
-                BalanceId: balance.PublicId,
-                Amount: balance.Amount,
-                FrozenAmount: balance.FrozenAmount));
+            walletsData);
+    }
+
+    private async Task<decimal?> GetExternalWallet(string account)
+    {
+        try
+        {
+            var externalRequest = new WalletRequest { Account = account };
+            var externalWallet = await gameProviderService.GetWalletAsync(externalRequest);
+            return externalWallet.Quota;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

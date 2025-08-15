@@ -1,9 +1,8 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos;
-using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnUserBalanceChanged;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
 
@@ -16,7 +15,7 @@ public sealed class WalletWithdrawalHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     IGameTransactionRepo gameTransactionRepo,
     IUnitOfWork unitOfWork,
-    IClientHubService clientHubService,
+    IApplicationEventDispatcher eventDispatcher,
     IGameProviderService gameProvider) : ICommandHandler<WalletWithdrawalCommand>
 {
     public async Task<Unit> Handle(WalletWithdrawalCommand command, CancellationToken ct = default)
@@ -74,12 +73,8 @@ public sealed class WalletWithdrawalHandler(
             throw new InvalidOperationException($"Failed to create local transaction. Game provider withdrawal may need manual rollback. SNO: {sno}", ex);
         }
 
-        await clientHubService.SendBalanceToMemberAsync(
-            userId,
-            new ClientBalanceDto(
-                BalanceId: userBalance.PublicId,
-                Amount: userBalance.Amount,
-                FrozenAmount: userBalance.FrozenAmount));
+        // Trigger event to send wallets data
+        await eventDispatcher.Publish(new OnUserBalanceChangedEvent(userBalance), ct);
 
         return Unit.Value;
     }

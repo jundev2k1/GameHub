@@ -36,8 +36,8 @@ public sealed class ClientHubService(IHubContext<ClientHub, IClientHub> hubConte
         await hubContext.Clients.Group($"member-{userId}").UserVerifyUpdated(verificationStatus);
     }
 
-    // public async Task SendUserBankAccountToMemberAsync(string userId, UserBankAccountDto userBankAccount)
-    // {
-    //     await hubContext.Clients.Group($"member-{userId}").UserBankAccountUpdated(userBankAccount);
-    // }
+    public async Task SendWalletsToMemberAsync(string userId, ClientWalletsDto wallets)
+    {
+        await hubContext.Clients.Group($"member-{userId}").WalletsUpdated(wallets);
+    }
 }

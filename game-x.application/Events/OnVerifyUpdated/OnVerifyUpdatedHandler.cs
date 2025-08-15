@@ -22,13 +22,21 @@ public sealed class OnVerifyUpdatedHandler(
 
     private async Task SendToMember(string userId, VerificationStatusDto verificationDto, CancellationToken ct)
     {
-        // Create notification for verification update
+        // Create notification data with enum as strings
+        var notificationData = new
+        {
+            CurrencyCode = verificationDto.CurrencyCode,
+            Type = verificationDto.Type.ToString(),
+            Status = verificationDto.Status.ToString(),
+            IsVerified = verificationDto.IsVerified
+        };
+
         var notification = Notification.Create(
             NotificationMessageKey.User_VerifyStatus_Changed,
             userId,
             NotificationType.Info,
             NotificationSeverity.Info,
-            JsonSerializer.Serialize(verificationDto));
+            JsonSerializer.Serialize(notificationData));
         await notificationRepo.AddNotificationAsync(notification, ct);
 
         await clientHubService.SendVerifyUpdateAsync(
