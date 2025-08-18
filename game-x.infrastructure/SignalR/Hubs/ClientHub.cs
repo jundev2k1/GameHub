@@ -1,5 +1,6 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
 using game_x.share.Extensions;
@@ -19,10 +20,11 @@ public interface IClientHub
     Task TransactionUpdated(ClientTransactionDto orderInfo);
     /// <summary>Notify that user balance has been updated.</summary>
     Task BalanceUpdated(ClientBalanceDto dto);
+    /// <summary>Notify that user wallets have been updated.</summary>
+    Task WalletsUpdated(ClientWalletsDto dto);
     /// <summary>Notify that a transaction history has been updated.</summary>
     Task LedgerUpdated(ClientLedgerDto dto);
-    Task UserKycUpdated(UserKycDto dto);
-    Task UserBankAccountUpdated(UserBankAccountDto dto);
+    Task UserVerifyUpdated(VerificationStatusDto dto);
 }
 
 [Authorize(Roles = AppRoles.User)]

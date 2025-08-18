@@ -1,14 +1,16 @@
-﻿namespace game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Features.Notifications.Dtos;
+
+namespace game_x.application.Contract.Persistence.Repo;
 
 public interface INotificationRepo
 {
-    Task<Notification[]> GetNotificationByUserIdAsync(
+    Task<NotificationListDto> GetNotificationByUserIdAsync(
         string userId,
         int pageNo = 1,
         int pageSize = 20,
         CancellationToken ct = default);
 
-    Task<Notification[]> GetAdjacentNotificationsAsync(
+    Task<NotificationListDto> GetAdjacentNotificationsAsync(
         string userId,
         Guid currentNotificationId,
         bool isNext = true,

@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnUserBalanceChanged;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
 
@@ -15,7 +16,7 @@ public sealed class WalletDepositHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     IGameTransactionRepo gameTransactionRepo,
     IUnitOfWork unitOfWork,
-    IClientHubService clientHubService,
+    IApplicationEventDispatcher eventDispatcher,
     IGameProviderService gameProvider) : ICommandHandler<WalletDepositCommand>
 {
     public async Task<Unit> Handle(WalletDepositCommand command, CancellationToken ct = default)
@@ -73,13 +74,7 @@ public sealed class WalletDepositHandler(
             throw new InvalidOperationException($"Failed to create local transaction. Game provider deposit may need manual rollback. SNO: {sno}", ex);
         }
 
-        await clientHubService.SendBalanceToMemberAsync(
-            userId,
-            new ClientBalanceDto(
-                BalanceId: userBalance.PublicId,
-                Amount: userBalance.Amount,
-                FrozenAmount: userBalance.FrozenAmount));
-
+        await eventDispatcher.Publish(new OnUserBalanceChangedEvent(userBalance), ct);
         return Unit.Value;
     }
 }

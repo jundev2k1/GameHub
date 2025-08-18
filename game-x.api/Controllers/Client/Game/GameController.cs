@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.Games.Commands.GameWallet.Deposit;
+﻿using game_x.application.Common;
+using game_x.application.Features.Games.Commands.GameWallet.Deposit;
 using game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
 using game_x.application.Features.Games.Commands.LoginGame;
 using game_x.application.Features.Games.Queries.WalletGame;
@@ -38,5 +39,11 @@ public sealed class GameController : BaseApiController
     {
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
+    }
+
+    [HttpGet("game-codes")]
+    public IActionResult GetGameCode()
+    {
+        return ApiResponseFactory.Ok(GameCodeProvider.All());
     }
 }
