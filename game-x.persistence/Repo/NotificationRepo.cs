@@ -9,21 +9,32 @@ namespace game_x.persistence.Repo;
 
 public sealed class NotificationRepo(GameXContext context, IUnitOfWork unitOfWork) : INotificationRepo, IRepository
 {
-    public async Task<Notification[]> GetNotificationByUserIdAsync(
+    public async Task<NotificationListDto> GetNotificationByUserIdAsync(
         string userId,
         int pageNo = 1,
         int pageSize = 20,
         CancellationToken ct = default)
     {
         var beginCount = (pageNo - 1) * pageSize;
-        var result = await context.Notifications
+        var data = context.Notifications
             .AsNoTracking()
             .Where(n => (n.UserId == null) || (n.UserId == userId))
-            .OrderByDescending(n => n.CreatedAt)
+            .OrderByDescending(n => n.CreatedAt);
+        var totalItems = await data.CountAsync(ct);
+        var unReadCount = await data.CountAsync(n => n.IsRead == false, ct);
+        var hasNextPage = await data.Skip(beginCount + pageSize).AnyAsync(ct);
+        var items = await data
             .Skip(beginCount)
             .Take(pageSize)
             .ToArrayAsync(ct);
-        return result;
+        return new ()
+        {
+            Items = [.. items.Select(n => n.Adapt<NotificationDto>())],
+            TotalItems = totalItems,
+            UnReadCount = unReadCount,
+            HasNextPage = hasNextPage,
+            PageSize = pageSize
+        };
     }
 
     public async Task<NotificationListDto> GetAdjacentNotificationsAsync(

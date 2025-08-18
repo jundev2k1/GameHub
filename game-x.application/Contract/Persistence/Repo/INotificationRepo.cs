@@ -4,7 +4,7 @@ namespace game_x.application.Contract.Persistence.Repo;
 
 public interface INotificationRepo
 {
-    Task<Notification[]> GetNotificationByUserIdAsync(
+    Task<NotificationListDto> GetNotificationByUserIdAsync(
         string userId,
         int pageNo = 1,
         int pageSize = 20,
