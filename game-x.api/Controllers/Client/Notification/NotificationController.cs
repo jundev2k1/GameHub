@@ -15,7 +15,7 @@ public sealed class NotificationController : BaseApiController
     }
 
     [HttpGet("me/{currentId:guid}/adjacent")]
-    public async Task<IActionResult> GetAdjacentNotificationsAsync(Guid currentId, int pageSize, bool isNext = true)
+    public async Task<IActionResult> GetAdjacentNotificationsAsync(Guid currentId, int pageSize = 20, bool isNext = true)
     {
         var query = new GetAdjacentNotificationsQuery(currentId, pageSize, isNext);
         var result = await Mediator.Send(query);

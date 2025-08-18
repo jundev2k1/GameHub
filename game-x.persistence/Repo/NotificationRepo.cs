@@ -1,6 +1,9 @@
 ﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.application.Features.Notifications.Dtos;
+using Mapster;
 
 namespace game_x.persistence.Repo;
 
@@ -23,7 +26,7 @@ public sealed class NotificationRepo(GameXContext context, IUnitOfWork unitOfWor
         return result;
     }
 
-    public async Task<Notification[]> GetAdjacentNotificationsAsync(
+    public async Task<NotificationListDto> GetAdjacentNotificationsAsync(
         string userId,
         Guid currentNotificationId,
         bool isNext = true,
@@ -36,13 +39,27 @@ public sealed class NotificationRepo(GameXContext context, IUnitOfWork unitOfWor
             ?? throw new NotFoundException(nameof(Notification), currentNotificationId);
 
         var dateTime = targetNotification.CreatedAt;
-        var result = await context.Notifications
+        var notifications = context.Notifications
             .AsNoTracking()
-            .Where(n => isNext ? n.CreatedAt > dateTime : n.CreatedAt < dateTime)
-            .OrderByDescending(n => n.CreatedAt)
-            .Take(pageSize)
-            .ToArrayAsync(ct);
-        return result;
+            .AsQueryable()
+            .Where(n => n.UserId == userId);
+        var totalCount = await notifications.CountAsync(ct);
+        var unReadCount = await notifications.CountAsync(n => n.IsRead == false, ct);
+        var data = notifications
+            .Where(n => isNext ? n.CreatedAt < dateTime : n.CreatedAt > dateTime);
+        data = isNext
+            ? data.OrderByDescending(n => n.CreatedAt)
+            : data.OrderBy(n => n.CreatedAt);
+        var hasNextPage = await data.Skip(pageSize).AnyAsync(ct);
+        var items = await data.Take(pageSize).ToArrayAsync(ct);
+        return new()
+        {
+            Items = [.. items.Select(n => n.Adapt<NotificationDto>()).OrderByDescending(n => n.CreatedAt)],
+            TotalItems = totalCount,
+            UnReadCount = unReadCount,
+            PageSize = pageSize,
+            HasNextPage = hasNextPage,
+        };
     }
 
     public async Task<Notification> GetNotificationIdAsync(Guid notificationId, CancellationToken ct = default)
