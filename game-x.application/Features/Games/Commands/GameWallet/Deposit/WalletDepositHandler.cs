@@ -1,8 +1,7 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos;
-using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnGame598TransactionSuccess;
 using game_x.application.Events.OnUserBalanceChanged;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
@@ -61,13 +60,15 @@ public sealed class WalletDepositHandler(
                 sno,
                 command.Amount,
                 GamePlatform.G598,
-                GameTransactionType.Deposit
-            );
+                GameTransactionType.Deposit,
+                token.Id);
 
             await gameTransactionRepo.AddAsync(gameTransaction, ct);
             userBalance.AdjustAmount(command.Amount, false);
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
             await unitOfWork.SaveChangesAsync(ct);
+
+            await eventDispatcher.Publish(new OnGame598TransactionCreatedEvent(gameTransaction, token), ct);
         }
         catch (Exception ex)
         {
@@ -75,6 +76,7 @@ public sealed class WalletDepositHandler(
         }
 
         await eventDispatcher.Publish(new OnUserBalanceChangedEvent(userBalance), ct);
+
         return Unit.Value;
     }
 }

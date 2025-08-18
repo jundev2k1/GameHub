@@ -1,17 +1,13 @@
-using System.Text.Json;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
-using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 
 namespace game_x.application.Events.OnUserBalanceChanged;
 
 public sealed class OnUserBalanceChangedHandler(
     IUnitOfWork unitOfWork,
-    INotificationRepo notificationRepo,
     IUserRepo userRepo,
     IGameProviderService gameProviderService,
     IClientHubService clientHubService) : IApplicationEventHandler<OnUserBalanceChangedEvent>
@@ -44,20 +40,6 @@ public sealed class OnUserBalanceChangedHandler(
             SiteBalances: siteBalances,
             GameBalance: gameBalance
         );
-
-        var notificationData = new
-        {
-            Wallets = walletsData,
-            UpdatedBalance = balance.Adapt<ClientBalanceDto>()
-        };
-
-        var notification = Notification.Create(
-            NotificationMessageKey.Balance_Updated,
-            balance.UserId,
-            NotificationType.UserBalance,
-            NotificationSeverity.Info,
-            JsonSerializer.Serialize(walletsData));
-        await notificationRepo.AddNotificationAsync(notification, ct);
 
         await clientHubService.SendWalletsToMemberAsync(
             balance.UserId,
