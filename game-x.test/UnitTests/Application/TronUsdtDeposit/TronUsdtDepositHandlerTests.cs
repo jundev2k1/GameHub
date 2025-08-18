@@ -1,17 +1,16 @@
-using Moq;
 using FluentAssertions;
-using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtDeposit;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.ChainTransactions.Dtos;
-using game_x.share.ExternalApi.Uxm.Dtos;
-using Microsoft.Extensions.Configuration;
+using game_x.application.Exceptions;
+using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtDeposit;
+using game_x.domain.Constants;
 using game_x.domain.Entities;
 using game_x.domain.Enum;
-using game_x.application.Exceptions;
-using game_x.domain.Constants;
+using game_x.share.ExternalApi.Uxm.Dtos;
+using Microsoft.Extensions.Configuration;
+using Moq;
 
 namespace Test.UnitTests.Application;
 
@@ -46,7 +45,7 @@ public sealed class TronUsdtDepositHandlerTests
     public async Task Handle_ShouldReturnSuccessResponse_WhenDepositIsSuccessful()
     {
         // Arrange
-        var request = new TronUsdtDepositCommand(100m, "Test deposit");
+        var request = new TronUsdtDepositCommand(100m, "Test deposit", Guid.NewGuid());
         var userId = "user123";
         var merchantNumber = "MERCHANT001";
         var cryptoToken = new CryptoToken { PublicId = Guid.NewGuid(), Symbol = CryptoTokenSymbol.Usdt };
@@ -89,7 +88,7 @@ public sealed class TronUsdtDepositHandlerTests
     public async Task Handle_ShouldThrowBadRequestException_WhenCryptoTokenNotFound()
     {
         // Arrange
-        var request = new TronUsdtDepositCommand(100m, "Test deposit");
+        var request = new TronUsdtDepositCommand(100m, "Test deposit", Guid.NewGuid());
         var userId = "user123";
 
         _userAccessorMock.Setup(x => x.GetUserId()).Returns(userId);
@@ -107,7 +106,7 @@ public sealed class TronUsdtDepositHandlerTests
     public async Task Handle_ShouldThrowBadRequestException_WhenUxmSignatureIsInvalid()
     {
         // Arrange
-        var request = new TronUsdtDepositCommand(100m, "Test deposit");
+        var request = new TronUsdtDepositCommand(100m, "Test deposit", Guid.NewGuid());
         var userId = "user123";
         var merchantNumber = "MERCHANT001";
         var cryptoToken = new CryptoToken { PublicId = Guid.NewGuid(), Symbol = CryptoTokenSymbol.Usdt };
@@ -138,7 +137,7 @@ public sealed class TronUsdtDepositHandlerTests
     public async Task Handle_ShouldRollbackTransaction_WhenExceptionOccurs()
     {
         // Arrange
-        var request = new TronUsdtDepositCommand(100m, "Test deposit");
+        var request = new TronUsdtDepositCommand(100m, "Test deposit", Guid.NewGuid());
 
         _cryptoTokenRepoMock.Setup(x => x.GetBySymbolAndNetworkAsync(It.IsAny<string>(), It.IsAny<NetworkType>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Database error"));
