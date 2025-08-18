@@ -4,7 +4,8 @@ public sealed class RevokeTokenValidator : AbstractValidator<RevokeTokenCommand>
 {
     public RevokeTokenValidator()
     {
-        RuleFor(x => x.Id)
-            .NotEmpty().WithMessage($"{nameof(RevokeTokenCommand.Id)} is required.");
+        RuleFor(x => x.Token)
+            .NotNull().WithMessage($"{nameof(RevokeTokenCommand.Token)} is required.")
+            .NotEmpty().WithMessage($"{nameof(RevokeTokenCommand.Token)} must be not empty.");
     }
 }

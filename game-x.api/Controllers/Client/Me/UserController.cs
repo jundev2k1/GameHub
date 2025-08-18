@@ -50,7 +50,7 @@ public sealed class UserController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPost("revoke-token")]
+    [HttpDelete("tokens")]
     public async Task<IActionResult> RevokeTokenAsync(RevokeTokenCommand command)
     {
         await Mediator.Send(command);

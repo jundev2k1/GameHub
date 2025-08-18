@@ -100,7 +100,7 @@ public sealed class AuthGateMiddleware : IAuthorizationMiddlewareResultHandler
         // return a JSON response with the error message
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = statusCode;
-        var error = ApiResponseFactory.Error(messageCode);
+        var error = ApiResponseFactory.Error(messageCode, statusCode: statusCode);
         await context.Response.WriteAsJsonAsync(error);
     }
 }
