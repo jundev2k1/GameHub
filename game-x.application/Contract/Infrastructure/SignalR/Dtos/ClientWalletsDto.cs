@@ -8,5 +8,5 @@ public record ClientCryptoBalanceDto(
     decimal Amount,
     decimal FrozenAmount,
     decimal TotalAmount,
-    string Network,
+    NetworkType Network,
     string Symbol);
