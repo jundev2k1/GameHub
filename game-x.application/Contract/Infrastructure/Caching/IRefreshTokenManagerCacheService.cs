@@ -8,6 +8,8 @@ public interface IRefreshTokenManagerCacheService
 
     RefreshTokenDto GetToken(string rawToken);
 
+    RefreshTokenDto? GetTokenByJwtId(string jwtId);
+
     void InsertNewToken(RefreshTokenDto tokenDto);
 
     void ReplaceToken(string oldTokenHash, string newTokenHash);

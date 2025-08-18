@@ -1,7 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 
 namespace game_x.api.Middleware;
@@ -58,10 +57,34 @@ public sealed class AuthGateMiddleware : IAuthorizationMiddlewareResultHandler
         // Check if the user is blocked or inactive
         var userId = userAccessor.GetUserId();
         var isBlocked = await userCache.IsInactiveUser(userId);
+        if (isBlocked) return MessageCode.User.UserDisabled;
 
-        return isBlocked
-            ? MessageCode.User.UserDisabled
-            : null;
+        var token = context.Request.Headers.Authorization.ToStringOrEmpty();
+        if (token.IsNullOrWhiteSpace())
+            return MessageCode.System.InvalidOrMissingToken;
+        if (!IsValidToken(context, token))
+            return MessageCode.System.InvalidOrMissingToken;
+
+        return null;
+    }
+
+    private static bool IsValidToken(HttpContext context, string token)
+    {
+        // Get the JWT token generator and decode the token
+        var tokenGenerator = context.RequestServices.GetRequiredService<IJwtTokenGenerator>();
+        var rawToken = token.Split(" ")[1];
+        var tokenPayload = tokenGenerator.DecodeToken(rawToken);
+        var jwtId = tokenPayload.JwtId;
+        if (jwtId.IsNullOrWhiteSpace())
+            return false;
+
+        // Check if the token is linked to a valid refresh token
+        var refreshTokenManager = context.RequestServices.GetRequiredService<IRefreshTokenManagerCacheService>();
+        var tokenLinked = refreshTokenManager.GetTokenByJwtId(jwtId!);
+        return tokenLinked != null
+            && !tokenLinked.IsExpired
+            && !tokenLinked.IsRevoked
+            && tokenLinked.ReplacedByToken.IsNullOrEmpty();
     }
 
     private static async Task HandleAuthExceptionAsync(HttpContext context, Exception ex)

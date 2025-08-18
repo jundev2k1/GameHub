@@ -32,6 +32,11 @@ public sealed class RefreshTokenManagerCacheService(
             ?? throw new NotFoundException("Refresh Token is invalid or not found.");
     }
 
+    public RefreshTokenDto? GetTokenByJwtId(string jwtId)
+    {
+        return DataSource.FirstOrDefault(rt => rt.JwtId == jwtId);
+    }
+
     public void InsertNewToken(RefreshTokenDto tokenDto)
     {
         DataSource = [.. DataSource, tokenDto];
