@@ -14,8 +14,7 @@ namespace game_x.persistence.Migrations
                 name: "crypto_token_id",
                 table: "game_transactions",
                 type: "integer",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_game_transactions_crypto_token_id",

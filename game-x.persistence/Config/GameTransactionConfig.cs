@@ -46,8 +46,7 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
             .HasDefaultValue(string.Empty);
 
         builder.Property(gt => gt.CryptoTokenId)
-            .HasColumnName("crypto_token_id")
-            .IsRequired();
+            .HasColumnName("crypto_token_id");
 
         builder.HasOne(gt => gt.User)
             .WithMany(u => u.GameTransactions)
@@ -57,6 +56,7 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
         builder.HasOne(x => x.CryptoToken)
             .WithMany()
             .HasForeignKey(x => x.CryptoTokenId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
     }
 }

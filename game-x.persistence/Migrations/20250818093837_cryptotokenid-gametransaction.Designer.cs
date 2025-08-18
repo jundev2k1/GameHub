@@ -12,7 +12,7 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    [Migration("20250818064037_cryptotokenid-gametransaction")]
+    [Migration("20250818093837_cryptotokenid-gametransaction")]
     partial class cryptotokenidgametransaction
     {
         /// <inheritdoc />
@@ -599,7 +599,7 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<int>("CryptoTokenId")
+                    b.Property<int?>("CryptoTokenId")
                         .HasColumnType("integer")
                         .HasColumnName("crypto_token_id");
 
@@ -1516,7 +1516,6 @@ namespace game_x.persistence.Migrations
                         .WithMany()
                         .HasForeignKey("CryptoTokenId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_game_transactions_crypto_tokens_crypto_token_id");
 
                     b.HasOne("game_x.domain.Entities.User", "User")
