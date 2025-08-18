@@ -32,7 +32,7 @@ public sealed class OnUserBalanceChangedHandler(
             Amount: b.Amount,
             FrozenAmount: b.FrozenAmount,
             TotalAmount: b.TotalAmount,
-            Network: b.Network.ToString(),
+            Network: b.Network,
             Symbol: b.Symbol
         )).ToArray();
 

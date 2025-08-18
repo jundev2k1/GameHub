@@ -33,7 +33,7 @@ public sealed class OnGame598TransactionCreatedHandler(
                 var balanceDto = new GameBalanceDto(
                 Amount: balance.Amount,
                 FrozenAmount: balance.FrozenAmount,
-                Network: token.Network.ToString());
+                Network: token.Network);
 
                 var notification = Notification.Create(
                     NotificationMessageKey.Balance_Updated,
