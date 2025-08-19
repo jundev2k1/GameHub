@@ -6,13 +6,13 @@ using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
-public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRepo, IRepository
+public sealed class UserUsdtLedgerRepo(GameXContext context) : IUserUsdtLedgerRepo, IRepository
 {
     public IQueryable<UserUsdtLedger> Query()
     {
         return context.UserUsdtLedgers;
     }
-    
+
     public async Task<PaginationResult<UserUsdtLedger>> GetUsdtLedgerUserByCriteriaAsync(
         string userId,
         Func<IQueryable<UserUsdtLedger>, IQueryable<UserUsdtLedger>>? queryBuilder = null,
@@ -43,7 +43,7 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
             page,
             pageSize);
     }
-    
+
     public async Task<UserUsdtLedger?> GetLatestLedgerAsync(string userId)
     {
         return await context.UserUsdtLedgers
@@ -51,7 +51,7 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync();
     }
-    
+
     public async Task<UserUsdtLedger> GetDetailByTransactionIdAsync(int transactionId)
     {
         return await context.UserUsdtLedgers
@@ -60,7 +60,7 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
             .FirstOrDefaultAsync()
                ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionHistoryNotFound);
     }
-    
+
     public async Task<UserUsdtLedger> GetDetailByUserAsync(string userId, Guid ledgerId, CancellationToken ct = default)
     {
         return await context.UserUsdtLedgers
@@ -70,7 +70,7 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
             .FirstOrDefaultAsync(x => x.UserId == userId && x.PublicId == ledgerId, ct)
                ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionHistoryNotFound);
     }
-    
+
     public async Task<UserUsdtLedger> GetDetailByIdAsync(Guid ledgerId, CancellationToken ct = default)
     {
         return await context.UserUsdtLedgers
@@ -79,7 +79,7 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
             .FirstOrDefaultAsync(x => x.PublicId == ledgerId, ct)
                ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionHistoryNotFound);
     }
-    
+
     public async Task<UserUsdtLedger> GetDetailByIdAsync(int ledgerId, CancellationToken ct = default)
     {
         return await context.UserUsdtLedgers
@@ -88,10 +88,18 @@ public sealed class UserUsdtLedgerRepo(GameXContext context): IUserUsdtLedgerRep
             .FirstOrDefaultAsync(x => x.Id == ledgerId, ct)
                ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionHistoryNotFound);
     }
-    
+
     public async Task AddAsync(UserUsdtLedger userUsdtLedger, CancellationToken ct = default)
     {
         await context.UserUsdtLedgers.AddAsync(userUsdtLedger, ct);
         await context.SaveChangesAsync(ct);
+    }
+    public async Task<UserUsdtLedger> GetDetailByGameTransactionIdAsync(int transactionId)
+    {
+        return await context.UserUsdtLedgers
+            .Where(x => x.GameTransactionId == transactionId)
+            .Include(x => x.GameTransaction)
+            .FirstOrDefaultAsync()
+               ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionHistoryNotFound);
     }
 }

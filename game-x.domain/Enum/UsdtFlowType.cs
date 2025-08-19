@@ -5,4 +5,6 @@ public enum UsdtFlowType
     Init = 0,
     Deposit = 1,
     Withdrawal = 2,
+    GameDeposit = 3,
+    GameWithdrawal = 4,
 }

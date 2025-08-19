@@ -1,6 +1,7 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Infrastructure.Services.UserUsdtLedger;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnGame598TransactionSuccess;
 using game_x.application.Events.OnUserBalanceChanged;
@@ -15,6 +16,7 @@ public sealed class WalletWithdrawalHandler(
     IUserBalanceRepo userBalanceRepo,
     ICryptoTokenRepo cryptoTokenRepo,
     IGameTransactionRepo gameTransactionRepo,
+    IUserUsdtLedgerService userUsdtLedgerService,
     IUnitOfWork unitOfWork,
     IApplicationEventDispatcher eventDispatcher,
     IGameProviderService gameProvider) : ICommandHandler<WalletWithdrawalCommand>
@@ -68,6 +70,7 @@ public sealed class WalletWithdrawalHandler(
             await gameTransactionRepo.AddAsync(gameTransaction, ct);
             userBalance.AdjustAmount(command.Amount, true);
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
+            await userUsdtLedgerService.CreateForGameTransactionAsync(gameTransaction);
             await unitOfWork.SaveChangesAsync(ct);
 
             await eventDispatcher.Publish(new OnGame598TransactionCreatedEvent(gameTransaction, token), ct);
