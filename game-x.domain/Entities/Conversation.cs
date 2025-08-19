@@ -23,4 +23,19 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
     
     public ICollection<ConversationMember> Members { get; set; } = new List<ConversationMember>(); // Linked users (for both Support & Direct)
     public ICollection<Message> Messages { get; set; } = new List<Message>();
+    
+    public static Conversation Create(
+        ConversationType type,
+        string senderUserId
+    )
+    {
+        var conv = new Conversation
+        {
+            Type = type,
+            Status = ConversationStatus.Open,
+            CustomerId = senderUserId,
+            LastMessageAt = DateTime.UtcNow
+        };
+        return conv;
+    }
 }

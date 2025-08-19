@@ -1930,12 +1930,12 @@ namespace game_x.persistence.Migrations
                     b.HasOne("game_x.domain.Entities.User", "AssignedAgent")
                         .WithMany()
                         .HasForeignKey("AssignedAgentId")
-                        .HasConstraintName("fk_conversations_asp_net_users_assigned_agent_id");
+                        .HasConstraintName("fk_conversations_user_assigned_agent_id");
 
                     b.HasOne("game_x.domain.Entities.User", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
-                        .HasConstraintName("fk_conversations_asp_net_users_customer_id");
+                        .HasConstraintName("fk_conversations_user_customer_id");
 
                     b.Navigation("AssignedAgent");
 
@@ -1954,14 +1954,14 @@ namespace game_x.persistence.Migrations
                     b.HasOne("game_x.domain.Entities.Message", "LastReadMessage")
                         .WithMany()
                         .HasForeignKey("LastReadMessageId")
-                        .HasConstraintName("fk_conversation_members_message_last_read_message_id");
+                        .HasConstraintName("fk_conversation_members_messages_last_read_message_id");
 
                     b.HasOne("game_x.domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_conversation_members_asp_net_users_user_id");
+                        .HasConstraintName("fk_conversation_members_user_user_id");
 
                     b.Navigation("Conversation");
 
@@ -1989,7 +1989,7 @@ namespace game_x.persistence.Migrations
                         .HasForeignKey("SenderUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_messages_asp_net_users_sender_user_id");
+                        .HasConstraintName("fk_messages_user_sender_user_id");
 
                     b.Navigation("Conversation");
 
@@ -2018,7 +2018,7 @@ namespace game_x.persistence.Migrations
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_message_attachments_message_message_id");
+                        .HasConstraintName("fk_message_attachments_messages_message_id");
 
                     b.Navigation("AddedByUser");
 

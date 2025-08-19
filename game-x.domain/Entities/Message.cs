@@ -34,4 +34,27 @@ public sealed class Message: BaseEntity<int>, IAuditable
     
     public List<MessageAttachment> Attachments { get; set; } = new();
     public List<MessageEditSnapshot> EditHistory { get; set; } = new();
+    
+    public static Message Create(
+        int convId,
+        string senderUserId,
+        RoleInConversation senderRole,
+        MessageKind kind,
+        string text
+    )
+    {
+        var msg = new Message
+        {
+            ConversationId = convId,
+            SenderUserId = senderUserId,
+            SenderRole = senderRole,
+            Kind = kind,
+            Text = text,
+            SentAt = DateTime.UtcNow,
+            IsTombstone = false,
+            EditCount = 0,
+            CurrentVersion = 1,
+        };
+        return msg;
+    }
 }

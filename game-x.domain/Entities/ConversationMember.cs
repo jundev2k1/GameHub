@@ -23,4 +23,20 @@ public sealed class ConversationMember: BaseEntity<int>, IAuditable
     public Message? LastReadMessage { get; set; }
     
     public DateTime? LastDeliveredAt { get; set; }
+    
+    public static ConversationMember Create(
+        int convId,
+        string userId,
+        RoleInConversation role
+    )
+    {
+        var convMember = new ConversationMember
+        {
+            ConversationId = convId,
+            UserId = userId,
+            Role = role,
+            JoinedAt = DateTime.UtcNow
+        };
+        return convMember;
+    }
 }
