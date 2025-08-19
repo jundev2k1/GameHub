@@ -58,10 +58,6 @@ public sealed class OnGame598TransactionCreatedHandler(
                     new ClientLedgerDto(
                         LedgerId: userLedger.PublicId,
                         Status: userLedger.StatusAtEvent));
-
-                // await clientHubService.SendGameBalanceToMemberAsync(
-                //     transaction.UserId,
-                //     balanceDto);
             }
         }
     }
