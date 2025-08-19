@@ -11,4 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\game-x.share\game-x.share.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Factories\" />
+  </ItemGroup>
 </Project>

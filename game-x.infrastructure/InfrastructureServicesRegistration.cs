@@ -69,6 +69,7 @@ public static class InfrastructureServicesRegistration
 
         // Builders
         services.AddScoped(typeof(ICriteriaBuilder<>), typeof(CriteriaBuilder<>));
+        services.AddScoped(typeof(ISeekCursorBuilder<>), typeof(SeekCursorBuilder<>));
 
         // Add external services
         services.AddScoped<IEmailService, EngageLabEmailService>();

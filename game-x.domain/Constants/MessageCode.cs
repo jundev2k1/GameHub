@@ -309,4 +309,16 @@ public static class MessageCode
         CryptoTokenUnsupported = 10401,
         #endregion
     }
+    
+    public enum Chatting
+    {
+        #region ■ Message group: Error
+        /// <summary>CryptoToken configuration not found.</summary>
+        [EnumMetadata("Conversation not found.")]
+        ConversationNotFound = 10500,
+        /// <summary>Conversation was already claimed.</summary>
+        [EnumMetadata("Conversation was already claimed.")]
+        ConversationAlreadyClaimed = 10501,
+        #endregion
+    }
 }
