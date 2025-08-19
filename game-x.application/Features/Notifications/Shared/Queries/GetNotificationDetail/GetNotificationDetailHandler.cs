@@ -1,21 +1,17 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Notifications.Dtos;
 
 namespace game_x.application.Features.Notifications.Shared.Queries.GetNotificationDetail;
 
 public sealed class GetNotificationDetailHandler(INotificationRepo notificationRepo, IUserAccessor userAccessor)
-    : IQueryHandler<GetNotificationDetailQuery, NotificationDto[]>
+    : IQueryHandler<GetNotificationDetailQuery, NotificationListDto>
 {
-    public async Task<NotificationDto[]> Handle(GetNotificationDetailQuery request, CancellationToken ct = default)
+    public async Task<NotificationListDto> Handle(GetNotificationDetailQuery request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
-        var notifications = await notificationRepo
-            .GetNotificationByUserIdAsync(userId, ct);
-
-        var result = notifications
-            .Select(n => n.Adapt<NotificationDto>())
-            .ToArray();
+        var result = await notificationRepo
+            .GetNotificationByUserIdAsync(userId, request.PageNo, request.PageSize, ct);
         return result;
     }
 }

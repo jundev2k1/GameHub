@@ -6,11 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Features\Notifications\Dtos\**" />
-    <EmbeddedResource Remove="Features\Notifications\Dtos\**" />
-    <None Remove="Features\Notifications\Dtos\**" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Remove="Features\UserManagement\User\Commands\CreateUserCommand.cs" />
   </ItemGroup>
   <ItemGroup>

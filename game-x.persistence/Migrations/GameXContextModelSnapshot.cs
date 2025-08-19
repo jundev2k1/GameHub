@@ -718,6 +718,83 @@ namespace game_x.persistence.Migrations
                     b.ToTable("fiat_currencies", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.GameTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int?>("CryptoTokenId")
+                        .HasColumnType("integer")
+                        .HasColumnName("crypto_token_id");
+
+                    b.Property<string>("G598Sno")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("g598_sno");
+
+                    b.Property<short>("GamePlatform")
+                        .HasColumnType("smallint")
+                        .HasColumnName("game_platform");
+
+                    b.Property<string>("Note")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_transactions");
+
+                    b.HasIndex("CryptoTokenId")
+                        .HasDatabaseName("ix_game_transactions_crypto_token_id");
+
+                    b.HasIndex("G598Sno")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_transactions_g598sno");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_transactions_public_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_game_transactions_user_id");
+
+                    b.ToTable("game_transactions", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.MediaFile", b =>
                 {
                     b.Property<int>("Id")
@@ -1771,6 +1848,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("flow_type");
 
+                    b.Property<int?>("GameTransactionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_transaction_id");
+
                     b.Property<string>("Meta")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -1801,6 +1882,12 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp");
 
+                    b.Property<int>("Type")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("type");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -1815,12 +1902,15 @@ namespace game_x.persistence.Migrations
                     b.HasIndex("ChainTransactionId")
                         .HasDatabaseName("ix_user_usdt_ledgers_chain_transaction_id");
 
+                    b.HasIndex("GameTransactionId")
+                        .HasDatabaseName("ix_user_usdt_ledgers_game_transaction_id");
+
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("ix_user_usdt_ledgers_public_id");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_user_usdt_ledgers_user_id");
+                    b.HasIndex("UserId", "Type", "Timestamp")
+                        .HasDatabaseName("ix_user_usdt_ledgers_user_id_type_timestamp");
 
                     b.ToTable("user_usdt_ledgers", (string)null);
                 });
@@ -1919,6 +2009,26 @@ namespace game_x.persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_chain_transactions_user_user_id");
+
+                    b.Navigation("CryptoToken");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameTransaction", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
+                        .WithMany()
+                        .HasForeignKey("CryptoTokenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_game_transactions_crypto_tokens_crypto_token_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("GameTransactions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_transactions_user_user_id");
 
                     b.Navigation("CryptoToken");
 
@@ -2228,6 +2338,12 @@ namespace game_x.persistence.Migrations
                         .HasForeignKey("ChainTransactionId")
                         .HasConstraintName("fk_user_usdt_ledgers_chain_transactions_chain_transaction_id");
 
+                    b.HasOne("game_x.domain.Entities.GameTransaction", "GameTransaction")
+                        .WithMany()
+                        .HasForeignKey("GameTransactionId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_user_usdt_ledgers_game_transactions_game_transaction_id");
+
                     b.HasOne("game_x.domain.Entities.User", "User")
                         .WithMany("UserUsdtLedgers")
                         .HasForeignKey("UserId")
@@ -2235,6 +2351,8 @@ namespace game_x.persistence.Migrations
                         .HasConstraintName("fk_user_usdt_ledgers_user_user_id");
 
                     b.Navigation("ChainTransaction");
+
+                    b.Navigation("GameTransaction");
 
                     b.Navigation("User");
                 });
@@ -2267,6 +2385,8 @@ namespace game_x.persistence.Migrations
                     b.Navigation("BlocksToMe");
 
                     b.Navigation("ChainTransactions");
+
+                    b.Navigation("GameTransactions");
 
                     b.Navigation("ReceivedRequests");
 

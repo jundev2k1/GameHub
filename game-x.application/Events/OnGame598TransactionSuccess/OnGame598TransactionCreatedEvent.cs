@@ -1,0 +1,3 @@
+namespace game_x.application.Events.OnGame598TransactionSuccess;
+
+public record OnGame598TransactionCreatedEvent(GameTransaction Transaction, CryptoToken Token) : IApplicationEvent;

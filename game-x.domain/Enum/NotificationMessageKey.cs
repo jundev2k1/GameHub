@@ -17,8 +17,15 @@ public enum NotificationMessageKey : short
     Transaction_Approved = 403,
     Transaction_Rejected = 404,
     Transaction_Reviewed = 405,
-    
+
     // Enum group key: UserLedger module
     UserLedger_Created = 500,
+
+    // Enum group key: Transaction module
+    Balance_Updated = 600,
+
+    // Enum group key: UserBankAccount - UserKyc module
+    User_VerifyStatus_Changed = 700,
+
     // Enum group key: ...
 }

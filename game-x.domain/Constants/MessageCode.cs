@@ -219,7 +219,7 @@ public static class MessageCode
         UserResetPasswordSuccess = 10153,
         #endregion
     }
-    
+
     public enum Transaction
     {
         #region ■ Message group: Error
@@ -261,7 +261,7 @@ public static class MessageCode
         ChainTransactionHistoryNotFound = 10211,
         #endregion
     }
-    
+
     public enum Accounting
     {
         #region ■ Message group: Error
@@ -292,9 +292,12 @@ public static class MessageCode
         /// <summary>The amount must be at least 10 USDT.</summary>
         [EnumMetadata("Invalid amount.")]
         InvalidAmount = 10308,
+        /// <summary>Cannot deposit to a system wallet.</summary>
+        [EnumMetadata("Cannot deposit to a system wallet.")]
+        CannotDepositToSystemWallet = 10309,
         #endregion
     }
-    
+
     public enum Crypto
     {
         #region ■ Message group: Error

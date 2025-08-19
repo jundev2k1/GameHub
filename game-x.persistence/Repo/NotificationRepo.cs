@@ -1,18 +1,76 @@
 ﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.application.Features.Notifications.Dtos;
+using Mapster;
 
 namespace game_x.persistence.Repo;
 
 public sealed class NotificationRepo(GameXContext context) : INotificationRepo, IRepository
 {
-    public async Task<Notification[]> GetNotificationByUserIdAsync(string userId, CancellationToken ct = default)
+    public async Task<NotificationListDto> GetNotificationByUserIdAsync(
+        string userId,
+        int pageNo = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
     {
-        var result = await context.Notifications
+        var beginCount = (pageNo - 1) * pageSize;
+        var data = context.Notifications
             .AsNoTracking()
             .Where(n => (n.UserId == null) || (n.UserId == userId))
+            .OrderByDescending(n => n.CreatedAt);
+        var totalItems = await data.CountAsync(ct);
+        var unReadCount = await data.CountAsync(n => n.IsRead == false, ct);
+        var hasNextPage = await data.Skip(beginCount + pageSize).AnyAsync(ct);
+        var items = await data
+            .Skip(beginCount)
+            .Take(pageSize)
             .ToArrayAsync(ct);
-        return result;
+        return new ()
+        {
+            Items = [.. items.Select(n => n.Adapt<NotificationDto>())],
+            TotalItems = totalItems,
+            UnReadCount = unReadCount,
+            HasNextPage = hasNextPage,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<NotificationListDto> GetAdjacentNotificationsAsync(
+        string userId,
+        Guid currentNotificationId,
+        bool isNext = true,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var targetNotification = await context.Notifications
+            .AsNoTracking()
+            .FirstOrDefaultAsync(n => n.UserId == userId && n.PublicId == currentNotificationId, ct)
+            ?? throw new NotFoundException(nameof(Notification), currentNotificationId);
+
+        var dateTime = targetNotification.CreatedAt;
+        var notifications = context.Notifications
+            .AsNoTracking()
+            .AsQueryable()
+            .Where(n => n.UserId == userId);
+        var totalCount = await notifications.CountAsync(ct);
+        var unReadCount = await notifications.CountAsync(n => n.IsRead == false, ct);
+        var data = notifications
+            .Where(n => isNext ? n.CreatedAt < dateTime : n.CreatedAt > dateTime);
+        data = isNext
+            ? data.OrderByDescending(n => n.CreatedAt)
+            : data.OrderBy(n => n.CreatedAt);
+        var hasNextPage = await data.Skip(pageSize).AnyAsync(ct);
+        var items = await data.Take(pageSize).ToArrayAsync(ct);
+        return new()
+        {
+            Items = [.. items.Select(n => n.Adapt<NotificationDto>()).OrderByDescending(n => n.CreatedAt)],
+            TotalItems = totalCount,
+            UnReadCount = unReadCount,
+            PageSize = pageSize,
+            HasNextPage = hasNextPage,
+        };
     }
 
     public async Task<Notification> GetNotificationIdAsync(Guid notificationId, CancellationToken ct = default)
@@ -26,6 +84,15 @@ public sealed class NotificationRepo(GameXContext context) : INotificationRepo, 
     public async Task AddNotificationAsync(Notification notification, CancellationToken ct = default)
     {
         await context.Notifications.AddAsync(notification, ct);
+    }
+
+    public async Task MarkAllAsReadAsync(string userId, CancellationToken ct = default)
+    {
+        await context.Notifications
+            .Where(n => n.UserId == userId && !n.IsRead)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(n => n.IsRead, _ => true)
+                .SetProperty(n => n.ReadAt, _ => DateTime.UtcNow), ct);
     }
 
     public async Task MarkAsReadAsync(Guid notificationId, string userId, CancellationToken ct = default)

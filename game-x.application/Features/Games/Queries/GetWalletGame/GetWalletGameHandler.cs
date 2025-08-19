@@ -26,6 +26,6 @@ public sealed class GetWalletGameHandler(
             Account = targetUser.UserExtend.GameProviderAccount
         };
         var result = await gameProvider.GetWalletAsync(externalRequest);
-        return new GetWalletGameResult(result.Currency, result.Quota);
+        return new GetWalletGameResult(result.Quota);
     }
 }
