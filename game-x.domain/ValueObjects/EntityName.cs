@@ -14,6 +14,9 @@ public sealed class EntityName
     public static EntityName UserBalance => Of(nameof(Entities.UserBalance));
     public static EntityName FiatCurrency => Of(nameof(Entities.FiatCurrency));
     public static EntityName UserBankAccount => Of(nameof(Entities.UserBankAccount));
+    public static EntityName Conversation => Of(nameof(Entities.Conversation));
+    public static EntityName ConversationMember => Of(nameof(Entities.ConversationMember));
+    public static EntityName Message => Of(nameof(Entities.Message));
 
     public static EntityName Of(string value)
     {
@@ -33,7 +36,11 @@ public sealed class EntityName
         nameof(Entities.GameTransaction),
         nameof(Entities.UserBalance),
         nameof(Entities.FiatCurrency),
-        nameof(Entities.UserBankAccount)];
+        nameof(Entities.UserBankAccount),
+        nameof(Entities.Conversation),
+        nameof(Entities.ConversationMember),
+        nameof(Entities.Message),
+    ];
 
     public override bool Equals(object? obj) =>
         (obj != null) && (obj is EntityName type) && (Value == type.Value);
