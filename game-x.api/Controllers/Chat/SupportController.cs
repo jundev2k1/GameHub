@@ -6,9 +6,9 @@ using game_x.application.Features.Chat.Queries.ListUnassignedQueue;
 namespace game_x.api.Controllers.Chat;
 
 [Route("api/support")]
-[Authorize(Roles = AppRoles.User)]
 public class SupportController : BaseApiController
 {
+    [Authorize(Roles = AppRoles.User)]
     [HttpPost("messages")]
     public async Task<IActionResult> SendMessageAsync([FromBody] SendSupportMessageCommand command, CancellationToken ct)
     {
@@ -20,9 +20,7 @@ public class SupportController : BaseApiController
     /// List unassigned support conversations (ordered by lastMessageAt desc).
     /// Cursor-based pagination. Optional search by customer or last message text.
     /// </summary>
-    /// <param name="limit">Page size (1..100). Default 20.</param>
-    /// <param name="c">Opaque cursor returned from the previous page.</param>
-    /// <param name="q">a common convention for free-text search keywords; full-text.</param>
+    [Authorize(Roles = AppRoles.User)]
     [HttpGet("queue/unassigned")]
     public async Task<IActionResult> GetUnassignedConversationAsync([AsParameters] CursorCriteriaRequest parameters)
     {

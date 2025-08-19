@@ -32,10 +32,15 @@ public async Task<CursorResult<ConversationQueueItemDto>> GetUnassignedQueueByCu
         query = query.Where(c =>
             (c.CustomerId != null && EF.Functions.ILike(c.CustomerId, s)) ||
             context.Users.Where(u => u.Id == c.CustomerId)
-                         .Any(u => EF.Functions.ILike(u.UserName!, s) || EF.Functions.ILike(u.Nickname, s)) ||
-            context.Messages.Where(m => m.ConversationId == c.Id)
-                            .Any(m => EF.Functions.ILike(m.Text ?? string.Empty, s)));
+                .Any(u => EF.Functions.ILike(u.UserName!, s) || EF.Functions.ILike(u.Nickname, s)));
     }
+    
+    if (!string.IsNullOrWhiteSpace(q))
+    {
+        query = query.Where(c =>
+            context.Messages.Where(m => m.ConversationId == c.Id)
+                .Any(m => EF.Functions.ILike(m.Text ?? string.Empty, $"%{q.Trim()}%")));
+    } 
 
     // --- Include customer + last message (for DTO mapping & preview) ---
         // Keep only conversations that have messages.
@@ -51,12 +56,7 @@ public async Task<CursorResult<ConversationQueueItemDto>> GetUnassignedQueueByCu
         => string.IsNullOrWhiteSpace(text) ? "[Attachment]"
          : text.Length <= 140 ? text
          : text[..140];
-
-    // --- Build via seek builder: ---
-    //    - Key1: LastMessageAt (UTC)
-    //    - Key2: LastMessage.Id (tie-breaker; use the same order as above)
-    //    - Sort: newest first (DESC, DESC)
-    //    - FromCursor: opaque token + optional filter fingerprint (stable across searches)
+    
     var fp = CursorHelper.ComputeFp($"q:{search?.Trim().ToLowerInvariant() ?? string.Empty}");
 
     return await SeekCursorBuilder<Conversation>
