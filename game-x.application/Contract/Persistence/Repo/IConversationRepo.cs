@@ -10,6 +10,14 @@ public interface IConversationRepo
         string? cursor,
         string? q,
         string? search,
+        CancellationToken ct = default); 
+    
+    Task<CursorResult<ConversationQueueItemDto>> GetMyConversationsByCursorAsync(
+        string userId,
+        int limit,
+        string? cursor,
+        string? q,
+        string? search,
         CancellationToken ct = default);
     Task<Conversation?> GetSupportConversationAsync(ConversationStatus status, string customerId, CancellationToken ct = default);
     Task AddAsync(Conversation conv, CancellationToken ct = default);

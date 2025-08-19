@@ -9,7 +9,6 @@ public sealed class ListUnassignedQueueQueryHandler(IConversationRepo conversati
 {
     public async Task<CursorResult<ConversationQueueItemDto>> Handle(ListUnassignedQueueQuery request, CancellationToken ct)
     {
-        // Prefer cursor; ignore page index/size for this endpoint
         var limit = Math.Clamp(request.Limit ?? 20, 1, 100);
 
         return await conversationRepo.GetUnassignedQueueByCursorAsync(
