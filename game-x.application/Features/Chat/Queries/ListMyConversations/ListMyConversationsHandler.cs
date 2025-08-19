@@ -11,11 +11,10 @@ public sealed class ListMyConversationsHandler(IUserAccessor userAccessor, IConv
     public async Task<CursorResult<ConversationQueueItemDto>> Handle(ListMyConversationsQuery request, CancellationToken ct)
     {
         var userId = userAccessor.GetUserId();
-        var limit = Math.Clamp(request.Limit ?? 20, 1, 100);
 
         return await conversationRepo.GetMyConversationsByCursorAsync(
             userId: userId,
-            limit: limit,
+            limit: request.Limit ?? 20,
             cursor: request.Cursor,
             q: request.Q,
             search: request.Search,

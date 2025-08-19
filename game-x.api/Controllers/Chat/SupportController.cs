@@ -1,5 +1,6 @@
 using game_x.api.Common;
 using game_x.application.Common.Filters;
+using game_x.application.Features.Chat.Commands.ClaimConversationById;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Queries.ListUnassignedQueue;
 
@@ -20,7 +21,7 @@ public class SupportController : BaseApiController
     /// List unassigned support conversations (ordered by lastMessageAt desc).
     /// Cursor-based pagination. Optional search by customer or last message text.
     /// </summary>
-    [Authorize(Roles = AppRoles.User)]
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("queue/unassigned")]
     public async Task<IActionResult> GetUnassignedConversationAsync([AsParameters] CursorCriteriaRequest parameters)
     {
@@ -33,6 +34,14 @@ public class SupportController : BaseApiController
             Cursor: parameters.Cursor
         );
         var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpPost("queue/{convId}/claim")]
+    public async Task<IActionResult> ClaimConversationAsync(Guid convId, [FromBody] ClaimConversationByIdCommand command, CancellationToken ct)
+    {
+        var result = await Mediator.Send(command with {ConversationId = convId}, ct);
         return ApiResponseFactory.Ok(result);
     }
 }

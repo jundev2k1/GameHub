@@ -2,8 +2,11 @@ using System.Linq.Expressions;
 using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Exceptions;
 using game_x.application.Features.Chat.Dtos;
+using game_x.domain.Constants;
 using game_x.share.Helper;
 using Mapster;
 
@@ -58,7 +61,7 @@ public async Task<CursorResult<ConversationQueueItemDto>> GetUnassignedQueueByCu
          : text.Length <= 140 ? text
          : text[..140];
     
-    var fp = CursorHelper.ComputeFp($"q:{search?.Trim().ToLowerInvariant() ?? string.Empty}");
+    var fp = CursorHelper.ComputeFp($"q:{q?.Trim().ToLowerInvariant() ?? string.Empty}");
 
     return await SeekCursorBuilder<Conversation>
         .For(src)
@@ -166,5 +169,15 @@ public async Task<CursorResult<ConversationQueueItemDto>> GetUnassignedQueueByCu
     public async Task AddAsync(Conversation conv, CancellationToken ct = default)
     {
         await context.Conversations.AddAsync(conv, ct);
+    }
+    
+    public async Task PatchUpdateAsync(Guid publicId, Action<Conversation> updateAction, CancellationToken ct = default)
+    {
+        var conv = await context.Conversations
+            .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
+                ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+
+        updateAction.Invoke(conv);
+        await context.SaveChangesAsync(ct);
     }
 }

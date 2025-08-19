@@ -71,13 +71,10 @@ public sealed class SendSupportMessageHandler(
     
     private async Task<ConversationMember> CreateConversationMemberAsync(Conversation conv, string userId, CancellationToken ct)
     {
-        var convMember = new ConversationMember
-        {
-            Conversation = conv,
-            UserId = userId,
-            Role = RoleInConversation.Member,
-            JoinedAt = DateTime.UtcNow
-        };
+        var convMember = ConversationMember.Create(
+                conv: conv,
+                userId: userId,
+                role: RoleInConversation.Member);
         
         await conversationMemberRepo.AddAsync(convMember, ct);
         return convMember;

@@ -21,4 +21,6 @@ public interface IConversationRepo
         CancellationToken ct = default);
     Task<Conversation?> GetSupportConversationAsync(ConversationStatus status, string customerId, CancellationToken ct = default);
     Task AddAsync(Conversation conv, CancellationToken ct = default);
+
+    Task PatchUpdateAsync(Guid publicId, Action<Conversation> updateAction, CancellationToken ct = default);
 }
