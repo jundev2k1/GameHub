@@ -6,6 +6,7 @@ using game_x.application.Exceptions;
 using game_x.share.ExternalApi.GameProvider.Dtos;
 using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
+using game_x.share.ExternalApi.GameProvider.Dtos.Logout;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
@@ -32,7 +33,7 @@ public sealed class GameProviderService(
                 Data = request,
             };
 
-            var result = await gameApi.LoginAsync(bodyPayload, gameProviderCache.Language, ip);
+            var result = await gameApi.LoginAsync(bodyPayload, gameProviderCache.GetLanguage(data.Account), ip);
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
                 logger.LogError($"Response failed: Status={result.StatusCode}");
@@ -58,6 +59,54 @@ public sealed class GameProviderService(
         }
     }
 
+    public async Task<LogoutResponse> LogoutAsync(LogoutRequest data)
+    {
+        try
+        {
+            var json = JsonConvert.SerializeObject(data);
+            var request = aesEncryptor.Encrypt(json);
+            var bodyPayload = new PayloadRequest
+            {
+                Data = request,
+            };
+
+            var result = await gameApi.LogoutAsync(bodyPayload, gameProviderCache.GetLanguage(data.Account));
+            if (!result.IsSuccessStatusCode || result.Content == null)
+            {
+                logger.LogError($"Response failed: Status={result.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            var resJson = aesEncryptor.Decrypt(result.Content.Data);
+            logger.LogInformation("Full logout response: {response}", resJson);
+
+            var logoutResponse = JsonConvert.DeserializeObject<LogoutResponse>(resJson);
+            if (logoutResponse == null)
+            {
+                logger.LogError("Failed to deserialize logout response");
+                throw new ExternalServiceException();
+            }
+
+            if (!logoutResponse.IsSuccess)
+            {
+                logger.LogError("Logout response failed: Code={ErrorCode} - Message={ErrorMessage}",
+                    logoutResponse.ErrorCode ?? "Unknown",
+                    logoutResponse.ErrorMessage ?? "Unknown error");
+            }
+            else
+            {
+                logger.LogInformation("Logout request successful");
+            }
+
+            return logoutResponse;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to send deposit request to GameProvider: {Ex}", ex);
+            throw;
+        }
+    }
+
     public async Task<RegisterResponse> RegisterAsync(RegisterRequest data)
     {
         try
@@ -71,7 +120,7 @@ public sealed class GameProviderService(
                 Data = request,
             };
 
-            var result = await gameApi.RegisterAsync(bodyPayload, gameProviderCache.Language);
+            var result = await gameApi.RegisterAsync(bodyPayload, gameProviderCache.GetLanguage(data.Account));
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
                 logger.LogError($"Response failed: Status={result.StatusCode}");
@@ -109,7 +158,7 @@ public sealed class GameProviderService(
                 Data = request,
             };
 
-            var result = await gameApi.GetWalletAsync(bodyPayload, gameProviderCache.Language);
+            var result = await gameApi.GetWalletAsync(bodyPayload, gameProviderCache.GetLanguage(data.Account));
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
                 logger.LogError($"Response failed: Status={result.StatusCode}");
@@ -141,6 +190,7 @@ public sealed class GameProviderService(
             throw;
         }
     }
+
     public async Task<GameDepositResponse> DepositWalletAsync(GameDepositRequest data)
     {
         try
@@ -154,7 +204,7 @@ public sealed class GameProviderService(
                 Data = request,
             };
 
-            var result = await gameApi.DepositAsync(bodyPayload, gameProviderCache.Language);
+            var result = await gameApi.DepositAsync(bodyPayload, gameProviderCache.GetLanguage(data.Account));
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
                 logger.LogError($"Response failed: Status={result.StatusCode}");
@@ -204,7 +254,7 @@ public sealed class GameProviderService(
                 Data = request,
             };
 
-            var result = await gameApi.WithdrawalAsync(bodyPayload, gameProviderCache.Language);
+            var result = await gameApi.WithdrawalAsync(bodyPayload, gameProviderCache.GetLanguage(data.Account));
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
                 logger.LogError($"Response failed: Status={result.StatusCode}");
