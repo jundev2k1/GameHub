@@ -1,5 +1,7 @@
-﻿using game_x.application.Common.Abstractions;
+﻿using EFCore.BulkExtensions;
+using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Auth.Dtos;
 
 namespace game_x.persistence.Repo;
 
@@ -42,5 +44,34 @@ public sealed class RefreshTokenRepo(GameXContext context) : IRefreshTokenRepo, 
             .ToListAsync(ct);
 
         targetItems.ForEach(rt => rt.Revoke());
+    }
+
+    public async Task SyncRefreshTokensAsync(IEnumerable<RefreshTokenDto> tokens, CancellationToken ct = default)
+    {
+        // Get tokens that are needed to be updated
+        var updateIds = tokens.Select(rt => rt.PublicId);
+        var targetTokens = await context.RefreshTokens
+            .Where(rt => updateIds.Contains(rt.PublicId))
+            .ToArrayAsync(ct);
+        if (targetTokens.Length == 0) return;
+
+        // Update tokens with new values
+        foreach (var token in targetTokens)
+        {
+            var updateItem = tokens.FirstOrDefault(rt => rt.PublicId == token.PublicId);
+            if (updateItem is null) continue;
+
+            token.UpdateToSync(updateItem.ReplacedByToken, updateItem.RevokedAt);
+        }
+
+        // Perform bulk update
+        await context.BulkUpdateAsync(targetTokens, new BulkConfig
+        {
+            UpdateByProperties = [nameof(RefreshToken.PublicId)],
+            PropertiesToInclude = [
+                nameof(RefreshToken.RevokedAt),
+                nameof(RefreshToken.ReplacedByToken)
+            ]
+        }, cancellationToken: ct);
     }
 }

@@ -16,8 +16,9 @@ public sealed class RefreshTokenHandler(
 {
     public async Task<RefreshTokenResult> Handle(RefreshTokenCommand request, CancellationToken ct = default)
     {
+        var userId = userAccessor.GetUserId();
         var tokenInfo = tokenGenerator.DecodeToken(request.AccessToken);
-        var currentRefreshToken = refreshTokenManager.GetToken(request.RefreshToken);
+        var currentRefreshToken = refreshTokenManager.GetToken(userId, request.RefreshToken);
 
         var isValid = IsValidToken(tokenInfo, currentRefreshToken);
         if (!isValid) throw new BadRequestException(MessageCode.System.InvalidOrMissingToken);
@@ -63,7 +64,10 @@ public sealed class RefreshTokenHandler(
             deviceInfo: userAccessor.GetDeviceInfo());
         var refreshTokenDto = refreshTokenEntity.Adapt<RefreshTokenDto>();
         refreshTokenManager.InsertNewToken(refreshTokenDto);
-        refreshTokenManager.ReplaceToken(oldRefreshToken.TokenHash, refreshTokenDto.TokenHash);
+        refreshTokenManager.ReplaceToken(
+            oldRefreshToken.UserId,
+            oldRefreshToken.TokenHash,
+            refreshTokenDto.TokenHash);
 
         return (newAccessToken.Token, newRefreshToken.Token);
     }

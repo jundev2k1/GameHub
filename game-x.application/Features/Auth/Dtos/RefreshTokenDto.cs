@@ -3,7 +3,6 @@
 public sealed class RefreshTokenDto
 {
     public Guid PublicId { get; set; } = Guid.NewGuid();
-
     public string UserId { get; set; } = string.Empty;
 
     public string TokenHash { get; set; } = string.Empty;
@@ -27,5 +26,6 @@ public sealed class RefreshTokenDto
 public enum SyncState
 {
     NotSynced,
-    Synced
+    Synced,
+    Updated,
 }

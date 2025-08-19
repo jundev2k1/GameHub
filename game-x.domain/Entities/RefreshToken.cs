@@ -1,4 +1,6 @@
-﻿namespace game_x.domain.Entities;
+﻿using static game_x.domain.Constants.MessageCode;
+
+namespace game_x.domain.Entities;
 
 public sealed class RefreshToken : BaseEntity<long>
 {
@@ -30,7 +32,11 @@ public sealed class RefreshToken : BaseEntity<long>
         string ipAddress,
         string userAgent,
         string? deviceInfo = null,
-        string? location = null)
+        string? location = null,
+        Guid? publicId = null,
+        string? replacedByToken = null,
+        DateTime? revokedAt = null,
+        DateTime? createdAt = null)
     {
         return new RefreshToken
         {
@@ -38,12 +44,23 @@ public sealed class RefreshToken : BaseEntity<long>
             TokenHash = tokenHash,
             JwtId = jwtId,
             ExpiresAt = expiresAt.ToUniversalTime(),
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = createdAt ?? DateTime.UtcNow,
             IpAddress = ipAddress,
             UserAgent = userAgent,
             DeviceInfo = deviceInfo,
-            Location = location
+            Location = location,
+            PublicId = publicId ?? Guid.NewGuid(),
+            ReplacedByToken = replacedByToken,
+            RevokedAt = revokedAt,
         };
+    }
+
+    public void UpdateToSync(
+        string? replacedByToken,
+        DateTime? revokedAt)
+    {
+        ReplacedByToken = replacedByToken ?? ReplacedByToken;
+        RevokedAt = revokedAt ?? RevokedAt;
     }
 
     public void Revoke()

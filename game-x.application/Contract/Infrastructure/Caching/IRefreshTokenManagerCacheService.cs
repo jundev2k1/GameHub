@@ -4,15 +4,19 @@ namespace game_x.application.Contract.Infrastructure.Caching;
 
 public interface IRefreshTokenManagerCacheService
 {
-    RefreshTokenDto[] GetAllTokens();
+    IEnumerable<RefreshTokenDto> GetAllTokens();
 
-    RefreshTokenDto GetToken(string rawToken);
+    RefreshTokenDto GetToken(string userId, string rawToken);
 
-    RefreshTokenDto? GetTokenByJwtId(string jwtId);
+    RefreshTokenDto? GetTokenByJwtId(string userId, string jwtId);
 
     void InsertNewToken(RefreshTokenDto tokenDto);
 
-    void ReplaceToken(string oldTokenHash, string newTokenHash);
+    void ReplaceToken(string userId, string oldTokenHash, string newTokenHash);
 
-    void RevokeToken(string tokenHash);
+    void RevokeToken(string userId, string tokenHash);
+
+    void UpdateAfterSync(Guid[] tokens);
+
+    void RemoveExpiredTokens();
 }

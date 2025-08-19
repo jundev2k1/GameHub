@@ -1,4 +1,6 @@
-﻿namespace game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Features.Auth.Dtos;
+
+namespace game_x.application.Contract.Persistence.Repo;
 
 public interface IRefreshTokenRepo
 {
@@ -11,4 +13,6 @@ public interface IRefreshTokenRepo
     Task AddRangeAsync(IEnumerable<RefreshToken> tokens, CancellationToken ct = default);
 
     Task BulkRevokeAsync(IEnumerable<Guid> publicIds, DateTime revokedAtUtc, CancellationToken ct = default);
+
+    Task SyncRefreshTokensAsync(IEnumerable<RefreshTokenDto> tokens, CancellationToken ct = default);
 }

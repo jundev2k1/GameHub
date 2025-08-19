@@ -1,6 +1,7 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
+using game_x.infrastructure.Security;
 using Microsoft.AspNetCore.Authorization.Policy;
 
 namespace game_x.api.Middleware;
@@ -62,13 +63,13 @@ public sealed class AuthGateMiddleware : IAuthorizationMiddlewareResultHandler
         var token = context.Request.Headers.Authorization.ToStringOrEmpty();
         if (token.IsNullOrWhiteSpace())
             return MessageCode.System.InvalidOrMissingToken;
-        if (!IsValidToken(context, token))
+        if (!IsValidToken(context, userId, token))
             return MessageCode.System.InvalidOrMissingToken;
 
         return null;
     }
 
-    private static bool IsValidToken(HttpContext context, string token)
+    private static bool IsValidToken(HttpContext context, string userId, string token)
     {
         // Get the JWT token generator and decode the token
         var tokenGenerator = context.RequestServices.GetRequiredService<IJwtTokenGenerator>();
@@ -80,7 +81,7 @@ public sealed class AuthGateMiddleware : IAuthorizationMiddlewareResultHandler
 
         // Check if the token is linked to a valid refresh token
         var refreshTokenManager = context.RequestServices.GetRequiredService<IRefreshTokenManagerCacheService>();
-        var tokenLinked = refreshTokenManager.GetTokenByJwtId(jwtId!);
+        var tokenLinked = refreshTokenManager.GetTokenByJwtId(userId, jwtId!);
         return tokenLinked != null
             && !tokenLinked.IsExpired
             && !tokenLinked.IsRevoked
