@@ -18,4 +18,6 @@ public interface IUserUsdtLedgerRepo
     Task<UserUsdtLedger> GetDetailByIdAsync(int ledgerId, CancellationToken ct = default);
     Task<UserUsdtLedger> GetDetailByTransactionIdAsync(int transactionId);
     Task AddAsync(UserUsdtLedger userUsdtLedger, CancellationToken ct = default);
+    Task<UserUsdtLedger> GetDetailByGameTransactionIdAsync(int transactionId);
+
 }

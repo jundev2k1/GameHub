@@ -4,7 +4,7 @@ using game_x.domain.Shared;
 
 namespace game_x.domain.Entities;
 
-public sealed class UserUsdtLedger: BaseEntity<int>
+public sealed class UserUsdtLedger : BaseEntity<int>
 {
     public Guid PublicId { get; set; }
     public string UserId { get; set; } = null!;
@@ -17,10 +17,17 @@ public sealed class UserUsdtLedger: BaseEntity<int>
 
     public decimal BalanceAfter { get; set; }    // balance after change
     public string? StatusAtEvent { get; set; } // Status at the time the event takes place
-    
+
     // Associated raw data
     public int? ChainTransactionId { get; set; }
     public ChainTransaction? ChainTransaction { get; set; }
+
+    // NEW: Default = UXM để backward compatibility
+    public LedgerType Type { get; set; } = LedgerType.UXM;
+
+    // NEW: Game transaction field - nullable
+    public int? GameTransactionId { get; set; }
+    public GameTransaction? GameTransaction { get; set; }
 
     public string Meta { get; set; } = "{}";
 

@@ -1,4 +1,6 @@
 using System.Text.Json;
+using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Services.UserUsdtLedger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
@@ -8,6 +10,7 @@ namespace game_x.application.Events.OnGame598TransactionSuccess;
 public sealed class OnGame598TransactionCreatedHandler(
     IUnitOfWork unitOfWork,
     INotificationRepo notificationRepo,
+    IUserUsdtLedgerRepo userUsdtLedgerRepo,
     IClientHubService clientHubService) : IApplicationEventHandler<OnGame598TransactionCreatedEvent>
 {
     public async Task Handle(OnGame598TransactionCreatedEvent @event, CancellationToken ct = default)
@@ -33,7 +36,9 @@ public sealed class OnGame598TransactionCreatedHandler(
                 var balanceDto = new GameBalanceDto(
                 Amount: balance.Amount,
                 FrozenAmount: balance.FrozenAmount,
-                Network: token.Network);
+                Network: token.Network.ToString().ToLower());
+
+                UserUsdtLedger userLedger = await userUsdtLedgerRepo.GetDetailByGameTransactionIdAsync(transaction.Id);
 
                 var notification = Notification.Create(
                     NotificationMessageKey.Balance_Updated,
@@ -43,9 +48,20 @@ public sealed class OnGame598TransactionCreatedHandler(
                     JsonSerializer.Serialize(balanceDto));
                 await notificationRepo.AddNotificationAsync(notification, ct);
 
-                await clientHubService.SendGameBalanceToMemberAsync(
-                    transaction.UserId,
-                    balanceDto);
+
+                await clientHubService.SendNotificationToMemberAsync(
+                    balance.UserId,
+                    notification.Adapt<NotificationDto>());
+
+                await clientHubService.SendLedgerToMemberAsync(
+                    balance.UserId,
+                    new ClientLedgerDto(
+                        LedgerId: userLedger.PublicId,
+                        Status: userLedger.StatusAtEvent));
+
+                // await clientHubService.SendGameBalanceToMemberAsync(
+                //     transaction.UserId,
+                //     balanceDto);
             }
         }
     }
