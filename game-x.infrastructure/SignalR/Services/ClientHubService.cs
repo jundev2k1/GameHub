@@ -40,10 +40,4 @@ public sealed class ClientHubService(IHubContext<ClientHub, IClientHub> hubConte
     {
         await hubContext.Clients.Group($"member-{userId}").WalletsUpdated(wallets);
     }
-
-    // public async Task SendGameBalanceToMemberAsync(string userId, GameBalanceDto balances)
-    // {
-    //     await hubContext.Clients.Group($"member-{userId}").GameBalanceUpdated(balances);
-    // }
-
 }
