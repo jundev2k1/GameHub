@@ -12,6 +12,11 @@ public interface IGameProviderApi
         [Header("Language")] string language,
         [Header("PIP")] string? ip = null);
 
+    [Post("/v1/logout")]
+    Task<ApiResponse<PayloadRequest>> LogoutAsync(
+        [Body] PayloadRequest request,
+        [Header("Language")] string language);
+
     /// <summary>Register API</summary>
     [Post("/v1/user/register")]
     Task<ApiResponse<PayloadRequest>> RegisterAsync(
