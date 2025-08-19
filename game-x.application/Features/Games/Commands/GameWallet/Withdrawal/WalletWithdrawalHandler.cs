@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnGame598TransactionSuccess;
 using game_x.application.Events.OnUserBalanceChanged;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
@@ -61,19 +62,22 @@ public sealed class WalletWithdrawalHandler(
                 sno,
                 command.Amount,
                 GamePlatform.G598,
-                GameTransactionType.Withdrawal);
+                GameTransactionType.Withdrawal,
+                token.Id);
 
             await gameTransactionRepo.AddAsync(gameTransaction, ct);
             userBalance.AdjustAmount(command.Amount, true);
             await userBalanceRepo.PutUpdateAsync(userBalance, ct);
             await unitOfWork.SaveChangesAsync(ct);
+
+            await eventDispatcher.Publish(new OnGame598TransactionCreatedEvent(gameTransaction, token), ct);
+
         }
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to create local transaction. Game provider withdrawal may need manual rollback. SNO: {sno}", ex);
         }
 
-        // Trigger event to send wallets data
         await eventDispatcher.Publish(new OnUserBalanceChangedEvent(userBalance), ct);
 
         return Unit.Value;

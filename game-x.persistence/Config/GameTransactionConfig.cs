@@ -45,9 +45,18 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
             .HasMaxLength(4000)
             .HasDefaultValue(string.Empty);
 
+        builder.Property(gt => gt.CryptoTokenId)
+            .HasColumnName("crypto_token_id");
+
         builder.HasOne(gt => gt.User)
             .WithMany(u => u.GameTransactions)
             .HasForeignKey(gt => gt.UserId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(x => x.CryptoToken)
+            .WithMany()
+            .HasForeignKey(x => x.CryptoTokenId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
     }
 }

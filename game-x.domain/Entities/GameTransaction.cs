@@ -10,13 +10,15 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
     public decimal Amount { get; private set; }
     public GamePlatform GamePlatform { get; private set; }
     public string? Note { get; private set; } = string.Empty;
-
+    public int? CryptoTokenId { get; private set; }
+    public CryptoToken CryptoToken { get; set; } = null!;
     public static GameTransaction Create(
         string userId,
         string g598sno,
         decimal amount,
         GamePlatform gamePlatform,
         GameTransactionType type,
+        int? cryptoTokenId,
         string? note = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
@@ -31,6 +33,7 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
             Amount = amount,
             GamePlatform = gamePlatform,
             Type = type,
+            CryptoTokenId = cryptoTokenId,
             Note = note
         };
     }
