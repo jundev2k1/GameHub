@@ -78,6 +78,10 @@ public sealed class AuthGateMiddleware : IAuthorizationMiddlewareResultHandler
         if (jwtId.IsNullOrWhiteSpace())
             return false;
 
+        // Check if the token is expired
+        if (tokenPayload.IsExpired)
+            return false;
+
         // Check if the token is linked to a valid refresh token
         var refreshTokenManager = context.RequestServices.GetRequiredService<IRefreshTokenManagerCacheService>();
         var tokenLinked = refreshTokenManager.GetTokenByJwtId(userId, jwtId!);
