@@ -34,7 +34,7 @@ public sealed class UserLoginHandler(
         CreateRefreshToken(loginUser.Id, refreshToken, tokenInfo.JwtId);
         RevokeAllTokenSameDevice(loginUser.Id, refreshToken.Token);
 
-        _ = eventDispatcher.Publish(new OnUserLoginEvent(loginUser.Id), ct);
+        await eventDispatcher.Publish(new OnUserLoginEvent(loginUser.Id), ct);
 
         return new UserLoginResult(
             Email: loginUser.Email!,
