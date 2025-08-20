@@ -64,7 +64,7 @@ public sealed class UserUsdtLedgerService
             ChangeAmount = changeAmount,
             BalanceAfter = previousBalance + changeAmount,
             GameTransactionId = transaction.Id,
-            Type = LedgerType.GameProvider,
+            Type = LedgerType.G598SnoGameProvider,
             MetaObject = new UserUsdtLedgerMeta
             {
                 CounterpartyUserId = null,

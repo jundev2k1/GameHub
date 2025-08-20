@@ -10,8 +10,11 @@ public class UserUsdtLedgerConfig : IEntityTypeConfiguration<UserUsdtLedger>
 
         builder.HasKey(x => x.Id);
 
+        // Indexes
         builder.HasIndex(x => x.PublicId).IsUnique();
-
+        builder.HasIndex(x => new { x.UserId, x.Type, x.Timestamp });
+        builder.HasIndex(x => x.GameTransactionId);
+        
         builder.Property(x => x.PublicId)
             .HasColumnName("public_id")
             .IsRequired()
@@ -52,13 +55,11 @@ public class UserUsdtLedgerConfig : IEntityTypeConfiguration<UserUsdtLedger>
             .HasColumnName("chain_transaction_id")
             .IsRequired(false);
 
-        // NEW: Configuration cho Type field
         builder.Property(x => x.Type)
             .HasColumnName("type")
             .IsRequired()
-            .HasDefaultValue(LedgerType.Uxm); // Default = 1
+            .HasDefaultValue(LedgerType.Uxm);
 
-        // NEW: Configuration cho GameTransactionId field  
         builder.Property(x => x.GameTransactionId)
             .HasColumnName("game_transaction_id")
             .IsRequired(false);
@@ -69,6 +70,7 @@ public class UserUsdtLedgerConfig : IEntityTypeConfiguration<UserUsdtLedger>
             .IsRequired()
             .HasDefaultValue("{}");
 
+        // Relationships
         builder.HasOne(x => x.User)
             .WithMany(u => u.UserUsdtLedgers)
             .HasForeignKey(x => x.UserId)
@@ -78,15 +80,10 @@ public class UserUsdtLedgerConfig : IEntityTypeConfiguration<UserUsdtLedger>
             .WithOne(x => x.Ledger)
             .HasForeignKey<UserUsdtLedger>(x => x.ChainTransactionId)
             .OnDelete(DeleteBehavior.SetNull);
-        
-        // NEW: Relationship với GameTransaction
-        builder.HasOne(x => x.GameTransaction)
-            .WithMany()
-            .HasForeignKey(x => x.GameTransactionId)
-            .OnDelete(DeleteBehavior.SetNull);
 
-        // NEW: Indexes để optimize queries
-        builder.HasIndex(x => new { x.UserId, x.Type, x.Timestamp });
-        builder.HasIndex(x => x.GameTransactionId);
+        builder.HasOne(x => x.GameTransaction)
+            .WithOne(x => x.Ledger)
+            .HasForeignKey<UserUsdtLedger>(x => x.GameTransactionId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
