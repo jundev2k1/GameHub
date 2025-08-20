@@ -11,13 +11,13 @@ namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdt
 
 public sealed class CreateDepositChainTransactionHandler(
     IUxmService uxmService,
-    IChainTransactionRepo chainTransactionRepo,
     IUnitOfWork unitOfWork,
-    IAsymmetricCryptoService asymmetricCryptoService,
     IUserAccessor userAccessor,
     IConfiguration configuration,
-    IAsymmetricKeyCacheService asymmetricKeyCacheService,
-    ICryptoTokenRepo cryptoTokenRepo
+    ICryptoTokenRepo cryptoTokenRepo,
+    IChainTransactionRepo chainTransactionRepo,
+    IAsymmetricCryptoService asymmetricCryptoService,
+    IAsymmetricKeyCacheService asymmetricKeyCacheService
 ) : ICommandHandler<TronUsdtDepositCommand, CreateChainTransactionResponseDto>
 {
     public async Task<CreateChainTransactionResponseDto> Handle(TronUsdtDepositCommand request, CancellationToken ct)
@@ -131,8 +131,6 @@ public sealed class CreateDepositChainTransactionHandler(
             publicId,
             tx =>
             {
-                tx.Status = ChainTransactionStatus.Approved;
-                tx.UpdatedAt = DateTime.UtcNow;
                 tx.OrderUid = result.Data.OrderUid;
                 tx.ToAddress = result.Data.To;
                 tx.Amount = result.Data.Amount;
