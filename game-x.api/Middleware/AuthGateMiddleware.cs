@@ -1,7 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
-using game_x.infrastructure.Security;
 using Microsoft.AspNetCore.Authorization.Policy;
 
 namespace game_x.api.Middleware;
@@ -19,19 +18,19 @@ public sealed class AuthGateMiddleware : IAuthorizationMiddlewareResultHandler
             var isAuthenticated = context.User.Identity?.IsAuthenticated ?? false;
 
             // If the user is authenticated, check if they are blocked or inactive
-            Enum? messageCode = isAuthenticated
+            Exception? ex = isAuthenticated
                 ? await CheckUserStatusAsync(context)
                 : null;
 
             // Next, if the user is blocked or inactive
-            if (messageCode is null)
+            if (ex is null)
             {
                 await next(context);
                 return;
             }
 
             // If the user is blocked or inactive, handle the exception with a specific message code
-            await HandleAuthExceptionAsync(context, new ForbiddenException(messageCode));
+            await HandleAuthExceptionAsync(context, ex);
             return;
         }
 
@@ -49,7 +48,7 @@ public sealed class AuthGateMiddleware : IAuthorizationMiddlewareResultHandler
         }
     }
 
-    private static async Task<Enum?> CheckUserStatusAsync(HttpContext context)
+    private static async Task<Exception?> CheckUserStatusAsync(HttpContext context)
     {
         // Inject the required services
         var userCache = context.RequestServices.GetRequiredService<IUserCacheService>();
@@ -58,13 +57,13 @@ public sealed class AuthGateMiddleware : IAuthorizationMiddlewareResultHandler
         // Check if the user is blocked or inactive
         var userId = userAccessor.GetUserId();
         var isBlocked = await userCache.IsInactiveUser(userId);
-        if (isBlocked) return MessageCode.User.UserDisabled;
+        if (isBlocked) return new ForbiddenException(MessageCode.User.UserDisabled);
 
         var token = context.Request.Headers.Authorization.ToStringOrEmpty();
         if (token.IsNullOrWhiteSpace())
-            return MessageCode.System.InvalidOrMissingToken;
+            return new UnauthorizedException(MessageCode.System.InvalidOrMissingToken);
         if (!IsValidToken(context, userId, token))
-            return MessageCode.System.InvalidOrMissingToken;
+            return new UnauthorizedException(MessageCode.System.InvalidOrMissingToken);
 
         return null;
     }
