@@ -36,7 +36,7 @@ public sealed class ChainTransaction : BaseEntity<int>, IAuditable
         decimal amount,
         int cryptoTokenId,
         ChainTransactionType type,
-        ChainTransactionStatus status,
+        ChainTransactionStatus? status,
         decimal? fee = null,
         string? fromAddress = null,
         string? toAddress = null,
@@ -61,7 +61,7 @@ public sealed class ChainTransaction : BaseEntity<int>, IAuditable
             Amount = amount,
             Fee = fee ?? 0,
             CryptoTokenId = cryptoTokenId,
-            Status = status,
+            Status = status ?? ChainTransactionStatus.Pending,
             Note = note,
         };
         return chainTransaction;

@@ -12,7 +12,7 @@ using game_x.share.ExternalApi.Uxm.Dtos;
 using Microsoft.Extensions.Configuration;
 using Moq;
 
-namespace Test.UnitTests.Application;
+namespace Test.UnitTests.Application.TronUsdtDeposit;
 
 public sealed class TronUsdtDepositHandlerTests
 {
@@ -30,14 +30,14 @@ public sealed class TronUsdtDepositHandlerTests
     public TronUsdtDepositHandlerTests()
     {
         _handler = new CreateDepositChainTransactionHandler(
-            _uxmServiceMock.Object,
-            _chainTransactionRepoMock.Object,
-            _unitOfWorkMock.Object,
-            _asymmetricCryptoServiceMock.Object,
-            _userAccessorMock.Object,
-            _configurationMock.Object,
-            _asymmetricKeyCacheServiceMock.Object,
-            _cryptoTokenRepoMock.Object
+            uxmService: _uxmServiceMock.Object,
+            chainTransactionRepo:  _chainTransactionRepoMock.Object,
+            unitOfWork: _unitOfWorkMock.Object,
+            asymmetricCryptoService: _asymmetricCryptoServiceMock.Object,
+            userAccessor: _userAccessorMock.Object,
+            configuration: _configurationMock.Object,
+            asymmetricKeyCacheService: _asymmetricKeyCacheServiceMock.Object,
+            cryptoTokenRepo: _cryptoTokenRepoMock.Object
         );
     }
 
