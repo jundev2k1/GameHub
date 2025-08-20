@@ -6,6 +6,8 @@ public interface IRefreshTokenManagerCacheService
 {
     IEnumerable<RefreshTokenDto> GetAllTokens();
 
+    IEnumerable<RefreshTokenDto> GetsByUserId(string userId);
+
     RefreshTokenDto GetToken(string userId, string rawToken);
 
     RefreshTokenDto? GetTokenByJwtId(string userId, string jwtId);
