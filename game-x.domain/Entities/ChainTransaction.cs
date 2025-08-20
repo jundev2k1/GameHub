@@ -27,6 +27,7 @@ public sealed class ChainTransaction : BaseEntity<int>, IAuditable
     public DateTime ConfirmedAt { get; set; } = DateTime.UtcNow;
     public ChainTransactionType Type { get; set; }
     public ChainTransactionStatus Status { get; set; } = ChainTransactionStatus.Pending;
+    public UserUsdtLedger? Ledger { get; set; }
     public string Meta { get; set; } = "{}";
     public string? Note { get; set; }
 

@@ -25,7 +25,7 @@ public sealed class OnUserLoginHandler(
         }
         finally
         {
-            await Task.Delay(1000, ct);
+            // await Task.Delay(1000, ct);
             ProcessingUsers.TryRemove(userId, out _);
         }
     }

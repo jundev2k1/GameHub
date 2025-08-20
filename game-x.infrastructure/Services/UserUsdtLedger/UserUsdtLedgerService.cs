@@ -52,19 +52,19 @@ public sealed class UserUsdtLedgerService
             _ => throw new InvalidOperationException($"Unsupported flow type: {flowType}")
         };
 
-        var previousLedger = await userUsdtLedgerRepo.GetLatestLedgerAsync(transaction.UserId!);
+        var previousLedger = await userUsdtLedgerRepo.GetLatestLedgerAsync(transaction.UserId);
         var previousBalance = previousLedger?.BalanceAfter ?? 0;
 
         var ledger = new domain.Entities.UserUsdtLedger
         {
-            UserId = transaction.UserId!,
+            UserId = transaction.UserId,
             Timestamp = transaction.CreatedAt,
             FlowType = flowType,
             SourceId = "",
             ChangeAmount = changeAmount,
             BalanceAfter = previousBalance + changeAmount,
             GameTransactionId = transaction.Id,
-            Type = LedgerType.Game598,
+            Type = LedgerType.GameProvider,
             MetaObject = new UserUsdtLedgerMeta
             {
                 CounterpartyUserId = null,

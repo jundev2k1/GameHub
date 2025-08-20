@@ -16,7 +16,6 @@ public sealed class OnUxmTransactionCallbackHandler(
     IChainTransactionRepo chainTransactionRepo,
     IUserBalanceRepo userBalanceRepo,
     IUserUsdtLedgerService userUsdtLedgerService,
-    IUserUsdtLedgerRepo userUsdtLedgerRepo,
     IUserRepo userRepo,
     INotificationRepo notificationRepo,
     IAdminHubService adminHubService,
@@ -91,14 +90,13 @@ public sealed class OnUxmTransactionCallbackHandler(
         var userId = transaction.UserId;
         if (userId != null)
         {
-            // Send a notification to update the transaction history
-            UserUsdtLedger userLedger = await userUsdtLedgerRepo.GetDetailByTransactionIdAsync(transaction.Id);
             var notification = Notification.Create(
-                NotificationMessageKey.UserLedger_Created,
+                NotificationMessageKey.Transaction_Completed,
                 userId,
-                NotificationType.UserLedger,
+                NotificationType.Transaction,
                 NotificationSeverity.Success,
-                JsonSerializer.Serialize(userLedger.Adapt<UserUsdtLedgerNotificationDto>()));
+                JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
+            
             await notificationRepo.AddNotificationAsync(notification, ct);
                 
             await clientHubService.SendNotificationToMemberAsync(
@@ -111,12 +109,13 @@ public sealed class OnUxmTransactionCallbackHandler(
                     BalanceId: balance.PublicId,
                     Amount: balance.Amount,
                     FrozenAmount: balance.FrozenAmount));
-        
-            await clientHubService.SendLedgerToMemberAsync(
+            
+            await clientHubService.SendTransactionToMemberAsync(
                 userId,
-                new ClientLedgerDto(
-                    LedgerId: userLedger.PublicId,
-                    Status: userLedger.StatusAtEvent));
+                new ClientTransactionDto(
+                    TransactionId: transaction.PublicId,
+                    Status: transaction.Status.ToString().ToLower(),
+                    Type: transaction.Type.ToString().ToLower()));
         }
     }
     

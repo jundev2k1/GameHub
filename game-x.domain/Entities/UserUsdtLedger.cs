@@ -10,20 +10,24 @@ public sealed class UserUsdtLedger : BaseEntity<int>
     public string UserId { get; set; } = null!;
     public User User { get; set; } = null!;
 
-    public DateTime Timestamp { get; set; }      // Time
-    public UsdtFlowType FlowType { get; set; }   // Deposit, Withdrawal, etc.
-    public string SourceId { get; set; } = string.Empty; // Raw Record ID
-    public decimal ChangeAmount { get; set; }    // Current Transaction Amount Change
+    public DateTime Timestamp { get; set; }
+    /// <summary>The transaction type</summary>
+    public UsdtFlowType FlowType { get; set; }
+    /// <summary>Raw Record ID</summary>
+    public string SourceId { get; set; } = string.Empty;
+    /// <summary>Current Transaction Amount Change</summary>
+    public decimal ChangeAmount { get; set; }
+    /// <summary>The user balance after change</summary>
+    public decimal BalanceAfter { get; set; }
+    /// <summary>Status at the time the event takes place</summary>
+    public string? StatusAtEvent { get; set; }
 
-    public decimal BalanceAfter { get; set; }    // balance after change
-    public string? StatusAtEvent { get; set; } // Status at the time the event takes place
-
-    // Associated raw data
+    /// <summary>The chain transaction </summary>
     public int? ChainTransactionId { get; set; }
     public ChainTransaction? ChainTransaction { get; set; }
 
     // NEW: Default = UXM để backward compatibility
-    public LedgerType Type { get; set; } = LedgerType.UXM;
+    public LedgerType Type { get; set; } = LedgerType.Uxm;
 
     // NEW: Game transaction field - nullable
     public int? GameTransactionId { get; set; }
