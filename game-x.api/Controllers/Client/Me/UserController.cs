@@ -1,5 +1,7 @@
 using game_x.application.Exceptions;
+using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.Accounts.User.Commands.UserSelfUpdate;
+using game_x.application.Features.Accounts.User.Queries.GetAllActiveTokens;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 using game_x.application.Features.Accounts.User.Queries.GetSelfVerificationStatusList;
@@ -41,11 +43,26 @@ public sealed class UserController : BaseApiController
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
-    
+
     [HttpGet("balances")]
     public async Task<IActionResult> GetUserBalanceAsync()
     {
         var result = await Mediator.Send(new GetSelfUserBalanceQuery());
         return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpGet("tokens")]
+    public async Task<IActionResult> GetActiveTokensAsync()
+    {
+        var query = new GetAllActiveTokensQuery();
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpDelete("tokens")]
+    public async Task<IActionResult> RevokeTokenAsync(RevokeTokenCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
     }
 }

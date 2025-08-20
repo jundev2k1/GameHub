@@ -4,6 +4,9 @@ public sealed class TimestampInterceptor : ISaveChangesInterceptor
 {
     public Task OnBeforeSaveAsync(GameXContext context, CancellationToken cancellationToken = default)
     {
+        if (context.IsDisableTimestamps)
+            return Task.CompletedTask;
+
         var entities = context.ChangeTracker.Entries<IEntity>()
             .Where(q => q.State == EntityState.Added || q.State == EntityState.Modified);
         foreach (var entry in entities)

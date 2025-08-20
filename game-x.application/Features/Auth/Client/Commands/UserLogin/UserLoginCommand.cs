@@ -7,5 +7,4 @@ public record UserLoginResult(
     string UserId,
     string Nickname,
     string Token,
-    DateTime ExpiresAt,
-    string[] Roles);
+    string RefreshToken);

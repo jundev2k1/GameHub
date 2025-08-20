@@ -1,5 +1,6 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Exceptions;
 using game_x.share.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -49,7 +50,40 @@ public class JwtTokenGenerator(
         return new JwtTokenDto
         {
             Token = new JwtSecurityTokenHandler().WriteToken(token),
-            ExpiresAt = expires
+            ExpiresAt = expires,
+            JwtId = jti
+        };
+    }
+
+    public JwtPayloadDto DecodeToken(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var parameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Value.Key))
+        };
+
+        var principal = handler.ValidateToken(token, parameters, out var validatedToken);
+        if (validatedToken is not JwtSecurityToken jwtToken)
+            throw new BadRequestException(MessageCode.System.InvalidOrMissingToken, "Invalid token");
+
+        var expUnix = long.Parse(jwtToken.Claims.First(x => x.Type == "exp").Value);
+        var expiresAt = DateTimeOffset.FromUnixTimeSeconds(expUnix).UtcDateTime;
+
+        return new JwtPayloadDto
+        {
+            JwtId = jwtToken.Id,
+            Subject = jwtToken.Subject,
+            Issuer = jwtToken.Issuer,
+            Audience = jwtToken.Audiences.FirstOrDefault(),
+            IssuedAt = jwtToken.IssuedAt.ToUniversalTime(),
+            ExpiresAt = expiresAt,
+            IsExpired = DateTime.UtcNow >= expiresAt,
+            Claims = jwtToken.Claims.ToDictionary(c => c.Type, c => (object)c.Value)
         };
     }
 }

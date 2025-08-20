@@ -23,8 +23,4 @@
     <ProjectReference Include="..\game-x.share\game-x.share.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="BackgroundJobs\Jobs\" />
-  </ItemGroup>
-
 </Project>
