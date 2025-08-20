@@ -8,5 +8,13 @@ public interface IUserAccessor
 
     ClaimsPrincipal GetClaimsPrincipal();
 
+    JwtPayloadDto GetTokenInfo();
+
     AppRole GetRoles();
+
+    string GetIpAddress();
+
+    public string GetUserAgent();
+
+    public string GetDeviceInfo();
 }

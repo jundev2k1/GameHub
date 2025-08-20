@@ -7,6 +7,7 @@ using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Jobs;
 using game_x.application.Contract.Polly;
 using game_x.infrastructure.Caching;
 using game_x.infrastructure.Email;
@@ -92,6 +93,11 @@ public static class InfrastructureServicesRegistration
 
     private static IServiceCollection AddBackgroundJobs(this IServiceCollection services)
     {
+        services.Scan(scan => scan.FromApplicationDependencies()
+            .AddClasses(c => c.AssignableTo<IRecurringJob>().Where(t => !t.IsAbstract))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
         return services;
     }
 

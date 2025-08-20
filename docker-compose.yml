@@ -22,13 +22,14 @@ services:
       - JWT_EXPIRED_MINUTES=${JWT_EXPIRED_MINUTES}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
      
+      - RefreshTokenSettings__DurationInMinutes=${REFRESHTOKEN_EXPIRED_MINUTES}
+
       - EngageLab_BaseUrl=${EngageLab_BaseUrl}
       - EngageLab_ApiUser=${EngageLab_ApiUser}
       - EngageLab_ApiKey=${EngageLab_ApiKey}
       - EngageLab_From=${EngageLab_From}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - RecurringJob_DashboardStatisticJob=${RecurringJob_DashboardStatisticJob}
-      - RecurringJob_SessionCleanUpJob=${RecurringJob_SessionCleanUpJob}
+      - RecurringJob_SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
       
       - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
       - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
