@@ -104,6 +104,10 @@ public static class PersistenceServiceRegistration
                     var accessToken = context.Request.Query["access_token"];
                     var path = context.HttpContext.Request.Path;
 
+                    Console.WriteLine("===== SignalR connection with =====");
+                    Console.WriteLine(accessToken);
+                    Console.WriteLine("=============== End ===============");
+
                     // The connection URL is only checked if it is a Hubs-related path
                     bool hasToken = !string.IsNullOrEmpty(accessToken);
                     bool shouldValidPath = path.StartsWithSegments("/hubs");
