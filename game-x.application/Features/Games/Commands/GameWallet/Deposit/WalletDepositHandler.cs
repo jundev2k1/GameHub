@@ -3,7 +3,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.UserUsdtLedger;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnGame598TransactionSuccess;
-using game_x.application.Events.OnUserBalanceChanged;
+using game_x.application.Events.OnUserBalanceChanged.FromGame598;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
 
@@ -78,7 +78,7 @@ public sealed class WalletDepositHandler(
             throw new InvalidOperationException($"Failed to create local transaction. Game provider deposit may need manual rollback. SNO: {sno}", ex);
         }
 
-        await eventDispatcher.Publish(new OnUserBalanceChangedEvent(userBalance), ct);
+        await eventDispatcher.Publish(new OnUserBalanceChangedFromGame598Event(userBalance), ct);
 
         return Unit.Value;
     }

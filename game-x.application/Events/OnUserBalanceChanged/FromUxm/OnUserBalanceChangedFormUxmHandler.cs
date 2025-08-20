@@ -1,24 +1,49 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 
-namespace game_x.application.Events.OnUserBalanceChanged;
+namespace game_x.application.Events.OnUserBalanceChanged.FromUxm;
 
-public sealed class OnUserBalanceChangedHandler(
+public sealed class OnUserBalanceChangedFromUxmHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IGameProviderService gameProviderService,
-    IClientHubService clientHubService) : IApplicationEventHandler<OnUserBalanceChangedEvent>
+    IChainTransactionRepo chainTransactionRepo,
+    IAppLogger<ChainTransaction> logger,
+    IClientHubService clientHubService) : IApplicationEventHandler<OnUserBalanceChangedFromUxmEvent>
 {
-    public async Task Handle(OnUserBalanceChangedEvent @event, CancellationToken ct = default)
+    public async Task Handle(OnUserBalanceChangedFromUxmEvent @event, CancellationToken ct = default)
     {
-        var targetBalance = @event.UserBalance;
-        await unitOfWork.WithTransactionAsync(async () =>
+        try
         {
-            await SendToMember(targetBalance, ct);
-        }, ct);
+            ChainTransaction? transaction =
+                await chainTransactionRepo.GetByOrderNumberAsync(@event.OrderNumber ?? string.Empty, ct);
+
+            if (transaction == null)
+                throw new NotFoundException(MessageCode.Transaction.TradeNotFound,
+                    $"Transaction with order number '{@event.OrderNumber}' not found.");
+
+            // Anti-spam request if the Transaction has already been updated
+            if (transaction.Status == ChainTransactionStatus.Completed)
+                throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
+
+            UserBalance? balance = transaction.User?.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId);
+            if (balance == null)
+                throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+
+            await unitOfWork.WithTransactionAsync(async () =>
+            {
+                await SendToMember(balance, ct);
+            }, ct);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e.Message);
+        }
+
     }
 
     private async Task SendToMember(UserBalance balance, CancellationToken ct)
