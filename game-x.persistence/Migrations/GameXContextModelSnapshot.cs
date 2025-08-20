@@ -1900,6 +1900,7 @@ namespace game_x.persistence.Migrations
                         .HasName("pk_user_usdt_ledgers");
 
                     b.HasIndex("ChainTransactionId")
+                        .IsUnique()
                         .HasDatabaseName("ix_user_usdt_ledgers_chain_transaction_id");
 
                     b.HasIndex("GameTransactionId")
@@ -2015,26 +2016,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("game_x.domain.Entities.GameTransaction", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
-                        .WithMany()
-                        .HasForeignKey("CryptoTokenId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_game_transactions_crypto_tokens_crypto_token_id");
-
-                    b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany("GameTransactions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired()
-                        .HasConstraintName("fk_game_transactions_user_user_id");
-
-                    b.Navigation("CryptoToken");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("game_x.domain.Entities.Conversation", b =>
                 {
                     b.HasOne("game_x.domain.Entities.User", "AssignedAgent")
@@ -2076,6 +2057,26 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Conversation");
 
                     b.Navigation("LastReadMessage");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameTransaction", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
+                        .WithMany()
+                        .HasForeignKey("CryptoTokenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_game_transactions_crypto_tokens_crypto_token_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("GameTransactions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_transactions_user_user_id");
+
+                    b.Navigation("CryptoToken");
 
                     b.Navigation("User");
                 });
@@ -2334,8 +2335,9 @@ namespace game_x.persistence.Migrations
             modelBuilder.Entity("game_x.domain.Entities.UserUsdtLedger", b =>
                 {
                     b.HasOne("game_x.domain.Entities.ChainTransaction", "ChainTransaction")
-                        .WithMany()
-                        .HasForeignKey("ChainTransactionId")
+                        .WithOne("Ledger")
+                        .HasForeignKey("game_x.domain.Entities.UserUsdtLedger", "ChainTransactionId")
+                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_user_usdt_ledgers_chain_transactions_chain_transaction_id");
 
                     b.HasOne("game_x.domain.Entities.GameTransaction", "GameTransaction")
@@ -2355,6 +2357,11 @@ namespace game_x.persistence.Migrations
                     b.Navigation("GameTransaction");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.ChainTransaction", b =>
+                {
+                    b.Navigation("Ledger");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.Conversation", b =>

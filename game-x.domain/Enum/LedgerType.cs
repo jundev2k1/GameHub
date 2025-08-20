@@ -2,6 +2,8 @@ namespace game_x.domain.Enum;
 
 public enum LedgerType
 {
-    UXM = 1,        // Default value for the existing data
-    Game598 = 2
+    /// <summary>The transaction takes place with the Uxm service</summary>
+    Uxm = 1,
+    /// <summary>The transaction takes place with the third-party game provider</summary>
+    GameProvider = 2
 }

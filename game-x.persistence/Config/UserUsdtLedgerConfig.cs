@@ -56,7 +56,7 @@ public class UserUsdtLedgerConfig : IEntityTypeConfiguration<UserUsdtLedger>
         builder.Property(x => x.Type)
             .HasColumnName("type")
             .IsRequired()
-            .HasDefaultValue(LedgerType.UXM); // Default = 1
+            .HasDefaultValue(LedgerType.Uxm); // Default = 1
 
         // NEW: Configuration cho GameTransactionId field  
         builder.Property(x => x.GameTransactionId)
@@ -73,7 +73,12 @@ public class UserUsdtLedgerConfig : IEntityTypeConfiguration<UserUsdtLedger>
             .WithMany(u => u.UserUsdtLedgers)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.SetNull);
-
+        
+        builder.HasOne(x => x.ChainTransaction)
+            .WithOne(x => x.Ledger)
+            .HasForeignKey<UserUsdtLedger>(x => x.ChainTransactionId)
+            .OnDelete(DeleteBehavior.SetNull);
+        
         // NEW: Relationship với GameTransaction
         builder.HasOne(x => x.GameTransaction)
             .WithMany()

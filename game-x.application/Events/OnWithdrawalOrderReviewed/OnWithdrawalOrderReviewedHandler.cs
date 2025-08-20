@@ -37,8 +37,8 @@ public sealed class OnWithdrawalOrderReviewedHandler(
                 transaction.UserId,
                 new ClientTransactionDto(
                     TransactionId: transaction.PublicId,
-                    Status: transaction.Status.ToString(),
-                    Type: transaction.Type.ToString()));
+                    Status: transaction.Status.ToString().ToLower(),
+                    Type: transaction.Type.ToString().ToLower()));
             
             UserBalance? balance = transaction.User?.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId);
             if (balance != null)

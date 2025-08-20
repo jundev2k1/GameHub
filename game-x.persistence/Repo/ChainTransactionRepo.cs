@@ -41,6 +41,37 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
             pageSize);
     }
 
+    public async Task<PaginationResult<ChainTransaction>> GetMyTransactionsAsync(
+        string userId,
+        Func<IQueryable<ChainTransaction>, IQueryable<ChainTransaction>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.ChainTransactions
+            .AsNoTracking()
+            .Include(x => x.CryptoToken)
+            .Include(x => x.Ledger)
+            .Where(x => x.UserId == userId)
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<ChainTransaction>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
+    
     public async Task<PaginationResult<ChainTransaction>> GetOngoingTransactionCriteriaByUserAsync(
         string userId,
         Func<IQueryable<ChainTransaction>, IQueryable<ChainTransaction>>? queryBuilder = null,
@@ -78,8 +109,21 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
             .Include(t => t.User!)
                 .ThenInclude(u => u.UserBalances)
             .Include(t => t.CryptoToken)
+            .Include(t => t.Ledger)
             .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
             ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
+    }
+    
+    public async Task<ChainTransaction> GetByIdAndUserIdAsync(string userId, Guid publicId, CancellationToken ct = default)
+    {
+        return await context.ChainTransactions
+                   .AsNoTracking()
+                   .Include(t => t.User!)
+                   .ThenInclude(u => u.UserBalances)
+                   .Include(t => t.CryptoToken)
+                   .Include(t => t.Ledger)
+                   .FirstOrDefaultAsync(x => x.PublicId == publicId && x.UserId == userId, ct)
+               ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
     
     public async Task<ChainTransaction> GetOngoingTransactionDetailByUserAsync(string userId, Guid publicId, CancellationToken ct = default)
@@ -104,6 +148,7 @@ public sealed class ChainTransactionRepo(GameXContext context) : IChainTransacti
             .Include(t => t.User!)
                 .ThenInclude(u => u.UserBalances)
             .Include(t => t.CryptoToken)
+            .Include(t => t.Ledger)
             .FirstOrDefaultAsync(x => x.OrderNumber == orderNumber, ct);
     }
 
