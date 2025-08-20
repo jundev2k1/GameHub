@@ -16,9 +16,8 @@ public sealed class RefreshTokenHandler(
 {
     public async Task<RefreshTokenResult> Handle(RefreshTokenCommand request, CancellationToken ct = default)
     {
-        var userId = userAccessor.GetUserId();
         var tokenInfo = tokenGenerator.DecodeToken(request.AccessToken);
-        var currentRefreshToken = refreshTokenManager.GetToken(userId, request.RefreshToken);
+        var currentRefreshToken = refreshTokenManager.GetToken(tokenInfo.Subject!, request.RefreshToken);
 
         var isValid = IsValidToken(tokenInfo, currentRefreshToken);
         if (!isValid) throw new BadRequestException(MessageCode.System.InvalidOrMissingToken);
