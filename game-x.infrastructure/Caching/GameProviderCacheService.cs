@@ -7,13 +7,25 @@ public sealed class GameProviderCacheService(IMemoryCache cache) : CacheService(
 {
     private readonly string _prefixCache = "external:game-provider:";
 
-    public string Language
+    public string GetLanguage(string account)
     {
-        get { return Get<string>($"{_prefixCache}:language") ?? "zh-Hant"; }
-        set
-        {
-            var lang = (value != "zh-Hant" || value != "zh-Hants") ? value : "zh-Hant";
-            Set($"{_prefixCache}:language", lang);
-        }
+        var language = Get<string>($"{_prefixCache}:{account}:language") ?? "zh-Hant";
+        return language;
+    }
+
+    public void SetLanguage(string account, string language)
+    {
+        Set($"{_prefixCache}:{account}:language", language);
+    }
+
+    public bool GetIsLoggedIn(string account)
+    {
+        var isLoggedIn = Get<bool>($"{_prefixCache}:{account}:is-logged-in");
+        return isLoggedIn;
+    }
+
+    public void SetIsLoggedIn(string account, bool isLoggedIn)
+    {
+        Set($"{_prefixCache}:{account}:is-logged-in", isLoggedIn);
     }
 }

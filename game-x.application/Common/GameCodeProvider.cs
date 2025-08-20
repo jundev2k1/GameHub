@@ -2,31 +2,31 @@ namespace game_x.application.Common;
 
 public static class GameCodeProvider
 {
-    public record GameCodeDto(string GameCode, string Name, string Category, string Icon, string Provider, int Priority);
+    public record GameCodeDto(string Category, string GameType, string GamePlatform, string GameName, string GameCode, int Priority);
 
     private static readonly List<GameCodeDto> _gameCodes =
     [
-        new(GameCode.KRF3,   "韓國快3",       "Fast3",  "🎲",  "G598", 1),
-        new(GameCode.ESF3,   "極速快3",       "Fast3",  "⚡",  "G598", 2),
-        new(GameCode.ALPK10, "澳洲幸運10",     "PK10",   "🍀",  "G598", 1),
-        new(GameCode.ESPK10, "極速賽車",       "PK10",   "🏎️", "G598", 2),
-        new(GameCode.LBPK10, "幸運飛艇",       "PK10",   "🚁", "G598", 3),
-        new(GameCode.EBPK10, "極速飛艇",       "PK10",   "✈️", "G598", 4),
-        new(GameCode.ANPK6,  "動物運動會",     "Animal", "🐾", "G598", 1),
-        new(GameCode.M3ANPK6,"三分動物運動會", "Animal", "🦁", "G598", 2),
-        new(GameCode.ESSSC,  "極速時時彩",     "SSC",    "⏰", "G598", 1),
-        new(GameCode.ALSSC,  "澳洲幸運5",     "SSC",    "🎯", "G598", 2),
-        new(GameCode.LBSSC,  "幸運時時彩",     "SSC",    "🎰", "G598", 3),
-        new(GameCode.HKM6,   "香港六合彩",     "MarkSix","🇭🇰", "G598", 1),
-        new(GameCode.MCM6,   "澳門六合彩",     "MarkSix","🇲🇴", "G598", 2),
-        new(GameCode.NMCM6,  "新澳門六合彩",   "MarkSix","🆕", "G598", 3),
-        new(GameCode.TWM6,   "台灣大樂透",     "MarkSix","🇹🇼", "G598", 4),
-        new(GameCode.HKDM6,  "香港日日六合彩", "MarkSix","📅", "G598", 5),
-        new(GameCode.FCD3,   "福彩3D",        "Lottery","🎫", "G598", 1),
-        new(GameCode.PLD3,   "體彩排列3",     "Lottery","🏆", "G598", 2),
-        new(GameCode.ALEGG,  "PC蛋蛋",        "Special","🥚", "G598", 1),
-        new(GameCode.AL10FT, "澳洲幸運10番攤","FanTan","🎴", "G598", 1),
-        new(GameCode.AL5FT,  "澳洲幸運5番攤", "FanTan","🃏", "G598", 2)
+        new("彩票", "快三",   "598彩票", "韓國快3",       GameCode.KRF3,    1),
+        new("彩票", "快三",   "598彩票", "極速快3",       GameCode.ESF3,    2),
+        new("彩票", "PK10",  "598彩票", "澳洲幸運10",     GameCode.ALPK10,  1),
+        new("彩票", "PK10",  "598彩票", "極速賽車",       GameCode.ESPK10,  1),
+        new("彩票", "PK10",  "598彩票", "幸運飛艇",       GameCode.LBPK10,  1),
+        new("彩票", "PK10",  "598彩票", "極速飛艇",       GameCode.EBPK10,  1),
+        new("彩票", "PK6",   "598彩票", "動物運動會",     GameCode.ANPK6,   1),
+        new("彩票", "PK6",   "598彩票", "三分動物運動會", GameCode.M3ANPK6, 1),
+        new("彩票", "時時彩","598彩票", "極速時時彩",     GameCode.ESSSC,   1),
+        new("彩票", "時時彩","598彩票", "澳洲幸運5",      GameCode.ALSSC,   1),
+        new("彩票", "時時彩","598彩票", "幸運時時彩",     GameCode.LBSSC,   1),
+        new("彩票", "六合彩", "598彩票", "香港六合彩",     GameCode.HKM6,    1),
+        new("彩票", "六合彩", "598彩票", "澳門六合彩",     GameCode.MCM6,    1),
+        new("彩票", "六合彩", "598彩票", "新澳門六合彩",   GameCode.NMCM6,   1),
+        new("彩票", "六合彩", "598彩票", "台灣大樂透",     GameCode.TWM6,    1),
+        new("彩票", "六合彩", "598彩票", "香港日日六合彩", GameCode.HKDM6,   1),
+        new("彩票", "3D",    "598彩票", "福彩3D",        GameCode.FCD3,    1),
+        new("彩票", "3D",    "598彩票", "體彩排列3",     GameCode.PLD3,    1),
+        new("彩票", "蛋蛋",  "598彩票", "PC蛋蛋",        GameCode.ALEGG,   1),
+        new("彩票", "番攤",  "598彩票", "澳洲幸運10番攤", GameCode.AL10FT,  5),
+        new("彩票", "番攤",  "598彩票", "澳洲幸運5番攤",  GameCode.AL5FT,   5)
     ];
 
     public static List<GameCodeDto> All() => _gameCodes
