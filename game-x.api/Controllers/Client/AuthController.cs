@@ -6,6 +6,7 @@ using game_x.application.Features.Auth.Client.Commands.RegisterUser;
 using game_x.application.Features.Auth.Client.Commands.ResendCodeUser;
 using game_x.application.Features.Auth.Client.Commands.ResetPasswordUser;
 using game_x.application.Features.Auth.Client.Commands.UserLogin;
+using game_x.application.Features.Auth.Client.Commands.UserLogout;
 using game_x.application.Features.Auth.Client.Commands.VerifyEmailForChangePassword;
 using game_x.application.Features.Auth.Client.Commands.VerifyEmailForRegistration;
 using game_x.application.Features.Auth.Client.Commands.VerifyEmailForResetPassword;
@@ -46,6 +47,15 @@ public sealed class AuthController : BaseApiController
     {
         var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result, MessageCode.User.UserResetPasswordSuccess);
+    }
+
+    [Authorize(Roles = AppRoles.User)]
+    [HttpPost("logout")]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        var command = new UserLogoutCommand();
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent(MessageCode.System.LogoutSuccess);
     }
 
     [AllowAnonymous]

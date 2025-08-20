@@ -1,13 +1,15 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
+using game_x.share.Extensions;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace game_x.infrastructure.Security;
 
-public sealed class UserAccessor(IHttpContextAccessor httpContextAccessor)
-    : IUserAccessor, IServices
+public sealed class UserAccessor(
+    IHttpContextAccessor httpContextAccessor,
+    IJwtTokenGenerator tokenGenerator) : IUserAccessor, IServices
 {
     public string GetUserId()
     {
@@ -19,6 +21,16 @@ public sealed class UserAccessor(IHttpContextAccessor httpContextAccessor)
     {
         return httpContextAccessor.HttpContext?.User
             ?? throw new UnauthorizedException("No active user context");
+    }
+
+    public JwtPayloadDto GetTokenInfo()
+    {
+        var token = httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToStringOrEmpty()
+            ?? throw new UnauthorizedException("Not exist token.");
+
+        var rawToken = token.Split(" ")[1];
+        return tokenGenerator.DecodeToken(rawToken)
+            ?? throw new UnauthorizedException("Token is invalid.");
     }
 
     public AppRole GetRoles()
