@@ -122,7 +122,7 @@ public sealed class OnUxmTransactionCallbackHandler(
     private async Task SendToAdmin(ChainTransaction transaction, CancellationToken ct)
     {
         var adminUsers = await userRepo.GetAdminUsers(ct);
-
+        var metadata = JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>());
         foreach (var adminUser in adminUsers)
         { 
             var notification = Notification.Create(
@@ -130,7 +130,7 @@ public sealed class OnUxmTransactionCallbackHandler(
                 adminUser.Id,
                 NotificationType.Transaction,
                 NotificationSeverity.Success,
-                JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
+                metadata);
             await notificationRepo.AddNotificationAsync(notification, ct);
 
             await adminHubService.SendNotificationAsync(
