@@ -2,6 +2,7 @@
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Auth.Dtos;
+using Polly;
 
 namespace game_x.persistence.Repo;
 
@@ -51,6 +52,7 @@ public sealed class RefreshTokenRepo(GameXContext context) : IRefreshTokenRepo, 
         // Get tokens that are needed to be updated
         var updateIds = tokens.Select(rt => rt.PublicId);
         var targetTokens = await context.RefreshTokens
+            .AsNoTracking()
             .Where(rt => updateIds.Contains(rt.PublicId))
             .ToArrayAsync(ct);
         if (targetTokens.Length == 0) return;
@@ -65,6 +67,7 @@ public sealed class RefreshTokenRepo(GameXContext context) : IRefreshTokenRepo, 
         }
 
         // Perform bulk update
+        context.IsDisableTimestamps = true;
         await context.BulkUpdateAsync(targetTokens, new BulkConfig
         {
             UpdateByProperties = [nameof(RefreshToken.PublicId)],
@@ -73,5 +76,6 @@ public sealed class RefreshTokenRepo(GameXContext context) : IRefreshTokenRepo, 
                 nameof(RefreshToken.ReplacedByToken)
             ]
         }, cancellationToken: ct);
+        context.IsDisableTimestamps = false;
     }
 }

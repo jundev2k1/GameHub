@@ -18,7 +18,7 @@ public sealed class SyncRefreshTokenJob(
     public bool IsInit => false;
 
     /// <summary>Maximum number of records allowed to be processed per transaction</summary>
-    private const int LimitRangeCount = 1;
+    private const int LimitRangeCount = 1000;
 
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
@@ -47,21 +47,25 @@ public sealed class SyncRefreshTokenJob(
         var batches = newItems.Chunk(LimitRangeCount);
         foreach (var batch in batches)
         {
-            var newTokens = batch
-                .Select(CreateEntity)
-                .ToArray();
-
-            unitOfWork.SetIsDisableTimeStamps(true);
-            await unitOfWork.WithTransactionAsync(async () =>
+            try
             {
-                await refreshTokenRepo.AddRangeAsync(newTokens, ct);
-            }, ct);
+                var newTokens = batch
+                    .Select(CreateEntity)
+                    .ToArray();
 
-            // Mark tokens as synced after saving
-            var updateIds = newTokens
-                .Select(t => t.PublicId)
-                .ToArray();
-            refreshTokenManager.UpdateAfterSync(updateIds);
+                unitOfWork.SetIsDisableTimeStamps(true);
+                await unitOfWork.WithTransactionAsync(async () =>
+                {
+                    await refreshTokenRepo.AddRangeAsync(newTokens, ct);
+                }, ct);
+
+                // Mark tokens as synced after saving
+                var updateIds = newTokens
+                    .Select(t => t.PublicId)
+                    .ToArray();
+                refreshTokenManager.UpdateAfterSync(updateIds);
+            }
+            catch { }
         }
     }
 
@@ -70,17 +74,17 @@ public sealed class SyncRefreshTokenJob(
         var batches = updateItems.Chunk(LimitRangeCount);
         foreach (var batch in batches)
         {
-            unitOfWork.SetIsDisableTimeStamps(true);
-            await unitOfWork.WithTransactionAsync(async () =>
+            try
             {
                 await refreshTokenRepo.SyncRefreshTokensAsync(batch, ct);
-            }, ct);
 
-            // Mark tokens as synced after saving
-            var updateIds = batch
-                .Select(t => t.PublicId)
-                .ToArray();
-            refreshTokenManager.UpdateAfterSync(updateIds);
+                // Mark tokens as synced after saving
+                var updateIds = batch
+                    .Select(t => t.PublicId)
+                    .ToArray();
+                refreshTokenManager.UpdateAfterSync(updateIds);
+            }
+            catch { }
         }
     }
 
