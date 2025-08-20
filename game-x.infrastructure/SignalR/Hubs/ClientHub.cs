@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Polly;
 
 namespace game_x.infrastructure.SignalR.Hubs;
 
@@ -31,8 +32,7 @@ public interface IClientHub
 [Authorize(Roles = AppRoles.User)]
 public sealed class ClientHub(
     ISender sender,
-    ILogger<ClientHub> logger,
-    IUserAccessor userAccessor) : Hub<IClientHub>
+    ILogger<ClientHub> logger) : Hub<IClientHub>
 {
     public const string Path = "/hubs/client-service";
 
@@ -54,14 +54,14 @@ public sealed class ClientHub(
 
     public async Task MarkNotificationAsRead(Guid notificationId)
     {
-        var adminUserId = userAccessor.GetUserId();
+        var adminUserId = Context.UserIdentifier!;
         var command = new MarkAsReadCommand(notificationId, adminUserId);
         await sender.Send(command);
     }
 
     public async Task MarkAllNotificationsAsRead()
     {
-        var adminUserId = userAccessor.GetUserId();
+        var adminUserId = Context.UserIdentifier!;
         var command = new MarkAllAsReadCommand(adminUserId);
         await sender.Send(command);
     }
