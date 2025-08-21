@@ -39,7 +39,7 @@ public sealed class UserLoginHandler(
             Email: loginUser.Email!,
             UserId: loginUser.Id,
             Nickname: loginUser.Nickname,
-            Token: tokenInfo.Token,
+            AccessToken: tokenInfo.Token,
             RefreshToken: refreshToken.Token);
     }
 

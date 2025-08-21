@@ -66,7 +66,7 @@ public sealed class UserLoginHandlerTests
         // Assert
         result.Email.Should().Be(user.Email);
         result.UserId.Should().Be(user.Id);
-        result.Token.Should().Be(tokenInfo.Token);
+        result.AccessToken.Should().Be(tokenInfo.Token);
     }
 
     [Theory]

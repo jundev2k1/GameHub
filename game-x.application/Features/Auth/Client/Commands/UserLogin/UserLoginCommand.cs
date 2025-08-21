@@ -6,5 +6,5 @@ public record UserLoginResult(
     string Email,
     string UserId,
     string Nickname,
-    string Token,
+    string AccessToken,
     string RefreshToken);
