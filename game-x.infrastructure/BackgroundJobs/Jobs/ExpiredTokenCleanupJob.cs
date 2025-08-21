@@ -17,7 +17,7 @@ public sealed class ExpiredTokenCleanupJob(
     public bool IsInit => false;
 
     /// <summary>Maximum number of records allowed to be processed per transaction</summary>
-    private const int DayOverdueCount = 3;
+    private const int DayOverdueCount = 15;
 
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
@@ -29,6 +29,7 @@ public sealed class ExpiredTokenCleanupJob(
             {
                 var refreshTokenIds = await dbContext.RefreshTokens
                     .Where(rt => rt.ExpiresAt < expiredDate)
+                    .Take(500)
                     .Select(rt => rt.PublicId)
                     .ToArrayAsync(ct);
                 if (refreshTokenIds.Length == 0)
