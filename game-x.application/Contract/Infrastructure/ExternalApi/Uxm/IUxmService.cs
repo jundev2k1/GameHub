@@ -6,7 +6,7 @@ namespace game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 public interface IUxmService
 {
     Task<SecureResponse<UxmDepositOrderResponseData>> CreateDepositOrderAsync(
-        SecureRequest<UxmDepositOrderRequestData> data);
+        SecureRequest<UxmDepositOrderRequest> data);
 
     Task<SecureResponse<UxmWithdrawalOrderResponseData>> CreateWithdrawalOrderAsync(
         SecureRequest<UxmWithdrawalOrderRequest> data);

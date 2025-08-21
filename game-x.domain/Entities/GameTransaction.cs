@@ -5,13 +5,15 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
     public Guid PublicId { get; private set; } = Guid.NewGuid();
     public string G598Sno { get; private set; } = string.Empty;
     public string UserId { get; private set; } = string.Empty;
-    public User User { get; private set; } = default!;
+    public User User { get; private set; } = null!;
     public GameTransactionType Type { get; private set; }
+    public GameTransactionStatus Status { get; set; } = GameTransactionStatus.Pending;
     public decimal Amount { get; private set; }
     public GamePlatform GamePlatform { get; private set; }
     public string? Note { get; private set; } = string.Empty;
     public int? CryptoTokenId { get; private set; }
-    public CryptoToken CryptoToken { get; set; } = null!;
+    public CryptoToken? CryptoToken { get; set; }
+    public UserUsdtLedger? Ledger { get; set; }
     public static GameTransaction Create(
         string userId,
         string g598sno,
@@ -31,6 +33,7 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
             UserId = userId,
             G598Sno = g598sno,
             Amount = amount,
+            Status = GameTransactionStatus.Pending,
             GamePlatform = gamePlatform,
             Type = type,
             CryptoTokenId = cryptoTokenId,
