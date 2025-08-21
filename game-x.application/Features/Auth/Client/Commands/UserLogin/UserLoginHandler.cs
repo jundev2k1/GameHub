@@ -3,7 +3,6 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Events.OnUserLogin;
 using game_x.application.Features.Auth.Dtos;
-using game_x.share.Extensions;
 using game_x.share.Helper;
 using RefreshTokenEntity = game_x.domain.Entities.RefreshToken;
 
@@ -32,7 +31,7 @@ public sealed class UserLoginHandler(
         var tokenInfo = await jwtTokenGenerator.GenerateToken(loginUser);
         var refreshToken = tokenService.GenerateRefreshToken(loginUser.Id);
         CreateRefreshToken(loginUser.Id, refreshToken, tokenInfo.JwtId);
-        RevokeAllTokenSameDevice(loginUser.Id, refreshToken.Token);
+        refreshTokenManager.RevokeAllTokenSameDevice(loginUser.Id, refreshToken.Token);
 
         await eventDispatcher.Publish(new OnUserLoginEvent(loginUser.Id), ct);
 
@@ -55,22 +54,5 @@ public sealed class UserLoginHandler(
             userAccessor.GetUserAgent(),
             deviceInfo: userAccessor.GetDeviceInfo());
         refreshTokenManager.InsertNewToken(token.Adapt<RefreshTokenDto>());
-    }
-
-    private void RevokeAllTokenSameDevice(string userId, string newToken)
-    {
-        var ipAddress = userAccessor.GetIpAddress();
-        var deviceInfo = userAccessor.GetDeviceInfo();
-        var hashToken = HashHelper.Sha256(newToken);
-        var sameDeviceTokenIds = refreshTokenManager.GetsByUserId(userId)
-            .Where(rt => !rt.IsRevoked
-                && !rt.IsExpired
-                && rt.IpAddress.Equals(ipAddress, StringComparison.InvariantCultureIgnoreCase)
-                && rt.DeviceInfo.ToStringOrEmpty().Equals(deviceInfo, StringComparison.InvariantCultureIgnoreCase)
-                && rt.TokenHash != hashToken)
-            .Select(rt => rt.TokenHash)
-            .ToList();
-        sameDeviceTokenIds.ForEach(
-            token => refreshTokenManager.RevokeToken(userId, token));
     }
 }

@@ -2,4 +2,4 @@
 
 public record CsLoginCommand(string UserName, string Password) : ICommand<CsLoginResult>;
 
-public record CsLoginResult(string UserName, string UserId, string Token, DateTime ExpiresAt, string[] Roles);
+public record CsLoginResult(string UserId, string Username, string AccessToken, string RefreshToken);

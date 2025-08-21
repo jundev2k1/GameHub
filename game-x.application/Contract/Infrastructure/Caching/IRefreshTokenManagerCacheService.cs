@@ -20,6 +20,8 @@ public interface IRefreshTokenManagerCacheService
     void RevokeToken(string userId, Guid id);
     void RevokeToken(RefreshTokenDto token);
 
+    void RevokeAllTokenSameDevice(string userId, string token);
+
     void UpdateAfterSync(Guid[] tokens);
 
     void RemoveExpiredTokens();

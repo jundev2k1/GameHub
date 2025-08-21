@@ -1,4 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Auth.Dtos;
@@ -9,6 +10,7 @@ namespace game_x.infrastructure.Caching;
 
 public sealed class RefreshTokenManagerCacheService(
     IMemoryCache cache,
+    IUserAccessor userAccessor,
     IRefreshTokenRepo refreshTokenRepo) : CacheService(cache), IRefreshTokenManagerCacheService
 {
     private const string CacheKeyPrefix = "RefreshTokenManager";
@@ -141,6 +143,23 @@ public sealed class RefreshTokenManagerCacheService(
         // Set the updated token back to cache
         var cacheKey = $"{CacheKeyPrefix}:{token.UserId}:{token.PublicId}";
         SetNewValue(cacheKey, token);
+    }
+
+    public void RevokeAllTokenSameDevice(string userId, string token)
+    {
+        var ipAddress = userAccessor.GetIpAddress();
+        var deviceInfo = UserAgentHelper.GetDeviceKey(userAccessor.GetUserAgent());
+        var hashToken = HashHelper.Sha256(token);
+        var sameDeviceTokenIds = GetsByUserId(userId)
+            .Where(rt => !rt.IsRevoked
+                && !rt.IsExpired
+                && rt.IpAddress.Equals(ipAddress, StringComparison.InvariantCultureIgnoreCase)
+                && UserAgentHelper.GetDeviceKey(rt.UserAgent) == deviceInfo
+                && rt.TokenHash != hashToken)
+            .Select(rt => rt.TokenHash)
+            .ToList();
+        sameDeviceTokenIds.ForEach(
+            token => RevokeToken(userId, token));
     }
 
     public void ReplaceToken(string userId, string oldTokenHash, string newTokenHash)
