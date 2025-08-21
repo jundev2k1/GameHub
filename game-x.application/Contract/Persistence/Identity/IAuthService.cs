@@ -2,7 +2,7 @@
 
 public interface IAuthService
 {
-    Task<User> TryLoginAsync(string userName, string password, bool rememberMe = false, bool shouldLockout = true);
+    Task<User> TryLoginAsync(string userName, string password, bool shouldLockout = true);
 
     Task<AppRole> GetRolesAsync(User user);
 

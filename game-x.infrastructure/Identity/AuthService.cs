@@ -13,13 +13,12 @@ public sealed class AuthService(
     public async Task<User> TryLoginAsync(
         string userName,
         string password,
-        bool rememberMe = false,
         bool shouldLockout = true)
     {
         var targetUser = await userManager.FindByNameAsync(userName) 
             ?? throw new BadRequestException(MessageCode.User.UserInvalidCredentials, $"Username ({userName}) is not found.");
         
-        var loginResult = await signInManager.PasswordSignInAsync(userName, password, rememberMe, shouldLockout);
+        var loginResult = await signInManager.CheckPasswordSignInAsync(targetUser, password, shouldLockout);
         if (loginResult.IsLockedOut)
         {
             var errorDetail = new { lockoutEnd = targetUser.LockoutEnd };
@@ -44,11 +43,8 @@ public sealed class AuthService(
     public async Task<bool> IsValidPasswordAsync(User user, string rawPassword, CancellationToken ct = default)
         => await userManager.CheckPasswordAsync(user, rawPassword);
 
-    public async Task<string> GeneratePasswordResetTokenAsync(User user)
-    {
-        var result = await userManager.GeneratePasswordResetTokenAsync(user);
-        return result;
-    }
+    public Task<string> GeneratePasswordResetTokenAsync(User user)
+        => userManager.GeneratePasswordResetTokenAsync(user);
 
     public async Task ResetPasswordAsync(User user, string token, string newPassword, CancellationToken ct = default)
     {

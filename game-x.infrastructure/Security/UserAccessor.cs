@@ -2,17 +2,25 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
 using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace game_x.infrastructure.Security;
 
-public sealed class UserAccessor(IHttpContextAccessor httpContextAccessor)
-    : IUserAccessor, IServices
+public sealed class UserAccessor(
+    IHttpContextAccessor httpContextAccessor,
+    IJwtTokenGenerator tokenGenerator) : IUserAccessor, IServices
 {
     public string GetUserId()
     {
         return httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
             ?? throw new UnauthorizedException("No user found");
+    }
+
+    public string GetJwtId()
+    {
+        return httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Jti)
+            ?? throw new UnauthorizedException("No active user context");
     }
 
     public ClaimsPrincipal GetClaimsPrincipal()
@@ -28,5 +36,27 @@ public sealed class UserAccessor(IHttpContextAccessor httpContextAccessor)
             .Select(r => r.Value)
             .ToList() ?? [];
         return AppRole.Of(roles);
+    }
+
+    public string GetIpAddress()
+    {
+        var ip = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+        if (string.IsNullOrWhiteSpace(ip))
+            ip = httpContextAccessor.HttpContext?.Request?.Headers["X-Forwarded-For"].FirstOrDefault();
+        return ip ?? "unknown";
+    }
+
+    public string GetUserAgent()
+    {
+        return httpContextAccessor.HttpContext?.Request?.Headers.UserAgent.ToString() ?? "unknown";
+    }
+
+    public string GetDeviceInfo()
+    {
+        var userAgent = GetUserAgent();
+        if (userAgent.Contains("Mobile", StringComparison.OrdinalIgnoreCase)) return "Mobile";
+        if (userAgent.Contains("Windows", StringComparison.OrdinalIgnoreCase)) return "Windows PC";
+        if (userAgent.Contains("Macintosh", StringComparison.OrdinalIgnoreCase)) return "MacOS";
+        return "Other";
     }
 }

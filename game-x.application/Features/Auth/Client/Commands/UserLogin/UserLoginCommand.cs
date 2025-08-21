@@ -6,6 +6,5 @@ public record UserLoginResult(
     string Email,
     string UserId,
     string Nickname,
-    string Token,
-    DateTime ExpiresAt,
-    string[] Roles);
+    string AccessToken,
+    string RefreshToken);

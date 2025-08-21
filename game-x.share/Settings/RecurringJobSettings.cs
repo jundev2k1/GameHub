@@ -2,4 +2,5 @@
 
 public sealed class RecurringJobSettings : BaseSettings
 {
+    public string SyncRefreshTokenJob { get; set; } = string.Empty;
 }

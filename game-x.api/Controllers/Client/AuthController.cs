@@ -1,6 +1,7 @@
 using game_x.api.Dtos;
 using game_x.api.Enums;
 using game_x.application.Exceptions;
+using game_x.application.Features.Auth.Client.Commands.RefreshToken;
 using game_x.application.Features.Auth.Client.Commands.RegisterUser;
 using game_x.application.Features.Auth.Client.Commands.ResendCodeUser;
 using game_x.application.Features.Auth.Client.Commands.ResetPasswordUser;
@@ -8,6 +9,7 @@ using game_x.application.Features.Auth.Client.Commands.UserLogin;
 using game_x.application.Features.Auth.Client.Commands.VerifyEmailForChangePassword;
 using game_x.application.Features.Auth.Client.Commands.VerifyEmailForRegistration;
 using game_x.application.Features.Auth.Client.Commands.VerifyEmailForResetPassword;
+using game_x.application.Features.Auth.Shared.Commands.Logout;
 using game_x.application.Services.Verification;
 
 namespace game_x.api.Controllers.Client;
@@ -32,11 +34,28 @@ public sealed class AuthController : BaseApiController
     }
 
     [AllowAnonymous]
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshTokenAsync(RefreshTokenCommand command)
+    {
+        var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPasswordAsync(ResetPasswordUserCommand command)
     {
         var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result, MessageCode.User.UserResetPasswordSuccess);
+    }
+
+    [Authorize(Roles = AppRoles.User)]
+    [HttpPost("logout")]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        var command = new LogoutCommand();
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent(MessageCode.System.LogoutSuccess);
     }
 
     [AllowAnonymous]

@@ -2,4 +2,4 @@
 
 public record RootLoginCommand(string UserName, string Password) : ICommand<RootLoginResult>;
 
-public record RootLoginResult(string Token);
+public record RootLoginResult(string AccessToken, string RefreshToken);

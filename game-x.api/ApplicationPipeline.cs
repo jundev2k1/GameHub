@@ -13,6 +13,7 @@ public static class ApplicationPipeline
     {
         app.UseSwaggerApiDoc();
         app.UseMiddlewares();
+        app.UseRouting();
         app.UseCors("AllowSpecificOrigin");
         app.MapHealthChecks("/healthz");
         app.UseAuthentication();

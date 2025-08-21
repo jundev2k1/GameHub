@@ -36,6 +36,7 @@ public sealed class GameXContext(
     public DbSet<Conversation> Conversations { get; set; }
     public DbSet<ConversationMember> ConversationMembers { get; set; }
     public DbSet<Message> Messages { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -68,4 +69,5 @@ public sealed class GameXContext(
     }
 
     public bool IsAuditSaveInProgress { get; set; } = false;
+    public bool IsDisableTimestamps { get; set; } = false;
 }

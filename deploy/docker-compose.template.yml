@@ -21,6 +21,8 @@ services:
       - JwtSettings__Provider=${JWT_PROVIDER}
       - JwtSettings__Version=${JWT_VERSION}
 
+      - RefreshTokenSettings__DurationInMinutes=${REFRESHTOKEN_EXPIRED_MINUTES}
+
       - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
 
       - UxmSettings__Host=${UXM_HOST}

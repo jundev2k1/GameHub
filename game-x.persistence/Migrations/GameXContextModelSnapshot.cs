@@ -1193,6 +1193,103 @@ namespace game_x.persistence.Migrations
                     b.ToTable("notifications", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("DeviceInfo")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasDefaultValue("")
+                        .HasColumnName("device_info");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)")
+                        .HasDefaultValue("")
+                        .HasColumnName("ip_address");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("jwt_id");
+
+                    b.Property<string>("Location")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasDefaultValue("")
+                        .HasColumnName("location");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("ReplacedByToken")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("replaced_by_token");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(88)
+                        .HasColumnType("character varying(88)")
+                        .HasColumnName("token_hash");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasDefaultValue("")
+                        .HasColumnName("user_agent");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_refresh_tokens");
+
+                    b.HasIndex("JwtId")
+                        .HasDatabaseName("ix_refresh_tokens_jwt_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_refresh_tokens_public_id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_refresh_tokens_token_hash");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_refresh_tokens_user_id");
+
+                    b.ToTable("refresh_tokens", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.Role", b =>
                 {
                     b.Property<string>("Id")
@@ -2216,6 +2313,18 @@ namespace game_x.persistence.Migrations
                     b.Navigation("BlockerUser");
 
                     b.Navigation("RequesterUser");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_refresh_tokens_user_user_id");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.UserBalance", b =>
