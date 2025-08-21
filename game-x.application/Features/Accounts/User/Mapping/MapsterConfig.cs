@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.Accounts.User.Dtos;
+﻿using game_x.application.Contract.Infrastructure.SignalR;
+using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 
 namespace game_x.application.Features.Accounts.User.Mapping;

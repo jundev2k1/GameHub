@@ -45,6 +45,11 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
             .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter);
         
+        cfg.NewConfig<ChainTransaction, ClientTransactionDto>()
+            .Map(dest => dest.TransactionId, src => src.PublicId)
+            .Map(dest => dest.Status, src => src.Status.ToString().ToLower())
+            .Map(dest => dest.Type, src => src.Type.ToString().ToLower()) ;
+        
         cfg.NewConfig<CryptoToken, CryptoTokenDto>()
             .Map(dest => dest.Id, src => src.PublicId);
     }

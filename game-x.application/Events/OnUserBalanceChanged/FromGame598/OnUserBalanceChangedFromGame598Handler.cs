@@ -1,5 +1,5 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
-using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.SignalR;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
@@ -15,28 +15,20 @@ public sealed class OnUserBalanceChangedHandler(
 {
     public async Task Handle(OnUserBalanceChangedFromGame598Event @event, CancellationToken ct = default)
     {
-        var targetBalance = @event.UserBalance;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await SendToMember(targetBalance, ct);
+            await SendToMember(@event.UserId, ct);
         }, ct);
     }
 
-
-    private async Task SendToMember(UserBalance balance, CancellationToken ct)
+    private async Task SendToMember(string userId, CancellationToken ct)
     {
         // Get user details with all balances
-        var userDetail = await userRepo.GetUserDetailAsync(balance.UserId, ct);
+        var userDetail = await userRepo.GetUserDetailAsync(userId, ct);
         var gameBalance = await GetExternalWallet(userDetail.UserExtendInfo.GameProviderAccount);
 
         // Create site balances from user balances
-        var siteBalances = userDetail.Balances.Select(b => new ClientCryptoBalanceDto(
-            Amount: b.Amount,
-            FrozenAmount: b.FrozenAmount,
-            TotalAmount: b.TotalAmount,
-            Network: b.Network,
-            Symbol: b.Symbol
-        )).ToArray();
+        var siteBalances = userDetail.Balances.Select(b => b.Adapt<ClientCryptoBalanceDto>()).ToArray();
 
         var walletsData = new ClientWalletsDto(
             SiteBalances: siteBalances,
@@ -44,7 +36,7 @@ public sealed class OnUserBalanceChangedHandler(
         );
 
         await clientHubService.SendWalletsToMemberAsync(
-            balance.UserId,
+            userId,
             walletsData);
     }
 

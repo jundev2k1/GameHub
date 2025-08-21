@@ -1,6 +1,4 @@
 using System.Text.Json;
-using game_x.application.Contract.Infrastructure.Logger;
-using game_x.application.Contract.Infrastructure.Services.UserUsdtLedger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
@@ -15,50 +13,44 @@ public sealed class OnGame598TransactionCreatedHandler(
 {
     public async Task Handle(OnGame598TransactionCreatedEvent @event, CancellationToken ct = default)
     {
-        var targetTransaction = @event.Transaction;
-        var token = @event.Token;
+        var transaction = @event.Transaction;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await SendToMember(targetTransaction, token, ct);
-
+            await SendToMember(transaction, ct);
         }, ct);
     }
 
-    private async Task SendToMember(GameTransaction transaction, CryptoToken token, CancellationToken ct)
+    private async Task SendToMember(GameTransaction transaction, CancellationToken ct)
     {
-        if (transaction.UserId != null)
+        UserBalance? balance = transaction.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId);
+        if (balance != null)
         {
-
-            UserBalance? balance = transaction.User?.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId);
-
-            if (balance != null)
-            {
-                var balanceDto = new GameBalanceDto(
+            CryptoToken token = balance.CryptoToken;
+            var balanceNotification = new GameBalanceNotificationDto(
                 Amount: balance.Amount,
                 FrozenAmount: balance.FrozenAmount,
-                Network: token.Network.ToString().ToLower());
+                Network: token.Network.ToString().ToLower(),
+                Symbol: token.Symbol);
 
-                UserUsdtLedger userLedger = await userUsdtLedgerRepo.GetDetailByGameTransactionIdAsync(transaction.Id);
+            UserUsdtLedger userLedger = await userUsdtLedgerRepo.GetDetailByGameTransactionIdAsync(transaction.Id);
 
-                var notification = Notification.Create(
-                    NotificationMessageKey.Balance_Updated,
-                    balance.UserId,
-                    NotificationType.UserBalance,
-                    NotificationSeverity.Info,
-                    JsonSerializer.Serialize(balanceDto));
-                await notificationRepo.AddNotificationAsync(notification, ct);
+            var notification = Notification.Create(
+                NotificationMessageKey.Balance_Updated,
+                balance.UserId,
+                NotificationType.UserBalance,
+                NotificationSeverity.Info,
+                JsonSerializer.Serialize(balanceNotification));
+            await notificationRepo.AddNotificationAsync(notification, ct);
+            
+            await clientHubService.SendNotificationToMemberAsync(
+                balance.UserId,
+                notification.Adapt<NotificationDto>());
 
-
-                await clientHubService.SendNotificationToMemberAsync(
-                    balance.UserId,
-                    notification.Adapt<NotificationDto>());
-
-                await clientHubService.SendLedgerToMemberAsync(
-                    balance.UserId,
-                    new ClientLedgerDto(
-                        LedgerId: userLedger.PublicId,
-                        Status: userLedger.StatusAtEvent));
-            }
+            await clientHubService.SendLedgerToMemberAsync(
+                balance.UserId,
+                new ClientLedgerDto(
+                    LedgerId: userLedger.PublicId,
+                    Status: userLedger.StatusAtEvent));
         }
     }
 }

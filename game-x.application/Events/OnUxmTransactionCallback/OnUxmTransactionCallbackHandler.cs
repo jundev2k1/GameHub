@@ -59,7 +59,7 @@ public sealed class OnUxmTransactionCallbackHandler(
                 switch (transaction.Type)
                 {
                     case ChainTransactionType.Deposit:
-                        userBalanceService.AddAmount(balance, @event.ActualAmount);
+                        userBalanceService.IncreaseAmount(balance, @event.ActualAmount);
                         break;
                     case ChainTransactionType.Withdrawal:
                         userBalanceService.FinalizeFrozen(balance, @event.ActualAmount);
@@ -112,10 +112,7 @@ public sealed class OnUxmTransactionCallbackHandler(
             
             await clientHubService.SendTransactionToMemberAsync(
                 userId,
-                new ClientTransactionDto(
-                    TransactionId: transaction.PublicId,
-                    Status: transaction.Status.ToString().ToLower(),
-                    Type: transaction.Type.ToString().ToLower()));
+                transaction.Adapt<ClientTransactionDto>());
         }
     }
     

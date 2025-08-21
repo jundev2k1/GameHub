@@ -8,5 +8,7 @@ public sealed class WalletDepositValidator : AbstractValidator<WalletDepositComm
             .NotEmpty().WithMessage($"{nameof(WalletDepositCommand.Amount)} is required.")
             .GreaterThanOrEqualTo(0).WithMessage($"{nameof(WalletDepositCommand.Amount)} must be greater than zero.");
 
+        RuleFor(x => x.CryptoTokenId)
+            .NotEmpty().WithMessage($"{nameof(WalletDepositCommand.CryptoTokenId)} is required.");
     }
 }

@@ -25,7 +25,7 @@ public interface IClientHub
     /// <summary>Notify that a transaction history has been updated.</summary>
     Task LedgerUpdated(ClientLedgerDto dto);
     Task UserVerifyUpdated(VerificationStatusDto dto);
-    Task GameBalanceUpdated(GameBalanceDto dto);
+    Task GameBalanceUpdated(GameBalanceNotificationDto notificationDto);
 }
 
 [Authorize(Roles = AppRoles.User)]
