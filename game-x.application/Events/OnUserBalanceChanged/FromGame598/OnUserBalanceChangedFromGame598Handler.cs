@@ -1,4 +1,5 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
@@ -11,7 +12,8 @@ public sealed class OnUserBalanceChangedHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IGameProviderService gameProviderService,
-    IClientHubService clientHubService) : IApplicationEventHandler<OnUserBalanceChangedFromGame598Event>
+    IClientHubService clientHubService,
+    IAppLogger<User> logger) : IApplicationEventHandler<OnUserBalanceChangedFromGame598Event>
 {
     public async Task Handle(OnUserBalanceChangedFromGame598Event @event, CancellationToken ct = default)
     {
@@ -48,8 +50,9 @@ public sealed class OnUserBalanceChangedHandler(
             var externalWallet = await gameProviderService.GetWalletAsync(externalRequest);
             return externalWallet.Quota;
         }
-        catch
+        catch (Exception ex)
         {
+            logger.LogError($"Failed to get external wallet", ex.Message);
             return null;
         }
     }
