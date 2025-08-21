@@ -118,14 +118,29 @@ public sealed class RefreshTokenManagerCacheService(
             ?? throw new NotFoundException("Token not found or has been revoked");
 
         // Update the token state and revoked time
-        targetToken.State = targetToken.State == SyncState.NotSynced
-            ? targetToken.State
+        RevokeToken(targetToken);
+    }
+    public void RevokeToken(string userId, Guid id)
+    {
+        // Check if the user exists in the cache
+        var tokens = GetsByUserId(userId);
+        var targetToken = tokens.FirstOrDefault(rt => rt.PublicId == id && rt.RevokedAt is null)
+            ?? throw new NotFoundException("Token not found or has been revoked");
+
+        // Update the token state and revoked time
+        RevokeToken(targetToken);
+    }
+    public void RevokeToken(RefreshTokenDto token)
+    {
+        // Update the token state and revoked time
+        token.State = token.State == SyncState.NotSynced
+            ? token.State
             : SyncState.Updated;
-        targetToken.RevokedAt = DateTime.UtcNow;
+        token.RevokedAt = DateTime.UtcNow;
 
         // Set the updated token back to cache
-        var cacheKey = $"{CacheKeyPrefix}:{userId}:{targetToken.PublicId}";
-        SetNewValue(cacheKey, targetToken);
+        var cacheKey = $"{CacheKeyPrefix}:{token.UserId}:{token.PublicId}";
+        SetNewValue(cacheKey, token);
     }
 
     public void ReplaceToken(string userId, string oldTokenHash, string newTokenHash)
