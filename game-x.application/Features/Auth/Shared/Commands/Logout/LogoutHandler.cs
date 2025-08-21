@@ -1,13 +1,13 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 
-namespace game_x.application.Features.Auth.Client.Commands.UserLogout;
+namespace game_x.application.Features.Auth.Shared.Commands.Logout;
 
-public sealed class UserLogoutHandler(
+public sealed class LogoutHandler(
     IUserAccessor userAccessor,
-    IRefreshTokenManagerCacheService refreshTokenManager) : ICommandHandler<UserLogoutCommand>
+    IRefreshTokenManagerCacheService refreshTokenManager) : ICommandHandler<LogoutCommand>
 {
-    public async Task<Unit> Handle(UserLogoutCommand request, CancellationToken ct = default)
+    public Task<Unit> Handle(LogoutCommand request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
         var jwtId = userAccessor.GetJwtId();
@@ -16,6 +16,6 @@ public sealed class UserLogoutHandler(
 
         refreshTokenManager.RevokeToken(targetRefreshToken.UserId, targetRefreshToken.TokenHash);
 
-        return await Task.FromResult(Unit.Value);
+        return Task.FromResult(Unit.Value);
     }
 }
