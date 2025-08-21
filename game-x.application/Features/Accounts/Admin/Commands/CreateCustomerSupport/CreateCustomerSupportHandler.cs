@@ -1,4 +1,5 @@
 using game_x.application.Contract.Persistence.Repo;
+using UserEntity = game_x.domain.Entities.User;
 
 namespace game_x.application.Features.Accounts.Admin.Commands.CreateCustomerSupport;
 
@@ -8,7 +9,7 @@ public sealed class CreateCustomerSupportHandler(
 {
     public async Task<Unit> Handle(CreateCustomerSupportCommand request, CancellationToken ct = default)
     {
-        var newUser = domain.Entities.User.Create(request.Username, string.Empty);
+        var newUser = UserEntity.Create(request.Email, request.Email);
         await userRepo.AddUserAsync(
             user: newUser,
             rawPassword: request.Password,

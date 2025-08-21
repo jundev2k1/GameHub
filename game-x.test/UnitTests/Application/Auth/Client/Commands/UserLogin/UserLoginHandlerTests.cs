@@ -51,7 +51,7 @@ public sealed class UserLoginHandlerTests
         var roles = AppRole.Of(AppRoles.User);
         var tokenInfo = new JwtTokenDto { Token = "token123", ExpiresAt = DateTime.UtcNow.AddMinutes(30) };
 
-        _authServiceMock.Setup(x => x.TryLoginAsync("test@example.com", "password", false, true))
+        _authServiceMock.Setup(x => x.TryLoginAsync("test@example.com", "password", true))
             .ReturnsAsync(user);
 
         _authServiceMock.Setup(x => x.GetRolesAsync(user))
@@ -100,7 +100,7 @@ public sealed class UserLoginHandlerTests
         var roles = AppRole.Of(role);
         var tokenInfo = new JwtTokenDto { Token = "token123", ExpiresAt = DateTime.UtcNow.AddMinutes(30) };
         
-        _authServiceMock.Setup(x => x.TryLoginAsync(command.Email, command.Password, false, true))
+        _authServiceMock.Setup(x => x.TryLoginAsync(command.Email, command.Password, true))
             .ReturnsAsync(user);
         
         _authServiceMock.Setup(x => x.GetRolesAsync(user))
