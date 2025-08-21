@@ -59,29 +59,15 @@ public sealed class AuthGateMiddleware : IAuthorizationMiddlewareResultHandler
         var isBlocked = await userCache.IsInactiveUser(userId);
         if (isBlocked) return new ForbiddenException(MessageCode.User.UserDisabled);
 
-        var token = context.Request.Headers.Authorization.ToStringOrEmpty();
-        if (token.IsNullOrWhiteSpace())
-            return new UnauthorizedException(MessageCode.System.InvalidOrMissingToken);
-        if (!IsValidToken(context, userId, token))
+        var jwtId = userAccessor.GetJwtId();
+        if (!IsValidToken(context, userId, jwtId))
             return new UnauthorizedException(MessageCode.System.InvalidOrMissingToken);
 
         return null;
     }
 
-    private static bool IsValidToken(HttpContext context, string userId, string token)
+    private static bool IsValidToken(HttpContext context, string userId, string jwtId)
     {
-        // Get the JWT token generator and decode the token
-        var tokenGenerator = context.RequestServices.GetRequiredService<IJwtTokenGenerator>();
-        var rawToken = token.Split(" ")[1];
-        var tokenPayload = tokenGenerator.DecodeToken(rawToken);
-        var jwtId = tokenPayload.JwtId;
-        if (jwtId.IsNullOrWhiteSpace())
-            return false;
-
-        // Check if the token is expired
-        if (tokenPayload.IsExpired)
-            return false;
-
         // Check if the token is linked to a valid refresh token
         var refreshTokenManager = context.RequestServices.GetRequiredService<IRefreshTokenManagerCacheService>();
         var tokenLinked = refreshTokenManager.GetTokenByJwtId(userId, jwtId!);

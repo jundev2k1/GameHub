@@ -9,8 +9,9 @@ public sealed class UserLogoutHandler(
 {
     public async Task<Unit> Handle(UserLogoutCommand request, CancellationToken ct = default)
     {
-        var accessTokenInfo = userAccessor.GetTokenInfo();
-        var targetRefreshToken = refreshTokenManager.GetTokenByJwtId(accessTokenInfo.Subject!, accessTokenInfo.JwtId!)
+        var userId = userAccessor.GetUserId();
+        var jwtId = userAccessor.GetJwtId();
+        var targetRefreshToken = refreshTokenManager.GetTokenByJwtId(userId, jwtId)
             ?? throw new UnauthorizedException();
 
         refreshTokenManager.RevokeToken(targetRefreshToken.UserId, targetRefreshToken.TokenHash);

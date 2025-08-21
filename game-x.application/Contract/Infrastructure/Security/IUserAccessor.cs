@@ -6,9 +6,9 @@ public interface IUserAccessor
 {
     string GetUserId();
 
-    ClaimsPrincipal GetClaimsPrincipal();
+    string GetJwtId();
 
-    JwtPayloadDto GetTokenInfo();
+    ClaimsPrincipal GetClaimsPrincipal();
 
     AppRole GetRoles();
 
