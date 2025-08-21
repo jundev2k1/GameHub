@@ -6,7 +6,21 @@ namespace game_x.application.Features.ChainTransactions.Mapping;
 
 public static class ChainTransactionMapping
 {
-    public static UxmWithdrawalOrderRequest ToUxmWithdrawalOrderRequestData(
+    public static UxmDepositOrderRequest ToUxmDepositOrderRequest(
+        this ChainTransaction transaction,
+        string merchantNumber)
+    {
+        var result = transaction.Adapt<UxmDepositOrderRequest>();
+        return result with {
+            UserId = transaction.UserId!,
+            MerchantNumber = merchantNumber,
+            OrderNumber = transaction.OrderNumber,
+            Amount =  transaction.Amount,
+            Remark = transaction.Note ?? string.Empty
+        };
+    }
+    
+    public static UxmWithdrawalOrderRequest ToUxmWithdrawalOrderRequest(
         this ChainTransaction transaction,
         string merchantNumber)
     {

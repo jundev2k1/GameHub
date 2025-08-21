@@ -5,5 +5,5 @@ public enum LedgerType
     /// <summary>The transaction takes place with the Uxm service</summary>
     Uxm = 1,
     /// <summary>The transaction takes place with the third-party game provider</summary>
-    GameProvider = 2
+    G598SnoGameProvider = 2
 }

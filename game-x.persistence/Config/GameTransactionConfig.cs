@@ -38,6 +38,11 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
             .HasConversion<short>()
             .IsRequired();
 
+        builder.Property(gt => gt.Status)
+            .HasColumnName("status")
+            .HasConversion<short>()
+            .IsRequired();
+        
         builder.Property(gt => gt.Amount)
             .IsRequired();
 

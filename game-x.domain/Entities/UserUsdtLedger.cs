@@ -27,9 +27,10 @@ public sealed class UserUsdtLedger : BaseEntity<int>
     public ChainTransaction? ChainTransaction { get; set; }
 
     // NEW: Default = UXM để backward compatibility
+    /// <summary>The chain transaction</summary>
     public LedgerType Type { get; set; } = LedgerType.Uxm;
 
-    // NEW: Game transaction field - nullable
+    /// <summary>The game transaction</summary>
     public int? GameTransactionId { get; set; }
     public GameTransaction? GameTransaction { get; set; }
 

@@ -26,10 +26,6 @@ public sealed class OnUserBalanceChangedFromUxmHandler(
                 throw new NotFoundException(MessageCode.Transaction.TradeNotFound,
                     $"Transaction with order number '{@event.OrderNumber}' not found.");
 
-            // Anti-spam request if the Transaction has already been updated
-            if (transaction.Status == ChainTransactionStatus.Completed)
-                throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
-
             UserBalance? balance = transaction.User?.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId);
             if (balance == null)
                 throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);

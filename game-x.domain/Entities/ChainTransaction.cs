@@ -24,7 +24,7 @@ public sealed class ChainTransaction : BaseEntity<int>, IAuditable
     public decimal Fee { get; set; }
     public int CryptoTokenId { get; set; }
     public CryptoToken CryptoToken { get; set; } = null!;
-    public DateTime ConfirmedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? ConfirmedAt { get; set; }
     public ChainTransactionType Type { get; set; }
     public ChainTransactionStatus Status { get; set; } = ChainTransactionStatus.Pending;
     public UserUsdtLedger? Ledger { get; set; }
