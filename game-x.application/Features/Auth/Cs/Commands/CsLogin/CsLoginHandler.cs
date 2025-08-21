@@ -16,7 +16,7 @@ public sealed class CsLoginHandler(
 {
     public async Task<CsLoginResult> Handle(CsLoginCommand request, CancellationToken ct = default)
     {
-        var loginUser = await authService.TryLoginAsync(request.UserName, request.Password);
+        var loginUser = await authService.TryLoginAsync(request.Email, request.Password);
         var (isValid, errorCode) = loginUser.CheckValidUser();
         if (!isValid) throw new ForbiddenException(errorCode!);
 
