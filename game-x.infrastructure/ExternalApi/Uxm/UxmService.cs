@@ -31,7 +31,7 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
     }
 
     public async Task<SecureResponse<UxmDepositOrderResponseData>> CreateDepositOrderAsync(
-        SecureRequest<UxmDepositOrderRequestData> data)
+        SecureRequest<UxmDepositOrderRequest> data)
     {
         try
         {

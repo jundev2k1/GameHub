@@ -3,9 +3,11 @@ using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.ChainTransactions.Dtos;
+using game_x.application.Features.ChainTransactions.Mapping;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.Uxm.Dtos;
-using Microsoft.Extensions.Configuration;
+using game_x.share.Settings;
+using Microsoft.Extensions.Options;
 
 namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtDeposit;
 
@@ -13,42 +15,39 @@ public sealed class CreateDepositChainTransactionHandler(
     IUxmService uxmService,
     IUnitOfWork unitOfWork,
     IUserAccessor userAccessor,
-    IConfiguration configuration,
     ICryptoTokenRepo cryptoTokenRepo,
     IChainTransactionRepo chainTransactionRepo,
     IAsymmetricCryptoService asymmetricCryptoService,
-    IAsymmetricKeyCacheService asymmetricKeyCacheService
-) : ICommandHandler<TronUsdtDepositCommand, CreateChainTransactionResponseDto>
+    IAsymmetricKeyCacheService asymmetricKeyCacheService,
+    IOptions<GameXSettings> gameXSettings
+) : ICommandHandler<TronUsdtDepositCommand, DepositChainTransactionResponseDto>
 {
-    public async Task<CreateChainTransactionResponseDto> Handle(TronUsdtDepositCommand request, CancellationToken ct)
+    public async Task<DepositChainTransactionResponseDto> Handle(TronUsdtDepositCommand request, CancellationToken ct)
     {
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
             var userId = userAccessor.GetUserId();
-
-            // 1. Create local chain transaction
             var localTransaction = await CreateLocalChainTransaction(request, userId, ct);
             await unitOfWork.SaveChangesAsync(ct);
 
-            // 2. Call UXM API
-            var uxmRequest = CreateUxmRequest(request, localTransaction.OrderNumber, userId);
-            var apiResponse = await uxmService.CreateDepositOrderAsync(uxmRequest);
+            var uxmRequest = CreateUxmRequest(localTransaction);
+            var result = await uxmService.CreateDepositOrderAsync(uxmRequest);
 
-            // 3. Verify signature from UXM
-            ValidateUxmResponse(apiResponse);
+            // Verify UXM signature
+            var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
+            var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
+            if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
+            
+            await UpdateChainTransaction(localTransaction.PublicId, result.Data, ct);
 
-            // 4. Update chain transaction
-            await UpdateChainTransaction(localTransaction.PublicId, apiResponse, ct);
-
-            // 5. Commit transaction
             await unitOfWork.CommitAsync(ct);
 
-            return new CreateChainTransactionResponseDto
+            return new DepositChainTransactionResponseDto
             {
-                OrderUid = apiResponse.Data.OrderUid,
-                Amount = apiResponse.Data.Amount,
-                To = apiResponse.Data.To
+                TransactionId = localTransaction.PublicId,
+                Amount = result.Data.Amount,
+                To = result.Data.To
             };
         }
         catch
@@ -74,6 +73,7 @@ public sealed class CreateDepositChainTransactionHandler(
             orderNumber: orderNumber,
             cryptoTokenId: token.Id,
             amount: request.Amount,
+            note: request.Note,
             type: ChainTransactionType.Deposit,
             status: ChainTransactionStatus.Pending
         );
@@ -82,58 +82,32 @@ public sealed class CreateDepositChainTransactionHandler(
         return transaction;
     }
 
-    private SecureRequest<UxmDepositOrderRequestData> CreateUxmRequest(
-        TronUsdtDepositCommand request,
-        string orderNumber,
-        string userId)
+    private SecureRequest<UxmDepositOrderRequest> CreateUxmRequest(ChainTransaction chainTransaction)
     {
-        var merchantNumber = configuration.GetValue<string>("GameXSettings:MerchantNumber")
-            ?? throw new InvalidOperationException("MerchantNumber is not configured.");
+        var merchantNumber = gameXSettings.Value.MerchantNumber;
+        var gameXPrivateKey = asymmetricKeyCacheService.GameXPrivateKey;
+        
+        var requestData = chainTransaction.ToUxmDepositOrderRequest(merchantNumber);
 
-        var requestData = new UxmDepositOrderRequestData(
-            merchantNumber,
-            request.Amount,
-            orderNumber,
-            userId,
-            request.Note
-        );
-
-        var signature = asymmetricCryptoService.Sign(
-            asymmetricKeyCacheService.GameXPrivateKey,
-            requestData
-        );
-
-        return new SecureRequest<UxmDepositOrderRequestData>
+        return new SecureRequest<UxmDepositOrderRequest>
         {
             Data = requestData,
-            Signature = signature
+            Signature = asymmetricCryptoService.Sign(gameXPrivateKey, requestData)
         };
-    }
-
-    private void ValidateUxmResponse(dynamic apiResponse)
-    {
-        var isValid = asymmetricCryptoService.VerifySignature(
-            asymmetricKeyCacheService.UxmPublicKey,
-            apiResponse.Data,
-            apiResponse.Signature
-        );
-
-        if (!isValid)
-            throw new BadRequestException("Invalid signature from UXM.");
     }
 
     private async Task UpdateChainTransaction(
         Guid publicId,
-        dynamic result,
+        UxmDepositOrderResponseData data,
         CancellationToken ct)
     {
         await chainTransactionRepo.PatchUpdateAsync(
             publicId,
             tx =>
             {
-                tx.OrderUid = result.Data.OrderUid;
-                tx.ToAddress = result.Data.To;
-                tx.Amount = result.Data.Amount;
+                tx.OrderUid = data.OrderUid;
+                tx.ToAddress = data.To;
+                tx.Amount = data.Amount;
             },
             ct
         );

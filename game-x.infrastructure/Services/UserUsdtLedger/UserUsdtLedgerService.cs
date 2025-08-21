@@ -24,7 +24,7 @@ public sealed class UserUsdtLedgerService
         var ledger = new domain.Entities.UserUsdtLedger
         {
             UserId = transaction.UserId!,
-            Timestamp = transaction.ConfirmedAt,
+            Timestamp = transaction.ConfirmedAt ?? DateTime.UtcNow,
             FlowType = flowType,
             SourceId = "",
             ChangeAmount = changeAmount,

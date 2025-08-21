@@ -60,7 +60,7 @@ public sealed class ChainTransactionConfig : IEntityTypeConfiguration<ChainTrans
         builder.Property(x => x.ConfirmedAt)
             .HasColumnName("confirmed_at")
             .HasColumnType("timestamp with time zone")
-            .IsRequired();
+            .IsRequired(false);
         
         builder.Property(x => x.Type)
             .HasColumnName("type")

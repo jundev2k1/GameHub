@@ -13,6 +13,6 @@ public class ChainTransactionCallbackController : BaseApiController
             Data: request.Data,
             Signature: request.Signature);
         var result = await Mediator.Send(command);
-        return Ok(result);
+        return ApiResponseFactory.Ok(result);
     }
 }

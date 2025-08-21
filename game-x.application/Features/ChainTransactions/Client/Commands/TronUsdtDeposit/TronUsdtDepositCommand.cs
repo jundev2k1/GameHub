@@ -5,4 +5,4 @@ namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdt
 public record TronUsdtDepositCommand(
     decimal Amount,
     string Note,
-    Guid CryptoTokenId) : ICommand<CreateChainTransactionResponseDto>;
+    Guid CryptoTokenId) : ICommand<DepositChainTransactionResponseDto>;

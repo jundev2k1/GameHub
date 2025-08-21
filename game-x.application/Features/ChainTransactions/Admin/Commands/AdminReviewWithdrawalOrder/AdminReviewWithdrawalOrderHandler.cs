@@ -21,7 +21,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     IApplicationEventDispatcher eventDispatcher,
     IUserBalanceRepo userBalanceRepo,
     IAppLogger<ChainTransaction> logger,
-    IOptions<GameXSettings> galaxySettings,
+    IOptions<GameXSettings> gameXSettings,
     IAsymmetricKeyCacheService asymmetricKeyCacheService,
     IAsymmetricCryptoService asymmetricCryptoService)
     : ICommandHandler<AdminReviewWithdrawalOrderCommand>
@@ -34,7 +34,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         if (transaction.Hash?.IsNotNullOrEmpty() == true)
         {
             logger.LogWarning("Skip duplicate transaction Hash: {TxHash}, UserId: {UserId}, TokenId: {TokenId}", 
-                transaction.Hash, transaction?.UserId ?? String.Empty, transaction?.CryptoTokenId.ToString() ?? String.Empty);
+                transaction.Hash, transaction.UserId ?? String.Empty, transaction.CryptoTokenId.ToString());
             return Unit.Value;
         }
         
@@ -84,10 +84,10 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         try
         {
             var gameXPrivateKey = asymmetricKeyCacheService.GameXPrivateKey;
-            var merchantNumber = galaxySettings.Value.MerchantNumber;
+            var merchantNumber = gameXSettings.Value.MerchantNumber;
         
             // Create UXM request data
-            var requestData = chainTransaction.ToUxmWithdrawalOrderRequestData(merchantNumber);
+            var requestData = chainTransaction.ToUxmWithdrawalOrderRequest(merchantNumber);
             var uxmRequest = new SecureRequest<UxmWithdrawalOrderRequest>
             {
                 Data = requestData,

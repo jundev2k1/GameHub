@@ -354,7 +354,7 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("amount");
 
-                    b.Property<DateTime>("ConfirmedAt")
+                    b.Property<DateTime?>("ConfirmedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("confirmed_at");
 

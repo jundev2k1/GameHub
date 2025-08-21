@@ -11,6 +11,7 @@ using game_x.domain.Enum;
 using game_x.share.ExternalApi.Uxm.Dtos;
 using Microsoft.Extensions.Configuration;
 using Moq;
+using Test.Common.Settings;
 
 namespace Test.UnitTests.Application.TronUsdtDeposit;
 
@@ -29,15 +30,17 @@ public sealed class TronUsdtDepositHandlerTests
 
     public TronUsdtDepositHandlerTests()
     {
+        var gameXSettings = MockSettings.GameX;
+        
         _handler = new CreateDepositChainTransactionHandler(
             uxmService: _uxmServiceMock.Object,
-            chainTransactionRepo:  _chainTransactionRepoMock.Object,
+            chainTransactionRepo: _chainTransactionRepoMock.Object,
             unitOfWork: _unitOfWorkMock.Object,
             asymmetricCryptoService: _asymmetricCryptoServiceMock.Object,
             userAccessor: _userAccessorMock.Object,
-            configuration: _configurationMock.Object,
             asymmetricKeyCacheService: _asymmetricKeyCacheServiceMock.Object,
-            cryptoTokenRepo: _cryptoTokenRepoMock.Object
+            cryptoTokenRepo: _cryptoTokenRepoMock.Object,
+            gameXSettings: gameXSettings
         );
     }
 
@@ -63,9 +66,9 @@ public sealed class TronUsdtDepositHandlerTests
             .ReturnsAsync(cryptoToken);
         _asymmetricKeyCacheServiceMock.Setup(x => x.GameXPrivateKey).Returns(privateKey);
         _asymmetricKeyCacheServiceMock.Setup(x => x.UxmPublicKey).Returns(publicKey);
-        _asymmetricCryptoServiceMock.Setup(x => x.Sign(privateKey, It.IsAny<UxmDepositOrderRequestData>()))
+        _asymmetricCryptoServiceMock.Setup(x => x.Sign(privateKey, It.IsAny<UxmDepositOrderRequest>()))
             .Returns(signature);
-        _uxmServiceMock.Setup(x => x.CreateDepositOrderAsync(It.IsAny<SecureRequest<UxmDepositOrderRequestData>>()))
+        _uxmServiceMock.Setup(x => x.CreateDepositOrderAsync(It.IsAny<SecureRequest<UxmDepositOrderRequest>>()))
             .ReturnsAsync(uxmResponse);
         _asymmetricCryptoServiceMock.Setup(x => x.VerifySignature(publicKey, uxmResponse.Data, uxmResponse.Signature))
             .Returns(true);
@@ -75,7 +78,6 @@ public sealed class TronUsdtDepositHandlerTests
 
         // Assert
         result.Should().NotBeNull();
-        result.OrderUid.Should().Be("UXM123");
         result.Amount.Should().Be(100m);
         result.To.Should().Be("TRX123ADDRESS");
 
@@ -120,7 +122,7 @@ public sealed class TronUsdtDepositHandlerTests
         _configurationMock.Setup(x => x.GetSection("GameXSettings:MerchantNumber")).Returns(_configurationSectionMock.Object);
         _cryptoTokenRepoMock.Setup(x => x.GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, It.IsAny<CancellationToken>()))
             .ReturnsAsync(cryptoToken);
-        _uxmServiceMock.Setup(x => x.CreateDepositOrderAsync(It.IsAny<SecureRequest<UxmDepositOrderRequestData>>()))
+        _uxmServiceMock.Setup(x => x.CreateDepositOrderAsync(It.IsAny<SecureRequest<UxmDepositOrderRequest>>()))
             .ReturnsAsync(uxmResponse);
         _asymmetricKeyCacheServiceMock.Setup(x => x.UxmPublicKey).Returns(publicKey);
         _asymmetricCryptoServiceMock.Setup(x => x.VerifySignature(publicKey, uxmResponse.Data, uxmResponse.Signature))
