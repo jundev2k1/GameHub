@@ -26,7 +26,6 @@ public sealed class LoginAdminHandler(
         var tokenInfo = await jwtTokenGenerator.GenerateToken(loginUser);
         var refreshToken = tokenService.GenerateRefreshToken(loginUser.Id);
         CreateRefreshToken(loginUser.Id, refreshToken, tokenInfo.JwtId);
-        refreshTokenManager.RevokeAllTokenSameDevice(loginUser.Id, refreshToken.Token);
 
         return new AdminLoginResult(
             UserName: loginUser.UserName!,

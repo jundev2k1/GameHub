@@ -145,21 +145,6 @@ public sealed class RefreshTokenManagerCacheService(
         SetNewValue(cacheKey, token);
     }
 
-    public void RevokeAllTokenSameDevice(string userId, string token)
-    {
-        var ipAddress = userAccessor.GetIpAddress();
-        var deviceInfo = UserAgentHelper.GetDeviceKey(userAccessor.GetUserAgent());
-        var hashToken = HashHelper.Sha256(token);
-        var sameDeviceTokenIds = GetsByUserId(userId)
-            .Where(rt => !rt.IsRevoked
-                && !rt.IsExpired
-                && rt.TokenHash != hashToken)
-            .Select(rt => rt.TokenHash)
-            .ToList();
-        sameDeviceTokenIds.ForEach(
-            token => RevokeToken(userId, token));
-    }
-
     public void ReplaceToken(string userId, string oldTokenHash, string newTokenHash)
     {
         var tokens = GetsByUserId(userId);
