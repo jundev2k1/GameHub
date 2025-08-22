@@ -96,7 +96,6 @@ public sealed class WalletWithdrawalHandler(
             userId: userId,
             g598sno: sno,
             amount: command.Amount,
-            gamePlatform: GamePlatform.G598,
             type: GameTransactionType.Withdrawal,
             cryptoTokenId: cryptoTokenId,
             note: command.Note);

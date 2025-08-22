@@ -30,8 +30,7 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
         builder.Property(gt => gt.UserId)
             .IsRequired();
 
-        builder.Property(gt => gt.GamePlatform)
-            .HasConversion<short>()
+        builder.Property(gt => gt.GamePlatformId)
             .IsRequired();
 
         builder.Property(gt => gt.Type)
@@ -53,7 +52,7 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
         builder.Property(gt => gt.CryptoTokenId)
             .HasColumnName("crypto_token_id");
 
-        builder.Property(x => x.Meta)
+        builder.Property(gt => gt.Meta)
             .HasColumnName("meta")
             .HasColumnType("jsonb")
             .IsRequired()
@@ -64,10 +63,15 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
             .HasForeignKey(gt => gt.UserId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        builder.HasOne(x => x.CryptoToken)
+        builder.HasOne(gt => gt.CryptoToken)
             .WithMany()
-            .HasForeignKey(x => x.CryptoTokenId)
+            .HasForeignKey(gt => gt.CryptoTokenId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
+
+        builder.HasOne(gt => gt.GamePlatform)
+            .WithMany(gp => gp.GameTransactions)
+            .HasForeignKey(gt => gt.GamePlatformId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
