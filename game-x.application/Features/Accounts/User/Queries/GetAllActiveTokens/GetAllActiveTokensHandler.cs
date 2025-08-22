@@ -10,9 +10,13 @@ public sealed class GetAllActiveTokensHandler(
     public Task<GetAllActiveTokensDto[]> Handle(GetAllActiveTokensQuery request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
+        var currentJwtId = userAccessor.GetJwtId();
         var result = refreshTokenManager.GetsByUserId(userId)
             .Where(rt => !rt.IsRevoked || !rt.IsExpired)
-            .Select(token => token.Adapt<GetAllActiveTokensDto>())
+            .Select(token => token.Adapt<GetAllActiveTokensDto>() with
+            {
+                IsCurrentToken = token.JwtId == currentJwtId
+            })
             .ToArray();
         return Task.FromResult(result);
     }
