@@ -14,10 +14,10 @@ public sealed class ExpiredTokenCleanupJob(
 {
     public string JobId => "expired-token-cleanup";
     public string CronExpression => jobOptions.Value.ExpiredTokenCleanupJob;
-    public bool IsInit => false;
+    public bool IsInit => true;
 
     /// <summary>Maximum number of records allowed to be processed per transaction</summary>
-    private const int DayOverdueCount = 0;
+    private const int DayOverdueCount = 15;
 
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
