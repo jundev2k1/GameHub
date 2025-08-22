@@ -17,7 +17,7 @@ public sealed class ExpiredTokenCleanupJob(
     public bool IsInit => false;
 
     /// <summary>Maximum number of records allowed to be processed per transaction</summary>
-    private const int DayOverdueCount = 15;
+    private const int DayOverdueCount = 0;
 
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
