@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.Accounts.User.Commands.UserSelfUpdate;
@@ -60,8 +61,11 @@ public sealed class UserController : BaseApiController
     }
 
     [HttpDelete("tokens")]
-    public async Task<IActionResult> RevokeTokenAsync(RevokeTokenCommand command)
+    public async Task<IActionResult> RevokeTokenAsync(Guid tokenId)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = new RevokeTokenCommand(userId, tokenId);
+
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
     }

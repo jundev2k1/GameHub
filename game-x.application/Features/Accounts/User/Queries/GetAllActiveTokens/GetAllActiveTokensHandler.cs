@@ -12,7 +12,7 @@ public sealed class GetAllActiveTokensHandler(
         var userId = userAccessor.GetUserId();
         var currentJwtId = userAccessor.GetJwtId();
         var result = refreshTokenManager.GetsByUserId(userId)
-            .Where(rt => !rt.IsRevoked || !rt.IsExpired)
+            .Where(rt => !rt.IsRevoked && !rt.IsExpired)
             .Select(token => token.Adapt<GetAllActiveTokensDto>() with
             {
                 IsCurrentToken = token.JwtId == currentJwtId
