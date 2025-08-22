@@ -31,7 +31,7 @@ public sealed class LoginAdminHandler(
         return new AdminLoginResult(
             UserName: loginUser.UserName!,
             UserId: loginUser.Id,
-            Token: tokenInfo.Token,
+            AccessToken: tokenInfo.Token,
             RefreshToken: refreshToken.Token);
     }
 
