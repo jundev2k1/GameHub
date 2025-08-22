@@ -153,8 +153,6 @@ public sealed class RefreshTokenManagerCacheService(
         var sameDeviceTokenIds = GetsByUserId(userId)
             .Where(rt => !rt.IsRevoked
                 && !rt.IsExpired
-                && rt.IpAddress.Equals(ipAddress, StringComparison.InvariantCultureIgnoreCase)
-                && UserAgentHelper.GetDeviceKey(rt.UserAgent) == deviceInfo
                 && rt.TokenHash != hashToken)
             .Select(rt => rt.TokenHash)
             .ToList();
