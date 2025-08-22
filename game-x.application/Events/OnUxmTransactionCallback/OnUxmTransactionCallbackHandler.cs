@@ -5,6 +5,7 @@ using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.share.Context;
 
 namespace game_x.application.Events.OnUxmTransactionCallback;
@@ -19,6 +20,7 @@ public sealed class OnUxmTransactionCallbackHandler(
     IUserRepo userRepo,
     INotificationRepo notificationRepo,
     IAdminHubService adminHubService,
+    IApplicationEventDispatcher eventDispatcher,
     IAppLogger<ChainTransaction> logger) : IApplicationEventHandler<OnUxmTransactionCallbackEvent>
 {
     public async Task Handle(OnUxmTransactionCallbackEvent @event, CancellationToken ct = default)
@@ -69,7 +71,7 @@ public sealed class OnUxmTransactionCallbackHandler(
                 }
                 await userBalanceRepo.PutUpdateAsync(balance, ct);
                 
-                await SendToMember(balance, transaction, ct);
+                await SendToMember(transaction, ct);
                 await SendToAdmin(transaction, ct);
             }, ct);
             
@@ -85,7 +87,7 @@ public sealed class OnUxmTransactionCallbackHandler(
         }
     }
 
-    private async Task SendToMember(UserBalance balance, ChainTransaction transaction, CancellationToken ct)
+    private async Task SendToMember(ChainTransaction transaction, CancellationToken ct)
     {
         var userId = transaction.UserId;
         if (userId != null)
@@ -102,17 +104,12 @@ public sealed class OnUxmTransactionCallbackHandler(
             await clientHubService.SendNotificationToMemberAsync(
                 userId,
                 notification.Adapt<NotificationDto>());
-        
-            await clientHubService.SendBalanceToMemberAsync(
-                userId,
-                new ClientBalanceDto(
-                    BalanceId: balance.PublicId,
-                    Amount: balance.Amount,
-                    FrozenAmount: balance.FrozenAmount));
             
             await clientHubService.SendTransactionToMemberAsync(
                 userId,
                 transaction.Adapt<ClientTransactionDto>());
+            
+            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(userId), ct);
         }
     }
     

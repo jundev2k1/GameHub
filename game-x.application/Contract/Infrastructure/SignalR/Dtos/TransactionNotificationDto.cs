@@ -14,6 +14,7 @@ public class TransactionNotificationDto
     public Guid CryptoTokenId { get; set; }
     public DateTime? ConfirmedAt { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
     public string? Note { get; set; }
     public string? Meta { get; set; }
     public DateTime CreatedAt { get; set; }

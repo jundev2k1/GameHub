@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnTransactionCreated;
+using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.application.Utils;
 
 namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWithdrawal;
@@ -14,9 +15,9 @@ public sealed class TronUsdtWithdrawalHandler(
     IChainTransactionRepo chainTransactionRepo,
     ICryptoTokenRepo cryptoTokenRepo,
     IUserBalanceRepo userBalanceRepo,
-    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<TronUsdtWithdrawalCommand, Unit>
+    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<TronUsdtWithdrawalCommand, ChainTransactionDto>
 {
-    public async Task<Unit> Handle(TronUsdtWithdrawalCommand request, CancellationToken ct)
+    public async Task<ChainTransactionDto> Handle(TronUsdtWithdrawalCommand request, CancellationToken ct)
     {
         string userId = userAccessor.GetUserId();
         int minimumAmount = 10;
@@ -41,7 +42,9 @@ public sealed class TronUsdtWithdrawalHandler(
             await eventDispatcher.Publish(new OnTransactionCreatedEvent(createdTransaction), ct);
         }, ct);
         
-        return Unit.Value;
+        var updatedTransaction = await chainTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
+        
+        return updatedTransaction.Adapt<ChainTransactionDto>();
     }
    
     private async Task ValidateKyc(

@@ -59,22 +59,20 @@ public sealed class AdminReviewWithdrawalOrderHandler(
 
     private async Task HandleApproveTransactionAsync(ChainTransaction transaction, CancellationToken ct)
     {
-        await chainTransactionRepo
-            .PatchUpdateAsync(transaction.PublicId, updatedOrder => 
-                updatedOrder.UpdateStatus(ChainTransactionStatus.Approved), ct);
+        transaction.UpdateStatus(ChainTransactionStatus.Approved);
+        await chainTransactionRepo.PutUpdateAsync(transaction, ct);
         
         await SendUxmWithdrawalOrderAsync(transaction, ct);
     }
     
     private async Task HandleRejectTransactionAsync(ChainTransaction transaction, CancellationToken ct)
     {
+        transaction.UpdateStatus(ChainTransactionStatus.Rejected);
+        
         await unitOfWork.WithTransactionAsync(
             async () =>
             {
-                await chainTransactionRepo
-                    .PatchUpdateAsync(transaction.PublicId, updatedOrder => 
-                        updatedOrder.UpdateStatus(ChainTransactionStatus.Rejected), ct);
-
+                await chainTransactionRepo.PutUpdateAsync(transaction, ct);
                 await TryRefundFrozenBalanceAsync(transaction, ct);
             }, ct);
     }
@@ -121,42 +119,25 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         UserBalance? balance = chainTransaction.User?.UserBalances.FirstOrDefault(b => b.CryptoTokenId == chainTransaction.CryptoTokenId);
         if (balance == null)
             throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
-        
-        const int maxRetries = 3;
-        int attempt = 0;
+
         decimal refundAmount = chainTransaction.Amount + chainTransaction.Fee;
 
-        while (attempt < maxRetries)
+        try
         {
-            attempt++;
-            try
-            {
-                userBalanceService.Unfreeze(balance, refundAmount);
-                await userBalanceRepo.PutUpdateAsync(balance, ct);
-                return;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(
-                    "[TronWithdrawal] ❌ No. {Attempt} Balance compensation failed，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}, Err={ex}",
-                    attempt, 
-                    chainTransaction?.UserId ?? string.Empty, 
-                    chainTransaction?.CryptoTokenId ?? 0, 
-                    chainTransaction?.OrderNumber ?? string.Empty, 
-                    refundAmount, 
-                    ex);
-
-                await Task.Delay(200, ct); // Retry after a short delay
-            }
+            userBalanceService.Unfreeze(balance, refundAmount);
+            await userBalanceRepo.PutUpdateAsync(balance, ct);
         }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                "[TronWithdrawal] ❌ Balance compensation failed，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}, Err={ex}",
+                chainTransaction.UserId ?? string.Empty, 
+                chainTransaction.CryptoTokenId, 
+                chainTransaction.OrderNumber, 
+                refundAmount, 
+                ex);
 
-        logger.LogError(
-            "[TronWithdrawal] ❌ Compensation failure exceeds the maximum number of retries，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}",
-            chainTransaction?.UserId ?? string.Empty, 
-            chainTransaction?.CryptoTokenId ?? 0, 
-            chainTransaction?.OrderNumber ?? string.Empty, 
-            refundAmount);
-        
-        throw new BadRequestException(MessageCode.System.TokenGenerationFailed);
+            throw new BadRequestException(MessageCode.Accounting.InsufficientFrozenBalance);
+        }
     }
 }

@@ -3,7 +3,6 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.ChainTransactions.Admin.Commands.AdminReviewWithdrawalOrder;
 using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionCriteriaByAdmin;
 using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionDetailById;
-using game_x.application.Features.ChainTransactions.Client.Queries.GetUsdtLedgerDetail;
 
 namespace game_x.api.Controllers.Admin.Chain;
 

@@ -14,7 +14,7 @@ public class ChainTransactionDetailDto
     public Guid CryptoTokenId { get; set; }
     public string Symbol { get; set; } = string.Empty;
     public NetworkType Network { get; set; }
-    public DateTime ConfirmedAt { get; set; }
+    public DateTime? ConfirmedAt { get; set; }
     public ChainTransactionStatus Status { get; set; }
     public string? Note { get; set; }
     public string? Meta { get; set; }

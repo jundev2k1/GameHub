@@ -1,4 +1,3 @@
-using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
@@ -8,7 +7,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using Polly;
 
 namespace game_x.infrastructure.SignalR.Hubs;
 
@@ -19,8 +17,6 @@ public interface IClientHub
     /// <summary>Notify that an order has been updated.</summary>
     /// <param name="orderInfo">The order information that was updated.</param>
     Task TransactionUpdated(ClientTransactionDto orderInfo);
-    /// <summary>Notify that user balance has been updated.</summary>
-    Task BalanceUpdated(ClientBalanceDto dto);
     /// <summary>Notify that user wallets have been updated.</summary>
     Task WalletsUpdated(ClientWalletsDto dto);
     /// <summary>Notify that a transaction history has been updated.</summary>

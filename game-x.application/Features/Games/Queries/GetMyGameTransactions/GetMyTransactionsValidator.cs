@@ -13,7 +13,6 @@ public sealed class GetMyGameTransactionsValidator : AbstractValidator<GetMyGame
         nameof(GameTransactionDto.UserId),
         nameof(GameTransactionDto.Status),
         nameof(GameTransactionDto.Amount),
-        nameof(GameTransactionDto.BalanceAfter),
         nameof(GameTransactionDto.Type),
         nameof(GameTransactionDto.UpdatedAt),
         nameof(GameTransactionDto.CreatedAt)
@@ -23,7 +22,6 @@ public sealed class GetMyGameTransactionsValidator : AbstractValidator<GetMyGame
     [
         nameof(GameTransactionDto.Status),
         nameof(GameTransactionDto.Amount),
-        nameof(GameTransactionDto.BalanceAfter),
         nameof(GameTransactionDto.Type),
         nameof(GameTransactionDto.UpdatedAt),
         nameof(GameTransactionDto.CreatedAt)

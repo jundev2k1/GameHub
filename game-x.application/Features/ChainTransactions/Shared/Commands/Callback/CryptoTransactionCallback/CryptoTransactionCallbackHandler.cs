@@ -1,6 +1,5 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Events.OnUserBalanceChanged.FromUxm;
 using game_x.application.Events.OnUxmTransactionCallback;
 
 namespace game_x.application.Features.ChainTransactions.Shared.Commands.Callback.CryptoTransactionCallback;
@@ -29,8 +28,6 @@ public sealed class CryptoTransactionCallbackHandler(
             CreatedAt: requestData.CreatedAt,
             ConfirmedAt: requestData.ConfirmedAt,
             Remark: requestData.Remark), ct);
-
-        await eventDispatcher.Publish(new OnUserBalanceChangedFromUxmEvent(OrderNumber: requestData.OrderNumber), ct);
 
         return Unit.Value;
     }
