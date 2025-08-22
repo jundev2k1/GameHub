@@ -29,8 +29,8 @@ services:
       - EngageLab__ApiKey=${EngageLab_ApiKey}
       - EngageLab__From=${EngageLab_From}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - RecurringJob__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
-      - RecurringJob__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
+      - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
+      - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
       
       - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
       - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}

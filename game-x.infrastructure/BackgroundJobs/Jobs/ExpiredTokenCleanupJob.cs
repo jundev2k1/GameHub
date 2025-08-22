@@ -29,6 +29,7 @@ public sealed class ExpiredTokenCleanupJob(
             {
                 var refreshTokenIds = await dbContext.RefreshTokens
                     .Where(rt => rt.ExpiresAt < expiredDate)
+                    .OrderByDescending(rt => rt.CreatedAt)
                     .Take(500)
                     .Select(rt => rt.PublicId)
                     .ToArrayAsync(ct);
