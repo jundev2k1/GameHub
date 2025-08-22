@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using GamePlatform = game_x.domain.Entities.GamePlatform;
 
 namespace game_x.persistence.Config;
 

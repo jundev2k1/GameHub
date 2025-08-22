@@ -1,5 +1,3 @@
-using GamePlatform = game_x.domain.Entities.GamePlatform;
-
 namespace game_x.application.Features.Games.Dtos;
 
 public class GameTransactionDetailDto
