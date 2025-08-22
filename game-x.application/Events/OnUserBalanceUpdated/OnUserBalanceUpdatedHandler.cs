@@ -1,42 +1,36 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.SignalR;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 
-namespace game_x.application.Events.OnUserBalanceChanged.FromGame598;
+namespace game_x.application.Events.OnUserBalanceUpdated;
 
-public sealed class OnUserBalanceChangedHandler(
+public sealed class OnUserBalanceUpdatedHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IGameProviderService gameProviderService,
-    IClientHubService clientHubService) : IApplicationEventHandler<OnUserBalanceChangedFromGame598Event>
+    IClientHubService clientHubService,
+    IAppLogger<User> logger) : IApplicationEventHandler<OnUserBalanceUpdatedEvent>
 {
-    public async Task Handle(OnUserBalanceChangedFromGame598Event @event, CancellationToken ct = default)
+    public async Task Handle(OnUserBalanceUpdatedEvent @event, CancellationToken ct = default)
     {
-        var targetBalance = @event.UserBalance;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await SendToMember(targetBalance, ct);
+            await SendToMember(@event.UserId, ct);
         }, ct);
     }
 
-
-    private async Task SendToMember(UserBalance balance, CancellationToken ct)
+    private async Task SendToMember(string userId, CancellationToken ct)
     {
         // Get user details with all balances
-        var userDetail = await userRepo.GetUserDetailAsync(balance.UserId, ct);
-        var gameBalance = await GetExternalWallet(userDetail.UserExtendInfo.GameProviderAccount);
+        var userDetail = await userRepo.GetUserDetailAsync(userId, ct);
+        var gameBalance = await GetExternalWallet(userDetail?.UserExtendInfo?.GameProviderAccount);
 
         // Create site balances from user balances
-        var siteBalances = userDetail.Balances.Select(b => new ClientCryptoBalanceDto(
-            Amount: b.Amount,
-            FrozenAmount: b.FrozenAmount,
-            TotalAmount: b.TotalAmount,
-            Network: b.Network,
-            Symbol: b.Symbol
-        )).ToArray();
+        var siteBalances = userDetail.Balances.Select(b => b.Adapt<ClientCryptoBalanceDto>()).ToArray();
 
         var walletsData = new ClientWalletsDto(
             SiteBalances: siteBalances,
@@ -44,20 +38,23 @@ public sealed class OnUserBalanceChangedHandler(
         );
 
         await clientHubService.SendWalletsToMemberAsync(
-            balance.UserId,
+            userId,
             walletsData);
     }
 
-    private async Task<decimal?> GetExternalWallet(string account)
+    private async Task<decimal?> GetExternalWallet(string? account)
     {
         try
         {
+            if (account is null) return null;
+            
             var externalRequest = new WalletRequest { Account = account };
             var externalWallet = await gameProviderService.GetWalletAsync(externalRequest);
             return externalWallet.Quota;
         }
-        catch
+        catch (Exception ex)
         {
+            logger.LogError($"Failed to get external wallet", ex.Message);
             return null;
         }
     }

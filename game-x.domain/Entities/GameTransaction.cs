@@ -1,3 +1,7 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
+using game_x.domain.Shared;
+
 namespace game_x.domain.Entities;
 
 public sealed class GameTransaction : BaseEntity<int>, IAuditable
@@ -11,9 +15,25 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
     public decimal Amount { get; private set; }
     public GamePlatform GamePlatform { get; private set; }
     public string? Note { get; private set; } = string.Empty;
+    public string Meta { get; set; } = "{}";
     public int? CryptoTokenId { get; private set; }
     public CryptoToken? CryptoToken { get; set; }
     public UserUsdtLedger? Ledger { get; set; }
+    
+    [NotMapped]
+    public ChainTransactionMeta MetaObject
+    {
+        get => JsonSerializer.Deserialize<ChainTransactionMeta>(Meta) ?? new();
+        set => Meta = JsonSerializer.Serialize(value, JsonOptions.NoEscape);
+    }
+
+    public void UpdateMeta(Action<ChainTransactionMeta> updater)
+    {
+        var meta = MetaObject;
+        updater(meta);
+        MetaObject = meta;
+    }
+    
     public static GameTransaction Create(
         string userId,
         string g598sno,

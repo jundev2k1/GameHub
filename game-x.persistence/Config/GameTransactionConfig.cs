@@ -53,6 +53,12 @@ public sealed class GameTransactionConfig : IEntityTypeConfiguration<GameTransac
         builder.Property(gt => gt.CryptoTokenId)
             .HasColumnName("crypto_token_id");
 
+        builder.Property(x => x.Meta)
+            .HasColumnName("meta")
+            .HasColumnType("jsonb")
+            .IsRequired()
+            .HasDefaultValue("{}");
+        
         builder.HasOne(gt => gt.User)
             .WithMany(u => u.GameTransactions)
             .HasForeignKey(gt => gt.UserId)

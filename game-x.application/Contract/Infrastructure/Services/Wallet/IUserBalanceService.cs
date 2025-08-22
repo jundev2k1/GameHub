@@ -2,15 +2,14 @@ namespace game_x.application.Contract.Infrastructure.Services.Wallet;
 
 public interface IUserBalanceService
 {
-    // Freeze order
+    /// <summary>Freeze order</summary>
     void Freeze(UserBalance balance, decimal amount);
-    
-    // Order canceled, unfrozen
+    /// <summary>Order canceled, unfrozen</summary>
     void Unfreeze(UserBalance balance, decimal amount);
-
-    // Complete the order and deduct the frozen amount
+    /// <summary>Complete the order and deduct the frozen amount</summary>
     void FinalizeFrozen(UserBalance balance, decimal amount);
-    
-    // Add amount to user's balance
-    void AddAmount(UserBalance balance, decimal amount);
+    /// <summary>Increase the user's balance</summary>
+    void IncreaseAmount(UserBalance balance, decimal amount);
+    /// <summary>Decrease the user's balance</summary>
+    void DecreaseAmount(UserBalance balance, decimal amount);
 }

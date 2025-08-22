@@ -3,7 +3,6 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.ChainTransactions.Admin.Commands.AdminReviewWithdrawalOrder;
 using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionCriteriaByAdmin;
 using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionDetailById;
-using game_x.application.Features.ChainTransactions.Client.Queries.GetUsdtLedgerDetail;
 
 namespace game_x.api.Controllers.Admin.Chain;
 
@@ -11,7 +10,7 @@ namespace game_x.api.Controllers.Admin.Chain;
 [Route("/api/admin")]
 public sealed class ChainController : BaseApiController
 {
-    [HttpPost("withdrawal/{orderId}/review")]
+    [HttpPost("withdrawal/{orderId:guid}/review")]
     public async Task<IActionResult> ReviewWithdrawalOrderAsync(Guid orderId, [FromBody] AdminReviewWithdrawalOrderCommand command, CancellationToken ct)
     {
         var result = await Mediator.Send(command with {OrderId = orderId}, ct);
@@ -32,7 +31,7 @@ public sealed class ChainController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpGet("chain-transactions/{transactionId}")]
+    [HttpGet("chain-transactions/{transactionId:guid}")]
     public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
     {
         var query = new GetTransactionDetailByIdQuery(transactionId);

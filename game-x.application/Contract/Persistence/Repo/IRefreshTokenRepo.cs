@@ -15,4 +15,6 @@ public interface IRefreshTokenRepo
     Task BulkRevokeAsync(IEnumerable<Guid> publicIds, DateTime revokedAtUtc, CancellationToken ct = default);
 
     Task SyncRefreshTokensAsync(IEnumerable<RefreshTokenDto> tokens, CancellationToken ct = default);
+
+    Task BulkDeleteAsync(IEnumerable<Guid> publicIds, CancellationToken ct = default);
 }

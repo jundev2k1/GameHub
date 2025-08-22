@@ -2,7 +2,7 @@ using System.Text.Json;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.ChainTransactions.Dtos;
+using game_x.application.Events.OnUserBalanceUpdated;
 
 namespace game_x.application.Events.OnTransactionCreated;
 
@@ -11,7 +11,7 @@ public sealed class OnTransactionCreatedHandler(
     IUserRepo userRepo,
     INotificationRepo notificationRepo,
     IAdminHubService adminHubService,
-    IClientHubService clientHubService) : IApplicationEventHandler<OnTransactionCreatedEvent>
+    IApplicationEventDispatcher eventDispatcher) : IApplicationEventHandler<OnTransactionCreatedEvent>
 {
     public async Task Handle(OnTransactionCreatedEvent @event, CancellationToken ct = default)
     {
@@ -57,16 +57,7 @@ public sealed class OnTransactionCreatedHandler(
     {
         if (transaction.UserId != null)
         {
-            UserBalance? balance = transaction.User?.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId);
-            if (balance != null)
-            {
-                await clientHubService.SendBalanceToMemberAsync(
-                    transaction.UserId,
-                    new ClientBalanceDto(
-                        BalanceId: balance.PublicId,
-                        Amount: balance.Amount,
-                        FrozenAmount: balance.FrozenAmount));
-            }
+            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
         }
     }
 }

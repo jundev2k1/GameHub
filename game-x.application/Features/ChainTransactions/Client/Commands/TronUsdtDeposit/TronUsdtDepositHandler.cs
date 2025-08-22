@@ -28,10 +28,10 @@ public sealed class CreateDepositChainTransactionHandler(
         try
         {
             var userId = userAccessor.GetUserId();
-            var localTransaction = await CreateLocalChainTransaction(request, userId, ct);
+            var transaction = await CreateLocalChainTransaction(request, userId, ct);
             await unitOfWork.SaveChangesAsync(ct);
 
-            var uxmRequest = CreateUxmRequest(localTransaction);
+            var uxmRequest = CreateUxmRequest(transaction);
             var result = await uxmService.CreateDepositOrderAsync(uxmRequest);
 
             // Verify UXM signature
@@ -39,15 +39,17 @@ public sealed class CreateDepositChainTransactionHandler(
             var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
             if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
             
-            await UpdateChainTransaction(localTransaction.PublicId, result.Data, ct);
+            await UpdateChainTransaction(transaction.PublicId, result.Data, ct);
 
             await unitOfWork.CommitAsync(ct);
 
+            var updatedTransaction = await chainTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
+            
             return new DepositChainTransactionResponseDto
             {
-                TransactionId = localTransaction.PublicId,
                 Amount = result.Data.Amount,
-                To = result.Data.To
+                To = result.Data.To,
+                Transaction = updatedTransaction.Adapt<ChainTransactionDto>(),
             };
         }
         catch

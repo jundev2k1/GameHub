@@ -202,6 +202,9 @@ public static class MessageCode
         /// <summary>Invalid bank account status.</summary>
         [EnumMetadata("Invalid bank account status.")]
         BankAccountStatusInvalid = 10122,
+        /// <summary>Invalid bank account status.</summary>
+        [EnumMetadata("User extend not found.")]
+        UserExtendNotFound = 10123,
         #endregion
 
         #region ■ Message group: Success
@@ -259,6 +262,9 @@ public static class MessageCode
         /// <summary>Transaction history not found.</summary>
         [EnumMetadata("Transaction history not found.")]
         ChainTransactionHistoryNotFound = 10211,
+        /// <summary>Transaction history not found.</summary>
+        [EnumMetadata("Game transaction not found.")]
+        GameTransactionNotFound = 10212,
         #endregion
     }
 
@@ -286,15 +292,15 @@ public static class MessageCode
         /// <summary>Specified wallet does not exist (e.g., no wallet found for the user or merchant).</summary>
         [EnumMetadata("Specified wallet does not exist (e.g., no wallet found for the user or merchant).")]
         WalletNotFound = 10306,
-        /// <summary>Cannot withdraw to a system wallet.</summary>
-        [EnumMetadata("Cannot withdraw to a system wallet.")]
-        CannotWithdrawToSystemWallet = 10307,
+        /// <summary>Failed to withdraw into the provider's wallet.</summary>
+        [EnumMetadata("Failed to withdraw into the provider's wallet.")]
+        WithdrawalToProviderWalletFailed = 10307,
         /// <summary>The amount must be at least 10 USDT.</summary>
         [EnumMetadata("Invalid amount.")]
         InvalidAmount = 10308,
-        /// <summary>Cannot deposit to a system wallet.</summary>
-        [EnumMetadata("Cannot deposit to a system wallet.")]
-        CannotDepositToSystemWallet = 10309,
+        /// <summary>Failed to deposit into the provider's wallet.</summary>
+        [EnumMetadata("Failed to deposit into the provider's wallet.")]
+        DepositToProviderWalletFailed = 10309,
         #endregion
     }
 

@@ -2,7 +2,6 @@
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Auth.Dtos;
-using Polly;
 
 namespace game_x.persistence.Repo;
 
@@ -77,5 +76,16 @@ public sealed class RefreshTokenRepo(GameXContext context) : IRefreshTokenRepo, 
             ]
         }, cancellationToken: ct);
         context.IsDisableTimestamps = false;
+    }
+
+    public async Task BulkDeleteAsync(IEnumerable<Guid> publicIds, CancellationToken ct = default)
+    {
+        var targetItems = await context.RefreshTokens
+            .Where(rt => publicIds.Contains(rt.PublicId))
+            .ToArrayAsync(ct);
+        if (targetItems.Length == 0) return;
+
+        context.RefreshTokens.RemoveRange(targetItems);
+        await context.SaveChangesAsync(ct);
     }
 }

@@ -749,6 +749,13 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("game_platform");
 
+                    b.Property<string>("Meta")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("{}")
+                        .HasColumnName("meta");
+
                     b.Property<string>("Note")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(4000)

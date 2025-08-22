@@ -2,14 +2,15 @@ using System.Text.Json;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.ChainTransactions.Dtos;
+using game_x.application.Events.OnUserBalanceUpdated;
 
 namespace game_x.application.Events.OnWithdrawalOrderReviewed;
 
 public sealed class OnWithdrawalOrderReviewedHandler(
     IUnitOfWork unitOfWork,
     INotificationRepo notificationRepo,
-    IClientHubService clientHubService) : IApplicationEventHandler<OnWithdrawalOrderReviewedEvent>
+    IClientHubService clientHubService,
+    IApplicationEventDispatcher eventDispatcher) : IApplicationEventHandler<OnWithdrawalOrderReviewedEvent>
 {
     public async Task Handle(OnWithdrawalOrderReviewedEvent @event, CancellationToken ct = default)
     {
@@ -35,21 +36,9 @@ public sealed class OnWithdrawalOrderReviewedHandler(
             
             await clientHubService.SendTransactionToMemberAsync(
                 transaction.UserId,
-                new ClientTransactionDto(
-                    TransactionId: transaction.PublicId,
-                    Status: transaction.Status.ToString().ToLower(),
-                    Type: transaction.Type.ToString().ToLower()));
+                transaction.Adapt<ClientTransactionDto>());
             
-            UserBalance? balance = transaction.User?.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId);
-            if (balance != null)
-            {
-                await clientHubService.SendBalanceToMemberAsync(
-                    transaction.UserId,
-                    new ClientBalanceDto(
-                        BalanceId: balance.PublicId,
-                        Amount: balance.Amount,
-                        FrozenAmount: balance.FrozenAmount));
-            }
+            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
         }
     }
 }

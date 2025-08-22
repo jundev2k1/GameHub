@@ -131,7 +131,7 @@ public sealed class CriteriaBuilder<TModel> : ICriteriaBuilder<TModel>
         var resultExpression = Expression.Call(
             typeof(Queryable),
             methodName,
-            new[] { typeof(TModel), property.Type },
+            [typeof(TModel), property.Type],
             query.Expression,
             Expression.Quote(lambda));
 

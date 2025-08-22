@@ -12,7 +12,6 @@ public sealed class GetMyTransactionsValidator : AbstractValidator<GetMyTransact
         nameof(ChainTransactionDto.UserId),
         nameof(ChainTransactionDto.Status),
         nameof(ChainTransactionDto.Amount),
-        nameof(ChainTransactionDto.BalanceAfter),
         nameof(ChainTransactionDto.Type),
         nameof(ChainTransactionDto.UpdatedAt),
         nameof(ChainTransactionDto.CreatedAt)
@@ -22,7 +21,6 @@ public sealed class GetMyTransactionsValidator : AbstractValidator<GetMyTransact
     [
         nameof(ChainTransactionDto.Status),
         nameof(ChainTransactionDto.Amount),
-        nameof(ChainTransactionDto.BalanceAfter),
         nameof(ChainTransactionDto.Type),
         nameof(ChainTransactionDto.UpdatedAt),
         nameof(ChainTransactionDto.CreatedAt)

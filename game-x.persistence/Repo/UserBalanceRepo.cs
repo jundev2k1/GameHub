@@ -25,6 +25,7 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
     public async Task<UserBalance?> GetByUserIdAndTokenIdAsync(string userId, int cryptoTokenId, CancellationToken ct = default)
     {
         return await context.UserBalances
+            .Include(x => x.CryptoToken)
             .FirstOrDefaultAsync(x => x.UserId == userId && x.CryptoTokenId == cryptoTokenId, ct);
     }
 

@@ -1,6 +1,7 @@
 namespace game_x.application.Contract.Infrastructure.SignalR.Dtos;
 
-public record GameBalanceDto(
+public record GameBalanceNotificationDto(
     decimal Amount,
     decimal FrozenAmount,
-    string Network);
+    string Network,
+    string Symbol);

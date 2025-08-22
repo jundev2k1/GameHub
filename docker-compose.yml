@@ -24,12 +24,13 @@ services:
      
       - RefreshTokenSettings__DurationInMinutes=${REFRESHTOKEN_EXPIRED_MINUTES}
 
-      - EngageLab_BaseUrl=${EngageLab_BaseUrl}
-      - EngageLab_ApiUser=${EngageLab_ApiUser}
-      - EngageLab_ApiKey=${EngageLab_ApiKey}
-      - EngageLab_From=${EngageLab_From}
+      - EngageLab__BaseUrl=${EngageLab_BaseUrl}
+      - EngageLab__ApiUser=${EngageLab_ApiUser}
+      - EngageLab__ApiKey=${EngageLab_ApiKey}
+      - EngageLab__From=${EngageLab_From}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - RecurringJob_SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
+      - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
+      - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
       
       - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
       - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}

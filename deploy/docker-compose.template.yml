@@ -39,8 +39,8 @@ services:
       - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
       - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
 
-      - RecurringJobSettings__DashboardStatisticJob=${RecurringJob_DashboardStatisticJob}
-      - RecurringJobSettings__SessionCleanUpJob=${RecurringJob_SessionCleanUpJob}
+      - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
+      - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
 
       - EngageLabSettings__BaseUrl=${EngageLab_BaseUrl}
       - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
