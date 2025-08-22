@@ -28,7 +28,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
 {
     public async Task<Unit> Handle(AdminReviewWithdrawalOrderCommand request, CancellationToken ct = default)
     {
-        var transaction = await chainTransactionRepo.GetByIdAsync(request.OrderId, ct);
+        var transaction = await chainTransactionRepo.GetByIdAsync(request.OrderId ?? Guid.Empty, ct);
 
         // The transaction already exists on the blockchain
         if (transaction.Hash?.IsNotNullOrEmpty() == true)
