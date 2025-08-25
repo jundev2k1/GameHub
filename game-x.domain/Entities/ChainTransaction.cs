@@ -31,6 +31,8 @@ public sealed class ChainTransaction : BaseEntity<int>, IAuditable
     public string Meta { get; set; } = "{}";
     public string? Note { get; set; }
 
+    public decimal TotalAmount => Amount + Fee;
+    
     public static ChainTransaction Create(
         string userId,
         string orderNumber,

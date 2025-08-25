@@ -1,4 +1,5 @@
 using System.Text.Json;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
@@ -10,7 +11,8 @@ public sealed class OnWithdrawalOrderReviewedHandler(
     IUnitOfWork unitOfWork,
     INotificationRepo notificationRepo,
     IClientHubService clientHubService,
-    IApplicationEventDispatcher eventDispatcher) : IApplicationEventHandler<OnWithdrawalOrderReviewedEvent>
+    IApplicationEventDispatcher eventDispatcher,
+    IAppLogger<User> logger) : IApplicationEventHandler<OnWithdrawalOrderReviewedEvent>
 {
     public async Task Handle(OnWithdrawalOrderReviewedEvent @event, CancellationToken ct = default)
     {
@@ -20,25 +22,32 @@ public sealed class OnWithdrawalOrderReviewedHandler(
 
     private async Task SendToMember(ChainTransaction transaction, CancellationToken ct)
     {
-        var notification = Notification.Create(
-            NotificationMessageKey.Transaction_Reviewed,
-            transaction.UserId,
-            NotificationType.Transaction,
-            NotificationSeverity.Success,
-            JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
-        await notificationRepo.AddNotificationAsync(notification, ct);
-
-        if (transaction.UserId != null)
+        try
         {
-            await clientHubService.SendNotificationToMemberAsync(
+            var notification = Notification.Create(
+                NotificationMessageKey.Transaction_Reviewed,
                 transaction.UserId,
-                notification.Adapt<NotificationDto>());
+                NotificationType.Transaction,
+                NotificationSeverity.Success,
+                JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
+            await notificationRepo.AddNotificationAsync(notification, ct);
+
+            if (transaction.UserId != null)
+            {
+                await clientHubService.SendNotificationToMemberAsync(
+                    transaction.UserId,
+                    notification.Adapt<NotificationDto>());
             
-            await clientHubService.SendTransactionToMemberAsync(
-                transaction.UserId,
-                transaction.Adapt<ClientTransactionDto>());
+                await clientHubService.SendTransactionToMemberAsync(
+                    transaction.UserId,
+                    transaction.Adapt<ClientTransactionDto>());
             
-            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
+                await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to envoke signals to members", ex.Message);
         }
     }
 }
