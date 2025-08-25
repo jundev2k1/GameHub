@@ -100,7 +100,7 @@ public sealed class TronUsdtWithdrawalHandler(
         var balance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
             ?? throw new BadRequestException(MessageCode.Accounting.WalletNotFound);
 
-        decimal feeAmount = 3m;
+        decimal feeAmount = userBalanceService.GetWithdrawalFree();
         decimal totalAmount = amount + feeAmount;
 
         if (balance.Amount < totalAmount)

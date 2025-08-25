@@ -120,7 +120,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         if (balance == null)
             throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
-        decimal refundAmount = chainTransaction.Amount + chainTransaction.Fee;
+        decimal refundAmount = chainTransaction.TotalAmount;
 
         try
         {

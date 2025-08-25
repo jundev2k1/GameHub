@@ -13,7 +13,7 @@ public class UserDetailDto
     public bool IsKycConfirmed { get; set; }
     public bool IsBankConfirmed { get; set; }
     public BalanceInfo[] Balances { get; set; } = [];
-    public UserExtendDto UserExtendInfo { get; set; } = default!;
+    public UserExtendDto? UserExtendInfo { get; set; } = default!;
     public AppRole Roles { get; set; } = default!;
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

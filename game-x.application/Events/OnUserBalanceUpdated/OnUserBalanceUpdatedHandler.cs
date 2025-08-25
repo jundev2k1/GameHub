@@ -25,21 +25,28 @@ public sealed class OnUserBalanceUpdatedHandler(
 
     private async Task SendToMember(string userId, CancellationToken ct)
     {
-        // Get user details with all balances
-        var userDetail = await userRepo.GetUserDetailAsync(userId, ct);
-        var gameBalance = await GetExternalWallet(userDetail?.UserExtendInfo?.GameProviderAccount);
+        try
+        {
+            // Get user details with all balances
+            var userDetail = await userRepo.GetUserDetailAsync(userId, ct);
+            var gameBalance = await GetExternalWallet(userDetail.UserExtendInfo?.GameProviderAccount);
 
-        // Create site balances from user balances
-        var siteBalances = userDetail.Balances.Select(b => b.Adapt<ClientCryptoBalanceDto>()).ToArray();
+            // Create site balances from user balances
+            var siteBalances = userDetail.Balances.Select(b => b.Adapt<ClientCryptoBalanceDto>()).ToArray();
 
-        var walletsData = new ClientWalletsDto(
-            SiteBalances: siteBalances,
-            GameBalance: gameBalance
-        );
+            var walletsData = new ClientWalletsDto(
+                SiteBalances: siteBalances,
+                GameBalance: gameBalance
+            );
 
-        await clientHubService.SendWalletsToMemberAsync(
-            userId,
-            walletsData);
+            await clientHubService.SendWalletsToMemberAsync(
+                userId,
+                walletsData);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to envoke BalanceUpdated signal", ex.Message);
+        }
     }
 
     private async Task<decimal?> GetExternalWallet(string? account)

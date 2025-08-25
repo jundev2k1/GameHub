@@ -28,7 +28,7 @@ public static class ChainTransactionMapping
         return result with {
             MerchantNumber = merchantNumber,
             OrderNumber = transaction.OrderNumber,
-            Amount =  transaction.Amount,
+            Amount =  transaction.TotalAmount,
             To = transaction.ToAddress ?? string.Empty,
             Remark = transaction.Note ?? string.Empty
         };

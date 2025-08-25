@@ -24,7 +24,6 @@ public sealed class RootLoginHandler(
         var tokenInfo = await jwtTokenGenerator.GenerateToken(user);
         var refreshToken = tokenService.GenerateRefreshToken(user.Id);
         CreateRefreshToken(user.Id, refreshToken, tokenInfo.JwtId);
-        refreshTokenManager.RevokeAllTokenSameDevice(user.Id, refreshToken.Token);
 
         return new RootLoginResult(tokenInfo.Token, refreshToken.Token);
     }

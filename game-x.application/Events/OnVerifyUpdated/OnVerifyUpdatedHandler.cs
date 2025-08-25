@@ -22,12 +22,11 @@ public sealed class OnVerifyUpdatedHandler(
 
     private async Task SendToMember(string userId, VerificationStatusDto verificationDto, CancellationToken ct)
     {
-        // Create notification data with enum as strings
-        var notificationData = new
+        var notificationDto = new VerificationNotificationDto
         {
             CurrencyCode = verificationDto.CurrencyCode,
-            Type = verificationDto.Type.ToString(),
-            Status = verificationDto.Status.ToString(),
+            Type = verificationDto.Type.ToString().ToLower(),
+            Status = verificationDto.Status.ToString().ToLower(),
             IsVerified = verificationDto.IsVerified
         };
 
@@ -36,7 +35,7 @@ public sealed class OnVerifyUpdatedHandler(
             userId,
             NotificationType.Info,
             NotificationSeverity.Info,
-            JsonSerializer.Serialize(notificationData));
+            JsonSerializer.Serialize(notificationDto));
         await notificationRepo.AddNotificationAsync(notification, ct);
 
         await clientHubService.SendVerifyUpdateAsync(
