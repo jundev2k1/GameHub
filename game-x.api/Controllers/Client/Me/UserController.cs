@@ -72,8 +72,7 @@ public sealed class UserController(IRefreshTokenManagerCacheService refreshToken
 
         if (targetToken!.JwtId == currentJwtId)
             return BadRequest(ApiResponseFactory.Error(
-                MessageCode.User.UserNotAllowed,
-                "You cannot revoke the current token. Please log out to invalidate it."));
+                MessageCode.System.Forbidden));
 
         var command = new RevokeTokenCommand(userId!, tokenId);
 

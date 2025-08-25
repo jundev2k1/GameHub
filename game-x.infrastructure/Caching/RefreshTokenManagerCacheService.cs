@@ -1,5 +1,4 @@
-﻿using game_x.application.Common.Abstractions.Pagination;
-using game_x.application.Contract.Infrastructure.Caching;
+﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
@@ -58,49 +57,6 @@ public sealed class RefreshTokenManagerCacheService(
                 yield return token;
             }
         }
-    }
-    public PaginationResult<RefreshTokenDto> GetRefreshTokenByCriteria(
-        Func<IQueryable<RefreshTokenDto>, IQueryable<RefreshTokenDto>>? queryBuilder = null,
-        int page = 1,
-        int pageSize = 20,
-        CancellationToken ct = default)
-    {
-        // Build danh sách token từ DataSource
-        var tokens = new List<RefreshTokenDto>();
-        foreach (var kvp in DataSource)
-        {
-            var userId = kvp.Key;
-            foreach (var tokenId in kvp.Value)
-            {
-                var cacheKey = $"{CacheKeyPrefix}:{userId}:{tokenId}";
-                var token = Get<RefreshTokenDto>(cacheKey);
-                if (token is null) continue;
-
-                tokens.Add(token);
-            }
-        }
-        var query = tokens
-            .Where(rt => !rt.IsRevoked && !rt.IsExpired)
-            .AsQueryable();
-
-        if (queryBuilder is not null)
-            query = queryBuilder(query);
-
-        // Phân trang
-        var totalItems = query.Count();
-        var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-        var pagedItems = query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
-        return new PaginationResult<RefreshTokenDto>(
-            pagedItems,
-            totalItems,
-            totalPages,
-            page,
-            pageSize
-        );
     }
 
     public IEnumerable<RefreshTokenDto> GetsByUserId(string userId)

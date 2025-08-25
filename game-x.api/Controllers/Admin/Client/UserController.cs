@@ -32,24 +32,6 @@ public sealed class UserController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpGet("tokens")]
-    public async Task<IActionResult> GetAllActiveTokensAsync([AsParameters] SearchCriteriaRequest parameters)
-    {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
-        var sorts = QueryConverter.ToSorts(parameters.Sorts);
-
-        var query = new GetAllActiveTokensByAdminQuery(
-            filters,
-            sorts,
-            parameters.PageNumber,
-            parameters.PageSize
-        );
-
-        var result = await Mediator.Send(query);
-        return ApiResponseFactory.Ok(result);
-    }
-
-
     [HttpGet("{userId}/tokens")]
     public async Task<IActionResult> GetActiveTokensAsync(string userId)
     {
@@ -58,7 +40,7 @@ public sealed class UserController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpDelete("{tokenId}/tokens")]
+    [HttpDelete("{userId}/tokens/{tokenId}")]
     public async Task<IActionResult> RevokeTokenAsync(string userId, Guid tokenId)
     {
         var command = new RevokeTokenCommand(userId, tokenId);
