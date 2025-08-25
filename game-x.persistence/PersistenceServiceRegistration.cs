@@ -1,7 +1,6 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.persistence.Interceptors;
-using game_x.persistence.Repo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -132,7 +131,6 @@ public static class PersistenceServiceRegistration
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
-        services.AddScoped<IGameTransactionRepo, GameTransactionRepo>();
         return services;
     }
 
