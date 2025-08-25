@@ -31,7 +31,6 @@ public sealed class UserLoginHandler(
         var tokenInfo = await jwtTokenGenerator.GenerateToken(loginUser);
         var refreshToken = tokenService.GenerateRefreshToken(loginUser.Id);
         CreateRefreshToken(loginUser.Id, refreshToken, tokenInfo.JwtId);
-        refreshTokenManager.RevokeAllTokenSameDevice(loginUser.Id, refreshToken.Token);
 
         await eventDispatcher.Publish(new OnUserLoginEvent(loginUser.Id), ct);
 

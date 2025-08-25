@@ -26,7 +26,6 @@ public sealed class CsLoginHandler(
         var tokenInfo = await jwtTokenGenerator.GenerateToken(loginUser);
         var refreshToken = tokenService.GenerateRefreshToken(loginUser.Id);
         CreateRefreshToken(loginUser.Id, refreshToken, tokenInfo.JwtId);
-        refreshTokenManager.RevokeAllTokenSameDevice(loginUser.Id, refreshToken.Token);
 
         return new CsLoginResult(
             UserId: loginUser.Id,
