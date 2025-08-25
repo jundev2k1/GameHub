@@ -13,7 +13,7 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    [Migration("20250822111233_AddGameProvidersEntity")]
+    [Migration("20250825042951_AddGameProvidersEntity")]
     partial class AddGameProvidersEntity
     {
         /// <inheritdoc />
@@ -25,44 +25,6 @@ namespace game_x.persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("GameGameCategory", b =>
-                {
-                    b.Property<int>("CategoriesId")
-                        .HasColumnType("integer")
-                        .HasColumnName("categories_id");
-
-                    b.Property<int>("GamesId")
-                        .HasColumnType("integer")
-                        .HasColumnName("games_id");
-
-                    b.HasKey("CategoriesId", "GamesId")
-                        .HasName("pk_game_game_category");
-
-                    b.HasIndex("GamesId")
-                        .HasDatabaseName("ix_game_game_category_games_id");
-
-                    b.ToTable("game_game_category", (string)null);
-                });
-
-            modelBuilder.Entity("GameGameType", b =>
-                {
-                    b.Property<int>("GameTypesId")
-                        .HasColumnType("integer")
-                        .HasColumnName("game_types_id");
-
-                    b.Property<int>("GamesId")
-                        .HasColumnType("integer")
-                        .HasColumnName("games_id");
-
-                    b.HasKey("GameTypesId", "GamesId")
-                        .HasName("pk_game_game_type");
-
-                    b.HasIndex("GamesId")
-                        .HasDatabaseName("ix_game_game_type_games_id");
-
-                    b.ToTable("game_game_type", (string)null);
-                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
@@ -912,6 +874,45 @@ namespace game_x.persistence.Migrations
                     b.ToTable("game_categories", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.GameCategoryMapping", b =>
+                {
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("category_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_primary");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("priority");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("GameId", "CategoryId")
+                        .HasName("pk_game_category_mappings");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_game_category_mappings_category_id");
+
+                    b.ToTable("game_category_mappings", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GamePlatform", b =>
                 {
                     b.Property<int>("Id")
@@ -1139,6 +1140,45 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_game_types_code");
 
                     b.ToTable("game_types", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameTypeMapping", b =>
+                {
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
+
+                    b.Property<int>("TypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("type_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_primary");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("priority");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("GameId", "TypeId")
+                        .HasName("pk_game_type_mappings");
+
+                    b.HasIndex("TypeId")
+                        .HasDatabaseName("ix_game_type_mappings_type_id");
+
+                    b.ToTable("game_type_mappings", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.MediaFile", b =>
@@ -2360,40 +2400,6 @@ namespace game_x.persistence.Migrations
                     b.ToTable("user_usdt_ledgers", (string)null);
                 });
 
-            modelBuilder.Entity("GameGameCategory", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.GameCategory", null)
-                        .WithMany()
-                        .HasForeignKey("CategoriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_game_game_category_game_category_categories_id");
-
-                    b.HasOne("game_x.domain.Entities.Game", null)
-                        .WithMany()
-                        .HasForeignKey("GamesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_game_game_category_game_games_id");
-                });
-
-            modelBuilder.Entity("GameGameType", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.GameType", null)
-                        .WithMany()
-                        .HasForeignKey("GameTypesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_game_game_type_game_type_game_types_id");
-
-                    b.HasOne("game_x.domain.Entities.Game", null)
-                        .WithMany()
-                        .HasForeignKey("GamesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_game_game_type_game_games_id");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("game_x.domain.Entities.Role", null)
@@ -2546,9 +2552,30 @@ namespace game_x.persistence.Migrations
                         .HasForeignKey("PlatformId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_games_game_platform_platform_id");
+                        .HasConstraintName("fk_games_game_platforms_platform_id");
 
                     b.Navigation("Platform");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameCategoryMapping", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.GameCategory", "Category")
+                        .WithMany("GameCategoryMappings")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_category_mappings_game_categories_category_id");
+
+                    b.HasOne("game_x.domain.Entities.Game", "Game")
+                        .WithMany("GameCategoryMappings")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_category_mappings_games_game_id");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Game");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.GameTransaction", b =>
@@ -2564,7 +2591,7 @@ namespace game_x.persistence.Migrations
                         .HasForeignKey("GamePlatformId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_game_transactions_game_platform_game_platform_id");
+                        .HasConstraintName("fk_game_transactions_game_platforms_game_platform_id");
 
                     b.HasOne("game_x.domain.Entities.User", "User")
                         .WithMany("GameTransactions")
@@ -2578,6 +2605,27 @@ namespace game_x.persistence.Migrations
                     b.Navigation("GamePlatform");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameTypeMapping", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Game", "Game")
+                        .WithMany("GameTypeMappings")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_type_mappings_games_game_id");
+
+                    b.HasOne("game_x.domain.Entities.GameType", "Type")
+                        .WithMany("GameTypeMappings")
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_type_mappings_game_types_type_id");
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.Message", b =>
@@ -2882,6 +2930,18 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Messages");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.Game", b =>
+                {
+                    b.Navigation("GameCategoryMappings");
+
+                    b.Navigation("GameTypeMappings");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameCategory", b =>
+                {
+                    b.Navigation("GameCategoryMappings");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GamePlatform", b =>
                 {
                     b.Navigation("GameTransactions");
@@ -2892,6 +2952,11 @@ namespace game_x.persistence.Migrations
             modelBuilder.Entity("game_x.domain.Entities.GameTransaction", b =>
                 {
                     b.Navigation("Ledger");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameType", b =>
+                {
+                    b.Navigation("GameTypeMappings");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.Message", b =>

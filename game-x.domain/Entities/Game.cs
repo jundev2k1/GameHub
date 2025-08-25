@@ -1,6 +1,6 @@
 ﻿namespace game_x.domain.Entities;
 
-public sealed class Game : BaseEntity<int>
+public sealed class Game : BaseEntity<int>, IAuditable
 {
     public Guid PublicId { get; private set; } = Guid.NewGuid();
     public string GameCode { get; private set; } = string.Empty;
@@ -11,8 +11,8 @@ public sealed class Game : BaseEntity<int>
     public string Note { get; private set; } = string.Empty;
     public int Priority { get; private set; }
     public bool IsActive { get; private set; } = true;
-    public ICollection<GameCategory> Categories { get; private set; } = default!;
-    public ICollection<GameType> GameTypes { get; private set; } = default!;
+    public ICollection<GameCategoryMapping> GameCategoryMappings { get; private set; } = default!;
+    public ICollection<GameTypeMapping> GameTypeMappings { get; private set; } = default!;
 
     public static Game Create(string name, string gameCode, string desc, string note, int priority)
     {
@@ -27,5 +27,45 @@ public sealed class Game : BaseEntity<int>
             Note = note,
             Priority = priority,
         };
+    }
+
+    public void UpdatePlatform(GamePlatform platform)
+    {
+        ArgumentNullException.ThrowIfNull(platform, nameof(platform));
+
+        Platform = platform;
+        PlatformId = platform.Id;
+    }
+
+    public void AddCategory(GameCategory category)
+    {
+        ArgumentNullException.ThrowIfNull(category, nameof(category));
+
+        GameCategoryMappings ??= [];
+        if (GameCategoryMappings.Any(c => c.Category.PublicId == category.PublicId))
+            throw new InvalidOperationException($"Category with PublicId {category.PublicId} already exists in the game.");
+
+        var gameCategoryMapping = GameCategoryMapping.Create(this, category);
+        var hasPrimary = GameCategoryMappings.Any(c => c.IsPrimary);
+        if (!hasPrimary)
+            gameCategoryMapping.SetPrimary(true);
+
+        GameCategoryMappings.Add(gameCategoryMapping);
+    }
+
+    public void AddType(GameType type)
+    {
+        ArgumentNullException.ThrowIfNull(type, nameof(type));
+
+        GameTypeMappings ??= [];
+        if (GameTypeMappings.Any(t => t.Type.PublicId == type.PublicId))
+            throw new InvalidOperationException($"Type with PublicId {type.PublicId} already exists in the game.");
+
+        var gameTypeMapping = GameTypeMapping.Create(this, type);
+        var hasPrimary = GameTypeMappings.Any(c => c.IsPrimary);
+        if (!hasPrimary)
+            gameTypeMapping.SetPrimary(true);
+
+        GameTypeMappings.Add(gameTypeMapping);
     }
 }

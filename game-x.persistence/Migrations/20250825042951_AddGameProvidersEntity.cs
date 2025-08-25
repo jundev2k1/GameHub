@@ -104,7 +104,7 @@ namespace game_x.persistence.Migrations
                 {
                     table.PrimaryKey("pk_games", x => x.id);
                     table.ForeignKey(
-                        name: "fk_games_game_platform_platform_id",
+                        name: "fk_games_game_platforms_platform_id",
                         column: x => x.platform_id,
                         principalTable: "game_platforms",
                         principalColumn: "id",
@@ -112,49 +112,57 @@ namespace game_x.persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "game_game_category",
+                name: "game_category_mappings",
                 columns: table => new
                 {
-                    categories_id = table.Column<int>(type: "integer", nullable: false),
-                    games_id = table.Column<int>(type: "integer", nullable: false)
+                    game_id = table.Column<int>(type: "integer", nullable: false),
+                    category_id = table.Column<int>(type: "integer", nullable: false),
+                    is_primary = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    priority = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_game_game_category", x => new { x.categories_id, x.games_id });
+                    table.PrimaryKey("pk_game_category_mappings", x => new { x.game_id, x.category_id });
                     table.ForeignKey(
-                        name: "fk_game_game_category_game_category_categories_id",
-                        column: x => x.categories_id,
+                        name: "fk_game_category_mappings_game_categories_category_id",
+                        column: x => x.category_id,
                         principalTable: "game_categories",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_game_game_category_game_games_id",
-                        column: x => x.games_id,
+                        name: "fk_game_category_mappings_games_game_id",
+                        column: x => x.game_id,
                         principalTable: "games",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "game_game_type",
+                name: "game_type_mappings",
                 columns: table => new
                 {
-                    game_types_id = table.Column<int>(type: "integer", nullable: false),
-                    games_id = table.Column<int>(type: "integer", nullable: false)
+                    game_id = table.Column<int>(type: "integer", nullable: false),
+                    type_id = table.Column<int>(type: "integer", nullable: false),
+                    is_primary = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    priority = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_game_game_type", x => new { x.game_types_id, x.games_id });
+                    table.PrimaryKey("pk_game_type_mappings", x => new { x.game_id, x.type_id });
                     table.ForeignKey(
-                        name: "fk_game_game_type_game_games_id",
-                        column: x => x.games_id,
-                        principalTable: "games",
+                        name: "fk_game_type_mappings_game_types_type_id",
+                        column: x => x.type_id,
+                        principalTable: "game_types",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_game_game_type_game_type_game_types_id",
-                        column: x => x.game_types_id,
-                        principalTable: "game_types",
+                        name: "fk_game_type_mappings_games_game_id",
+                        column: x => x.game_id,
+                        principalTable: "games",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -171,20 +179,20 @@ namespace game_x.persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_game_game_category_games_id",
-                table: "game_game_category",
-                column: "games_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_game_game_type_games_id",
-                table: "game_game_type",
-                column: "games_id");
+                name: "ix_game_category_mappings_category_id",
+                table: "game_category_mappings",
+                column: "category_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_game_platforms_code",
                 table: "game_platforms",
                 column: "code",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_game_type_mappings_type_id",
+                table: "game_type_mappings",
+                column: "type_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_game_types_code",
@@ -204,7 +212,7 @@ namespace game_x.persistence.Migrations
                 column: "platform_id");
 
             migrationBuilder.AddForeignKey(
-                name: "fk_game_transactions_game_platform_game_platform_id",
+                name: "fk_game_transactions_game_platforms_game_platform_id",
                 table: "game_transactions",
                 column: "game_platform_id",
                 principalTable: "game_platforms",
@@ -216,23 +224,23 @@ namespace game_x.persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "fk_game_transactions_game_platform_game_platform_id",
+                name: "fk_game_transactions_game_platforms_game_platform_id",
                 table: "game_transactions");
 
             migrationBuilder.DropTable(
-                name: "game_game_category");
+                name: "game_category_mappings");
 
             migrationBuilder.DropTable(
-                name: "game_game_type");
+                name: "game_type_mappings");
 
             migrationBuilder.DropTable(
                 name: "game_categories");
 
             migrationBuilder.DropTable(
-                name: "games");
+                name: "game_types");
 
             migrationBuilder.DropTable(
-                name: "game_types");
+                name: "games");
 
             migrationBuilder.DropTable(
                 name: "game_platforms");

@@ -9,14 +9,15 @@ public sealed class GameType : BaseEntity<int>, IAuditable
     public int Priority { get; private set; }
     public bool IsActive { get; private set; } = true;
 
-    public ICollection<Game> Games { get; private set; } = default!;
+    public ICollection<GameTypeMapping> GameTypeMappings { get; private set; } = default!;
 
-    public static GameType Create(string name, string desc, string note, int priority)
+    public static GameType Create(string name, string desc, string note, int priority, Guid? publicId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
 
         return new GameType
         {
+            PublicId = publicId ?? Guid.NewGuid(),
             Name = name,
             Description = desc,
             Note = note,

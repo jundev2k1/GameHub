@@ -12,12 +12,13 @@ public sealed class GamePlatform : BaseEntity<int>
     public ICollection<Game> Games { get; private set; } = default!;
     public ICollection<GameTransaction> GameTransactions { get; private set; } = default!;
 
-    public static GamePlatform Create(string name, string desc, string note, int priority)
+    public static GamePlatform Create(string name, string desc, string note, int priority, Guid? publicId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
 
         return new GamePlatform
         {
+            PublicId = publicId ?? Guid.NewGuid(),
             Name = name,
             Description = desc,
             Note = note,
