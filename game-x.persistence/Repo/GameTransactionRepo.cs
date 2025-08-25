@@ -38,7 +38,35 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
             page,
             pageSize);
     }
-    
+    public async Task<PaginationResult<GameTransaction>> GetTransactionByCriteriaAsync(
+        Func<IQueryable<GameTransaction>, IQueryable<GameTransaction>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.GameTransactions
+            .AsNoTracking()
+            .Include(x => x.CryptoToken)
+            .Include(x => x.Ledger)
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<GameTransaction>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
+
     public async Task<GameTransaction> GetByIdAndUserIdAsync(string userId, Guid publicId, CancellationToken ct = default)
     {
         return await context.GameTransactions
@@ -50,13 +78,23 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
                    .FirstOrDefaultAsync(x => x.PublicId == publicId && x.UserId == userId, ct)
                ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
-    
+    public async Task<GameTransaction> GetByIdAsync(Guid publicId, CancellationToken ct = default)
+    {
+        return await context.GameTransactions
+            .AsNoTracking()
+            .Include(t => t.User!)
+                .ThenInclude(u => u.UserBalances)
+            .Include(t => t.CryptoToken)
+            .Include(t => t.Ledger)
+            .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
+            ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
+    }
     public async Task<GameTransaction> AddAsync(GameTransaction entity, CancellationToken ct = default)
     {
         await context.GameTransactions.AddAsync(entity, ct);
         return entity;
     }
-    
+
     public async Task PatchUpdateAsync(Guid publicId, Action<GameTransaction> updateAction, CancellationToken ct = default)
     {
         var transaction = await context.GameTransactions

@@ -13,15 +13,6 @@ public sealed class GetUserCriteriaByAdminHandler(
     )
     : IQueryHandler<GetUserCriteriaByAdminQuery, PaginationResult<UserDto>>
 {
-    private readonly Dictionary<string, Func<object, Expression<Func<UserDto, bool>>>> _options =
-        new()
-        {
-            // ["createdByName"] = value => user => user.Staff != null && user.Staff.UserName == value.ToString(),
-            // ["createdById"] = value => user => user.Staff != null && user.Staff.Id == value.ToString(),
-            // ["passportNumber"] = value =>
-            //     user => user.Passport != null && user.Passport.PassportNumber == value.ToString()
-        };
-
     public async Task<PaginationResult<UserDto>> Handle(GetUserCriteriaByAdminQuery request,
         CancellationToken ct = default)
     {
@@ -34,14 +25,12 @@ public sealed class GetUserCriteriaByAdminHandler(
                     user =>
                         (user.Nickname != null && user.Nickname.Contains(keyword)) ||
                         (user.UserName != null && user.UserName.Contains(keyword)) ||
-                        (user.Email != null && user.Email.Contains(keyword)),
-                _options)
+                        (user.Email != null && user.Email.Contains(keyword)))
             ,
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);
 
-        // var result = userMapper.ToUserDtos(items);
         return items;
     }
 }

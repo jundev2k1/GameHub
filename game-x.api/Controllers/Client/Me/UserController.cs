@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.Accounts.User.Commands.UserSelfUpdate;
@@ -7,12 +8,13 @@ using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 using game_x.application.Features.Accounts.User.Queries.GetSelfVerificationStatusList;
 using game_x.application.Features.Auth.Client.Commands.ChangePasswordUser;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace game_x.api.Controllers.Client.Me;
 
 [Authorize(Roles = AppRoles.User)]
 [Route("api/user/me")]
-public sealed class UserController : BaseApiController
+public sealed class UserController(IRefreshTokenManagerCacheService refreshTokenManager) : BaseApiController
 {
     [HttpGet]
     public async Task<IActionResult> GetUserDetailAsync()
@@ -64,7 +66,16 @@ public sealed class UserController : BaseApiController
     public async Task<IActionResult> RevokeTokenAsync(Guid tokenId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = new RevokeTokenCommand(userId, tokenId);
+        var currentJwtId = User.FindFirstValue(JwtRegisteredClaimNames.Jti);
+        var tokens = refreshTokenManager.GetsByUserId(userId!);
+        var targetToken = tokens.FirstOrDefault(t => t.PublicId == tokenId);
+
+        if (targetToken!.JwtId == currentJwtId)
+            return BadRequest(ApiResponseFactory.Error(
+                MessageCode.User.UserNotAllowed,
+                "You cannot revoke the current token. Please log out to invalidate it."));
+
+        var command = new RevokeTokenCommand(userId!, tokenId);
 
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();

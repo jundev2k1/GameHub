@@ -2,9 +2,9 @@ using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Dtos;
 
-namespace game_x.application.Features.Games.Queries.GetMyGameTransactions;
+namespace game_x.application.Features.Games.Client.Queries.GetGameTransactions;
 
-public record GetMyGameTransactionsQuery(
+public record GetGameTransactionsQuery(
     IEnumerable<QueryFilter> Filters,
     IEnumerable<QuerySort> Sorts,
     int? PageIndex,

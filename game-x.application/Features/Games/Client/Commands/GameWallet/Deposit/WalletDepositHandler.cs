@@ -9,7 +9,7 @@ using game_x.application.Features.Games.Dtos;
 using game_x.application.Utils;
 using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
 
-namespace game_x.application.Features.Games.Commands.GameWallet.Deposit;
+namespace game_x.application.Features.Games.Client.Commands.GameWallet.Deposit;
 
 public sealed class WalletDepositHandler(
     IUserAccessor userAccessor,
@@ -29,7 +29,7 @@ public sealed class WalletDepositHandler(
         var currentUser = await GetCurrentUserAsync(ct);
         var balance = await GetUserBalanceAsync(currentUser.Id, command, ct);
         var transaction = await CreateTransactionAsync(currentUser.Id, balance.CryptoToken.Id, command, ct);
-        
+
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
@@ -38,13 +38,13 @@ public sealed class WalletDepositHandler(
             await userBalanceRepo.PutUpdateAsync(balance, ct);
             await userUsdtLedgerService.CreateForGameTransactionAsync(transaction);
             await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, x => x.Status = GameTransactionStatus.Completed, ct);
-                    
+
             // Rollback all processing if the transaction fails at the third party
             await DepositToProviderWalletAsync(
                 gameProviderAccount: currentUser.UserExtend!.GameProviderAccount,
                 sno: transaction.G598Sno,
                 amount: transaction.Amount);
-                    
+
             await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
             return transaction.Adapt<GameTransactionDto>();
         }
@@ -57,11 +57,11 @@ public sealed class WalletDepositHandler(
                 x.Status = GameTransactionStatus.Failed;
                 x.UpdateMeta(m => m.ErrorMessage = ex.Message);
             }, ct);
-                    
+
             throw;
         }
     }
-    
+
     private async Task<User> GetCurrentUserAsync(CancellationToken ct)
     {
         var userId = userAccessor.GetUserId();
@@ -74,11 +74,11 @@ public sealed class WalletDepositHandler(
 
         return currentUser;
     }
-    
+
     private async Task<UserBalance> GetUserBalanceAsync(string userId, WalletDepositCommand command, CancellationToken ct)
     {
         var token = await cryptoTokenRepo.GetByIdAsync(command.CryptoTokenId, ct);
-        if(token.Status != CryptoTokenStatus.Active)
+        if (token.Status != CryptoTokenStatus.Active)
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
 
         var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
@@ -87,10 +87,10 @@ public sealed class WalletDepositHandler(
 
         if (userBalance.Amount < command.Amount)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
-        
+
         return userBalance;
     }
-    
+
     /// <summary>The transaction is created in advance to record the history of the transaction process</summary>
     private async Task<GameTransaction> CreateTransactionAsync(string userId, int cryptoTokenId, WalletDepositCommand command, CancellationToken ct)
     {
@@ -108,7 +108,7 @@ public sealed class WalletDepositHandler(
         await unitOfWork.SaveChangesAsync(ct);
         return transaction;
     }
-    
+
     private async Task DepositToProviderWalletAsync(string gameProviderAccount, string sno, decimal amount)
     {
         var depositRequest = new GameDepositRequest
@@ -117,7 +117,7 @@ public sealed class WalletDepositHandler(
             Quota = amount,
             Sno = sno
         };
-        
+
         var result = await gameProvider.DepositWalletAsync(depositRequest);
         if (!result.IsSuccess)
             throw new BadRequestException(MessageCode.Accounting.DepositToProviderWalletFailed);

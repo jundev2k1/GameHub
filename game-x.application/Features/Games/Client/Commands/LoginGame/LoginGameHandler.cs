@@ -5,7 +5,7 @@ using game_x.application.Contract.Persistence.Repo;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Logout;
 
-namespace game_x.application.Features.Games.Commands.LoginGame;
+namespace game_x.application.Features.Games.Client.Commands.LoginGame;
 
 public sealed class LoginGameHandler(
     IUserAccessor userAccessor,

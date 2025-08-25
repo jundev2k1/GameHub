@@ -1,4 +1,4 @@
-﻿namespace game_x.application.Features.Games.Queries.WalletGame;
+﻿namespace game_x.application.Features.Games.Client.Queries.WalletGame;
 
 public record GetWalletGameQuery : ICommand<GetWalletGameResult>;
 

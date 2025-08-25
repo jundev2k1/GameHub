@@ -4,7 +4,6 @@ using game_x.application.Features.Accounts.Admin.Queries.GetAllActiveTokensByAdm
 using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
-using game_x.application.Features.Accounts.User.Queries.GetAllActiveTokens;
 
 namespace game_x.api.Controllers.Admin.Client;
 
@@ -33,19 +32,37 @@ public sealed class UserController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpGet("{userId}/tokens")]
-    public async Task<IActionResult> GetActiveTokensAsync(string userId)
+    [HttpGet("tokens")]
+    public async Task<IActionResult> GetAllActiveTokensAsync([AsParameters] SearchCriteriaRequest parameters)
     {
-        var query = new GetAllActiveTokensByAdminQuery(userId);
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var sorts = QueryConverter.ToSorts(parameters.Sorts);
+
+        var query = new GetAllActiveTokensByAdminQuery(
+            filters,
+            sorts,
+            parameters.PageNumber,
+            parameters.PageSize
+        );
+
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
 
-    // [HttpDelete("{tokenId}/tokens")]
-    // public async Task<IActionResult> RevokeTokenAsync(Guid tokenId)
-    // {
-    //     var command = new RevokeTokenCommand(tokenId);
-    //     await Mediator.Send(command);
-    //     return ApiResponseFactory.NoContent();
-    // }
+
+    [HttpGet("{userId}/tokens")]
+    public async Task<IActionResult> GetActiveTokensAsync(string userId)
+    {
+        var query = new GetUserActiveTokensByAdminQuery(userId);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpDelete("{tokenId}/tokens")]
+    public async Task<IActionResult> RevokeTokenAsync(string userId, Guid tokenId)
+    {
+        var command = new RevokeTokenCommand(userId, tokenId);
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
 }

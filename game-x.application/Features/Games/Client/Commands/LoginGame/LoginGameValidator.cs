@@ -1,7 +1,7 @@
 ﻿using game_x.share.Extensions;
 using System.Net;
 
-namespace game_x.application.Features.Games.Commands.LoginGame;
+namespace game_x.application.Features.Games.Client.Commands.LoginGame;
 
 public sealed class LoginGameValidator : AbstractValidator<LoginGameCommand>
 {

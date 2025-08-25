@@ -1,12 +1,12 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common;
 using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Commands.GameWallet.Deposit;
-using game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
-using game_x.application.Features.Games.Commands.LoginGame;
-using game_x.application.Features.Games.Queries.GetMyGameTransactionDetail;
-using game_x.application.Features.Games.Queries.GetMyGameTransactions;
-using game_x.application.Features.Games.Queries.WalletGame;
+using game_x.application.Features.Games.Client.Commands.GameWallet.Deposit;
+using game_x.application.Features.Games.Client.Commands.GameWallet.Withdrawal;
+using game_x.application.Features.Games.Client.Commands.LoginGame;
+using game_x.application.Features.Games.Client.Queries.GetMyGameTransactionDetail;
+using game_x.application.Features.Games.Client.Queries.GetMyGameTransactions;
+using game_x.application.Features.Games.Client.Queries.WalletGame;
 
 namespace game_x.api.Controllers.Client.Game;
 
@@ -50,7 +50,7 @@ public sealed class GameController : BaseApiController
     {
         return ApiResponseFactory.Ok(GameCodeProvider.All());
     }
-    
+
     [HttpGet("transactions/me")]
     public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
     {
@@ -64,7 +64,7 @@ public sealed class GameController : BaseApiController
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
-    
+
     [HttpGet("transactions/{transactionId}")]
     public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
     {

@@ -1,4 +1,4 @@
-namespace game_x.application.Features.Games.Commands.GameWallet.Deposit;
+namespace game_x.application.Features.Games.Client.Commands.GameWallet.Deposit;
 
 public sealed class WalletDepositValidator : AbstractValidator<WalletDepositCommand>
 {

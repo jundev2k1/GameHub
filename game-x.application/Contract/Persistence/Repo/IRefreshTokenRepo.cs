@@ -1,9 +1,15 @@
-﻿using game_x.application.Features.Auth.Dtos;
+﻿using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Features.Auth.Dtos;
 
 namespace game_x.application.Contract.Persistence.Repo;
 
 public interface IRefreshTokenRepo
 {
+    Task<PaginationResult<RefreshToken>> GetActiveTokenByCriteriaAsync(
+        Func<IQueryable<RefreshToken>, IQueryable<RefreshToken>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
     Task<RefreshToken[]> GetActiveTokensAsync(CancellationToken ct = default);
 
     Task<RefreshToken?> FindActiveByTokenHashAsync(string tokenHash, CancellationToken ct = default);

@@ -6,10 +6,10 @@ using game_x.application.Extensions.FilterExtensions;
 using game_x.application.Features.Games.Dtos;
 using game_x.application.Features.Games.Mapping;
 
-namespace game_x.application.Features.Games.Queries.GetMyGameTransactions;
+namespace game_x.application.Features.Games.Client.Queries.GetMyGameTransactions;
 
 public sealed class GetMyGameTransactionsHandler(
-    ICriteriaBuilder<GameTransaction> builder, 
+    ICriteriaBuilder<GameTransaction> builder,
     IGameTransactionRepo gameTransactionRepo,
     IUserAccessor userAccessor)
     : IQueryHandler<GetMyGameTransactionsQuery, PaginationResult<GameTransactionDto>>
@@ -27,7 +27,7 @@ public sealed class GetMyGameTransactionsHandler(
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);
-        
+
         var result = items.ToSearchResult();
         return result;
     }

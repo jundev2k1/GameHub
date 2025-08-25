@@ -1,11 +1,16 @@
-﻿using game_x.application.Features.Auth.Dtos;
+﻿using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Features.Auth.Dtos;
 
 namespace game_x.application.Contract.Infrastructure.Caching;
 
 public interface IRefreshTokenManagerCacheService
 {
     IEnumerable<RefreshTokenDto> GetAllTokens();
-
+    PaginationResult<RefreshTokenDto> GetRefreshTokenByCriteria(
+        Func<IQueryable<RefreshTokenDto>, IQueryable<RefreshTokenDto>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
     IEnumerable<RefreshTokenDto> GetsByUserId(string userId);
 
     RefreshTokenDto GetToken(string userId, string rawToken);

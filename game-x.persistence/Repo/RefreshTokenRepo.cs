@@ -1,5 +1,6 @@
 ﻿using EFCore.BulkExtensions;
 using game_x.application.Common.Abstractions;
+using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Auth.Dtos;
 
@@ -7,6 +8,32 @@ namespace game_x.persistence.Repo;
 
 public sealed class RefreshTokenRepo(GameXContext context) : IRefreshTokenRepo, IRepository
 {
+    public async Task<PaginationResult<RefreshToken>> GetActiveTokenByCriteriaAsync(
+    Func<IQueryable<RefreshToken>, IQueryable<RefreshToken>>? queryBuilder = null,
+    int page = 1,
+    int pageSize = 20,
+    CancellationToken ct = default)
+    {
+        var query = context.RefreshTokens
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<RefreshToken>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
     public async Task<RefreshToken[]> GetActiveTokensAsync(CancellationToken ct = default)
     {
         return await context.RefreshTokens
