@@ -1,3 +1,4 @@
+using System.Text.Json;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
@@ -50,8 +51,6 @@ public sealed class ChatHub(
     ILogger<ChatHub> logger) : Hub<IChatClient>
 {
     public const string Path = "/hubs/chat";
-    static string UG(string userId) => $"user-{userId}";
-    static string CG(int convId) => $"conv-{convId}";
 
     // public override async Task OnConnectedAsync()
     // {
@@ -63,7 +62,8 @@ public sealed class ChatHub(
 
     public override async Task OnConnectedAsync()
     {
-        var userId = Context.UserIdentifier ?? userAccessor.GetUserId();
+        var userId = userAccessor.GetUserId();
+        var role = userAccessor.GetRoles();
         await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Member(userId));
         
         // If the user is an Admin/Cs, also add them to role groups (so they get broadcasts)
@@ -72,36 +72,39 @@ public sealed class ChatHub(
         if (Context.User?.IsInRole(AppRoles.Cs) == true)
             await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.Cs));
 
-        logger.LogInformation("ChatHub connected: {UserId}", userId);
+        logger.LogInformation("ChatHub {Role} connected: {UserId}",role.ToString(), userId);
         await base.OnConnectedAsync();
     }
     
     public override async Task OnDisconnectedAsync(Exception? ex)
     {
-        logger.LogInformation("ChatHub disconnected: {UserId}", Context.UserIdentifier);
+        var userId = userAccessor.GetUserId();
+        var role = userAccessor.GetRoles();
+        logger.LogInformation("ChatHub {Role} disconnected: {UserId}",role.ToString(), userId);
         await base.OnDisconnectedAsync(ex);
     }
 
+    public Task<string> Ping(dynamic payload) => Task.FromResult($"pong:{JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true })}");
+    
     // --- Customer Support ---
     
     /// <summary>
     /// Send a support message. Creates the user's support conversation if missing
     /// and broadcasts to the conversation AND to all Admin/Cs role groups.
     /// </summary>
-    public async Task<MessageDto> SendSupportMessage(SendSupportMessageCommand cmd, CancellationToken ct = default)
+    public async Task<MessageDto> SendSupportMessage(SendSupportMessageCommand cmd)
     {
+        var ct = Context.ConnectionAborted;
+        
         var result = await sender.Send(cmd, ct);
-        // If a new conversation was created on first send, notify the sender (optional)
+        // If a new conversation was created on first sending, notify the sender (optional)
         if (result.CreatedConversation is { } conv)
         {
             await Clients.Caller.ConversationCreated(conv);
         }
 
         // Broadcast to conversation participants (user’s devices)…
-        await Clients.Group(GroupNames.Conversation(result.Message.ConversationId))
-            .MessageCreated(result.Message);
-
-        // …and to all Admin/Cs (staff UIs)
+        await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
         await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
         await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
 

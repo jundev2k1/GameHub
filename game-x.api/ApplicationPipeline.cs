@@ -60,6 +60,7 @@ public static class ApplicationPipeline
     {
         app.MapHub<AdminHub>(AdminHub.Path);
         app.MapHub<ClientHub>(ClientHub.Path);
+        app.MapHub<ChatHub>(ChatHub.Path);
         return app;
     }
 }
