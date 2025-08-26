@@ -4,10 +4,10 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Client.Commands.GameWallet.Deposit;
 using game_x.application.Features.Games.Client.Commands.GameWallet.Withdrawal;
 using game_x.application.Features.Games.Client.Commands.LoginGame;
+using game_x.application.Features.Games.Client.Queries.GetGames;
 using game_x.application.Features.Games.Client.Queries.GetMyGameTransactionDetail;
 using game_x.application.Features.Games.Client.Queries.GetMyGameTransactions;
 using game_x.application.Features.Games.Client.Queries.WalletGame;
-using game_x.application.Features.Games.Client.Queries.GetGames;
 
 namespace game_x.api.Controllers.Client.Game;
 
