@@ -1,12 +1,12 @@
+using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.domain.Constants;
-using Microsoft.EntityFrameworkCore;
 
 namespace game_x.persistence.Repo;
 
-public sealed class GameTransactionRepo(GameXContext context) : IGameTransactionRepo
+public sealed class GameTransactionRepo(GameXContext context) : IGameTransactionRepo, IRepository
 {
     public async Task<PaginationResult<GameTransaction>> GetMyTransactionsAsync(
         string userId,

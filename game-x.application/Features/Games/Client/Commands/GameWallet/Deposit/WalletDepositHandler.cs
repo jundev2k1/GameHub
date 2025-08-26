@@ -99,7 +99,6 @@ public sealed class WalletDepositHandler(
             userId: userId,
             g598sno: sno,
             amount: command.Amount,
-            gamePlatform: GamePlatform.G598,
             type: GameTransactionType.Deposit,
             cryptoTokenId: cryptoTokenId,
             note: command.Note);

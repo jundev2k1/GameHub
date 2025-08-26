@@ -13,7 +13,8 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
     public GameTransactionType Type { get; private set; }
     public GameTransactionStatus Status { get; set; } = GameTransactionStatus.Pending;
     public decimal Amount { get; private set; }
-    public GamePlatform GamePlatform { get; private set; }
+    public int GamePlatformId { get; private set; } = default!;
+    public GamePlatform GamePlatform { get; private set; } = default!;
     public string? Note { get; private set; } = string.Empty;
     public string Meta { get; set; } = "{}";
     public int? CryptoTokenId { get; private set; }
@@ -38,7 +39,6 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
         string userId,
         string g598sno,
         decimal amount,
-        GamePlatform gamePlatform,
         GameTransactionType type,
         int? cryptoTokenId,
         string? note = null)
@@ -54,7 +54,6 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
             G598Sno = g598sno,
             Amount = amount,
             Status = GameTransactionStatus.Pending,
-            GamePlatform = gamePlatform,
             Type = type,
             CryptoTokenId = cryptoTokenId,
             Note = note

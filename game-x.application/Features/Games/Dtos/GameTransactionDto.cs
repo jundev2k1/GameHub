@@ -10,7 +10,7 @@ public class GameTransactionDto
     public Guid CryptoTokenId { get; set; }
     public string? Note { get; set; } = string.Empty;
     public string Symbol { get; set; } = string.Empty;
-    public GamePlatform GamePlatform { get; set; }
+    public Guid GamePlatformId { get; set; }
     public NetworkType Network { get; set; }
     public GameTransactionType Type { get; set; }
     public GameTransactionStatus Status { get; set; }
