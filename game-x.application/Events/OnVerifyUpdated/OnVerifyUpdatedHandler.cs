@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.User.Dtos;
+using game_x.share.Extensions;
 
 namespace game_x.application.Events.OnVerifyUpdated;
 
@@ -25,8 +26,8 @@ public sealed class OnVerifyUpdatedHandler(
         var notificationDto = new VerificationNotificationDto
         {
             CurrencyCode = verificationDto.CurrencyCode,
-            Type = verificationDto.Type.ToString().ToLower(),
-            Status = verificationDto.Status.ToString().ToLower(),
+            Type = verificationDto.Type.ToString().ToCamelCase(),
+            Status = verificationDto.Status.ToString().ToCamelCase(),
             IsVerified = verificationDto.IsVerified
         };
 
