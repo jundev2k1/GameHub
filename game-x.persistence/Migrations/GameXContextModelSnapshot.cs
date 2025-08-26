@@ -718,6 +718,267 @@ namespace game_x.persistence.Migrations
                     b.ToTable("fiat_currencies", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.Game", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<string>("GameCode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("game_code");
+
+                    b.Property<short>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)1)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasDefaultValue("")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("note");
+
+                    b.Property<int>("PlatformId")
+                        .HasColumnType("integer")
+                        .HasColumnName("platform_id");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("priority");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_games");
+
+                    b.HasIndex("PlatformId")
+                        .HasDatabaseName("ix_games_platform_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_games_code");
+
+                    b.ToTable("games", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<short>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)1)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasDefaultValue("")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("note");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("priority");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_categories");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_categories_code");
+
+                    b.ToTable("game_categories", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameCategoryMapping", b =>
+                {
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("category_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_primary");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("priority");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("GameId", "CategoryId")
+                        .HasName("pk_game_category_mappings");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_game_category_mappings_category_id");
+
+                    b.ToTable("game_category_mappings", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GamePlatform", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<short>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)1)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasDefaultValue("")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("note");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("priority");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_platforms");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_platforms_code");
+
+                    b.ToTable("game_platforms", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GameTransaction", b =>
                 {
                     b.Property<int>("Id")
@@ -745,9 +1006,9 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("g598_sno");
 
-                    b.Property<short>("GamePlatform")
-                        .HasColumnType("smallint")
-                        .HasColumnName("game_platform");
+                    b.Property<int>("GamePlatformId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_platform_id");
 
                     b.Property<string>("Meta")
                         .IsRequired()
@@ -796,6 +1057,9 @@ namespace game_x.persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_game_transactions_g598sno");
 
+                    b.HasIndex("GamePlatformId")
+                        .HasDatabaseName("ix_game_transactions_game_platform_id");
+
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("ix_game_transactions_public_id");
@@ -804,6 +1068,114 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_game_transactions_user_id");
 
                     b.ToTable("game_transactions", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<short>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)1)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasDefaultValue("")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("note");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("priority");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_types");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_types_code");
+
+                    b.ToTable("game_types", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameTypeMapping", b =>
+                {
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
+
+                    b.Property<int>("TypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("type_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_primary");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("priority");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("GameId", "TypeId")
+                        .HasName("pk_game_type_mappings");
+
+                    b.HasIndex("TypeId")
+                        .HasDatabaseName("ix_game_type_mappings_type_id");
+
+                    b.ToTable("game_type_mappings", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.MediaFile", b =>
@@ -2170,6 +2542,39 @@ namespace game_x.persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.Game", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.GamePlatform", "Platform")
+                        .WithMany("Games")
+                        .HasForeignKey("PlatformId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_games_game_platforms_platform_id");
+
+                    b.Navigation("Platform");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameCategoryMapping", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.GameCategory", "Category")
+                        .WithMany("GameCategoryMappings")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_category_mappings_game_categories_category_id");
+
+                    b.HasOne("game_x.domain.Entities.Game", "Game")
+                        .WithMany("GameCategoryMappings")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_category_mappings_games_game_id");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Game");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GameTransaction", b =>
                 {
                     b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
@@ -2177,6 +2582,13 @@ namespace game_x.persistence.Migrations
                         .HasForeignKey("CryptoTokenId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_game_transactions_crypto_tokens_crypto_token_id");
+
+                    b.HasOne("game_x.domain.Entities.GamePlatform", "GamePlatform")
+                        .WithMany("GameTransactions")
+                        .HasForeignKey("GamePlatformId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_transactions_game_platforms_game_platform_id");
 
                     b.HasOne("game_x.domain.Entities.User", "User")
                         .WithMany("GameTransactions")
@@ -2187,7 +2599,30 @@ namespace game_x.persistence.Migrations
 
                     b.Navigation("CryptoToken");
 
+                    b.Navigation("GamePlatform");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameTypeMapping", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Game", "Game")
+                        .WithMany("GameTypeMappings")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_type_mappings_games_game_id");
+
+                    b.HasOne("game_x.domain.Entities.GameType", "Type")
+                        .WithMany("GameTypeMappings")
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_type_mappings_game_types_type_id");
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.Message", b =>
@@ -2276,6 +2711,18 @@ namespace game_x.persistence.Migrations
                     b.Navigation("ReplyToMessage");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_refresh_tokens_user_user_id");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.SocialLink", b =>
                 {
                     b.HasOne("game_x.domain.Entities.User", "AddresseeUser")
@@ -2313,18 +2760,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("BlockerUser");
 
                     b.Navigation("RequesterUser");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.RefreshToken", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_refresh_tokens_user_user_id");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.UserBalance", b =>
@@ -2492,9 +2927,33 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Messages");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.Game", b =>
+                {
+                    b.Navigation("GameCategoryMappings");
+
+                    b.Navigation("GameTypeMappings");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameCategory", b =>
+                {
+                    b.Navigation("GameCategoryMappings");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GamePlatform", b =>
+                {
+                    b.Navigation("GameTransactions");
+
+                    b.Navigation("Games");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GameTransaction", b =>
                 {
                     b.Navigation("Ledger");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameType", b =>
+                {
+                    b.Navigation("GameTypeMappings");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.Message", b =>

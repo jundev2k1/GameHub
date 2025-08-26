@@ -4,4 +4,6 @@ public record ClientTransactionDto(
     Guid TransactionId, 
     string Type, 
     string Status,
-    decimal? BalanceAfter);
+    decimal? BalanceAfter,
+    DateTime? ConfirmedAt,
+    string? Hash);

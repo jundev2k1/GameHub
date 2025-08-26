@@ -1,3 +1,4 @@
+using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Features.Accounts.Dtos;
 using game_x.application.Features.Accounts.User.Dtos;
 
@@ -20,6 +21,12 @@ public interface IUserRepo
     Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync(string userId, CancellationToken ct = default);
 
     Task<VerificationStatusDto[]> GetVerificationStatusList(string userId, CancellationToken ct = default);
+
+    Task<PaginationResult<UserDto>> GetUserByCriteriaAsync(
+    Func<IQueryable<UserDto>, IQueryable<UserDto>>? queryBuilder = null,
+    int page = 1,
+    int pageSize = 20,
+    CancellationToken ct = default);
 
     Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default);
 

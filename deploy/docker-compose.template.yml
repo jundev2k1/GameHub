@@ -31,6 +31,7 @@ services:
       - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}
       - GameProviderSettings__AesKey=${GAMEPROVIDER_AESKEY}
       - GameProviderSettings__Iv=${GAMEPROVIDER_IV}
+      - GameProviderSettings__RevertProxyUrl=${GAMEPROVIDER_REVERTPROXYURL}
 
       - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
       - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}

@@ -1,0 +1,5 @@
+using game_x.application.Features.Games.Dtos;
+
+namespace game_x.application.Features.Games.Client.Commands.GameWallet.Withdrawal;
+
+public record WalletWithdrawalCommand(decimal Amount, Guid CryptoTokenId, string? Note) : ICommand<GameTransactionDto>;

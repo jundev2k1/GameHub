@@ -1,6 +1,6 @@
 ﻿namespace game_x.application.Features.Accounts.Dtos;
 
-public sealed class UserDetailDto
+public class UserDetailDto
 {
     public string UserId { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;

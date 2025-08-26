@@ -1,0 +1,14 @@
+namespace game_x.application.Features.Games.Client.Commands.GameWallet.Deposit;
+
+public sealed class WalletDepositValidator : AbstractValidator<WalletDepositCommand>
+{
+    public WalletDepositValidator()
+    {
+        RuleFor(x => x.Amount)
+            .NotEmpty().WithMessage($"{nameof(WalletDepositCommand.Amount)} is required.")
+            .GreaterThanOrEqualTo(0).WithMessage($"{nameof(WalletDepositCommand.Amount)} must be greater than zero.");
+
+        RuleFor(x => x.CryptoTokenId)
+            .NotEmpty().WithMessage($"{nameof(WalletDepositCommand.CryptoTokenId)} is required.");
+    }
+}

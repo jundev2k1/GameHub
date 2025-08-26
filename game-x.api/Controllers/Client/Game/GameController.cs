@@ -1,12 +1,13 @@
 ﻿using game_x.api.Common;
-using game_x.application.Common;
+using game_x.api.Dtos;
 using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Commands.GameWallet.Deposit;
-using game_x.application.Features.Games.Commands.GameWallet.Withdrawal;
-using game_x.application.Features.Games.Commands.LoginGame;
-using game_x.application.Features.Games.Queries.GetMyGameTransactionDetail;
-using game_x.application.Features.Games.Queries.GetMyGameTransactions;
-using game_x.application.Features.Games.Queries.WalletGame;
+using game_x.application.Features.Games.Client.Commands.GameWallet.Deposit;
+using game_x.application.Features.Games.Client.Commands.GameWallet.Withdrawal;
+using game_x.application.Features.Games.Client.Commands.LoginGame;
+using game_x.application.Features.Games.Client.Queries.GetMyGameTransactionDetail;
+using game_x.application.Features.Games.Client.Queries.GetMyGameTransactions;
+using game_x.application.Features.Games.Client.Queries.WalletGame;
+using game_x.application.Features.Games.Client.Queries.GetGames;
 
 namespace game_x.api.Controllers.Client.Game;
 
@@ -45,12 +46,20 @@ public sealed class GameController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpGet("game-codes")]
-    public IActionResult GetGameCode()
+    [HttpGet]
+    public IActionResult GetGameCode([AsParameters] GetGamesRequest request)
     {
-        return ApiResponseFactory.Ok(GameCodeProvider.All());
+        var query = new GetGamesQuery(
+            request.Keyword,
+            request.Platform,
+            request.Category,
+            request.GameType,
+            request.PageNumber ?? 1,
+            request.PageSize ?? 20);
+        var result = Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
     }
-    
+
     [HttpGet("transactions/me")]
     public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
     {
@@ -64,7 +73,7 @@ public sealed class GameController : BaseApiController
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
-    
+
     [HttpGet("transactions/{transactionId}")]
     public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
     {
