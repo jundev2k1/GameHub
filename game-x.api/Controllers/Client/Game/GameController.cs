@@ -8,6 +8,7 @@ using game_x.application.Features.Games.Client.Queries.GetGames;
 using game_x.application.Features.Games.Client.Queries.GetMyGameTransactionDetail;
 using game_x.application.Features.Games.Client.Queries.GetMyGameTransactions;
 using game_x.application.Features.Games.Client.Queries.WalletGame;
+using System.Threading.Tasks;
 
 namespace game_x.api.Controllers.Client.Game;
 
@@ -47,7 +48,7 @@ public sealed class GameController : BaseApiController
     }
 
     [HttpGet]
-    public IActionResult GetGameCode([AsParameters] GetGamesRequest request)
+    public async Task<IActionResult> GetGameCode([AsParameters] GetGamesRequest request)
     {
         var query = new GetGamesQuery(
             request.Keyword,
@@ -56,7 +57,7 @@ public sealed class GameController : BaseApiController
             request.GameType,
             request.PageNumber ?? 1,
             request.PageSize ?? 20);
-        var result = Mediator.Send(query);
+        var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
 

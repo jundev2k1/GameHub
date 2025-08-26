@@ -1,4 +1,5 @@
 ﻿using game_x.application.Features.Accounts.Dtos;
+using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using UserEntity = game_x.domain.Entities.User;
 
@@ -44,9 +45,12 @@ public sealed class MapsterConfig : IRegister
                     && src.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved));
 
         cfg.NewConfig<UserDetailDto, GetSelfUserResult>()
-            .Map(
-                dest => dest.SiteBalances,
-                src => src.Balances.Select(b => b.Adapt<GetSelfUserCyptoInfo>()).ToArray())
             .Map(dest => dest.Roles, src => src.Roles.Items);
+
+        cfg.NewConfig<UserBalance, UserWalletInternalItemDto>()
+            .Map(dest => dest.WalletId, src => src.PublicId)
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
+            .Map(dest => dest.Network, src => src.CryptoToken.Network)
+            .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol);
     }
 }

@@ -15,6 +15,7 @@ public sealed class WalletManagerCacheService(
     IUserAccessor userAccessor,
     IUserBalanceRepo userBalanceRepo,
     IUserRepo userRepo,
+    IGameProviderCacheService gameProviderCache,
     IGameProviderService gameProvider,
     IGameAesEncryptor aesEncryptor) : CacheService(cache), IWalletManagerCacheService
 {
@@ -40,11 +41,12 @@ public sealed class WalletManagerCacheService(
             ExternalWallets = [],
         };
 
+        var g598Platform = gameProviderCache.G598Platform;
         var g598Balance = await GetGame598Wallet(userId);
         userWallet.ExternalWallets.Add(new UserWalletExternalItemDto
         {
-            PlatformId = Guid.NewGuid(),
-            PlatformName = "",
+            PlatformId = g598Platform.Id,
+            PlatformName = g598Platform.Name,
             Amount = g598Balance,
         });
 
@@ -82,15 +84,22 @@ public sealed class WalletManagerCacheService(
         var targetUser = await userRepo.GetUserByIdAsync(userId);
         if (targetUser.UserExtend is null)
             throw new NotFoundException("User extend is not exists.");
-        var loginState = await gameProvider.LoginAsync(
-            new LoginRequest
-            {
-                Account = targetUser.UserExtend.GameProviderAccount,
-                Passwd = aesEncryptor.Decrypt(targetUser.UserExtend.GameProviderPassword)
-            },
-            userAccessor.GetIpAddress());
-        if (loginState.IsSuccess == false)
-            throw new ExternalServiceException();
+        var isLogin = gameProviderCache.GetIsLoggedIn(targetUser.UserExtend.GameProviderAccount);
+        if (!isLogin)
+        {
+            var loginState = await gameProvider.LoginAsync(
+                new LoginRequest
+                {
+                    Account = targetUser.UserExtend.GameProviderAccount,
+                    Passwd = aesEncryptor.Decrypt(targetUser.UserExtend.GameProviderPassword),
+                    Locale = gameProviderCache.GetLanguage(targetUser.UserExtend.GameProviderAccount),
+                    Address = "lobby",
+                    Gamecode = gameProviderCache.GameList[0].GameCode,
+                },
+                userAccessor.GetIpAddress());
+            if (loginState.IsSuccess == false)
+                throw new ExternalServiceException();
+        }
 
         var gameWallet = await gameProvider.GetWalletAsync(new WalletRequest
         {
