@@ -10,6 +10,9 @@ public sealed class EntityName
     public static EntityName MediaFile => Of(nameof(Entities.MediaFile));
     public static EntityName UserKyc => Of(nameof(Entities.UserKyc));
     public static EntityName ChainTransaction => Of(nameof(Entities.ChainTransaction));
+    public static EntityName Game => Of(nameof(Entities.Game));
+    public static EntityName GameType => Of(nameof(Entities.GameType));
+    public static EntityName GameCategory => Of(nameof(Entities.GameCategory));
     public static EntityName GameTransaction => Of(nameof(Entities.GameTransaction));
     public static EntityName UserBalance => Of(nameof(Entities.UserBalance));
     public static EntityName FiatCurrency => Of(nameof(Entities.FiatCurrency));
@@ -33,6 +36,9 @@ public sealed class EntityName
         nameof(Entities.MediaFile),
         nameof(Entities.UserKyc),
         nameof(Entities.ChainTransaction),
+        nameof(Entities.Game),
+        nameof(Entities.GameType),
+        nameof(Entities.GameCategory),
         nameof(Entities.GameTransaction),
         nameof(Entities.UserBalance),
         nameof(Entities.FiatCurrency),

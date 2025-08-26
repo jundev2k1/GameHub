@@ -2,8 +2,11 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.share.Extensions;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Logout;
+using game_x.share.Settings;
+using Microsoft.Extensions.Options;
 
 namespace game_x.application.Features.Games.Client.Commands.LoginGame;
 
@@ -12,7 +15,8 @@ public sealed class LoginGameHandler(
     IUserRepo userRepo,
     IGameProviderService gameProvider,
     IGameAesEncryptor aesEncryptor,
-    IGameProviderCacheService gameProviderCache) : ICommandHandler<LoginGameCommand, LoginGameResult>
+    IGameProviderCacheService gameProviderCache,
+    IOptions<GameProviderSettings> gameSettings) : ICommandHandler<LoginGameCommand, LoginGameResult>
 {
     public async Task<LoginGameResult> Handle(LoginGameCommand request, CancellationToken ct = default)
     {
@@ -45,7 +49,8 @@ public sealed class LoginGameHandler(
         };
         var result = await gameProvider.LoginAsync(externalRequest, request.IpAddress!);
         gameProviderCache.SetIsLoggedIn(gameProviderAccount, true);
-        return new LoginGameResult(result.Url);
+        var gameEmbededLink = ConvertEmbededLink(result.Url);
+        return new LoginGameResult(gameEmbededLink);
     }
 
     public async Task LogoutGameAsync(string account)
@@ -55,5 +60,14 @@ public sealed class LoginGameHandler(
             Account = account,
         };
         await gameProvider.LogoutAsync(logoutRequest);
+    }
+
+    private string ConvertEmbededLink(string url)
+    {
+        var domain = gameSettings.Value.RevertProxyUrl;
+        if (domain.IsNullOrWhiteSpace()) return url;
+
+        var uri = new Uri(url);
+        return $"{domain}{uri.PathAndQuery}";
     }
 }
