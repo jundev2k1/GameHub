@@ -38,6 +38,10 @@ public sealed class OnVerifyUpdatedHandler(
             JsonSerializer.Serialize(notificationDto));
         await notificationRepo.AddNotificationAsync(notification, ct);
 
+        await clientHubService.SendNotificationToMemberAsync(
+            userId,
+            notification.Adapt<NotificationDto>());
+
         await clientHubService.SendVerifyUpdateAsync(
             userId,
             verificationDto);
