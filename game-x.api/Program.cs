@@ -1,5 +1,6 @@
 using game_x.api;
 using game_x.application;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.domain.Entities;
@@ -50,6 +51,12 @@ try
     var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
     var asymmetricCryptoService = serviceProvider.GetRequiredService<IAsymmetricCryptoService>();
     await Seed.SeedData(asymmetricCryptoService, userManager, context);
+
+    var gameProviderCache = serviceProvider.GetRequiredService<IGameProviderCacheService>();
+    await gameProviderCache.RefreshGamePlatformList();
+    await gameProviderCache.RefreshGameCategoryList();
+    await gameProviderCache.RefreshGameTypeList();
+    await gameProviderCache.RefreshGameList();
 }
 catch (Exception ex)
 {

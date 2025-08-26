@@ -1,7 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.domain.Constants;
 using Microsoft.AspNetCore.Identity;
-using System.Threading.Tasks;
 
 namespace game_x.persistence;
 

@@ -46,5 +46,14 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Id, src => src.Type.PublicId)
             .Map(dest => dest.Name, src => src.Type.Name)
             .Map(dest => dest.Priority, src => src.Type.Priority);
+
+        cfg.NewConfig<GamePlatform, GamePlatformDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
+
+        cfg.NewConfig<GameCategory, GameCategoryDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
+
+        cfg.NewConfig<GameType, GameTypeDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
     }
 }
