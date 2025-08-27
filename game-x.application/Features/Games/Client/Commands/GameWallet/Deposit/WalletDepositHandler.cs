@@ -1,3 +1,4 @@
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
@@ -22,6 +23,7 @@ public sealed class WalletDepositHandler(
     IUnitOfWork unitOfWork,
     IApplicationEventDispatcher eventDispatcher,
     IGameProviderService gameProvider,
+    IGameProviderCacheService gameProviderCache,
     IAppLogger<GameTransaction> logger) : ICommandHandler<WalletDepositCommand, GameTransactionDto>
 {
     public async Task<GameTransactionDto> Handle(WalletDepositCommand command, CancellationToken ct = default)
@@ -46,20 +48,21 @@ public sealed class WalletDepositHandler(
                 amount: transaction.Amount);
 
             await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
-            return transaction.Adapt<GameTransactionDto>();
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync(ct);
             logger.LogError($"Failed to create deposit game transaction. SNO: {transaction.G598Sno}", ex.Message);
-            await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, x =>
+            await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, gt =>
             {
-                x.Status = GameTransactionStatus.Failed;
-                x.UpdateMeta(m => m.ErrorMessage = ex.Message);
+                gt.Status = GameTransactionStatus.Failed;
+                gt.UpdateMeta(m => m.ErrorMessage = ex.Message);
             }, ct);
 
             throw;
         }
+        var result = await gameTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
+        return result.Adapt<GameTransactionDto>();
     }
 
     private async Task<User> GetCurrentUserAsync(CancellationToken ct)
@@ -81,9 +84,8 @@ public sealed class WalletDepositHandler(
         if (token.Status != CryptoTokenStatus.Active)
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
 
-        var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
-        if (userBalance == null)
-            throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+        var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
+            ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
         if (userBalance.Amount < command.Amount)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
@@ -100,6 +102,7 @@ public sealed class WalletDepositHandler(
             g598sno: sno,
             amount: command.Amount,
             type: GameTransactionType.Deposit,
+            gamePlatformId: gameProviderCache.G598Platform.LocalId,
             cryptoTokenId: cryptoTokenId,
             note: command.Note);
 

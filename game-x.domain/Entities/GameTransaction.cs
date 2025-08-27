@@ -40,6 +40,7 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
         string g598sno,
         decimal amount,
         GameTransactionType type,
+        int gamePlatformId,
         int? cryptoTokenId,
         string? note = null)
     {
@@ -56,6 +57,7 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
             Status = GameTransactionStatus.Pending,
             Type = type,
             CryptoTokenId = cryptoTokenId,
+            GamePlatformId = gamePlatformId,
             Note = note
         };
     }
