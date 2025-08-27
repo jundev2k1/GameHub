@@ -9,6 +9,7 @@ public sealed class GameInfoDto
     public Guid Id { get; set; }
     public string GameCode { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
+    public Guid PlatformId { get; set; }
     public string PlatformName { get; set; } = string.Empty;
     public GameCategoryInfo[] Categories { get; set; } = [];
     public GameTypeInfo[] GameTypes { get; set; } = [];

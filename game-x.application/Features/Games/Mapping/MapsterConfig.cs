@@ -38,6 +38,7 @@ public sealed class MapsterConfig : IRegister
                     .Select(x => x.Adapt<GameTypeInfo>())
                     .OrderBy(g => g.IsPrimary)
                     .ThenBy(g => g.Priority))
+            .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
             .Map(dest => dest.PlatformName, src => src.Platform.Name);
 
         cfg.NewConfig<GameCategoryMapping, GameCategoryInfo>()
