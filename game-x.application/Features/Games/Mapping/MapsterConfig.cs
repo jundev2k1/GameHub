@@ -13,14 +13,17 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.GamePlatformName, src => src.GamePlatform!.Name)
             .Map(dest => dest.Symbol, src => src.CryptoToken!.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken!.Network)
-            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter);
+            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter)
+            .Map(dest => dest.Type, src => src.Ledger!.BalanceAfter);
         
         cfg.NewConfig<GameTransaction, GameTransactionDetailDto>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken!.PublicId)
             .Map(dest => dest.Symbol, src => src.CryptoToken!.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken!.Network)
-            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter);
+            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter)
+            .Map(dest => dest.GamePlatformId, src => src.GamePlatform!.PublicId)
+            .Map(dest => dest.GamePlatformName, src => src.GamePlatform!.Name);
 
         cfg.NewConfig<Game, GameInfoDto>()
             .Map(dest => dest.LocalId, src => src.Id)

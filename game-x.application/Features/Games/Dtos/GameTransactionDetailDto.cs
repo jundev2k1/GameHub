@@ -4,14 +4,13 @@ public class GameTransactionDetailDto
 {
     public Guid Id { get; set; }
     public string UserId { get; set; } =  string.Empty;
-    public string? G598Sno { get; set; }
     public decimal Amount { get; set; }
     public decimal? BalanceAfter { get; set; }
     public Guid CryptoTokenId { get; set; }
     public string? Note { get; set; } = string.Empty;
     public string Symbol { get; set; } = string.Empty;
-    public int GamePlatformId { get; set; }
-    public GamePlatform GamePlatform { get; set; } = default!;
+    public Guid GamePlatformId { get; set; }
+    public string GamePlatformName { get; set; } = string.Empty;
     public NetworkType Network { get; set; }
     public GameTransactionType Type { get; set; }
     public GameTransactionStatus Status { get; set; }
