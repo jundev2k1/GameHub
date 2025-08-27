@@ -48,28 +48,34 @@ public sealed class WalletDepositHandler(
             userBalanceService.DecreaseAmount(balance, transaction.Amount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
             await userUsdtLedgerService.CreateForGameTransactionAsync(transaction);
-            await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, x => x.Status = GameTransactionStatus.Completed, ct);
+            await gameTransactionRepo.UpdateAsync(
+                transaction.PublicId,
+                gt => gt.UpdateStatus(GameTransactionStatus.Completed),
+                ct);
 
             // Rollback all processing if the transaction fails at the third party
             await DepositToProviderWalletAsync(
                 gameProviderAccount: currentUser.UserExtend!.GameProviderAccount,
                 sno: transaction.G598Sno,
                 amount: transaction.Amount);
-
-            var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
-            await eventDispatcher.Publish(@event, ct);
+            await unitOfWork.CommitAsync(ct);
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync(ct);
+
             logger.LogError($"Failed to create deposit game transaction. SNO: {transaction.G598Sno}", ex.Message);
-            await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, gt =>
+            await gameTransactionRepo.UpdateAsync(transaction.PublicId, gt =>
             {
-                gt.Status = GameTransactionStatus.Failed;
+                gt.UpdateStatus(GameTransactionStatus.Failed);
                 gt.UpdateMeta(m => m.ErrorMessage = ex.Message);
             }, ct);
             throw;
         }
+
+        var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
+        await eventDispatcher.Publish(@event, ct);
+
         var result = await gameTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
         return result.Adapt<GameTransactionDto>();
     }

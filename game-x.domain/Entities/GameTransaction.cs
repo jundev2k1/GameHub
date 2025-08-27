@@ -11,28 +11,21 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
     public string UserId { get; private set; } = string.Empty;
     public User User { get; private set; } = null!;
     public GameTransactionType Type { get; private set; }
-    public GameTransactionStatus Status { get; set; } = GameTransactionStatus.Pending;
+    public GameTransactionStatus Status { get; private set; } = GameTransactionStatus.Pending;
     public decimal Amount { get; private set; }
     public int GamePlatformId { get; private set; } = default!;
     public GamePlatform GamePlatform { get; private set; } = default!;
     public string? Note { get; private set; } = string.Empty;
-    public string Meta { get; set; } = "{}";
+    public string Meta { get; private set; } = "{}";
     public int? CryptoTokenId { get; private set; }
-    public CryptoToken? CryptoToken { get; set; }
-    public UserUsdtLedger? Ledger { get; set; }
+    public CryptoToken? CryptoToken { get; private set; }
+    public UserUsdtLedger? Ledger { get; private set; }
     
     [NotMapped]
     public ChainTransactionMeta MetaObject
     {
         get => JsonSerializer.Deserialize<ChainTransactionMeta>(Meta) ?? new();
         set => Meta = JsonSerializer.Serialize(value, JsonOptions.NoEscape);
-    }
-
-    public void UpdateMeta(Action<ChainTransactionMeta> updater)
-    {
-        var meta = MetaObject;
-        updater(meta);
-        MetaObject = meta;
     }
     
     public static GameTransaction Create(
@@ -60,5 +53,17 @@ public sealed class GameTransaction : BaseEntity<int>, IAuditable
             GamePlatformId = gamePlatformId,
             Note = note
         };
+    }
+
+    public void UpdateStatus(GameTransactionStatus status)
+    {
+        Status = status;
+    }
+
+    public void UpdateMeta(Action<ChainTransactionMeta> updater)
+    {
+        var meta = MetaObject;
+        updater(meta);
+        MetaObject = meta;
     }
 }

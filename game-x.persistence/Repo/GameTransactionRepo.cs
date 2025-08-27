@@ -89,19 +89,17 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
         return entity;
     }
 
-    public async Task PatchUpdateAsync(Guid publicId, Action<GameTransaction> updateAction, CancellationToken ct = default)
+    public async Task UpdateAsync(Guid publicId, Action<GameTransaction> updateAction, CancellationToken ct = default)
     {
         var transaction = await context.GameTransactions
             .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
             ?? throw new NotFoundException(MessageCode.Transaction.GameTransactionNotFound);
 
         updateAction.Invoke(transaction);
-        await context.SaveChangesAsync(ct);
     }
-
-    public async Task PutUpdateAsync(GameTransaction transaction, CancellationToken ct = default)
+    public async Task UpdateAsync(GameTransaction transaction, CancellationToken ct = default)
     {
         context.Entry(transaction).State = EntityState.Modified;
-        await context.SaveChangesAsync(ct);
+        await Task.CompletedTask;
     }
 }

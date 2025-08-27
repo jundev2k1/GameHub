@@ -8,7 +8,7 @@ public static class GameTransactionMapping
     public static PaginationResult<GameTransactionDto> ToSearchResult(this PaginationResult<GameTransaction> data)
     {
         var result = new PaginationResult<GameTransactionDto>(
-            items: [.. data.Items.Adapt<IEnumerable<GameTransactionDto>>()],
+            items: [.. data.Items.Select(i => i.Adapt<GameTransactionDto>())],
             totalItems: data.TotalItems,
             totalPages: data.TotalPages,
             pageIndex: data.PageNumber,

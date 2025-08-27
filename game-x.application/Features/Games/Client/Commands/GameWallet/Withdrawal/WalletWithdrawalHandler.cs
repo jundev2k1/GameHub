@@ -42,25 +42,28 @@ public sealed class WalletWithdrawalHandler(
             userBalanceService.IncreaseAmount(balance, transaction.Amount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
             await userUsdtLedgerService.CreateForGameTransactionAsync(transaction);
-            await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, x => x.Status = GameTransactionStatus.Completed, ct);
+            await gameTransactionRepo.UpdateAsync(
+                transaction.PublicId,
+                gt => gt.UpdateStatus(GameTransactionStatus.Completed),
+                ct);
 
             // Rollback all processing if the transaction fails at the third party
             await WithdrawalToProviderWalletAsync(
                 gameProviderAccount: currentUser.UserExtend!.GameProviderAccount,
                 sno: transaction.G598Sno,
                 amount: transaction.Amount);
-
+            await unitOfWork.CommitAsync(ct);
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync(ct);
             logger.LogError($"Failed to create withdrawal game transaction. SNO: {transaction.G598Sno}", ex.Message);
-            await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, x =>
+            await gameTransactionRepo.UpdateAsync(transaction.PublicId, gt =>
             {
-                x.Status = GameTransactionStatus.Failed;
-                x.UpdateMeta(m => m.ErrorMessage = ex.Message);
+                gt.UpdateStatus(GameTransactionStatus.Failed);
+                gt.UpdateMeta(m => m.ErrorMessage = ex.Message);
             }, ct);
-
+            await unitOfWork.SaveChangesAsync(ct);
             throw;
         }
 
@@ -124,7 +127,6 @@ public sealed class WalletWithdrawalHandler(
         };
 
         var result = await gameProvider.WithdrawalWalletAsync(withdrawalRequest);
-
         if (!result.IsSuccess)
         {
             if (result.ErrorCode == GameMessage.InsufficientBalance)
