@@ -13,7 +13,7 @@ namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
     [Migration("20250819080518_user-ledger-add-game-transaction")]
-    partial class userledgeraddgametransaction
+    partial class UserLedgerAddGameTransaction
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

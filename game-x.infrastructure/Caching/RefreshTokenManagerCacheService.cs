@@ -1,5 +1,4 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Auth.Dtos;
@@ -10,7 +9,6 @@ namespace game_x.infrastructure.Caching;
 
 public sealed class RefreshTokenManagerCacheService(
     IMemoryCache cache,
-    IUserAccessor userAccessor,
     IRefreshTokenRepo refreshTokenRepo) : CacheService(cache), IRefreshTokenManagerCacheService
 {
     private const string CacheKeyPrefix = "RefreshTokenManager";

@@ -34,6 +34,9 @@ public sealed class MapsterConfig : IRegister
                 dest => dest.UserExtendInfo,
                 src => src.UserExtend.Adapt<UserExtendDto>())
             .Map(
+                dest => dest.Roles,
+                src => AppRole.Of(src.UserRoles.Select(ur => ur.Role.Name!)))
+            .Map(
                 dest => dest.IsEmailConfirmed,
                 src => src.EmailConfirmed)
             .Map(

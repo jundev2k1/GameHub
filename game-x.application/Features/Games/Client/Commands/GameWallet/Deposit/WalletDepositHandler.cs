@@ -26,11 +26,20 @@ public sealed class WalletDepositHandler(
     IGameProviderCacheService gameProviderCache,
     IAppLogger<GameTransaction> logger) : ICommandHandler<WalletDepositCommand, GameTransactionDto>
 {
-    public async Task<GameTransactionDto> Handle(WalletDepositCommand command, CancellationToken ct = default)
+    public async Task<GameTransactionDto> Handle(WalletDepositCommand request, CancellationToken ct = default)
     {
+        var targetPlatform = gameProviderCache.PlatformList.FirstOrDefault(gp => gp.Id == request.PlatformId)
+            ?? throw new NotFoundException("Platform is not exist.");
+
         var currentUser = await GetCurrentUserAsync(ct);
-        var balance = await GetUserBalanceAsync(currentUser.Id, command, ct);
-        var transaction = await CreateTransactionAsync(currentUser.Id, balance.CryptoToken.Id, command, ct);
+        var balance = await GetUserBalanceAsync(currentUser.Id, request, ct);
+        var transaction = await CreateTransactionAsync(
+            currentUser.Id,
+            balance.CryptoToken.Id,
+            request.Amount,
+            targetPlatform.LocalId,
+            request.Note,
+            ct);
 
         await unitOfWork.BeginTransactionAsync(ct);
         try
@@ -47,7 +56,8 @@ public sealed class WalletDepositHandler(
                 sno: transaction.G598Sno,
                 amount: transaction.Amount);
 
-            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
+            var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
+            await eventDispatcher.Publish(@event, ct);
         }
         catch (Exception ex)
         {
@@ -58,7 +68,6 @@ public sealed class WalletDepositHandler(
                 gt.Status = GameTransactionStatus.Failed;
                 gt.UpdateMeta(m => m.ErrorMessage = ex.Message);
             }, ct);
-
             throw;
         }
         var result = await gameTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
@@ -94,17 +103,23 @@ public sealed class WalletDepositHandler(
     }
 
     /// <summary>The transaction is created in advance to record the history of the transaction process</summary>
-    private async Task<GameTransaction> CreateTransactionAsync(string userId, int cryptoTokenId, WalletDepositCommand command, CancellationToken ct)
+    private async Task<GameTransaction> CreateTransactionAsync(
+        string userId,
+        int cryptoTokenId,
+        decimal amount,
+        int localPlatformId,
+        string? note,
+        CancellationToken ct)
     {
         var sno = GameProviderUtils.SnoGenerate();
         var transaction = GameTransaction.Create(
             userId: userId,
             g598sno: sno,
-            amount: command.Amount,
+            amount: amount,
             type: GameTransactionType.Deposit,
-            gamePlatformId: gameProviderCache.G598Platform.LocalId,
+            gamePlatformId: localPlatformId,
             cryptoTokenId: cryptoTokenId,
-            note: command.Note);
+            note: note);
 
         await gameTransactionRepo.AddAsync(transaction, ct);
         await unitOfWork.SaveChangesAsync(ct);

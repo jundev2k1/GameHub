@@ -16,6 +16,8 @@ public interface IUserRepo
 
     Task<UserDetailDto> GetUserDetailAsync(string userId, CancellationToken ct = default);
 
+    Task<UserExtend> GetUserExtendAsync(string userId, CancellationToken ct = default);
+
     Task<UserKyc> GetKycProfileAsync(string userId, CancellationToken ct = default);
 
     Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync(string userId, CancellationToken ct = default);

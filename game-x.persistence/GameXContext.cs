@@ -19,16 +19,17 @@ public sealed class GameXContext(
         IdentityUserToken<string>>(options)
 {
     public DbSet<User> AppUsers { get; set; }
+    public DbSet<UserExtend> UserExtends { get; set; }
     public DbSet<UserRole> AppUserRoles { get; set; }
     public DbSet<UserKyc> UserKycs { get; set; }
+    public DbSet<UserBalance> UserBalances { get; set; }
+    public DbSet<UserUsdtLedger> UserUsdtLedgers { get; set; }
     public DbSet<AsymmetricKey> AsymmetricKeys { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<MediaFile> MediaFiles { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<CryptoToken> CryptoTokens { get; set; }
     public DbSet<ChainTransaction> ChainTransactions { get; set; }
-    public DbSet<UserBalance> UserBalances { get; set; }
-    public DbSet<UserUsdtLedger> UserUsdtLedgers { get; set; }
     public DbSet<BalanceTransferLog> BalanceTransferLogs { get; set; }
     public DbSet<GamePlatform> GamePlatforms { get; set; }
     public DbSet<GameCategory> GameCategories { get; set; }

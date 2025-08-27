@@ -7,8 +7,6 @@ using game_x.application.Features.Games.Client.Commands.LoginGame;
 using game_x.application.Features.Games.Client.Queries.GetGames;
 using game_x.application.Features.Games.Client.Queries.GetMyGameTransactionDetail;
 using game_x.application.Features.Games.Client.Queries.GetMyGameTransactions;
-using game_x.application.Features.Games.Client.Queries.WalletGame;
-using System.Threading.Tasks;
 
 namespace game_x.api.Controllers.Client.Game;
 
@@ -25,30 +23,22 @@ public sealed class GameController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpGet("me/wallet-G598")]
-    public async Task<IActionResult> GetWalletAsync()
+    [HttpPost("platform/{platformId:guid}/deposit")]
+    public async Task<IActionResult> DepositAsync(Guid platformId, WalletDepositCommand command)
     {
-        var query = new GetWalletGameQuery();
-        var result = await Mediator.Send(query);
+        var result = await Mediator.Send(command with { PlatformId = platformId });
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPost("me/wallet-G598/deposit")]
-    public async Task<IActionResult> DepositAsync(WalletDepositCommand command)
+    [HttpPost("platform/{platformId:guid}/withdrawal")]
+    public async Task<IActionResult> WithdrawalAsync(Guid platformId, WalletWithdrawalCommand command)
     {
-        var result = await Mediator.Send(command);
-        return ApiResponseFactory.Ok(result);
-    }
-
-    [HttpPost("me/wallet-G598/withdrawal")]
-    public async Task<IActionResult> WithdrawalAsync(WalletWithdrawalCommand command)
-    {
-        var result = await Mediator.Send(command);
+        var result = await Mediator.Send(command with { PlatformId = platformId });
         return ApiResponseFactory.Ok(result);
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetGameCode([AsParameters] GetGamesRequest request)
+    public async Task<IActionResult> GetGamesAsync([AsParameters] GetGamesRequest request)
     {
         var query = new GetGamesQuery(
             request.Keyword,

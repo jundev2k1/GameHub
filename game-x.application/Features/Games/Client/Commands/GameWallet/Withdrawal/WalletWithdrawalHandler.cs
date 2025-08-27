@@ -28,6 +28,9 @@ public sealed class WalletWithdrawalHandler(
 {
     public async Task<GameTransactionDto> Handle(WalletWithdrawalCommand command, CancellationToken ct = default)
     {
+        if (command.PlatformId != GameConstants.PLATFORM_ID_G598)
+            throw new BadRequestException("Platform is invalid.");
+
         var currentUser = await GetCurrentUserAsync(ct);
         var balance = await GetUserBalanceAsync(currentUser.Id, command, ct);
         var transaction = await CreateTransactionAsync(currentUser.Id, balance.CryptoToken.Id, command, ct);
@@ -47,7 +50,6 @@ public sealed class WalletWithdrawalHandler(
                 sno: transaction.G598Sno,
                 amount: transaction.Amount);
 
-            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
         }
         catch (Exception ex)
         {
@@ -61,6 +63,9 @@ public sealed class WalletWithdrawalHandler(
 
             throw;
         }
+
+        // Refresh wallet cache and notify user
+        await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId, command.PlatformId), ct);
 
         var result = await gameTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
         return result.Adapt<GameTransactionDto>();

@@ -18,12 +18,12 @@ public sealed class OnTransactionCreatedHandler(
         var targetTransaction = @event.Transaction;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await SendToMember(targetTransaction, ct);
-            await SendToAdmin(targetTransaction, ct);
+            await SendUpdateWalletToMember(targetTransaction, ct);
+            await SendNotificationToAdmin(targetTransaction, ct);
         }, ct);
     }
 
-    private async Task SendToAdmin(ChainTransaction transaction, CancellationToken ct)
+    private async Task SendNotificationToAdmin(ChainTransaction transaction, CancellationToken ct)
     {
         var adminUsers = await userRepo.GetAdminUsers(ct);
 
@@ -53,11 +53,12 @@ public sealed class OnTransactionCreatedHandler(
         }
     }
     
-    private async Task SendToMember(ChainTransaction transaction, CancellationToken ct)
+    private async Task SendUpdateWalletToMember(ChainTransaction transaction, CancellationToken ct)
     {
         if (transaction.UserId != null)
         {
-            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
+            var @event = new OnUserBalanceUpdatedEvent(transaction.UserId);
+            await eventDispatcher.Publish(@event, ct);
         }
     }
 }
