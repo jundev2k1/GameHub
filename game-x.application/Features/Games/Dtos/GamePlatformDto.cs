@@ -10,6 +10,8 @@ public sealed class GamePlatformDto
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Note { get; set; } = string.Empty;
+    [JsonIgnore]
     public int Priority { get; set; }
+    [JsonIgnore]
     public bool IsActive { get; set; } = true;
 }
