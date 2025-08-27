@@ -12,8 +12,14 @@ namespace game_x.infrastructure.SignalR.Hubs;
 public interface IChatClient
 {
     // ----- V1 -----
-    Task ConversationCreated(ConversationDto dto);
+    /// <summary>
+    ///     Send it whenever there is any update in the conversation, such as sending a message, reacting, etc.
+    /// </summary>
+    Task ConversationUpdated(ConversationDto dto);
     Task MemberAdded(ConversationMemberDto dto);
+    /// <summary>
+    ///     Send it whenever a message is sent.
+    /// </summary>
     Task MessageCreated(MessageDto dto);
     
     // Task MemberRemoved(ConversationMemberDto dto);
@@ -64,13 +70,25 @@ public sealed class ChatHub(
     {
         var userId = userAccessor.GetUserId();
         var role = userAccessor.GetRoles();
-        await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Member(userId));
+        
+        if (Context.User?.IsInRole(AppRoles.User) == true)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Member(userId));
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.User));
+        }
         
         // If the user is an Admin/Cs, also add them to role groups (so they get broadcasts)
         if (Context.User?.IsInRole(AppRoles.Admin) == true)
+        {
             await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.Admin));
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Admin(userId));
+        }
+
         if (Context.User?.IsInRole(AppRoles.Cs) == true)
+        {
             await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.Cs));
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Cs(userId));
+        }
 
         logger.LogInformation("ChatHub {Role} connected: {UserId}",role.ToString(), userId);
         await base.OnConnectedAsync();
@@ -89,26 +107,40 @@ public sealed class ChatHub(
     // --- Customer Support ---
     
     /// <summary>
-    /// Send a support message. Creates the user's support conversation if missing
-    /// and broadcasts to the conversation AND to all Admin/Cs role groups.
+    /// Send a support message by customer.
+    /// Creates the user's support conversation if missing
+    /// Broadcast to all Admin/Cs role groups if this is a new conversation
+    /// Only send to the assigned CS representative if the conversation has been claimed
     /// </summary>
-    public async Task<MessageDto> SendSupportMessage(SendSupportMessageCommand cmd)
+    public async Task SendSupportMessage(SendSupportMessageCommand cmd)
     {
         var ct = Context.ConnectionAborted;
         
         var result = await sender.Send(cmd, ct);
-        // If a new conversation was created on first sending, notify the sender (optional)
-        if (result.CreatedConversation is { } conv)
+        
+        if(result.Conv != null)
+            await Clients.Caller.ConversationUpdated(result.Conv);
+        
+        switch (result.Conv?.Status)
         {
-            await Clients.Caller.ConversationCreated(conv);
+            case ConversationStatus.Open:
+                await Clients.Group(GroupNames.Role(AppRoles.Admin)).ConversationUpdated(result.Conv);
+                await Clients.Group(GroupNames.Role(AppRoles.Cs)).ConversationUpdated(result.Conv);
+            
+                await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
+                await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
+                await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
+                break;
+            case ConversationStatus.Claimed:
+                if (result.Conv.AssignedAgentId != null)
+                {
+                    await Clients.Group(GroupNames.Cs(result.Conv.AssignedAgentId)).ConversationUpdated(result.Conv);
+                    await Clients.Group(GroupNames.Cs(result.Conv.AssignedAgentId)).MessageCreated(result.Message);
+                }
+                // await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).ConversationUpdated(result.Conv);
+                // await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
+                break;
         }
-
-        // Broadcast to conversation participants (user’s devices)…
-        await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
-        await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
-        await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
-
-        return result.Message;
     }
     
     // --- Conversations & membership ---

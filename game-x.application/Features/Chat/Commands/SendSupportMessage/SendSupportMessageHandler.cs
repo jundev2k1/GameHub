@@ -19,8 +19,8 @@ public sealed class SendSupportMessageHandler(
         var senderUserId = userAccessor.GetUserId();
         var now = DateTime.UtcNow;
 
-        // 1) Get-or-create support conversation for this user (Open)
-        var conv = await conversationRepo.GetSupportConversationAsync(ConversationStatus.Open, senderUserId, ct);
+        // Each customer has only one conversation with customer support; if none exists, a new one will be created
+        var conv = await conversationRepo.GetSupportConversationAsync(ConversationStatus.Claimed, senderUserId, ct);
         ConversationMember? convMember = null;
         await unitOfWork.BeginTransactionAsync(ct);
         try
