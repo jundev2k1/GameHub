@@ -19,6 +19,7 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
             .AsNoTracking()
             .Include(x => x.CryptoToken)
             .Include(x => x.Ledger)
+            .Include(x => x.GamePlatform)
             .Where(x => x.UserId == userId)
             .AsQueryable();
 
@@ -38,6 +39,7 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
             page,
             pageSize);
     }
+
     public async Task<PaginationResult<GameTransaction>> GetTransactionByCriteriaAsync(
         Func<IQueryable<GameTransaction>, IQueryable<GameTransaction>>? queryBuilder = null,
         int page = 1,
@@ -48,6 +50,7 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
             .AsNoTracking()
             .Include(x => x.CryptoToken)
             .Include(x => x.Ledger)
+            .Include(x => x.GamePlatform)
             .AsQueryable();
 
         if (queryBuilder != null)

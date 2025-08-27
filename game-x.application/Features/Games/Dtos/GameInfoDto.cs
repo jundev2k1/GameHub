@@ -12,6 +12,7 @@ public sealed class GameInfoDto
     public string PlatformName { get; set; } = string.Empty;
     public GameCategoryInfo[] Categories { get; set; } = [];
     public GameTypeInfo[] GameTypes { get; set; } = [];
+    [JsonIgnore]
     public int Priority { get; set; } = 0;
 }
 
@@ -20,6 +21,7 @@ public sealed class GameCategoryInfo
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public bool IsPrimary { get; set; }
+    [JsonIgnore]
     public int Priority { get; set; }
 }
 
@@ -28,5 +30,6 @@ public sealed class GameTypeInfo
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public bool IsPrimary { get; set; }
+    [JsonIgnore]
     public int Priority { get; set; }
 }

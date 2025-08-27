@@ -13,8 +13,8 @@ public sealed class GameController : BaseApiController
             request.Keyword,
             request.Platform,
             request.Category,
-        request.GameType,
-        request.PageNumber ?? 1,
+            request.GameType,
+            request.PageNumber ?? 1,
             request.PageSize ?? 20);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
