@@ -18,4 +18,10 @@ public static class StringExtension
         => string.Join(separater, input);
     public static string JoinToString<T>(this IEnumerable<T> input, Func<T, string> callback, string separater)
         => string.Join(separater, input.Select(x => callback(x)));
+    public static string ToCamelCase(this string s)
+    {
+        if (string.IsNullOrEmpty(s) || !char.IsUpper(s[0]))
+            return s;
+        return char.ToLower(s[0]) + s.Substring(1);
+    }
 }
