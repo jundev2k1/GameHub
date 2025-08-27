@@ -57,8 +57,6 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             .Include(u => u.UserKyc)
             .Include(u => u.UserExtend)
             .Include(u => u.UserBankAccounts)
-            .Include(u => u.UserBalances)
-            .ThenInclude(ub => ub.CryptoToken)
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)

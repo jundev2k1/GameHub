@@ -1,3 +1,4 @@
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
@@ -22,6 +23,7 @@ public sealed class WalletWithdrawalHandler(
     IUnitOfWork unitOfWork,
     IApplicationEventDispatcher eventDispatcher,
     IGameProviderService gameProvider,
+    IGameProviderCacheService gameProviderCache,
     IAppLogger<GameTransaction> logger) : ICommandHandler<WalletWithdrawalCommand, GameTransactionDto>
 {
     public async Task<GameTransactionDto> Handle(WalletWithdrawalCommand command, CancellationToken ct = default)
@@ -46,7 +48,6 @@ public sealed class WalletWithdrawalHandler(
                 amount: transaction.Amount);
 
             await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
-            return transaction.Adapt<GameTransactionDto>();
         }
         catch (Exception ex)
         {
@@ -60,6 +61,9 @@ public sealed class WalletWithdrawalHandler(
 
             throw;
         }
+
+        var result = await gameTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
+        return result.Adapt<GameTransactionDto>();
     }
 
     private async Task<User> GetCurrentUserAsync(CancellationToken ct)
@@ -81,9 +85,8 @@ public sealed class WalletWithdrawalHandler(
         if (token.Status != CryptoTokenStatus.Active)
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
 
-        var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
-        if (userBalance == null)
-            throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+        var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
+            ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
         return userBalance;
     }
@@ -97,6 +100,7 @@ public sealed class WalletWithdrawalHandler(
             g598sno: sno,
             amount: command.Amount,
             type: GameTransactionType.Withdrawal,
+            gamePlatformId: gameProviderCache.G598Platform.LocalId,
             cryptoTokenId: cryptoTokenId,
             note: command.Note);
 

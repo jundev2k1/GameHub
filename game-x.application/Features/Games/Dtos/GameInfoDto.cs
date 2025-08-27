@@ -1,7 +1,11 @@
-﻿namespace game_x.application.Features.Games.Dtos;
+﻿using System.Text.Json.Serialization;
+
+namespace game_x.application.Features.Games.Dtos;
 
 public sealed class GameInfoDto
 {
+    [JsonIgnore]
+    public int LocalId { get; set; }
     public Guid Id { get; set; }
     public string GameCode { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
