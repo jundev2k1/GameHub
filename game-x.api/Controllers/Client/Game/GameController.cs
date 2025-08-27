@@ -1,10 +1,8 @@
 ﻿using game_x.api.Common;
-using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Client.Commands.GameWallet.Deposit;
 using game_x.application.Features.Games.Client.Commands.GameWallet.Withdrawal;
 using game_x.application.Features.Games.Client.Commands.LoginGame;
-using game_x.application.Features.Games.Client.Queries.GetGames;
 using game_x.application.Features.Games.Client.Queries.GetMyGameTransactionDetail;
 using game_x.application.Features.Games.Client.Queries.GetMyGameTransactions;
 
@@ -34,20 +32,6 @@ public sealed class GameController : BaseApiController
     public async Task<IActionResult> WithdrawalAsync(Guid platformId, WalletWithdrawalCommand command)
     {
         var result = await Mediator.Send(command with { PlatformId = platformId });
-        return ApiResponseFactory.Ok(result);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetGamesAsync([AsParameters] GetGamesRequest request)
-    {
-        var query = new GetGamesQuery(
-            request.Keyword,
-            request.Platform,
-            request.Category,
-            request.GameType,
-            request.PageNumber ?? 1,
-            request.PageSize ?? 20);
-        var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
 
