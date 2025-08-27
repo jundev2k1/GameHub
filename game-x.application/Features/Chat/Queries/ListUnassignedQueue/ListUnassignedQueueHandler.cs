@@ -5,17 +5,13 @@ using game_x.application.Features.Chat.Dtos;
 namespace game_x.application.Features.Chat.Queries.ListUnassignedQueue;
 
 public sealed class ListUnassignedQueueQueryHandler(IConversationRepo conversationRepo)
-    : IRequestHandler<ListUnassignedQueueQuery, CursorResult<ConversationQueueItemDto>>
+    : IRequestHandler<ListUnassignedQueueQuery, CursorResult<SupportConversationDto>>
 {
-    public async Task<CursorResult<ConversationQueueItemDto>> Handle(ListUnassignedQueueQuery request, CancellationToken ct)
+    public async Task<CursorResult<SupportConversationDto>> Handle(ListUnassignedQueueQuery request, CancellationToken ct)
     {
-        var limit = Math.Clamp(request.Limit ?? 20, 1, 100);
-
         return await conversationRepo.GetUnassignedQueueByCursorAsync(
-            limit: limit,
+            limit: request.Limit ?? 20,
             cursor: request.Cursor,
-            q: request.Q,
-            search: request.Search,
             ct: ct);
     }
 }

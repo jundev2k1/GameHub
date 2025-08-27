@@ -82,18 +82,13 @@ public sealed class SendSupportMessageHandler(
     
     private async Task<Message> CreateMessageAsync(Conversation conv, string userId, string text, CancellationToken ct)
     {
-        var msg = new Message
-        {
-            Conversation = conv,
-            SenderUserId = userId,
-            SenderRole = RoleInConversation.Member,
-            Kind = MessageKind.Text,
-            Text = text,
-            SentAt = DateTime.UtcNow,
-            IsTombstone = false,
-            EditCount = 0,
-            CurrentVersion = 1,
-        };
+        var msg = Message.Create(
+            conv: conv,
+            senderUserId: userId,
+            text: text,
+            kind: MessageKind.Text,
+            senderRole: RoleInConversation.Member
+        );
         
         await messageRepo.AddAsync(msg, ct);
         return msg;

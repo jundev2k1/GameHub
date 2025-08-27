@@ -1,5 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Features.Chat.Dtos;
+using ConversationDto = game_x.application.Features.Chat.Dtos.ConversationDto;
 
 namespace game_x.application.Features.Chat.Mapping;
 
@@ -7,14 +8,24 @@ public sealed class MapsterConfig : IRegister
 {
     public void Register(TypeAdapterConfig cfg)
     {
-        cfg.NewConfig<Conversation, ConversationDto>()
+        cfg.NewConfig<Conversation, Contract.Infrastructure.SignalR.Dtos.Chat.ConversationDto>()
             .Map(dest => dest.Id, src => src.PublicId);
         
-        cfg.NewConfig<Conversation, ConversationQueueItemDto>()
+        cfg.NewConfig<Conversation, SupportConversationDto>()
             .Map(dest => dest.ConversationId, src => src.PublicId)
             .Map(dest => dest.CustomerUserId, src => src.CustomerId ?? String.Empty)
             .Map(dest => dest.CustomerDisplayName, src => src.Customer!.Nickname)
             .Map(dest => dest.CustomerAvatarUrl, src => string.Empty)
+            .Map(dest => dest.LastMessageAt, src => src.LastMessageAt)
+            .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault()!.PublicId)
+            .Map(dest => dest.LastMessagePreview, src => src.Messages.FirstOrDefault()!.Text);
+        
+        cfg.NewConfig<Conversation, ConversationDto>()
+            .Map(dest => dest.ConversationId, src => src.PublicId)
+            .Map(dest => dest.LastUserId, src => src.Messages.FirstOrDefault()!.SenderUserId)
+            .Map(dest => dest.LastUserName, src => 
+                src.Messages.FirstOrDefault().SenderUser != null ? src.Messages.FirstOrDefault()!.SenderUser.Nickname : String.Empty)
+            .Map(dest => dest.LastUserAvatarUrl, src => string.Empty)
             .Map(dest => dest.LastMessageAt, src => src.LastMessageAt)
             .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault()!.PublicId)
             .Map(dest => dest.LastMessagePreview, src => src.Messages.FirstOrDefault()!.Text);

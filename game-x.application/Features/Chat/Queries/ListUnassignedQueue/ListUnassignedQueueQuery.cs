@@ -5,8 +5,5 @@ using game_x.application.Features.Chat.Dtos;
 namespace game_x.application.Features.Chat.Queries.ListUnassignedQueue;
 
 public record ListUnassignedQueueQuery(
-    IEnumerable<QueryFilter> Filters,
     int? Limit,
-    string? Q = null,
-    string? Search = null,
-    string? Cursor = null) : IQuery<CursorResult<ConversationQueueItemDto>>;
+    string? Cursor = null) : IQuery<CursorResult<SupportConversationDto>>;

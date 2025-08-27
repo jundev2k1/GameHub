@@ -1,6 +1,7 @@
 using System.Text.Json;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -58,14 +59,6 @@ public sealed class ChatHub(
 {
     public const string Path = "/hubs/chat";
 
-    // public override async Task OnConnectedAsync()
-    // {
-    //     var userId = Context.UserIdentifier ?? userAccessor.GetUserId();
-    //     await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Member(userId));
-    //     logger.LogInformation("ChatHub connected: {UserId}", userId);
-    //     await base.OnConnectedAsync();
-    // }
-
     public override async Task OnConnectedAsync()
     {
         var userId = userAccessor.GetUserId();
@@ -118,29 +111,72 @@ public sealed class ChatHub(
         
         var result = await sender.Send(cmd, ct);
         
-        if(result.Conv != null)
-            await Clients.Caller.ConversationUpdated(result.Conv);
+        await Clients.Caller.ConversationUpdated(result.Conv);
+        await Clients.Caller.MessageCreated(result.Message);
         
-        switch (result.Conv?.Status)
+        switch (result.Conv.Status)
         {
             case ConversationStatus.Open:
+                // Notify the conversation group
+                await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).ConversationUpdated(result.Conv);
+                await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
+
+                // Notify all admins and cs
                 await Clients.Group(GroupNames.Role(AppRoles.Admin)).ConversationUpdated(result.Conv);
                 await Clients.Group(GroupNames.Role(AppRoles.Cs)).ConversationUpdated(result.Conv);
-            
-                await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
                 await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
                 await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
                 break;
             case ConversationStatus.Claimed:
-                if (result.Conv.AssignedAgentId != null)
-                {
-                    await Clients.Group(GroupNames.Cs(result.Conv.AssignedAgentId)).ConversationUpdated(result.Conv);
-                    await Clients.Group(GroupNames.Cs(result.Conv.AssignedAgentId)).MessageCreated(result.Message);
-                }
+                // if (result.Conv.AssignedAgentId != null)
+                // {
+                //     await Clients.Group(GroupNames.Cs(result.Conv.AssignedAgentId)).ConversationUpdated(result.Conv);
+                //     await Clients.Group(GroupNames.Cs(result.Conv.AssignedAgentId)).MessageCreated(result.Message);
+                // }
+                
+                // Notify all admins and cs for now
+                await Clients.Group(GroupNames.Role(AppRoles.Admin)).ConversationUpdated(result.Conv);
+                await Clients.Group(GroupNames.Role(AppRoles.Cs)).ConversationUpdated(result.Conv);
+                await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
+                await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
+                
                 // await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).ConversationUpdated(result.Conv);
                 // await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
                 break;
         }
+    }
+    
+    /// <summary>
+    /// Send a support message to customer.
+    /// </summary>
+    public async Task SendSupportMessageToCustomer(SendMessageToCustomerCommand cmd)
+    {
+        var ct = Context.ConnectionAborted;
+        
+        var result = await sender.Send(cmd, ct);
+        
+        // Notify the sender
+        await Clients.Caller.ConversationUpdated(result.Conv);
+        await Clients.Caller.MessageCreated(result.Message);
+        
+        // Notify all admins for now
+        await Clients.Group(GroupNames.Role(AppRoles.Admin)).ConversationUpdated(result.Conv);
+        await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
+        
+        // Notify all customer supports for now
+        await Clients.Group(GroupNames.Role(AppRoles.Cs)).ConversationUpdated(result.Conv);
+        await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
+        
+        // Notify the customer
+        if (result.Conv.CustomerId != null)
+        {
+            await Clients.Group(GroupNames.Member(result.Conv.CustomerId)).ConversationUpdated(result.Conv);
+            await Clients.Group(GroupNames.Member(result.Conv.CustomerId)).MessageCreated(result.Message);
+        }
+        
+        // Notify the conversation group
+        await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).ConversationUpdated(result.Conv);
+        await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
     }
     
     // --- Conversations & membership ---
