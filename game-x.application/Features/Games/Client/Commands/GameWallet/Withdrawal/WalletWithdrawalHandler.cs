@@ -48,7 +48,6 @@ public sealed class WalletWithdrawalHandler(
                 amount: transaction.Amount);
 
             await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
-            return transaction.Adapt<GameTransactionDto>();
         }
         catch (Exception ex)
         {
@@ -62,6 +61,9 @@ public sealed class WalletWithdrawalHandler(
 
             throw;
         }
+
+        var result = await gameTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
+        return result.Adapt<GameTransactionDto>();
     }
 
     private async Task<User> GetCurrentUserAsync(CancellationToken ct)

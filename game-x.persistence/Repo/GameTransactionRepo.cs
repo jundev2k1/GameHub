@@ -67,17 +67,6 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
             pageSize);
     }
 
-    public async Task<GameTransaction> GetByIdAndUserIdAsync(string userId, Guid publicId, CancellationToken ct = default)
-    {
-        return await context.GameTransactions
-                   .AsNoTracking()
-                   .Include(t => t.User!)
-                   .ThenInclude(u => u.UserBalances)
-                   .Include(t => t.CryptoToken)
-                   .Include(t => t.Ledger)
-                   .FirstOrDefaultAsync(x => x.PublicId == publicId && x.UserId == userId, ct)
-               ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
-    }
     public async Task<GameTransaction> GetByIdAsync(Guid publicId, CancellationToken ct = default)
     {
         return await context.GameTransactions
@@ -86,9 +75,11 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
                 .ThenInclude(u => u.UserBalances)
             .Include(t => t.CryptoToken)
             .Include(t => t.Ledger)
+            .Include(t => t.GamePlatform)
             .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
             ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
+
     public async Task<GameTransaction> AddAsync(GameTransaction entity, CancellationToken ct = default)
     {
         await context.GameTransactions.AddAsync(entity, ct);
@@ -98,8 +89,8 @@ public sealed class GameTransactionRepo(GameXContext context) : IGameTransaction
     public async Task PatchUpdateAsync(Guid publicId, Action<GameTransaction> updateAction, CancellationToken ct = default)
     {
         var transaction = await context.GameTransactions
-                              .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
-                               ?? throw new NotFoundException(MessageCode.Transaction.GameTransactionNotFound);
+            .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
+            ?? throw new NotFoundException(MessageCode.Transaction.GameTransactionNotFound);
 
         updateAction.Invoke(transaction);
         await context.SaveChangesAsync(ct);

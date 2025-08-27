@@ -53,15 +53,16 @@ public sealed class WalletDepositHandler(
         {
             await unitOfWork.RollbackAsync(ct);
             logger.LogError($"Failed to create deposit game transaction. SNO: {transaction.G598Sno}", ex.Message);
-            await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, x =>
+            await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, gt =>
             {
-                x.Status = GameTransactionStatus.Failed;
-                x.UpdateMeta(m => m.ErrorMessage = ex.Message);
+                gt.Status = GameTransactionStatus.Failed;
+                gt.UpdateMeta(m => m.ErrorMessage = ex.Message);
             }, ct);
 
             throw;
         }
-        return transaction.Adapt<GameTransactionDto>();
+        var result = await gameTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
+        return result.Adapt<GameTransactionDto>();
     }
 
     private async Task<User> GetCurrentUserAsync(CancellationToken ct)
@@ -83,9 +84,8 @@ public sealed class WalletDepositHandler(
         if (token.Status != CryptoTokenStatus.Active)
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
 
-        var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct);
-        if (userBalance == null)
-            throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+        var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
+            ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
         if (userBalance.Amount < command.Amount)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
