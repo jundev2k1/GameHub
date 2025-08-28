@@ -2,9 +2,11 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.share.Extensions;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Logout;
+using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 
@@ -16,7 +18,8 @@ public sealed class LoginGameHandler(
     IGameProviderService gameProvider,
     IGameAesEncryptor aesEncryptor,
     IGameProviderCacheService gameProviderCache,
-    IOptions<GameProviderSettings> gameSettings) : ICommandHandler<LoginGameCommand, LoginGameResult>
+    IOptions<GameProviderSettings> gameSettings,
+    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<LoginGameCommand, LoginGameResult>
 {
     public async Task<LoginGameResult> Handle(LoginGameCommand request, CancellationToken ct = default)
     {
@@ -34,7 +37,10 @@ public sealed class LoginGameHandler(
         // Loggout if user already login
         var isLoggedIn = gameProviderCache.GetIsLoggedIn(gameProviderAccount);
         if (isLoggedIn)
+        {
             await LogoutGameAsync(gameProviderAccount);
+            gameProviderCache.SetIsLoggedIn(gameProviderAccount, false);
+        }
 
         // Login from external API
         gameProviderCache.SetLanguage(gameProviderAccount, request.Locale);
@@ -49,6 +55,7 @@ public sealed class LoginGameHandler(
         };
         var result = await gameProvider.LoginAsync(externalRequest, request.IpAddress!);
         gameProviderCache.SetIsLoggedIn(gameProviderAccount, true);
+        await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(userId, gameProviderCache.G598Platform.Id), ct);
         var gameEmbededLink = ConvertEmbededLink(result.Url);
         return new LoginGameResult(gameEmbededLink);
     }
@@ -60,6 +67,12 @@ public sealed class LoginGameHandler(
             Account = account,
         };
         await gameProvider.LogoutAsync(logoutRequest);
+
+        var tempRequest = new WalletRequest()
+        {
+            Account = account
+        };
+        await gameProvider.GetWalletAsync(tempRequest);
     }
 
     private string ConvertEmbededLink(string url)
