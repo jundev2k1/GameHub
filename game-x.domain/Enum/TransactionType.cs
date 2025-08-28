@@ -1,6 +1,6 @@
 namespace game_x.domain.Enum;
 
-public enum UsdtFlowType
+public enum TransactionType
 {
     /// <summary>
     /// Initialize the ledger to serve as the foundation for transactions throughout the lifecycle of the user account

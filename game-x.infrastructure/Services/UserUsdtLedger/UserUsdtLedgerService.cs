@@ -9,12 +9,12 @@ public sealed class UserUsdtLedgerService
 {
     public async Task CreateForChainTransactionAsync(ChainTransaction transaction)
     {
-        var flowType = transaction.Type == ChainTransactionType.Deposit ? UsdtFlowType.Deposit : UsdtFlowType.Withdrawal;
+        var flowType = transaction.Type == ChainTransactionType.Deposit ? UsdtFlowType.UxmDeposit : UsdtFlowType.UxmWithdrawal;
 
         decimal changeAmount = flowType switch
         {
-            UsdtFlowType.Deposit => transaction.Amount + transaction.Fee,
-            UsdtFlowType.Withdrawal => -(transaction.Amount + transaction.Fee),
+            UsdtFlowType.UxmDeposit => transaction.Amount + transaction.Fee,
+            UsdtFlowType.UxmWithdrawal => -(transaction.Amount + transaction.Fee),
             _ => throw new InvalidOperationException($"Unsupported flow type: {flowType}")
         };
 

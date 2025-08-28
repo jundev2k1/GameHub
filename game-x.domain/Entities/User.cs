@@ -11,6 +11,7 @@ public class User : IdentityUser, IEntity, IAuditable
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public ICollection<Transaction> Transactions { get; set; } = [];
     public ICollection<ChainTransaction> ChainTransactions { get; set; } = [];
     public ICollection<GameTransaction> GameTransactions { get; set; } = [];
     public ICollection<UserUsdtLedger> UserUsdtLedgers { get; set; } = [];
