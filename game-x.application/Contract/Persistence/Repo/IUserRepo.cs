@@ -16,6 +16,12 @@ public interface IUserRepo
 
     Task<User> GetAdminById(string userId, CancellationToken ct = default);
 
+    Task<PaginationResult<User>> GetCsAdminByCriteria(
+        Func<IQueryable<User>, IQueryable<User>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
+
     Task<UserDetailDto> GetUserDetailAsync(string userId, CancellationToken ct = default);
 
     Task<UserExtend> GetUserExtendAsync(string userId, CancellationToken ct = default);
@@ -27,10 +33,10 @@ public interface IUserRepo
     Task<VerificationStatusDto[]> GetVerificationStatusList(string userId, CancellationToken ct = default);
 
     Task<PaginationResult<UserDto>> GetUserByCriteriaAsync(
-    Func<IQueryable<UserDto>, IQueryable<UserDto>>? queryBuilder = null,
-    int page = 1,
-    int pageSize = 20,
-    CancellationToken ct = default);
+        Func<IQueryable<UserDto>, IQueryable<UserDto>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
 
     Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default);
 

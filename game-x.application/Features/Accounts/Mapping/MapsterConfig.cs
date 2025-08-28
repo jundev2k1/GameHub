@@ -59,6 +59,7 @@ public sealed class MapsterConfig : IRegister
 
         cfg.NewConfig<UserEntity, GetSelfUserProfileResult>()
             .Map(dest => dest.UserId, src => src.Id)
+            .Map(dest => dest.Username, src => src.UserName)
             .Map(dest => dest.Roles, src => src.UserRoles.Select(ur => ur.Role.Name).ToArray());
     }
 }

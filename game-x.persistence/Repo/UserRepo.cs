@@ -60,6 +60,35 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             ?? throw new NotFoundException(nameof(userId), userId);
     }
 
+    public async Task<PaginationResult<User>> GetCsAdminByCriteria(
+        Func<IQueryable<User>, IQueryable<User>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.AppUsers
+            .AsNoTracking()
+            .Where(u => u.UserRoles.Any(u => u.Role.Name == AppRoles.Cs))
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var totalPageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
+        var result = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToArrayAsync(ct);
+
+        return new PaginationResult<User>(
+            result,
+            totalCount,
+            totalPageCount,
+            page,
+            pageSize);
+    }
+
     public async Task<UserDetailDto> GetUserDetailAsync(string userId, CancellationToken ct = default)
     {
         var targetUser = await context.Users
