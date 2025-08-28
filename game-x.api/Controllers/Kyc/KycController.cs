@@ -42,7 +42,7 @@ public sealed class KycController : BaseApiController
         return ApiResponseFactory.NoContent();
     }
 
-    [Authorize(Roles = AppRoles.Admin)]
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpPost("decision")]
     public async Task<IActionResult> DecideAsync(DecisionKycCommand command)
     {
