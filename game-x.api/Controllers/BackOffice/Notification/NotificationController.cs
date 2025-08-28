@@ -1,6 +1,6 @@
 ﻿using game_x.application.Features.Notifications.Shared.Queries.GetNotificationDetail;
 
-namespace game_x.api.Controllers.Admin.Notification;
+namespace game_x.api.Controllers.BackOffice.Notification;
 
 [Route("api/back-office/notifications")]
 public sealed class NotificationController : BaseApiController

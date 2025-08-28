@@ -2,7 +2,7 @@ using game_x.application.Features.Auth.Admin.Commands.AdminLogin;
 using game_x.application.Features.Auth.Client.Commands.RefreshToken;
 using game_x.application.Features.Auth.Shared.Commands.Logout;
 
-namespace game_x.api.Controllers.Admin;
+namespace game_x.api.Controllers.BackOffice;
 
 [Route("api/back-office/auth")]
 public sealed class AuthController : BaseApiController

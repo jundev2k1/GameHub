@@ -1,6 +1,6 @@
 using game_x.application.Features.UserRoles.Admin.Queries;
 
-namespace game_x.api.Controllers.Admin.Role;
+namespace game_x.api.Controllers.BackOffice.Role;
 
 [Route("api/back-office/roles")]
 public sealed class RoleController : BaseApiController

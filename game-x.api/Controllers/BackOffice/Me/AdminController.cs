@@ -1,7 +1,7 @@
 using game_x.application.Features.Accounts.Admin.Queries.GetSelfUserProfile;
 using game_x.application.Features.Auth.Admin.Commands.ChangePasswordAdmin;
 
-namespace game_x.api.Controllers.Admin.Me;
+namespace game_x.api.Controllers.BackOffice.Me;
 
 [Route("api/back-office/me")]
 public sealed class AdminController : BaseApiController

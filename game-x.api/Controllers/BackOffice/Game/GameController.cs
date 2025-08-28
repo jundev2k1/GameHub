@@ -3,7 +3,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Client.Queries.GetGameTransactionDetail;
 using game_x.application.Features.Games.Client.Queries.GetGameTransactions;
 
-namespace game_x.api.Controllers.Admin.Game;
+namespace game_x.api.Controllers.BackOffice.Game;
 
 [Route("/api/back-office/games")]
 public sealed class GameController : BaseApiController

@@ -32,8 +32,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\Cs\" />
-  </ItemGroup>
-
 </Project>

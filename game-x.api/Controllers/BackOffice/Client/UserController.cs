@@ -5,7 +5,7 @@ using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 
-namespace game_x.api.Controllers.Admin.Client;
+namespace game_x.api.Controllers.BackOffice.Client;
 
 [Route("api/back-office/users")]
 public sealed class UserController : BaseApiController

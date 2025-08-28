@@ -4,7 +4,7 @@ using game_x.application.Features.ChainTransactions.Admin.Commands.AdminReviewWi
 using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionCriteriaByAdmin;
 using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionDetailById;
 
-namespace game_x.api.Controllers.Admin.Chain;
+namespace game_x.api.Controllers.BackOffice.Chain;
 
 [Route("/api/back-office/chains")]
 public sealed class ChainController : BaseApiController
