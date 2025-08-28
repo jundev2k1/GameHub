@@ -5,6 +5,7 @@ using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.Kyc.Queries.GetKycByCriteria;
+using game_x.application.Features.Kyc.Queries.GetKycProfile;
 
 namespace game_x.api.Controllers.BackOffice.Client;
 
@@ -45,6 +46,15 @@ public sealed class UserController : BaseApiController
             sorts,
             parameters.PageNumber,
             parameters.PageSize);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("kycs/{userId}")]
+    public async Task<IActionResult> GetUserKycDetailAsync(string userId)
+    {
+        var query = new GetKycProfileQuery(userId);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }

@@ -1,5 +1,6 @@
 ﻿using game_x.api.Dtos;
 using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Features.Kyc.Commands._1_SubmitKyc;
 using game_x.application.Features.Kyc.Commands._2_DecisionKyc;
 using game_x.application.Features.Kyc.Commands._3_ResubmitKyc;
@@ -9,13 +10,14 @@ using game_x.application.Features.Kyc.Queries.GetKycStatus;
 namespace game_x.api.Controllers.Kyc;
 
 [Route("api/kyc")]
-public sealed class KycController : BaseApiController
+public sealed class KycController(IUserAccessor userAccessor) : BaseApiController
 {
     [Authorize(Roles = AppRoles.User)]
     [HttpGet("me")]
     public async Task<IActionResult> GetKycProfileAsync()
     {
-        var query = new GetKycProfileQuery();
+        var userId = userAccessor.GetUserId();
+        var query = new GetKycProfileQuery(userId);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }

@@ -1,19 +1,16 @@
 ﻿using game_x.application.Contract.Infrastructure.FileStorage;
-using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Kyc.Dtos;
 
 namespace game_x.application.Features.Kyc.Queries.GetKycProfile;
 
 public sealed class GetKycProfileHandler(
-    IUserAccessor userAccessor,
     IUserRepo userRepo,
     IFileStorageService fileStorage) : IQueryHandler<GetKycProfileQuery, UserKycDto>
 {
     public async Task<UserKycDto> Handle(GetKycProfileQuery request, CancellationToken ct = default)
     {
-        var userId = userAccessor.GetUserId();
-        var targetProfile = await userRepo.GetKycProfileAsync(userId, ct);
+        var targetProfile = await userRepo.GetKycProfileAsync(request.UserId, ct);
 
         var result = targetProfile.Adapt<UserKycDto>();
         result.FrontImageUrl = await GetImageUrl(targetProfile.FrontImage);

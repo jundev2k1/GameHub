@@ -2,4 +2,4 @@
 
 namespace game_x.application.Features.Kyc.Queries.GetKycProfile;
 
-public record GetKycProfileQuery : IQuery<UserKycDto>;
+public record GetKycProfileQuery(string UserId) : IQuery<UserKycDto>;
