@@ -114,6 +114,39 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             ?? throw new NotFoundException(nameof(userId), userId);
     }
 
+    public async Task<PaginationResult<UserKyc>> GetUserKycByCriteria(
+        Func<IQueryable<UserKyc>, IQueryable<UserKyc>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.UserKycs
+            .AsNoTracking()
+            .Include(uk => uk.User)
+            .Include(uk => uk.ReviewedBy)
+            .Include(uk => uk.FrontImage)
+            .Include(uk => uk.BackImage)
+            .Where(uk => !uk.User.IsDeleted)
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var totalPageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
+
+        var result = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToArrayAsync(ct);
+        return new PaginationResult<UserKyc>(
+            items: result,
+            totalItems: totalCount,
+            totalPages: totalPageCount,
+            pageIndex: page,
+            pageSize: pageSize);
+    }
+
     public async Task<UserKyc> GetKycProfileAsync(string userId, CancellationToken ct = default)
     {
         return await context.UserKycs

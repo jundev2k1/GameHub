@@ -4,6 +4,7 @@ using game_x.application.Features.Accounts.Admin.Queries.GetAllActiveTokensByAdm
 using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
+using game_x.application.Features.Kyc.Queries.GetKycByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Client;
 
@@ -25,6 +26,21 @@ public sealed class UserController : BaseApiController
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetUserCriteriaByAdminQuery(
+            filters,
+            sorts,
+            parameters.PageNumber,
+            parameters.PageSize);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("kycs")]
+    public async Task<IActionResult> GetUserKycByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    {
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var sorts = QueryConverter.ToSorts(parameters.Sorts);
+        var query = new GetKycByCriteriaQuery(
             filters,
             sorts,
             parameters.PageNumber,
