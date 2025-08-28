@@ -14,6 +14,8 @@ public interface IUserRepo
 
     Task<User[]> GetAdminUsers(CancellationToken ct = default);
 
+    Task<User> GetAdminById(string userId, CancellationToken ct = default);
+
     Task<UserDetailDto> GetUserDetailAsync(string userId, CancellationToken ct = default);
 
     Task<UserExtend> GetUserExtendAsync(string userId, CancellationToken ct = default);

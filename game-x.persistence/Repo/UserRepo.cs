@@ -50,6 +50,16 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
         return [.. users];
     }
 
+    public async Task<User> GetAdminById(string userId, CancellationToken ct = default)
+    {
+        return await context.AppUsers
+            .AsNoTracking()
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.Id == userId && u.Status == UserStatus.Active, ct)
+            ?? throw new NotFoundException(nameof(userId), userId);
+    }
+
     public async Task<UserDetailDto> GetUserDetailAsync(string userId, CancellationToken ct = default)
     {
         var targetUser = await context.Users
