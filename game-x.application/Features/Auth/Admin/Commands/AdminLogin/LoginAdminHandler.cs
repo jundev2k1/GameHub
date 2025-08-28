@@ -21,7 +21,7 @@ public sealed class LoginAdminHandler(
         if (!isValid) throw new ForbiddenException(errorCode!);
 
         var roles = await authService.GetRolesAsync(loginUser);
-        if (!roles.IsAdmin) throw new ForbiddenException();
+        if (!roles.IsAdmin && !roles.IsCs) throw new ForbiddenException();
 
         var tokenInfo = await jwtTokenGenerator.GenerateToken(loginUser);
         var refreshToken = tokenService.GenerateRefreshToken(loginUser.Id);

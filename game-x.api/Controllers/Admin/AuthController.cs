@@ -15,7 +15,7 @@ public sealed class AuthController : BaseApiController
         return ApiResponseFactory.Ok(result, MessageCode.System.LoginSuccess);
     }
 
-    [Authorize(Roles = AppRoles.Admin)]
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpPost("logout")]
     public async Task<IActionResult> LogoutAsync()
     {
