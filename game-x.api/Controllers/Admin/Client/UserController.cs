@@ -7,10 +7,10 @@ using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 
 namespace game_x.api.Controllers.Admin.Client;
 
-[Authorize(Roles = AppRoles.Admin)]
-[Route("api/admin/users")]
+[Route("api/back-office/users")]
 public sealed class UserController : BaseApiController
 {
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("{userId}")]
     public async Task<IActionResult> GetUserDetailAsync(string userId)
     {
@@ -18,6 +18,7 @@ public sealed class UserController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet]
     public async Task<IActionResult> GetUserByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
     {
@@ -32,6 +33,7 @@ public sealed class UserController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("{userId}/tokens")]
     public async Task<IActionResult> GetActiveTokensAsync(string userId)
     {
@@ -40,6 +42,7 @@ public sealed class UserController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpDelete("{userId}/tokens/{tokenId}")]
     public async Task<IActionResult> RevokeTokenAsync(string userId, Guid tokenId)
     {

@@ -2,10 +2,10 @@
 
 namespace game_x.api.Controllers.Admin.Notification;
 
-[Authorize(Roles = AppRoles.Admin)]
-[Route("api/admin/notifications")]
+[Route("api/back-office/notifications")]
 public sealed class NotificationController : BaseApiController
 {
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("me")]
     public async Task<IActionResult> GetMyNotificationAsync(int page = 1, int pageSize = 20)
     {

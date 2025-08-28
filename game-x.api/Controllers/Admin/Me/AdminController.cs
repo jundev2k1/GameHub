@@ -3,7 +3,7 @@ using game_x.application.Features.Auth.Admin.Commands.ChangePasswordAdmin;
 
 namespace game_x.api.Controllers.Admin.Me;
 
-[Route("api/admin/me")]
+[Route("api/back-office/me")]
 public sealed class AdminController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]

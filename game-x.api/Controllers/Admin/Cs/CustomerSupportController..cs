@@ -2,10 +2,10 @@ using game_x.application.Features.Accounts.Admin.Commands.CreateCustomerSupport;
 
 namespace game_x.api.Controllers.Admin.Cs;
 
-[Route("api/admin/customer-supports")]
-[Authorize(Roles = AppRoles.Admin)]
+[Route("api/back-office/customer-supports")]
 public sealed class CustomerSupportController : BaseApiController
 {
+    [Authorize(Roles = AppRoles.Admin)]
     [HttpPost]
     public async Task<IActionResult> CreateCsAsync(CreateCustomerSupportCommand command)
     {

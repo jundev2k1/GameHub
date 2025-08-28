@@ -5,10 +5,10 @@ using game_x.application.Features.Games.Client.Queries.GetGameTransactions;
 
 namespace game_x.api.Controllers.Admin.Game;
 
-[Authorize(Roles = AppRoles.Admin)]
-[Route("/api/admin/game")]
+[Route("/api/back-office/games")]
 public sealed class GameController : BaseApiController
 {
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("transactions")]
     public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
     {
@@ -23,6 +23,7 @@ public sealed class GameController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("transactions/{transactionId}")]
     public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
     {

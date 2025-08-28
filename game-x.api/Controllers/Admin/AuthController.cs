@@ -4,7 +4,7 @@ using game_x.application.Features.Auth.Shared.Commands.Logout;
 
 namespace game_x.api.Controllers.Admin;
 
-[Route("api/admin/auth")]
+[Route("api/back-office/auth")]
 public sealed class AuthController : BaseApiController
 {
     [AllowAnonymous]
