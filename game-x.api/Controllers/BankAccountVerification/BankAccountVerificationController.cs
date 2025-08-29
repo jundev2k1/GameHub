@@ -12,6 +12,7 @@ namespace game_x.api.Controllers.BankAccountVerification;
 [Route("api/bank-account-verifications")]
 public sealed class BankAccountVerificationController : BaseApiController
 {
+    [Authorize(Roles = AppRoles.User)]
     [HttpGet("me/{currency}")]
     public async Task<IActionResult> GetBankAccountProfileAsync(string currency)
     {
@@ -48,7 +49,7 @@ public sealed class BankAccountVerificationController : BaseApiController
         return ApiResponseFactory.NoContent();
     }
 
-    [Authorize(Roles = AppRoles.Admin)]
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpPatch("{id:guid}/decision")]
     public async Task<IActionResult> DecideAsync(Guid id, DecisionBankAccountCommand request)
     {
