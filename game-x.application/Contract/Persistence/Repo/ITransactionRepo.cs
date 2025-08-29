@@ -18,6 +18,7 @@ public interface ITransactionRepo
     Task<bool> ExistsByOrderNoAsync(string otcOrderNo, CancellationToken ct);
     Task<Transaction?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct);
     Task<Transaction> GetByIdAsync(Guid publicId, CancellationToken ct = default);
+    Task<Transaction> GetExternalByIdAsync(Guid publicId, CancellationToken ct = default);
     Task<Transaction> GetByIdAndUserIdAsync(string userId, Guid publicId, CancellationToken ct = default);
     /// <summary>
     /// Get the balance after from the lasted successful transaction of the user

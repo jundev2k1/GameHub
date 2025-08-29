@@ -77,7 +77,6 @@ public sealed class CreateDepositChainTransactionHandler(
             sourceType: TransactionSourceType.Uxm,
             type: TransactionType.Deposit,
             userId: userId,
-            status: TransactionStatus.Pending,
             amount: request.Amount,
             cryptoTokenId: token.Id,
             note: request.Note);

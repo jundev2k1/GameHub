@@ -45,8 +45,8 @@ public sealed class OnUxmTransactionCallbackHandler(
                 decimal lastedBalanceAfter = await transactionRepo.GetLatestBalanceAfterAsync(transaction.UserId, ct);
                 decimal changeAmount = transaction.Type switch
                 {
-                    TransactionType.Deposit => transaction.TotalAmount,
-                    TransactionType.Withdrawal => - transaction.TotalAmount,
+                    TransactionType.Deposit => @event.ActualAmount,
+                    TransactionType.Withdrawal => - @event.ActualAmount,
                     _ => 0
                 };
                 
@@ -54,7 +54,7 @@ public sealed class OnUxmTransactionCallbackHandler(
                 {
                     order.UpdateStatus(TransactionStatus.Completed);
                     order.UpdateUxmResponse(
-                        amount: @event.ActualAmount,
+                        actualAmount: @event.ActualAmount,
                         orderUid: @event.OrderUid,
                         hash: @event.Hash,
                         confirmedAt: @event.ConfirmedAt

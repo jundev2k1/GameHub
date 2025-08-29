@@ -11,6 +11,8 @@ public class Transaction: BaseEntity<int>, IAuditable
     public User User { get; set; } = null!;
     /// <summary>The funds used for the transaction.</summary>
     public decimal Amount { get; set; }
+    /// <summary>The amount of funds the user actually transferred.</summary>
+    public decimal? ActualAmount { get; set; }
     public decimal? Fee { get; set; }
     public int CryptoTokenId { get; set; }
     public CryptoToken CryptoToken { get; set; } = null!;
@@ -31,7 +33,7 @@ public class Transaction: BaseEntity<int>, IAuditable
         int cryptoTokenId,
         TransactionSourceType sourceType,
         TransactionType type,
-        TransactionStatus? status,
+        TransactionStatus? status = null,
         decimal? fee = null,
         string? note = null
     )
@@ -88,19 +90,21 @@ public class Transaction: BaseEntity<int>, IAuditable
     }
     
     public void UpdateUxmResponse(
-        decimal amount, 
+        decimal? amount = null,
+        decimal? actualAmount = null,
         string? orderUid = null, 
         string? hash = null,
         string? to = null,
         DateTime? confirmedAt = null)
     {
-        Amount = amount;
+        Amount = amount ?? Amount;
+        ActualAmount = actualAmount ?? ActualAmount;
         if (TransactionInternal != null)
         {
-            TransactionInternal.OrderUid = orderUid;
-            TransactionInternal.Hash = hash;
-            TransactionInternal.ToAddress = to;
-            TransactionInternal.ConfirmedAt = confirmedAt;
+            TransactionInternal.OrderUid = orderUid ?? TransactionInternal.OrderUid;
+            TransactionInternal.Hash = hash ?? TransactionInternal.Hash;
+            TransactionInternal.ToAddress = to ?? TransactionInternal.ToAddress;
+            TransactionInternal.ConfirmedAt = confirmedAt ?? TransactionInternal.ConfirmedAt;
         }
     }
 }

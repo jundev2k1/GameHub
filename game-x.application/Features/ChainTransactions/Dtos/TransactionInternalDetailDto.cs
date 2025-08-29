@@ -8,6 +8,7 @@ public class TransactionInternalDetailDto
     public string? FromAddress { get; set; }
     public string? ToAddress { get; set; }
     public decimal Amount { get; set; }
+    public decimal? ActualAmount { get; set; }
     public decimal? Fee { get; set; }
     public decimal? BalanceAfter { get; set; }
     public TransactionType Type { get; set; }

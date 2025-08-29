@@ -1,6 +1,7 @@
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Extensions.FilterExtensions;
 using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.application.Features.ChainTransactions.Mapping;
 
@@ -17,7 +18,8 @@ public sealed class GetTransactionCriteriaByAdminHandler(
             query => builder.Apply(
                 query,
                 request.Filters,
-                request.Sorts),
+                request.Sorts,
+                options: TransactionFilterExtensions.Options),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);

@@ -21,6 +21,7 @@ namespace game_x.persistence.Migrations
                     public_id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
                     user_id = table.Column<string>(type: "text", nullable: false),
                     amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    actual_amount = table.Column<decimal>(type: "numeric", nullable: true),
                     fee = table.Column<decimal>(type: "numeric", nullable: true),
                     crypto_token_id = table.Column<int>(type: "integer", nullable: false),
                     source_type = table.Column<int>(type: "integer", nullable: false),

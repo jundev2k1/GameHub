@@ -51,7 +51,7 @@ public sealed class OnUserBalanceUpdatedHandler(
         // If platformId is null, skip refreshing external wallet
         if (!platformId.HasValue) return;
 
-        // Get external wallet from third party
+        // Get external wallet from a third party
         var amount = platformId switch
         {
             var id when id == GameConstants.PLATFORM_ID_G598 =>

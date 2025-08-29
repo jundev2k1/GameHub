@@ -1821,6 +1821,10 @@ namespace game_x.persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal?>("ActualAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("actual_amount");
+
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric")
                         .HasColumnName("amount");
@@ -2959,6 +2963,7 @@ namespace game_x.persistence.Migrations
                         .WithOne("TransactionExternal")
                         .HasForeignKey("game_x.domain.Entities.TransactionExternal", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("fk_transactions_external_transactions_id");
 
                     b.Navigation("GamePlatform");
@@ -2972,6 +2977,7 @@ namespace game_x.persistence.Migrations
                         .WithOne("TransactionInternal")
                         .HasForeignKey("game_x.domain.Entities.TransactionInternal", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("fk_transactions_internal_transactions_id");
 
                     b.Navigation("Transaction");

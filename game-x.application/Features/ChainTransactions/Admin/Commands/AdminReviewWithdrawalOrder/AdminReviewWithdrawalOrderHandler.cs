@@ -24,11 +24,14 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     IOptions<GameXSettings> gameXSettings,
     IAsymmetricKeyCacheService asymmetricKeyCacheService,
     IAsymmetricCryptoService asymmetricCryptoService)
-    : ICommandHandler<AdminReviewWithdrawalOrderCommand>
+    : ICommandHandler<AdminReviewWithdrawalOrderCommand, ListTransactionInternalDto>
 {
-    public async Task<Unit> Handle(AdminReviewWithdrawalOrderCommand request, CancellationToken ct = default)
+    public async Task<ListTransactionInternalDto> Handle(AdminReviewWithdrawalOrderCommand request, CancellationToken ct = default)
     {
         var tx = await transactionRepo.GetByIdAsync(request.OrderId ?? Guid.Empty, ct);
+        
+        if (!tx.Type.Equals(TransactionType.Withdrawal))
+            throw new BadRequestException(MessageCode.Transaction.InvalidTradeType);
         
         if (!tx.Status.Equals(TransactionStatus.Pending))
             throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
@@ -46,7 +49,8 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         }
         
         await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(tx.Adapt<TransactionInternalDto>()), ct);
-        return Unit.Value;
+        
+        return tx.Adapt<ListTransactionInternalDto>();
     }
 
     private async Task HandleApproveTransactionAsync(Transaction transaction, CancellationToken ct)

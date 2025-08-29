@@ -7,17 +7,10 @@ using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransaction
 namespace game_x.api.Controllers.Admin.Chain;
 
 [Authorize(Roles = AppRoles.Admin)]
-[Route("/api/admin")]
+[Route("/api/admin/chain/transactions")]
 public sealed class ChainController : BaseApiController
 {
-    [HttpPost("withdrawal/{orderId:guid}/review")]
-    public async Task<IActionResult> ReviewWithdrawalOrderAsync(Guid orderId, [FromBody] AdminReviewWithdrawalOrderCommand command, CancellationToken ct)
-    {
-        var result = await Mediator.Send(command with {OrderId = orderId}, ct);
-        return ApiResponseFactory.Ok(result);
-    }
-
-    [HttpGet("chain-transactions")]
+    [HttpGet()]
     public async Task<IActionResult> GetTransactionByCriteria([AsParameters] SearchCriteriaRequest parameters)
     {
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
@@ -31,11 +24,18 @@ public sealed class ChainController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpGet("chain-transactions/{transactionId:guid}")]
+    [HttpGet("{transactionId:guid}")]
     public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
     {
         var query = new GetTransactionDetailByIdQuery(transactionId);
         var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpPost("{orderId:guid}/withdrawal-review")]
+    public async Task<IActionResult> ReviewWithdrawalOrderAsync(Guid orderId, [FromBody] AdminReviewWithdrawalOrderCommand command, CancellationToken ct)
+    {
+        var result = await Mediator.Send(command with {OrderId = orderId}, ct);
         return ApiResponseFactory.Ok(result);
     }
 }

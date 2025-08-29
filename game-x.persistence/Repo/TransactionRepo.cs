@@ -97,6 +97,19 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
     
+    public async Task<Transaction> GetExternalByIdAsync(Guid publicId, CancellationToken ct = default)
+    {
+        return await context.Transactions
+                   .AsNoTracking()
+                   .Include(t => t.User)
+                   .ThenInclude(u => u.UserBalances)
+                   .Include(t => t.CryptoToken)
+                   .Include(x => x.TransactionExternal)
+                        .ThenInclude(x => x!.GamePlatform)
+                   .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
+               ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
+    }
+    
     public async Task<Transaction> GetByIdAndUserIdAsync(string userId, Guid publicId, CancellationToken ct = default)
     {
         return await context.Transactions

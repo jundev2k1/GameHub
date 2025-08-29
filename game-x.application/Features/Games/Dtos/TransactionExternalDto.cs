@@ -1,16 +1,16 @@
-namespace game_x.application.Features.ChainTransactions.Dtos;
+namespace game_x.application.Features.Games.Dtos;
 
-public class ListTransactionInternalDto
+public class TransactionExternalDto
 {
     public Guid Id { get; set; }
-    public string UserId { get; set; } = string.Empty;
+    public string UserId { get; set; } =  string.Empty;
     public decimal Amount { get; set; }
-    public decimal? ActualAmount { get; set; }
-    public decimal? Fee { get; set; }
     public decimal? BalanceAfter { get; set; }
-    public string? Note { get; set; }
     public Guid CryptoTokenId { get; set; }
+    public string? Note { get; set; } = string.Empty;
     public string Symbol { get; set; } = string.Empty;
+    public Guid GamePlatformId { get; set; }
+    public string GamePlatformName { get; set; } = string.Empty;
     public NetworkType Network { get; set; }
     public TransactionType Type { get; set; }
     public TransactionStatus Status { get; set; }

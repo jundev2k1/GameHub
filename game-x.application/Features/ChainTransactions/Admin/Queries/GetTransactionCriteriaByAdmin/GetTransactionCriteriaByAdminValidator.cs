@@ -1,9 +1,9 @@
 using game_x.application.Common.Filters;
 using game_x.application.Features.ChainTransactions.Dtos;
 
-namespace game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactions;
+namespace game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionCriteriaByAdmin;
 
-public sealed class GetMyTransactionsValidator : AbstractValidator<GetMyTransactionsQuery>
+public sealed class GetTransactionCriteriaByAdminValidator : AbstractValidator<GetTransactionCriteriaByAdminQuery>
 {
     private readonly string[] _allowFilterFields =
     [
@@ -28,7 +28,7 @@ public sealed class GetMyTransactionsValidator : AbstractValidator<GetMyTransact
         nameof(ListTransactionInternalDto.CreatedAt)
     ];
     
-    public GetMyTransactionsValidator()
+    public GetTransactionCriteriaByAdminValidator()
     {
         RuleForEach(x => x.Filters)
             .Custom(ValidateFilterField);
@@ -44,7 +44,7 @@ public sealed class GetMyTransactionsValidator : AbstractValidator<GetMyTransact
             .LessThanOrEqualTo(1000).WithMessage("Page size must be less than or equal 1000");
     }
 
-    private void ValidateFilterField(QueryFilter filter, ValidationContext<GetMyTransactionsQuery> context)
+    private void ValidateFilterField(QueryFilter filter, ValidationContext<GetTransactionCriteriaByAdminQuery> context)
     {
         if (_allowFilterFields.All(f => f.ToLower() != filter.Field.ToLower()))
             context.AddFailure($"Filter field {filter.Field} is not allowed.");
@@ -60,13 +60,13 @@ public sealed class GetMyTransactionsValidator : AbstractValidator<GetMyTransact
         }
     }
 
-    private void ValidateSortField(QuerySort sort, ValidationContext<GetMyTransactionsQuery> context)
+    private void ValidateSortField(QuerySort sort, ValidationContext<GetTransactionCriteriaByAdminQuery> context)
     {
         if (_allowSortFields.All(f => f.ToLower() != sort.Field.ToLower()))
             context.AddFailure($"Sort field '{sort.Field} is not allowed.");
     }
     
-    private void ValidateStatusField(string value, ValidationContext<GetMyTransactionsQuery> context)
+    private void ValidateStatusField(string value, ValidationContext<GetTransactionCriteriaByAdminQuery> context)
     {
         var arr = value
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -84,7 +84,7 @@ public sealed class GetMyTransactionsValidator : AbstractValidator<GetMyTransact
         }
     }
     
-    private void ValidateTypeField(string value, ValidationContext<GetMyTransactionsQuery> context)
+    private void ValidateTypeField(string value, ValidationContext<GetTransactionCriteriaByAdminQuery> context)
     {
         var upperValue = value.Trim().ToUpperInvariant();
         var allValidTypes = Enum.GetNames(typeof(ChainTransactionType)).ToList();

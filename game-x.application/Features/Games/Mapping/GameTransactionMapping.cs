@@ -16,4 +16,16 @@ public static class GameTransactionMapping
         );
         return result;
     }
+
+    public static PaginationResult<ListTransactionExternalDto> ToSearchResult(this PaginationResult<Transaction> data)
+    {
+        var result = new PaginationResult<ListTransactionExternalDto>(
+            items: [.. data.Items.Select(i => i.Adapt<ListTransactionExternalDto>())],
+            totalItems: data.TotalItems,
+            totalPages: data.TotalPages,
+            pageIndex: data.PageNumber,
+            pageSize: data.PageSize
+        );
+        return result;
+    }
 }

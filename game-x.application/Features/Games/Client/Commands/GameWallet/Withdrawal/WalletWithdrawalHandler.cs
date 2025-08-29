@@ -29,7 +29,7 @@ public sealed class WalletWithdrawalHandler(
     public async Task<GameTransactionDto> Handle(WalletWithdrawalCommand command, CancellationToken ct = default)
     {
         if (command.PlatformId != GameConstants.PLATFORM_ID_G598)
-            throw new BadRequestException("Platform is invalid.");
+            throw new BadRequestException(MessageCode.Accounting.InvalidPlatform);
 
         var currentUser = await GetCurrentUserAsync(ct);
         var balance = await GetUserBalanceAsync(currentUser.Id, command, ct);
