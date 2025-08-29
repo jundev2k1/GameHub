@@ -8,7 +8,7 @@ using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransact
 namespace game_x.api.Controllers.Client.Chain;
 
 [Authorize(Roles = AppRoles.User)]
-[Route("/api/user/chain")]
+[Route("/api/user/chain-transactions")]
 public sealed class ChainController : BaseApiController
 {
     [HttpPost("withdrawal")]
@@ -25,7 +25,7 @@ public sealed class ChainController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
     
-    [HttpGet("transactions/me")]
+    [HttpGet("me")]
     public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
     {
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
@@ -39,7 +39,7 @@ public sealed class ChainController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
     
-    [HttpGet("transactions/{transactionId:guid}")]
+    [HttpGet("{transactionId:guid}")]
     public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
     {
         var query = new GetMyTransactionDetailQuery(transactionId);

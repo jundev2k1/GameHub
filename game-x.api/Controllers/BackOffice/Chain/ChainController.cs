@@ -7,8 +7,7 @@ using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransaction
 namespace game_x.api.Controllers.BackOffice.Chain;
 
 [Authorize(Roles = AppRoles.Admin)]
-[Route("/api/admin/chain/transactions")]
-[Route("/api/back-office/chains")]
+[Route("/api/back-office/chain-transactions")]
 public sealed class ChainController : BaseApiController
 {
     [HttpGet()]
@@ -24,9 +23,8 @@ public sealed class ChainController : BaseApiController
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
-
-    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
-    [HttpGet("transactions/{transactionId:guid}")]
+    
+    [HttpGet("{transactionId:guid}")]
     public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
     {
         var query = new GetTransactionDetailByIdQuery(transactionId);
