@@ -1,22 +1,5 @@
-﻿namespace game_x.application.Features.Kyc.Queries.GetKycProfile;
+﻿using game_x.application.Features.Kyc.Dtos;
 
-public record GetKycProfileQuery : IQuery<GetKycProfileResult>;
+namespace game_x.application.Features.Kyc.Queries.GetKycProfile;
 
-public record GetKycProfileResult(
-    Guid Id,
-    string FullName,
-    DateTime DateOfBirth,
-    string ResidentialAddress,
-    string IdNumber,
-    KycType Type,
-    string FrontImageName,
-    string FrontImageUrl,
-    string BackImageName,
-    string BackImageUrl,
-    KycStatus Status,
-    string? RejectionReason,
-    string? RejectDetails,
-    DateTime SubmittedAt,
-    string? ReviewedById,
-    string? ReviewedBy,
-    DateTime? DateReviewed);
+public record GetKycProfileQuery(string UserId) : IQuery<UserKycDto>;

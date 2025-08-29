@@ -2,10 +2,11 @@ namespace game_x.application.Features.Accounts.Dtos;
 
 public class AdminDto
 {
-    public required string Id { get; set; }
-    public required string UserName { get; set; }
-    public required bool IsNew { get; set; }
+    public string Id { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Nickname { get; set; } = string.Empty;
     public UserStatus Status { get; set; }
-    public required DateTime? CreatedAt { get; set; }
-    public required DateTime? UpdatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }
