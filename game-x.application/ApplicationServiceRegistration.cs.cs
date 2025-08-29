@@ -3,7 +3,6 @@ using game_x.application.Contract.Infrastructure.Services.EmailProcessor;
 using game_x.application.Contract.Infrastructure.Services.VerificationCode;
 using game_x.application.Services.Notification;
 using game_x.application.Services.Verification;
-using game_x.application.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
