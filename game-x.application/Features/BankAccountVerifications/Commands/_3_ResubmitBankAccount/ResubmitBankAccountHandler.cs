@@ -2,6 +2,8 @@
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnVerifyCreated;
+using game_x.application.Features.Accounts.User.Dtos;
 
 namespace game_x.application.Features.BankAccountVerifications.Commands._3_ResubmitBankAccount;
 
@@ -9,12 +11,16 @@ public sealed class ResubmitBankAccountHandler(
     IUnitOfWork unitOfWork,
     IUserBankAccountRepo bankAccountRepo,
     IUserAccessor userAccessor,
+    IUserRepo userRepo,
     IMediaFileRepo mediaFileRepo,
+    IApplicationEventDispatcher eventDispatcher,
     IFileStorageService fileStorage) : ICommandHandler<ResubmitBankAccountCommand>
 {
     public async Task<Unit> Handle(ResubmitBankAccountCommand request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
+        var user = await userRepo.GetUserByIdAsync(userId, ct);
+
         await unitOfWork.WithTransactionAsync(async () =>
         {
             UserBankAccount? updateBankAccount = null;
@@ -33,6 +39,15 @@ public sealed class ResubmitBankAccountHandler(
 
             if (request.Image != null)
                 await ReupImage(updateBankAccount, request.Image, ct);
+
+            var verificationDto = new VerificationCreatedDto
+            {
+                Type = Enum.GetName(typeof(VerificationStatusType), VerificationStatusType.BankAccount) ?? string.Empty,
+                Email = user.Email!,
+                NickName = user.Nickname,
+            };
+
+            await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, verificationDto), ct);
         }, ct);
 
         return Unit.Value;

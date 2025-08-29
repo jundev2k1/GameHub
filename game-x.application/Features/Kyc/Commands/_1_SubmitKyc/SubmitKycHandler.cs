@@ -2,6 +2,8 @@
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnVerifyCreated;
+using game_x.application.Features.Accounts.User.Dtos;
 
 namespace game_x.application.Features.Kyc.Commands._1_SubmitKyc;
 
@@ -9,6 +11,7 @@ public sealed class SubmitKycHandler(
     IUserAccessor userAccessor,
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
+    IApplicationEventDispatcher eventDispatcher,
     IFileStorageService fileStorage) : ICommandHandler<SubmitKycCommand>
 {
     public async Task<Unit> Handle(SubmitKycCommand request, CancellationToken ct = default)
@@ -17,6 +20,7 @@ public sealed class SubmitKycHandler(
 
         var frontObjectName = await UploadFiles(request.FrontImage, userId, ct);
         var backObjectName = await UploadFiles(request.BackImage, userId, ct);
+        var user = await userRepo.GetUserByIdAsync(userId, ct);
 
         await unitOfWork.WithTransactionAsync(async () =>
         {
@@ -38,6 +42,15 @@ public sealed class SubmitKycHandler(
 
                 targetUser.AddUserKyc(userKyc);
             }, ct);
+
+            var verificationDto = new VerificationCreatedDto
+            {
+                Type = Enum.GetName(typeof(VerificationStatusType), VerificationStatusType.Kyc) ?? string.Empty,
+                Email = user.Email!,
+                NickName = user.Nickname,
+            };
+
+            await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, verificationDto), ct);
         }, ct);
 
         return Unit.Value;
