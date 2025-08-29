@@ -8,7 +8,7 @@ namespace game_x.persistence.Repo;
 
 public class TransactionRepo(GameXContext context) : ITransactionRepo, IRepository
 {
-    public async Task<PaginationResult<Transaction>> GetTransactionByCriteriaAsync(
+    public async Task<PaginationResult<Transaction>> GetInternalTransactionsAsync(
         Func<IQueryable<Transaction>, IQueryable<Transaction>>? queryBuilder = null,
         int page = 1,
         int pageSize = 20,
@@ -17,6 +17,37 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
         var query = context.Transactions
             .AsNoTracking()
             .Include(x => x.CryptoToken)
+            .Include(x => x.TransactionInternal)
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<Transaction>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
+    
+    public async Task<PaginationResult<Transaction>> GetExternalTransactionsAsync(
+        Func<IQueryable<Transaction>, IQueryable<Transaction>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.Transactions
+            .AsNoTracking()
+            .Include(x => x.CryptoToken)
+            .Include(x => x.TransactionExternal)
+                .ThenInclude(x => x!.GamePlatform)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -66,6 +97,38 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             page,
             pageSize);
     }
+
+    public async Task<PaginationResult<Transaction>> GetMyExternalTransactionsAsync(
+        string userId,
+        Func<IQueryable<Transaction>, IQueryable<Transaction>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.Transactions
+            .AsNoTracking()
+            .Include(x => x.CryptoToken)
+            .Include(x => x.TransactionExternal)
+                .ThenInclude(x => x!.GamePlatform)
+            .Where(x => x.UserId == userId && x.SourceType == TransactionSourceType.G598SnoGameProvider)
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<Transaction>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
     
     public async Task<bool> ExistsByOrderNoAsync(string otcOrderNo, CancellationToken ct)
     {
@@ -84,7 +147,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .FirstOrDefaultAsync(x => x.TransactionInternal != null && x.TransactionInternal.OrderNumber == orderNumber, ct);
     }
     
-    public async Task<Transaction> GetByIdAsync(Guid publicId, CancellationToken ct = default)
+    public async Task<Transaction> GetInternalByIdAsync(Guid publicId, CancellationToken ct = default)
     {
         return await context.Transactions
             .AsNoTracking()
@@ -92,7 +155,6 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
                 .ThenInclude(u => u.UserBalances)
             .Include(t => t.CryptoToken)
             .Include(x => x.TransactionInternal)
-            .Include(x => x.TransactionExternal)
             .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
             ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
@@ -119,6 +181,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
                    .Include(t => t.CryptoToken)
                    .Include(x => x.TransactionInternal)
                    .Include(x => x.TransactionExternal)
+                        .ThenInclude(x => x!.GamePlatform)
                    .FirstOrDefaultAsync(x => x.PublicId == publicId && x.UserId == userId, ct)
                ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
@@ -144,16 +207,6 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
         var tx = await context.Transactions
             .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
             ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionNotFound);
-
-        updateAction.Invoke(tx);
-        await context.SaveChangesAsync(ct);
-    }
-    
-    public async Task PatchUpdateAsync(int id, Action<Transaction> updateAction, CancellationToken ct = default)
-    {
-        var tx = await context.Transactions
-                     .FirstOrDefaultAsync(c => c.Id == id, ct)
-                 ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionNotFound);
 
         updateAction.Invoke(tx);
         await context.SaveChangesAsync(ct);

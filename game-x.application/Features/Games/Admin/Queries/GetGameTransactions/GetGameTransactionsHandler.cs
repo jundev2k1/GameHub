@@ -5,22 +5,21 @@ using game_x.application.Extensions.FilterExtensions;
 using game_x.application.Features.Games.Dtos;
 using game_x.application.Features.Games.Mapping;
 
-namespace game_x.application.Features.Games.Client.Queries.GetGameTransactions;
+namespace game_x.application.Features.Games.Admin.Queries.GetGameTransactions;
 
 public sealed class GetGameTransactionsHandler(
-    ICriteriaBuilder<GameTransaction> builder,
-    IGameTransactionRepo gameTransactionRepo)
-    : IQueryHandler<GetGameTransactionsQuery, PaginationResult<GameTransactionDto>>
+    ICriteriaBuilder<Transaction> builder,
+    ITransactionRepo transactionRepo)
+    : IQueryHandler<GetGameTransactionsQuery, PaginationResult<ListTransactionExternalDto>>
 {
-    public async Task<PaginationResult<GameTransactionDto>> Handle(GetGameTransactionsQuery request, CancellationToken ct = default)
+    public async Task<PaginationResult<ListTransactionExternalDto>> Handle(GetGameTransactionsQuery request, CancellationToken ct = default)
     {
-
-        var items = await gameTransactionRepo.GetTransactionByCriteriaAsync(
+        var items = await transactionRepo.GetExternalTransactionsAsync(
             query => builder.Apply(
                 query,
                 request.Filters,
                 request.Sorts,
-                options: GameTransactionFilterExtensions.Options),
+                options: TransactionFilterExtensions.Options),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);

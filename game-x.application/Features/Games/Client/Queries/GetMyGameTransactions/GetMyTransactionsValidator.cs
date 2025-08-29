@@ -1,5 +1,4 @@
 using game_x.application.Common.Filters;
-using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.application.Features.Games.Dtos;
 
 namespace game_x.application.Features.Games.Client.Queries.GetMyGameTransactions;
@@ -9,22 +8,22 @@ public sealed class GetMyGameTransactionsValidator : AbstractValidator<GetMyGame
     private readonly string[] _allowFilterFields =
     [
         "search",
-        nameof(GameTransactionDto.Id),
-        nameof(GameTransactionDto.UserId),
-        nameof(GameTransactionDto.Status),
-        nameof(GameTransactionDto.Amount),
-        nameof(GameTransactionDto.Type),
-        nameof(GameTransactionDto.UpdatedAt),
-        nameof(GameTransactionDto.CreatedAt)
+        nameof(ListTransactionExternalDto.Id),
+        nameof(ListTransactionExternalDto.UserId),
+        nameof(ListTransactionExternalDto.Status),
+        nameof(ListTransactionExternalDto.Amount),
+        nameof(ListTransactionExternalDto.Type),
+        nameof(ListTransactionExternalDto.UpdatedAt),
+        nameof(ListTransactionExternalDto.CreatedAt)
     ];
 
     private readonly string[] _allowSortFields =
     [
-        nameof(GameTransactionDto.Status),
-        nameof(GameTransactionDto.Amount),
-        nameof(GameTransactionDto.Type),
-        nameof(GameTransactionDto.UpdatedAt),
-        nameof(GameTransactionDto.CreatedAt)
+        nameof(ListTransactionExternalDto.Status),
+        nameof(ListTransactionExternalDto.Amount),
+        nameof(ListTransactionExternalDto.Type),
+        nameof(ListTransactionExternalDto.UpdatedAt),
+        nameof(ListTransactionExternalDto.CreatedAt)
     ];
 
     public GetMyGameTransactionsValidator()
@@ -48,12 +47,12 @@ public sealed class GetMyGameTransactionsValidator : AbstractValidator<GetMyGame
         if (_allowFilterFields.All(f => f.ToLower() != filter.Field.ToLower()))
             context.AddFailure($"Filter field {filter.Field} is not allowed.");
 
-        if (filter.Field.Equals(nameof(GameTransactionDto.Status), StringComparison.OrdinalIgnoreCase))
+        if (filter.Field.Equals(nameof(ListTransactionExternalDto.Status), StringComparison.OrdinalIgnoreCase))
         {
             ValidateStatusField(filter.Value, context);
         }
 
-        if (filter.Field.Equals(nameof(GameTransactionDto.Type), StringComparison.OrdinalIgnoreCase))
+        if (filter.Field.Equals(nameof(ListTransactionExternalDto.Type), StringComparison.OrdinalIgnoreCase))
         {
             ValidateTypeField(filter.Value, context);
         }

@@ -28,7 +28,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
 {
     public async Task<ListTransactionInternalDto> Handle(AdminReviewWithdrawalOrderCommand request, CancellationToken ct = default)
     {
-        var tx = await transactionRepo.GetByIdAsync(request.OrderId ?? Guid.Empty, ct);
+        var tx = await transactionRepo.GetInternalByIdAsync(request.OrderId ?? Guid.Empty, ct);
         
         if (!tx.Type.Equals(TransactionType.Withdrawal))
             throw new BadRequestException(MessageCode.Transaction.InvalidTradeType);
@@ -92,8 +92,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
             
             // Verify UXM signature
             var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
-            var isValid =
-                asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
+            var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
             if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
         }
         catch (Exception ex)

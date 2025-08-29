@@ -14,7 +14,7 @@ public sealed class GetTransactionCriteriaByAdminHandler(
 {
     public async Task<PaginationResult<ListTransactionInternalDto>> Handle(GetTransactionCriteriaByAdminQuery request, CancellationToken ct = default)
     {
-        var items = await transactionRepo.GetTransactionByCriteriaAsync(
+        var items = await transactionRepo.GetInternalTransactionsAsync(
             query => builder.Apply(
                 query,
                 request.Filters,

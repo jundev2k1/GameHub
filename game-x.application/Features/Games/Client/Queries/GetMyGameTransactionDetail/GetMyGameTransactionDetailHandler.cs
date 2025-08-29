@@ -1,15 +1,18 @@
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Games.Dtos;
 
 namespace game_x.application.Features.Games.Client.Queries.GetMyGameTransactionDetail;
 
 public sealed class GetMyGameTransactionDetailHandler(
-    IGameTransactionRepo gameTransactionRepo)
-    : IQueryHandler<GetMyGameTransactionDetailQuery, GameTransactionDetailDto>
+    IUserAccessor userAccessor,
+    ITransactionRepo transactionRepo)
+    : IQueryHandler<GetMyGameTransactionDetailQuery, TransactionExternalDetailDto>
 {
-    public async Task<GameTransactionDetailDto> Handle(GetMyGameTransactionDetailQuery request, CancellationToken ct = default)
+    public async Task<TransactionExternalDetailDto> Handle(GetMyGameTransactionDetailQuery request, CancellationToken ct = default)
     {
-        var result = await gameTransactionRepo.GetByIdAsync(request.TransactionId, ct);
-        return result.Adapt<GameTransactionDetailDto>();
+        var userId = userAccessor.GetUserId();
+        var result = await transactionRepo.GetByIdAndUserIdAsync(userId, request.TransactionId, ct);
+        return result.Adapt<TransactionExternalDetailDto>();
     }
 }

@@ -38,7 +38,7 @@ public sealed class WalletDepositHandler(
             targetPlatform.LocalId,
             request.Note,
             ct);
-
+        
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
@@ -47,17 +47,11 @@ public sealed class WalletDepositHandler(
             await userBalanceRepo.PutUpdateAsync(balance, ct);
             
             decimal lastedBalanceAfter = await transactionRepo.GetLatestBalanceAfterAsync(transaction.UserId, ct);
-            decimal changeAmount = transaction.Type switch
-            {
-                TransactionType.Deposit => - transaction.Amount,
-                TransactionType.Withdrawal => transaction.Amount,
-                _ => 0
-            };
             
             await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
             {
                 order.UpdateStatus(TransactionStatus.Completed);
-                order.BalanceAfter = lastedBalanceAfter + changeAmount;
+                order.BalanceAfter = lastedBalanceAfter - transaction.Amount;
             }, ct);
 
             // Rollback all processing if the transaction fails at the third party

@@ -70,7 +70,7 @@ public sealed class OnUxmTransactionCallbackHandler(
                         break;
 
                     case TransactionType.Withdrawal:
-                        userBalanceService.FinalizeFrozen(balance, @event.ActualAmount);
+                        userBalanceService.FinalizeFrozen(balance, @event.ActualAmount + (transaction.Fee ?? 0));
                         break;
 
                     default:

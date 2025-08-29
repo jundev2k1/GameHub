@@ -1,7 +1,7 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Client.Queries.GetGameTransactionDetail;
-using game_x.application.Features.Games.Client.Queries.GetGameTransactions;
+using game_x.application.Features.Games.Admin.Queries.GetGameTransactionDetail;
+using game_x.application.Features.Games.Admin.Queries.GetGameTransactions;
 
 namespace game_x.api.Controllers.Admin.Game;
 

@@ -45,7 +45,7 @@ public sealed class CreateDepositChainTransactionHandler(
             
             await unitOfWork.CommitAsync(ct);
 
-            var updatedTransaction = await transactionRepo.GetByIdAsync(tx.PublicId, ct);
+            var updatedTransaction = await transactionRepo.GetInternalByIdAsync(tx.PublicId, ct);
             
             return new DepositChainTransactionResponseDto
             {

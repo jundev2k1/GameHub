@@ -28,7 +28,7 @@ public static class TransactionMapping
         return result with {
             MerchantNumber = merchantNumber,
             OrderNumber = transaction.TransactionInternal?.OrderNumber ?? String.Empty,
-            Amount =  transaction.TotalAmount,
+            Amount =  transaction.Amount,
             To = transaction.TransactionInternal?.ToAddress ?? string.Empty,
             Remark = transaction.Note ?? string.Empty
         };

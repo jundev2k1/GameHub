@@ -1,6 +1,6 @@
 namespace game_x.application.Features.Games.Dtos;
 
-public class GameTransactionDetailDto
+public class TransactionExternalDetailDto
 {
     public Guid Id { get; set; }
     public string UserId { get; set; } =  string.Empty;
@@ -12,8 +12,8 @@ public class GameTransactionDetailDto
     public Guid GamePlatformId { get; set; }
     public string GamePlatformName { get; set; } = string.Empty;
     public NetworkType Network { get; set; }
-    public GameTransactionType Type { get; set; }
-    public GameTransactionStatus Status { get; set; }
+    public TransactionType Type { get; set; }
+    public TransactionStatus Status { get; set; }
     public string Meta { get; set; } = "{}";
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

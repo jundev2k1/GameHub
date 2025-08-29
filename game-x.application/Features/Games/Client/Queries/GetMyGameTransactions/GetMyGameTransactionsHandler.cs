@@ -9,21 +9,21 @@ using game_x.application.Features.Games.Mapping;
 namespace game_x.application.Features.Games.Client.Queries.GetMyGameTransactions;
 
 public sealed class GetMyGameTransactionsHandler(
-    ICriteriaBuilder<GameTransaction> builder,
-    IGameTransactionRepo gameTransactionRepo,
+    ICriteriaBuilder<Transaction> builder,
+    ITransactionRepo transactionRepo,
     IUserAccessor userAccessor)
-    : IQueryHandler<GetMyGameTransactionsQuery, PaginationResult<GameTransactionDto>>
+    : IQueryHandler<GetMyGameTransactionsQuery, PaginationResult<ListTransactionExternalDto>>
 {
-    public async Task<PaginationResult<GameTransactionDto>> Handle(GetMyGameTransactionsQuery request, CancellationToken ct = default)
+    public async Task<PaginationResult<ListTransactionExternalDto>> Handle(GetMyGameTransactionsQuery request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
-        var items = await gameTransactionRepo.GetMyTransactionsAsync(
+        var items = await transactionRepo.GetMyExternalTransactionsAsync(
             userId,
             query => builder.Apply(
                 query,
                 request.Filters,
                 request.Sorts,
-                options: GameTransactionFilterExtensions.Options),
+                options: TransactionFilterExtensions.Options),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);

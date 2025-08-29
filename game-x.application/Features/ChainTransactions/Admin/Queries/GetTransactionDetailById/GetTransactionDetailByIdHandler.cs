@@ -9,7 +9,7 @@ public sealed class GetTransactionDetailByIdHandler(
 {
     public async Task<TransactionInternalDetailDto> Handle(GetTransactionDetailByIdQuery request, CancellationToken ct = default)
     {
-        var result = await transactionRepo.GetByIdAsync(request.TransactionId, ct);
+        var result = await transactionRepo.GetInternalByIdAsync(request.TransactionId, ct);
         return result.Adapt<TransactionInternalDetailDto>();
     }
 }
