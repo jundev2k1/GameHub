@@ -4,6 +4,9 @@ using game_x.application.Features.Accounts.Admin.Queries.GetAllActiveTokensByAdm
 using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
+using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountByCriteria;
+using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountDetail;
+using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountProfile;
 using game_x.application.Features.Kyc.Queries.GetKycByCriteria;
 using game_x.application.Features.Kyc.Queries.GetKycProfile;
 
@@ -55,6 +58,30 @@ public sealed class UserController : BaseApiController
     public async Task<IActionResult> GetUserKycDetailAsync(string userId)
     {
         var query = new GetKycProfileQuery(userId);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("bank-accounts")]
+    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    {
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var sorts = QueryConverter.ToSorts(parameters.Sorts);
+        var query = new GetBankAccountByCriteriaQuery(
+            filters,
+            sorts,
+            parameters.PageNumber,
+            parameters.PageSize);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("bank-accounts/{bankAccountId:guid}")]
+    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync(Guid bankAccountId)
+    {
+        var query = new GetBankAccountDetailQuery(bankAccountId);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }

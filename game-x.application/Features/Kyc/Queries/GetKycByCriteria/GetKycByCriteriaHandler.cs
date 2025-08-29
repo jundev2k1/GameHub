@@ -19,9 +19,9 @@ public sealed class GetKycByCriteriaHandler(
                 request.Filters,
                 request.Sorts,
                 keyword =>
-                    kyc => kyc.FullName.StartsWith(keyword)
-                        || kyc.User.Email!.StartsWith(keyword)
-                        || kyc.User.Nickname.StartsWith(keyword)),
+                    kyc => kyc.FullName.ToLower().StartsWith(keyword.ToLower())
+                        || kyc.User.Email!.ToLower().StartsWith(keyword.ToLower())
+                        || kyc.User.Nickname.ToLower().StartsWith(keyword.ToLower())),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);

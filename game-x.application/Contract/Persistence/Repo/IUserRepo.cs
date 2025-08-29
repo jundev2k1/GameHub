@@ -34,6 +34,12 @@ public interface IUserRepo
 
     Task<UserKyc> GetKycProfileAsync(string userId, CancellationToken ct = default);
 
+    Task<PaginationResult<UserBankAccount>> GetUserBankAccountByCriteria(
+        Func<IQueryable<UserBankAccount>, IQueryable<UserBankAccount>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
+
     Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync(string userId, CancellationToken ct = default);
 
     Task<VerificationStatusDto[]> GetVerificationStatusList(string userId, CancellationToken ct = default);
