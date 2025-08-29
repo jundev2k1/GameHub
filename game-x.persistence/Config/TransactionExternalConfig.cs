@@ -17,5 +17,10 @@ public sealed class TransactionExternalConfig : IEntityTypeConfiguration<Transac
         builder.Property(x => x.GamePlatformId)
             .HasColumnName("game_platform_id")
             .IsRequired();
+        
+        builder.HasOne(gt => gt.GamePlatform)
+            .WithMany(gp => gp.TransactionExternals)
+            .HasForeignKey(gt => gt.GamePlatformId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
