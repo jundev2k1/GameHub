@@ -88,7 +88,7 @@ public sealed class WalletManagerCacheService(
         if (!isLogin)
         {
             var loginState = await gameProvider.LoginAsync(
-                new LoginRequest
+                new GameLoginRequest
                 {
                     Account = targetUser.UserExtend.GameProviderAccount,
                     Passwd = aesEncryptor.Decrypt(targetUser.UserExtend.GameProviderPassword),
@@ -101,13 +101,13 @@ public sealed class WalletManagerCacheService(
                 throw new ExternalServiceException();
         }
 
-        var gameWallet = await gameProvider.GetWalletAsync(new WalletRequest
+        var gameWallet = await gameProvider.GetWalletAsync(new GameWalletRequest
         {
             Account = targetUser.UserExtend.GameProviderAccount
         });
         if (gameWallet.IsSuccess == false)
             throw new ExternalServiceException();
 
-        return gameWallet.Quota;
+        return gameWallet.Data.Quota;
     }
 }

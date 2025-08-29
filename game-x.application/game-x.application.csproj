@@ -6,6 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Services\UserUsdtLedger\**" />
+    <EmbeddedResource Remove="Services\UserUsdtLedger\**" />
+    <None Remove="Services\UserUsdtLedger\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="Features\UserManagement\User\Commands\CreateUserCommand.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -28,6 +33,5 @@
     <Folder Include="Features\Accounts\Cs\" />
     <Folder Include="Features\Auth\Admin\Commands\" />
     <Folder Include="Features\Auth\Root\Commands\" />
-    <Folder Include="Services\UserUsdtLedger\" />
   </ItemGroup>
 </Project>

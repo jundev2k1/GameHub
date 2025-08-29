@@ -1,6 +1,6 @@
 ﻿namespace game_x.share.ExternalApi.GameProvider.Dtos.Login;
 
-public sealed class LoginRequest
+public sealed class GameLoginRequest
 {
     /// <summary>帳號 請輸入3-20個首字為英文英文字母以及數字的組合</summary>
     public string Account { get; set; } = string.Empty;

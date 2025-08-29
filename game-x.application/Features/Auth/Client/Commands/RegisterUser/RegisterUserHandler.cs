@@ -66,7 +66,7 @@ public sealed class RegisterUserHandler(
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}";
         var password = GameProviderPasswordGenerator.Generate();
-        var request = new RegisterRequest
+        var request = new GameRegisterRequest
         {
             Account = account,
             Passwd = password,
