@@ -34,5 +34,10 @@ public sealed class TransactionInternalConfig : IEntityTypeConfiguration<Transac
             .HasColumnName("confirmed_at")
             .HasColumnType("timestamp with time zone")
             .IsRequired(false);
+        
+        builder.HasOne(i => i.Transaction)
+            .WithOne(t => t.TransactionInternal)
+            .HasForeignKey<TransactionInternal>(i => i.Id)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

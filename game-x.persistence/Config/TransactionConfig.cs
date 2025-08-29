@@ -10,6 +10,10 @@ public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
         
         builder.HasKey(x => x.Id);
         
+        builder.Property(gc => gc.Id)
+            .IsRequired()
+            .ValueGeneratedOnAdd();
+        
         builder.HasIndex(x => x.PublicId).IsUnique();
 
         builder.Property(x => x.PublicId)
@@ -27,7 +31,7 @@ public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
         
         builder.Property(x => x.Fee)
             .HasColumnName("fee")
-            .IsRequired();
+            .IsRequired(false);
         
         builder.Property(x => x.CryptoTokenId)
             .HasColumnName("crypto_token_id")
@@ -69,12 +73,14 @@ public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
         
         builder.HasOne(x => x.TransactionInternal)
             .WithOne(x => x.Transaction)
-            .HasForeignKey<Transaction>(x => x.Id)
+            .HasForeignKey<TransactionInternal>(x => x.Id)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasOne(x => x.TransactionExternal)
             .WithOne(x => x.Transaction)
-            .HasForeignKey<Transaction>(x => x.Id)
+            .HasForeignKey<TransactionExternal>(x => x.Id)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
