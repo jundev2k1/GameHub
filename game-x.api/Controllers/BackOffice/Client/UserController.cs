@@ -5,6 +5,8 @@ using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountByCriteria;
+using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountDetail;
+using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountProfile;
 using game_x.application.Features.Kyc.Queries.GetKycByCriteria;
 using game_x.application.Features.Kyc.Queries.GetKycProfile;
 
@@ -71,6 +73,15 @@ public sealed class UserController : BaseApiController
             sorts,
             parameters.PageNumber,
             parameters.PageSize);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("bank-accounts/{bankAccountId:guid}")]
+    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync(Guid bankAccountId)
+    {
+        var query = new GetBankAccountDetailQuery(bankAccountId);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
