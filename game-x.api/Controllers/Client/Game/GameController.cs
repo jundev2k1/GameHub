@@ -36,7 +36,7 @@ public sealed class GameController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPost("platform/{platformId:guid}/report")]
+    [HttpPost("platforms/{platformId:guid}/report")]
     public async Task<IActionResult> ReportAsync(Guid platformId, GetGameReportQuery query)
     {
         var result = await Mediator.Send(query with { PlatformId = platformId });
