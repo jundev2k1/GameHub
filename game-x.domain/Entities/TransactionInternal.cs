@@ -2,7 +2,6 @@ namespace game_x.domain.Entities;
 
 public class TransactionInternal: BaseEntity<int>, IAuditable
 {
-    public int TransactionId { get; set; }
     public Transaction Transaction { get; set; } = null!;
     /// <summary>UXM's Order ID: The Order ID is returned from the UXM service.</summary>
     public string? OrderUid { get; set; }
@@ -23,13 +22,13 @@ public class TransactionInternal: BaseEntity<int>, IAuditable
         string? toAddress = null
     )
     {
-        var tx = new TransactionInternal
+        var txInternal = new TransactionInternal
         {
             OrderNumber = orderNumber,
             FromAddress = fromAddress,
             ToAddress = toAddress,
         };
-        return tx;
+        return txInternal;
     }
     
     public void UpdateUxmResponse(string orderUid, string hash, DateTime? confirmedAt)

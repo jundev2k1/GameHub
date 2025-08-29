@@ -9,7 +9,9 @@ public sealed class EntityName
     public static EntityName User => Of(nameof(Entities.User));
     public static EntityName MediaFile => Of(nameof(Entities.MediaFile));
     public static EntityName UserKyc => Of(nameof(Entities.UserKyc));
-    public static EntityName ChainTransaction => Of(nameof(Entities.ChainTransaction));
+    public static EntityName Transaction => Of(nameof(Entities.Transaction));
+    public static EntityName TransactionInternal => Of(nameof(Entities.TransactionInternal));
+    public static EntityName TransactionExternal => Of(nameof(Entities.TransactionExternal));
     public static EntityName Game => Of(nameof(Entities.Game));
     public static EntityName GameType => Of(nameof(Entities.GameType));
     public static EntityName GameCategory => Of(nameof(Entities.GameCategory));
@@ -35,7 +37,9 @@ public sealed class EntityName
         nameof(Entities.User),
         nameof(Entities.MediaFile),
         nameof(Entities.UserKyc),
-        nameof(Entities.ChainTransaction),
+        nameof(Entities.Transaction),
+        nameof(Entities.TransactionInternal),
+        nameof(Entities.TransactionExternal),
         nameof(Entities.Game),
         nameof(Entities.GameType),
         nameof(Entities.GameCategory),

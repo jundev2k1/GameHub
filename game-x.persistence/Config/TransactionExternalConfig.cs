@@ -10,10 +10,6 @@ public sealed class TransactionExternalConfig : IEntityTypeConfiguration<Transac
         
         builder.HasKey(x => x.Id);
         
-        builder.Property(x => x.TransactionId)
-            .HasColumnName("transaction_id")
-            .IsRequired();
-        
         builder.Property(x => x.G598Sno)
             .HasColumnName("g598_sno")
             .IsRequired(false);

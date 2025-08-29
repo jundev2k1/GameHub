@@ -13,8 +13,8 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    [Migration("20250828082246_AddTableRelatedTransaction")]
-    partial class AddTableRelatedTransaction
+    [Migration("20250829042948_AddTablesRelatedTransaction")]
+    partial class AddTablesRelatedTransaction
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1818,11 +1818,8 @@ namespace game_x.persistence.Migrations
             modelBuilder.Entity("game_x.domain.Entities.Transaction", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric")
@@ -1861,19 +1858,15 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("public_id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<int>("SourceType")
+                        .HasColumnType("integer")
+                        .HasColumnName("source_type");
+
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("status");
-
-                    b.Property<int?>("TransactionExternalId")
-                        .HasColumnType("integer")
-                        .HasColumnName("transaction_external_id");
-
-                    b.Property<int?>("TransactionInternalId")
-                        .HasColumnType("integer")
-                        .HasColumnName("transaction_internal_id");
 
                     b.Property<int>("Type")
                         .ValueGeneratedOnAdd()
@@ -1899,14 +1892,6 @@ namespace game_x.persistence.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("ix_transactions_public_id");
-
-                    b.HasIndex("TransactionExternalId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_transactions_transaction_external_id");
-
-                    b.HasIndex("TransactionInternalId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_transactions_transaction_internal_id");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_transactions_user_id");
@@ -1934,10 +1919,6 @@ namespace game_x.persistence.Migrations
                     b.Property<int>("GamePlatformId")
                         .HasColumnType("integer")
                         .HasColumnName("game_platform_id");
-
-                    b.Property<int>("TransactionId")
-                        .HasColumnType("integer")
-                        .HasColumnName("transaction_id");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1989,10 +1970,6 @@ namespace game_x.persistence.Migrations
                     b.Property<string>("ToAddress")
                         .HasColumnType("text")
                         .HasColumnName("to_address");
-
-                    b.Property<int>("TransactionId")
-                        .HasColumnType("integer")
-                        .HasColumnName("transaction_id");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -2965,22 +2942,24 @@ namespace game_x.persistence.Migrations
 
                     b.HasOne("game_x.domain.Entities.TransactionExternal", "TransactionExternal")
                         .WithOne("Transaction")
-                        .HasForeignKey("game_x.domain.Entities.Transaction", "TransactionExternalId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_transactions_transaction_external_transaction_external_id");
+                        .HasForeignKey("game_x.domain.Entities.Transaction", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_transactions_transaction_external_id");
 
                     b.HasOne("game_x.domain.Entities.TransactionInternal", "TransactionInternal")
                         .WithOne("Transaction")
-                        .HasForeignKey("game_x.domain.Entities.Transaction", "TransactionInternalId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_transactions_transaction_internal_transaction_internal_id");
+                        .HasForeignKey("game_x.domain.Entities.Transaction", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_transactions_transaction_internals_id");
 
                     b.HasOne("game_x.domain.Entities.User", "User")
                         .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired()
-                        .HasConstraintName("fk_transactions_asp_net_users_user_id");
+                        .HasConstraintName("fk_transactions_user_user_id");
 
                     b.Navigation("CryptoToken");
 

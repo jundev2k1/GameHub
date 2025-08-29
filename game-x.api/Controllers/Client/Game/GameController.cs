@@ -21,14 +21,14 @@ public sealed class GameController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPost("platform/{platformId:guid}/deposit")]
+    [HttpPost("platforms/{platformId:guid}/deposit")]
     public async Task<IActionResult> DepositAsync(Guid platformId, WalletDepositCommand command)
     {
         var result = await Mediator.Send(command with { PlatformId = platformId });
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPost("platform/{platformId:guid}/withdrawal")]
+    [HttpPost("platforms/{platformId:guid}/withdrawal")]
     public async Task<IActionResult> WithdrawalAsync(Guid platformId, WalletWithdrawalCommand command)
     {
         var result = await Mediator.Send(command with { PlatformId = platformId });

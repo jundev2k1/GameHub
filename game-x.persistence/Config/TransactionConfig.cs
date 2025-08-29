@@ -69,12 +69,12 @@ public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
         
         builder.HasOne(x => x.TransactionInternal)
             .WithOne(x => x.Transaction)
-            .HasForeignKey<Transaction>(x => x.TransactionInternalId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .HasForeignKey<Transaction>(x => x.Id)
+            .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasOne(x => x.TransactionExternal)
             .WithOne(x => x.Transaction)
-            .HasForeignKey<Transaction>(x => x.TransactionExternalId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .HasForeignKey<Transaction>(x => x.Id)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

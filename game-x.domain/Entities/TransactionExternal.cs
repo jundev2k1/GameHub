@@ -2,7 +2,6 @@ namespace game_x.domain.Entities;
 
 public class TransactionExternal: BaseEntity<int>, IAuditable
 {
-    public int TransactionId { get; set; }
     public Transaction Transaction { get; set; } = null!;
     public string G598Sno { get; private set; } = string.Empty;
     public int GamePlatformId { get; private set; }

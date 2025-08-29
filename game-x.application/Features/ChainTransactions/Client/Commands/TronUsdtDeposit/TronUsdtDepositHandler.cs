@@ -16,7 +16,7 @@ public sealed class CreateDepositChainTransactionHandler(
     IUnitOfWork unitOfWork,
     IUserAccessor userAccessor,
     ICryptoTokenRepo cryptoTokenRepo,
-    IChainTransactionRepo chainTransactionRepo,
+    ITransactionRepo transactionRepo,
     IAsymmetricCryptoService asymmetricCryptoService,
     IAsymmetricKeyCacheService asymmetricKeyCacheService,
     IOptions<GameXSettings> gameXSettings
@@ -28,10 +28,9 @@ public sealed class CreateDepositChainTransactionHandler(
         try
         {
             var userId = userAccessor.GetUserId();
-            var transaction = await CreateLocalChainTransaction(request, userId, ct);
-            await unitOfWork.SaveChangesAsync(ct);
+            var tx = await CreateTransaction(request, userId, ct);
 
-            var uxmRequest = CreateUxmRequest(transaction);
+            var uxmRequest = CreateUxmRequest(tx);
             var result = await uxmService.CreateDepositOrderAsync(uxmRequest);
 
             // Verify UXM signature
@@ -39,17 +38,20 @@ public sealed class CreateDepositChainTransactionHandler(
             var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
             if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
             
-            await UpdateChainTransaction(transaction.PublicId, result.Data, ct);
-
+            tx.UpdateUxmResponse(
+                amount: result.Data.Amount,
+                orderUid: result.Data.OrderUid,
+                to: result.Data.To);
+            
             await unitOfWork.CommitAsync(ct);
 
-            var updatedTransaction = await chainTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
+            var updatedTransaction = await transactionRepo.GetByIdAsync(tx.PublicId, ct);
             
             return new DepositChainTransactionResponseDto
             {
                 Amount = result.Data.Amount,
                 To = result.Data.To,
-                Transaction = updatedTransaction.Adapt<ChainTransactionDto>(),
+                Transaction = updatedTransaction.Adapt<ListTransactionInternalDto>(),
             };
         }
         catch
@@ -59,8 +61,8 @@ public sealed class CreateDepositChainTransactionHandler(
         }
     }
 
-    private async Task<ChainTransaction> CreateLocalChainTransaction(
-        TronUsdtDepositCommand request,
+    private async Task<Transaction> CreateTransaction(
+        TronUsdtDepositCommand request, 
         string userId,
         CancellationToken ct)
     {
@@ -68,50 +70,35 @@ public sealed class CreateDepositChainTransactionHandler(
         if(token.Status != CryptoTokenStatus.Active)
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
         
-        var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(chainTransactionRepo, ct);
-
-        var transaction = ChainTransaction.Create(
+        var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
+        var txInternal = TransactionInternal.Create(orderNumber: orderNumber);
+        
+        var tx = Transaction.Create(
+            sourceType: TransactionSourceType.Uxm,
+            type: TransactionType.Deposit,
             userId: userId,
-            orderNumber: orderNumber,
-            cryptoTokenId: token.Id,
+            status: TransactionStatus.Pending,
             amount: request.Amount,
-            note: request.Note,
-            type: ChainTransactionType.Deposit,
-            status: ChainTransactionStatus.Pending
-        );
-
-        await chainTransactionRepo.AddAsync(transaction, ct);
-        return transaction;
+            cryptoTokenId: token.Id,
+            note: request.Note);
+        
+        tx.AddTxInternal(txInternal);
+        
+        await transactionRepo.AddAsync(tx, ct);
+        return tx;
     }
 
-    private SecureRequest<UxmDepositOrderRequest> CreateUxmRequest(ChainTransaction chainTransaction)
+    private SecureRequest<UxmDepositOrderRequest> CreateUxmRequest(Transaction tx)
     {
         var merchantNumber = gameXSettings.Value.MerchantNumber;
         var gameXPrivateKey = asymmetricKeyCacheService.GameXPrivateKey;
         
-        var requestData = chainTransaction.ToUxmDepositOrderRequest(merchantNumber);
+        var requestData = tx.ToUxmDepositOrderRequest(merchantNumber);
 
         return new SecureRequest<UxmDepositOrderRequest>
         {
             Data = requestData,
             Signature = asymmetricCryptoService.Sign(gameXPrivateKey, requestData)
         };
-    }
-
-    private async Task UpdateChainTransaction(
-        Guid publicId,
-        UxmDepositOrderResponseData data,
-        CancellationToken ct)
-    {
-        await chainTransactionRepo.PatchUpdateAsync(
-            publicId,
-            tx =>
-            {
-                tx.OrderUid = data.OrderUid;
-                tx.ToAddress = data.To;
-                tx.Amount = data.Amount;
-            },
-            ct
-        );
     }
 }

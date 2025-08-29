@@ -2,16 +2,16 @@ using System.Linq.Expressions;
 
 namespace game_x.application.Extensions.FilterExtensions;
 
-public static class ChainTransactionFilterExtensions
+public static class TransactionFilterExtensions
 {
-    public static readonly Dictionary<string, Func<object, Expression<Func<ChainTransaction, bool>>>> Options =
+    public static readonly Dictionary<string, Func<object, Expression<Func<Transaction, bool>>>> Options =
         new()
         {
             ["status"] = CreateStatusFilter
         };
     
     /// <summary>Builds a filter by multiple statuses.</summary>
-    private static Expression<Func<ChainTransaction, bool>> CreateStatusFilter(object value)
+    private static Expression<Func<Transaction, bool>> CreateStatusFilter(object value)
     {
         var raw = value.ToString() ?? "";
 
@@ -26,7 +26,7 @@ public static class ChainTransactionFilterExtensions
         
         var validStatuses = statusList.Select(item =>
         {
-            Enum.TryParse<ChainTransactionStatus>(item, ignoreCase: true, out var status);
+            Enum.TryParse<TransactionStatus>(item, ignoreCase: true, out var status);
             return status;
         }).ToList();
 

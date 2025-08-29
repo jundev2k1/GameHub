@@ -48,12 +48,12 @@ public sealed class GetMyGameTransactionsValidator : AbstractValidator<GetMyGame
         if (_allowFilterFields.All(f => f.ToLower() != filter.Field.ToLower()))
             context.AddFailure($"Filter field {filter.Field} is not allowed.");
 
-        if (filter.Field.Equals(nameof(ChainTransactionDto.Status), StringComparison.OrdinalIgnoreCase))
+        if (filter.Field.Equals(nameof(GameTransactionDto.Status), StringComparison.OrdinalIgnoreCase))
         {
             ValidateStatusField(filter.Value, context);
         }
 
-        if (filter.Field.Equals(nameof(ChainTransactionDto.Type), StringComparison.OrdinalIgnoreCase))
+        if (filter.Field.Equals(nameof(GameTransactionDto.Type), StringComparison.OrdinalIgnoreCase))
         {
             ValidateTypeField(filter.Value, context);
         }

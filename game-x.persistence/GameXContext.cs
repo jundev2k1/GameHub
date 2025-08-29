@@ -29,6 +29,8 @@ public sealed class GameXContext(
     public DbSet<MediaFile> MediaFiles { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<CryptoToken> CryptoTokens { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<TransactionInternal> TransactionInternals { get; set; }
     public DbSet<ChainTransaction> ChainTransactions { get; set; }
     public DbSet<BalanceTransferLog> BalanceTransferLogs { get; set; }
     public DbSet<GamePlatform> GamePlatforms { get; set; }

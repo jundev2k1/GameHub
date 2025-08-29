@@ -14,14 +14,13 @@ public class Transaction: BaseEntity<int>, IAuditable
     public decimal? Fee { get; set; }
     public int CryptoTokenId { get; set; }
     public CryptoToken CryptoToken { get; set; } = null!;
+    public TransactionSourceType SourceType { get; set; }
     public TransactionType Type { get; set; }
-    public TransactionStatus Status { get; set; } = TransactionStatus.Pending;
+    public TransactionStatus Status { get; set; }
     public decimal? BalanceAfter { get; set; }
     public string Meta { get; set; } = "{}";
     public string? Note { get; set; }
-    public int? TransactionInternalId { get; set; }
     public TransactionInternal? TransactionInternal { get; set; }
-    public int? TransactionExternalId { get; set; }
     public TransactionExternal? TransactionExternal { get; set; }
     
     public decimal TotalAmount => Amount + (Fee ?? 0);
@@ -30,6 +29,7 @@ public class Transaction: BaseEntity<int>, IAuditable
         string userId,
         decimal amount,
         int cryptoTokenId,
+        TransactionSourceType sourceType,
         TransactionType type,
         TransactionStatus? status,
         decimal? fee = null,
@@ -47,9 +47,10 @@ public class Transaction: BaseEntity<int>, IAuditable
         var chainTransaction = new Transaction
         {
             UserId = userId,
+            SourceType = sourceType,
             Type = type,
             Amount = amount,
-            Fee = fee ?? 0,
+            Fee = fee,
             CryptoTokenId = cryptoTokenId,
             Status = status ?? TransactionStatus.Pending,
             Note = note,
@@ -76,12 +77,31 @@ public class Transaction: BaseEntity<int>, IAuditable
         Status = status;
     }
     
-    public void UpdateAmount(decimal amount)
+    public void AddTxInternal(TransactionInternal txInternal)
     {
-        if (amount <= 0)
-            throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
-        
+        TransactionInternal =  txInternal;
+    }
+    
+    public void AddTxExternal(TransactionExternal txExternal)
+    {
+        TransactionExternal =  txExternal;
+    }
+    
+    public void UpdateUxmResponse(
+        decimal amount, 
+        string? orderUid = null, 
+        string? hash = null,
+        string? to = null,
+        DateTime? confirmedAt = null)
+    {
         Amount = amount;
+        if (TransactionInternal != null)
+        {
+            TransactionInternal.OrderUid = orderUid;
+            TransactionInternal.Hash = hash;
+            TransactionInternal.ToAddress = to;
+            TransactionInternal.ConfirmedAt = confirmedAt;
+        }
     }
 }
 

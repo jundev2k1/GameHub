@@ -4,40 +4,40 @@ using game_x.share.ExternalApi.Uxm.Dtos;
 
 namespace game_x.application.Features.ChainTransactions.Mapping;
 
-public static class ChainTransactionMapping
+public static class TransactionMapping
 {
     public static UxmDepositOrderRequest ToUxmDepositOrderRequest(
-        this ChainTransaction transaction,
+        this Transaction tx,
         string merchantNumber)
     {
-        var result = transaction.Adapt<UxmDepositOrderRequest>();
+        var result = tx.Adapt<UxmDepositOrderRequest>();
         return result with {
-            UserId = transaction.UserId!,
+            UserId = tx.UserId!,
             MerchantNumber = merchantNumber,
-            OrderNumber = transaction.OrderNumber,
-            Amount =  transaction.Amount,
-            Remark = transaction.Note ?? string.Empty
+            OrderNumber = tx.TransactionInternal?.OrderNumber ?? string.Empty,
+            Amount =  tx.Amount,
+            Remark = tx.Note ?? string.Empty
         };
     }
     
     public static UxmWithdrawalOrderRequest ToUxmWithdrawalOrderRequest(
-        this ChainTransaction transaction,
+        this Transaction transaction,
         string merchantNumber)
     {
         var result = transaction.Adapt<UxmWithdrawalOrderRequest>();
         return result with {
             MerchantNumber = merchantNumber,
-            OrderNumber = transaction.OrderNumber,
+            OrderNumber = transaction.TransactionInternal?.OrderNumber ?? String.Empty,
             Amount =  transaction.TotalAmount,
-            To = transaction.ToAddress ?? string.Empty,
+            To = transaction.TransactionInternal?.ToAddress ?? string.Empty,
             Remark = transaction.Note ?? string.Empty
         };
     }
     
-    public static PaginationResult<ChainTransactionDto> ToSearchResult(this PaginationResult<ChainTransaction> data)
+    public static PaginationResult<ListTransactionInternalDto> ToSearchResult(this PaginationResult<Transaction> data)
     {
-        var result = new PaginationResult<ChainTransactionDto>(
-            items: [.. data.Items.Adapt<IEnumerable<ChainTransactionDto>>()],
+        var result = new PaginationResult<ListTransactionInternalDto>(
+            items: [.. data.Items.Adapt<IEnumerable<ListTransactionInternalDto>>()],
             totalItems: data.TotalItems,
             totalPages: data.TotalPages,
             pageIndex: data.PageNumber,

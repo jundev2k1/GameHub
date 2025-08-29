@@ -7,13 +7,13 @@ using game_x.application.Features.ChainTransactions.Mapping;
 namespace game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionCriteriaByAdmin;
 
 public sealed class GetTransactionCriteriaByAdminHandler(
-    ICriteriaBuilder<ChainTransaction> builder, 
-    IChainTransactionRepo chainTransactionRepo)
-    : IQueryHandler<GetTransactionCriteriaByAdminQuery, PaginationResult<ChainTransactionDto>>
+    ICriteriaBuilder<Transaction> builder, 
+    ITransactionRepo transactionRepo)
+    : IQueryHandler<GetTransactionCriteriaByAdminQuery, PaginationResult<ListTransactionInternalDto>>
 {
-    public async Task<PaginationResult<ChainTransactionDto>> Handle(GetTransactionCriteriaByAdminQuery request, CancellationToken ct = default)
+    public async Task<PaginationResult<ListTransactionInternalDto>> Handle(GetTransactionCriteriaByAdminQuery request, CancellationToken ct = default)
     {
-        var items = await chainTransactionRepo.GetTransactionByCriteriaAsync(
+        var items = await transactionRepo.GetTransactionByCriteriaAsync(
             query => builder.Apply(
                 query,
                 request.Filters,

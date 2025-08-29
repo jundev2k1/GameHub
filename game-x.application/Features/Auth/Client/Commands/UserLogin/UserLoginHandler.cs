@@ -1,7 +1,6 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
-using game_x.application.Events.OnUserLogin;
 using game_x.application.Features.Auth.Dtos;
 using game_x.share.Helper;
 using RefreshTokenEntity = game_x.domain.Entities.RefreshToken;
@@ -13,8 +12,7 @@ public sealed class UserLoginHandler(
     IJwtTokenGenerator jwtTokenGenerator,
     ITokenService tokenService,
     IRefreshTokenManagerCacheService refreshTokenManager,
-    IAuthService authService,
-    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<UserLoginCommand, UserLoginResult>
+    IAuthService authService) : ICommandHandler<UserLoginCommand, UserLoginResult>
 {
     public async Task<UserLoginResult> Handle(UserLoginCommand request, CancellationToken ct = default)
     {
@@ -31,8 +29,6 @@ public sealed class UserLoginHandler(
         var tokenInfo = await jwtTokenGenerator.GenerateToken(loginUser);
         var refreshToken = tokenService.GenerateRefreshToken(loginUser.Id);
         CreateRefreshToken(loginUser.Id, refreshToken, tokenInfo.JwtId);
-
-        await eventDispatcher.Publish(new OnUserLoginEvent(loginUser.Id), ct);
 
         return new UserLoginResult(
             Email: loginUser.Email!,

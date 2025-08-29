@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
+using game_x.application.Features.ChainTransactions.Dtos;
 
 namespace game_x.application.Events.OnWithdrawalOrderReviewed;
 
@@ -20,7 +21,7 @@ public sealed class OnWithdrawalOrderReviewedHandler(
         await unitOfWork.WithTransactionAsync(async () => { await SendToMember(targetTransaction, ct); }, ct);
     }
 
-    private async Task SendToMember(ChainTransaction transaction, CancellationToken ct)
+    private async Task SendToMember(TransactionInternalDto transaction, CancellationToken ct)
     {
         try
         {
@@ -32,18 +33,15 @@ public sealed class OnWithdrawalOrderReviewedHandler(
                 JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
             await notificationRepo.AddNotificationAsync(notification, ct);
 
-            if (transaction.UserId != null)
-            {
-                await clientHubService.SendNotificationToMemberAsync(
-                    transaction.UserId,
-                    notification.Adapt<NotificationDto>());
+            await clientHubService.SendNotificationToMemberAsync(
+                transaction.UserId,
+                notification.Adapt<NotificationDto>());
             
-                await clientHubService.SendTransactionToMemberAsync(
-                    transaction.UserId,
-                    transaction.Adapt<ClientTransactionDto>());
+            await clientHubService.SendTransactionToMemberAsync(
+                transaction.UserId,
+                transaction.Adapt<ClientTransactionDto>());
             
-                await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
-            }
+            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
         }
         catch (Exception ex)
         {

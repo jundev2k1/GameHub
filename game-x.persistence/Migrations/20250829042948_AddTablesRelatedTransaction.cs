@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace game_x.persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTableRelatedTransaction : Migration
+    public partial class AddTablesRelatedTransaction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,6 @@ namespace game_x.persistence.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    transaction_id = table.Column<int>(type: "integer", nullable: false),
                     g598_sno = table.Column<string>(type: "text", nullable: true),
                     game_platform_id = table.Column<int>(type: "integer", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -41,7 +40,6 @@ namespace game_x.persistence.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    transaction_id = table.Column<int>(type: "integer", nullable: false),
                     order_uid = table.Column<string>(type: "text", nullable: true),
                     order_number = table.Column<string>(type: "text", nullable: false),
                     hash = table.Column<string>(type: "text", nullable: true),
@@ -60,20 +58,18 @@ namespace game_x.persistence.Migrations
                 name: "transactions",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id = table.Column<int>(type: "integer", nullable: false),
                     public_id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
                     user_id = table.Column<string>(type: "text", nullable: false),
                     amount = table.Column<decimal>(type: "numeric", nullable: false),
                     fee = table.Column<decimal>(type: "numeric", nullable: false),
                     crypto_token_id = table.Column<int>(type: "integer", nullable: false),
+                    source_type = table.Column<int>(type: "integer", nullable: false),
                     type = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     status = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     balance_after = table.Column<decimal>(type: "numeric", nullable: true),
                     meta = table.Column<string>(type: "jsonb", nullable: false, defaultValue: "{}"),
                     note = table.Column<string>(type: "text", nullable: true),
-                    transaction_internal_id = table.Column<int>(type: "integer", nullable: true),
-                    transaction_external_id = table.Column<int>(type: "integer", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -81,27 +77,27 @@ namespace game_x.persistence.Migrations
                 {
                     table.PrimaryKey("pk_transactions", x => x.id);
                     table.ForeignKey(
-                        name: "fk_transactions_asp_net_users_user_id",
-                        column: x => x.user_id,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
                         name: "fk_transactions_crypto_tokens_crypto_token_id",
                         column: x => x.crypto_token_id,
                         principalTable: "crypto_tokens",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_transactions_transaction_external_transaction_external_id",
-                        column: x => x.transaction_external_id,
+                        name: "fk_transactions_transaction_external_id",
+                        column: x => x.id,
                         principalTable: "transactions_external",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_transactions_transaction_internal_transaction_internal_id",
-                        column: x => x.transaction_internal_id,
+                        name: "fk_transactions_transaction_internals_id",
+                        column: x => x.id,
                         principalTable: "transactions_internal",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_transactions_user_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.SetNull);
                 });
@@ -115,18 +111,6 @@ namespace game_x.persistence.Migrations
                 name: "ix_transactions_public_id",
                 table: "transactions",
                 column: "public_id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_transactions_transaction_external_id",
-                table: "transactions",
-                column: "transaction_external_id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_transactions_transaction_internal_id",
-                table: "transactions",
-                column: "transaction_internal_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
