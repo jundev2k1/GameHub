@@ -13,7 +13,7 @@ public sealed class ChainController : BaseApiController
     [HttpPost("withdrawal/{orderId:guid}/review")]
     public async Task<IActionResult> ReviewWithdrawalOrderAsync(Guid orderId, [FromBody] AdminReviewWithdrawalOrderCommand command, CancellationToken ct)
     {
-        var result = await Mediator.Send(command with {OrderId = orderId}, ct);
+        var result = await Mediator.Send(command with { OrderId = orderId }, ct);
         return ApiResponseFactory.Ok(result);
     }
 

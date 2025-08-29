@@ -26,7 +26,19 @@ public interface IUserRepo
 
     Task<UserExtend> GetUserExtendAsync(string userId, CancellationToken ct = default);
 
+    Task<PaginationResult<UserKyc>> GetUserKycByCriteria(
+        Func<IQueryable<UserKyc>, IQueryable<UserKyc>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
+
     Task<UserKyc> GetKycProfileAsync(string userId, CancellationToken ct = default);
+
+    Task<PaginationResult<UserBankAccount>> GetUserBankAccountByCriteria(
+        Func<IQueryable<UserBankAccount>, IQueryable<UserBankAccount>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
 
     Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync(string userId, CancellationToken ct = default);
 

@@ -66,7 +66,7 @@ public sealed class OnUxmTransactionCallbackHandler(
                         break;
 
                     case ChainTransactionType.Withdrawal:
-                        userBalanceService.FinalizeFrozen(balance, @event.ActualAmount);
+                        userBalanceService.FinalizeFrozen(balance, @event.ActualAmount + transaction.Fee);
                         break;
 
                     default:
@@ -75,7 +75,7 @@ public sealed class OnUxmTransactionCallbackHandler(
                 await userBalanceRepo.PutUpdateAsync(balance, ct);
 
                 await SendToMember(transaction, ct);
-                await SendToAdmin(transaction, ct);
+                //  await SendToAdmin(transaction, ct);
             }, ct);
 
             // Ensure the audit log records the order status updated by the external API
