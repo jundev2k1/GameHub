@@ -77,10 +77,10 @@ public sealed class OnUserBalanceUpdatedHandler(
         {
             if (account is null) return null;
 
-            var externalRequest = new WalletRequest { Account = account };
+            var externalRequest = new GameWalletRequest { Account = account };
             var externalWallet = await gameProviderService.GetWalletAsync(externalRequest);
 
-            return externalWallet.Quota;
+            return externalWallet.Data.Quota;
         }
         catch (Exception ex)
         {

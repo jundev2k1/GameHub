@@ -44,7 +44,7 @@ public sealed class LoginGameHandler(
 
         // Login from external API
         gameProviderCache.SetLanguage(gameProviderAccount, request.Locale);
-        var externalRequest = new LoginRequest
+        var externalRequest = new GameLoginRequest
         {
             Account = gameProviderAccount,
             Passwd = aesEncryptor.Decrypt(targetUser.UserExtend.GameProviderPassword),
@@ -62,17 +62,11 @@ public sealed class LoginGameHandler(
 
     public async Task LogoutGameAsync(string account)
     {
-        var logoutRequest = new LogoutRequest
+        var logoutRequest = new GameLogoutRequest
         {
             Account = account,
         };
         await gameProvider.LogoutAsync(logoutRequest);
-
-        var tempRequest = new WalletRequest()
-        {
-            Account = account
-        };
-        await gameProvider.GetWalletAsync(tempRequest);
     }
 
     private string ConvertEmbededLink(string url)
