@@ -159,6 +159,38 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             ?? throw new NotFoundException();
     }
 
+    public async Task<PaginationResult<UserBankAccount>> GetUserBankAccountByCriteria(
+        Func<IQueryable<UserBankAccount>, IQueryable<UserBankAccount>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.UserBankAccounts
+            .AsNoTracking()
+            .Include(uba => uba.User)
+            .Include(uba => uba.FiatCurrency)
+            .Include(uba => uba.ReviewedBy)
+            .Where(uba => !uba.User.IsDeleted)
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var totalPageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
+        var result = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToArrayAsync(ct);
+
+        return new PaginationResult<UserBankAccount>(
+            items: result,
+            totalItems: totalCount,
+            totalPages: totalPageCount,
+            pageIndex: page,
+            pageSize: pageSize);
+    }
+
     public async Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync(string userId, CancellationToken ct = default)
     {
         var profile = await context.UserKycs
