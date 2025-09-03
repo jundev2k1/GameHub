@@ -66,13 +66,14 @@ public sealed class UserController : BaseApiController
     [HttpGet("bank-accounts")]
     public async Task<IActionResult> GetUserBankAccountByCriteriaAsync([AsParameters] GetBankAccountListRequest parameters)
     {
+        var filterExtends = new Dictionary<string, string>();
+        if (parameters.CurrencyCode.IsNotNullOrEmpty())
+            filterExtends.Add("currency", parameters.CurrencyCode);
+
         var filters = QueryConverter.ToFilters(
             parameters.Filters,
             parameters.Keyword,
-            @params: new()
-            {
-                { "currency", parameters.CurrencyCode }
-            });
+            @params: filterExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetBankAccountByCriteriaQuery(
             filters,
