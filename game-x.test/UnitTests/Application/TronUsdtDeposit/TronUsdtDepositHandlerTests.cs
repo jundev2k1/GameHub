@@ -18,7 +18,7 @@ namespace Test.UnitTests.Application.TronUsdtDeposit;
 public sealed class TronUsdtDepositHandlerTests
 {
     private readonly Mock<IUxmService> _uxmServiceMock = new();
-    private readonly Mock<IChainTransactionRepo> _chainTransactionRepoMock = new();
+    private readonly Mock<ITransactionRepo> _transactionRepoMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     private readonly Mock<IAsymmetricCryptoService> _asymmetricCryptoServiceMock = new();
     private readonly Mock<IUserAccessor> _userAccessorMock = new();
@@ -34,12 +34,12 @@ public sealed class TronUsdtDepositHandlerTests
         
         _handler = new CreateDepositChainTransactionHandler(
             uxmService: _uxmServiceMock.Object,
-            chainTransactionRepo: _chainTransactionRepoMock.Object,
             unitOfWork: _unitOfWorkMock.Object,
-            asymmetricCryptoService: _asymmetricCryptoServiceMock.Object,
             userAccessor: _userAccessorMock.Object,
-            asymmetricKeyCacheService: _asymmetricKeyCacheServiceMock.Object,
             cryptoTokenRepo: _cryptoTokenRepoMock.Object,
+            transactionRepo: _transactionRepoMock.Object,
+            asymmetricCryptoService: _asymmetricCryptoServiceMock.Object,
+            asymmetricKeyCacheService: _asymmetricKeyCacheServiceMock.Object,
             gameXSettings: gameXSettings
         );
     }
