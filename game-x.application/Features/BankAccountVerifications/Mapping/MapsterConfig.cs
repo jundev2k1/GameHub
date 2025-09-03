@@ -16,6 +16,7 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<UserBankAccount, BankAccountProfileDto>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.CurrencyCode, src => src.FiatCurrency != null ? src.FiatCurrency.Code.Value : string.Empty)
+            .Map(dest => dest.CurrencySymbol, src => src.FiatCurrency != null ? src.FiatCurrency.Symbol : string.Empty)
             .Map(dest => dest.ReviewedBy, src => src.ReviewedBy != null ? src.ReviewedBy.UserName : null)
             .Map(dest => dest.ImageName, src => src.Image != null ? src.Image.FileName : string.Empty);
 
