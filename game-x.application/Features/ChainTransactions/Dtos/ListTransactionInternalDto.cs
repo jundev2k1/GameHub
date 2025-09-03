@@ -9,6 +9,8 @@ public class ListTransactionInternalDto
     public decimal? Fee { get; set; }
     public decimal? BalanceAfter { get; set; }
     public string? Note { get; set; }
+    public string? OrderNumber { get; set; }
+    public string? OrderUid { get; set; }
     public Guid CryptoTokenId { get; set; }
     public string Symbol { get; set; } = string.Empty;
     public NetworkType Network { get; set; }

@@ -2,7 +2,7 @@ namespace game_x.application.Contract.Infrastructure.Services.Wallet;
 
 public interface IUserBalanceService
 {
-    decimal GetWithdrawalFree();
+    decimal GetWithdrawalFee();
     /// <summary>Freeze order</summary>
     void Freeze(UserBalance balance, decimal amount);
     /// <summary>Order canceled, unfrozen</summary>

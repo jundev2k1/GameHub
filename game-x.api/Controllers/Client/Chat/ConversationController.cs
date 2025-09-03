@@ -9,9 +9,7 @@ namespace game_x.api.Controllers.Client.Chat;
 [Route("api/user/conversations")]
 public class ConversationController : BaseApiController
 {
-    /// <summary>
-    /// List conversations for current logged-in user
-    /// </summary>
+    /// <summary>List conversations for current logged-in user</summary>
     [HttpGet("me")]
     public async Task<IActionResult> GetMyConversationAsync([AsParameters] CursorCriteriaRequest parameters)
     {

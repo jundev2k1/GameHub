@@ -26,7 +26,12 @@ public sealed class TronUsdtWithdrawalHandler(
 
         await ValidateKyc(userId, ct);
         
-        var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(userId, request.Amount, request.CryptoTokenId, ct);
+        var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(
+            userId: userId, 
+            amount: request.Amount, 
+            cryptoTokenId: request.CryptoTokenId,
+            to: request.To,
+            ct: ct);
 
         var tx = await CreateTransaction(request, userId, feeAmount, token.Id, ct);
 
@@ -88,22 +93,32 @@ public sealed class TronUsdtWithdrawalHandler(
     }
     
     private async Task<(CryptoToken Token, UserBalance Balance, decimal FeeAmount, decimal TotalAmount)>
-        ResolveBalanceInfoAsync(string userId, decimal amount, Guid cryptoTokenId, CancellationToken ct)
+        ResolveBalanceInfoAsync(string userId, decimal amount, Guid cryptoTokenId, string to, CancellationToken ct)
     {
-        var token = await cryptoTokenRepo.GetByIdAsync(cryptoTokenId, ct);
-
-        if (token.Status != CryptoTokenStatus.Active)
-            throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
-                
+        var token = await ValidateTokenAsync(cryptoTokenId, to, ct);
+        
         var balance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
             ?? throw new BadRequestException(MessageCode.Accounting.WalletNotFound);
 
-        decimal feeAmount = userBalanceService.GetWithdrawalFree();
+        decimal feeAmount = userBalanceService.GetWithdrawalFee();
         decimal totalAmount = amount + feeAmount;
 
         if (balance.Amount < totalAmount)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
         return (token, balance, feeAmount, totalAmount);
+    }
+    
+    private async Task<CryptoToken> ValidateTokenAsync(Guid cryptoTokenId, string to, CancellationToken ct)
+    {
+        var token = await cryptoTokenRepo.GetByIdAsync(cryptoTokenId, ct);
+
+        if (token.Status != CryptoTokenStatus.Active)
+            throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
+                
+        if (!TransactionInternal.IsValidAddress(token.Network, to))
+            throw new BadRequestException(MessageCode.Transaction.InvalidTransactionAddress);
+
+        return token;
     }
 }
