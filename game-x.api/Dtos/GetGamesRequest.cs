@@ -10,6 +10,8 @@ public sealed class GetGamesRequest
     public Guid[]? Category { get; set; }
     [FromQuery(Name = "type")]
     public Guid[]? GameType { get; set; }
+    [FromQuery(Name = "active")]
+    public bool? IsActive { get; set; }
     [FromQuery(Name = "page")]
     public int? PageNumber { get; set; } = 1;
     [FromQuery(Name = "pageSize")]

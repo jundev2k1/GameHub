@@ -33,5 +33,6 @@
     <Folder Include="Features\Accounts\Cs\" />
     <Folder Include="Features\Auth\Admin\Commands\" />
     <Folder Include="Features\Auth\Root\Commands\" />
+    <Folder Include="Features\Games\Admin\Commands\" />
   </ItemGroup>
 </Project>

@@ -6,7 +6,6 @@ using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountByCriteria;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountDetail;
-using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountProfile;
 using game_x.application.Features.Kyc.Queries.GetKycByCriteria;
 using game_x.application.Features.Kyc.Queries.GetKycProfile;
 

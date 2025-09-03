@@ -1,38 +1,41 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
-using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Features.Games.Dtos;
-using System.Linq.Expressions;
 
 namespace game_x.application.Features.Games.Client.Queries.GetGames;
 
-public sealed class GetGamesHandler(IGameRepo gameRepo) : IQueryHandler<GetGamesQuery, PaginationResult<GameInfoDto>>
+public sealed class GetGamesHandler(
+    IGameProviderCacheService gameProviderCache) : IQueryHandler<GetGamesQuery, PaginationResult<GetGamesItemDto>>
 {
-    public async Task<PaginationResult<GameInfoDto>> Handle(GetGamesQuery request, CancellationToken ct = default)
+    public async Task<PaginationResult<GetGamesItemDto>> Handle(GetGamesQuery request, CancellationToken ct = default)
     {
-        var result = await gameRepo.GetsByCriteriaAsync(
-            GetFilterCondition(request),
-            request.PageIndex,
-            request.PageSize,
-            ct);
-        return new PaginationResult<GameInfoDto>(
-            [.. result.Items.Select(i => i.Adapt<GameInfoDto>())],
-            result.TotalItems,
-            result.TotalPages,
-            result.PageNumber,
-            result.PageSize);
+        var searchResult = gameProviderCache.GameList
+            .Where(GetFilterCondition(request))
+            .ToArray();
+        var totalItems = searchResult.Length;
+        var result = new PaginationResult<GetGamesItemDto>(
+            items: searchResult
+                .Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(game => game.Adapt<GetGamesItemDto>()),
+            totalItems: totalItems,
+            totalPages: (int)Math.Ceiling((decimal)totalItems / request.PageSize),
+            pageIndex: request.PageIndex,
+            pageSize: request.PageSize);
+        return await Task.FromResult(result);
     }
 
-    private static Expression<Func<Game, bool>> GetFilterCondition(GetGamesQuery request)
+    private static Func<GameInfoDto, bool> GetFilterCondition(GetGamesQuery request)
     {
         return game =>
             ((request.Platform == null)
-                || (game.Platform.PublicId == request.Platform))
+                || (game.PlatformId == request.Platform))
             && ((request.Categories == null)
-                || game.GameCategoryMappings.Any(m => request.Categories.Contains(m.Category.PublicId)))
+                || game.Categories.Any(c => request.Categories.Contains(c.Id)))
             && ((request.GameTypes == null)
-                || game.GameTypeMappings.Any(m => request.GameTypes.Contains(m.Type.PublicId)))
+                || game.GameTypes.Any(t => request.GameTypes.Contains(t.Id)))
             && ((request.Keyword == null)
-                || game.PublicId.ToString() == request.Keyword.Trim()
-                || game.Name.Contains(request.Keyword.Trim()));
+                || game.Id.ToString().Equals(request.Keyword.Trim(), StringComparison.InvariantCultureIgnoreCase)
+                || game.Name.Contains(request.Keyword.Trim(), StringComparison.InvariantCultureIgnoreCase));
     }
 }

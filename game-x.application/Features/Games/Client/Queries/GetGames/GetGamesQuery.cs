@@ -8,5 +8,16 @@ public record GetGamesQuery(
     Guid? Platform,
     Guid[]? Categories,
     Guid[]? GameTypes,
-    int PageIndex,
-    int PageSize) : IQuery<PaginationResult<GameInfoDto>>;
+    int PageIndex = 1,
+    int PageSize = 20) : IQuery<PaginationResult<GetGamesItemDto>>;
+
+public record GetGamesItemDto(
+    Guid Id,
+    string GameCode,
+    string Name,
+    string Description,
+    string Note,
+    Guid PlatformId,
+    string PlatformName,
+    GameCategoryInfo[] Categories,
+    GameTypeInfo[] GameTypes);
