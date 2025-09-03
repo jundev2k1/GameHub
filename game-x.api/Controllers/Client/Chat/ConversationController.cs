@@ -1,26 +1,19 @@
 using game_x.api.Common;
-using game_x.application.Common.Filters;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
-using game_x.application.Features.Chat.Queries.ListMyConversations;
+using game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
 using game_x.application.Features.Chat.Queries.ListWindowMessagesInConversation;
 
-namespace game_x.api.Controllers.Chat;
+namespace game_x.api.Controllers.Client.Chat;
 
-[Route("api/conversations")]
+[Authorize(Roles = AppRoles.User)]
+[Route("api/user/conversations")]
 public class ConversationController : BaseApiController
 {
-    /// <summary>
-    /// List conversations for current logged-in user
-    /// </summary>
-    [Authorize(Roles = $"{AppRoles.Root},{AppRoles.Admin},{AppRoles.Cs},{AppRoles.User}")]
+    /// <summary>List conversations for current logged-in user</summary>
     [HttpGet("me")]
-    public async Task<IActionResult> GetUnassignedConversationAsync([AsParameters] CursorCriteriaRequest parameters)
+    public async Task<IActionResult> GetMyConversationAsync([AsParameters] CursorCriteriaRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters);
-        var query = new ListMyConversationsQuery(
-            Filters: filters,
-            Q: parameters.Q,
-            Search: parameters.Search,
+        var query = new ListMyConversationsForClientQuery(
             Limit: parameters.Limit,
             Cursor: parameters.Cursor
         );

@@ -5,6 +5,8 @@ public class TransactionInternalDetailDto
     public Guid Id { get; set; }
     public string UserId { get; set; } = string.Empty;
     public string? Hash { get; set; }
+    public string? OrderNumber { get; set; }
+    public string? OrderUid { get; set; }
     public string? FromAddress { get; set; }
     public string? ToAddress { get; set; }
     public decimal Amount { get; set; }

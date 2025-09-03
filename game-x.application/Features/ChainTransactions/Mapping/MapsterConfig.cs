@@ -11,6 +11,8 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<Transaction, ListTransactionInternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
+            .Map(dest => dest.OrderUid, src => src.TransactionInternal != null ? src.TransactionInternal.OrderUid : null)
+            .Map(dest => dest.OrderNumber, src => src.TransactionInternal != null ? src.TransactionInternal.OrderNumber : null)
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network);
         
@@ -22,6 +24,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Hash, src => src.TransactionInternal != null ? src.TransactionInternal.Hash : null)
             .Map(dest => dest.FromAddress, src => src.TransactionInternal != null ? src.TransactionInternal.FromAddress : null)
             .Map(dest => dest.ToAddress, src => src.TransactionInternal != null ? src.TransactionInternal.ToAddress : null)
+            .Map(dest => dest.OrderUid, src => src.TransactionInternal != null ? src.TransactionInternal.OrderUid : null)
+            .Map(dest => dest.OrderNumber, src => src.TransactionInternal != null ? src.TransactionInternal.OrderNumber : null)
             .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null);
         
         cfg.NewConfig<Transaction, TransactionInternalDto>()

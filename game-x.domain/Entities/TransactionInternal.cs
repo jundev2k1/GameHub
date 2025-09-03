@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace game_x.domain.Entities;
 
 public class TransactionInternal: BaseEntity<int>, IAuditable
@@ -31,10 +33,22 @@ public class TransactionInternal: BaseEntity<int>, IAuditable
         return txInternal;
     }
     
-    public void UpdateUxmResponse(string orderUid, string hash, DateTime? confirmedAt)
+    public static bool IsValidAddress(NetworkType network, string address)
     {
-        OrderUid = orderUid;
-        Hash = hash;
-        ConfirmedAt = confirmedAt ?? DateTime.UtcNow;
+        var trc20Regexp = @"^T[a-zA-Z0-9]{33}$";
+        var erc20Regexp = @"^0x[a-fA-F0-9]{40}$";
+        
+        if (address.IsNullOrWhiteSpace())
+            return false;
+
+        switch (network)
+        {
+            case NetworkType.Tron:
+                return Regex.IsMatch(address, trc20Regexp, RegexOptions.IgnoreCase);
+            case NetworkType.Ethereum:
+                return Regex.IsMatch(address, erc20Regexp, RegexOptions.IgnoreCase);
+            default:
+                return false;
+        }
     }
 }

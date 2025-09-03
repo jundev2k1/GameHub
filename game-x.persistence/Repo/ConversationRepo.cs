@@ -2,144 +2,90 @@ using System.Linq.Expressions;
 using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Chat.Dtos;
 using game_x.domain.Constants;
 using game_x.share.Helper;
 using Mapster;
+using ConversationDto = game_x.application.Features.Chat.Dtos.ConversationDto;
 
 namespace game_x.persistence.Repo;
 
 public class ConversationRepo(GameXContext context): IConversationRepo, IRepository
 {
-    // ---- Cursor-based queue for unassigned support conversations (next-only) ----
-public async Task<CursorResult<ConversationQueueItemDto>> GetUnassignedQueueByCursorAsync(
-    int limit,
-    string? cursor,
-    string? q,
-    string? search,
-    CancellationToken ct = default)
-{
-    // --- Base feed: only open, unassigned support conversations ---
-    var query = context.Conversations
-        .AsNoTracking()
-        .Where(c => c.Type == ConversationType.Support
-                 && c.Status == ConversationStatus.Open
-                 && c.AssignedAgentId == null);
-
-    // --- Optional search (ILIKE on customer id / username / nickname / message text) ---
-    if (!string.IsNullOrWhiteSpace(search))
-    {
-        var s = $"%{search.Trim()}%";
-        query = query.Where(c =>
-            (c.CustomerId != null && EF.Functions.ILike(c.CustomerId, s)) ||
-            context.Users.Where(u => u.Id == c.CustomerId)
-                .Any(u => EF.Functions.ILike(u.UserName!, s) || EF.Functions.ILike(u.Nickname, s)));
-    }
-    
-    if (!string.IsNullOrWhiteSpace(q))
-    {
-        query = query.Where(c =>
-            context.Messages.Where(m => m.ConversationId == c.Id)
-                .Any(m => EF.Functions.ILike(m.Text ?? string.Empty, $"%{q.Trim()}%")));
-    } 
-
-    // --- Include customer + last message (for DTO mapping & preview) ---
-        // Keep only conversations that have messages.
-    var src = query
-        .Include(c => c.Customer)
-        .Include(c => c.Messages
-            .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
-            .Take(1))
-        .Where(c => c.Messages.Any());
-
-    // Helper for preview string (server-safe)
-    static string Preview(string? text)
+    /// <summary>Short preview helper</summary>
+    private string Preview(string? text)
         => string.IsNullOrWhiteSpace(text) ? "[Attachment]"
-         : text.Length <= 140 ? text
-         : text[..140];
+            : text.Length <= 140 ? text
+            : text[..140];
     
-    var fp = CursorHelper.ComputeFp($"q:{q?.Trim().ToLowerInvariant() ?? string.Empty}");
-
-    return await SeekCursorBuilder<Conversation>
-        .For(src)
-        .Keys(
-            c => c.LastMessageAt,
-            c => c.Messages
-               .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
-               .Select(m => m.Id)
-               .FirstOrDefault())
-        .Sort(desc1: true, desc2: true) // newest → older
-        .FromCursor(cursor, fp) // next-only feed; prev is omitted
-        .WithPrev(false)
-        .Limit(limit)
-        .ExecuteAsync(c =>
-        {
-            var dto = c.Adapt<ConversationQueueItemDto>();
-            return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
-        }, ct);
-    }
-
-    public async Task<CursorResult<ConversationQueueItemDto>> GetMyConversationsByCursorAsync(
-        string userId,
+    // ---- Cursor-based queue for unassigned support conversations (next-only) ----
+    public async Task<CursorResult<SupportConversationDto>> GetUnassignedQueueByCursorAsync(
         int limit,
         string? cursor,
-        string? q,
-        string? search,
         CancellationToken ct = default)
     {
-        var me = userId;
+        // --- Base feed: only open, unassigned support conversations ---
+        var query = context.Conversations
+            .AsNoTracking()
+            .Where(c => c.Type == ConversationType.Support
+                     && c.Status == ConversationStatus.Open
+                     && c.AssignedAgentId == null);
         
-        IQueryable<Conversation> query = context.Conversations.AsNoTracking();
-
-        Expression<Func<Conversation, bool>> minePredicate =
-            c => c.CustomerId == me
-              || c.AssignedAgentId == me
-              || context.ConversationMembers.Any(m => m.ConversationId == c.Id && m.UserId == me);
-
-        query = query.Where(minePredicate);
-
-        // Optional search (ILIKE across customer id / user profile / messages)
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var s = $"%{search.Trim()}%";
-            query = query.Where(c =>
-                (c.CustomerId != null && EF.Functions.ILike(c.CustomerId, s)) ||
-                context.Users.Where(u => u.Id == c.CustomerId)
-                    .Any(u => EF.Functions.ILike(u.UserName!, s) || EF.Functions.ILike(u.Nickname, s)));
-        }
-        
-        if (!string.IsNullOrWhiteSpace(q))
-        {
-            query = query.Where(c =>
-                context.Messages.Where(m => m.ConversationId == c.Id)
-                    .Any(m => EF.Functions.ILike(m.Text ?? string.Empty, $"%{q.Trim()}%")));
-        } 
-        
-        // Include data needed for DTO (customer + last message); keep only convs with messages
         var src = query
             .Include(c => c.Customer)
             .Include(c => c.Messages
                 .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
                 .Take(1))
+                .ThenInclude(x => x.SenderUser)
             .Where(c => c.Messages.Any());
+        
+        var fp = CursorHelper.ComputeFp($"q:");
 
-        // Short preview helper
-        static string Preview(string? text)
-            => string.IsNullOrWhiteSpace(text) ? "[Attachment]"
-             : text!.Length <= 140 ? text
-             : text[..140];
-
-        // Fingerprint ties the cursor to current user + search
-        var fp = CursorHelper.ComputeFp($"me:{me}|q:{search?.Trim().ToLowerInvariant() ?? ""}");
-
-        // Seek with (LastMessageAt, LastMessageId) in DESC/DESC (newest first), next-only
         return await SeekCursorBuilder<Conversation>
             .For(src)
             .Keys(
-                c => c.LastMessageAt, // UTC DateTime
+                c => c.LastMessageAt,
+                c => c.Messages
+                   .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
+                   .Select(m => m.Id)
+                   .FirstOrDefault())
+            .Sort(desc1: true, desc2: true) // newest → older
+            .FromCursor(cursor, fp)
+            .WithPrev(false)
+            .Limit(limit)
+            .ExecuteAsync(c =>
+            {
+                var dto = c.Adapt<SupportConversationDto>();
+                return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
+            }, ct);
+        }
+
+    public async Task<CursorResult<SupportConversationDto>> GetSupportConversationsAsync(
+        int limit,
+        string? cursor,
+        CancellationToken ct = default)
+    {
+        IQueryable<Conversation> query = context.Conversations.AsNoTracking();
+
+        query = query.Where(c => c.Type == ConversationType.Support);
+
+        var src = query
+            .Include(c => c.Customer)
+            .Include(c => c.Messages
+                .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
+                .Take(1))
+                .ThenInclude(x => x.SenderUser)
+            .Where(c => c.Messages.Any());
+
+        // Fingerprint ties the cursor to current user + search
+        var fp = CursorHelper.ComputeFp($"|q:");
+
+        return await SeekCursorBuilder<Conversation>
+            .For(src)
+            .Keys(
+                c => c.LastMessageAt,
                 c => context.Messages
                  .Where(m => m.ConversationId == c.Id)
                  .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
@@ -147,11 +93,56 @@ public async Task<CursorResult<ConversationQueueItemDto>> GetUnassignedQueueByCu
                  .FirstOrDefault())
             .Sort(desc1: true, desc2: true)
             .FromCursor(cursor, fp)
-            .WithPrev(false) // next-only for conversations
+            .WithPrev(false)
             .Limit(limit)
             .ExecuteAsync(c =>
             {
-                var dto = c.Adapt<ConversationQueueItemDto>();
+                var dto = c.Adapt<SupportConversationDto>();
+                return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
+            }, ct);
+    }
+
+    public async Task<CursorResult<ConversationDto>> GetMyConversationsForClientAsync(
+        string userId,
+        int limit,
+        string? cursor,
+        CancellationToken ct = default)
+    {
+        IQueryable<Conversation> query = context.Conversations.AsNoTracking();
+
+        // Retrieve all private conversations and group chats
+        Expression<Func<Conversation, bool>> minePredicate =
+            c => c.CustomerId == userId
+              || context.ConversationMembers.Any(m => m.ConversationId == c.Id && m.UserId == userId);
+
+        query = query.Where(minePredicate);
+
+        var src = query
+            .Include(c => c.Customer)
+            .Include(c => c.Messages
+                .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
+                .Take(1))
+                .ThenInclude(x => x.SenderUser)
+            .Where(c => c.Messages.Any());
+        
+        var fp = CursorHelper.ComputeFp($"me:{userId}|q:");
+        
+        return await SeekCursorBuilder<Conversation>
+            .For(src)
+            .Keys(
+                c => c.LastMessageAt,
+                c => context.Messages
+                 .Where(m => m.ConversationId == c.Id)
+                 .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
+                 .Select(m => m.Id)
+                 .FirstOrDefault())
+            .Sort(desc1: true, desc2: true)
+            .FromCursor(cursor, fp)
+            .WithPrev(false)
+            .Limit(limit)
+            .ExecuteAsync(c =>
+            {
+                var dto = c.Adapt<ConversationDto>();
                 return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
             }, ct);
     }
@@ -164,6 +155,14 @@ public async Task<CursorResult<ConversationQueueItemDto>> GetUnassignedQueueByCu
                 c.Type == ConversationType.Support &&
                 c.Status == status &&
                 c.CustomerId == customerId, ct);
+    }
+    
+    public async Task<Conversation> GetByIdAsync(Guid customerId, CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .AsTracking()
+            .FirstOrDefaultAsync(c => c.PublicId == customerId, ct)
+            ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
     }
     
     public async Task AddAsync(Conversation conv, CancellationToken ct = default)

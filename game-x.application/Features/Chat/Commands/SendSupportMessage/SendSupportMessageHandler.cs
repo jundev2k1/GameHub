@@ -19,8 +19,8 @@ public sealed class SendSupportMessageHandler(
         var senderUserId = userAccessor.GetUserId();
         var now = DateTime.UtcNow;
 
-        // 1) Get-or-create support conversation for this user (Open)
-        var conv = await conversationRepo.GetSupportConversationAsync(ConversationStatus.Open, senderUserId, ct);
+        // Each customer has only one conversation with customer support; if none exists, a new one will be created
+        var conv = await conversationRepo.GetSupportConversationAsync(ConversationStatus.Claimed, senderUserId, ct);
         ConversationMember? convMember = null;
         await unitOfWork.BeginTransactionAsync(ct);
         try
@@ -82,18 +82,13 @@ public sealed class SendSupportMessageHandler(
     
     private async Task<Message> CreateMessageAsync(Conversation conv, string userId, string text, CancellationToken ct)
     {
-        var msg = new Message
-        {
-            Conversation = conv,
-            SenderUserId = userId,
-            SenderRole = RoleInConversation.Member,
-            Kind = MessageKind.Text,
-            Text = text,
-            SentAt = DateTime.UtcNow,
-            IsTombstone = false,
-            EditCount = 0,
-            CurrentVersion = 1,
-        };
+        var msg = Message.Create(
+            conv: conv,
+            senderUserId: userId,
+            text: text,
+            kind: MessageKind.Text,
+            senderRole: RoleInConversation.Member
+        );
         
         await messageRepo.AddAsync(msg, ct);
         return msg;
