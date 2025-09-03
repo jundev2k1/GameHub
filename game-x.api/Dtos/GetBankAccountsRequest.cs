@@ -4,6 +4,6 @@ namespace game_x.api.Dtos;
 
 public sealed class GetBankAccountListRequest : SearchCriteriaRequest
 {
-    [FromQuery(Name = "currency")]
+    [FromQuery(Name = "currencies")]
     public string CurrencyCode { get; set; } = string.Empty;
 }
