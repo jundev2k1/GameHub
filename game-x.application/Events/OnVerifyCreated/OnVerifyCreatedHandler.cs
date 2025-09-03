@@ -44,7 +44,7 @@ public sealed class OnVerifyCreatedHandler(
     {
         var verificationDto = new AdminVerificationCreatedDto
         {
-            VerifyType = VerificationStatusType.Kyc.ToString().ToCamelCase(),
+            Type = VerificationStatusType.Kyc.ToString().ToCamelCase(),
             Email = user.Email ?? string.Empty,
             NickName = user.Nickname ?? string.Empty,
         };
@@ -68,7 +68,7 @@ public sealed class OnVerifyCreatedHandler(
     {
         var verificationDto = new AdminVerificationCreatedDto
         {
-            VerifyType = VerificationStatusType.BankAccount.ToString().ToCamelCase(),
+            Type = VerificationStatusType.BankAccount.ToString().ToCamelCase(),
             Email = user.Email ?? string.Empty,
             NickName = user.Nickname ?? string.Empty,
             AccountName = @event.BankAccountDto?.AccountName ?? string.Empty,
