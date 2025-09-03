@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace game_x.infrastructure.SignalR.Hubs;
 
-public interface IAdminHub
+public interface ICsAdminHub
 {
     Task ReceiveNotification(NotificationDto message);
 
@@ -21,27 +21,27 @@ public interface IAdminHub
     Task TransactionUpdated(AdminTransactionDto transaction);
 }
 
-[Authorize(Roles = AppRoles.Admin)]
-public sealed class AdminHub(
+[Authorize(Roles = AppRoles.Cs)]
+public sealed class CsAdminHub(
     ISender sender,
     IUserAccessor userAccessor,
-    ILogger<AdminHub> logger) : Hub<IAdminHub>
+    ILogger<AdminHub> logger) : Hub<ICsAdminHub>
 {
-    public const string Path = "/hubs/admin-service";
+    public const string Path = "/hubs/cs-admin-service";
 
     public override async Task OnConnectedAsync()
     {
         var userId = Context.UserIdentifier;
         if (userId.IsNotNullOrEmpty())
-            logger.LogInformation($"Admin User connected ({nameof(AdminHub)}): {userId}");
+            logger.LogInformation("Admin User connected ({hubName}): {userId}", nameof(CsAdminHub), userId);
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"admin-{userId}");
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"cs-admin-{userId}");
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        logger.LogInformation($"Admin User disconnected: {Context.UserIdentifier}");
+        logger.LogInformation("Admin User disconnected: {userId}", Context.UserIdentifier);
         await base.OnDisconnectedAsync(exception);
     }
 
