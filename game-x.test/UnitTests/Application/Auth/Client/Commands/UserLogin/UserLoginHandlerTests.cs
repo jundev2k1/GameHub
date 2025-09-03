@@ -20,7 +20,6 @@ public sealed class UserLoginHandlerTests
     private readonly Mock<ITokenService> _tokenServiceMock = new();
     private readonly Mock<IRefreshTokenManagerCacheService> _refreshTokenManagerMock = new();
     private readonly Mock<IAuthService> _authServiceMock = new();
-    private readonly Mock<IApplicationEventDispatcher> _eventDispatcherMock = new();
     private readonly UserLoginHandler _handler;
 
     public UserLoginHandlerTests()
@@ -30,8 +29,7 @@ public sealed class UserLoginHandlerTests
             jwtTokenGenerator: _jwtTokenGeneratorMock.Object,
             tokenService: _tokenServiceMock.Object,
             refreshTokenManager: _refreshTokenManagerMock.Object,
-            authService: _authServiceMock.Object,
-            eventDispatcher: _eventDispatcherMock.Object);
+            authService: _authServiceMock.Object);
     }
 
     [Fact]

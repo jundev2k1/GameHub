@@ -4,4 +4,6 @@ public record GameBalanceNotificationDto(
     decimal Amount,
     decimal FrozenAmount,
     string Network,
-    string Symbol);
+    string Symbol,
+    decimal? ActualAmount = null);
+    

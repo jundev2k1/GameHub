@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnVerifyCreated;
 using game_x.application.Features.Accounts.User.Dtos;
+using game_x.application.Features.Kyc.Dtos;
 
 namespace game_x.application.Features.Kyc.Commands._1_SubmitKyc;
 
@@ -20,7 +21,7 @@ public sealed class SubmitKycHandler(
 
         var frontObjectName = await UploadFiles(request.FrontImage, userId, ct);
         var backObjectName = await UploadFiles(request.BackImage, userId, ct);
-        var user = await userRepo.GetUserByIdAsync(userId, ct);
+        UserKyc? createdKyc = null;
 
         await unitOfWork.WithTransactionAsync(async () =>
         {
@@ -41,18 +42,12 @@ public sealed class SubmitKycHandler(
                 userKyc.Submit();
 
                 targetUser.AddUserKyc(userKyc);
+                createdKyc = userKyc;
             }, ct);
-
-            var verificationDto = new VerificationCreatedDto
-            {
-                Type = Enum.GetName(typeof(VerificationStatusType), VerificationStatusType.Kyc) ?? string.Empty,
-                Email = user.Email!,
-                NickName = user.Nickname,
-            };
-
-            await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, verificationDto), ct);
         }, ct);
+        var userKycDto = createdKyc?.Adapt<UserKycListItemDto>();
 
+        await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.Kyc, userKycDto), ct);
         return Unit.Value;
     }
 

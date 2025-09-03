@@ -7,4 +7,4 @@ public record WalletDepositCommand(
     [property: JsonIgnore] Guid PlatformId,
     decimal Amount,
     Guid CryptoTokenId,
-    string? Note) : ICommand<GameTransactionDto>;
+    string? Note) : ICommand<ListTransactionExternalDto>;

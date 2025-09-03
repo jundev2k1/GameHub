@@ -11,8 +11,8 @@ public sealed class AdminStatistics(GameXContext context) : IAdminStatistics, IS
         var statistic = await context.UserBankAccounts
             .GroupBy(_ => 1)
             .Select(baGroup => Tuple.Create(
-                context.ChainTransactions
-                    .Count(tx => (tx.Type == ChainTransactionType.Withdrawal) && (tx.Status == ChainTransactionStatus.Pending)),
+                context.Transactions
+                    .Count(tx => (tx.Type == TransactionType.Withdrawal) && (tx.Status == TransactionStatus.Pending)),
                 context.UserKycs
                     .Count(kyc => (kyc.User.Status == UserStatus.Active) && (kyc.Status == KycStatus.UnderReview)),
                 baGroup.Count(ba => (ba.User.Status == UserStatus.Active) && (ba.Status == UserBankAccountStatus.UnderReview))

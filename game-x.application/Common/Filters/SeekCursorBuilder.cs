@@ -7,7 +7,7 @@ namespace game_x.application.Common.Filters;
 
 public sealed class SeekCursorBuilder<T> : ISeekCursorBuilder<T> where T : notnull
 {
-    private IQueryable<T> _src = default!;
+    private IQueryable<T> _src;
     private Expression<Func<T, DateTime>> _key1 = null!;
     private Expression<Func<T, int>> _key2 = null!;
     private bool _desc1, _desc2;

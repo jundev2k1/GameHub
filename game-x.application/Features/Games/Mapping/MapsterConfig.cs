@@ -58,21 +58,21 @@ public sealed class MapsterConfig : IRegister
 
     private static void RegisterGameTransactionMappings(TypeAdapterConfig cfg)
     {
-        cfg.NewConfig<GameTransaction, GameTransactionDto>()
-            .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken!.PublicId)
+        cfg.NewConfig<TransactionExternal, TransactionExternalDto>()
+            .Map(dest => dest.Id, src => src.Transaction.PublicId)
+            .Map(dest => dest.CryptoTokenId, src => src.Transaction.CryptoToken!.PublicId)
             .Map(dest => dest.GamePlatformId, src => src.GamePlatform!.PublicId)
             .Map(dest => dest.GamePlatformName, src => src.GamePlatform!.Name)
-            .Map(dest => dest.Symbol, src => src.CryptoToken!.Symbol)
-            .Map(dest => dest.Network, src => src.CryptoToken!.Network)
-            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter);
+            .Map(dest => dest.Symbol, src => src.Transaction.CryptoToken!.Symbol)
+            .Map(dest => dest.Network, src => src.Transaction.CryptoToken!.Network)
+            .Map(dest => dest.BalanceAfter, src => src.Transaction.BalanceAfter);
 
-        cfg.NewConfig<GameTransaction, GameTransactionDetailDto>()
-            .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken!.PublicId)
-            .Map(dest => dest.Symbol, src => src.CryptoToken!.Symbol)
-            .Map(dest => dest.Network, src => src.CryptoToken!.Network)
-            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter)
+        cfg.NewConfig<TransactionExternal, TransactionExternalDetailDto>()
+            .Map(dest => dest.Id, src => src.Transaction.PublicId)
+            .Map(dest => dest.CryptoTokenId, src => src.Transaction.CryptoToken!.PublicId)
+            .Map(dest => dest.Symbol, src => src.Transaction.CryptoToken!.Symbol)
+            .Map(dest => dest.Network, src => src.Transaction.CryptoToken!.Network)
+            .Map(dest => dest.BalanceAfter, src => src.Transaction.BalanceAfter)
             .Map(dest => dest.GamePlatformId, src => src.GamePlatform!.PublicId)
             .Map(dest => dest.GamePlatformName, src => src.GamePlatform!.Name);
     }

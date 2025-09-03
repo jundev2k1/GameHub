@@ -4,12 +4,12 @@ using game_x.application.Features.ChainTransactions.Dtos;
 namespace game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionDetailById;
 
 public sealed class GetTransactionDetailByIdHandler(
-    IChainTransactionRepo chainTransactionRepo)
-    : IQueryHandler<GetTransactionDetailByIdQuery, ChainTransactionDetailDto>
+    ITransactionRepo transactionRepo)
+    : IQueryHandler<GetTransactionDetailByIdQuery, TransactionInternalDetailDto>
 {
-    public async Task<ChainTransactionDetailDto> Handle(GetTransactionDetailByIdQuery request, CancellationToken ct = default)
+    public async Task<TransactionInternalDetailDto> Handle(GetTransactionDetailByIdQuery request, CancellationToken ct = default)
     {
-        var result = await chainTransactionRepo.GetByIdAsync(request.TransactionId, ct);
-        return result.Adapt<ChainTransactionDetailDto>();
+        var result = await transactionRepo.GetInternalByIdAsync(request.TransactionId, ct);
+        return result.Adapt<TransactionInternalDetailDto>();
     }
 }

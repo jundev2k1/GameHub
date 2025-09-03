@@ -1,5 +1,8 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
+using game_x.application.Features.BankAccountVerifications.Dtos;
+using game_x.application.Features.Kyc.Dtos;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
 using game_x.share.Extensions;
 using MediatR;
@@ -18,6 +21,10 @@ public interface IAdminHub
     /// </summary>
     /// <param name="transaction">The transaction information that was updated.</param>
     Task TransactionUpdated(AdminTransactionDto transaction);
+    Task KycCreated(UserKycListItemDto verify);
+    Task BankAccountCreated(BankAccountListItemDto verify);
+
+
 }
 
 [Authorize(Roles = AppRoles.Admin)]
@@ -48,6 +55,13 @@ public sealed class AdminHub(
     {
         var adminUserId = userAccessor.GetUserId();
         var command = new MarkAsReadCommand(notificationId, adminUserId);
+        await sender.Send(command);
+    }
+
+    public async Task MarkAllNotificationsAsRead()
+    {
+        var adminUserId = Context.UserIdentifier!;
+        var command = new MarkAllAsReadCommand(adminUserId);
         await sender.Send(command);
     }
 }

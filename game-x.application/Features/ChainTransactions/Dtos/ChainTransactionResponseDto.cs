@@ -4,5 +4,5 @@ public sealed class DepositChainTransactionResponseDto
 {
     public decimal Amount { get; set; }
     public string To { get; set; } = String.Empty;
-    public ChainTransactionDto Transaction { get; set; } = null!;
+    public ListTransactionInternalDto Transaction { get; set; } = null!;
 }

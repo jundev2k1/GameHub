@@ -5,8 +5,8 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnWithdrawalOrderReviewed;
+using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.application.Features.ChainTransactions.Mapping;
-using game_x.share.Extensions;
 using game_x.share.ExternalApi.Uxm.Dtos;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
@@ -17,67 +17,63 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     IUxmService uxmService,
     IUnitOfWork unitOfWork,
     IUserBalanceService userBalanceService,
-    IChainTransactionRepo chainTransactionRepo,
+    ITransactionRepo transactionRepo,
     IApplicationEventDispatcher eventDispatcher,
     IUserBalanceRepo userBalanceRepo,
-    IAppLogger<ChainTransaction> logger,
+    IAppLogger<Transaction> logger,
     IOptions<GameXSettings> gameXSettings,
     IAsymmetricKeyCacheService asymmetricKeyCacheService,
     IAsymmetricCryptoService asymmetricCryptoService)
-    : ICommandHandler<AdminReviewWithdrawalOrderCommand>
+    : ICommandHandler<AdminReviewWithdrawalOrderCommand, ListTransactionInternalDto>
 {
-    public async Task<Unit> Handle(AdminReviewWithdrawalOrderCommand request, CancellationToken ct = default)
+    public async Task<ListTransactionInternalDto> Handle(AdminReviewWithdrawalOrderCommand request, CancellationToken ct = default)
     {
-        var transaction = await chainTransactionRepo.GetByIdAsync(request.OrderId ?? Guid.Empty, ct);
-
-        // The transaction already exists on the blockchain
-        if (transaction.Hash?.IsNotNullOrEmpty() == true)
-        {
-            logger.LogWarning("Skip duplicate transaction Hash: {TxHash}, UserId: {UserId}, TokenId: {TokenId}", 
-                transaction.Hash, transaction.UserId ?? String.Empty, transaction.CryptoTokenId.ToString());
-            return Unit.Value;
-        }
+        var tx = await transactionRepo.GetInternalByIdAsync(request.OrderId ?? Guid.Empty, ct);
         
-        if (!transaction.Status.Equals(ChainTransactionStatus.Pending))
+        if (!tx.Type.Equals(TransactionType.Withdrawal))
+            throw new BadRequestException(MessageCode.Transaction.InvalidTradeType);
+        
+        if (!tx.Status.Equals(TransactionStatus.Pending))
             throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
         
         switch (request.OrderStatus)
         {
-            case ChainTransactionStatus.Approved:
-                await HandleApproveTransactionAsync(transaction, ct);
+            case TransactionStatus.Approved:
+                await HandleApproveTransactionAsync(tx, ct);
                 break;
-            case ChainTransactionStatus.Rejected:
-                await HandleRejectTransactionAsync(transaction, ct);
+            case TransactionStatus.Rejected:
+                await HandleRejectTransactionAsync(tx, ct);
                 break;
             default:
                 throw new BadRequestException(MessageCode.System.InvalidParameters);
         }
         
-        await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(transaction), ct);
-        return Unit.Value;
+        await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(tx.Adapt<TransactionInternalDto>()), ct);
+        
+        return tx.Adapt<ListTransactionInternalDto>();
     }
 
-    private async Task HandleApproveTransactionAsync(ChainTransaction transaction, CancellationToken ct)
+    private async Task HandleApproveTransactionAsync(Transaction transaction, CancellationToken ct)
     {
-        transaction.UpdateStatus(ChainTransactionStatus.Approved);
-        await chainTransactionRepo.PutUpdateAsync(transaction, ct);
+        transaction.UpdateStatus(TransactionStatus.Approved);
+        await transactionRepo.PutUpdateAsync(transaction, ct);
         
         await SendUxmWithdrawalOrderAsync(transaction, ct);
     }
     
-    private async Task HandleRejectTransactionAsync(ChainTransaction transaction, CancellationToken ct)
+    private async Task HandleRejectTransactionAsync(Transaction transaction, CancellationToken ct)
     {
-        transaction.UpdateStatus(ChainTransactionStatus.Rejected);
+        transaction.UpdateStatus(TransactionStatus.Rejected);
         
         await unitOfWork.WithTransactionAsync(
             async () =>
             {
-                await chainTransactionRepo.PutUpdateAsync(transaction, ct);
+                await transactionRepo.PutUpdateAsync(transaction, ct);
                 await TryRefundFrozenBalanceAsync(transaction, ct);
             }, ct);
     }
     
-    private async Task SendUxmWithdrawalOrderAsync(ChainTransaction chainTransaction, CancellationToken ct)
+    private async Task SendUxmWithdrawalOrderAsync(Transaction tx, CancellationToken ct)
     {     
         try
         {
@@ -85,7 +81,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
             var merchantNumber = gameXSettings.Value.MerchantNumber;
         
             // Create UXM request data
-            var requestData = chainTransaction.ToUxmWithdrawalOrderRequest(merchantNumber);
+            var requestData = tx.ToUxmWithdrawalOrderRequest(merchantNumber);
             var uxmRequest = new SecureRequest<UxmWithdrawalOrderRequest>
             {
                 Data = requestData,
@@ -101,25 +97,25 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         }
         catch (Exception ex)
         {
-            await chainTransactionRepo.PatchUpdateAsync(chainTransaction.PublicId, x =>
+            await transactionRepo.PatchUpdateAsync(tx.PublicId, x =>
             {
-                x.Status = ChainTransactionStatus.Failed;
+                x.Status = TransactionStatus.Failed;
                 x.UpdateMeta(m => m.ErrorMessage = ex.Message);
             }, ct);
 
-            await TryRefundFrozenBalanceAsync(chainTransaction, ct);
+            await TryRefundFrozenBalanceAsync(tx, ct);
 
             throw;
         }
     }
     
-    private async Task TryRefundFrozenBalanceAsync(ChainTransaction chainTransaction, CancellationToken ct)
+    private async Task TryRefundFrozenBalanceAsync(Transaction tx, CancellationToken ct)
     {
-        UserBalance? balance = chainTransaction.User?.UserBalances.FirstOrDefault(b => b.CryptoTokenId == chainTransaction.CryptoTokenId);
+        UserBalance? balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId);
         if (balance == null)
             throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
-        decimal refundAmount = chainTransaction.TotalAmount;
+        decimal refundAmount = tx.TotalAmount;
 
         try
         {
@@ -130,10 +126,10 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         {
             logger.LogError(
                 "[TronWithdrawal] ❌ Balance compensation failed，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}, Err={ex}",
-                chainTransaction.UserId ?? string.Empty, 
-                chainTransaction.CryptoTokenId, 
-                chainTransaction.OrderNumber, 
-                refundAmount, 
+                tx.UserId, 
+                tx.CryptoTokenId, 
+                tx.TransactionInternal?.OrderNumber ?? string.Empty, 
+                refundAmount,
                 ex);
 
             throw new BadRequestException(MessageCode.Accounting.InsufficientFrozenBalance);

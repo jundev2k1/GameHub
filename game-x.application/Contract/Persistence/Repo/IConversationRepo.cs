@@ -5,20 +5,22 @@ namespace game_x.application.Contract.Persistence.Repo;
 
 public interface IConversationRepo
 {
-    Task<CursorResult<ConversationQueueItemDto>> GetUnassignedQueueByCursorAsync(
+    Task<CursorResult<SupportConversationDto>> GetUnassignedQueueByCursorAsync(
         int limit,
         string? cursor,
-        string? q,
-        string? search,
         CancellationToken ct = default); 
     
-    Task<CursorResult<ConversationQueueItemDto>> GetMyConversationsByCursorAsync(
+    Task<CursorResult<SupportConversationDto>> GetSupportConversationsAsync(
+        int limit,
+        string? cursor,
+        CancellationToken ct = default);
+    
+    Task<CursorResult<ConversationDto>> GetMyConversationsForClientAsync(
         string userId,
         int limit,
         string? cursor,
-        string? q,
-        string? search,
         CancellationToken ct = default);
+    Task<Conversation> GetByIdAsync(Guid convId, CancellationToken ct = default);
     Task<Conversation?> GetSupportConversationAsync(ConversationStatus status, string customerId, CancellationToken ct = default);
     Task AddAsync(Conversation conv, CancellationToken ct = default);
 

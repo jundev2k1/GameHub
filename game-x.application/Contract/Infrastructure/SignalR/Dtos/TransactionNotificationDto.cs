@@ -9,6 +9,7 @@ public class TransactionNotificationDto
     public string? FromAddress { get; set; }
     public string? ToAddress { get; set; }
     public decimal Amount { get; set; }
+    public decimal? ActualAmount { get; set; }
     public decimal Fee { get; set; }
     public decimal? BalanceAfter { get; set; }
     public Guid CryptoTokenId { get; set; }

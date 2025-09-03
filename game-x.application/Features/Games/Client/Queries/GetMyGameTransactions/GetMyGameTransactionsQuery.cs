@@ -8,4 +8,4 @@ public record GetMyGameTransactionsQuery(
     IEnumerable<QueryFilter> Filters,
     IEnumerable<QuerySort> Sorts,
     int? PageIndex,
-    int? PageSize) : IQuery<PaginationResult<GameTransactionDto>>;
+    int? PageSize) : IQuery<PaginationResult<ListTransactionExternalDto>>;

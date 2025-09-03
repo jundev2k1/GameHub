@@ -259,12 +259,9 @@ public static class MessageCode
         /// <summary>Transaction order not found.</summary>
         [EnumMetadata("Chain transaction not found.")]
         ChainTransactionNotFound = 10210,
-        /// <summary>Transaction history not found.</summary>
-        [EnumMetadata("Transaction history not found.")]
-        ChainTransactionHistoryNotFound = 10211,
-        /// <summary>Transaction history not found.</summary>
-        [EnumMetadata("Game transaction not found.")]
-        GameTransactionNotFound = 10212,
+        /// <summary>The Transaction address is invalid.</summary>
+        [EnumMetadata("Transaction address is invalid.")]
+        InvalidTransactionAddress = 10211,
         #endregion
     }
 
@@ -301,6 +298,12 @@ public static class MessageCode
         /// <summary>Failed to deposit into the provider's wallet.</summary>
         [EnumMetadata("Failed to deposit into the provider's wallet.")]
         DepositToProviderWalletFailed = 10309,
+        /// <summary>The platform does not exist.</summary>
+        [EnumMetadata("The platform does not exist.")]
+        PlatformNotExist = 10310,
+        /// <summary>The platform is invalid.</summary>
+        [EnumMetadata("The platform is invalid.")]
+        InvalidPlatform = 10311,
         #endregion
     }
 

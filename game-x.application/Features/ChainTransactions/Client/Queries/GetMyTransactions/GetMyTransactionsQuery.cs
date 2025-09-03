@@ -8,4 +8,4 @@ public record GetMyTransactionsQuery(
     IEnumerable<QueryFilter> Filters,
     IEnumerable<QuerySort> Sorts,
     int? PageIndex,
-    int? PageSize) : IQuery<PaginationResult<ChainTransactionDto>>;
+    int? PageSize) : IQuery<PaginationResult<ListTransactionInternalDto>>;

@@ -1,4 +1,5 @@
 using game_x.api.Common;
+using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Accounts.Admin.Queries.GetAllActiveTokensByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
@@ -63,9 +64,16 @@ public sealed class UserController : BaseApiController
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("bank-accounts")]
-    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync([AsParameters] GetBankAccountListRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var filterExtends = new Dictionary<string, string>();
+        if (parameters.CurrencyCode.IsNotNullOrEmpty())
+            filterExtends.Add("currencies", parameters.CurrencyCode);
+
+        var filters = QueryConverter.ToFilters(
+            parameters.Filters,
+            parameters.Keyword,
+            @params: filterExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetBankAccountByCriteriaQuery(
             filters,

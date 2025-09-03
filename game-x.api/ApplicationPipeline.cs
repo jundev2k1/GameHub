@@ -59,7 +59,9 @@ public static class ApplicationPipeline
     private static WebApplication UseRealtimeHubs(this WebApplication app)
     {
         app.MapHub<AdminHub>(AdminHub.Path);
+        app.MapHub<CsAdminHub>(CsAdminHub.Path);
         app.MapHub<ClientHub>(ClientHub.Path);
+        app.MapHub<ChatHub>(ChatHub.Path);
         return app;
     }
 }

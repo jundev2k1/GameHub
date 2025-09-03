@@ -4,15 +4,16 @@ using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWith
 using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtDeposit;
 using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactionDetail;
 using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactions;
+using game_x.api.Dtos;
 
 namespace game_x.api.Controllers.Client.Chain;
 
 [Authorize(Roles = AppRoles.User)]
-[Route("/api/user")]
+[Route("/api/user/chain-transactions")]
 public sealed class ChainController : BaseApiController
 {
     [HttpPost("withdrawal")]
-    public async Task<IActionResult> SendWithdrawVerificationCode(TronUsdtWithdrawalCommand command, CancellationToken ct)
+    public async Task<IActionResult> CreateWithdrawalTransactionAsync(TronUsdtWithdrawalCommand command, CancellationToken ct)
     {
         var result = await Mediator.Send(command, ct);
         return ApiResponseFactory.Ok(result);
@@ -25,10 +26,14 @@ public sealed class ChainController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
     
-    [HttpGet("chain-transactions/me")]
-    public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    [HttpGet("me")]
+    public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] GetTransactionsRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.TransactionStatuses.IsNotNullOrEmpty())
+            paramExtends.Add("statuses", parameters.TransactionStatuses);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetMyTransactionsQuery(
             filters,
@@ -39,7 +44,7 @@ public sealed class ChainController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
     
-    [HttpGet("chain-transactions/{transactionId}")]
+    [HttpGet("{transactionId:guid}")]
     public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
     {
         var query = new GetMyTransactionDetailQuery(transactionId);

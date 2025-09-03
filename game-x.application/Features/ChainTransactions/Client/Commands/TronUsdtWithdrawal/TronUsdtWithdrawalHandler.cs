@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnTransactionCreated;
+using game_x.application.Events.OnTransactionInternalCreated;
 using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.application.Utils;
 
@@ -12,12 +12,12 @@ public sealed class TronUsdtWithdrawalHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IUserAccessor userAccessor,
-    IChainTransactionRepo chainTransactionRepo,
+    ITransactionRepo transactionRepo,
     ICryptoTokenRepo cryptoTokenRepo,
     IUserBalanceRepo userBalanceRepo,
-    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<TronUsdtWithdrawalCommand, ChainTransactionDto>
+    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<TronUsdtWithdrawalCommand, ListTransactionInternalDto>
 {
-    public async Task<ChainTransactionDto> Handle(TronUsdtWithdrawalCommand request, CancellationToken ct)
+    public async Task<ListTransactionInternalDto> Handle(TronUsdtWithdrawalCommand request, CancellationToken ct)
     {
         string userId = userAccessor.GetUserId();
         int minimumAmount = 10;
@@ -26,25 +26,25 @@ public sealed class TronUsdtWithdrawalHandler(
 
         await ValidateKyc(userId, ct);
         
-        var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(userId, request.Amount, request.CryptoTokenId, ct);
+        var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(
+            userId: userId, 
+            amount: request.Amount, 
+            cryptoTokenId: request.CryptoTokenId,
+            to: request.To,
+            ct: ct);
 
-        var transaction = await CreateWithdrawalChainTransaction(request, userId, feeAmount, token.Id, ct);
-        
+        var tx = await CreateTransaction(request, userId, feeAmount, token.Id, ct);
+
         await unitOfWork.WithTransactionAsync( async () =>
         {
-            await chainTransactionRepo.AddAsync(transaction, ct);
+            await transactionRepo.AddAsync(tx, ct);
             
             userBalanceService.Freeze(balance, totalAmount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
-
-            var createdTransaction = await chainTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
-            
-            await eventDispatcher.Publish(new OnTransactionCreatedEvent(createdTransaction), ct);
+            await eventDispatcher.Publish(new OnTransactionInternalCreatedEvent(tx.Adapt<TransactionInternalDto>()), ct);
         }, ct);
         
-        var updatedTransaction = await chainTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
-        
-        return updatedTransaction.Adapt<ChainTransactionDto>();
+        return tx.Adapt<ListTransactionInternalDto>();
     }
    
     private async Task ValidateKyc(
@@ -65,47 +65,60 @@ public sealed class TronUsdtWithdrawalHandler(
         }
     }
     
-    private async Task<ChainTransaction> CreateWithdrawalChainTransaction(
+    private async Task<Transaction> CreateTransaction(
         TronUsdtWithdrawalCommand request, 
         string userId, 
         decimal feeAmount,
         int tokenId,
         CancellationToken ct = default)
     {
-        var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(chainTransactionRepo, ct);
+        var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
         
-        var chainTransaction = ChainTransaction.Create(
-            type: ChainTransactionType.Withdrawal,
-            userId: userId,
+        var txInternal = TransactionInternal.Create(
             orderNumber: orderNumber,
-            status: ChainTransactionStatus.Pending,
+            fromAddress: "",
+            toAddress: request.To);
+        
+        var tx = Transaction.Create(
+            sourceType: TransactionSourceType.Uxm,
+            type: TransactionType.Withdrawal,
+            userId: userId,
             amount: request.Amount,
             fee: feeAmount,
             cryptoTokenId: tokenId,
-            fromAddress: "",
-            toAddress: request.To,
             note: request.Note);
 
-        return chainTransaction;
+        tx.AddTxInternal(txInternal);
+        return tx;
     }
     
     private async Task<(CryptoToken Token, UserBalance Balance, decimal FeeAmount, decimal TotalAmount)>
-        ResolveBalanceInfoAsync(string userId, decimal amount, Guid cryptoTokenId, CancellationToken ct)
+        ResolveBalanceInfoAsync(string userId, decimal amount, Guid cryptoTokenId, string to, CancellationToken ct)
     {
-        var token = await cryptoTokenRepo.GetByIdAsync(cryptoTokenId, ct);
-
-        if (token.Status != CryptoTokenStatus.Active)
-            throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
-                
+        var token = await ValidateTokenAsync(cryptoTokenId, to, ct);
+        
         var balance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
             ?? throw new BadRequestException(MessageCode.Accounting.WalletNotFound);
 
-        decimal feeAmount = userBalanceService.GetWithdrawalFree();
+        decimal feeAmount = userBalanceService.GetWithdrawalFee();
         decimal totalAmount = amount + feeAmount;
 
         if (balance.Amount < totalAmount)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
         return (token, balance, feeAmount, totalAmount);
+    }
+    
+    private async Task<CryptoToken> ValidateTokenAsync(Guid cryptoTokenId, string to, CancellationToken ct)
+    {
+        var token = await cryptoTokenRepo.GetByIdAsync(cryptoTokenId, ct);
+
+        if (token.Status != CryptoTokenStatus.Active)
+            throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
+                
+        if (!TransactionInternal.IsValidAddress(token.Network, to))
+            throw new BadRequestException(MessageCode.Transaction.InvalidTransactionAddress);
+
+        return token;
     }
 }

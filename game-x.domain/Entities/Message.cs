@@ -36,7 +36,7 @@ public sealed class Message: BaseEntity<int>, IAuditable
     public List<MessageEditSnapshot> EditHistory { get; set; } = new();
     
     public static Message Create(
-        int convId,
+        Conversation conv,
         string senderUserId,
         RoleInConversation senderRole,
         MessageKind kind,
@@ -45,7 +45,7 @@ public sealed class Message: BaseEntity<int>, IAuditable
     {
         var msg = new Message
         {
-            ConversationId = convId,
+            Conversation = conv,
             SenderUserId = senderUserId,
             SenderRole = senderRole,
             Kind = kind,
