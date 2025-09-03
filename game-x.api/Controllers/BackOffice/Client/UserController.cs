@@ -73,6 +73,8 @@ public sealed class UserController : BaseApiController
         var filterExtends = new Dictionary<string, string>();
         if (parameters.CurrencyCode.IsNotNullOrEmpty())
             filterExtends.Add("currencies", parameters.CurrencyCode);
+        if (parameters.Statuses.IsNotNullOrEmpty())
+            filterExtends.Add("statuses", parameters.Statuses);
 
         var filters = QueryConverter.ToFilters(
             parameters.Filters,
