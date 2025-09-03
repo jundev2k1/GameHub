@@ -1,4 +1,5 @@
 using game_x.api.Common;
+using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Accounts.Admin.Queries.GetAllActiveTokensByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
@@ -6,7 +7,6 @@ using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountByCriteria;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountDetail;
-using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountProfile;
 using game_x.application.Features.Kyc.Queries.GetKycByCriteria;
 using game_x.application.Features.Kyc.Queries.GetKycProfile;
 
@@ -64,9 +64,15 @@ public sealed class UserController : BaseApiController
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("bank-accounts")]
-    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync([AsParameters] GetBankAccountListRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var filters = QueryConverter.ToFilters(
+            parameters.Filters,
+            parameters.Keyword,
+            @params: new()
+            {
+                { "currency", parameters.CurrencyCode }
+            });
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetBankAccountByCriteriaQuery(
             filters,
