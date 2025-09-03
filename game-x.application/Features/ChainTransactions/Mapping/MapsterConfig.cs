@@ -8,32 +8,47 @@ public sealed class MapsterConfig : IRegister
 {
     public void Register(TypeAdapterConfig cfg)
     {
-        cfg.NewConfig<ChainTransaction, TransactionNotificationDto>()
+        cfg.NewConfig<Transaction, ListTransactionInternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.Status, src => src.Status.ToString().ToLower())
-            .Map(dest => dest.Type, src => src.Type.ToString().ToLower())
-            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter)
-            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId);
-
-        cfg.NewConfig<ChainTransaction, ChainTransactionDto>()
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
+            .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
+            .Map(dest => dest.Network, src => src.CryptoToken.Network);
+        
+        cfg.NewConfig<Transaction, TransactionInternalDetailDto>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
-            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter);
+            .Map(dest => dest.Hash, src => src.TransactionInternal != null ? src.TransactionInternal.Hash : null)
+            .Map(dest => dest.FromAddress, src => src.TransactionInternal != null ? src.TransactionInternal.FromAddress : null)
+            .Map(dest => dest.ToAddress, src => src.TransactionInternal != null ? src.TransactionInternal.ToAddress : null)
+            .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null);
         
-        cfg.NewConfig<ChainTransaction, ChainTransactionDetailDto>()
+        cfg.NewConfig<Transaction, TransactionInternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
-            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter);
+            .Map(dest => dest.OrderUid, src => src.TransactionInternal != null ? src.TransactionInternal.OrderUid : null)
+            .Map(dest => dest.OrderNumber, src => src.TransactionInternal != null ? src.TransactionInternal.OrderNumber : null)
+            .Map(dest => dest.Hash, src => src.TransactionInternal != null ? src.TransactionInternal.Hash : null)
+            .Map(dest => dest.FromAddress, src => src.TransactionInternal != null ? src.TransactionInternal.FromAddress : null)
+            .Map(dest => dest.ToAddress, src => src.TransactionInternal != null ? src.TransactionInternal.ToAddress : null)
+            .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null);
         
-        cfg.NewConfig<ChainTransaction, ClientTransactionDto>()
-            .Map(dest => dest.TransactionId, src => src.PublicId)
+        cfg.NewConfig<TransactionInternalDto, TransactionNotificationDto>()
             .Map(dest => dest.Status, src => src.Status.ToString().ToLower())
-            .Map(dest => dest.Type, src => src.Type.ToString().ToLower())
-            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter);
+            .Map(dest => dest.Type, src => src.Type.ToString().ToLower());
+        
+        cfg.NewConfig<TransactionInternalDto, ClientTransactionDto>()
+            .Map(dest => dest.TransactionId, src => src.Id)
+            .Map(dest => dest.Status, src => src.Status.ToString().ToLower())
+            .Map(dest => dest.Type, src => src.Type.ToString().ToLower());
+        
+        cfg.NewConfig<TransactionInternalDto, AdminTransactionDto>()
+            .Map(dest => dest.TransactionId, src => src.Id)
+            .Map(dest => dest.Status, src => src.Status.ToString().ToLower())
+            .Map(dest => dest.Type, src => src.Type.ToString().ToLower());
         
         cfg.NewConfig<CryptoToken, CryptoTokenDto>()
             .Map(dest => dest.Id, src => src.PublicId);

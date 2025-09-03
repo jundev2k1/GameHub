@@ -6,20 +6,29 @@ public sealed class MapsterConfig : IRegister
 {
     public void Register(TypeAdapterConfig cfg)
     {
-        cfg.NewConfig<GameTransaction, GameTransactionDto>()
+        cfg.NewConfig<Transaction, TransactionExternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken!.PublicId)
-            .Map(dest => dest.GamePlatformId, src => src.GamePlatform!.PublicId)
+            .Map(dest => dest.GamePlatformId, src => src.TransactionExternal!.GamePlatform!.PublicId)
+            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal!.GamePlatform.Name)
             .Map(dest => dest.Symbol, src => src.CryptoToken!.Symbol)
-            .Map(dest => dest.Network, src => src.CryptoToken!.Network)
-            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter);
+            .Map(dest => dest.Network, src => src.CryptoToken!.Network);    
         
-        cfg.NewConfig<GameTransaction, GameTransactionDetailDto>()
+        cfg.NewConfig<Transaction, ListTransactionExternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken!.PublicId)
+            .Map(dest => dest.GamePlatformId, src => src.TransactionExternal!.GamePlatform!.PublicId)
+            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal!.GamePlatform.Name)
             .Map(dest => dest.Symbol, src => src.CryptoToken!.Symbol)
-            .Map(dest => dest.Network, src => src.CryptoToken!.Network)
-            .Map(dest => dest.BalanceAfter, src => src.Ledger!.BalanceAfter);
+            .Map(dest => dest.Network, src => src.CryptoToken!.Network);
+        
+        cfg.NewConfig<Transaction, TransactionExternalDetailDto>()
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken!.PublicId)
+            .Map(dest => dest.GamePlatformId, src => src.TransactionExternal!.GamePlatform!.PublicId)
+            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal!.GamePlatform.Name)
+            .Map(dest => dest.Symbol, src => src.CryptoToken!.Symbol)
+            .Map(dest => dest.Network, src => src.CryptoToken!.Network);
 
         cfg.NewConfig<Game, GameInfoDto>()
             .Map(dest => dest.LocalId, src => src.Id)
@@ -37,6 +46,7 @@ public sealed class MapsterConfig : IRegister
                     .Select(x => x.Adapt<GameTypeInfo>())
                     .OrderBy(g => g.IsPrimary)
                     .ThenBy(g => g.Priority))
+            .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
             .Map(dest => dest.PlatformName, src => src.Platform.Name);
 
         cfg.NewConfig<GameCategoryMapping, GameCategoryInfo>()

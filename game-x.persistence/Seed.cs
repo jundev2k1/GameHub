@@ -167,16 +167,11 @@ public static class Seed
         await context.FiatCurrencies.AddRangeAsync(fiatCurrencies);
     }
 
-    private static readonly Dictionary<string, Guid> GamePlatforms = new()
-    {
-        { "598彩票", Guid.Parse("b2e3c5bb-6b74-4bb0-9dc3-9e8a1e70d94a") },
-    };
-
     private static async Task SeedGamePlatforms(GameXContext context)
     {
         var gamePlatforms = new GamePlatform[]
         {
-            GamePlatform.Create("598彩票", string.Empty, string.Empty, 0, GamePlatforms["598彩票"]),
+            GamePlatform.Create("598彩票", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_G598),
         };
         foreach (var gamePlatform in gamePlatforms)
         {
@@ -283,26 +278,27 @@ public static class Seed
             await context.AddAsync(entity);
         }
 
-        await CreateEntity("韓國快3", "KRF3", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["快三"]]);
-        await CreateEntity("極速快3", "ESF3", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["快三"]]);
-        await CreateEntity("澳洲幸運10", "ALPK10", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["PK10"]]);
-        await CreateEntity("極速賽車", "ESPK10", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["PK10"]]);
-        await CreateEntity("幸運飛艇", "LBPK10", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["PK10"]]);
-        await CreateEntity("極速飛艇", "EBPK10", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["PK10"]]);
-        await CreateEntity("動物運動會", "ANPK6", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["PK6"]]);
-        await CreateEntity("三分動物運動會", "M3ANPK6", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["PK6"]]);
-        await CreateEntity("極速時時彩", "ESSSC", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["時時彩"]]);
-        await CreateEntity("澳洲幸運5", "ALSSC", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["時時彩"]]);
-        await CreateEntity("幸運時時彩", "LBSSC", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["時時彩"]]);
-        await CreateEntity("香港六合彩", "HKM6", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["六合彩"]]);
-        await CreateEntity("澳門六合彩", "MCM6", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["六合彩"]]);
-        await CreateEntity("新澳門六合彩", "NMCM6", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["六合彩"]]);
-        await CreateEntity("台灣大樂透", "TWM6", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["六合彩"]]);
-        await CreateEntity("香港日日六合彩", "HKDM6", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["六合彩"]]);
-        await CreateEntity("福彩3D", "FCD3", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["3D"]]);
-        await CreateEntity("體彩排列3", "PLD3", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["3D"]]);
-        await CreateEntity("PC蛋蛋", "ALEGG", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["蛋蛋"]]);
-        await CreateEntity("澳洲幸運10番攤", "AL10FT", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["蛋蛋"]]);
-        await CreateEntity("澳洲幸運5番攤", "AL5FT", GamePlatforms["598彩票"], [GameCategories["彩票"]], [GameTypes["蛋蛋"]]);
+        // Seed game list for 598彩票
+        await CreateEntity("韓國快3", "KRF3", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["快三"]]);
+        await CreateEntity("極速快3", "ESF3", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["快三"]]);
+        await CreateEntity("澳洲幸運10", "ALPK10", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["PK10"]]);
+        await CreateEntity("極速賽車", "ESPK10", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["PK10"]]);
+        await CreateEntity("幸運飛艇", "LBPK10", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["PK10"]]);
+        await CreateEntity("極速飛艇", "EBPK10", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["PK10"]]);
+        await CreateEntity("動物運動會", "ANPK6", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["PK6"]]);
+        await CreateEntity("三分動物運動會", "M3ANPK6", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["PK6"]]);
+        await CreateEntity("極速時時彩", "ESSSC", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["時時彩"]]);
+        await CreateEntity("澳洲幸運5", "ALSSC", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["時時彩"]]);
+        await CreateEntity("幸運時時彩", "LBSSC", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["時時彩"]]);
+        await CreateEntity("香港六合彩", "HKM6", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["六合彩"]]);
+        await CreateEntity("澳門六合彩", "MCM6", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["六合彩"]]);
+        await CreateEntity("新澳門六合彩", "NMCM6", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["六合彩"]]);
+        await CreateEntity("台灣大樂透", "TWM6", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["六合彩"]]);
+        await CreateEntity("香港日日六合彩", "HKDM6", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["六合彩"]]);
+        await CreateEntity("福彩3D", "FCD3", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["3D"]]);
+        await CreateEntity("體彩排列3", "PLD3", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["3D"]]);
+        await CreateEntity("PC蛋蛋", "ALEGG", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["蛋蛋"]]);
+        await CreateEntity("澳洲幸運10番攤", "AL10FT", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["蛋蛋"]]);
+        await CreateEntity("澳洲幸運5番攤", "AL5FT", GameConstants.PLATFORM_ID_G598, [GameCategories["彩票"]], [GameTypes["蛋蛋"]]);
     }
 }

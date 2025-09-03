@@ -2,6 +2,7 @@
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Logout;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
+using game_x.share.ExternalApi.GameProvider.Dtos.Report;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
 
@@ -9,15 +10,17 @@ namespace game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 
 public interface IGameProviderService
 {
-    Task<LoginResponse> LoginAsync(LoginRequest data, string ip);
+    Task<GameLoginResponse> LoginAsync(GameLoginRequest data, string ip);
 
-    Task<LogoutResponse> LogoutAsync(LogoutRequest data);
+    Task<GameLogoutResponse> LogoutAsync(GameLogoutRequest data);
 
-    Task<RegisterResponse> RegisterAsync(RegisterRequest data);
+    Task<GameRegisterResponse> RegisterAsync(GameRegisterRequest data);
 
-    Task<WalletResponse> GetWalletAsync(WalletRequest data);
+    Task<GameWalletResponse> GetWalletAsync(GameWalletRequest data);
 
     Task<GameDepositResponse> DepositWalletAsync(GameDepositRequest data);
 
     Task<GameWithdrawalResponse> WithdrawalWalletAsync(GameWithdrawalRequest data);
+
+    Task<GameReportResponse> GetReportAsync(GameReportRequest data, string account);
 }

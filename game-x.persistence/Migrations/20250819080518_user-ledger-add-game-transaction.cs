@@ -5,7 +5,7 @@
 namespace game_x.persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class userledgeraddgametransaction : Migration
+    public partial class UserLedgerAddGameTransaction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

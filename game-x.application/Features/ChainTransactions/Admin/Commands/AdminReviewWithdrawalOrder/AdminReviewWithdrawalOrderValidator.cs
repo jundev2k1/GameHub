@@ -5,7 +5,7 @@ public sealed class AdminReviewWithdrawalOrderValidator : AbstractValidator<Admi
     public AdminReviewWithdrawalOrderValidator()
     {
         RuleFor(x => x.OrderStatus)
-            .Must(status => new[] { ChainTransactionStatus.Approved, ChainTransactionStatus.Rejected }.Contains(status))
+            .Must(status => new[] { TransactionStatus.Approved, TransactionStatus.Rejected }.Contains(status))
             .WithMessage("OrderStatus is invalid.");
     }
 }

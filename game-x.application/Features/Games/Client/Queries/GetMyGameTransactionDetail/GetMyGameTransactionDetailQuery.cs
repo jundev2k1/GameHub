@@ -2,4 +2,4 @@ using game_x.application.Features.Games.Dtos;
 
 namespace game_x.application.Features.Games.Client.Queries.GetMyGameTransactionDetail;
 
-public record GetMyGameTransactionDetailQuery(Guid TransactionId) : IQuery<GameTransactionDetailDto>;
+public record GetMyGameTransactionDetailQuery(Guid TransactionId) : IQuery<TransactionExternalDetailDto>;

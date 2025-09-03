@@ -2,7 +2,6 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Infrastructure.Services.UserUsdtLedger;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
@@ -18,51 +17,69 @@ public sealed class WalletDepositHandler(
     IUserBalanceService userBalanceService,
     IUserBalanceRepo userBalanceRepo,
     ICryptoTokenRepo cryptoTokenRepo,
-    IGameTransactionRepo gameTransactionRepo,
-    IUserUsdtLedgerService userUsdtLedgerService,
+    ITransactionRepo transactionRepo,
     IUnitOfWork unitOfWork,
     IApplicationEventDispatcher eventDispatcher,
     IGameProviderService gameProvider,
     IGameProviderCacheService gameProviderCache,
-    IAppLogger<GameTransaction> logger) : ICommandHandler<WalletDepositCommand, GameTransactionDto>
+    IAppLogger<Transaction> logger) : ICommandHandler<WalletDepositCommand, ListTransactionExternalDto>
 {
-    public async Task<GameTransactionDto> Handle(WalletDepositCommand command, CancellationToken ct = default)
+    public async Task<ListTransactionExternalDto> Handle(WalletDepositCommand request, CancellationToken ct = default)
     {
-        var currentUser = await GetCurrentUserAsync(ct);
-        var balance = await GetUserBalanceAsync(currentUser.Id, command, ct);
-        var transaction = await CreateTransactionAsync(currentUser.Id, balance.CryptoToken.Id, command, ct);
+        var targetPlatform = gameProviderCache.PlatformList.FirstOrDefault(gp => gp.Id == request.PlatformId)
+            ?? throw new NotFoundException(MessageCode.Accounting.PlatformNotExist);
 
+        var currentUser = await GetCurrentUserAsync(ct);
+        var balance = await GetUserBalanceAsync(currentUser.Id, request, ct);
+        var transaction = await CreateTransactionAsync(
+            currentUser.Id,
+            balance.CryptoToken.Id,
+            request.Amount,
+            targetPlatform.LocalId,
+            request.Note,
+            ct);
+        
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
             // Handle actions related to post-transaction success
             userBalanceService.DecreaseAmount(balance, transaction.Amount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
-            await userUsdtLedgerService.CreateForGameTransactionAsync(transaction);
-            await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, x => x.Status = GameTransactionStatus.Completed, ct);
+            
+            decimal lastedBalanceAfter = await transactionRepo.GetLatestBalanceAfterAsync(transaction.UserId, ct);
+            
+            await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
+            {
+                order.UpdateStatus(TransactionStatus.Completed);
+                order.BalanceAfter = lastedBalanceAfter - transaction.Amount;
+            }, ct);
 
             // Rollback all processing if the transaction fails at the third party
             await DepositToProviderWalletAsync(
                 gameProviderAccount: currentUser.UserExtend!.GameProviderAccount,
-                sno: transaction.G598Sno,
+                sno: transaction.TransactionExternal!.G598Sno,
                 amount: transaction.Amount);
-
-            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
+            await unitOfWork.CommitAsync(ct);
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync(ct);
-            logger.LogError($"Failed to create deposit game transaction. SNO: {transaction.G598Sno}", ex.Message);
-            await gameTransactionRepo.PatchUpdateAsync(transaction.PublicId, gt =>
-            {
-                gt.Status = GameTransactionStatus.Failed;
-                gt.UpdateMeta(m => m.ErrorMessage = ex.Message);
-            }, ct);
 
+            logger.LogError($"Failed to create deposit game transaction. SNO: {transaction.TransactionExternal!.G598Sno}", ex.Message);
+            await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
+            {
+                order.UpdateStatus(TransactionStatus.Failed);
+                order.UpdateMeta(m => m.ErrorMessage = ex.Message);
+            }, ct);
+            
             throw;
         }
-        var result = await gameTransactionRepo.GetByIdAsync(transaction.PublicId, ct);
-        return result.Adapt<GameTransactionDto>();
+
+        var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
+        await eventDispatcher.Publish(@event, ct);
+
+        var result = await transactionRepo.GetExternalByIdAsync(transaction.PublicId, ct);
+        return result.Adapt<ListTransactionExternalDto>();
     }
 
     private async Task<User> GetCurrentUserAsync(CancellationToken ct)
@@ -94,21 +111,30 @@ public sealed class WalletDepositHandler(
     }
 
     /// <summary>The transaction is created in advance to record the history of the transaction process</summary>
-    private async Task<GameTransaction> CreateTransactionAsync(string userId, int cryptoTokenId, WalletDepositCommand command, CancellationToken ct)
+    private async Task<Transaction> CreateTransactionAsync(
+        string userId,
+        int cryptoTokenId,
+        decimal amount,
+        int localPlatformId,
+        string? note,
+        CancellationToken ct)
     {
-        var sno = GameProviderUtils.SnoGenerate();
-        var transaction = GameTransaction.Create(
+        var txExternal = TransactionExternal.Create(
+            g598sno: GameProviderUtils.SnoGenerate(),
+            gamePlatformId: localPlatformId);
+        
+        var tx = Transaction.Create(
+            sourceType: TransactionSourceType.G598SnoGameProvider,
+            type: TransactionType.Deposit,
             userId: userId,
-            g598sno: sno,
-            amount: command.Amount,
-            type: GameTransactionType.Deposit,
-            gamePlatformId: gameProviderCache.G598Platform.LocalId,
+            amount: amount,
             cryptoTokenId: cryptoTokenId,
-            note: command.Note);
-
-        await gameTransactionRepo.AddAsync(transaction, ct);
+            note: note);
+        
+        tx.AddTxExternal(txExternal);
+        await transactionRepo.AddAsync(tx, ct);
         await unitOfWork.SaveChangesAsync(ct);
-        return transaction;
+        return tx;
     }
 
     private async Task DepositToProviderWalletAsync(string gameProviderAccount, string sno, decimal amount)

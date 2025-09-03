@@ -301,6 +301,12 @@ public static class MessageCode
         /// <summary>Failed to deposit into the provider's wallet.</summary>
         [EnumMetadata("Failed to deposit into the provider's wallet.")]
         DepositToProviderWalletFailed = 10309,
+        /// <summary>The platform does not exist.</summary>
+        [EnumMetadata("The platform does not exist.")]
+        PlatformNotExist = 10310,
+        /// <summary>The platform is invalid.</summary>
+        [EnumMetadata("The platform is invalid.")]
+        InvalidPlatform = 10311,
         #endregion
     }
 

@@ -8,22 +8,24 @@ public sealed class GetMyTransactionsValidator : AbstractValidator<GetMyTransact
     private readonly string[] _allowFilterFields =
     [
         "search",
-        nameof(ChainTransactionDto.Id),
-        nameof(ChainTransactionDto.UserId),
-        nameof(ChainTransactionDto.Status),
-        nameof(ChainTransactionDto.Amount),
-        nameof(ChainTransactionDto.Type),
-        nameof(ChainTransactionDto.UpdatedAt),
-        nameof(ChainTransactionDto.CreatedAt)
+        nameof(ListTransactionInternalDto.Id),
+        nameof(ListTransactionInternalDto.UserId),
+        nameof(ListTransactionInternalDto.Status),
+        nameof(ListTransactionInternalDto.Amount),
+        nameof(ListTransactionInternalDto.ActualAmount),
+        nameof(ListTransactionInternalDto.Type),
+        nameof(ListTransactionInternalDto.UpdatedAt),
+        nameof(ListTransactionInternalDto.CreatedAt)
     ];
     
     private readonly string[] _allowSortFields =
     [
-        nameof(ChainTransactionDto.Status),
-        nameof(ChainTransactionDto.Amount),
-        nameof(ChainTransactionDto.Type),
-        nameof(ChainTransactionDto.UpdatedAt),
-        nameof(ChainTransactionDto.CreatedAt)
+        nameof(ListTransactionInternalDto.Status),
+        nameof(ListTransactionInternalDto.Amount),
+        nameof(ListTransactionInternalDto.ActualAmount),
+        nameof(ListTransactionInternalDto.Type),
+        nameof(ListTransactionInternalDto.UpdatedAt),
+        nameof(ListTransactionInternalDto.CreatedAt)
     ];
     
     public GetMyTransactionsValidator()
@@ -47,12 +49,12 @@ public sealed class GetMyTransactionsValidator : AbstractValidator<GetMyTransact
         if (_allowFilterFields.All(f => f.ToLower() != filter.Field.ToLower()))
             context.AddFailure($"Filter field {filter.Field} is not allowed.");
             
-        if (filter.Field.Equals(nameof(ChainTransactionDto.Status), StringComparison.OrdinalIgnoreCase))
+        if (filter.Field.Equals(nameof(ListTransactionInternalDto.Status), StringComparison.OrdinalIgnoreCase))
         {
             ValidateStatusField(filter.Value, context);
         }
         
-        if (filter.Field.Equals(nameof(ChainTransactionDto.Type), StringComparison.OrdinalIgnoreCase))
+        if (filter.Field.Equals(nameof(ListTransactionInternalDto.Type), StringComparison.OrdinalIgnoreCase))
         {
             ValidateTypeField(filter.Value, context);
         }

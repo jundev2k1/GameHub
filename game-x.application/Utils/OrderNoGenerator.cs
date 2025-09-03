@@ -21,14 +21,13 @@ public static class OrderNoGenerator
         const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ123456789";
         return new string([.. Enumerable.Range(0, length).Select(_ => chars[Random.Shared.Next(chars.Length)])]);
     }
-
-
-    public static async Task<string> GenerateUniqueOtcOrderNoAsync(IChainTransactionRepo chainTransactionRepo, CancellationToken ct)
+    
+    public static async Task<string> GenerateUniqueOtcOrderNoAsync(ITransactionRepo transactionRepo, CancellationToken ct)
     {
         for (int i = 0; i < 5; i++)
         {
             var candidate = Otc();
-            var exists = await chainTransactionRepo.ExistsByOrderNoAsync(candidate, ct);
+            var exists = await transactionRepo.ExistsByOrderNoAsync(candidate, ct);
             if (!exists) return candidate;
         }
 

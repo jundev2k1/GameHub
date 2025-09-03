@@ -13,7 +13,7 @@ namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
     [Migration("20250813035627_gametransaction")]
-    partial class gametransaction
+    partial class GameTransaction
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

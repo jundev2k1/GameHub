@@ -6,4 +6,4 @@ public record TronUsdtWithdrawalCommand(
     string To,
     decimal Amount,
     Guid CryptoTokenId,
-    string? Note = null) : ICommand<ChainTransactionDto>;
+    string? Note = null) : ICommand<ListTransactionInternalDto>;

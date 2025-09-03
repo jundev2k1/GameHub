@@ -5,7 +5,7 @@
 namespace game_x.persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class cryptotokenidgametransaction : Migration
+    public partial class CryptoTokenIdGameTransaction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -1,7 +1,6 @@
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
@@ -11,6 +10,9 @@ public sealed class UserBankAccountRepo(GameXContext context) : IUserBankAccount
     {
         var result = await context.UserBankAccounts
             .AsNoTracking()
+            .Include(uba => uba.Image)
+            .Include(uba => uba.FiatCurrency)
+            .Include(uba => uba.ReviewedBy)
             .Where(uba => uba.UserId == userId
                 && uba.User.Status == UserStatus.Active
                 && uba.User.IsDeleted == false)
@@ -23,6 +25,9 @@ public sealed class UserBankAccountRepo(GameXContext context) : IUserBankAccount
     {
         var result = await context.UserBankAccounts
             .AsNoTracking()
+            .Include(uba => uba.Image)
+            .Include(uba => uba.FiatCurrency)
+            .Include(uba => uba.ReviewedBy)
             .FirstOrDefaultAsync(uba => uba.PublicId == id
                 && uba.User.Status == UserStatus.Active
                 && uba.User.IsDeleted == false

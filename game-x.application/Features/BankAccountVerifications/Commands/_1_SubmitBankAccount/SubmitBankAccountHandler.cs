@@ -2,6 +2,8 @@
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnVerifyCreated;
+using game_x.application.Features.Accounts.User.Dtos;
 
 namespace game_x.application.Features.BankAccountVerifications.Commands._1_SubmitBankAccount;
 
@@ -10,6 +12,7 @@ public sealed class SubmitBankAccountHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IFiatCurrencyRepo currencyRepo,
+    IApplicationEventDispatcher eventDispatcher,
     IFileStorageService fileStorage) : ICommandHandler<SubmitBankAccountCommand>
 {
     public async Task<Unit> Handle(SubmitBankAccountCommand request, CancellationToken ct = default)
@@ -19,6 +22,7 @@ public sealed class SubmitBankAccountHandler(
             .GetByCodeAsync(CurrencyUnit.Of(request.CurrencyCode), ct);
 
         var imageObjectName = await UploadFiles(request.Image, userId, ct);
+        var user = await userRepo.GetUserByIdAsync(userId, ct);
 
         await unitOfWork.WithTransactionAsync(async () =>
         {
@@ -41,6 +45,15 @@ public sealed class SubmitBankAccountHandler(
 
                 targetUser.AddUserBankAccount(userBankAccount);
             }, ct);
+
+            var verificationDto = new VerificationCreatedDto
+            {
+                Type = Enum.GetName(typeof(VerificationStatusType), VerificationStatusType.BankAccount) ?? string.Empty,
+                Email = user.Email!,
+                NickName = user.Nickname,
+            };
+
+            await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, verificationDto), ct);
         }, ct);
 
         return Unit.Value;

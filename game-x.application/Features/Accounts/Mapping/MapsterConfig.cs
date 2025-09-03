@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.Accounts.Dtos;
+﻿using game_x.application.Features.Accounts.Admin.Queries.GetSelfUserProfile;
+using game_x.application.Features.Accounts.Dtos;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using UserEntity = game_x.domain.Entities.User;
@@ -34,6 +35,9 @@ public sealed class MapsterConfig : IRegister
                 dest => dest.UserExtendInfo,
                 src => src.UserExtend.Adapt<UserExtendDto>())
             .Map(
+                dest => dest.Roles,
+                src => AppRole.Of(src.UserRoles.Select(ur => ur.Role.Name!)))
+            .Map(
                 dest => dest.IsEmailConfirmed,
                 src => src.EmailConfirmed)
             .Map(
@@ -52,5 +56,10 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol);
+
+        cfg.NewConfig<UserEntity, GetSelfUserProfileResult>()
+            .Map(dest => dest.UserId, src => src.Id)
+            .Map(dest => dest.Username, src => src.UserName)
+            .Map(dest => dest.Roles, src => src.UserRoles.Select(ur => ur.Role.Name).ToArray());
     }
 }

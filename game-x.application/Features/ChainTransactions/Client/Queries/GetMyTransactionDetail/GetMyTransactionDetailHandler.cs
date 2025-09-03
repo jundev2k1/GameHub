@@ -6,13 +6,13 @@ namespace game_x.application.Features.ChainTransactions.Client.Queries.GetMyTran
 
 public sealed class GetMyTransactionDetailHandler(
     IUserAccessor userAccessor,
-    IChainTransactionRepo chainTransactionRepo)
-    : IQueryHandler<GetMyTransactionDetailQuery, ChainTransactionDetailDto>
+    ITransactionRepo transactionRepo)
+    : IQueryHandler<GetMyTransactionDetailQuery, TransactionInternalDetailDto>
 {
-    public async Task<ChainTransactionDetailDto> Handle(GetMyTransactionDetailQuery request, CancellationToken ct = default)
+    public async Task<TransactionInternalDetailDto> Handle(GetMyTransactionDetailQuery request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
-        var result = await chainTransactionRepo.GetByIdAndUserIdAsync(userId, request.TransactionId, ct);
-        return result.Adapt<ChainTransactionDetailDto>();
+        var result = await transactionRepo.GetByIdAndUserIdAsync(userId, request.TransactionId, ct);
+        return result.Adapt<TransactionInternalDetailDto>();
     }
 }

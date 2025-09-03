@@ -8,6 +8,6 @@ public interface IUxmService
     Task<SecureResponse<UxmDepositOrderResponseData>> CreateDepositOrderAsync(
         SecureRequest<UxmDepositOrderRequest> data);
 
-    Task<SecureResponse<UxmWithdrawalOrderResponseData>> CreateWithdrawalOrderAsync(
+    Task<SecureResponse<UxmWithdrawalOrderResponseData>>  CreateWithdrawalOrderAsync(
         SecureRequest<UxmWithdrawalOrderRequest> data);
 }

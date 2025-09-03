@@ -1,14 +1,11 @@
 ﻿using game_x.api.Common;
-using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Client.Commands.GameWallet.Deposit;
 using game_x.application.Features.Games.Client.Commands.GameWallet.Withdrawal;
 using game_x.application.Features.Games.Client.Commands.LoginGame;
-using game_x.application.Features.Games.Client.Queries.GetGames;
+using game_x.application.Features.Games.Client.Queries.GetGameReport;
 using game_x.application.Features.Games.Client.Queries.GetMyGameTransactionDetail;
 using game_x.application.Features.Games.Client.Queries.GetMyGameTransactions;
-using game_x.application.Features.Games.Client.Queries.WalletGame;
-using System.Threading.Tasks;
 
 namespace game_x.api.Controllers.Client.Game;
 
@@ -25,39 +22,24 @@ public sealed class GameController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpGet("me/wallet-G598")]
-    public async Task<IActionResult> GetWalletAsync()
+    [HttpPost("platforms/{platformId:guid}/deposit")]
+    public async Task<IActionResult> DepositAsync(Guid platformId, WalletDepositCommand command)
     {
-        var query = new GetWalletGameQuery();
-        var result = await Mediator.Send(query);
+        var result = await Mediator.Send(command with { PlatformId = platformId });
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPost("me/wallet-G598/deposit")]
-    public async Task<IActionResult> DepositAsync(WalletDepositCommand command)
+    [HttpPost("platforms/{platformId:guid}/withdrawal")]
+    public async Task<IActionResult> WithdrawalAsync(Guid platformId, WalletWithdrawalCommand command)
     {
-        var result = await Mediator.Send(command);
+        var result = await Mediator.Send(command with { PlatformId = platformId });
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpPost("me/wallet-G598/withdrawal")]
-    public async Task<IActionResult> WithdrawalAsync(WalletWithdrawalCommand command)
+    [HttpPost("platforms/{platformId:guid}/report")]
+    public async Task<IActionResult> ReportAsync(Guid platformId, GetGameReportQuery query)
     {
-        var result = await Mediator.Send(command);
-        return ApiResponseFactory.Ok(result);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetGameCode([AsParameters] GetGamesRequest request)
-    {
-        var query = new GetGamesQuery(
-            request.Keyword,
-            request.Platform,
-            request.Category,
-            request.GameType,
-            request.PageNumber ?? 1,
-            request.PageSize ?? 20);
-        var result = await Mediator.Send(query);
+        var result = await Mediator.Send(query with { PlatformId = platformId });
         return ApiResponseFactory.Ok(result);
     }
 

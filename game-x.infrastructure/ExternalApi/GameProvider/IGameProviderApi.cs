@@ -38,4 +38,9 @@ public interface IGameProviderApi
     Task<ApiResponse<PayloadRequest>> WithdrawalAsync(
         [Body] PayloadRequest request,
         [Header("Language")] string language);
+
+    [Post("/v1/report/bets")]
+    Task<ApiResponse<PayloadRequest>> ReportAsync(
+        [Body] PayloadRequest request,
+        [Header("Language")] string language);
 }

@@ -7,9 +7,9 @@ public enum UsdtFlowType
     /// </summary>
     Init = 0,
     /// <summary>Deposit transaction with the Uxm service</summary>
-    Deposit = 1,
+    UxmDeposit = 1,
     /// <summary>Withdrawal transaction with the Uxm service</summary>
-    Withdrawal = 2,
+    UxmWithdrawal = 2,
     /// <summary>Deposit transaction with a third-party game provider</summary>
     GameDeposit = 3,
     /// <summary>Withdrawal transaction with a third-party game provider</summary>

@@ -6,7 +6,7 @@ namespace game_x.infrastructure.Services.Wallet;
 
 public sealed class UserBalanceService : IUserBalanceService, IServices
 {
-    private readonly decimal _withdrawalFree = 3m;
+    private readonly decimal _withdrawalFree = 0m;
     public decimal GetWithdrawalFree() => _withdrawalFree;
     
     public void Freeze(UserBalance balance, decimal amount)
