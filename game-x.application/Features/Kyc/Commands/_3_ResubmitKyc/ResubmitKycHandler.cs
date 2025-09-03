@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnVerifyCreated;
 using game_x.application.Features.Accounts.User.Dtos;
+using game_x.application.Features.Kyc.Dtos;
 
 namespace game_x.application.Features.Kyc.Commands._3_ResubmitKyc;
 
@@ -19,10 +20,10 @@ public sealed class ResubmitKycHandler(
     {
         var userId = userAccessor.GetUserId();
         var user = await userRepo.GetUserByIdAsync(userId, ct);
+        UserKyc? updateKyc = null;
 
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            UserKyc? updateKyc = null;
             await userRepo.UpdateKycAsync(userId, targetKyc =>
             {
                 targetKyc.Resubmit(
@@ -39,17 +40,10 @@ public sealed class ResubmitKycHandler(
 
             if (request.BackImage != null)
                 await ReupImage(updateKyc, request.BackImage, false, ct);
-
-            var verificationDto = new VerificationCreatedDto
-            {
-                Type = Enum.GetName(typeof(VerificationStatusType), VerificationStatusType.Kyc) ?? string.Empty,
-                Email = user.Email!,
-                NickName = user.Nickname,
-            };
-
-            await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, verificationDto), ct);
         }, ct);
+        var userKycDto = updateKyc?.Adapt<UserKycListItemDto>();
 
+        await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.Kyc, userKycDto), ct);
         return Unit.Value;
     }
 
