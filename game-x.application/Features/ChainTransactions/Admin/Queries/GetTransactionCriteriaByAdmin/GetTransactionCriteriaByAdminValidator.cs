@@ -8,6 +8,7 @@ public sealed class GetTransactionCriteriaByAdminValidator : AbstractValidator<G
     private readonly string[] _allowFilterFields =
     [
         "search",
+        "statuses",
         nameof(ListTransactionInternalDto.Id),
         nameof(ListTransactionInternalDto.UserId),
         nameof(ListTransactionInternalDto.Status),

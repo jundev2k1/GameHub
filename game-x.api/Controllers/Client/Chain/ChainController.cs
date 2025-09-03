@@ -4,6 +4,7 @@ using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWith
 using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtDeposit;
 using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactionDetail;
 using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactions;
+using game_x.api.Dtos;
 
 namespace game_x.api.Controllers.Client.Chain;
 
@@ -26,9 +27,13 @@ public sealed class ChainController : BaseApiController
     }
     
     [HttpGet("me")]
-    public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] GetTransactionsRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.TransactionStatuses.IsNotNullOrEmpty())
+            paramExtends.Add("statuses", parameters.TransactionStatuses);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetMyTransactionsQuery(
             filters,
