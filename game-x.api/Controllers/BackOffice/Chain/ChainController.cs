@@ -1,4 +1,5 @@
 using game_x.api.Common;
+using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.ChainTransactions.Admin.Commands.AdminReviewWithdrawalOrder;
 using game_x.application.Features.ChainTransactions.Admin.Queries.GetTransactionCriteriaByAdmin;
@@ -10,10 +11,14 @@ namespace game_x.api.Controllers.BackOffice.Chain;
 [Route("/api/back-office/chain-transactions")]
 public sealed class ChainController : BaseApiController
 {
-    [HttpGet()]
-    public async Task<IActionResult> GetTransactionByCriteria([AsParameters] SearchCriteriaRequest parameters)
+    [HttpGet]
+    public async Task<IActionResult> GetTransactionByCriteria([AsParameters] GetTransactionsRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.TransactionStatuses.IsNotNullOrEmpty())
+            paramExtends.Add("statuses", parameters.TransactionStatuses);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetTransactionCriteriaByAdminQuery(
             filters,

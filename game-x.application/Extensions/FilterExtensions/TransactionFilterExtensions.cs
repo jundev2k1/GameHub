@@ -7,7 +7,7 @@ public static class TransactionFilterExtensions
     public static readonly Dictionary<string, Func<object, Expression<Func<Transaction, bool>>>> Options =
         new()
         {
-            ["status"] = CreateStatusFilter
+            ["statuses"] = CreateStatusFilter
         };
     
     /// <summary>Builds a filter by multiple statuses.</summary>

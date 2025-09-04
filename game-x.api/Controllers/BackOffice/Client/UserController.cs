@@ -1,4 +1,5 @@
 using game_x.api.Common;
+using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Accounts.Admin.Queries.GetAllActiveTokensByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
@@ -6,7 +7,6 @@ using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountByCriteria;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountDetail;
-using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountProfile;
 using game_x.application.Features.Kyc.Queries.GetKycByCriteria;
 using game_x.application.Features.Kyc.Queries.GetKycProfile;
 
@@ -40,9 +40,13 @@ public sealed class UserController : BaseApiController
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("kycs")]
-    public async Task<IActionResult> GetUserKycByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    public async Task<IActionResult> GetUserKycByCriteriaAsync([AsParameters] GetKycsRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.Statuses.IsNotNullOrEmpty())
+            paramExtends.Add("statuses", parameters.Statuses);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetKycByCriteriaQuery(
             filters,
@@ -64,9 +68,18 @@ public sealed class UserController : BaseApiController
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("bank-accounts")]
-    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync([AsParameters] GetBankAccountListRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var filterExtends = new Dictionary<string, string>();
+        if (parameters.CurrencyCode.IsNotNullOrEmpty())
+            filterExtends.Add("currencies", parameters.CurrencyCode);
+        if (parameters.Statuses.IsNotNullOrEmpty())
+            filterExtends.Add("statuses", parameters.Statuses);
+
+        var filters = QueryConverter.ToFilters(
+            parameters.Filters,
+            parameters.Keyword,
+            @params: filterExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetBankAccountByCriteriaQuery(
             filters,

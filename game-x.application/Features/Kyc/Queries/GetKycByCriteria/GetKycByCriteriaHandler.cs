@@ -1,6 +1,7 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Extensions.FilterExtensions;
 using game_x.application.Features.Accounts.Mapping;
 using game_x.application.Features.Kyc.Dtos;
 using game_x.application.Features.Kyc.Mapping;
@@ -21,7 +22,8 @@ public sealed class GetKycByCriteriaHandler(
                 keyword =>
                     kyc => kyc.FullName.ToLower().StartsWith(keyword.ToLower())
                         || kyc.User.Email!.ToLower().StartsWith(keyword.ToLower())
-                        || kyc.User.Nickname.ToLower().StartsWith(keyword.ToLower())),
+                        || kyc.User.Nickname.ToLower().StartsWith(keyword.ToLower()),
+                KycFilterExtensions.Options),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);

@@ -6,5 +6,5 @@ public record ReSubmitKycRequest(
     string? Address,
     string? IdNumber,
     KycType? Type,
-    IFormFile? FrontPhoto,
-    IFormFile? BackPhoto);
+    IFormFile? FrontImage,
+    IFormFile? BackImage);
