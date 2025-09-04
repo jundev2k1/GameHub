@@ -19,6 +19,8 @@ public sealed class GameTagIcon
 
     public static bool IsValid(string value)
     {
+        if (value.IsNullOrEmpty()) return true;
+
         var upper = value.ToUpperInvariant();
         var isExist = typeof(GameTagIcons).GetFields(BindingFlags.Public | BindingFlags.Static)
             .Any(f => f.GetValue(null)?.ToString() == upper);

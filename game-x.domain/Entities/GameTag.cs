@@ -44,4 +44,8 @@ public sealed class GameTag : BaseEntity<int>, IAuditable
         Color = color ?? Color;
         Note = note ?? Note;
     }
+
+    public void Activate() => IsActive = true;
+
+    public void Deactivate() => IsActive = false;
 }
