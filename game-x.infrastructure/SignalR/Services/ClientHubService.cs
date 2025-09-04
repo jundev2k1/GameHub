@@ -20,11 +20,6 @@ public sealed class ClientHubService(IHubContext<ClientHub, IClientHub> hubConte
         await hubContext.Clients.Group($"member-{memberId}").TransactionUpdated(transaction);
     }
 
-    public async Task SendLedgerToMemberAsync(string userId, ClientLedgerDto ledger)
-    {
-        await hubContext.Clients.Group($"member-{userId}").LedgerUpdated(ledger);
-    }
-
     public async Task SendVerifyUpdateAsync(string userId, VerificationStatusDto verificationStatus)
     {
         await hubContext.Clients.Group($"member-{userId}").UserVerifyUpdated(verificationStatus);
