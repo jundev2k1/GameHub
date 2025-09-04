@@ -13,9 +13,11 @@ public class AdminTransactionDto
     public string? OrderUid { get; set; }
     public Guid CryptoTokenId { get; set; }
     public string Symbol { get; set; } = string.Empty;
+    public string? Hash { get; set; }
     public string Network { get; set; }  = string.Empty;
     public string Type { get; set; } =  string.Empty;
     public string Status { get; set; } = string.Empty;
+    public DateTime? ConfirmedAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
