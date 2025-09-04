@@ -16,7 +16,7 @@ public sealed class GetGamesHandler(
             .ToArray();
         var totalItems = gameProviderCache.GameList.Count(GetFilterCondition(request));
         var result = new PaginationResult<GameInfoDto>(
-            items: [.. items.Select(i => i.Adapt<GameInfoDto>())],
+            items: items,
             totalItems: totalItems,
             totalPages: (int)Math.Ceiling((decimal)totalItems / request.PageSize),
             pageIndex: request.PageIndex,

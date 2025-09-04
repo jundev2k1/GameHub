@@ -21,7 +21,6 @@ public sealed class GetGameTagsByCriteriaHandler(
         var items = searchResult
             .Skip((request.PageIndex - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(i => i.Adapt<GameTagDto>())
             .ToArray();
 
         var result = new PaginationResult<GameTagDto>(

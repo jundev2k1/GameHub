@@ -1,24 +1,23 @@
 ﻿using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Admin.Queries.GetCategoriesByCriteria;
 using game_x.application.Features.Games.Dtos;
 
-namespace game_x.application.Features.Games.Admin.Queries.GetGameTagsByCriteria;
+namespace game_x.application.Features.Games.Admin.Queries.GetCategoriesByCriteria;
 
-public sealed class GetGameTagsByCriteriaValidator : AbstractValidator<GetGameTagsByCriteriaQuery>
+public sealed class GetCategoriesByCriteriaValidator : AbstractValidator<GetCategoriesByCriteriaQuery>
 {
     private readonly string[] _allowFields =
     {
         "search",
-        nameof(GameTagDto.Id),
-        nameof(GameTagDto.Name),
-        nameof(GameTagDto.Description),
-        nameof(GameTagDto.Note),
-        nameof(GameTagDto.Priority),
-        nameof(GameTagDto.CreatedAt),
-        nameof(GameTagDto.UpdatedAt),
+        nameof(GameCategoryDto.Id),
+        nameof(GameCategoryDto.Name),
+        nameof(GameCategoryDto.Description),
+        nameof(GameCategoryDto.Note),
+        nameof(GameCategoryDto.Priority),
+        nameof(GameCategoryDto.CreatedAt),
+        nameof(GameCategoryDto.UpdatedAt),
     };
 
-    public GetGameTagsByCriteriaValidator()
+    public GetCategoriesByCriteriaValidator()
     {
         RuleForEach(x => x.Filters)
             .Custom(ValidateFilterField);
@@ -34,13 +33,13 @@ public sealed class GetGameTagsByCriteriaValidator : AbstractValidator<GetGameTa
             .LessThanOrEqualTo(1000).WithMessage("Page size must be less than or equal 1000");
     }
 
-    private void ValidateFilterField(QueryFilter filter, ValidationContext<GetGameTagsByCriteriaQuery> context)
+    private void ValidateFilterField(QueryFilter filter, ValidationContext<GetCategoriesByCriteriaQuery> context)
     {
         if (_allowFields.All(f => f.ToLowerInvariant() != filter.Field.ToLowerInvariant()))
             context.AddFailure($"Filter field '{filter.Field}' is not allowed.");
     }
 
-    private void ValidateSortField(QuerySort sort, ValidationContext<GetGameTagsByCriteriaQuery> context)
+    private void ValidateSortField(QuerySort sort, ValidationContext<GetCategoriesByCriteriaQuery> context)
     {
         if (_allowFields.All(f => f.ToLowerInvariant() != sort.Field.ToLowerInvariant()))
             context.AddFailure($"Sort field '{sort.Field}' is not allowed.");

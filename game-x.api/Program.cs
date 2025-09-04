@@ -56,6 +56,7 @@ try
     await gameProviderCache.RefreshGamePlatformList();
     await gameProviderCache.RefreshGameCategoryList();
     await gameProviderCache.RefreshGameTypeList();
+    await gameProviderCache.RefreshGameTagList();
     await gameProviderCache.RefreshGameList();
 }
 catch (Exception ex)

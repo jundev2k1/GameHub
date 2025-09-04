@@ -1,5 +1,4 @@
 ﻿using game_x.application.Common.Filters;
-using game_x.application.Features.Accounts.Admin.Queries.GetCsCriteriaByAdmin;
 using game_x.application.Features.Games.Dtos;
 
 namespace game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;

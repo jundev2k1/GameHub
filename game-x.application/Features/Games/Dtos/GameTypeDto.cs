@@ -12,4 +12,6 @@ public sealed class GameTypeDto
     public string Note { get; set; } = string.Empty;
     public int Priority { get; set; }
     public bool IsActive { get; set; } = true;
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }
