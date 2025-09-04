@@ -16,6 +16,11 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
     [MaxLength(64)] 
     public string? CustomerId { get; set; }
     public User? Customer { get; set; }
+    /// <summary>The guest who creates the conversation for support</summary>
+    [MaxLength(64)]
+    
+    public string? GuestId { get; set; }
+    
     /// <summary>Enables queues/claiming; The agent who owns the support conversation</summary>
     [MaxLength(64)] 
     public string? AssignedAgentId { get; set; }

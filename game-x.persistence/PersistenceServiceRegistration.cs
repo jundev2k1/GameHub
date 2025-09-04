@@ -86,7 +86,7 @@ public static class PersistenceServiceRegistration
             .AddJwtBearer(option =>
             {
                 var jwtKey = configuration["JwtSettings:Key"]
-                    ?? throw new InvalidOperationException("JwtSettings:Key 未設定");
+                    ?? throw new InvalidOperationException("JwtSettings:Key Not configured");
 
                 option.TokenValidationParameters = new TokenValidationParameters
                 {

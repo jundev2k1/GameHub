@@ -32,6 +32,7 @@
   <ItemGroup>
     <Folder Include="Features\Accounts\Cs\" />
     <Folder Include="Features\Auth\Admin\Commands\" />
+    <Folder Include="Features\Auth\Guest\Commands\" />
     <Folder Include="Features\Auth\Root\Commands\" />
   </ItemGroup>
 </Project>

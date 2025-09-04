@@ -147,6 +147,51 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
             }, ct);
     }
     
+    
+
+    public async Task<CursorResult<ConversationDto>> GetMyConversationsForGuestAsync(
+        string guestId,
+        int limit,
+        string? cursor,
+        CancellationToken ct = default)
+    {
+        IQueryable<Conversation> query = context.Conversations.AsNoTracking();
+
+        // Retrieve all private conversations and group chats
+        Expression<Func<Conversation, bool>> minePredicate = c => c.GuestId == guestId;
+
+        query = query.Where(minePredicate);
+
+        var src = query
+            .Include(c => c.Customer)
+            .Include(c => c.Messages
+                .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
+                .Take(1))
+            .ThenInclude(x => x.SenderUser)
+            .Where(c => c.Messages.Any());
+        
+        var fp = CursorHelper.ComputeFp($"me:{guestId}|q:");
+        
+        return await SeekCursorBuilder<Conversation>
+            .For(src)
+            .Keys(
+                c => c.LastMessageAt,
+                c => context.Messages
+                    .Where(m => m.ConversationId == c.Id)
+                    .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
+                    .Select(m => m.Id)
+                    .FirstOrDefault())
+            .Sort(desc1: true, desc2: true)
+            .FromCursor(cursor, fp)
+            .WithPrev(false)
+            .Limit(limit)
+            .ExecuteAsync(c =>
+            {
+                var dto = c.Adapt<ConversationDto>();
+                return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
+            }, ct);
+    }
+    
     public async Task<Conversation?> GetSupportConversationAsync(ConversationStatus status, string customerId, CancellationToken ct = default)
     {
         return await context.Conversations

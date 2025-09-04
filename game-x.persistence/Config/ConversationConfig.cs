@@ -12,6 +12,7 @@ public sealed class ConversationConfig : IEntityTypeConfiguration<Conversation>
         // Indexes
         builder.HasIndex(x => new { x.Type, x.LastMessageAt });
         builder.HasIndex(x => new { x.Status, x.LastMessageAt });
+        builder.HasIndex(x => new { x.GuestId, x.LastMessageAt });
         builder.HasIndex(x => new { x.AssignedAgentId, x.Status });
         builder.HasIndex(x => new { CustomerUserId = x.CustomerId, x.Status });
         
@@ -53,6 +54,10 @@ public sealed class ConversationConfig : IEntityTypeConfiguration<Conversation>
             .HasColumnName("last_message_at")
             .HasColumnType("timestamp with time zone")
             .IsRequired();
+        
+        builder.Property(x => x.GuestId)
+            .HasColumnName("guest_id")
+            .IsRequired(false);
         
         // Relationships
         builder.HasMany(x => x.Members)
