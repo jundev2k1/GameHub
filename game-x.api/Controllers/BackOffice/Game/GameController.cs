@@ -1,7 +1,7 @@
 ﻿using game_x.api.Common;
 using game_x.api.Dtos;
 using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Admin.Queries.GetGames;
+using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
 using game_x.application.Features.Games.Admin.Queries.GetGameTransactionDetail;
 using game_x.application.Features.Games.Admin.Queries.GetGameTransactions;
 
@@ -10,17 +10,23 @@ namespace game_x.api.Controllers.BackOffice.Game;
 [Route("/api/back-office/games")]
 public sealed class GameController : BaseApiController
 {
-    [Authorize(Roles = AppRoles.Admin)]
-    public async Task<IActionResult> GetGameListAsync([AsParameters] GetGamesRequest request)
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet]
+    public async Task<IActionResult> GetGameListAsync([AsParameters] GetGamesByCriteriaRequest parameters)
     {
-        var query = new GetGamesQuery(
-            request.Keyword,
-            request.Platform,
-            request.Category,
-            request.GameType,
-            request.IsActive,
-            request.PageNumber ?? 1,
-            request.PageSize ?? 20);
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.Types.IsNotNullOrEmpty())
+            paramExtends.Add("types", parameters.Types!);
+        if (parameters.Categories.IsNotNullOrEmpty())
+            paramExtends.Add("categories", parameters.Categories!);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
+        var sorts = QueryConverter.ToSorts(parameters.Sorts);
+        var query = new GetGamesByCriteriaQuery(
+            filters,
+            sorts,
+            parameters.PageNumber ?? 1,
+            parameters.PageSize ?? 20);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }

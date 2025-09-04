@@ -36,13 +36,11 @@ public class GameTagConfig : IEntityTypeConfiguration<GameTag>
 
         builder.Property(gt => gt.Icon)
             .IsRequired()
-            .HasConversion(v => v.Value, v => GameTagIcon.Of(v))
-            .HasDefaultValue(string.Empty);
+            .HasConversion(v => v.Value, v => GameTagIcon.Of(v));
 
         builder.Property(gt => gt.Color)
             .IsRequired()
-            .HasConversion(v => v.Value, v => GameTagColor.Of(v))
-            .HasDefaultValue(string.Empty);
+            .HasConversion(v => v.Value, v => GameTagColor.Of(v));
 
         builder.Property(gt => gt.IsActive)
             .IsRequired()
