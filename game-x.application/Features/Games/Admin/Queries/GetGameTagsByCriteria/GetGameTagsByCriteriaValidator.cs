@@ -13,7 +13,6 @@ public sealed class GetGameTagsByCriteriaValidator : AbstractValidator<GetGameTa
         nameof(GameTagDto.Name),
         nameof(GameTagDto.Description),
         nameof(GameTagDto.Note),
-        nameof(GameTagDto.Priority),
         nameof(GameTagDto.CreatedAt),
         nameof(GameTagDto.UpdatedAt),
     };

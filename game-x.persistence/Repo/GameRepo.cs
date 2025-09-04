@@ -16,6 +16,8 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gcm => gcm.Category)
             .Include(g => g.GameTypeMappings)
             .ThenInclude(gtm => gtm.Type)
+            .Include(g => g.GameTagMappings)
+            .ThenInclude(gtm => gtm.Tag)
             .ToArrayAsync(ct);
     }
 
@@ -32,6 +34,8 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gcm => gcm.Category)
             .Include(g => g.GameTypeMappings)
             .ThenInclude(gtm => gtm.Type)
+            .Include(g => g.GameTagMappings)
+            .ThenInclude(gtm => gtm.Tag)
             .Where(condition)
             .OrderBy(g => g.Priority)
             .ThenBy(g => g.Name)

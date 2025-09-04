@@ -10,7 +10,7 @@ public sealed class GameTagIcon
 
     public static GameTagIcon Of(string value)
     {
-        var upper = value.ToUpperInvariant();
+        var upper = value.ToLowerInvariant();
         if (upper.IsNotNullOrEmpty() && !IsValid(upper))
             throw new ArgumentException($"Game Tag Icon '{value}' is invalid.");
 
@@ -21,7 +21,7 @@ public sealed class GameTagIcon
     {
         if (value.IsNullOrEmpty()) return true;
 
-        var upper = value.ToUpperInvariant();
+        var upper = value.ToLowerInvariant();
         var isExist = typeof(GameTagIcons).GetFields(BindingFlags.Public | BindingFlags.Static)
             .Any(f => f.GetValue(null)?.ToString() == upper);
         return isExist;

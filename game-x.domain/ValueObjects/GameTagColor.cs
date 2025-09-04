@@ -12,7 +12,7 @@ public sealed class GameTagColor
     {
         ArgumentException.ThrowIfNullOrEmpty(value, nameof(value));
 
-        var upper = value.ToUpperInvariant();
+        var upper = value.ToLowerInvariant();
         if (!IsValid(upper))
             throw new ArgumentException($"Game Tag Color '{value}' is invalid.");
 
@@ -21,7 +21,7 @@ public sealed class GameTagColor
 
     public static bool IsValid(string value)
     {
-        var upper = value.ToUpperInvariant();
+        var upper = value.ToLowerInvariant();
         var isExist = typeof(GameTagColors).GetFields(BindingFlags.Public | BindingFlags.Static)
             .Any(f => f.GetValue(null)?.ToString() == upper);
         return isExist;

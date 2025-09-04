@@ -1,10 +1,12 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
 
 namespace game_x.application.Features.Games.Admin.Commands.UpdateGameTag;
 
 public sealed class UpdateGameTagHandler(
     IUnitOfWork unitOfWork,
-    IGameTagRepo gameTagRepo) : ICommandHandler<UpdateGameTagCommand>
+    IGameTagRepo gameTagRepo,
+    IGameProviderCacheService gameProviderCache) : ICommandHandler<UpdateGameTagCommand>
 {
     public async Task<Unit> Handle(UpdateGameTagCommand request, CancellationToken ct = default)
     {
@@ -18,6 +20,9 @@ public sealed class UpdateGameTagHandler(
                 request.Note);
             await unitOfWork.SaveChangesAsync(ct);
         }, ct);
+
+        // Refresh cache data after database updated
+        await gameProviderCache.RefreshGameTagList();
 
         return Unit.Value;
     }

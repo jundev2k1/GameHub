@@ -7,6 +7,10 @@ public sealed class MapsterConfig : IRegister
     public void Register(TypeAdapterConfig cfg)
     {
         RegisterGameMappings(cfg);
+        RegisterGamePlatformMappings(cfg);
+        RegisterGameCategoryMappings(cfg);
+        RegisterGameTypeMappings(cfg);
+        RegisterGameTagMappings(cfg);
         RegisterGameTransactionMappings(cfg);
     }
 
@@ -28,32 +32,63 @@ public sealed class MapsterConfig : IRegister
                     .Select(x => x.Adapt<GameTypeInfo>())
                     .OrderBy(g => g.IsPrimary)
                     .ThenBy(g => g.Priority))
+            .Map(
+                dest => dest.GameTags,
+                src => src.GameTagMappings
+                    .Select(x => x.Adapt<GameTagInfo>())
+                    .OrderBy(g => g.IsPrimary)
+                    .ThenBy(g => g.Priority))
             .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
             .Map(dest => dest.PlatformName, src => src.Platform.Name);
+    }
+
+    private static void RegisterGamePlatformMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GamePlatform, GamePlatformDto>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.Id, src => src.PublicId);
+    }
+
+    private static void RegisterGameCategoryMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GameCategory, GameCategoryDto>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.Id, src => src.PublicId);
 
         cfg.NewConfig<GameCategoryMapping, GameCategoryInfo>()
             .Map(dest => dest.LocalId, src => src.Category.Id)
             .Map(dest => dest.Id, src => src.Category.PublicId)
             .Map(dest => dest.Name, src => src.Category.Name)
             .Map(dest => dest.Priority, src => src.Category.Priority);
+    }
+
+    private static void RegisterGameTypeMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GameType, GameTypeDto>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.Id, src => src.PublicId);
 
         cfg.NewConfig<GameTypeMapping, GameTypeInfo>()
             .Map(dest => dest.LocalId, src => src.Type.Id)
             .Map(dest => dest.Id, src => src.Type.PublicId)
             .Map(dest => dest.Name, src => src.Type.Name)
             .Map(dest => dest.Priority, src => src.Type.Priority);
+    }
 
-        cfg.NewConfig<GamePlatform, GamePlatformDto>()
+    private static void RegisterGameTagMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GameTag, GameTagDto>()
             .Map(dest => dest.LocalId, src => src.Id)
-            .Map(dest => dest.Id, src => src.PublicId);
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Icon, src => src.Icon.Value)
+            .Map(dest => dest.Color, src => src.Color.Value);
 
-        cfg.NewConfig<GameCategory, GameCategoryDto>()
-            .Map(dest => dest.LocalId, src => src.Id)
-            .Map(dest => dest.Id, src => src.PublicId);
-
-        cfg.NewConfig<GameType, GameTypeDto>()
-            .Map(dest => dest.LocalId, src => src.Id)
-            .Map(dest => dest.Id, src => src.PublicId);
+        cfg.NewConfig<GameTagMapping, GameTagInfo>()
+            .Map(dest => dest.LocalId, src => src.Tag.Id)
+            .Map(dest => dest.Id, src => src.Tag.PublicId)
+            .Map(dest => dest.Name, src => src.Tag.Name)
+            .Map(dest => dest.Icon, src => src.Tag.Icon.Value)
+            .Map(dest => dest.Color, src => src.Tag.Color.Value);
     }
 
     private static void RegisterGameTransactionMappings(TypeAdapterConfig cfg)
