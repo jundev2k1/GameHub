@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
+using game_x.application.Features.Accounts.User.Commands.RevokeAllOtherToken;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.Accounts.User.Commands.UserSelfUpdate;
 using game_x.application.Features.Accounts.User.Queries.GetAllActiveTokens;
@@ -14,7 +16,9 @@ namespace game_x.api.Controllers.Client.Me;
 
 [Authorize(Roles = AppRoles.User)]
 [Route("api/user/me")]
-public sealed class UserController(IRefreshTokenManagerCacheService refreshTokenManager) : BaseApiController
+public sealed class UserController(
+    IUserAccessor userAccessor,
+    IRefreshTokenManagerCacheService refreshTokenManager) : BaseApiController
 {
     [HttpGet]
     public async Task<IActionResult> GetUserDetailAsync()
@@ -65,18 +69,23 @@ public sealed class UserController(IRefreshTokenManagerCacheService refreshToken
     [HttpDelete("tokens")]
     public async Task<IActionResult> RevokeTokenAsync(Guid tokenId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var currentJwtId = User.FindFirstValue(JwtRegisteredClaimNames.Jti);
+        var userId = userAccessor.GetUserId();
+        var currentJwtId = userAccessor.GetJwtId();
         var tokens = refreshTokenManager.GetsByUserId(userId!);
         var targetToken = tokens.FirstOrDefault(t => t.PublicId == tokenId);
 
         if (targetToken!.JwtId == currentJwtId)
-            return BadRequest(ApiResponseFactory.Error(
-                MessageCode.System.Forbidden));
+            return ApiResponseFactory.Forbidden(MessageCode.System.Forbidden);
 
         var command = new RevokeTokenCommand(userId!, tokenId);
-
         await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
+    [HttpDelete("tokens/others")]
+    public async Task<IActionResult> RevokeOtherTokensAsync()
+    {
+        await Mediator.Send(new RevokeAllOtherTokenCommand());
         return ApiResponseFactory.NoContent();
     }
 }

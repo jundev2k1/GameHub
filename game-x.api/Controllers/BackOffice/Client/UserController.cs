@@ -4,6 +4,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.Accounts.Admin.Queries.GetAllActiveTokensByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
+using game_x.application.Features.Accounts.User.Commands.RevokeAllOtherToken;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountByCriteria;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountDetail;
