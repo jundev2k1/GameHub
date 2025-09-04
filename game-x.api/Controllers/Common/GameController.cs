@@ -1,6 +1,7 @@
 ﻿using game_x.api.Dtos;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Features.Games.Client.Queries.GetGames;
+using System.Reflection;
 
 namespace game_x.api.Controllers.Common;
 
@@ -46,6 +47,13 @@ public sealed class GameController(
         var result = gameProviderCache.GameTypeList
             .OrderBy(type => type.Priority)
             .ToArray();
+        return await Task.FromResult(ApiResponseFactory.Ok(result));
+    }
+
+    [HttpGet("tags/icons")]
+    public async Task<IActionResult> GetGameTagIconListAsync()
+    {
+        var result = typeof(GameTagIcons).GetFields(BindingFlags.Public | BindingFlags.Static);
         return await Task.FromResult(ApiResponseFactory.Ok(result));
     }
 }
