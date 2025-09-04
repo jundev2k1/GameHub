@@ -53,14 +53,18 @@ public sealed class GameController(
     [HttpGet("tags/icons")]
     public async Task<IActionResult> GetGameTagIconListAsync()
     {
-        var result = typeof(GameTagIcons).GetFields(BindingFlags.Public | BindingFlags.Static);
+        var result = typeof(GameTagIcons).GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Select(f => f.GetValue(null).ToStringOrEmpty())
+            .ToArray();
         return await Task.FromResult(ApiResponseFactory.Ok(result));
     }
 
     [HttpGet("tags/colors")]
     public async Task<IActionResult> GetGameTagColorListAsync()
     {
-        var result = typeof(GameTagColors).GetFields(BindingFlags.Public | BindingFlags.Static);
+        var result = typeof(GameTagColors).GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Select(f => f.GetValue(null).ToStringOrEmpty())
+            .ToArray();
         return await Task.FromResult(ApiResponseFactory.Ok(result));
     }
 }
