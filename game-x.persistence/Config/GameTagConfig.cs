@@ -34,6 +34,16 @@ public class GameTagConfig : IEntityTypeConfiguration<GameTag>
             .HasMaxLength(4000)
             .HasDefaultValue(string.Empty);
 
+        builder.Property(gt => gt.Icon)
+            .IsRequired()
+            .HasConversion(v => v.Value, v => GameTagIcon.Of(v))
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(gt => gt.Color)
+            .IsRequired()
+            .HasConversion(v => v.Value, v => GameTagColor.Of(v))
+            .HasDefaultValue(string.Empty);
+
         builder.Property(gt => gt.IsActive)
             .IsRequired()
             .HasConversion<short>()

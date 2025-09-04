@@ -11,6 +11,7 @@ public sealed class GameProviderCacheService(
     IGamePlatformRepo gamePlatformRepo,
     IGameCategoryRepo gameCategoryRepo,
     IGameTypeRepo gameTypeRepo,
+    IGameTagRepo gameTagRepo,
     IGameRepo gameRepo)
     : CacheService(cache), IGameProviderCacheService
 {
@@ -59,6 +60,13 @@ public sealed class GameProviderCacheService(
         Set(cacheKey, gameList.Select(g => g.Adapt<GameTypeDto>()).ToArray());
     }
 
+    public async Task RefreshGameTagList()
+    {
+        var cacheKey = $"{_prefixCache}:game-tag:list";
+        var gameList = await gameTagRepo.GetAllAsync();
+        Set(cacheKey, gameList.Select(g => g.Adapt<GameTagDto>()).ToArray());
+    }
+
     public async Task RefreshGameList()
     {
         var cacheKey = $"{_prefixCache}:game:list";
@@ -72,6 +80,8 @@ public sealed class GameProviderCacheService(
         => Get<GameCategoryDto[]>($"{_prefixCache}:category:list") ?? [];
     public GameTypeDto[] GameTypeList
         => Get<GameTypeDto[]>($"{_prefixCache}:game-type:list") ?? [];
+    public GameTagDto[] GameTagList
+        => Get<GameTagDto[]>($"{_prefixCache}:game-tag:list") ?? [];
     public GameInfoDto[] GameList
         => Get<GameInfoDto[]>($"{_prefixCache}:game:list") ?? [];
 
