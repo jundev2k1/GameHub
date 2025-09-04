@@ -11,8 +11,10 @@ public sealed class Game : BaseEntity<int>, IAuditable
     public string Note { get; private set; } = string.Empty;
     public int Priority { get; private set; }
     public bool IsActive { get; private set; } = true;
+
     public ICollection<GameCategoryMapping> GameCategoryMappings { get; private set; } = default!;
     public ICollection<GameTypeMapping> GameTypeMappings { get; private set; } = default!;
+    public ICollection<GameTagMapping> GameTagMappings { get; private set; } = default!;
 
     public static Game Create(string name, string gameCode, string desc, string note, int priority)
     {
@@ -67,5 +69,36 @@ public sealed class Game : BaseEntity<int>, IAuditable
             gameTypeMapping.SetPrimary(true);
 
         GameTypeMappings.Add(gameTypeMapping);
+    }
+
+    public void AddTag(GameTag tag, int priority)
+    {
+        ArgumentNullException.ThrowIfNull(tag, nameof(tag));
+
+        GameTagMappings ??= [];
+        if (GameTagMappings.Any(t => t.Tag.PublicId == tag.PublicId))
+            throw new ArgumentException($"Tag {tag.Name} already exists in the game.");
+
+        GameTagMappings.Add(GameTagMapping.Create(this, tag, priority));
+    }
+
+    public void SetPrimaryTag(Guid tagId)
+    {
+        if (GameTagMappings.Any(t => t.Tag.PublicId == tagId))
+            throw new ArgumentException($"Tag with PublicId {tagId} does not exist in the game.");
+
+        foreach (var m in GameTagMappings!)
+        {
+            m.SetPrimary(m.Tag.PublicId == tagId);
+        }
+    }
+
+    public void RemoveTag(GameTag tag)
+    {
+        var mapping = GameTagMappings?.FirstOrDefault(t => t.Tag.PublicId == tag.PublicId);
+        if (mapping is not null)
+        {
+            GameTagMappings!.Remove(mapping);
+        }
     }
 }

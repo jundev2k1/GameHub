@@ -32,6 +32,7 @@ public sealed class GameXContext(
     public DbSet<GamePlatform> GamePlatforms { get; set; }
     public DbSet<GameCategory> GameCategories { get; set; }
     public DbSet<GameType> GameTypes { get; set; }
+    public DbSet<GameTag> GameTags { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<FiatCurrency> FiatCurrencies { get; set; }
     public DbSet<UserBankAccount> UserBankAccounts { get; set; }
