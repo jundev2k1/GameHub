@@ -1,6 +1,7 @@
 ﻿using game_x.api.Common;
 using game_x.api.Dtos;
 using game_x.application.Common.Filters;
+using game_x.application.Features.Games.Admin.Commands.UpdateGame;
 using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
 using game_x.application.Features.Games.Admin.Queries.GetGameTransactionDetail;
 using game_x.application.Features.Games.Admin.Queries.GetGameTransactions;
@@ -29,6 +30,14 @@ public sealed class GameController : BaseApiController
             parameters.PageSize ?? 20);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPut("{gameId}")]
+    public async Task<IActionResult> UpdateGameAsync(Guid gameId, UpdateGameCommand command)
+    {
+        await Mediator.Send(command with { Id = gameId });
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]

@@ -10,12 +10,20 @@ public sealed class GameTagMapping : BaseEntity<int>
     public bool IsPrimary { get; private set; } = false;
     public int Priority { get; private set; } = 0;
 
-    public static GameTagMapping Create(Game game, GameTag tag, int priority)
+    public static GameTagMapping Create(
+        int gameId,
+        int tagId,
+        bool isPrimary = false,
+        int priority = 0)
     {
+        if (priority < 0)
+            throw new ArgumentException("Priority must be greater than or equal to 0.", nameof(priority));
+
         return new GameTagMapping
         {
-            Game = game,
-            Tag = tag,
+            GameId = gameId,
+            TagId = tagId,
+            IsPrimary = isPrimary,
             Priority = priority,
         };
     }

@@ -31,6 +31,42 @@ public sealed class Game : BaseEntity<int>, IAuditable
         };
     }
 
+    public void UpdateGame(
+        string name,
+        string desc,
+        string note,
+        int priority,
+        bool isActive,
+        ICollection<GameCategoryMapping> categories,
+        ICollection<GameTypeMapping> types,
+        ICollection<GameTagMapping> tags)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name, "Name is required.");
+        if (priority < 0)
+            throw new ArgumentException("Priority must be greater than or equal to 0.", nameof(priority));
+        if (categories.Count == 0 || categories.Count(c => c.IsPrimary) != 1)
+            throw new ArgumentException("There must be exactly one primary category.", nameof(categories));
+        if (types.Count == 0 || types.Count(t => t.IsPrimary) != 1)
+            throw new ArgumentException("There must be exactly one primary type.", nameof(types));
+        if (tags.Count == 0 || tags.Count(t => t.IsPrimary) != 1)
+            throw new ArgumentException("There must be exactly one primary tag.", nameof(tags));
+        if (categories.Select(c => c.CategoryId).Distinct().Count() != categories.Count)
+            throw new ArgumentException("Categories contains duplicate category IDs.", nameof(categories));
+        if (types.Select(t => t.TypeId).Distinct().Count() != types.Count)
+            throw new ArgumentException("Types contains duplicate type IDs.", nameof(types));
+        if (tags.Select(t => t.TagId).Distinct().Count() != tags.Count)
+            throw new ArgumentException("Tags contains duplicate tag IDs.", nameof(tags));
+
+        Name = name;
+        Description = desc;
+        Note = note;
+        Priority = priority;
+        IsActive = isActive;
+        GameCategoryMappings = categories;
+        GameTypeMappings = types;
+        GameTagMappings = tags;
+    }
+
     public void UpdatePlatform(GamePlatform platform)
     {
         ArgumentNullException.ThrowIfNull(platform, nameof(platform));
@@ -47,7 +83,7 @@ public sealed class Game : BaseEntity<int>, IAuditable
         if (GameCategoryMappings.Any(c => c.Category.PublicId == category.PublicId))
             throw new InvalidOperationException($"Category with PublicId {category.PublicId} already exists in the game.");
 
-        var gameCategoryMapping = GameCategoryMapping.Create(this, category);
+        var gameCategoryMapping = GameCategoryMapping.Create(Id, category.Id);
         var hasPrimary = GameCategoryMappings.Any(c => c.IsPrimary);
         if (!hasPrimary)
             gameCategoryMapping.SetPrimary(true);
@@ -63,7 +99,7 @@ public sealed class Game : BaseEntity<int>, IAuditable
         if (GameTypeMappings.Any(t => t.Type.PublicId == type.PublicId))
             throw new InvalidOperationException($"Type with PublicId {type.PublicId} already exists in the game.");
 
-        var gameTypeMapping = GameTypeMapping.Create(this, type);
+        var gameTypeMapping = GameTypeMapping.Create(Id, type.Id);
         var hasPrimary = GameTypeMappings.Any(c => c.IsPrimary);
         if (!hasPrimary)
             gameTypeMapping.SetPrimary(true);
@@ -71,7 +107,7 @@ public sealed class Game : BaseEntity<int>, IAuditable
         GameTypeMappings.Add(gameTypeMapping);
     }
 
-    public void AddTag(GameTag tag, int priority)
+    public void AddTag(GameTag tag, bool isPrimary, int priority)
     {
         ArgumentNullException.ThrowIfNull(tag, nameof(tag));
 
@@ -79,7 +115,7 @@ public sealed class Game : BaseEntity<int>, IAuditable
         if (GameTagMappings.Any(t => t.Tag.PublicId == tag.PublicId))
             throw new ArgumentException($"Tag {tag.Name} already exists in the game.");
 
-        GameTagMappings.Add(GameTagMapping.Create(this, tag, priority));
+        GameTagMappings.Add(GameTagMapping.Create(Id, tag.Id, isPrimary, priority));
     }
 
     public void SetPrimaryTag(Guid tagId)

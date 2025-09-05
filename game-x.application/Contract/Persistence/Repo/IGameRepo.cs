@@ -12,4 +12,9 @@ public interface IGameRepo
         int Page,
         int PageSize,
         CancellationToken ct = default);
+
+    Task UpdateGameAsync(
+        Guid gameId,
+        Func<Game, Task> updateAction,
+        CancellationToken ct = default);
 }
