@@ -2,7 +2,8 @@ namespace game_x.application.Features.Chat.Dtos;
 
 public sealed record SupportConversationDto(
     Guid ConversationId,
-    string CustomerUserId,
+    string GuestId,
+    string CustomerId,
     string CustomerDisplayName,
     string? CustomerAvatarUrl,
     DateTime LastMessageAt,

@@ -33,7 +33,8 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
     
     public static Conversation Create(
         ConversationType type,
-        string senderUserId
+        string? senderUserId = null,
+        string? senderGuestId = null
     )
     {
         var conv = new Conversation
@@ -41,6 +42,7 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
             Type = type,
             Status = ConversationStatus.Open,
             CustomerId = senderUserId,
+            GuestId = senderGuestId,
             LastMessageAt = DateTime.UtcNow
         };
         return conv;

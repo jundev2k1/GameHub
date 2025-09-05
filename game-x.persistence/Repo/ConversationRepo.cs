@@ -8,7 +8,6 @@ using game_x.application.Features.Chat.Dtos;
 using game_x.domain.Constants;
 using game_x.share.Helper;
 using Mapster;
-using ConversationDto = game_x.application.Features.Chat.Dtos.ConversationDto;
 
 namespace game_x.persistence.Repo;
 
@@ -146,14 +145,8 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
             }, ct);
     }
-    
-    
 
-    public async Task<CursorResult<ConversationDto>> GetMyConversationsForGuestAsync(
-        string guestId,
-        int limit,
-        string? cursor,
-        CancellationToken ct = default)
+    public async Task<ConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
     {
         IQueryable<Conversation> query = context.Conversations.AsNoTracking();
 
@@ -162,34 +155,22 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
 
         query = query.Where(minePredicate);
 
-        var src = query
-            .Include(c => c.Customer)
+        var src = await query
+            .AsTracking()
+            .OrderDescending()
             .Include(c => c.Messages
                 .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
                 .Take(1))
-            .ThenInclude(x => x.SenderUser)
-            .Where(c => c.Messages.Any());
+            .Where(c => c.Messages.Any())
+            .FirstOrDefaultAsync(c =>
+                c.Type == ConversationType.Support &&
+                c.GuestId == guestId, ct);
         
-        var fp = CursorHelper.ComputeFp($"me:{guestId}|q:");
+        if (src == null)
+            return null;
         
-        return await SeekCursorBuilder<Conversation>
-            .For(src)
-            .Keys(
-                c => c.LastMessageAt,
-                c => context.Messages
-                    .Where(m => m.ConversationId == c.Id)
-                    .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
-                    .Select(m => m.Id)
-                    .FirstOrDefault())
-            .Sort(desc1: true, desc2: true)
-            .FromCursor(cursor, fp)
-            .WithPrev(false)
-            .Limit(limit)
-            .ExecuteAsync(c =>
-            {
-                var dto = c.Adapt<ConversationDto>();
-                return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
-            }, ct);
+        var dto = src.Adapt<ConversationDto>();
+        return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
     }
     
     public async Task<Conversation?> GetSupportConversationAsync(ConversationStatus status, string customerId, CancellationToken ct = default)
@@ -200,6 +181,13 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 c.Type == ConversationType.Support &&
                 c.Status == status &&
                 c.CustomerId == customerId, ct);
+    }
+    
+    public async Task<Conversation?> GetSupportConversationForGuestAsync(string guestId, CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .AsTracking()
+            .FirstOrDefaultAsync(c => c.Type == ConversationType.Support && c.GuestId == guestId, ct);
     }
     
     public async Task<Conversation> GetByIdAsync(Guid customerId, CancellationToken ct = default)

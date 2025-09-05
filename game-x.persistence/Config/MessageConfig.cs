@@ -30,9 +30,13 @@ public sealed class MessageConfig : IEntityTypeConfiguration<Message>
             .HasColumnName("conversation_id")
             .IsRequired();
         
+        builder.Property(x => x.SenderActorId)
+            .HasColumnName("sender_actor_id")
+            .IsRequired();
+        
         builder.Property(x => x.SenderUserId)
             .HasColumnName("sender_user_id")
-            .IsRequired();
+            .IsRequired(false);
         
         builder.Property(x => x.SenderRole)
             .HasColumnName("sender_role")

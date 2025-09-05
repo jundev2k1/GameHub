@@ -33,6 +33,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using game_x.infrastructure.Security;
+using Microsoft.AspNetCore.SignalR;
 
 namespace game_x.infrastructure;
 
@@ -81,8 +83,9 @@ public static class InfrastructureServicesRegistration
         // Add security services
         services.AddSingleton<IAsymmetricCryptoService, AsymmetricCryptoService>();
         services.AddSingleton<IGameAesEncryptor, GameAesEncryptor>();
-
-        // Add services DI
+        services.AddSingleton<IUserIdProvider, GidQueryUserIdProvider>();
+        
+        // Add service DI
         services.Scan(scan => scan.FromApplicationDependencies()
             .AddClasses(c => c.AssignableTo<IServices>().Where(t => !t.IsAbstract))
             .AsImplementedInterfaces()

@@ -7,10 +7,12 @@ public sealed class Message: BaseEntity<int>, IAuditable
     public Guid PublicId { get; set; }
     public int ConversationId { get; set; }
     public Conversation Conversation { get; set; } =  null!;
-
+    /// <summary>Guest or User</summary>
+    [MaxLength(64)]
+    public string SenderActorId { get; set; } = null!;
     [MaxLength(64)] 
-    public string SenderUserId { get; set; } = null!;
-    public User SenderUser { get; set; } = null!;
+    public string? SenderUserId { get; set; }
+    public User? SenderUser { get; set; }
     public RoleInConversation SenderRole { get; set; } = RoleInConversation.Member;
 
     public MessageKind Kind { get; set; } = MessageKind.Text; // Determines how clients render and what fields are relevant
@@ -37,15 +39,17 @@ public sealed class Message: BaseEntity<int>, IAuditable
     
     public static Message Create(
         Conversation conv,
-        string senderUserId,
+        string senderActorId,
         RoleInConversation senderRole,
         MessageKind kind,
-        string text
+        string text,
+        string? senderUserId = null
     )
     {
         var msg = new Message
         {
             Conversation = conv,
+            SenderActorId = senderActorId,
             SenderUserId = senderUserId,
             SenderRole = senderRole,
             Kind = kind,

@@ -1,37 +1,41 @@
 using game_x.application.Contract.Infrastructure.Logger;
-using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Features.Chat.Commands.SendMessageToCustomer;
+namespace game_x.application.Features.Chat.Commands.SendSupportMessageByGuest;
 
-public sealed class SendMessageToCustomerHandler(
+public sealed class SendSupportMessageByGuestHandler(
     IUnitOfWork unitOfWork,
     IConversationRepo conversationRepo,
     IMessageRepo messageRepo,
-    IAppLogger<Message> logger,
-    IUserAccessor userAccessor
-    ) : IRequestHandler<SendMessageToCustomerCommand, SendMessageToCustomerResult>
+    IAppLogger<Message> logger
+    ) : IRequestHandler<SendSupportMessageByGuestCommand, SendSupportMessageByGuestResult>
 {
-    public async Task<SendMessageToCustomerResult> Handle(SendMessageToCustomerCommand request, CancellationToken ct)
+    public async Task<SendSupportMessageByGuestResult> Handle(SendSupportMessageByGuestCommand request, CancellationToken ct)
     {
-        var senderUserId = userAccessor.GetUserId();
+        var senderUserId = request.GuestId;
         var now = DateTime.UtcNow;
 
-        var conv = await conversationRepo.GetByIdAsync(request.ConversationId, ct);
-        
+        // Each guest has only one conversation with customer support; if none exists, a new one will be created
+        var conv = await conversationRepo.GetSupportConversationForGuestAsync(senderUserId, ct);
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
+            if (conv is null)
+            {
+                conv = await CreateConversationAsync(senderUserId, ct);
+            }
+            
             var message = await CreateMessageAsync(conv, senderUserId, request.Text, ct);
             
             conv.LastMessageAt = now;
 
             await unitOfWork.CommitAsync(ct);
             
-            return new SendMessageToCustomerResult(
+            return new SendSupportMessageByGuestResult(
                 message.Adapt<MessageDto>(), 
                 conv.Adapt<ConversationSignalDto>());
+            
         }
         catch(Exception ex)
         {
@@ -41,16 +45,26 @@ public sealed class SendMessageToCustomerHandler(
         }
     }
     
+    private async Task<Conversation> CreateConversationAsync(string guestId, CancellationToken ct)
+    {
+        var conv = Conversation.Create(
+            type: ConversationType.Support,
+            senderGuestId: guestId);
+                
+        await conversationRepo.AddAsync(conv, ct);
+        return conv;
+    }
+    
     private async Task<Message> CreateMessageAsync(Conversation conv, string userId, string text, CancellationToken ct)
     {
         var msg = Message.Create(
             conv: conv,
             senderActorId: userId,
-            senderUserId: userId,
             text: text,
             kind: MessageKind.Text,
-            senderRole: RoleInConversation.Agent
+            senderRole: RoleInConversation.Member
         );
+        
         await messageRepo.AddAsync(msg, ct);
         return msg;
     }

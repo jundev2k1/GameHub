@@ -9,5 +9,5 @@ public sealed record SendMessageToCustomerCommand(
 
 public sealed record SendMessageToCustomerResult(
     MessageDto Message,
-    ConversationDto Conv
+    ConversationSignalDto Conv
 );

@@ -27,7 +27,7 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
         return await SeekCursorBuilder<Message>
             .For(query)
             .Keys(m => m.SentAt, m => m.Id)
-            .Sort(desc1: true, desc2: true) // newest → older
+            .Sort(desc1: true, desc2: false) // newest → older
             .FromCursor(cursor, fp)
             .WithPrev()
             .Limit(limit)

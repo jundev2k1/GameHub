@@ -16,6 +16,7 @@ internal static class GroupNames
 
     // ---------- Common groups ----------
     public static string Member(string userId) => Build("member", San(userId));
+    public static string Guest(string guestId) => Build("guest", San(guestId));
     public static string Admin(string userId) => Build("admin", San(userId));
     public static string Cs(string userId) => Build("cs", San(userId));
     public static string Role(string roleName) => Build("role", San(roleName));            // e.g., Admin, User

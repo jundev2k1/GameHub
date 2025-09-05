@@ -8,5 +8,5 @@ public sealed record SendSupportMessageCommand(
 
 public sealed record SendSupportMessageResult(
     MessageDto Message,
-    ConversationDto Conv
+    ConversationSignalDto Conv
 );

@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
+using game_x.application.Features.Chat.Commands.SendSupportMessageByGuest;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -16,7 +17,7 @@ public interface IChatClient
     /// <summary>
     ///     Send it whenever there is any update in the conversation, such as sending a message, reacting, etc.
     /// </summary>
-    Task ConversationUpdated(ConversationDto dto);
+    Task ConversationUpdated(ConversationSignalDto signalDto);
     Task MemberAdded(ConversationMemberDto dto);
     /// <summary>
     ///     Send it whenever a message is sent.
@@ -51,46 +52,73 @@ public interface IChatClient
     // Task DeliveryUpdated(DeliveryDto dto);         // per-member LastDeliveredAt if you track it
 }
 
-[Authorize(Roles = $"{AppRoles.User},{AppRoles.Admin},{AppRoles.Cs},{AppRoles.Root}")]
 public sealed class ChatHub(
     ISender sender,
     IUserAccessor userAccessor,
     ILogger<ChatHub> logger) : Hub<IChatClient>
 {
     public const string Path = "/hubs/chat";
-
+    
     public override async Task OnConnectedAsync()
     {
-        var userId = userAccessor.GetUserId();
-        var role = userAccessor.GetRoles();
+        var user = Context.User;
+        AppRole? role;
+        string? userId;
         
-        if (Context.User?.IsInRole(AppRoles.User) == true)
+        if (user?.Identity?.IsAuthenticated == true)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Member(userId));
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.User));
+            userId = userAccessor.GetUserId();
+            role = userAccessor.GetRoles();
+    
+            if (Context.User?.IsInRole(AppRoles.User) == true)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Member(userId));
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.User));
+            }
+        
+            // If the user is an Admin/Cs, also add them to role groups (so they get broadcasts)
+            if (Context.User?.IsInRole(AppRoles.Admin) == true)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.Admin));
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Admin(userId));
+            }
+    
+            if (Context.User?.IsInRole(AppRoles.Cs) == true)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.Cs));
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Cs(userId));
+            }
+    
+            logger.LogInformation("ChatHub {Role} connected: {UserId}",role.ToString(), userId);
+        }
+        else
+        {
+            userId = Context.UserIdentifier;
+            if (string.IsNullOrWhiteSpace(userId)) { Context.Abort(); return; }
+            role = AppRole.Of(AppRoles.Guest);
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Guest(userId));
         }
         
-        // If the user is an Admin/Cs, also add them to role groups (so they get broadcasts)
-        if (Context.User?.IsInRole(AppRoles.Admin) == true)
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.Admin));
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Admin(userId));
-        }
-
-        if (Context.User?.IsInRole(AppRoles.Cs) == true)
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.Cs));
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Cs(userId));
-        }
-
-        logger.LogInformation("ChatHub {Role} connected: {UserId}",role.ToString(), userId);
+        logger.LogInformation("ChatHub {Role} connected: {UserId}", role.ToString(), userId);
         await base.OnConnectedAsync();
     }
     
     public override async Task OnDisconnectedAsync(Exception? ex)
     {
-        var userId = userAccessor.GetUserId();
-        var role = userAccessor.GetRoles();
+        var user = Context.User;
+        AppRole? role;
+        string? userId;
+
+        if (user?.Identity?.IsAuthenticated == true)
+        {
+            userId = userAccessor.GetUserId();
+            role = userAccessor.GetRoles();
+        }
+        else
+        {
+            userId = Context.UserIdentifier;
+            role = AppRole.Of(AppRoles.Guest);
+        }
         logger.LogInformation("ChatHub {Role} disconnected: {UserId}",role.ToString(), userId);
         await base.OnDisconnectedAsync(ex);
     }
@@ -105,12 +133,13 @@ public sealed class ChatHub(
     /// Broadcast to all Admin/Cs role groups if this is a new conversation
     /// Only send to the assigned CS representative if the conversation has been claimed
     /// </summary>
+    [Authorize(Roles = AppRoles.User)]
     public async Task SendSupportMessage(SendSupportMessageCommand cmd)
     {
         var ct = Context.ConnectionAborted;
         
         var result = await sender.Send(cmd, ct);
-        
+    
         await Clients.Caller.ConversationUpdated(result.Conv);
         await Clients.Caller.MessageCreated(result.Message);
         
@@ -147,8 +176,59 @@ public sealed class ChatHub(
     }
     
     /// <summary>
+    /// Send a support message by customer.
+    /// Creates the user's support conversation if missing
+    /// Broadcast to all Admin/Cs role groups if this is a new conversation
+    /// Only send to the assigned CS representative if the conversation has been claimed
+    /// </summary>
+    public async Task SendSupportMessageByGuest(SendSupportMessageByGuestCommand cmd)
+    {
+        var guestId = Context.UserIdentifier;
+        if (string.IsNullOrWhiteSpace(guestId)) { return; }
+        
+        var ct = Context.ConnectionAborted;
+        
+        var result = await sender.Send(cmd with {GuestId = guestId}, ct);
+        
+        await Clients.Caller.ConversationUpdated(result.Conv);
+        await Clients.Caller.MessageCreated(result.Message);
+        
+        switch (result.Conv.Status)
+        {
+            case ConversationStatus.Open:
+                // Notify the conversation group
+                await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).ConversationUpdated(result.Conv);
+                await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
+
+                // Notify all admins and cs
+                await Clients.Group(GroupNames.Role(AppRoles.Admin)).ConversationUpdated(result.Conv);
+                await Clients.Group(GroupNames.Role(AppRoles.Cs)).ConversationUpdated(result.Conv);
+                await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
+                await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
+                break;
+            case ConversationStatus.Claimed:
+                // if (result.Conv.AssignedAgentId != null)
+                // {
+                //     await Clients.Group(GroupNames.Cs(result.Conv.AssignedAgentId)).ConversationUpdated(convDto);
+                //     await Clients.Group(GroupNames.Cs(result.Conv.AssignedAgentId)).MessageCreated(result.Message);
+                // }
+                
+                // Notify all admins and cs for now
+                await Clients.Group(GroupNames.Role(AppRoles.Admin)).ConversationUpdated(result.Conv);
+                await Clients.Group(GroupNames.Role(AppRoles.Cs)).ConversationUpdated(result.Conv);
+                await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
+                await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
+                
+                // await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).ConversationUpdated(convDto);
+                // await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
+                break;
+        }
+    }
+    
+    /// <summary>
     /// Send a support message to customer.
     /// </summary>
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     public async Task SendSupportMessageToCustomer(SendMessageToCustomerCommand cmd)
     {
         var ct = Context.ConnectionAborted;

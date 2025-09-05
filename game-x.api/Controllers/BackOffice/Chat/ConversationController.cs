@@ -5,15 +5,14 @@ using game_x.application.Features.Chat.Queries.ListSupportConversations;
 using game_x.application.Features.Chat.Queries.ListUnassignedQueue;
 using game_x.application.Features.Chat.Queries.ListWindowMessagesInConversation;
 
-namespace game_x.api.Controllers.CS.Chat;
+namespace game_x.api.Controllers.BackOffice.Chat;
 
-[Route("api/cs/conversations")]
-[Authorize(Roles = AppRoles.Cs)]
+[Route("api/back-office/conversations")]
+[Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
 public class ConversationController : BaseApiController
 {
     /// <summary>
-    /// List unassigned support conversations (ordered by lastMessageAt desc).
-    /// Cursor-based pagination. Optional search by customer or last message text.
+    /// List unassigned support conversations. Cursor-based pagination.
     /// </summary>
     [HttpGet("queue")]
     public async Task<IActionResult> GetConversationQueueAsync([AsParameters] CursorCriteriaRequest parameters)
@@ -37,7 +36,7 @@ public class ConversationController : BaseApiController
     /// List conversations for current logged-in user
     /// </summary>
     [HttpGet("me")]
-    public async Task<IActionResult> GetMyConversationAsync([AsParameters] CursorCriteriaRequest parameters)
+    public async Task<IActionResult> GetSupportConversationAsync([AsParameters] CursorCriteriaRequest parameters)
     {
         var query = new ListSupportConversationsQuery(
             Limit: parameters.Limit,

@@ -7,8 +7,7 @@ using System.Security.Claims;
 
 namespace game_x.infrastructure.Security;
 
-public sealed class UserAccessor(
-    IHttpContextAccessor httpContextAccessor) : IUserAccessor, IServices
+public sealed class UserAccessor(IHttpContextAccessor httpContextAccessor) : IUserAccessor, IServices
 {
     public string GetUserId()
     {

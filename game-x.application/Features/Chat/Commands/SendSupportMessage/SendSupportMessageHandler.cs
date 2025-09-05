@@ -48,7 +48,7 @@ public sealed class SendSupportMessageHandler(
             
             return new SendSupportMessageResult(
                 message.Adapt<MessageDto>(), 
-                conv.Adapt<ConversationDto>());
+                conv.Adapt<ConversationSignalDto>());
             
         }
         catch(Exception ex)
@@ -84,6 +84,7 @@ public sealed class SendSupportMessageHandler(
     {
         var msg = Message.Create(
             conv: conv,
+            senderActorId: userId,
             senderUserId: userId,
             text: text,
             kind: MessageKind.Text,
