@@ -12,7 +12,6 @@ public sealed class ResubmitBankAccountHandler(
     IUnitOfWork unitOfWork,
     IUserBankAccountRepo bankAccountRepo,
     IUserAccessor userAccessor,
-    IUserRepo userRepo,
     IMediaFileRepo mediaFileRepo,
     IApplicationEventDispatcher eventDispatcher,
     IFileStorageService fileStorage) : ICommandHandler<ResubmitBankAccountCommand>
@@ -20,7 +19,6 @@ public sealed class ResubmitBankAccountHandler(
     public async Task<Unit> Handle(ResubmitBankAccountCommand request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
-        var user = await userRepo.GetUserByIdAsync(userId, ct);
         UserBankAccount? updateBankAccount = null;
 
         await unitOfWork.WithTransactionAsync(async () =>
@@ -41,9 +39,13 @@ public sealed class ResubmitBankAccountHandler(
             if (request.Image != null)
                 await ReupImage(updateBankAccount, request.Image, ct);
         }, ct);
-        var userBankAccountDto = updateBankAccount?.Adapt<BankAccountListItemDto>();
+        if (updateBankAccount != null)
+        {
+            var bankAccountAfterUpdated = await bankAccountRepo.GetByIdAsync(updateBankAccount.PublicId, ct);
+            var userBankAccountItemDto = bankAccountAfterUpdated?.Adapt<BankAccountListItemDto>();
+            await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.BankAccount, null, userBankAccountItemDto), ct);
+        }
 
-        await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.BankAccount, null, userBankAccountDto), ct);
         return Unit.Value;
     }
 

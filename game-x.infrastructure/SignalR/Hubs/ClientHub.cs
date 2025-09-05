@@ -19,8 +19,6 @@ public interface IClientHub
     Task TransactionUpdated(ClientTransactionDto orderInfo);
     /// <summary>Notify that user wallets have been updated.</summary>
     Task WalletsUpdated(ClientWalletsDto dto);
-    /// <summary>Notify that a transaction history has been updated.</summary>
-    Task LedgerUpdated(ClientLedgerDto dto);
     Task UserVerifyUpdated(VerificationStatusDto dto);
     Task GameBalanceUpdated(GameBalanceNotificationDto notificationDto);
 }

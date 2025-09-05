@@ -12,6 +12,7 @@ public sealed class SubmitBankAccountHandler(
     IUserAccessor userAccessor,
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
+    IUserBankAccountRepo userBankAccountRepo,
     IFiatCurrencyRepo currencyRepo,
     IApplicationEventDispatcher eventDispatcher,
     IFileStorageService fileStorage) : ICommandHandler<SubmitBankAccountCommand>
@@ -23,7 +24,6 @@ public sealed class SubmitBankAccountHandler(
             .GetByCodeAsync(CurrencyUnit.Of(request.CurrencyCode), ct);
 
         var imageObjectName = await UploadFiles(request.Image, userId, ct);
-        var user = await userRepo.GetUserByIdAsync(userId, ct);
         UserBankAccount? userBankAccountDto = null;
 
         await unitOfWork.WithTransactionAsync(async () =>
@@ -49,8 +49,12 @@ public sealed class SubmitBankAccountHandler(
                 userBankAccountDto = userBankAccount;
             }, ct);
         }, ct);
-        var userBankAccountItemDto = userBankAccountDto?.Adapt<BankAccountListItemDto>();
-        await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.BankAccount, null, userBankAccountItemDto), ct);
+        if (userBankAccountDto != null)
+        {
+            var bankAccountAfterUpdated = await userBankAccountRepo.GetByIdAsync(userBankAccountDto.PublicId, ct);
+            var userBankAccountItemDto = bankAccountAfterUpdated?.Adapt<BankAccountListItemDto>();
+            await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.BankAccount, null, userBankAccountItemDto), ct);
+        }
 
         return Unit.Value;
     }
