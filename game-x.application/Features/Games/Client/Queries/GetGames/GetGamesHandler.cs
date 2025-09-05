@@ -34,6 +34,8 @@ public sealed class GetGamesHandler(
                 || game.Categories.Any(c => request.Categories.Contains(c.Id)))
             && ((request.GameTypes == null)
                 || game.GameTypes.Any(t => request.GameTypes.Contains(t.Id)))
+            && ((request.GameTags == null)
+                || game.GameTags.Any(t => request.GameTags.Contains(t.Id)))
             && ((request.Keyword == null)
                 || game.Id.ToString().Equals(request.Keyword.Trim(), StringComparison.InvariantCultureIgnoreCase)
                 || game.Name.Contains(request.Keyword.Trim(), StringComparison.InvariantCultureIgnoreCase));

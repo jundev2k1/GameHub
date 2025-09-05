@@ -15,8 +15,9 @@ public sealed class GameController(
         var query = new GetGamesQuery(
             request.Keyword,
             request.Platform,
-            request.Category,
-            request.GameType,
+            request.Categories,
+            request.GameTypes,
+            request.GameTags,
             request.PageNumber ?? 1,
             request.PageSize ?? 20);
         var result = await Mediator.Send(query);
