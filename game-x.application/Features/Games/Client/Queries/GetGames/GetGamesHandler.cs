@@ -17,7 +17,7 @@ public sealed class GetGamesHandler(
             items: searchResult
                 .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
-                .Select(game => game.Adapt<GetGamesItemDto>()),
+                .Select(game => new GetGamesItemDto(game)),
             totalItems: totalItems,
             totalPages: (int)Math.Ceiling((decimal)totalItems / request.PageSize),
             pageIndex: request.PageIndex,
