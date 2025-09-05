@@ -10,10 +10,6 @@ namespace game_x.persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "fk_messages_user_sender_user_id",
-                table: "messages");
-
             migrationBuilder.AlterColumn<string>(
                 name: "sender_user_id",
                 table: "messages",
@@ -31,22 +27,11 @@ namespace game_x.persistence.Migrations
                 maxLength: 64,
                 nullable: false,
                 defaultValue: "");
-
-            migrationBuilder.AddForeignKey(
-                name: "fk_messages_user_sender_user_id",
-                table: "messages",
-                column: "sender_user_id",
-                principalTable: "users",
-                principalColumn: "id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "fk_messages_user_sender_user_id",
-                table: "messages");
-
             migrationBuilder.DropColumn(
                 name: "sender_actor_id",
                 table: "messages");
@@ -62,14 +47,6 @@ namespace game_x.persistence.Migrations
                 oldType: "character varying(64)",
                 oldMaxLength: 64,
                 oldNullable: true);
-
-            migrationBuilder.AddForeignKey(
-                name: "fk_messages_user_sender_user_id",
-                table: "messages",
-                column: "sender_user_id",
-                principalTable: "users",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
         }
     }
 }
