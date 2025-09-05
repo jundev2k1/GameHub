@@ -41,9 +41,13 @@ public sealed class UserController : BaseApiController
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("kycs")]
-    public async Task<IActionResult> GetUserKycByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    public async Task<IActionResult> GetUserKycByCriteriaAsync([AsParameters] GetKycsRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.Statuses.IsNotNullOrEmpty())
+            paramExtends.Add("statuses", parameters.Statuses);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetKycByCriteriaQuery(
             filters,
@@ -70,6 +74,8 @@ public sealed class UserController : BaseApiController
         var filterExtends = new Dictionary<string, string>();
         if (parameters.CurrencyCode.IsNotNullOrEmpty())
             filterExtends.Add("currencies", parameters.CurrencyCode);
+        if (parameters.Statuses.IsNotNullOrEmpty())
+            filterExtends.Add("statuses", parameters.Statuses);
 
         var filters = QueryConverter.ToFilters(
             parameters.Filters,

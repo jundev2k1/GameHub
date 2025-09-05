@@ -9,6 +9,7 @@ public sealed class BankAccountProfileDto
     public string AccountName { get; set; } = string.Empty;
     public string AccountNumber { get; set; } = string.Empty;
     public string CurrencyCode { get; set; } = string.Empty;
+    public string CurrencySymbol { get; set; } = string.Empty;
     public UserBankAccountStatus Status { get; set; }
     public string ImageName { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;

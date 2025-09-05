@@ -8,6 +8,7 @@ public sealed class GetBankAccountByCriteriaValidator : AbstractValidator<GetBan
     {
         "search",
         "currencies",
+        "statuses",
         nameof(UserBankAccount.PublicId),
         nameof(UserBankAccount.BankCode),
         nameof(UserBankAccount.BankName),
