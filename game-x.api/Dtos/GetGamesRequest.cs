@@ -6,10 +6,14 @@ public sealed class GetGamesRequest
     public string? Keyword { get; set; }
     [FromQuery(Name = "platform")]
     public Guid? Platform { get; set; }
-    [FromQuery(Name = "category")]
-    public Guid[]? Category { get; set; }
-    [FromQuery(Name = "type")]
-    public Guid[]? GameType { get; set; }
+    [FromQuery(Name = "categories")]
+    public Guid[]? Categories { get; set; }
+    [FromQuery(Name = "types")]
+    public Guid[]? GameTypes { get; set; }
+    [FromQuery(Name = "tags")]
+    public Guid[]? GameTags { get; set; }
+    [FromQuery(Name = "active")]
+    public bool? IsActive { get; set; }
     [FromQuery(Name = "page")]
     public int? PageNumber { get; set; } = 1;
     [FromQuery(Name = "pageSize")]

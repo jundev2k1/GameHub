@@ -1,6 +1,7 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Exceptions;
 using System.Linq.Expressions;
 
 namespace game_x.persistence.Repo;
@@ -16,6 +17,8 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gcm => gcm.Category)
             .Include(g => g.GameTypeMappings)
             .ThenInclude(gtm => gtm.Type)
+            .Include(g => g.GameTagMappings)
+            .ThenInclude(gtm => gtm.Tag)
             .ToArrayAsync(ct);
     }
 
@@ -32,6 +35,8 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gcm => gcm.Category)
             .Include(g => g.GameTypeMappings)
             .ThenInclude(gtm => gtm.Type)
+            .Include(g => g.GameTagMappings)
+            .ThenInclude(gtm => gtm.Tag)
             .Where(condition)
             .OrderBy(g => g.Priority)
             .ThenBy(g => g.Name)
@@ -50,5 +55,23 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             totalPageCount,
             page,
             pageSize);
+    }
+
+    public async Task UpdateGameAsync(
+        Guid gameId,
+        Func<Game, Task> updateAction,
+        CancellationToken ct = default)
+    {
+        var targetGame = await context.Games
+            .Include(g => g.GameCategoryMappings)
+            .ThenInclude(gcm => gcm.Category)
+            .Include(g => g.GameTypeMappings)
+            .ThenInclude(gtm => gtm.Type)
+            .Include(g => g.GameTagMappings)
+            .ThenInclude(gtm => gtm.Tag)
+            .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
+            ?? throw new NotFoundException(nameof(gameId), gameId);
+
+        await updateAction.Invoke(targetGame);
     }
 }

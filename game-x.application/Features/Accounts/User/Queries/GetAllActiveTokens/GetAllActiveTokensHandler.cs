@@ -17,6 +17,8 @@ public sealed class GetAllActiveTokensHandler(
             {
                 IsCurrentToken = token.JwtId == currentJwtId
             })
+            .OrderByDescending(token => token.IsCurrentToken)
+            .ThenByDescending(token => token.CreatedAt)
             .ToArray();
         return Task.FromResult(result);
     }

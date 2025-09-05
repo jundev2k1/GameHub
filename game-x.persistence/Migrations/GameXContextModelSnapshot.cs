@@ -799,6 +799,118 @@ namespace game_x.persistence.Migrations
                     b.ToTable("game_platforms", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.GameTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("color");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("icon");
+
+                    b.Property<short>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)1)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasDefaultValue("")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_tags");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_tags_code");
+
+                    b.ToTable("game_tags", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameTagMapping", b =>
+                {
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer")
+                        .HasColumnName("tag_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_primary");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("priority");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("GameId", "TagId")
+                        .HasName("pk_game_tag_mappings");
+
+                    b.HasIndex("TagId")
+                        .HasDatabaseName("ix_game_tag_mappings_tag_id");
+
+                    b.ToTable("game_tag_mappings", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GameType", b =>
                 {
                     b.Property<int>("Id")
@@ -2328,6 +2440,27 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Game");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.GameTagMapping", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Game", "Game")
+                        .WithMany("GameTagMappings")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_tag_mappings_games_game_id");
+
+                    b.HasOne("game_x.domain.Entities.GameTag", "Tag")
+                        .WithMany("GameTagMappings")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_tag_mappings_game_tags_tag_id");
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Tag");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GameTypeMapping", b =>
                 {
                     b.HasOne("game_x.domain.Entities.Game", "Game")
@@ -2675,6 +2808,8 @@ namespace game_x.persistence.Migrations
                 {
                     b.Navigation("GameCategoryMappings");
 
+                    b.Navigation("GameTagMappings");
+
                     b.Navigation("GameTypeMappings");
                 });
 
@@ -2688,6 +2823,11 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Games");
 
                     b.Navigation("TransactionExternals");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameTag", b =>
+                {
+                    b.Navigation("GameTagMappings");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.GameType", b =>

@@ -11,17 +11,19 @@ public sealed class GameTypeMapping : BaseEntity<object>
     public bool IsPrimary { get; private set; } = false;
     public int Priority { get; private set; } = 0;
 
-    public static GameTypeMapping Create(Game game, GameType type, bool isPrimary = false, int priority = 0)
+    public static GameTypeMapping Create(
+        int gameId,
+        int typeId,
+        bool isPrimary = false,
+        int priority = 0)
     {
-        if (game == null)
-            throw new ArgumentNullException(nameof(game), "Game cannot be null.");
-        if (type == null)
-            throw new ArgumentNullException(nameof(type), "Game Type cannot be null.");
+        if (priority < 0)
+            throw new ArgumentException("Priority cannot be negative.", nameof(priority));
 
         return new GameTypeMapping
         {
-            Game = game,
-            Type = type,
+            GameId = gameId,
+            TypeId = typeId,
             IsPrimary = isPrimary,
             Priority = priority,
         };
@@ -35,7 +37,7 @@ public sealed class GameTypeMapping : BaseEntity<object>
     public void SetPriority(int priority)
     {
         if (priority < 0)
-            throw new ArgumentOutOfRangeException(nameof(priority), "Priority cannot be negative.");
+            throw new ArgumentException("Priority cannot be negative.", nameof(priority));
         Priority = priority;
     }
 }

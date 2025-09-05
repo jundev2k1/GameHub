@@ -50,8 +50,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Type, src => src.Type.ToString().ToLower());
         
         cfg.NewConfig<TransactionInternalDto, AdminTransactionDto>()
-            .Map(dest => dest.TransactionId, src => src.Id)
             .Map(dest => dest.Status, src => src.Status.ToString().ToLower())
+            .Map(dest => dest.Network, src => src.Network.ToString().ToLower())
             .Map(dest => dest.Type, src => src.Type.ToString().ToLower());
         
         cfg.NewConfig<CryptoToken, CryptoTokenDto>()

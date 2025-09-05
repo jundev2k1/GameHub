@@ -37,8 +37,8 @@ public sealed class KycController(IUserAccessor userAccessor) : BaseApiControlle
     {
         var command = formData.Adapt<SubmitKycCommand>() with
         {
-            FrontImage = FileUpload.FromFormFile(formData.FrontPhoto),
-            BackImage = FileUpload.FromFormFile(formData.BackPhoto),
+            FrontImage = FileUpload.FromFormFile(formData.FrontImage),
+            BackImage = FileUpload.FromFormFile(formData.BackImage),
         };
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
@@ -58,11 +58,11 @@ public sealed class KycController(IUserAccessor userAccessor) : BaseApiControlle
     {
         var command = formData.Adapt<ResubmitKycCommand>() with
         {
-            FrontImage = formData.FrontPhoto != null
-                ? FileUpload.FromFormFile(formData.FrontPhoto)
+            FrontImage = formData.FrontImage != null
+                ? FileUpload.FromFormFile(formData.FrontImage)
                 : null,
-            BackImage = formData.BackPhoto!= null
-                ? FileUpload.FromFormFile(formData.BackPhoto)
+            BackImage = formData.BackImage!= null
+                ? FileUpload.FromFormFile(formData.BackImage)
                 : null
         };
         await Mediator.Send(command);

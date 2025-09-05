@@ -7,6 +7,7 @@ public sealed class GetKycByCriteriaValidator : AbstractValidator<GetKycByCriter
     private readonly string[] _allowFields =
     {
         "search",
+        "statuses",
         nameof(UserKyc.PublicId),
         nameof(UserKyc.UserId),
         nameof(UserKyc.FullName),

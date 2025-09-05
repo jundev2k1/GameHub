@@ -1,6 +1,8 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Features.BankAccountVerifications.Dtos;
+using game_x.application.Features.Kyc.Dtos;
 using game_x.infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
@@ -22,5 +24,15 @@ public sealed class AdminHubService(IHubContext<AdminHub, IAdminHub> hubContext)
     public async Task SendTransactionToAdminAsync(string adminId, AdminTransactionDto transaction)
     {
         await hubContext.Clients.Group($"admin-{adminId}").TransactionUpdated(transaction);
+    }
+
+    public async Task SendVerificationToAdminAsync(string adminId, UserKycListItemDto verification)
+    {
+        await hubContext.Clients.Group($"admin-{adminId}").KycCreated(verification);
+    }
+
+    public async Task SendVerificationToAdminAsync(string adminId, BankAccountListItemDto verification)
+    {
+        await hubContext.Clients.Group($"admin-{adminId}").BankAccountCreated(verification);
     }
 }
