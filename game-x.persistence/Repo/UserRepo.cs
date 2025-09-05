@@ -24,6 +24,7 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
         var targetUser = await context.Users
             .Include(u => u.UserKyc)
             .Include(u => u.UserExtend)
+            .Include(u => u.UserRoles)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
