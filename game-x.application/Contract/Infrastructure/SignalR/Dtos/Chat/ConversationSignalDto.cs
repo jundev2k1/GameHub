@@ -2,7 +2,7 @@ namespace game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
     
 public sealed record ConversationSignalDto(
     Guid ConversationId,
-    string GuestId,
+    string? GuestId,
     ConversationStatus Status,
     string? CustomerId,
     string? CustomerDisplayName,

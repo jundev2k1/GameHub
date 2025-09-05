@@ -22,7 +22,7 @@ public interface IConversationRepo
         CancellationToken ct = default);
     Task<ConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default);
     Task<Conversation> GetByIdAsync(Guid convId, CancellationToken ct = default);
-    Task<Conversation?> GetSupportConversationAsync(ConversationStatus status, string customerId, CancellationToken ct = default);
+    Task<Conversation?> GetSupportConversationForClientAsync(string customerId, CancellationToken ct = default);
     Task<Conversation?> GetSupportConversationForGuestAsync(string guestId, CancellationToken ct = default);
     Task AddAsync(Conversation conv, CancellationToken ct = default);
 

@@ -328,6 +328,9 @@ public static class MessageCode
         /// <summary>Conversation was already claimed.</summary>
         [EnumMetadata("Conversation was already claimed.")]
         ConversationAlreadyClaimed = 10501,
+        /// <summary>Conversation has not been claimed.</summary>
+        [EnumMetadata("Conversation has not been claimed.")]
+        ConversationNotClaimed = 10502,
         #endregion
     }
 }

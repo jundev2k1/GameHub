@@ -20,6 +20,9 @@ public sealed class SendMessageToCustomerHandler(
 
         var conv = await conversationRepo.GetByIdAsync(request.ConversationId, ct);
         
+        if(conv.Status != ConversationStatus.Claimed)
+            throw new BadRequestException(MessageCode.Chatting.ConversationNotClaimed);
+        
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {

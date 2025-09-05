@@ -20,7 +20,7 @@ public sealed class SendSupportMessageHandler(
         var now = DateTime.UtcNow;
 
         // Each customer has only one conversation with customer support; if none exists, a new one will be created
-        var conv = await conversationRepo.GetSupportConversationAsync(ConversationStatus.Claimed, senderUserId, ct);
+        var conv = await conversationRepo.GetSupportConversationForClientAsync(senderUserId, ct);
         ConversationMember? convMember = null;
         await unitOfWork.BeginTransactionAsync(ct);
         try

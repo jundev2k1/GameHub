@@ -173,13 +173,12 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
     }
     
-    public async Task<Conversation?> GetSupportConversationAsync(ConversationStatus status, string customerId, CancellationToken ct = default)
+    public async Task<Conversation?> GetSupportConversationForClientAsync(string customerId, CancellationToken ct = default)
     {
         return await context.Conversations
             .AsTracking()
             .FirstOrDefaultAsync(c =>
                 c.Type == ConversationType.Support &&
-                c.Status == status &&
                 c.CustomerId == customerId, ct);
     }
     
