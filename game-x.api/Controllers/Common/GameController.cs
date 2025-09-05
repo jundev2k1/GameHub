@@ -28,6 +28,12 @@ public sealed class GameController(
     {
         var result = gameProviderCache.PlatformList
             .OrderBy(platform => platform.Priority)
+            .Select(platform => new
+            {
+                platform.Id,
+                platform.Name,
+                platform.Description
+            })
             .ToArray();
         return await Task.FromResult(ApiResponseFactory.Ok(result));
     }
@@ -37,6 +43,12 @@ public sealed class GameController(
     {
         var result = gameProviderCache.CategoryList
             .OrderBy(cate => cate.Priority)
+            .Select(cate => new
+            {
+                cate.Id,
+                cate.Name,
+                cate.Description
+            })
             .ToArray();
         return await Task.FromResult(ApiResponseFactory.Ok(result));
     }
@@ -46,6 +58,12 @@ public sealed class GameController(
     {
         var result = gameProviderCache.GameTypeList
             .OrderBy(type => type.Priority)
+            .Select(type => new
+            {
+                type.Id,
+                type.Name,
+                type.Description
+            })
             .ToArray();
         return await Task.FromResult(ApiResponseFactory.Ok(result));
     }
