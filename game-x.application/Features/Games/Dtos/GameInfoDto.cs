@@ -18,6 +18,8 @@ public sealed class GameInfoDto
     public GameTagInfo[] GameTags { get; set; } = [];
     public int Priority { get; set; } = 0;
     public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
 
 public sealed class GameCategoryInfo
