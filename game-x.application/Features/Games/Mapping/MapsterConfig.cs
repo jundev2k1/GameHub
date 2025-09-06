@@ -93,30 +93,30 @@ public sealed class MapsterConfig : IRegister
 
     private static void RegisterGameTransactionMappings(TypeAdapterConfig cfg)
     {
-        cfg.NewConfig<TransactionExternal, TransactionExternalDto>()
-            .Map(dest => dest.Id, src => src.Transaction.PublicId)
-            .Map(dest => dest.CryptoTokenId, src => src.Transaction.CryptoToken!.PublicId)
-            .Map(dest => dest.GamePlatformId, src => src.GamePlatform!.PublicId)
-            .Map(dest => dest.GamePlatformName, src => src.GamePlatform!.Name)
-            .Map(dest => dest.Symbol, src => src.Transaction.CryptoToken!.Symbol)
-            .Map(dest => dest.Network, src => src.Transaction.CryptoToken!.Network)
-            .Map(dest => dest.BalanceAfter, src => src.Transaction.BalanceAfter);
+        cfg.NewConfig<Transaction, TransactionExternalDto>()
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
+            .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : Guid.Empty)
+            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : null)
+            .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
+            .Map(dest => dest.Network, src => src.CryptoToken.Network)
+            .Map(dest => dest.BalanceAfter, src => src.BalanceAfter);
 
         cfg.NewConfig<Transaction, ListTransactionExternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken!.PublicId)
-            .Map(dest => dest.GamePlatformId, src => src.TransactionExternal!.GamePlatform!.PublicId)
-            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal!.GamePlatform.Name)
-            .Map(dest => dest.Symbol, src => src.CryptoToken!.Symbol)
-            .Map(dest => dest.Network, src => src.CryptoToken!.Network);
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
+            .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : Guid.Empty)
+            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : String.Empty)
+            .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
+            .Map(dest => dest.Network, src => src.CryptoToken.Network);
         
-        cfg.NewConfig<TransactionExternal, TransactionExternalDetailDto>()
-            .Map(dest => dest.Id, src => src.Transaction.PublicId)
-            .Map(dest => dest.CryptoTokenId, src => src.Transaction.CryptoToken!.PublicId)
-            .Map(dest => dest.Symbol, src => src.Transaction.CryptoToken!.Symbol)
-            .Map(dest => dest.Network, src => src.Transaction.CryptoToken!.Network)
-            .Map(dest => dest.BalanceAfter, src => src.Transaction.BalanceAfter)
-            .Map(dest => dest.GamePlatformId, src => src.GamePlatform!.PublicId)
-            .Map(dest => dest.GamePlatformName, src => src.GamePlatform!.Name);
+        cfg.NewConfig<Transaction, TransactionExternalDetailDto>()
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
+            .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
+            .Map(dest => dest.Network, src => src.CryptoToken.Network)
+            .Map(dest => dest.BalanceAfter, src => src.BalanceAfter)
+            .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : Guid.Empty)
+            .Map(dest => dest.GamePlatformName, src =>  src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : null);
     }
 }
