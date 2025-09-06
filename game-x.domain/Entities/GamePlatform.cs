@@ -25,6 +25,19 @@ public sealed class GamePlatform : BaseEntity<int>
         };
     }
 
+    public void Update(string name, string desc, string note, int priority, bool isActive)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        if (priority < 0)
+            throw new ArgumentException("Priority must be greater than or equal 0.", nameof(priority));
+
+        Name = name;
+        Description = desc;
+        Note = note;
+        Priority = priority;
+        IsActive = isActive;
+    }
+
     public void SetActive(bool isActive) =>
         IsActive = isActive;
 }

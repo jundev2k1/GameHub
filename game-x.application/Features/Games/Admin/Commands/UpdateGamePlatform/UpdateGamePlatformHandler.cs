@@ -1,18 +1,18 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Features.Games.Admin.Commands.UpdateGameType;
+namespace game_x.application.Features.Games.Admin.Commands.UpdateGamePlatform;
 
-public sealed class UpdateGameTypeHandler(
+public sealed class UpdateGamePlatformHandler(
     IUnitOfWork unitOfWork,
-    IGameTypeRepo gameTypeRepo,
-    IGameProviderCacheService gameProviderCache) : ICommandHandler<UpdateGameTypeCommand>
+    IGamePlatformRepo gamePlatformRepo,
+    IGameProviderCacheService gameProviderCache) : ICommandHandler<UpdateGamePlatformCommand>
 {
-    public async Task<Unit> Handle(UpdateGameTypeCommand request, CancellationToken ct = default)
+    public async Task<Unit> Handle(UpdateGamePlatformCommand request, CancellationToken ct = default)
     {
-        await gameTypeRepo.UpdateAsync(request.Id, async type =>
+        await gamePlatformRepo.UpdateAsync(request.Id, async platform =>
         {
-            type.Update(
+            platform.Update(
                 request.Name,
                 request.Description,
                 request.Note,
@@ -22,7 +22,7 @@ public sealed class UpdateGameTypeHandler(
         }, ct);
 
         // Refresh cache data after database updated
-        await gameProviderCache.RefreshGameTypeList();
+        await gameProviderCache.RefreshGamePlatformList();
         await gameProviderCache.RefreshGameList();
 
         return Unit.Value;

@@ -17,7 +17,8 @@ public sealed class GetGameTagDetailHandler(
             .Select(g => new GameTagRelatedGameDto
             {
                 Id = g.Id,
-                Name = g.Name
+                Name = g.Name,
+                PlatformName = g.PlatformName,
             })
             .ToArray();
         var gameResult = targetGame.Adapt<GameTagDetailDto>();

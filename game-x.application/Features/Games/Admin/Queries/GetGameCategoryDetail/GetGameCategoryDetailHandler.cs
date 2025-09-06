@@ -17,7 +17,8 @@ public sealed class GetGameCategoryDetailHandler(
             .Select(g => new CategoryRelatedGameDto
             {
                 Id = g.Id,
-                Name = g.Name
+                Name = g.Name,
+                PlatformName = g.PlatformName
             })
             .ToArray();
         var gameResult = targetGame.Adapt<GameCategoryDetailDto>();

@@ -3,4 +3,6 @@
 public interface IGamePlatformRepo
 {
     Task<GamePlatform[]> GetAllAsync(CancellationToken ct = default);
+
+    Task UpdateAsync(Guid id, Func<GamePlatform, Task> updateAction, CancellationToken ct = default);
 }
