@@ -1,6 +1,6 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Admin.Queries.GetGameTagsByCriteria;
+using game_x.application.Features.Games.Admin.Commands.CreateGameTag;
 using game_x.application.Features.Games.Admin.Queries.GetTypeByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Game;
@@ -21,5 +21,13 @@ public sealed class GameTypeController : BaseApiController
             parameters.PageSize ?? 20);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost]
+    public async Task<IActionResult> CreateGameTypeAsync(CreateGameTagCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
     }
 }
