@@ -1,6 +1,7 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Admin.Commands.CreateGameTag;
+using game_x.application.Features.Games.Admin.Commands.DeleteGameType;
 using game_x.application.Features.Games.Admin.Commands.UpdateGameType;
 using game_x.application.Features.Games.Admin.Queries.GetTypeByCriteria;
 
@@ -29,7 +30,7 @@ public sealed class GameTypeController : BaseApiController
     public async Task<IActionResult> CreateGameTypeAsync(CreateGameTagCommand command)
     {
         await Mediator.Send(command);
-        return ApiResponseFactory.NoContent();
+        return ApiResponseFactory.NoContent(MessageCode.System.Created);
     }
 
     [Authorize(Roles = AppRoles.Admin)]
@@ -37,6 +38,14 @@ public sealed class GameTypeController : BaseApiController
     public async Task<IActionResult> UpdateGameTypeAsync(Guid id, UpdateGameTypeCommand command)
     {
         await Mediator.Send(command with { Id = id });
-        return ApiResponseFactory.NoContent();
+        return ApiResponseFactory.NoContent(MessageCode.System.Updated);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteGameTypeAsync(Guid id)
+    {
+        await Mediator.Send(new DeleteGameTypeCommand(id));
+        return ApiResponseFactory.NoContent(MessageCode.System.Deleted);
     }
 }
