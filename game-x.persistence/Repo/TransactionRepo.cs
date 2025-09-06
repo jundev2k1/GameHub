@@ -16,6 +16,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         var query = context.Transactions
             .AsNoTracking()
+            .Where(x => x.SourceType == TransactionSourceType.Uxm)
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionInternal)
             .AsQueryable();
@@ -45,6 +46,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         var query = context.Transactions
             .AsNoTracking()
+            .Where(x => x.SourceType != TransactionSourceType.Uxm)
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionExternal)
                 .ThenInclude(x => x!.GamePlatform)
@@ -110,7 +112,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionExternal)
                 .ThenInclude(x => x!.GamePlatform)
-            .Where(x => x.UserId == userId && x.SourceType == TransactionSourceType.G598SnoGameProvider)
+            .Where(x => x.UserId == userId && x.SourceType != TransactionSourceType.Uxm)
             .AsQueryable();
 
         if (queryBuilder != null)
