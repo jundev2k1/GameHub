@@ -4,6 +4,7 @@ using game_x.application.Features.Games.Admin.Commands.CreateGameCategory;
 using game_x.application.Features.Games.Admin.Commands.DeleteGameCategory;
 using game_x.application.Features.Games.Admin.Commands.UpdateGameCategory;
 using game_x.application.Features.Games.Admin.Queries.GetCategoriesByCriteria;
+using game_x.application.Features.Games.Admin.Queries.GetGameCategoryDetail;
 
 namespace game_x.api.Controllers.BackOffice.Game;
 
@@ -21,6 +22,15 @@ public sealed class GameCategoryController : BaseApiController
             sorts,
             parameters.PageNumber ?? 1,
             parameters.PageSize ?? 20);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetGameCategoryDetailAsync(Guid id)
+    {
+        var query = new GetGameCategoryDetailQuery(id);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
