@@ -1,6 +1,6 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Admin.Commands.CreateGameTag;
+using game_x.application.Features.Games.Admin.Commands.CreateGameType;
 using game_x.application.Features.Games.Admin.Commands.DeleteGameType;
 using game_x.application.Features.Games.Admin.Commands.UpdateGameType;
 using game_x.application.Features.Games.Admin.Queries.GetGameTypeDetail;
@@ -37,7 +37,7 @@ public sealed class GameTypeController : BaseApiController
 
     [Authorize(Roles = AppRoles.Admin)]
     [HttpPost]
-    public async Task<IActionResult> CreateGameTypeAsync(CreateGameTagCommand command)
+    public async Task<IActionResult> CreateGameTypeAsync(CreateGameTypeCommand command)
     {
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent(MessageCode.System.Created);
