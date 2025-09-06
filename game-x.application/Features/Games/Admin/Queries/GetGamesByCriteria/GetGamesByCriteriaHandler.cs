@@ -8,9 +8,9 @@ namespace game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
 
 public sealed class GetGamesByCriteriaHandler(
     ICriteriaBuilder<GameInfoDto> builder,
-    IGameProviderCacheService gameProviderCache) : IQueryHandler<GetGamesByCriteriaQuery, PaginationResult<GameInfoDto>>
+    IGameProviderCacheService gameProviderCache) : IQueryHandler<GetGamesByCriteriaQuery, PaginationResult<GetGamesByCriteriaListItem>>
 {
-    public async Task<PaginationResult<GameInfoDto>> Handle(GetGamesByCriteriaQuery request, CancellationToken ct = default)
+    public async Task<PaginationResult<GetGamesByCriteriaListItem>> Handle(GetGamesByCriteriaQuery request, CancellationToken ct = default)
     {
         var searchResult = builder.Apply(
             query: gameProviderCache.GameList.AsQueryable(),
@@ -23,9 +23,10 @@ public sealed class GetGamesByCriteriaHandler(
         var items = searchResult
             .Skip((request.PageIndex - 1) * request.PageSize)
             .Take(request.PageSize)
+            .Select(item => item.Adapt<GetGamesByCriteriaListItem>())
             .ToArray();
 
-        var result = new PaginationResult<GameInfoDto>(
+        var result = new PaginationResult<GetGamesByCriteriaListItem>(
             items: items,
             totalItems: totalItems,
             totalPages: (int)Math.Ceiling((decimal)totalItems / request.PageSize),

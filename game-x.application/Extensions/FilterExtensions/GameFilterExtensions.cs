@@ -10,12 +10,13 @@ public static class GameFilterExtensions
         new()
         {
             ["types"] = FilterByMultipleTypes,
-            ["categories"] = FilterByMultipleCategories
+            ["categories"] = FilterByMultipleCategories,
+            ["tags"] = FilterByMultipleTags
         };
 
     private static Expression<Func<GameInfoDto, bool>> FilterByMultipleTypes(object value)
     {
-        var raw = value.ToString() ?? "";
+        var raw = value.ToStringOrEmpty();
         if (raw.IsNullOrWhiteSpace()) return _ => true;
 
         var idList = raw
@@ -31,7 +32,7 @@ public static class GameFilterExtensions
 
     private static Expression<Func<GameInfoDto, bool>> FilterByMultipleCategories(object value)
     {
-        var raw = value.ToString() ?? "";
+        var raw = value.ToStringOrEmpty();
         if (raw.IsNullOrWhiteSpace()) return _ => true;
 
         var idList = raw
@@ -43,5 +44,21 @@ public static class GameFilterExtensions
             return _ => false;
 
         return game => game.Categories.Any(gt => idList.Contains(gt.Id));
+    }
+
+    private static Expression<Func<GameInfoDto, bool>> FilterByMultipleTags(object value)
+    {
+        var raw = value.ToStringOrEmpty();
+        if (raw.IsNullOrWhiteSpace()) return _ => true;
+
+        var idList = raw
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s => Guid.TryParse(s, out _))
+            .Select(Guid.Parse)
+            .ToList();
+        if (idList.Count == 0)
+            return _ => false;
+
+        return game => game.GameTags.Any(gt => idList.Contains(gt.Id));
     }
 }

@@ -8,4 +8,6 @@ public sealed class GetGamesByCriteriaRequest : SearchCriteriaRequest
     public string? Types { get; set; }
     [FromQuery(Name = "categories")]
     public string? Categories { get; set; }
+    [FromQuery(Name = "tags")]
+    public string? Tags { get; set; }
 }

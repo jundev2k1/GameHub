@@ -1,6 +1,7 @@
 ﻿using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Admin.Commands.UpdateGame;
+using game_x.application.Features.Games.Admin.Queries.GetGameDetail;
 using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
 using game_x.application.Features.Games.Admin.Queries.GetGameTransactionDetail;
 using game_x.application.Features.Games.Admin.Queries.GetGameTransactions;
@@ -19,6 +20,8 @@ public sealed class GameController : BaseApiController
             paramExtends.Add("types", parameters.Types!);
         if (parameters.Categories.IsNotNullOrEmpty())
             paramExtends.Add("categories", parameters.Categories!);
+        if (parameters.Tags.IsNotNullOrEmpty())
+            paramExtends.Add("tags", parameters.Tags!);
 
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
@@ -27,6 +30,15 @@ public sealed class GameController : BaseApiController
             sorts,
             parameters.PageNumber ?? 1,
             parameters.PageSize ?? 20);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetGameDetailAsync(Guid id)
+    {
+        var query = new GetGameDetailQuery(id);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }

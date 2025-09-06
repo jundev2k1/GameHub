@@ -10,12 +10,15 @@ public sealed class GetGamesByCriteriaValidator : AbstractValidator<GetGamesByCr
         "search",
         "types",
         "categories",
+        "tags",
         nameof(GameInfoDto.Id),
         nameof(GameInfoDto.GameCode),
         nameof(GameInfoDto.Priority),
         nameof(GameInfoDto.Name),
         nameof(GameInfoDto.Description),
         nameof(GameInfoDto.PlatformName),
+        nameof(GameInfoDto.CreatedAt),
+        nameof(GameInfoDto.UpdatedAt),
     };
 
     public GetGamesByCriteriaValidator()
