@@ -1,5 +1,6 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
+using game_x.application.Features.Games.Admin.Commands.CreateGameCategory;
 using game_x.application.Features.Games.Admin.Queries.GetCategoriesByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Game;
@@ -20,5 +21,13 @@ public sealed class GameCategoryController : BaseApiController
             parameters.PageSize ?? 20);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost]
+    public async Task<IActionResult> CreateGameCategoryAsync(CreateGameCategoryCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Created);
     }
 }
