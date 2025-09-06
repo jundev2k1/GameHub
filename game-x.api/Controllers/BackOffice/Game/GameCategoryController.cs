@@ -1,6 +1,7 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Admin.Commands.CreateGameCategory;
+using game_x.application.Features.Games.Admin.Commands.DeleteGameCategory;
 using game_x.application.Features.Games.Admin.Commands.UpdateGameCategory;
 using game_x.application.Features.Games.Admin.Queries.GetCategoriesByCriteria;
 
@@ -38,5 +39,13 @@ public sealed class GameCategoryController : BaseApiController
     {
         await Mediator.Send(command with { Id = id });
         return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteGameCategoryAsync(Guid id)
+    {
+        await Mediator.Send(new DeleteGameCategoryCommand(id));
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Deleted);
     }
 }
