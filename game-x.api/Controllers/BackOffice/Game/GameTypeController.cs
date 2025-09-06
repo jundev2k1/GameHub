@@ -1,6 +1,7 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Admin.Commands.CreateGameTag;
+using game_x.application.Features.Games.Admin.Commands.UpdateGameType;
 using game_x.application.Features.Games.Admin.Queries.GetTypeByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Game;
@@ -28,6 +29,14 @@ public sealed class GameTypeController : BaseApiController
     public async Task<IActionResult> CreateGameTypeAsync(CreateGameTagCommand command)
     {
         await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateGameTypeAsync(Guid id, UpdateGameTypeCommand command)
+    {
+        await Mediator.Send(command with { Id = id });
         return ApiResponseFactory.NoContent();
     }
 }
