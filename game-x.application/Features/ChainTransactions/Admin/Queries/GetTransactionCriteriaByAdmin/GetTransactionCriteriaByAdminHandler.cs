@@ -23,7 +23,7 @@ public sealed class GetTransactionCriteriaByAdminHandler(
                     x.PublicId.ToString().Contains(keyword) 
                     || x.TransactionInternal!.OrderUid!.Contains(keyword)
                     || x.TransactionInternal!.OrderNumber.Contains(keyword),
-                options: TransactionFilterExtensions.Options),
+                options: TransactionFilterExtensions.InternalOptions),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);

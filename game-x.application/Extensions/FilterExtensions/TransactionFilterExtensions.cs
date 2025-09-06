@@ -1,29 +1,39 @@
+using game_x.share.Extensions;
 using System.Linq.Expressions;
 
 namespace game_x.application.Extensions.FilterExtensions;
 
 public static class TransactionFilterExtensions
 {
-    public static readonly Dictionary<string, Func<object, Expression<Func<Transaction, bool>>>> Options =
+    public static readonly Dictionary<string, Func<object, Expression<Func<Transaction, bool>>>> InternalOptions =
         new()
         {
             ["statuses"] = CreateStatusFilter
         };
-    
+
+    public static readonly Dictionary<string, Func<object, Expression<Func<Transaction, bool>>>> ExternalOptions =
+        new()
+        {
+            ["statuses"] = CreateStatusFilter,
+            ["platforms"] = CreatePlatformFilter
+        };
+
     /// <summary>Builds a filter by multiple statuses.</summary>
     private static Expression<Func<Transaction, bool>> CreateStatusFilter(object value)
     {
-        var raw = value.ToString() ?? "";
+        var raw = value.ToStringOrEmpty();
+        if (raw.IsNullOrEmpty())
+            return _ => true;
 
         var statusList = raw
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(s => s.Trim().ToUpperInvariant())
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .ToList();
-        
+
         if (statusList.Count == 0)
-            return _ => true;
-        
+            return _ => false;
+
         var validStatuses = statusList.Select(item =>
         {
             Enum.TryParse<TransactionStatus>(item, ignoreCase: true, out var status);
@@ -31,5 +41,24 @@ public static class TransactionFilterExtensions
         }).ToList();
 
         return transaction => validStatuses.Contains(transaction.Status);
+    }
+
+    /// <summary>Builds a filter by platform</summary>
+    private static Expression<Func<Transaction, bool>> CreatePlatformFilter(object value)
+    {
+        var raw = value.ToStringOrEmpty();
+        if (raw.IsNullOrEmpty())
+            return _ => true;
+
+        var statusList = raw
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s => Guid.TryParse(s, out _))
+            .Select(Guid.Parse)
+            .ToArray();
+        if (statusList.Length == 0)
+            return _ => false;
+
+        return transaction => (transaction.TransactionExternal != null)
+            && statusList.Contains(transaction.TransactionExternal.GamePlatform.PublicId);
     }
 }

@@ -8,13 +8,15 @@ public sealed class GetGameTransactionsValidator : AbstractValidator<GetGameTran
     private readonly string[] _allowFilterFields =
     [
         "search",
-        nameof(ListTransactionExternalDto.Id),
-        nameof(ListTransactionExternalDto.UserId),
-        nameof(ListTransactionExternalDto.Status),
-        nameof(ListTransactionExternalDto.Amount),
-        nameof(ListTransactionExternalDto.Type),
-        nameof(ListTransactionExternalDto.UpdatedAt),
-        nameof(ListTransactionExternalDto.CreatedAt)
+        "statuses",
+        "platforms",
+        nameof(Transaction.PublicId),
+        nameof(Transaction.UserId),
+        nameof(Transaction.Status),
+        nameof(Transaction.Amount),
+        nameof(Transaction.Type),
+        nameof(Transaction.UpdatedAt),
+        nameof(Transaction.CreatedAt)
     ];
 
     private readonly string[] _allowSortFields =

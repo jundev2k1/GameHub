@@ -42,9 +42,15 @@ public sealed class GameController : BaseApiController
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("transactions")]
-    public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] GetGameTransactionsRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.Statuses.IsNotNullOrEmpty())
+            paramExtends.Add("statuses", parameters.Statuses);
+        if (parameters.Platforms.IsNotNullOrEmpty())
+            paramExtends.Add("platforms", parameters.Platforms);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetGameTransactionsQuery(
             filters,

@@ -19,7 +19,7 @@ public sealed class GetGameTransactionsHandler(
                 query,
                 request.Filters,
                 request.Sorts,
-                options: TransactionFilterExtensions.Options),
+                options: TransactionFilterExtensions.InternalOptions),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);
