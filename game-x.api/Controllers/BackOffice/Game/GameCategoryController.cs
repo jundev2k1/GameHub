@@ -1,6 +1,7 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Admin.Commands.CreateGameCategory;
+using game_x.application.Features.Games.Admin.Commands.UpdateGameCategory;
 using game_x.application.Features.Games.Admin.Queries.GetCategoriesByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Game;
@@ -29,5 +30,13 @@ public sealed class GameCategoryController : BaseApiController
     {
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent(code: MessageCode.System.Created);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateGameCategoryAsync(Guid id, UpdateGameCategoryCommand command)
+    {
+        await Mediator.Send(command with { Id = id });
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
 }

@@ -24,4 +24,17 @@ public sealed class GameCategory : BaseEntity<int>, IAuditable
             Priority = priority,
         };
     }
+
+    public void Update(string name, string desc, string note, int priority, bool isActive)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        if (priority < 0)
+            throw new ArgumentException("Priority must be greater than or equal 0.", nameof(priority));
+
+        Name = name;
+        Description = desc;
+        Note = note;
+        Priority = priority;
+        IsActive = isActive;
+    }
 }
