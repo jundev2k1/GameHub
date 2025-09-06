@@ -2,7 +2,7 @@
 
 namespace game_x.application.Features.Games.Dtos;
 
-public sealed class GameTagDto
+public class GameTagDto
 {
     [JsonIgnore]
     public int LocalId { get; set; }

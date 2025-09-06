@@ -3,6 +3,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Admin.Commands.CreateGameTag;
 using game_x.application.Features.Games.Admin.Commands.DeleteGameTag;
 using game_x.application.Features.Games.Admin.Commands.UpdateGameTag;
+using game_x.application.Features.Games.Admin.Queries.GetGameTagDetail;
 using game_x.application.Features.Games.Admin.Queries.GetGameTagsByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Game;
@@ -21,6 +22,15 @@ public sealed class GameTagController : BaseApiController
             sorts,
             parameters.PageNumber ?? 1,
             parameters.PageSize ?? 20);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetGameTagAsync(Guid id)
+    {
+        var query = new GetGameTagDetailQuery(id);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
