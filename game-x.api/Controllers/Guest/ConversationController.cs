@@ -12,7 +12,7 @@ public class ConversationController : BaseApiController
     [HttpPost("start")]
     public IActionResult StartGuest()
     {
-        var guestId = Guid.NewGuid().ToString("N");
+        var guestId = Guid.NewGuid().ToString();
         return ApiResponseFactory.Ok(guestId);
     }
     
