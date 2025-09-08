@@ -1,8 +1,8 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Admin.Commands.CreateGameCategory;
-using game_x.application.Features.Games.Admin.Commands.DeleteGameCategory;
-using game_x.application.Features.Games.Admin.Commands.UpdateGameCategory;
+using game_x.application.Features.Games.Admin.Commands.CreateGameRecommend;
+using game_x.application.Features.Games.Admin.Commands.DeleteGameRecommend;
+using game_x.application.Features.Games.Admin.Commands.UpdateGameRecommend;
 using game_x.application.Features.Games.Admin.Queries.GetGameRecommendDetail;
 using game_x.application.Features.Games.Admin.Queries.GetRecommendsByCriteria;
 
@@ -13,7 +13,7 @@ public sealed class GameRecommendController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet]
-    public async Task<IActionResult> GetGameCategoryListAsync([AsParameters] SearchCriteriaRequest parameters)
+    public async Task<IActionResult> GetGameRecommendListAsync([AsParameters] SearchCriteriaRequest parameters)
     {
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
@@ -28,7 +28,7 @@ public sealed class GameRecommendController : BaseApiController
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetGameCategoryDetailAsync(Guid id)
+    public async Task<IActionResult> GetGameRecommendDetailAsync(Guid id)
     {
         var query = new GetGameRecommendDetailQuery(id);
         var result = await Mediator.Send(query);
@@ -37,7 +37,7 @@ public sealed class GameRecommendController : BaseApiController
 
     [Authorize(Roles = AppRoles.Admin)]
     [HttpPost]
-    public async Task<IActionResult> CreateGameCategoryAsync(CreateGameCategoryCommand command)
+    public async Task<IActionResult> CreateGameRecommendAsync(CreateGameRecommendCommand command)
     {
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent(code: MessageCode.System.Created);
@@ -45,7 +45,7 @@ public sealed class GameRecommendController : BaseApiController
 
     [Authorize(Roles = AppRoles.Admin)]
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateGameCategoryAsync(Guid id, UpdateGameCategoryCommand command)
+    public async Task<IActionResult> UpdateGameRecommendAsync(Guid id, UpdateGameRecommendCommand command)
     {
         await Mediator.Send(command with { Id = id });
         return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
@@ -53,9 +53,9 @@ public sealed class GameRecommendController : BaseApiController
 
     [Authorize(Roles = AppRoles.Admin)]
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteGameCategoryAsync(Guid id)
+    public async Task<IActionResult> DeleteGameRecommendAsync(Guid id)
     {
-        await Mediator.Send(new DeleteGameCategoryCommand(id));
+        await Mediator.Send(new DeleteGameRecommendCommand(id));
         return ApiResponseFactory.NoContent(code: MessageCode.System.Deleted);
     }
 }

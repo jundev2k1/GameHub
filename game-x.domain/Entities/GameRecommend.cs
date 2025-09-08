@@ -34,10 +34,16 @@ public sealed class GameRecommend : BaseEntity<int>, IAuditable
         };
     }
 
-    public void UpdateInfo(string name, string? description)
+    public void Update(
+        string name,
+        string? description,
+        DateTime? startDate,
+        DateTime? endDate)
     {
         Name = name;
         Description = description;
+        StartDate = startDate;
+        EndDate = endDate;
     }
 
     public void UpdateBanner(MediaFile? banner)
@@ -52,5 +58,13 @@ public sealed class GameRecommend : BaseEntity<int>, IAuditable
         ArgumentNullException.ThrowIfNull(game);
 
         Items.Add(game);
+    }
+
+    public void UpdateGame(ICollection<GameRecommendItem> games)
+    {
+        var isDuplicate = games.Select(g => g.GameId).Distinct().Count() != games.Count;
+        if (isDuplicate) throw new ArgumentException("Duplicate game items.");
+
+        Items = games;
     }
 }
