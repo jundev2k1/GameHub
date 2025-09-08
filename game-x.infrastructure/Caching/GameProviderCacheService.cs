@@ -12,6 +12,7 @@ public sealed class GameProviderCacheService(
     IGameCategoryRepo gameCategoryRepo,
     IGameTypeRepo gameTypeRepo,
     IGameTagRepo gameTagRepo,
+    IGameRecommendRepo gameRecommendRepo,
     IGameRepo gameRepo)
     : CacheService(cache), IGameProviderCacheService
 {
@@ -42,29 +43,36 @@ public sealed class GameProviderCacheService(
     public async Task RefreshGamePlatformList()
     {
         var cacheKey = $"{_prefixCache}:platform:list";
-        var gameList = await gamePlatformRepo.GetAllAsync();
-        Set(cacheKey, gameList.Select(g => g.Adapt<GamePlatformDto>()).ToArray());
+        var gamePlatformList = await gamePlatformRepo.GetAllAsync();
+        Set(cacheKey, gamePlatformList.Select(g => g.Adapt<GamePlatformDto>()).ToArray());
     }
 
     public async Task RefreshGameCategoryList()
     {
         var cacheKey = $"{_prefixCache}:category:list";
-        var gameList = await gameCategoryRepo.GetAllAsync();
-        Set(cacheKey, gameList.Select(g => g.Adapt<GameCategoryDto>()).ToArray());
+        var gameCategoryList = await gameCategoryRepo.GetAllAsync();
+        Set(cacheKey, gameCategoryList.Select(g => g.Adapt<GameCategoryDto>()).ToArray());
     }
 
     public async Task RefreshGameTypeList()
     {
         var cacheKey = $"{_prefixCache}:game-type:list";
-        var gameList = await gameTypeRepo.GetAllAsync();
-        Set(cacheKey, gameList.Select(g => g.Adapt<GameTypeDto>()).ToArray());
+        var gameTypeList = await gameTypeRepo.GetAllAsync();
+        Set(cacheKey, gameTypeList.Select(g => g.Adapt<GameTypeDto>()).ToArray());
     }
 
     public async Task RefreshGameTagList()
     {
         var cacheKey = $"{_prefixCache}:game-tag:list";
-        var gameList = await gameTagRepo.GetAllAsync();
-        Set(cacheKey, gameList.Select(g => g.Adapt<GameTagDto>()).ToArray());
+        var gameTagList = await gameTagRepo.GetAllAsync();
+        Set(cacheKey, gameTagList.Select(g => g.Adapt<GameTagDto>()).ToArray());
+    }
+
+    public async Task RefreshGameRecommendList()
+    {
+        var cacheKey = $"{_prefixCache}:game-recommend:list";
+        var gameRecommendList = await gameRecommendRepo.GetAllAsync();
+        Set(cacheKey, gameRecommendList.Select(g => g.Adapt<GameRecommendDto>()).ToArray());
     }
 
     public async Task RefreshGameList()
@@ -82,6 +90,8 @@ public sealed class GameProviderCacheService(
         => Get<GameTypeDto[]>($"{_prefixCache}:game-type:list") ?? [];
     public GameTagDto[] GameTagList
         => Get<GameTagDto[]>($"{_prefixCache}:game-tag:list") ?? [];
+    public GameRecommendDto[] GameRecommendList
+        => Get<GameRecommendDto[]>($"{_prefixCache}:game-recommend:list") ?? [];
     public GameInfoDto[] GameList
         => Get<GameInfoDto[]>($"{_prefixCache}:game:list") ?? [];
 

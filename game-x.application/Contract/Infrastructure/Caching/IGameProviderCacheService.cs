@@ -20,12 +20,15 @@ public interface IGameProviderCacheService
 
     Task RefreshGameTagList();
 
+    Task RefreshGameRecommendList();
+
     Task RefreshGameList();
 
     GamePlatformDto[] PlatformList { get; }
     GameCategoryDto[] CategoryList { get; }
     GameTypeDto[] GameTypeList { get; }
     GameTagDto[] GameTagList { get; }
+    GameRecommendDto[] GameRecommendList { get; }
     GameInfoDto[] GameList { get; }
 
     GamePlatformDto G598Platform { get; }

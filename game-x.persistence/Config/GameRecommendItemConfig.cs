@@ -8,11 +8,7 @@ public class GameRecommendItemConfig : IEntityTypeConfiguration<GameRecommendIte
     {
         builder.ToTable("game_recommend_items");
 
-        builder.HasKey(gri => gri.Id);
-
-        builder.Property(gri => gri.Id)
-            .IsRequired()
-            .ValueGeneratedOnAdd();
+        builder.HasKey(gri => new { gri.GameRecommendId, gri.GameId });
 
         builder.Property(gri => gri.GameRecommendId)
             .IsRequired();
@@ -32,6 +28,8 @@ public class GameRecommendItemConfig : IEntityTypeConfiguration<GameRecommendIte
             .IsRequired()
             .HasConversion<short>()
             .HasDefaultValue(true);
+
+        builder.Ignore(gri => gri.Id);
 
         builder.HasOne(gri => gri.Game)
             .WithMany()

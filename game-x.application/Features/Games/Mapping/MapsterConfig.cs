@@ -12,6 +12,7 @@ public sealed class MapsterConfig : IRegister
         RegisterGameTypeMappings(cfg);
         RegisterGameTagMappings(cfg);
         RegisterGameTransactionMappings(cfg);
+        RegisterGameRecommendMappings(cfg);
     }
 
     private static void RegisterGameMappings(TypeAdapterConfig cfg)
@@ -118,5 +119,21 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.BalanceAfter, src => src.BalanceAfter)
             .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : Guid.Empty)
             .Map(dest => dest.GamePlatformName, src =>  src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : null);
+    }
+
+    private static void RegisterGameRecommendMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GameRecommend, GameRecommendDto>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Items, src => src.Items.Select(i => i.Adapt<GameRecommendItemDto>()));
+
+        cfg.NewConfig<GameRecommendItem, GameRecommendItemDto>()
+            .Map(dest => dest.LocalGameId, src => src.Game.PublicId)
+            .Map(dest => dest.GameId, src => src.GameId)
+            .Map(dest => dest.GameName, src => src.Game.Name)
+            .Map(dest => dest.LocalPlatformId, src => src.Game.PlatformId)
+            .Map(dest => dest.PlatformId, src => src.Game.Platform.PublicId)
+            .Map(dest => dest.PlatformName, src => src.Game.Platform.Name);
     }
 }
