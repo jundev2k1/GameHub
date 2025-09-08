@@ -143,7 +143,8 @@ public sealed class SeekCursorBuilder<T> : ISeekCursorBuilder<T> where T : notnu
 
     // (4) Map
     var items = kept.Select(map).ToList();
-
+    items.Reverse();
+    
     // (5) Build cursors
     string? next = null, prev = null;
     if (kept.Count > 0)
@@ -174,8 +175,7 @@ public sealed class SeekCursorBuilder<T> : ISeekCursorBuilder<T> where T : notnu
         limit: _limit
     );
 }
-
-
+    
     // --------------- Helpers ---------------
 
     /// <summary>Ensure Keys() was called.</summary>
