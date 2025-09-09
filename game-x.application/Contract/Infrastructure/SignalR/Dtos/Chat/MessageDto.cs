@@ -3,7 +3,7 @@ namespace game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 public record MessageDto(
     Guid Id, 
     Guid ConversationId, 
-    string SenderUserId, 
+    string SenderActorId,
     MessageKind Kind, 
     string? Text, 
     Guid? ReplyToMessageId, 
