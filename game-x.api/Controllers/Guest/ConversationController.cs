@@ -1,6 +1,7 @@
 using game_x.api.Common;
 using game_x.api.Dtos;
 using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListMyConversationsForGuest;
@@ -49,13 +50,23 @@ public class ConversationController : BaseApiController
     [HttpPost("messages")]
     public async Task<IActionResult> SendSupportMessagesAttachmentAsync([FromHeader] string guestId, [FromForm] MessageAttachmentRequest formData)
     {
-        var command = formData.Adapt<SendSupportMessageCommand>() with
+        try
         {
-            SenderActorId = guestId,
-            ReplyToMessageId = formData.ReplyToMessageId,
-            Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
-        };
-        var result = await Mediator.Send(command);
-        return ApiResponseFactory.Ok(result);
+            var command = formData.Adapt<SendSupportMessageCommand>() with
+            {
+                SenderActorId = guestId,
+                ClientLocalId = formData.ClientLocalId,
+                ReplyToMessageId = formData.ReplyToMessageId,
+                Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
+            };
+            var result = await Mediator.Send(command);
+            return ApiResponseFactory.Ok(result);
+        }
+        catch
+        {
+            return ApiResponseFactory.BadRequest(
+                code: MessageCode.Chatting.FailToSendMessage,
+                errorDetail: new {ClientLocalId = formData.ClientLocalId});
+        }
     }
 }

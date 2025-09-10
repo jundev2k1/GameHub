@@ -174,6 +174,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
     {
         return await context.Conversations
             .AsTracking()
+            .Include(c => c.Customer)
             .FirstOrDefaultAsync(c =>
                 c.Type == ConversationType.Support &&
                 c.CustomerId == actorId || c.GuestId == actorId, ct);
