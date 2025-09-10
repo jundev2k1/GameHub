@@ -1,4 +1,8 @@
 using game_x.api.Common;
+using game_x.api.Dtos;
+using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
 using game_x.application.Features.Chat.Queries.ListWindowMessagesInConversation;
@@ -6,11 +10,11 @@ using game_x.application.Features.Chat.Queries.ListWindowMessagesInConversation;
 namespace game_x.api.Controllers.Client.Chat;
 
 [Authorize(Roles = AppRoles.User)]
-[Route("api/user/conversations")]
-public class ConversationController : BaseApiController
+[Route("api/user")]
+public class ConversationController(IUserAccessor userAccessor) : BaseApiController
 {
     /// <summary>List conversations for current logged-in user</summary>
-    [HttpGet("me")]
+    [HttpGet("conversations/me")]
     public async Task<IActionResult> GetMyConversationAsync([AsParameters] CursorCriteriaRequest parameters)
     {
         var query = new ListMyConversationsForClientQuery(
@@ -21,12 +25,14 @@ public class ConversationController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [HttpGet("{convId:guid}/messages")]
+    [HttpGet("conversations/{convId:guid}/messages")]
     public async Task<IActionResult> ListMessagesInConversationAsync(
         Guid convId,
         [AsParameters] CursorCriteriaRequest parameters)
     {
+        var userId = userAccessor.GetUserId();
         var query = new ListMessagesInConversationQuery(
+            ActorId: userId,
             ConvId: convId,
             Limit: parameters.Limit,
             Cursor: parameters.Cursor
@@ -35,7 +41,7 @@ public class ConversationController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
     
-    [HttpGet("{convId:guid}/messages/{anchorId:guid}/window")]
+    [HttpGet("conversations/{convId:guid}/messages/{anchorId:guid}/window")]
     public async Task<IActionResult> ListWindowMessagesInConversationAsync(
         Guid convId,
         Guid anchorId,
@@ -51,6 +57,21 @@ public class ConversationController : BaseApiController
             Anchor: anchor
         );
         var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpPost("messages")]
+    public async Task<IActionResult> SendSupportMessagesAttachmentAsync([FromForm] MessageAttachmentRequest formData)
+    {
+        var userId = userAccessor.GetUserId();
+        var command = formData.Adapt<SendSupportMessageCommand>() with
+        {
+            SenderActorId = userId,
+            SenderUserId = userId,
+            ReplyToMessageId = formData.ReplyToMessageId,
+            Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
+        };
+        var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result);
     }
 }

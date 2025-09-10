@@ -1184,8 +1184,12 @@ namespace game_x.persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AddedByActorId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("added_by_actor_id");
+
                     b.Property<string>("AddedByUserId")
-                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("added_by_user_id");
@@ -2513,9 +2517,7 @@ namespace game_x.persistence.Migrations
                     b.HasOne("game_x.domain.Entities.User", "AddedByUser")
                         .WithMany()
                         .HasForeignKey("AddedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_message_attachments_asp_net_users_added_by_user_id");
+                        .HasConstraintName("fk_message_attachments_user_added_by_user_id");
 
                     b.HasOne("game_x.domain.Entities.MediaFile", "MediaFile")
                         .WithMany()

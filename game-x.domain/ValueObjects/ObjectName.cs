@@ -12,6 +12,8 @@ public sealed class ObjectName
     public string Extension => Path.GetExtension(Value);
 
     // Factories
+    public static ObjectName Attachment(string userId, string fileName)
+        => Of($"attachment/{userId:N}/{fileName}");
     public static ObjectName KycProfile(string userId, string fileName)
         => Of($"user-kyc/{userId:N}/{fileName}");
     public static ObjectName BankAccountProfile(string userId, string fileName)
@@ -32,7 +34,7 @@ public sealed class ObjectName
 
     // Constants
     private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] ValidPrefixValues = ["user-kyc", "user-bank-account"];
+    private static readonly string[] ValidPrefixValues = ["user-kyc", "user-bank-account", "attachment"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>

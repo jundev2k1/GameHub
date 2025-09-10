@@ -91,7 +91,7 @@ public sealed class FileStorageService(
         var deleteFiles = await GetAllFileNamesAsync(bucketName, prefix, ct);
         if (deleteFiles.Length == 0) return;
 
-        // Batch delete to avoid exceeding API limits
+        // Batch delete it to avoid exceeding API limits
         foreach (var groupFiles in deleteFiles.Chunk(DefaultChunkSize))
         {
             var deleteObjects = groupFiles
@@ -214,5 +214,64 @@ public sealed class FileStorageService(
         if (isExist) return;
 
         await client.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName.Value), ct);
+    }
+    
+    public async Task<PresignedUploadTicket> CreatePresignedPutAsync(
+        BucketName bucket,
+        ObjectName objectName,
+        MimeType mimeType,
+        int sizeBytes,
+        TimeSpan expiry,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            await EnsureBucketExistsAsync(bucket, ct);
+
+            // MinIO has a maximum limit of ~7 days
+            var seconds = (int)Math.Clamp(expiry.TotalSeconds, 1, 7 * 24 * 3600);
+
+            var args = new PresignedPutObjectArgs()
+                .WithBucket(bucket.Value)
+                .WithObject(objectName.Value)
+                .WithExpiry(seconds);
+
+            var url = await client.PresignedPutObjectAsync(args).ConfigureAwait(false);
+
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = mimeType.Value
+            };
+
+            return new PresignedUploadTicket(url, headers);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("CreatePresignedPutAsync failed: {Message}", ex.Message);
+            throw;
+        }
+    }
+
+    public async Task<StoredObjectInfo?> HeadObjectAsync(
+        BucketName bucketName,
+        ObjectName objectName,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var stat = await client.StatObjectAsync(new StatObjectArgs()
+                .WithBucket(bucketName.Value)
+                .WithObject(objectName.Value), ct).ConfigureAwait(false);
+
+            return new StoredObjectInfo(
+                ContentType: stat.ContentType ?? "application/octet-stream",
+                ContentLength: stat.Size,
+                ETag: stat.ETag
+            );
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 }

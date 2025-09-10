@@ -331,6 +331,9 @@ public static class MessageCode
         /// <summary>Conversation has not been claimed.</summary>
         [EnumMetadata("Conversation has not been claimed.")]
         ConversationNotClaimed = 10502,
+        /// <summary>Message not found.</summary>
+        [EnumMetadata("Message not found.")]
+        MessageNotFound = 10503,
         #endregion
     }
 }

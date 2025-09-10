@@ -32,9 +32,13 @@ public sealed class MessageAttachmentConfig : IEntityTypeConfiguration<MessageAt
             .HasColumnName("sort_order")
             .IsRequired();
         
+        builder.Property(x => x.AddedByActorId)
+            .HasColumnName("added_by_actor_id")
+            .IsRequired(false);
+        
         builder.Property(x => x.AddedByUserId)
             .HasColumnName("added_by_user_id")
-            .IsRequired();
+            .IsRequired(false);
         
         // Relationships
         builder.HasOne(x => x.MediaFile)

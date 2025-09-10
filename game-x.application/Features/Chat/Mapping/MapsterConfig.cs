@@ -38,9 +38,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault()!.PublicId)
             .Map(dest => dest.LastMessagePreview, src => src.Messages.FirstOrDefault()!.Text);
         
-        cfg.NewConfig<Message, MessageDto>()
-            .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.ConversationId, src => src.Conversation.PublicId)
-            .Map(dest => dest.ReplyToMessageId, src => src.ReplyToMessage!.PublicId);
+        cfg.NewConfig<MessageDto, ListMessageDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
     }
 }
