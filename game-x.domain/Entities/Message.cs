@@ -42,8 +42,9 @@ public sealed class Message: BaseEntity<int>, IAuditable
         string senderActorId,
         RoleInConversation senderRole,
         MessageKind kind,
-        string text,
-        string? senderUserId = null
+        string? text = null,
+        string? senderUserId = null,
+        int? replyToMessageId = null
     )
     {
         var msg = new Message
@@ -58,6 +59,7 @@ public sealed class Message: BaseEntity<int>, IAuditable
             IsTombstone = false,
             EditCount = 0,
             CurrentVersion = 1,
+            ReplyToMessageId = replyToMessageId
         };
         return msg;
     }

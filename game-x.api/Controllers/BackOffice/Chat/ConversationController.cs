@@ -1,5 +1,8 @@
 using game_x.api.Common;
+using game_x.api.Dtos;
+using game_x.application.Common.Files;
 using game_x.application.Features.Chat.Commands.ClaimConversationById;
+using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListSupportConversations;
 using game_x.application.Features.Chat.Queries.ListUnassignedQueue;
@@ -76,6 +79,21 @@ public class ConversationController : BaseApiController
             Anchor: anchor
         );
         var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpPost("{convId:guid}/messages")]
+    public async Task<IActionResult> SendSupportMessagesAttachmentAsync(
+        Guid convId,
+        [FromForm] MessageAttachmentRequest formData)
+    {
+        var command = formData.Adapt<SendMessageToCustomerCommand>() with
+        {
+            ConversationId = convId,
+            ReplyToMessageId = formData.ReplyToMessageId,
+            Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
+        };
+        var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result);
     }
 }

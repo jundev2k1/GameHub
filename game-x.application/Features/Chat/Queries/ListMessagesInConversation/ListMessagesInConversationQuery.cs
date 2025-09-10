@@ -6,4 +6,5 @@ namespace game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 public record ListMessagesInConversationQuery(
     Guid ConvId,
     int? Limit,
-    string? Cursor = null) : IQuery<CursorResult<MessageDto>>;
+    string? ActorId = null,
+    string? Cursor = null) : IQuery<CursorResult<ListMessageDto>>;

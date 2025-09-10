@@ -1,7 +1,10 @@
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnSupportMessageCreated;
+using game_x.application.Features.Chat.Dtos;
 
 namespace game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 
@@ -9,32 +12,63 @@ public sealed class SendMessageToCustomerHandler(
     IUnitOfWork unitOfWork,
     IConversationRepo conversationRepo,
     IMessageRepo messageRepo,
+    IMessageService messageService,
     IAppLogger<Message> logger,
-    IUserAccessor userAccessor
-    ) : IRequestHandler<SendMessageToCustomerCommand, SendMessageToCustomerResult>
+    IUserAccessor userAccessor,
+    IApplicationEventDispatcher eventDispatcher
+    ) : IRequestHandler<SendMessageToCustomerCommand, Unit>
 {
-    public async Task<SendMessageToCustomerResult> Handle(SendMessageToCustomerCommand request, CancellationToken ct)
+    public async Task<Unit> Handle(SendMessageToCustomerCommand request, CancellationToken ct)
     {
         var senderUserId = userAccessor.GetUserId();
         var now = DateTime.UtcNow;
 
         var conv = await conversationRepo.GetByIdAsync(request.ConversationId, ct);
         
+        // The conversation needs to be claimed before sending a message
         if(conv.Status != ConversationStatus.Claimed)
             throw new BadRequestException(MessageCode.Chatting.ConversationNotClaimed);
         
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
-            var message = await CreateMessageAsync(conv, senderUserId, request.Text, ct);
+            var message = await CreateMessageAsync(
+                conv: conv, 
+                userId: senderUserId,
+                text: request.Text,
+                replyMessageId: request.ReplyToMessageId,
+                ct: ct);
             
             conv.LastMessageAt = now;
 
+            await messageService.CreateMessageAttachmentsAsync(msg: message, attachments: request.Attachments, ct);
+            
             await unitOfWork.CommitAsync(ct);
             
-            return new SendMessageToCustomerResult(
-                message.Adapt<MessageDto>(), 
+            var msgDto = new MessageDto
+            {
+                Id = message.Id,
+                PublicId = message.PublicId,
+                ConversationId = conv.PublicId,
+                SenderActorId = message.SenderActorId,
+                Kind = message.Kind,
+                Text = message.Text,
+                ReplyToMessageId = request.ReplyToMessageId,
+                IsTombstone = message.IsTombstone,
+                SentAt = message.SentAt,
+                EditedAt = message.EditedAt,
+                EditCount = message.EditCount,
+                CurrentVersion = message.CurrentVersion,
+                Attachments = []
+            };
+            
+            var dto = new SendMessageResult(
+                await messageService.GetMessageDtoAsync(msgDto, ct),
                 conv.Adapt<ConversationSignalDto>());
+            
+            await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
+            
+            return Unit.Value;
         }
         catch(Exception ex)
         {
@@ -44,15 +78,29 @@ public sealed class SendMessageToCustomerHandler(
         }
     }
     
-    private async Task<Message> CreateMessageAsync(Conversation conv, string userId, string text, CancellationToken ct)
+    private async Task<Message> CreateMessageAsync(
+        Conversation conv, 
+        string userId, 
+        string text,
+        Guid? replyMessageId,
+        CancellationToken ct)
     {
+        int? replyMessageIntId = null;
+        if (replyMessageId is not null && replyMessageId.Value != Guid.Empty)
+        {
+            var rid = replyMessageId.Value;
+            var replyMessage = await messageRepo.GetByIdAsync(rid, ct);
+            replyMessageIntId = replyMessage.Id;
+        }
+        
         var msg = Message.Create(
             conv: conv,
             senderActorId: userId,
             senderUserId: userId,
             text: text,
             kind: MessageKind.Text,
-            senderRole: RoleInConversation.Agent
+            senderRole: RoleInConversation.Agent,
+            replyToMessageId: replyMessageIntId
         );
         await messageRepo.AddAsync(msg, ct);
         return msg;
