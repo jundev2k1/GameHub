@@ -13,7 +13,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 
     [HttpPost("on-unpublish")]
@@ -22,7 +22,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 
     [HttpPost("on-connect")]
@@ -31,7 +31,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 
     [HttpPost("on-disconnect")]
@@ -40,7 +40,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 
     [HttpPost("on-play")]
@@ -49,7 +49,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 
     [HttpPost("on-stop")]
@@ -58,6 +58,6 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 }
