@@ -1,5 +1,5 @@
-﻿using game_x.api.Controllers;
-using game_x.api.Dtos.SrsHooks;
+﻿using game_x.api.Common;
+using game_x.api.Controllers;
 using System.Text.Json;
 
 namespace game_x.api.Hooks;
@@ -8,7 +8,7 @@ namespace game_x.api.Hooks;
 public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseApiController
 {
     [HttpPost("on-publish")]
-    public async Task<IActionResult> OnPublishAsync(OnPublishRequest request)
+    public async Task<IActionResult> OnPublishAsync(SrsEventHookRequest request)
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
@@ -17,7 +17,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     }
 
     [HttpPost("on-unpublish")]
-    public async Task<IActionResult> OnUnpublishAsync(OnUnpublishRequest request)
+    public async Task<IActionResult> OnUnpublishAsync(SrsEventHookRequest request)
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
@@ -26,7 +26,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     }
 
     [HttpPost("on-connect")]
-    public async Task<IActionResult> OnConnectAsync(OnConnectRequest request)
+    public async Task<IActionResult> OnConnectAsync(SrsEventHookRequest request)
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
@@ -35,7 +35,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     }
 
     [HttpPost("on-disconnect")]
-    public async Task<IActionResult> OnDisconnectAsync(OnDisconnectRequest request)
+    public async Task<IActionResult> OnDisconnectAsync(SrsEventHookRequest request)
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
@@ -44,7 +44,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     }
 
     [HttpPost("on-play")]
-    public async Task<IActionResult> OnPlayAsync(OnPlayRequest request)
+    public async Task<IActionResult> OnPlayAsync(SrsEventHookRequest request)
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
@@ -53,7 +53,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     }
 
     [HttpPost("on-stop")]
-    public async Task<IActionResult> OnStopAsync(OnStopRequest request)
+    public async Task<IActionResult> OnStopAsync(SrsEventHookRequest request)
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
