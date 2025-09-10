@@ -7,6 +7,7 @@ public sealed class BucketName
     private BucketName(string value) => Value = value;
 
     public static BucketName User => Of("user");
+    public static BucketName Chat => Of("chat");
 
     public static BucketName Of(string value)
     {
@@ -18,7 +19,7 @@ public sealed class BucketName
         return new BucketName(value);
     }
 
-    private static readonly string[] ValidValues = ["user"];
+    private static readonly string[] ValidValues = ["user", "chat"];
 
     public override bool Equals(object? obj) =>
         (obj != null) && (obj is BucketName type) && (Value == type.Value);

@@ -50,9 +50,8 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                    .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
                    .Select(m => m.Id)
                    .FirstOrDefault())
-            .Sort(desc1: true, desc2: true) // newest → older
+            .Sort(desc1: true, desc2: true)
             .FromCursor(cursor, fp)
-            .WithPrev(false)
             .Limit(limit)
             .ExecuteAsync(c =>
             {
@@ -68,7 +67,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
     {
         IQueryable<Conversation> query = context.Conversations.AsNoTracking();
 
-        query = query.Where(c => c.Type == ConversationType.Support);
+        query = query.Where(c => c.Type == ConversationType.Support && c.Status == ConversationStatus.Claimed);
 
         var src = query
             .Include(c => c.Customer)
@@ -92,7 +91,6 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                  .FirstOrDefault())
             .Sort(desc1: true, desc2: true)
             .FromCursor(cursor, fp)
-            .WithPrev(false)
             .Limit(limit)
             .ExecuteAsync(c =>
             {
@@ -137,7 +135,6 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                  .FirstOrDefault())
             .Sort(desc1: true, desc2: true)
             .FromCursor(cursor, fp)
-            .WithPrev(false)
             .Limit(limit)
             .ExecuteAsync(c =>
             {
@@ -173,27 +170,34 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
     }
     
-    public async Task<Conversation?> GetSupportConversationForClientAsync(string customerId, CancellationToken ct = default)
+    public async Task<Conversation?> GetSupportConversationAsync(string actorId, CancellationToken ct = default)
     {
         return await context.Conversations
             .AsTracking()
+            .Include(c => c.Customer)
             .FirstOrDefaultAsync(c =>
                 c.Type == ConversationType.Support &&
-                c.CustomerId == customerId, ct);
+                c.CustomerId == actorId || c.GuestId == actorId, ct);
     }
     
-    public async Task<Conversation?> GetSupportConversationForGuestAsync(string guestId, CancellationToken ct = default)
+    public async Task<Conversation> GetByIdAsync(Guid convId, CancellationToken ct = default)
     {
         return await context.Conversations
             .AsTracking()
-            .FirstOrDefaultAsync(c => c.Type == ConversationType.Support && c.GuestId == guestId, ct);
+            .FirstOrDefaultAsync(c => c.PublicId == convId, ct)
+            ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
     }
     
-    public async Task<Conversation> GetByIdAsync(Guid customerId, CancellationToken ct = default)
+    public async Task<Conversation> GetByIdAndActorIdAsync(string actorId, Guid convId, CancellationToken ct = default)
     {
         return await context.Conversations
             .AsTracking()
-            .FirstOrDefaultAsync(c => c.PublicId == customerId, ct)
+            .FirstOrDefaultAsync(c => 
+                c.PublicId == convId
+                && (c.CustomerId == actorId 
+                    || c.GuestId == actorId
+                    || context.ConversationMembers.Any(m => m.ConversationId == c.Id && m.UserId == actorId)), 
+                ct)
             ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
     }
     

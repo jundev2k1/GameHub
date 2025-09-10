@@ -38,9 +38,6 @@ public sealed class SeekCursorBuilder<T> : ISeekCursorBuilder<T> where T : notnu
     
     private int _limit = 20;
 
-    /// <summary>If true, also compute a prev cursor.</summary>
-    private bool _withPrev;
-
     /// <summary>Compiled getters for edge extraction after materialization.</summary>
     private Func<T, DateTime> _key1C = null!;
     private Func<T, int> _key2C = null!;
@@ -72,13 +69,6 @@ public sealed class SeekCursorBuilder<T> : ISeekCursorBuilder<T> where T : notnu
     {
         _desc1 = desc1;
         _desc2 = desc2;
-        return this;
-    }
-
-    /// <summary>Enable/disable emitting a prev cursor.</summary>
-    public ISeekCursorBuilder<T> WithPrev(bool enable = true)
-    {
-        _withPrev = enable;
         return this;
     }
     
@@ -143,7 +133,6 @@ public sealed class SeekCursorBuilder<T> : ISeekCursorBuilder<T> where T : notnu
 
     // (4) Map
     var items = kept.Select(map).ToList();
-    items.Reverse();
     
     // (5) Build cursors
     string? next = null, prev = null;
@@ -164,7 +153,7 @@ public sealed class SeekCursorBuilder<T> : ISeekCursorBuilder<T> where T : notnu
         if (hasNewer)
             next = BuildCursor(edgeNewer, CursorHelper.Dir.Newer);
 
-        if (_withPrev && hasOlder)
+        if (hasOlder)
             prev = BuildCursor(edgeOlder, CursorHelper.Dir.Older);
     }
 

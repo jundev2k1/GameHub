@@ -1,12 +1,13 @@
-using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using System.Text.Json.Serialization;
+using game_x.application.Common.Files;
 
 namespace game_x.application.Features.Chat.Commands.SendSupportMessage;
 
 public sealed record SendSupportMessageCommand(
-    string Text
-) : IRequest<SendSupportMessageResult>;
-
-public sealed record SendSupportMessageResult(
-    MessageDto Message,
-    ConversationSignalDto Conv
-);
+    [property: JsonIgnore] string SenderActorId, // guest or user
+    [property: JsonIgnore] string? SenderUserId,
+    string? Text,
+    Guid? ReplyToMessageId,
+    string ClientLocalId,
+    IReadOnlyList<FileUpload>? Attachments
+) : IRequest<Unit>;

@@ -1,13 +1,11 @@
-using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Common.Files;
 
 namespace game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 
 public sealed record SendMessageToCustomerCommand(
     Guid ConversationId,
-    string Text
-) : IRequest<SendMessageToCustomerResult>;
-
-public sealed record SendMessageToCustomerResult(
-    MessageDto Message,
-    ConversationSignalDto Conv
-);
+    string Text,
+    Guid? ReplyToMessageId,
+    string ClientLocalId,
+    IReadOnlyList<FileUpload>? Attachments
+) : IRequest<Unit>;
