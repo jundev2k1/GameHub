@@ -79,9 +79,11 @@ public sealed class SendSupportMessageHandler(
                 Attachments = []
             };
             
+            var updatedConv = await conversationRepo.GetSupportConversationAsync(senderActorId, ct);
+            
             var dto = new SendMessageResult(
                 await messageService.GetMessageDtoAsync(msgDto, ct),
-                conv.Adapt<ConversationSignalDto>());
+                updatedConv.Adapt<ConversationSignalDto>());
             
             await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
             
