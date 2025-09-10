@@ -22,6 +22,7 @@ public sealed class EntityName
     public static EntityName Conversation => Of(nameof(Entities.Conversation));
     public static EntityName ConversationMember => Of(nameof(Entities.ConversationMember));
     public static EntityName Message => Of(nameof(Entities.Message));
+    public static EntityName MessageAttachment => Of(nameof(Entities.MessageAttachment));
 
     public static EntityName Of(string value)
     {
@@ -50,6 +51,7 @@ public sealed class EntityName
         nameof(Entities.Conversation),
         nameof(Entities.ConversationMember),
         nameof(Entities.Message),
+        nameof(Entities.MessageAttachment),
     ];
 
     public override bool Equals(object? obj) =>

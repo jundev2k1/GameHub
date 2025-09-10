@@ -1,15 +1,22 @@
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 
 namespace game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 
-public sealed class ListMessagesInConversationHandler(IMessageRepo messageRepo)
-    : IRequestHandler<ListMessagesInConversationQuery, CursorResult<MessageDto>>
+public sealed class ListMessagesInConversationHandler(
+    IConversationRepo conversationRepo,
+    IMessageService messageService)
+    : IRequestHandler<ListMessagesInConversationQuery, CursorResult<ListMessageDto>>
 {
-    public async Task<CursorResult<MessageDto>> Handle(ListMessagesInConversationQuery request, CancellationToken ct)
+    public async Task<CursorResult<ListMessageDto>> Handle(ListMessagesInConversationQuery request, CancellationToken ct)
     {
-        return await messageRepo.GetByCursorAsync(
+        // Require permission for users and guests, optional for CS and admins
+        if(request.ActorId is not null)
+            await conversationRepo.GetByIdAndActorIdAsync(request.ActorId, request.ConvId, ct);
+        
+        return await messageService.GetByCursorAsync(
             convId: request.ConvId,
             limit: request.Limit ?? 20,
             cursor: request.Cursor,

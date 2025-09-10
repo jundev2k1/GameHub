@@ -20,11 +20,11 @@ public interface IConversationRepo
         int limit,
         string? cursor,
         CancellationToken ct = default);
+
+    Task<Conversation?> GetSupportConversationAsync(string actorId, CancellationToken ct = default);
     Task<ConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default);
     Task<Conversation> GetByIdAsync(Guid convId, CancellationToken ct = default);
-    Task<Conversation?> GetSupportConversationForClientAsync(string customerId, CancellationToken ct = default);
-    Task<Conversation?> GetSupportConversationForGuestAsync(string guestId, CancellationToken ct = default);
+    Task<Conversation> GetByIdAndActorIdAsync(string actorId, Guid convId, CancellationToken ct = default);
     Task AddAsync(Conversation conv, CancellationToken ct = default);
-
     Task PatchUpdateAsync(Guid publicId, Action<Conversation> updateAction, CancellationToken ct = default);
 }
