@@ -2,7 +2,7 @@
 
 namespace game_x.persistence.Config;
 
-public class GameConfig : IEntityTypeConfiguration<Game>
+public sealed class GameConfig : IEntityTypeConfiguration<Game>
 {
     public void Configure(EntityTypeBuilder<Game> builder)
     {
