@@ -63,15 +63,25 @@ public class ConversationController(IUserAccessor userAccessor) : BaseApiControl
     [HttpPost("messages")]
     public async Task<IActionResult> SendSupportMessagesAttachmentAsync([FromForm] MessageAttachmentRequest formData)
     {
-        var userId = userAccessor.GetUserId();
-        var command = formData.Adapt<SendSupportMessageCommand>() with
+        try
         {
-            SenderActorId = userId,
-            SenderUserId = userId,
-            ReplyToMessageId = formData.ReplyToMessageId,
-            Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
-        };
-        var result = await Mediator.Send(command);
-        return ApiResponseFactory.Ok(result);
+            var userId = userAccessor.GetUserId();
+            var command = formData.Adapt<SendSupportMessageCommand>() with
+            {
+                SenderActorId = userId,
+                SenderUserId = userId,
+                ClientLocalId = formData.ClientLocalId,
+                ReplyToMessageId = formData.ReplyToMessageId,
+                Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
+            };
+            var result = await Mediator.Send(command);
+            return ApiResponseFactory.Ok(result);
+        }
+        catch
+        {
+            return ApiResponseFactory.BadRequest(
+                code: MessageCode.Chatting.FailToSendMessage,
+                errorDetail: new {ClientLocalId = formData.ClientLocalId});
+        }
     }
 }

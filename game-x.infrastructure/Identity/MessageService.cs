@@ -36,7 +36,7 @@ public class MessageService(
             entityResult.Items.Select(m => GetMessageDtoAsync(m, ct))
         );
 
-        return entityResult.Transform(dtoItems); 
+        return entityResult.Transform(dtoItems.Reverse()); 
     }
     
     public async Task<ListMessageDto> GetMessageDtoAsync(MessageDto msg, CancellationToken ct)
