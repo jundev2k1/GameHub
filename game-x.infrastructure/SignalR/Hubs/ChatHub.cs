@@ -1,6 +1,7 @@
 using System.Text.Json;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Exceptions;
 using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using MediatR;
@@ -19,7 +20,7 @@ public interface IChatClient
     Task MemberAdded(ConversationMemberDto dto);
     /// <summary>Send it whenever a message is sent.</summary>
     Task MessageCreated(ListMessageDto dto);
-    Task MessageFailed(ListMessageDto dto);
+    Task MessageFailed(MessageFailedDto dto);
     // Task MemberRemoved(ConversationMemberDto dto);
     //
     // Task MessageCreated(MessageDto dto);
@@ -131,9 +132,17 @@ public sealed class ChatHub(
     [Authorize(Roles = AppRoles.User)]
     public async Task SendSupportMessage(SendSupportMessageCommand cmd)
     {
-        var userId = userAccessor.GetUserId();
-        var ct = Context.ConnectionAborted;
-        await sender.Send(cmd with {SenderActorId = userId, SenderUserId = userId }, ct);
+        try
+        {
+            var userId = userAccessor.GetUserId();
+            var ct = Context.ConnectionAborted;
+            await sender.Send(cmd with {SenderActorId = userId, SenderUserId = userId }, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error sending support message");
+            await Clients.Caller.MessageFailed(new MessageFailedDto(ClientLocalId: cmd.ClientLocalId));
+        }
     }
     
     /// <summary>
@@ -143,18 +152,36 @@ public sealed class ChatHub(
     /// </summary>
     public async Task SendSupportMessageByGuest(SendSupportMessageCommand cmd)
     {
-        var guestId = Context.UserIdentifier;
-        if (string.IsNullOrWhiteSpace(guestId)) { return; }
-        var ct = Context.ConnectionAborted;
-        await sender.Send(cmd with {SenderActorId = guestId}, ct);
+        try
+        {
+            var guestId = Context.UserIdentifier;
+            if (string.IsNullOrWhiteSpace(guestId)) { return; }
+            var ct = Context.ConnectionAborted;
+            await sender.Send(cmd with {SenderActorId = guestId}, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error sending support message");
+            await Clients.Caller.MessageFailed(new MessageFailedDto(ClientLocalId: cmd.ClientLocalId));
+        }
     }
     
     /// <summary>Send a support message to customer.</summary>
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     public async Task SendSupportMessageToCustomer(SendMessageToCustomerCommand cmd)
     {
-        var ct = Context.ConnectionAborted;
-        await sender.Send(cmd, ct);
+        try
+        {
+            var ct = Context.ConnectionAborted;
+            await sender.Send(cmd, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error sending support message");
+            await Clients.Caller.MessageFailed(new MessageFailedDto(
+                ClientLocalId: cmd.ClientLocalId,
+                ConversationId: cmd.ConversationId));
+        }
     }
     
     // --- Conversations & membership ---

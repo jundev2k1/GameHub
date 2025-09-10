@@ -6,5 +6,6 @@ public sealed record SendMessageToCustomerCommand(
     Guid ConversationId,
     string Text,
     Guid? ReplyToMessageId,
+    string ClientLocalId,
     IReadOnlyList<FileUpload>? Attachments
 ) : IRequest<Unit>;

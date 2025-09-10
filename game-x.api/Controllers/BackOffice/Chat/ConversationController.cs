@@ -87,13 +87,27 @@ public class ConversationController : BaseApiController
         Guid convId,
         [FromForm] MessageAttachmentRequest formData)
     {
-        var command = formData.Adapt<SendMessageToCustomerCommand>() with
+        try
         {
-            ConversationId = convId,
-            ReplyToMessageId = formData.ReplyToMessageId,
-            Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
-        };
-        var result = await Mediator.Send(command);
-        return ApiResponseFactory.Ok(result);
+            var command = formData.Adapt<SendMessageToCustomerCommand>() with
+            {
+                ConversationId = convId,
+                ClientLocalId = formData.ClientLocalId,
+                ReplyToMessageId = formData.ReplyToMessageId,
+                Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
+            };
+            var result = await Mediator.Send(command);
+            return ApiResponseFactory.Ok(result);
+        }
+        catch
+        {
+            return ApiResponseFactory.BadRequest(
+                code: MessageCode.Chatting.FailToSendMessage,
+                errorDetail: new
+                {
+                    ClientLocalId = formData.ClientLocalId,
+                    ConversationId = convId,
+                });
+        }
     }
 }
