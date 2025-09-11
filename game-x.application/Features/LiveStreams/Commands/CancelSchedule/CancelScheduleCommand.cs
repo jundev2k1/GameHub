@@ -1,3 +1,7 @@
-﻿namespace game_x.application.Features.LiveStreams.Commands.CancelSchedule;
+﻿using System.Text.Json.Serialization;
 
-public record CancelScheduleCommand(Guid Id) : ICommand;
+namespace game_x.application.Features.LiveStreams.Commands.CancelSchedule;
+
+public record CancelScheduleCommand(
+    [property: JsonIgnore] Guid Id,
+    string Reason) : ICommand;

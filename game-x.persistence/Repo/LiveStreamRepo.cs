@@ -49,6 +49,14 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             pageSize);
     }
 
+    public async Task<LivestreamSchedule> GetByIdAsync(Guid id, CancellationToken ct = default)
+    {
+        return await context.LiveStreamSchedules
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ls => ls.PublicId == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+    }
+
     public async Task CreateAsync(LivestreamSchedule schedule, CancellationToken ct = default)
     {
         await context.LiveStreamSchedules.AddAsync(schedule, ct);

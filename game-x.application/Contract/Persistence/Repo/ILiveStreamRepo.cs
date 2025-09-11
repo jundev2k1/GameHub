@@ -13,6 +13,8 @@ public interface ILiveStreamRepo
         int pageSize,
         CancellationToken ct = default);
 
+    Task<LivestreamSchedule> GetByIdAsync(Guid id, CancellationToken ct = default);
+
     Task CreateAsync(LivestreamSchedule schedule, CancellationToken ct = default);
 
     Task UpdateAsync(

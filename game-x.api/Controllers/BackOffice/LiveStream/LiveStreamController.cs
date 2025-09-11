@@ -2,6 +2,7 @@
 using game_x.application.Common.Filters;
 using game_x.application.Features.LiveStreams.Commands.CancelSchedule;
 using game_x.application.Features.LiveStreams.Commands.CreateSchedule;
+using game_x.application.Features.LiveStreams.Commands.DeleteSchedule;
 using game_x.application.Features.LiveStreams.Commands.UpdateSchedule;
 using game_x.application.Features.LiveStreams.Queries.GetScheduleDetail;
 using game_x.application.Features.LiveStreams.Queries.GetSchedulesByCriteria;
@@ -52,10 +53,18 @@ public sealed class LiveStreamController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.Admin)]
-    [HttpPatch("{id}/cancelation")]
-    public async Task<IActionResult> CancelScheduleAsync(Guid id)
+    [HttpPatch("{id:guid}/cancelation")]
+    public async Task<IActionResult> CancelScheduleAsync(Guid id, CancelScheduleCommand command)
     {
-        var command = new CancelScheduleCommand(id);
+        await Mediator.Send(command with { Id = id });
+        return ApiResponseFactory.NoContent();
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteScheduleAsync(Guid id)
+    {
+        var command = new DeleteScheduleCommand(id);
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
     }
