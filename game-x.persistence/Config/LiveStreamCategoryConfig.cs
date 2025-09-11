@@ -2,52 +2,47 @@
 
 namespace game_x.persistence.Config;
 
-public sealed class GamePlatformConfig : IEntityTypeConfiguration<GamePlatform>
+public sealed class LiveStreamCategoryConfig : IEntityTypeConfiguration<LiveStreamCategory>
 {
-    public void Configure(EntityTypeBuilder<GamePlatform> builder)
+    public void Configure(EntityTypeBuilder<LiveStreamCategory> builder)
     {
-        builder.ToTable("game_platforms");
+        builder.ToTable("livestream_categories");
 
-        builder.HasKey(gp => gp.Id);
+        builder.HasKey(lsc => lsc.Id);
 
-        builder.Property(gp => gp.Id)
+        builder.Property(lsc => lsc.Id)
             .IsRequired()
             .ValueGeneratedOnAdd();
 
-        builder.Property(gp => gp.PublicId)
+        builder.Property(lsc => lsc.PublicId)
             .HasColumnName("code")
             .IsRequired()
             .HasDefaultValueSql("gen_random_uuid()");
 
-        builder.Property(gp => gp.Name)
+        builder.Property(lsc => lsc.Name)
             .IsRequired()
             .HasMaxLength(255)
             .HasDefaultValue(string.Empty);
 
-        builder.Property(gp => gp.Description)
+        builder.Property(lsc => lsc.Description)
             .IsRequired()
             .HasMaxLength(4000)
             .HasDefaultValue(string.Empty);
 
-        builder.Property(gp => gp.Note)
+        builder.Property(lsc => lsc.Note)
             .IsRequired()
             .HasMaxLength(4000)
             .HasDefaultValue(string.Empty);
 
-        builder.Property(gp => gp.Priority)
+        builder.Property(lsc => lsc.Priority)
             .IsRequired()
             .HasDefaultValue(0);
 
-        builder.Property(gp => gp.IsActive)
+        builder.Property(lsc => lsc.IsActive)
             .IsRequired()
             .HasConversion<short>()
             .HasDefaultValue(true);
 
-        builder.HasIndex(gp => gp.PublicId).IsUnique();
-
-        builder.HasMany(gp => gp.Games)
-            .WithOne(g => g.Platform)
-            .HasForeignKey(g => g.PlatformId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(lsc => lsc.PublicId).IsUnique();
     }
 }

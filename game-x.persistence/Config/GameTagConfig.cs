@@ -2,7 +2,7 @@
 
 namespace game_x.persistence.Config;
 
-public class GameTagConfig : IEntityTypeConfiguration<GameTag>
+public sealed class GameTagConfig : IEntityTypeConfiguration<GameTag>
 {
     public void Configure(EntityTypeBuilder<GameTag> builder)
     {

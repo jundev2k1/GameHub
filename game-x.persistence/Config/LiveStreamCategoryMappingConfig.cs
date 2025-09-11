@@ -2,13 +2,13 @@
 
 namespace game_x.persistence.Config;
 
-public sealed class GameCategoryMappingConfig : IEntityTypeConfiguration<GameCategoryMapping>
+public sealed class LiveStreamCategoryMappingConfig : IEntityTypeConfiguration<LiveStreamCategoryMapping>
 {
-    public void Configure(EntityTypeBuilder<GameCategoryMapping> builder)
+    public void Configure(EntityTypeBuilder<LiveStreamCategoryMapping> builder)
     {
-        builder.ToTable("game_category_mappings");
+        builder.ToTable("livestream_category_mappings");
 
-        builder.HasKey(m => new { m.GameId, m.CategoryId });
+        builder.HasKey(m => new { m.ScheduleId, m.CategoryId });
 
         builder.Property(m => m.IsPrimary)
             .IsRequired()
@@ -20,13 +20,13 @@ public sealed class GameCategoryMappingConfig : IEntityTypeConfiguration<GameCat
 
         builder.Ignore(m => m.Id);
 
-        builder.HasOne(m => m.Game)
-            .WithMany(g => g.GameCategoryMappings)
-            .HasForeignKey(m => m.GameId)
+        builder.HasOne(m => m.Schedule)
+            .WithMany(ls => ls.CategoryMappings)
+            .HasForeignKey(m => m.ScheduleId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(m => m.Category)
-            .WithMany(gc => gc.GameCategoryMappings)
+            .WithMany(lsc => lsc.CategoryMappings)
             .HasForeignKey(m => m.CategoryId)
             .OnDelete(DeleteBehavior.Cascade);
     }

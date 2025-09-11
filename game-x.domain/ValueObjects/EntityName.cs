@@ -23,6 +23,8 @@ public sealed class EntityName
     public static EntityName ConversationMember => Of(nameof(Entities.ConversationMember));
     public static EntityName Message => Of(nameof(Entities.Message));
     public static EntityName MessageAttachment => Of(nameof(Entities.MessageAttachment));
+    public static EntityName LiveStreamCategory => Of(nameof(Entities.LiveStreamCategory));
+    public static EntityName LivestreamSchedule => Of(nameof(Entities.LivestreamSchedule));
 
     public static EntityName Of(string value)
     {
@@ -52,6 +54,8 @@ public sealed class EntityName
         nameof(Entities.ConversationMember),
         nameof(Entities.Message),
         nameof(Entities.MessageAttachment),
+        nameof(Entities.LiveStreamCategory),
+        nameof(Entities.LiveStreamCategoryMapping),
     ];
 
     public override bool Equals(object? obj) =>

@@ -1,4 +1,5 @@
-﻿using game_x.api.Controllers;
+﻿using game_x.api.Common;
+using game_x.api.Controllers;
 using System.Text.Json;
 
 namespace game_x.api.Hooks;
@@ -7,65 +8,56 @@ namespace game_x.api.Hooks;
 public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseApiController
 {
     [HttpPost("on-publish")]
-    public async Task<IActionResult> OnPublishAsync(SrsPublishRequest request)
+    public async Task<IActionResult> OnPublishAsync(SrsEventHookRequest request)
     {
-        logger.LogInformation("Called OnPublish successfully.");
+        logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 
     [HttpPost("on-unpublish")]
-    public async Task<IActionResult> OnUnpublishAsync(SrsPublishRequest request)
+    public async Task<IActionResult> OnUnpublishAsync(SrsEventHookRequest request)
     {
-        logger.LogInformation("Called OnUnpublish successfully.");
+        logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 
     [HttpPost("on-connect")]
-    public async Task<IActionResult> OnConnectAsync(SrsPublishRequest request)
+    public async Task<IActionResult> OnConnectAsync(SrsEventHookRequest request)
     {
-        logger.LogInformation("Called OnConnect successfully.");
+        logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 
     [HttpPost("on-disconnect")]
-    public async Task<IActionResult> OnDisconnectAsync(SrsPublishRequest request)
+    public async Task<IActionResult> OnDisconnectAsync(SrsEventHookRequest request)
     {
-        logger.LogInformation("Called OnDisconnect successfully.");
+        logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 
     [HttpPost("on-play")]
-    public async Task<IActionResult> OnPlayAsync(SrsPublishRequest request)
+    public async Task<IActionResult> OnPlayAsync(SrsEventHookRequest request)
     {
-        logger.LogInformation("Called OnPlay successfully.");
+        logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
 
     [HttpPost("on-stop")]
-    public async Task<IActionResult> OnStopAsync(SrsPublishRequest request)
+    public async Task<IActionResult> OnStopAsync(SrsEventHookRequest request)
     {
-        logger.LogInformation("Called OnStop successfully.");
+        logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
-        return Ok();
+        return Ok(0);
     }
-}
-
-public class SrsPublishRequest
-{
-    public string Action { get; set; } = default!;
-    public string ClientId { get; set; } = default!;
-    public string Stream { get; set; } = default!;
-    public string App { get; set; } = default!;
-    public string Ip { get; set; } = default!;
 }
