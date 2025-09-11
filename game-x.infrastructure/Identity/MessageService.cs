@@ -19,7 +19,7 @@ public class MessageService(
     IFileStorageService fileStorage
     ): IMessageService, IServices
 {
-    public async Task<CursorResult<ListMessageDto>> GetByCursorAsync(Guid convId, int limit, string? cursor, CancellationToken ct)
+    public async Task<CursorResult<ListedMessageDto>> GetByCursorAsync(Guid convId, int limit, string? cursor, CancellationToken ct)
     {
         var query = await messageRepo.GetByCursorAsync(convId, limit, cursor, ct);
         var fp = CursorHelper.ComputeFp($"conv:{convId}");
@@ -39,7 +39,7 @@ public class MessageService(
         return entityResult.Transform(dtoItems.Reverse()); 
     }
     
-    public async Task<ListMessageDto> GetMessageDtoAsync(MessageDto msg, CancellationToken ct)
+    public async Task<ListedMessageDto> GetMessageDtoAsync(MessageDto msg, CancellationToken ct)
     {
         var attachmentTasks = msg.Attachments
             .Select(async item =>
@@ -54,7 +54,7 @@ public class MessageService(
                         ct: ct);
                 }
                 
-                return new ListMessageAttachmentDto
+                return new ListedMessageAttachmentDto
                 (
                     SortOrder: item.SortOrder,
                     BindingStatus: item.BindingStatus.ToString().ToCamelCase(),
@@ -65,7 +65,7 @@ public class MessageService(
         
         var attachmentsDto = await Task.WhenAll(attachmentTasks);
         
-        return msg.Adapt<ListMessageDto>() with { Attachments = attachmentsDto };
+        return msg.Adapt<ListedMessageDto>() with { Attachments = attachmentsDto };
     }
     
     public async Task CreateMessageAttachmentsAsync(

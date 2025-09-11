@@ -10,4 +10,6 @@ public sealed record SendSupportMessageCommand(
     Guid? ReplyToMessageId,
     string ClientLocalId,
     IReadOnlyList<FileUpload>? Attachments
-) : IRequest<Unit>;
+) : IRequest<SendSupportMessageResult>;
+
+public record SendSupportMessageResult(string ClientLocalId);

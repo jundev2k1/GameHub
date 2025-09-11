@@ -1,7 +1,6 @@
 using System.Text.Json;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
-using game_x.application.Exceptions;
 using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using MediatR;
@@ -19,8 +18,8 @@ public interface IChatClient
     Task ConversationUpdated(ConversationSignalDto signalDto);
     Task MemberAdded(ConversationMemberDto dto);
     /// <summary>Send it whenever a message is sent.</summary>
-    Task MessageCreated(ListMessageDto dto);
-    Task MessageFailed(MessageFailedDto dto);
+    Task MessageCreated(MessageSignalDto dto);
+    Task MessageFailed(MessageFailedSignalDto signalDto);
     // Task MemberRemoved(ConversationMemberDto dto);
     //
     // Task MessageCreated(MessageDto dto);
@@ -141,7 +140,7 @@ public sealed class ChatHub(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error sending support message");
-            await Clients.Caller.MessageFailed(new MessageFailedDto(ClientLocalId: cmd.ClientLocalId));
+            await Clients.Caller.MessageFailed(new MessageFailedSignalDto(ClientLocalId: cmd.ClientLocalId));
         }
     }
     
@@ -162,7 +161,7 @@ public sealed class ChatHub(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error sending support message");
-            await Clients.Caller.MessageFailed(new MessageFailedDto(ClientLocalId: cmd.ClientLocalId));
+            await Clients.Caller.MessageFailed(new MessageFailedSignalDto(ClientLocalId: cmd.ClientLocalId));
         }
     }
     
@@ -178,7 +177,7 @@ public sealed class ChatHub(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error sending support message");
-            await Clients.Caller.MessageFailed(new MessageFailedDto(
+            await Clients.Caller.MessageFailed(new MessageFailedSignalDto(
                 ClientLocalId: cmd.ClientLocalId,
                 ConversationId: cmd.ConversationId));
         }

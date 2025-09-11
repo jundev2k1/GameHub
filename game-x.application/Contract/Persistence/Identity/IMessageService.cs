@@ -7,8 +7,8 @@ namespace game_x.application.Contract.Persistence.Identity;
 
 public interface IMessageService
 {
-    Task<CursorResult<ListMessageDto>> GetByCursorAsync(Guid convId, int limit, string? cursor, CancellationToken ct);
-    Task<ListMessageDto> GetMessageDtoAsync(MessageDto msg, CancellationToken ct);
+    Task<CursorResult<ListedMessageDto>> GetByCursorAsync(Guid convId, int limit, string? cursor, CancellationToken ct);
+    Task<ListedMessageDto> GetMessageDtoAsync(MessageDto msg, CancellationToken ct);
     Task CreateMessageAttachmentsAsync(
         Message msg,
         IReadOnlyList<FileUpload>? attachments,

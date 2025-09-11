@@ -1,20 +1,21 @@
 namespace game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 
-public record ListMessageDto(
+public record MessageSignalDto(
     Guid Id,
+    string ClientLocalId,
     Guid ConversationId,
     string SenderActorId,
     MessageKind Kind, 
     string? Text,
     Guid? ReplyToMessageId, 
-    bool IsTombstone, 
+    bool IsTombstone,
     DateTime SentAt, 
     DateTime? EditedAt, 
     int EditCount, 
     int CurrentVersion,
-    IReadOnlyList<ListMessageAttachmentDto> Attachments);
+    IReadOnlyList<MessageAttachmentSignalDto> Attachments);
     
-public record ListMessageAttachmentDto(
+public record MessageAttachmentSignalDto(
     int SortOrder,
     string BindingStatus,
     string? FileName,

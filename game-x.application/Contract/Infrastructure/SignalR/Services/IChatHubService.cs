@@ -4,5 +4,5 @@ namespace game_x.application.Contract.Infrastructure.SignalR.Services;
 
 public interface IChatHubService
 {
-    Task SendSupportMessageAsync(SendMessageResult res);
+    Task SendSupportMessageAsync(CreatedMessageSignalResult res);
 }
