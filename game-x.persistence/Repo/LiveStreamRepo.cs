@@ -2,7 +2,6 @@
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using System.Linq.Expressions;
 
 namespace game_x.persistence.Repo;
 
@@ -21,9 +20,9 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
     }
 
     public async Task<PaginationResult<LivestreamSchedule>> GetsByCriteriaAsync(
-        Expression<Func<LivestreamSchedule, bool>> condition,
-        int page,
-        int pageSize,
+        Func<IQueryable<LivestreamSchedule>, IQueryable<LivestreamSchedule>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
         CancellationToken ct = default)
     {
         var query = context.LiveStreamSchedules
@@ -31,8 +30,10 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             .Include(g => g.CategoryMappings)
             .ThenInclude(lsm => lsm.Category)
             .Include(g => g.AssignedBy)
-            .Where(condition)
             .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
 
         var totalCount = await query.CountAsync(ct);
         var totalPageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
@@ -53,6 +54,9 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
     {
         return await context.LiveStreamSchedules
             .AsNoTracking()
+            .Include(ls => ls.CategoryMappings)
+            .ThenInclude(lsm => lsm.Category)
+            .Include(ls => ls.AssignedBy)
             .FirstOrDefaultAsync(ls => ls.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
     }
@@ -66,6 +70,8 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
     {
         var targetSchedule = await context.LiveStreamSchedules
             .Include(ls => ls.CategoryMappings)
+            .ThenInclude(lsm => lsm.Category)
+            .Include(ls => ls.AssignedBy)
             .FirstOrDefaultAsync(ls => ls.PublicId == scheduleId, ct)
             ?? throw new NotFoundException(nameof(scheduleId), scheduleId);
 
@@ -77,6 +83,7 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
         var targetSchedule = await context.LiveStreamSchedules
             .FirstOrDefaultAsync(ls => ls.PublicId == scheduleId, ct)
             ?? throw new NotFoundException(nameof(scheduleId), scheduleId);
+
         context.LiveStreamSchedules.Remove(targetSchedule);
     }
 }

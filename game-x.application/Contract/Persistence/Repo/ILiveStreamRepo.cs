@@ -8,9 +8,9 @@ public interface ILiveStreamRepo
     Task<LivestreamSchedule[]> GetUnexpiredAsync(CancellationToken ct = default);
 
     Task<PaginationResult<LivestreamSchedule>> GetsByCriteriaAsync(
-        Expression<Func<LivestreamSchedule, bool>> condition,
-        int page,
-        int pageSize,
+        Func<IQueryable<LivestreamSchedule>, IQueryable<LivestreamSchedule>>? builder = null,
+        int page = 1,
+        int pageSize = 20,
         CancellationToken ct = default);
 
     Task<LivestreamSchedule> GetByIdAsync(Guid id, CancellationToken ct = default);

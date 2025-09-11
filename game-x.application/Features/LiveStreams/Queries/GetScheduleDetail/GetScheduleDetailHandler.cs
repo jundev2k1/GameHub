@@ -1,10 +1,14 @@
-﻿namespace game_x.application.Features.LiveStreams.Queries.GetScheduleDetail;
+﻿using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.LiveStreams.Dtos;
 
-public sealed class GetScheduleDetailHandler : IQueryHandler<GetScheduleDetailQuery, object>
+namespace game_x.application.Features.LiveStreams.Queries.GetScheduleDetail;
+
+public sealed class GetScheduleDetailHandler(
+    ILiveStreamRepo liveStreamRepo) : IQueryHandler<GetScheduleDetailQuery, LiveStreamScheduleDto>
 {
-    public async Task<object> Handle(GetScheduleDetailQuery request, CancellationToken ct = default)
+    public async Task<LiveStreamScheduleDto> Handle(GetScheduleDetailQuery request, CancellationToken ct = default)
     {
-        await Task.CompletedTask;
-        return 0;
+        var result = await liveStreamRepo.GetByIdAsync(request.Id, ct);
+        return result.Adapt<LiveStreamScheduleDto>();
     }
 }

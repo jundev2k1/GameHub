@@ -1,3 +1,9 @@
-﻿namespace game_x.application.Features.LiveStreams.Queries.GetActiveStreams;
+﻿using game_x.application.Common.Filters;
 
-public record GetActiveStreamsQuery : IQuery<object>;
+namespace game_x.application.Features.LiveStreams.Queries.GetActiveStreams;
+
+public record GetActiveStreamsQuery(
+    IEnumerable<QueryFilter> Filters,
+    IEnumerable<QuerySort> Sorts,
+    int PageIndex = 1,
+    int PageSize = 20) : IQuery<object>;

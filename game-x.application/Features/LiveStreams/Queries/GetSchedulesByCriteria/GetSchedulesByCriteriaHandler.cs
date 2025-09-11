@@ -1,10 +1,29 @@
-﻿namespace game_x.application.Features.LiveStreams.Queries.GetSchedulesByCriteria;
+﻿using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Common.Filters;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Games.Mapping;
+using game_x.application.Features.LiveStreams.Dtos;
 
-public sealed class GetSchedulesByCriteriaHandler : IQueryHandler<GetSchedulesByCriteriaQuery, object>
+namespace game_x.application.Features.LiveStreams.Queries.GetSchedulesByCriteria;
+
+public sealed class GetSchedulesByCriteriaHandler(
+    ICriteriaBuilder<LivestreamSchedule> builder,
+    ILiveStreamRepo liveStreamRepo) : IQueryHandler<GetSchedulesByCriteriaQuery, PaginationResult<LiveStreamScheduleListItemDto>>
 {
-    public async Task<object> Handle(GetSchedulesByCriteriaQuery request, CancellationToken ct = default)
+    public async Task<PaginationResult<LiveStreamScheduleListItemDto>> Handle(
+        GetSchedulesByCriteriaQuery request,
+        CancellationToken ct = default)
     {
-        await Task.CompletedTask;
-        return 0;
+        var items = await liveStreamRepo.GetsByCriteriaAsync(
+            query => builder.Apply(
+                query,
+                filters: request.Filters,
+                sorts: request.Sorts,
+                keyword => ls => ls.Title.ToLowerInvariant().Contains(keyword.ToLowerInvariant())),
+            request.PageIndex,
+            request.PageSize,
+            ct);
+        var result = items.ToSearchResult();
+        return result;
     }
 }
