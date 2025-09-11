@@ -45,9 +45,9 @@ public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
     }
 
     public void Update(
-        string title,
-        DateTime startTime,
-        DateTime endTime,
+        string? title = null,
+        DateTime? startTime = null,
+        DateTime? endTime = null,
         string? description = null,
         string? notes = null,
         List<LiveStreamCategoryMapping>? categories = null)
@@ -57,11 +57,11 @@ public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
         if (endTime <= startTime)
             throw new ArgumentException("End time must be after start time.", nameof(endTime));
 
-        Title = title;
-        StartTime = startTime;
-        EndTime = endTime;
-        Description = description;
-        Notes = notes;
+        Title = title ?? Title;
+        StartTime = startTime ?? StartTime;
+        EndTime = endTime ?? EndTime;
+        Description = description ?? Description;
+        Notes = notes ?? Notes;
 
         if (categories != null)
             CategoryMappings = categories;

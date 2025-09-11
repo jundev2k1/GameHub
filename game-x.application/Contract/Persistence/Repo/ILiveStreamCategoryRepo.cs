@@ -7,6 +7,8 @@ public interface ILiveStreamCategoryRepo
 {
     Task<LiveStreamCategory[]> GetAllAsync(CancellationToken ct = default);
 
+    Task<LiveStreamCategory[]> GetByIdsAsync(Guid[] ids, CancellationToken ct = default);
+
     Task<PaginationResult<LiveStreamCategory>> GetsByCriteriaAsync(
         Expression<Func<LiveStreamCategory, bool>> condition,
         int page,

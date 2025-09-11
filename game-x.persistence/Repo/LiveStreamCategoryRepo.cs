@@ -2,8 +2,6 @@
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace game_x.persistence.Repo;
@@ -14,6 +12,15 @@ public sealed class LiveStreamCategoryRepo(GameXContext context) : ILiveStreamCa
     {
         var result = await context.LiveStreamCategories
             .AsNoTracking()
+            .ToArrayAsync(ct);
+        return result;
+    }
+
+    public async Task<LiveStreamCategory[]> GetByIdsAsync(Guid[] ids, CancellationToken ct = default)
+    {
+        var result = await context.LiveStreamCategories
+            .AsNoTracking()
+            .Where(lsc => ids.Contains(lsc.PublicId) && lsc.IsActive)
             .ToArrayAsync(ct);
         return result;
     }
