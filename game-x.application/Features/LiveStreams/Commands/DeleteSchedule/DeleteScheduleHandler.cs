@@ -4,7 +4,7 @@ namespace game_x.application.Features.LiveStreams.Commands.DeleteSchedule;
 
 public sealed class DeleteScheduleHandler(
     IUnitOfWork unitOfWork,
-    ILiveStreamRepo liveStreamRepo) : ICommand<DeleteScheduleCommand>
+    ILiveStreamRepo liveStreamRepo) : ICommandHandler<DeleteScheduleCommand>
 {
     public async Task<Unit> Handle(DeleteScheduleCommand request, CancellationToken ct = default)
     {

@@ -4,7 +4,7 @@ namespace game_x.application.Features.LiveStreams.Commands.CancelSchedule;
 
 public sealed class CancelScheduleHandler(
     IUnitOfWork unitOfWork,
-    ILiveStreamRepo liveStreamRepo) : ICommand<CancelScheduleCommand>
+    ILiveStreamRepo liveStreamRepo) : ICommandHandler<CancelScheduleCommand>
 {
     public async Task<Unit> Handle(CancelScheduleCommand request, CancellationToken ct = default)
     {

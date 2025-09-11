@@ -1,5 +1,6 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
+using game_x.application.Features.LiveStreams.Commands.AssignTalent;
 using game_x.application.Features.LiveStreams.Commands.CancelSchedule;
 using game_x.application.Features.LiveStreams.Commands.CreateSchedule;
 using game_x.application.Features.LiveStreams.Commands.DeleteSchedule;
@@ -41,6 +42,14 @@ public sealed class LiveStreamController : BaseApiController
     public async Task<IActionResult> CreateScheduleAsync(CreateScheduleCommand command)
     {
         await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPatch("{id:guid}/talent")]
+    public async Task<IActionResult> AssignTalentToScheduleAsync(Guid id, AssignTalentCommand command)
+    {
+        await Mediator.Send(command with { Id = id });
         return ApiResponseFactory.NoContent();
     }
 
