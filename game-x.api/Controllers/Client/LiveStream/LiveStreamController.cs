@@ -2,7 +2,7 @@
 
 namespace game_x.api.Controllers.Client.LiveStream;
 
-[Route("api/user/livestreams")]
+[Route("/api/user/livestreams")]
 public sealed class LiveStreamController : BaseApiController
 {
     [Authorize(Roles = AppRoles.User)]

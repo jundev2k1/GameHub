@@ -8,7 +8,7 @@ using game_x.application.Features.LiveStreams.Queries.GetSchedulesByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.LiveStream;
 
-[Route("api/back-office/livestreams")]
+[Route("/api/back-office/livestreams")]
 public sealed class LiveStreamController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
