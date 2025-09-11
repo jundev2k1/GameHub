@@ -15,9 +15,9 @@ public sealed class SendSupportMessageHandler(
     IMessageService messageService,
     IAppLogger<Message> logger,
     IApplicationEventDispatcher eventDispatcher
-    ) : IRequestHandler<SendSupportMessageCommand, Unit>
+    ) : IRequestHandler<SendSupportMessageCommand, SendSupportMessageResult>
 {
-    public async Task<Unit> Handle(SendSupportMessageCommand request, CancellationToken ct)
+    public async Task<SendSupportMessageResult> Handle(SendSupportMessageCommand request, CancellationToken ct)
     {
         var senderActorId = request.SenderActorId;
         var senderUserId = request.SenderUserId;
@@ -80,14 +80,14 @@ public sealed class SendSupportMessageHandler(
             };
             
             var updatedConv = await conversationRepo.GetSupportConversationAsync(senderActorId, ct);
-            
-            var dto = new SendMessageResult(
-                await messageService.GetMessageDtoAsync(msgDto, ct),
-                updatedConv.Adapt<ConversationSignalDto>());
+            var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
+            var dto = new CreatedMessageSignalResult(
+                Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
+                Conv: updatedConv.Adapt<ConversationSignalDto>());
             
             await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
             
-            return Unit.Value;
+            return new SendSupportMessageResult(request.ClientLocalId);
             
         }
         catch(Exception ex)

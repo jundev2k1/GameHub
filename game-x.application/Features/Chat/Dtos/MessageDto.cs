@@ -3,6 +3,7 @@ namespace game_x.application.Features.Chat.Dtos;
 public class MessageDto
 {
     public int Id { get; set; }
+    public string? ClientLocalId { get; set; } = String.Empty;
     public Guid PublicId { get; set; }
     public Guid ConversationId { get; set; }
     public string SenderActorId { get; set; } = null!;

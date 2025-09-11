@@ -16,9 +16,9 @@ public sealed class SendMessageToCustomerHandler(
     IAppLogger<Message> logger,
     IUserAccessor userAccessor,
     IApplicationEventDispatcher eventDispatcher
-    ) : IRequestHandler<SendMessageToCustomerCommand, Unit>
+    ) : IRequestHandler<SendMessageToCustomerCommand, SendMessageToCustomerResult>
 {
-    public async Task<Unit> Handle(SendMessageToCustomerCommand request, CancellationToken ct)
+    public async Task<SendMessageToCustomerResult> Handle(SendMessageToCustomerCommand request, CancellationToken ct)
     {
         var senderUserId = userAccessor.GetUserId();
         var now = DateTime.UtcNow;
@@ -62,13 +62,14 @@ public sealed class SendMessageToCustomerHandler(
                 Attachments = []
             };
             
-            var dto = new SendMessageResult(
-                await messageService.GetMessageDtoAsync(msgDto, ct),
-                conv.Adapt<ConversationSignalDto>());
+            var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
+            var dto = new CreatedMessageSignalResult(
+                Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
+                Conv: conv.Adapt<ConversationSignalDto>());
             
             await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
             
-            return Unit.Value;
+            return new SendMessageToCustomerResult(request.ClientLocalId, conv.PublicId);
         }
         catch(Exception ex)
         {

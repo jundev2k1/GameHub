@@ -10,9 +10,9 @@ namespace game_x.infrastructure.SignalR.Services;
 public sealed class ChatHubService(IHubContext<ChatHub, IChatClient> hubContext)
     : IChatHubService, IHubServices
 {
-    public async Task SendSupportMessageAsync(SendMessageResult res)
+    public async Task SendSupportMessageAsync(CreatedMessageSignalResult res)
     {
-        var msgDto = res.ListMessage;
+        var msgDto = res.Msg;
         var conv = res.Conv;
 
         if (conv.CustomerId.IsNotNullOrEmpty())

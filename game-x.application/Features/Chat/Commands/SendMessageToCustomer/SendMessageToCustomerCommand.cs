@@ -8,4 +8,6 @@ public sealed record SendMessageToCustomerCommand(
     Guid? ReplyToMessageId,
     string ClientLocalId,
     IReadOnlyList<FileUpload>? Attachments
-) : IRequest<Unit>;
+) : IRequest<SendMessageToCustomerResult>;
+
+public record SendMessageToCustomerResult(string ClientLocalId, Guid ConversationId);

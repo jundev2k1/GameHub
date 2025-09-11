@@ -116,7 +116,7 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
 
         // 5) Build window
         var items = older.Concat([anchorMsg]).Concat(newer)
-            .Select(m => m.Adapt<ListMessageDto>())
+            .Select(m => m.Adapt<ListedMessageDto>())
             .ToList();
 
         var fp = CursorHelper.ComputeFp($"conv:{convId}");
