@@ -51,6 +51,7 @@ public sealed class SendMessageToCustomerHandler(
                 PublicId = message.PublicId,
                 ConversationId = conv.PublicId,
                 SenderActorId = message.SenderActorId,
+                SenderRole = message.SenderRole,
                 Kind = message.Kind,
                 Text = message.Text,
                 ReplyToMessageId = request.ReplyToMessageId,

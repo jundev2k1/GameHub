@@ -8,6 +8,7 @@ public class MessageDto
     public Guid ConversationId { get; set; }
     public string SenderActorId { get; set; } = null!;
     public MessageKind Kind { get; set; }
+    public RoleInConversation SenderRole { get; set; }
     public string? Text { get; set; }
     public Guid? ReplyToMessageId { get; set; }
     public bool IsTombstone { get; set; }

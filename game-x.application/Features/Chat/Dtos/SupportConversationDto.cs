@@ -7,7 +7,9 @@ public sealed record SupportConversationDto(
     string CustomerId,
     string CustomerDisplayName,
     string? CustomerAvatarUrl,
+    string LastUserId,
+    string LastUserName,
+    RoleInConversation LastSenderRole,
     DateTime LastMessageAt,
     Guid LastMessageId,
-    string LastMessagePreview
-);
+    string LastMessagePreview );

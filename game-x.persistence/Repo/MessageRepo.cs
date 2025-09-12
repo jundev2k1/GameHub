@@ -1,5 +1,4 @@
 using game_x.application.Common.Abstractions;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Chat.Dtos;
@@ -37,6 +36,7 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
                 PublicId = m.PublicId,
                 ConversationId = convId,
                 SenderActorId = m.SenderActorId,
+                SenderRole = m.SenderRole,
                 Kind = m.Kind,
                 Text = m.Text,
                 ReplyToMessageId = m.ReplyToMessage!.PublicId,

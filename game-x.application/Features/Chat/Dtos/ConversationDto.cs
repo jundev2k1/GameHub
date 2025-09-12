@@ -7,7 +7,7 @@ public sealed record ConversationDto(
     string LastUserId,
     string LastUserName,
     string? LastUserAvatarUrl,
+    RoleInConversation LastSenderRole,
     DateTime LastMessageAt,
     Guid LastMessageId,
-    string LastMessagePreview
-);
+    string LastMessagePreview );
