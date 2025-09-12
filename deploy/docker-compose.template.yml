@@ -40,6 +40,8 @@ services:
       - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
       - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
 
+      - SrsSettings__StreamServer=${Srs_StreamServer}
+
       - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
       - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
 

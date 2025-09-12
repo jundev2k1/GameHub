@@ -15,6 +15,13 @@ public sealed class AssignTalentHandler(
                 throw new BadRequestException("Only scheduled livestream can be assigned talent.");
 
             var talent = await userRepo.GetUserByIdAsync(request.TalentId, ct);
+            if ((talent.UserKyc == null) || talent.UserKyc.Status != KycStatus.Approved)
+                throw new BadRequestException("User must be kyc verified.");
+
+            if (talent.UserBankAccounts.Count == 0
+                || !talent.UserBankAccounts.Any(ba => ba.Status == UserBankAccountStatus.Approved))
+                throw new BadRequestException("Must have at least 1 verified bank account");
+
             livestream.AssignStream(talent.Id);
 
             await unitOfWork.SaveChangesAsync(ct);

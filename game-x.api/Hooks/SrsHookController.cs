@@ -1,5 +1,7 @@
 ﻿using game_x.api.Common;
 using game_x.api.Controllers;
+using game_x.application.Features.LiveStreams.Commands.PublishStream;
+using game_x.application.Features.LiveStreams.Commands.UnpublishStream;
 using System.Text.Json;
 
 namespace game_x.api.Hooks;
@@ -12,7 +14,9 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
+
+        var command = new PublishStreamCommand(request.App, request.Stream);
+        await Mediator.Send(command);
         return Ok(0);
     }
 
@@ -21,7 +25,9 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
+
+        var command = new UnpublishStreamCommand(request.App, request.Stream);
+        await Mediator.Send(command);
         return Ok(0);
     }
 

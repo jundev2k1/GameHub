@@ -3,9 +3,8 @@
 public sealed class LiveStreamStatusDto
 {
     public string StreamKey { get; set; } = string.Empty;
-    public string Url { get; set; } = string.Empty;
     public bool IsLive { get; set; }
-    public DateTime OfflineAt { get; set; }
+    public DateTime? OfflineAt { get; set; }
     public string TalentId { get; set; } = string.Empty;
     public string TalentName { get; set; } = string.Empty;
     public List<string> BlackList { get; set; } = [];

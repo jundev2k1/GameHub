@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace game_x.infrastructure.Caching;
 
-internal class LiveStreamManagerCacheService(IMemoryCache cache)
+public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
     : CacheService(cache), ILiveStreamManagerCacheService
 {
     private const string LiveStreamPrefix = "livestream:";

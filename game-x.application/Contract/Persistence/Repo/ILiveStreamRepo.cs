@@ -15,6 +15,8 @@ public interface ILiveStreamRepo
 
     Task<LivestreamSchedule> GetByIdAsync(Guid id, CancellationToken ct = default);
 
+    Task<LivestreamSchedule> GetByStreamKeyAsync(string streamKey, CancellationToken ct = default);
+
     Task CreateAsync(LivestreamSchedule schedule, CancellationToken ct = default);
 
     Task UpdateAsync(

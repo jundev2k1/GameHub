@@ -1,12 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace game_x.application.Features.LiveStreams.Commands.PublishStream;
 
-namespace game_x.application.Features.LiveStreams.Commands.PublishStream
-{
-    internal class PublishStreamCommand
-    {
-    }
-}
+public record PublishStreamCommand(string Server, string StreamKey) : ICommand;

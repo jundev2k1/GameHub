@@ -39,6 +39,8 @@ services:
       - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
       - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
 
+      - SrsSettings__StreamServer=${Srs_StreamServer}
+
       - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
       - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}
       - GameProviderSettings__AesKey=${GAMEPROVIDER_AESKEY}
