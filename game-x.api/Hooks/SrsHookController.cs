@@ -25,24 +25,6 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
         return Ok(0);
     }
 
-    [HttpPost("on-connect")]
-    public async Task<IActionResult> OnConnectAsync(SrsEventHookRequest request)
-    {
-        logger.LogInformation("=====SRS server=====");
-        logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
-        return Ok(0);
-    }
-
-    [HttpPost("on-disconnect")]
-    public async Task<IActionResult> OnDisconnectAsync(SrsEventHookRequest request)
-    {
-        logger.LogInformation("=====SRS server=====");
-        logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
-        return Ok(0);
-    }
-
     [HttpPost("on-play")]
     public async Task<IActionResult> OnPlayAsync(SrsEventHookRequest request)
     {
