@@ -11,5 +11,11 @@ public sealed class MapsterConfig : IRegister
 
         cfg.NewConfig<LivestreamSchedule, LiveStreamScheduleDto>()
             .Map(dest => dest.Id, src => src.PublicId);
+
+        cfg.NewConfig<LiveStreamCategory, LiveStreamCategoryListItemDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
+
+        cfg.NewConfig<LiveStreamCategory, LiveStreamCategoryDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
     }
 }

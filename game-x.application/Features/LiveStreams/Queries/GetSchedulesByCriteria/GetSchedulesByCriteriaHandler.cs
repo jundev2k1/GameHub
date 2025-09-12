@@ -3,6 +3,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Games.Mapping;
 using game_x.application.Features.LiveStreams.Dtos;
+using game_x.application.Features.LiveStreams.Mapping;
 
 namespace game_x.application.Features.LiveStreams.Queries.GetSchedulesByCriteria;
 

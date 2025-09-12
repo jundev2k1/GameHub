@@ -3,12 +3,12 @@ using game_x.application.Features.LiveStreams.Dtos;
 
 namespace game_x.application.Features.LiveStreams.Mapping;
 
-public static class LiveStreamMapping
+public static class LiveStreamCategoryMapping
 {
-    public static PaginationResult<LiveStreamScheduleListItemDto> ToSearchResult(this PaginationResult<LivestreamSchedule> data)
+    public static PaginationResult<LiveStreamCategoryListItemDto> ToSearchResult(this PaginationResult<LiveStreamCategory> data)
     {
-        var result = new PaginationResult<LiveStreamScheduleListItemDto>(
-            items: [.. data.Items.Select(i => i.Adapt<LiveStreamScheduleListItemDto>())],
+        var result = new PaginationResult<LiveStreamCategoryListItemDto>(
+            items: [.. data.Items.Select(i => i.Adapt<LiveStreamCategoryListItemDto>())],
             totalItems: data.TotalItems,
             totalPages: data.TotalPages, 
             pageIndex: data.PageNumber,

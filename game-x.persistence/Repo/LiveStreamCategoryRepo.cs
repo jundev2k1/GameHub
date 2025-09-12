@@ -16,24 +16,18 @@ public sealed class LiveStreamCategoryRepo(GameXContext context) : ILiveStreamCa
         return result;
     }
 
-    public async Task<LiveStreamCategory[]> GetByIdsAsync(Guid[] ids, CancellationToken ct = default)
-    {
-        var result = await context.LiveStreamCategories
-            .AsNoTracking()
-            .Where(lsc => ids.Contains(lsc.PublicId) && lsc.IsActive)
-            .ToArrayAsync(ct);
-        return result;
-    }
-
     public async Task<PaginationResult<LiveStreamCategory>> GetsByCriteriaAsync(
-        Expression<Func<LiveStreamCategory, bool>> condition,
-        int page,
-        int pageSize, CancellationToken ct)
+        Func<IQueryable<LiveStreamCategory>, IQueryable<LiveStreamCategory>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
     {
         var query = context.LiveStreamCategories
             .AsNoTracking()
-            .Where(condition)
             .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
 
         var totalCount = await query.CountAsync(ct);
         var totalPageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
@@ -48,6 +42,23 @@ public sealed class LiveStreamCategoryRepo(GameXContext context) : ILiveStreamCa
             totalPageCount,
             page,
             pageSize);
+    }
+
+    public async Task<LiveStreamCategory[]> GetByIdsAsync(Guid[] ids, CancellationToken ct = default)
+    {
+        var result = await context.LiveStreamCategories
+            .AsNoTracking()
+            .Where(lsc => ids.Contains(lsc.PublicId) && lsc.IsActive)
+            .ToArrayAsync(ct);
+        return result;
+    }
+
+    public async Task<LiveStreamCategory> GetByIdAsync(Guid id, CancellationToken ct = default)
+    {
+        return await context.LiveStreamCategories
+            .AsNoTracking()
+            .FirstOrDefaultAsync(lsc => lsc.PublicId == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
     }
 
     public async Task CreateAsync(LiveStreamCategory category, CancellationToken ct)
