@@ -12,7 +12,8 @@ public sealed class GetScheduleDetailHandler(
     {
         var targetStream = await liveStreamRepo.GetByIdAsync(request.Id, ct);
         var result = targetStream.Adapt<GetScheduleDetailResult>();
-        result.StreamUrl = $"{options.Value.StreamServer}?token={targetStream.Token}";
+        result.StreamUrl = options.Value.StreamServer;
+        result.StreamKey = $"{result.StreamKey}?token={targetStream.Token}";
         return result.Adapt<GetScheduleDetailResult>();
     }
 }
