@@ -77,7 +77,7 @@ public sealed class SendSupportMessageHandler(
                 EditedAt = message.EditedAt,
                 EditCount = message.EditCount,
                 CurrentVersion = message.CurrentVersion,
-                Attachments = []
+                Attachments = message.Attachments.Adapt<List<MessageAttachmentDto>>()
             };
             
             var updatedConv = await conversationRepo.GetSupportConversationAsync(senderActorId, ct);
