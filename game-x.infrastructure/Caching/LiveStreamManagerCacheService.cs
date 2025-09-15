@@ -81,7 +81,8 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
     public LiveStreamStatusDto? GetLiveStreamStatus(string streamKey)
     {
-        return Get<LiveStreamStatusDto?>(streamKey);
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
+        return Get<LiveStreamStatusDto?>(cacheKey);
     }
 
     public LiveStreamViewerDto? GetViewerInfo(string streamKey, string token)
