@@ -25,6 +25,7 @@ public sealed class EntityName
     public static EntityName MessageAttachment => Of(nameof(Entities.MessageAttachment));
     public static EntityName LiveStreamCategory => Of(nameof(Entities.LiveStreamCategory));
     public static EntityName LivestreamSchedule => Of(nameof(Entities.LivestreamSchedule));
+    public static EntityName SocialLink => Of(nameof(Entities.SocialLink));
 
     public static EntityName Of(string value)
     {
@@ -56,6 +57,7 @@ public sealed class EntityName
         nameof(Entities.MessageAttachment),
         nameof(Entities.LiveStreamCategory),
         nameof(Entities.LiveStreamCategoryMapping),
+        nameof(Entities.SocialLink),
     ];
 
     public override bool Equals(object? obj) =>

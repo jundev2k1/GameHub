@@ -337,6 +337,27 @@ public static class MessageCode
         /// <summary>Message not found.</summary>
         [EnumMetadata("Fail to send the message.")]
         FailToSendMessage = 10504,
+        /// <summary>Cannot friend yourself.</summary>
+        [EnumMetadata("Cannot friend yourself.")]
+        FailToFriendYourself = 10505,
+        /// <summary>The request is pending acceptance.</summary>
+        [EnumMetadata("The request is pending acceptance.")]
+        WaitToAccept = 10506,
+        /// <summary>Already friends.</summary>
+        [EnumMetadata("Already friends.")]
+        AlreadyFriend = 10507,
+        /// <summary>Cannot start DM with yourself.</summary>
+        [EnumMetadata("Cannot start DM with yourself.")]
+        FailToStartSelfDm = 10508,
+        /// <summary>Social link not found.</summary>
+        [EnumMetadata("Social link not found.")]
+        SocialLinkNotFound = 10509,
+        /// <summary>Request already responded.</summary>
+        [EnumMetadata("Request already responded.")]
+        FriendRequestAlreadyRespond = 10510,
+        /// <summary>Not the addressee.</summary>
+        [EnumMetadata("Not the addressee.")]
+        NotAddressee = 10511,
         #endregion
     }
 }

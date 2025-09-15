@@ -50,6 +50,7 @@ public interface IUserRepo
         int pageSize = 20,
         CancellationToken ct = default);
 
+    Task<bool> IsExistUserIdAsync(string userId, CancellationToken ct = default);
     Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default);
 
     Task<bool> IsExistPhoneNumberAsync(string phoneNumber, CancellationToken ct = default);

@@ -5,6 +5,6 @@ namespace game_x.application.Features.Chat.Queries.ListWindowMessagesInConversat
 public record ListWindowMessagesInConversationQuery(
     Guid ConvId,
     Guid AnchorId,
-    int Before,
-    int After,
-    string Anchor) : IQuery<MessageWindowDto>;
+    int? Before,
+    int? After,
+    WindowAnchorType? Anchor) : IQuery<MessageWindowDto>;

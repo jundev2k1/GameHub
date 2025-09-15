@@ -4,5 +4,6 @@ public enum ConversationType: short
 {
     Support = 1, 
     Direct = 2, // Direct Message
-    Group = 3
+    Group = 3,
+    Public = 4
 }

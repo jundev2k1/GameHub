@@ -180,6 +180,17 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 c.CustomerId == actorId || c.GuestId == actorId, ct);
     }
     
+    public async Task<Conversation?> FindForPairAsync(string userA, string userB, CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .Include(c => c.Members)
+            .Where(c => c.Type == ConversationType.Direct)
+            .FirstOrDefaultAsync(c =>
+                c.Members.Count == 2 &&
+                c.Members.Any(m => m.UserId == userA) &&
+                c.Members.Any(m => m.UserId == userB), ct);
+    }
+    
     public async Task<Conversation> GetByIdAsync(Guid convId, CancellationToken ct = default)
     {
         return await context.Conversations

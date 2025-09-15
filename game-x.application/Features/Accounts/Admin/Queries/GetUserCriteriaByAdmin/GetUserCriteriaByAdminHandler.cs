@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Persistence.Repo;
@@ -9,8 +8,7 @@ namespace game_x.application.Features.AccountManagement.Admin.Queries.GetUserCri
 
 public sealed class GetUserCriteriaByAdminHandler(
     IUserRepo userRepo,
-    ICriteriaBuilder<UserDto> builder
-    )
+    ICriteriaBuilder<UserDto> builder)
     : IQueryHandler<GetUserCriteriaByAdminQuery, PaginationResult<UserDto>>
 {
     public async Task<PaginationResult<UserDto>> Handle(GetUserCriteriaByAdminQuery request,

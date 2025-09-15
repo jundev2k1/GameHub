@@ -2,6 +2,7 @@ using game_x.api.Common;
 using game_x.api.Dtos;
 using game_x.application.Common.Files;
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
@@ -11,7 +12,10 @@ namespace game_x.api.Controllers.Client.Chat;
 
 [Authorize(Roles = AppRoles.User)]
 [Route("api/user")]
-public class ConversationController(IUserAccessor userAccessor) : BaseApiController
+public class ConversationController(
+    IConversationService convService,
+    IUserAccessor userAccessor
+    ) : BaseApiController
 {
     /// <summary>List conversations for current logged-in user</summary>
     [HttpGet("conversations/me")]
@@ -45,16 +49,14 @@ public class ConversationController(IUserAccessor userAccessor) : BaseApiControl
     public async Task<IActionResult> ListWindowMessagesInConversationAsync(
         Guid convId,
         Guid anchorId,
-        [FromQuery] int before = 30,
-        [FromQuery] int after = 30,
-        [FromQuery] string anchor = "self")
+        [AsParameters] AnchorWindowRequest parameters)
     {
         var query = new ListWindowMessagesInConversationQuery(
             ConvId: convId,
             AnchorId: anchorId,
-            Before: before,
-            After: after,
-            Anchor: anchor
+            Before: parameters.Before,
+            After: parameters.After,
+            Anchor: parameters.Anchor
         );
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
@@ -83,5 +85,14 @@ public class ConversationController(IUserAccessor userAccessor) : BaseApiControl
                 code: MessageCode.Chatting.FailToSendMessage,
                 errorDetail: new {ClientLocalId = formData.ClientLocalId});
         }
+    }
+
+    /// <summary>Return the ConversationId for the direct message between the current user and the peer.</summary>
+    [HttpPost("dm/{peerUserId}")]
+    public async Task<IActionResult> OpenDmAsync(string peerUserId, CancellationToken ct)
+    {
+        var me = userAccessor.GetUserId();
+        var result = await convService.EnsureForPair(me, peerUserId, ct);
+        return ApiResponseFactory.Ok(result);
     }
 }

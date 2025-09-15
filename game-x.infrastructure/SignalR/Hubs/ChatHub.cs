@@ -1,6 +1,7 @@
 using System.Text.Json;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Friend;
 using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using MediatR;
@@ -20,6 +21,8 @@ public interface IChatClient
     /// <summary>Send it whenever a message is sent.</summary>
     Task MessageCreated(MessageSignalDto dto);
     Task MessageFailed(MessageFailedSignalDto signalDto);
+    /// <summary>Notify that the user received a friend request</summary>
+    Task FriendRequest(FriendRequestSignalDto dto);
     // Task MemberRemoved(ConversationMemberDto dto);
     //
     // Task MessageCreated(MessageDto dto);

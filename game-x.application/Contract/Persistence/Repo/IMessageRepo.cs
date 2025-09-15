@@ -16,7 +16,7 @@ public interface IMessageRepo
 
     /// <summary> Window/Anchor (jump to message) </summary>
     Task<MessageWindowDto> GetWindowAsync(
-        Guid convId, Guid anchorId, int before, int after, string anchor = "self", CancellationToken ct = default);
+        Guid convId, Guid anchorId, int before, int after, WindowAnchorType anchor, CancellationToken ct = default);
     
     Task<Message> GetByIdAsync(Guid id, CancellationToken ct = default);
 }

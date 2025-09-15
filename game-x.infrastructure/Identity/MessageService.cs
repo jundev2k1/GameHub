@@ -13,7 +13,7 @@ using game_x.share.Helper;
 
 namespace game_x.infrastructure.Identity;
 
-public class MessageService(
+public sealed class MessageService(
     IMessageRepo messageRepo,
     IMessageAttachmentRepo messageAttachmentRepo,
     IFileStorageService fileStorage

@@ -67,16 +67,14 @@ public class ConversationController : BaseApiController
     public async Task<IActionResult> ListWindowMessagesInConversationAsync(
         Guid convId,
         Guid anchorId,
-        [FromQuery] int before = 30,
-        [FromQuery] int after = 30,
-        [FromQuery] string anchor = "self")
+        [AsParameters] AnchorWindowRequest parameters)
     {
         var query = new ListWindowMessagesInConversationQuery(
             ConvId: convId,
             AnchorId: anchorId,
-            Before: before,
-            After: after,
-            Anchor: anchor
+            Before: parameters.Before,
+            After: parameters.After,
+            Anchor: parameters.Anchor
         );
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
