@@ -118,7 +118,8 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
             && updatedViewers[viewer.ViewerId].Contains(viewer.Token);
         if (isExist) return;
 
-        updatedViewers[viewer.ViewerId] = [.. updatedViewers[viewer.ViewerId], viewer.Token];
+        var targetViewersArray = updatedViewers.FirstOrDefault(kvp => kvp.Key == viewer.ViewerId).Value ?? [];
+        updatedViewers[viewer.ViewerId] = [.. targetViewersArray, viewer.Token];
         var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
         Set(viewerListCacheKey, updatedViewers);
     }
@@ -135,7 +136,9 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         // Update viewer list for the stream
         var updatedViewers = GetAllViewersByStreamKey(viewer.StreamKey) ?? [];
-        updatedViewers[viewer.ViewerId] = [.. updatedViewers[viewer.ViewerId].Where(t => t != viewer.Token)];
+
+        var targetViewersArray = updatedViewers.FirstOrDefault(kvp => kvp.Key == viewer.ViewerId).Value ?? [];
+        updatedViewers[viewer.ViewerId] = [.. targetViewersArray.Where(t => t != viewer.Token)];
         var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
         Set(viewerListCacheKey, updatedViewers);
     }

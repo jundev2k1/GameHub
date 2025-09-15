@@ -60,5 +60,5 @@ public sealed class JoinLiveStreamHandler(
                 .Replace('/', '_');
 
     private string GenerateUrl(string streamKey, string token) =>
-        $"{options.Value.StreamServer}/live/{streamKey}.flv?token={token}";
+        $"{options.Value.StreamServer}/{streamKey}.flv?token={token}";
 }
