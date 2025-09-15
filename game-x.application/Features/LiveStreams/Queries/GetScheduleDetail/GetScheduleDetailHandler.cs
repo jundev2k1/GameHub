@@ -1,14 +1,18 @@
 ﻿using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.LiveStreams.Dtos;
+using game_x.share.Settings;
+using Microsoft.Extensions.Options;
 
 namespace game_x.application.Features.LiveStreams.Queries.GetScheduleDetail;
 
 public sealed class GetScheduleDetailHandler(
-    ILiveStreamRepo liveStreamRepo) : IQueryHandler<GetScheduleDetailQuery, LiveStreamScheduleDto>
+    ILiveStreamRepo liveStreamRepo,
+    IOptions<SrsSettings> options) : IQueryHandler<GetScheduleDetailQuery, GetScheduleDetailResult>
 {
-    public async Task<LiveStreamScheduleDto> Handle(GetScheduleDetailQuery request, CancellationToken ct = default)
+    public async Task<GetScheduleDetailResult> Handle(GetScheduleDetailQuery request, CancellationToken ct = default)
     {
-        var result = await liveStreamRepo.GetByIdAsync(request.Id, ct);
-        return result.Adapt<LiveStreamScheduleDto>();
+        var targetStream = await liveStreamRepo.GetByIdAsync(request.Id, ct);
+        var result = targetStream.Adapt<GetScheduleDetailResult>();
+        result.StreamUrl = $"{options.Value.StreamServer}?token={targetStream.Token}";
+        return result.Adapt<GetScheduleDetailResult>();
     }
 }
