@@ -1,22 +1,16 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.LiveStreams.Dtos;
-using game_x.share.Settings;
-using Microsoft.Extensions.Options;
 
 namespace game_x.application.Features.LiveStreams.Commands.PublishStream;
 
 public sealed class PublishStreamHandler(
     IUnitOfWork unitOfWork,
     ILiveStreamRepo liveStreamRepo,
-    ILiveStreamManagerCacheService liveStreamManager,
-    IOptions<SrsSettings> settings) : ICommandHandler<PublishStreamCommand>
+    ILiveStreamManagerCacheService liveStreamManager) : ICommandHandler<PublishStreamCommand>
 {
     public async Task<Unit> Handle(PublishStreamCommand request, CancellationToken ct = default)
     {
-        if (!settings.Value.StreamServer.EndsWith(request.Server))
-            throw new BadRequestException("Server Url invalid.");
-
         var streamSetting = await liveStreamRepo
             .GetByStreamKeyAsync(request.StreamKey, ct);
         if (streamSetting.AssignedId is null)
