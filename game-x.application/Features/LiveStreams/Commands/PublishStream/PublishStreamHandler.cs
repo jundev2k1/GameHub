@@ -13,6 +13,8 @@ public sealed class PublishStreamHandler(
     {
         var streamSetting = await liveStreamRepo
             .GetByStreamKeyAsync(request.StreamKey, ct);
+        if (streamSetting.Token != request.Token)
+            throw new ForbiddenException("Token is invalid.");
         if (streamSetting.AssignedId is null)
             throw new ForbiddenException("Stream key is not assigned to any talent.");
 
