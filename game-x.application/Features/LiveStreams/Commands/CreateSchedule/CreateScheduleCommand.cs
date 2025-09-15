@@ -8,5 +8,6 @@ public record CreateScheduleCommand(
     string Note,
     DateTime StartTime,
     DateTime EndTime,
-    ScheduleCategoryDto[] Categories) : ICommand;
+    ScheduleCategoryDto[] Categories,
+    string? TalentId) : ICommand;
 
