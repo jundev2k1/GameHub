@@ -72,34 +72,53 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         return GetAllStreamKeys().Contains(streamKey);
     }
 
+    public LiveStreamViewerDto GetViewerInfo(string streamKey, string clientId)
+    {
+        var viewerCacheKey = $"{LiveStreamViewersPrefix}{streamKey}:{clientId}";
+        return Get<LiveStreamViewerDto>(viewerCacheKey)
+            ?? throw new NotFoundException(nameof(clientId), clientId);
+    }
+
     public void WatchLiveStream(LiveStreamViewerDto viewer)
     {
         // Mark viewer as watching
         viewer.IsWatching = true;
+        if (!viewer.JoinAt.HasValue)
+            viewer.JoinAt = DateTime.UtcNow;
 
         // Store viewer info
-        var viewerCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.ClientId}:{viewer.DeviceInfo}";
+        var viewerCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.ClientId}";
         Set(viewerCacheKey, viewer);
 
         // Update viewer list for the stream
-        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
-        var allViewersByStreamKey = Get<string[]?>(viewerListCacheKey) ?? [];
+        var allViewersByStreamKey = GetAllViewersByStreamKey(viewer.StreamKey) ?? [];
         if (!allViewersByStreamKey.Contains(viewer.ClientId))
         {
+            var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
             string[] updatedViewers = [.. allViewersByStreamKey, viewer.ClientId];
             Set(viewerListCacheKey, updatedViewers);
         }
     }
 
-    public void UnwatchLiveStream(string streamKey, string clientId, string devideInfo)
+    public void UnwatchLiveStream(string streamKey, string clientId)
     {
-        var viewersKey = $"{LiveStreamViewersPrefix}{streamKey}:{clientId}:{devideInfo}";
+        // Retrieve viewer info
+        var viewersKey = $"{LiveStreamViewersPrefix}{streamKey}:{clientId}";
         var viewer = Get<LiveStreamViewerDto>(viewersKey)
             ?? throw new NotFoundException(nameof(clientId), clientId);
 
+        // Mark viewer as not watching
         viewer.IsWatching = false;
         viewer.OutAt = DateTime.UtcNow;
         Set(viewersKey, viewer);
+
+        // Update viewer list for the stream
+        var allViewersByStreamKey = GetAllViewersByStreamKey(viewer.StreamKey) ?? [];
+        var updatedViewers = allViewersByStreamKey
+            .Where(id => id != clientId)
+            .ToArray();
+        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{streamKey}";
+        Set(viewerListCacheKey, updatedViewers);
     }
 
     public string[] GetAllViewersByStreamKey(string streamKey)

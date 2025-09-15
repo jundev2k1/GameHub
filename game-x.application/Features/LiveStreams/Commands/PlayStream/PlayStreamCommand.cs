@@ -1,0 +1,7 @@
+﻿namespace game_x.application.Features.LiveStreams.Commands.PlayStream;
+
+public record PlayStreamCommand(
+    string Server,
+    string StreamKey,
+    string ClientId,
+    string Token) : ICommand;

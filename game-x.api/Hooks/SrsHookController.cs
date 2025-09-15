@@ -1,8 +1,11 @@
 ﻿using game_x.api.Common;
 using game_x.api.Controllers;
+using game_x.application.Exceptions;
+using game_x.application.Features.LiveStreams.Commands.PlayStream;
 using game_x.application.Features.LiveStreams.Commands.PublishStream;
 using game_x.application.Features.LiveStreams.Commands.UnpublishStream;
 using System.Text.Json;
+using System.Web;
 
 namespace game_x.api.Hooks;
 
@@ -36,7 +39,18 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
+
+        var query = HttpUtility.ParseQueryString(request.Param);
+        var token = query.Get("token");
+        if (token.IsNullOrWhiteSpace())
+            throw new BadRequestException("Token is required");
+
+        var command = new PlayStreamCommand(
+            request.App,
+            request.Stream,
+            request.ClientId,
+            token!);
+        await Mediator.Send(command);
         return Ok(0);
     }
 

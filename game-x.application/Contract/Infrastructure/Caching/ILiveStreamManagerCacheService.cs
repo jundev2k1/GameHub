@@ -16,9 +16,11 @@ public interface ILiveStreamManagerCacheService
 
     bool ContainsStreamKey(string streamKey);
 
+    LiveStreamViewerDto GetViewerInfo(string streamKey, string clientId);
+
     void WatchLiveStream(LiveStreamViewerDto viewer);
 
-    void UnwatchLiveStream(string streamKey, string clientId, string devideInfo);
+    void UnwatchLiveStream(string streamKey, string clientId);
 
     string[] GetAllViewersByStreamKey(string streamKey);
 
