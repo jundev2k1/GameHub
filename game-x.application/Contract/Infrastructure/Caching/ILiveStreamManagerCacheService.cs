@@ -14,15 +14,15 @@ public interface ILiveStreamManagerCacheService
 
     LiveStreamStatusDto? GetLiveStreamStatus(string streamKey);
 
-    bool ContainsStreamKey(string streamKey);
+    LiveStreamViewerDto? GetViewerInfo(string streamKey, string token);
 
-    LiveStreamViewerDto GetViewerInfo(string streamKey, string clientId);
+    void InitViewerLiveStream(LiveStreamViewerDto viewer);
 
     void WatchLiveStream(LiveStreamViewerDto viewer);
 
-    void UnwatchLiveStream(string streamKey, string clientId);
+    void UnwatchLiveStream(LiveStreamViewerDto viewer);
 
-    string[] GetAllViewersByStreamKey(string streamKey);
+    Dictionary<string, string[]> GetAllViewersByStreamKey(string streamKey);
 
     int GetViewerCount(string streamKey);
 }

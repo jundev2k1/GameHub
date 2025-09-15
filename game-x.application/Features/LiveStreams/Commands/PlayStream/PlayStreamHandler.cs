@@ -13,7 +13,8 @@ public sealed class PlayStreamHandler(
         if (!settings.Value.StreamServer.EndsWith(request.Server))
             throw new BadRequestException("Server Url invalid.");
 
-        var viewer = liveStreamManager.GetViewerInfo(request.StreamKey, request.ClientId);
+        var viewer = liveStreamManager.GetViewerInfo(request.StreamKey, request.Token)
+            ?? throw new BadRequestException("Viewer information was not found.");
         if (viewer.Token != request.Token)
             throw new ForbiddenException("Token is invalid.");
 

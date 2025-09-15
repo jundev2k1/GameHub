@@ -67,16 +67,20 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         return Get<LiveStreamStatusDto>(streamKey);
     }
 
-    public bool ContainsStreamKey(string streamKey)
+    public LiveStreamViewerDto? GetViewerInfo(string streamKey, string token)
     {
-        return GetAllStreamKeys().Contains(streamKey);
+        var viewerCacheKey = $"{LiveStreamViewersPrefix}{streamKey}:{token}";
+        return Get<LiveStreamViewerDto?>(viewerCacheKey);
     }
 
-    public LiveStreamViewerDto GetViewerInfo(string streamKey, string clientId)
+    public void InitViewerLiveStream(LiveStreamViewerDto viewer)
     {
-        var viewerCacheKey = $"{LiveStreamViewersPrefix}{streamKey}:{clientId}";
-        return Get<LiveStreamViewerDto>(viewerCacheKey)
-            ?? throw new NotFoundException(nameof(clientId), clientId);
+        viewer.IsWatching = false;
+        viewer.JoinAt = null;
+        viewer.OutAt = null;
+
+        var viewerCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.Token}";
+        Set(viewerCacheKey, viewer);
     }
 
     public void WatchLiveStream(LiveStreamViewerDto viewer)
@@ -87,25 +91,24 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
             viewer.JoinAt = DateTime.UtcNow;
 
         // Store viewer info
-        var viewerCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.ClientId}";
+        var viewerCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.Token}";
         Set(viewerCacheKey, viewer);
 
         // Update viewer list for the stream
-        var allViewersByStreamKey = GetAllViewersByStreamKey(viewer.StreamKey) ?? [];
-        if (!allViewersByStreamKey.Contains(viewer.ClientId))
-        {
-            var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
-            string[] updatedViewers = [.. allViewersByStreamKey, viewer.ClientId];
-            Set(viewerListCacheKey, updatedViewers);
-        }
+        var updatedViewers = GetAllViewersByStreamKey(viewer.StreamKey) ?? [];
+        var isExist = updatedViewers.ContainsKey(viewer.ViewerId)
+            && updatedViewers[viewer.ViewerId].Contains(viewer.Token);
+        if (isExist) return;
+
+        updatedViewers[viewer.ViewerId] = [.. updatedViewers[viewer.ViewerId], viewer.Token];
+        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
+        Set(viewerListCacheKey, updatedViewers);
     }
 
-    public void UnwatchLiveStream(string streamKey, string clientId)
+    public void UnwatchLiveStream(LiveStreamViewerDto viewer)
     {
         // Retrieve viewer info
-        var viewersKey = $"{LiveStreamViewersPrefix}{streamKey}:{clientId}";
-        var viewer = Get<LiveStreamViewerDto>(viewersKey)
-            ?? throw new NotFoundException(nameof(clientId), clientId);
+        var viewersKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.Token}";
 
         // Mark viewer as not watching
         viewer.IsWatching = false;
@@ -113,18 +116,16 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         Set(viewersKey, viewer);
 
         // Update viewer list for the stream
-        var allViewersByStreamKey = GetAllViewersByStreamKey(viewer.StreamKey) ?? [];
-        var updatedViewers = allViewersByStreamKey
-            .Where(id => id != clientId)
-            .ToArray();
-        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{streamKey}";
+        var updatedViewers = GetAllViewersByStreamKey(viewer.StreamKey) ?? [];
+        updatedViewers[viewer.ViewerId] = [.. updatedViewers[viewer.ViewerId].Where(t => t != viewer.Token)];
+        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
         Set(viewerListCacheKey, updatedViewers);
     }
 
-    public string[] GetAllViewersByStreamKey(string streamKey)
+    public Dictionary<string, string[]> GetAllViewersByStreamKey(string streamKey)
     {
         var viewerListCacheKey = $"{LiveStreamViewersPrefix}{streamKey}";
-        return Get<string[]>(viewerListCacheKey) ?? [];
+        return Get<Dictionary<string, string[]>>(viewerListCacheKey) ?? [];
     }
 
     public LiveStreamViewerDto[] GetAllViewerInfosByStreamKey(string streamKey)

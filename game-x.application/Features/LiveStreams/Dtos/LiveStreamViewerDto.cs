@@ -8,6 +8,8 @@ public sealed class LiveStreamViewerDto
     public string ClientId { get; set; } = string.Empty;
     public string ViewerId { get; set; } = string.Empty;
     public string ViewerName { get; set; } = string.Empty;
+    public string ViewerAvatar { get; set; } = string.Empty;
+    public string DeviceInfo { get; set; } = string.Empty;
     public bool IsWatching { get; set; }
     public DateTime? JoinAt { get; set; }
     public DateTime? OutAt { get; set; }

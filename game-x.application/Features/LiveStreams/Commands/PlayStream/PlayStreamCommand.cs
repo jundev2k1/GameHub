@@ -3,5 +3,4 @@
 public record PlayStreamCommand(
     string Server,
     string StreamKey,
-    string ClientId,
     string Token) : ICommand;

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 namespace game_x.application.Features.LiveStreams.Commands.PublishStream;
 
 public sealed class PublishStreamHandler(
+    IUnitOfWork unitOfWork,
     ILiveStreamRepo liveStreamRepo,
     ILiveStreamManagerCacheService liveStreamManager,
     IOptions<SrsSettings> settings) : ICommandHandler<PublishStreamCommand>
@@ -29,6 +30,12 @@ public sealed class PublishStreamHandler(
             TalentName = streamSetting.AssignedBy?.Nickname ?? string.Empty,
         };
         liveStreamManager.ConnectLiveStream(streamInfo);
+
+        await liveStreamRepo.UpdateAsync(streamSetting.PublicId, async schedule =>
+        {
+            schedule.StartStream();
+        }, ct);
+        await unitOfWork.SaveChangesAsync(ct);
 
         return Unit.Value;
     }
