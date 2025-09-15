@@ -3,6 +3,7 @@ using game_x.api.Controllers;
 using game_x.application.Exceptions;
 using game_x.application.Features.LiveStreams.Commands.PlayStream;
 using game_x.application.Features.LiveStreams.Commands.PublishStream;
+using game_x.application.Features.LiveStreams.Commands.StopStream;
 using game_x.application.Features.LiveStreams.Commands.UnpublishStream;
 using System.Text.Json;
 using System.Web;
@@ -58,7 +59,11 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
+        var command = new StopStreamCommand(
+            request.App,
+            request.Stream,
+            request.Param);
+        await Mediator.Send(command);
         return Ok(0);
     }
 }
