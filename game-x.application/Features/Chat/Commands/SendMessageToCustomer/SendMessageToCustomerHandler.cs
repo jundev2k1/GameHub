@@ -60,7 +60,7 @@ public sealed class SendMessageToCustomerHandler(
                 EditedAt = message.EditedAt,
                 EditCount = message.EditCount,
                 CurrentVersion = message.CurrentVersion,
-                Attachments = []
+                Attachments = message.Attachments.Adapt<List<MessageAttachmentDto>>()
             };
             
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);

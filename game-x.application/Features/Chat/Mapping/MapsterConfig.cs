@@ -63,5 +63,10 @@ public sealed class MapsterConfig : IRegister
         
         cfg.NewConfig<MessageDto, ListedMessageDto>()
             .Map(dest => dest.Id, src => src.PublicId);
+        
+        cfg.NewConfig<MessageAttachment, MessageAttachmentDto>()
+            .Map(dest => dest.FileName, src => src.MediaFile != null ? src.MediaFile.FileName : null)
+            .Map(dest => dest.BucketName, src => src.MediaFile != null ? src.MediaFile.BucketName : null)
+            .Map(dest => dest.ObjectName, src => src.MediaFile != null ? src.MediaFile.ObjectName : null);
     }
 }
