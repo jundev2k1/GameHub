@@ -6,6 +6,8 @@ public interface ILiveStreamManagerCacheService
 {
     string[] GetAllStreamKeys();
 
+    void InitLiveStream(LiveStreamStatusDto streamInfo);
+
     void ConnectLiveStream(LiveStreamStatusDto streamInfo);
 
     void DisconnnectLiveStream(string streamKey);

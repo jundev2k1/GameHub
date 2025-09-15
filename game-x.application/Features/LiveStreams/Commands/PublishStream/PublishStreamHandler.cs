@@ -27,9 +27,12 @@ public sealed class PublishStreamHandler(
 
         await liveStreamRepo.UpdateAsync(streamSetting.PublicId, async schedule =>
         {
+            if (schedule.Status == LiveStreamStatus.Live)
+                return;
+
             schedule.StartStream();
+            await unitOfWork.SaveChangesAsync(ct);
         }, ct);
-        await unitOfWork.SaveChangesAsync(ct);
 
         return Unit.Value;
     }

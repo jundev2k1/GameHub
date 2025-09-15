@@ -19,6 +19,17 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         return result;
     }
 
+    public void InitLiveStream(LiveStreamStatusDto streamInfo)
+    {
+        if (streamInfo.StreamKey.IsNullOrWhiteSpace())
+            throw new ArgumentException("Stream key cannot be null or empty.", streamInfo.StreamKey);
+
+        streamInfo.IsLive = true;
+
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamInfo.StreamKey}";
+        Set(cacheKey, streamInfo);
+    }
+
     public void ConnectLiveStream(LiveStreamStatusDto streamInfo)
     {
         if (streamInfo.StreamKey.IsNullOrWhiteSpace())
@@ -64,7 +75,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
     public LiveStreamStatusDto? GetLiveStreamStatus(string streamKey)
     {
-        return Get<LiveStreamStatusDto>(streamKey);
+        return Get<LiveStreamStatusDto?>(streamKey);
     }
 
     public LiveStreamViewerDto? GetViewerInfo(string streamKey, string token)
