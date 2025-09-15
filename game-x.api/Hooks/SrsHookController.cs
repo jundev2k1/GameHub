@@ -1,6 +1,12 @@
 ﻿using game_x.api.Common;
 using game_x.api.Controllers;
+using game_x.application.Exceptions;
+using game_x.application.Features.LiveStreams.Commands.PlayStream;
+using game_x.application.Features.LiveStreams.Commands.PublishStream;
+using game_x.application.Features.LiveStreams.Commands.StopStream;
+using game_x.application.Features.LiveStreams.Commands.UnpublishStream;
 using System.Text.Json;
+using System.Web;
 
 namespace game_x.api.Hooks;
 
@@ -12,7 +18,9 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
+
+        var command = new PublishStreamCommand(request.App, request.Stream);
+        await Mediator.Send(command);
         return Ok(0);
     }
 
@@ -21,25 +29,9 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
-        return Ok(0);
-    }
 
-    [HttpPost("on-connect")]
-    public async Task<IActionResult> OnConnectAsync(SrsEventHookRequest request)
-    {
-        logger.LogInformation("=====SRS server=====");
-        logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
-        return Ok(0);
-    }
-
-    [HttpPost("on-disconnect")]
-    public async Task<IActionResult> OnDisconnectAsync(SrsEventHookRequest request)
-    {
-        logger.LogInformation("=====SRS server=====");
-        logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
+        var command = new UnpublishStreamCommand(request.App, request.Stream);
+        await Mediator.Send(command);
         return Ok(0);
     }
 
@@ -48,7 +40,17 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
+
+        var query = HttpUtility.ParseQueryString(request.Param);
+        var token = query.Get("token");
+        if (token.IsNullOrWhiteSpace())
+            throw new BadRequestException("Token is required");
+
+        var command = new PlayStreamCommand(
+            request.App,
+            request.Stream,
+            token!);
+        await Mediator.Send(command);
         return Ok(0);
     }
 
@@ -57,7 +59,11 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
+        var command = new StopStreamCommand(
+            request.App,
+            request.Stream,
+            request.Param);
+        await Mediator.Send(command);
         return Ok(0);
     }
 }

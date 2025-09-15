@@ -4,6 +4,8 @@ namespace game_x.application.Contract.Infrastructure.Caching;
 
 public interface IRefreshTokenManagerCacheService
 {
+    void InitRefreshTokens();
+
     IEnumerable<RefreshTokenDto> GetAllTokens();
 
     IEnumerable<RefreshTokenDto> GetsByUserId(string userId);
