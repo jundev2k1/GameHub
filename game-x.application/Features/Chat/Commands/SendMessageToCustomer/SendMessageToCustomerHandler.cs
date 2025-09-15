@@ -35,7 +35,7 @@ public sealed class SendMessageToCustomerHandler(
             var message = await CreateMessageAsync(
                 conv: conv, 
                 userId: senderUserId,
-                text: request.Text,
+                text: request.Text ?? string.Empty,
                 replyMessageId: request.ReplyToMessageId,
                 ct: ct);
             
