@@ -54,8 +54,8 @@ public sealed class EntityName
         nameof(Entities.ConversationMember),
         nameof(Entities.Message),
         nameof(Entities.MessageAttachment),
+        nameof(Entities.LivestreamSchedule),
         nameof(Entities.LiveStreamCategory),
-        nameof(Entities.LiveStreamCategoryMapping),
     ];
 
     public override bool Equals(object? obj) =>

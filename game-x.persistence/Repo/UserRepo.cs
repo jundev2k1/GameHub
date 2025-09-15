@@ -291,6 +291,9 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             pageSize);
     }
 
+    public async Task<bool> IsExistUserIdAsync(string userId, CancellationToken ct = default)
+        => await userManager.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted, ct);
+
     public async Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.Email != null && u.Email.ToLower() == email.ToLower() && !u.IsDeleted, ct);
 

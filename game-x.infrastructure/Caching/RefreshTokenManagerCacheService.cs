@@ -13,7 +13,7 @@ public sealed class RefreshTokenManagerCacheService(
 {
     private const string CacheKeyPrefix = "RefreshTokenManager";
 
-    private Dictionary<string, Guid[]> GetValidRefreshTokens()
+    public void InitRefreshTokens()
     {
         static RefreshTokenDto MapToDtoFromDb(RefreshToken token)
         {
@@ -37,8 +37,6 @@ public sealed class RefreshTokenManagerCacheService(
 
         // Insert valid tokens into cache
         validTokens.ForEach(InsertNewToken);
-
-        return dataSource;
     }
 
     public IEnumerable<RefreshTokenDto> GetAllTokens()
@@ -189,7 +187,7 @@ public sealed class RefreshTokenManagerCacheService(
 
     private Dictionary<string, Guid[]> DataSource
     {
-        get { return Get<Dictionary<string, Guid[]>>($"{CacheKeyPrefix}:list") ?? GetValidRefreshTokens(); }
+        get { return Get<Dictionary<string, Guid[]>>($"{CacheKeyPrefix}:list") ?? []; }
         set { Set($"{CacheKeyPrefix}:list", value); }
     }
 }
