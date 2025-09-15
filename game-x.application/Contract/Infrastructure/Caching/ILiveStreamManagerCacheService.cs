@@ -8,11 +8,13 @@ public interface ILiveStreamManagerCacheService
 
     void InitLiveStream(LiveStreamStatusDto streamInfo);
 
-    void ConnectLiveStream(LiveStreamStatusDto streamInfo);
+    void ConnectLiveStream(string streamKey);
 
     void DisconnnectLiveStream(string streamKey);
 
     void RemoveLiveStream(string streamKey);
+
+    bool IsExistLiveStream(string streamKey);
 
     LiveStreamStatusDto? GetLiveStreamStatus(string streamKey);
 
