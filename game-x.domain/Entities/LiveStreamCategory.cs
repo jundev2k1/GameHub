@@ -11,7 +11,12 @@ public sealed class LiveStreamCategory : BaseEntity<int>, IAuditable
 
     public ICollection<LiveStreamCategoryMapping> CategoryMappings { get; private set; } = default!;
 
-    public static LiveStreamCategory Create(string name, string desc, string note, int priority)
+    public static LiveStreamCategory Create(
+        string name,
+        string desc,
+        string note,
+        int priority,
+        bool isActive = true)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
 
@@ -21,6 +26,7 @@ public sealed class LiveStreamCategory : BaseEntity<int>, IAuditable
             Description = desc,
             Note = note,
             Priority = priority,
+            IsActive = isActive,
         };
     }
 
@@ -36,4 +42,6 @@ public sealed class LiveStreamCategory : BaseEntity<int>, IAuditable
         Priority = priority;
         IsActive = isActive;
     }
+
+    public void UpdateStatus(bool isActive) => IsActive = isActive;
 }
