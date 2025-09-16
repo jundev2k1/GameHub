@@ -6,12 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Factories\**" />
+    <EmbeddedResource Remove="Factories\**" />
+    <None Remove="Factories\**" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\game-x.share\game-x.share.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Factories\" />
   </ItemGroup>
 </Project>

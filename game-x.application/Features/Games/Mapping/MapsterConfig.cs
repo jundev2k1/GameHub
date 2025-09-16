@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.Games.Dtos;
+﻿using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
+using game_x.application.Features.Games.Dtos;
 
 namespace game_x.application.Features.Games.Mapping;
 
@@ -45,6 +46,11 @@ public sealed class MapsterConfig : IRegister
                     .Select(x => x.Adapt<GameTagInfo>())
                     .OrderBy(g => g.IsPrimary)
                     .ThenBy(g => g.Priority))
+            .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
+            .Map(dest => dest.PlatformName, src => src.Platform.Name);
+
+        cfg.NewConfig<Game, GetGamesByCriteriaListItem>()
+            .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
             .Map(dest => dest.PlatformName, src => src.Platform.Name);
     }
