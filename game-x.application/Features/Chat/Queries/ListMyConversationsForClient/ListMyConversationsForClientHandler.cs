@@ -1,18 +1,17 @@
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Features.Chat.Dtos;
 
 namespace game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
 
-public sealed class ListMyConversationsHandler(IUserAccessor userAccessor, IConversationRepo conversationRepo)
-    : IRequestHandler<ListMyConversationsForClientQuery, CursorResult<ConversationDto>>
+public sealed class ListMyConversationsHandler(IUserAccessor userAccessor, IConversationService conversationService)
+    : IRequestHandler<ListMyConversationsForClientQuery, CursorResult<ListedConversationDto>>
 {
-    public async Task<CursorResult<ConversationDto>> Handle(ListMyConversationsForClientQuery request, CancellationToken ct)
+    public async Task<CursorResult<ListedConversationDto>> Handle(ListMyConversationsForClientQuery request, CancellationToken ct)
     {
         var userId = userAccessor.GetUserId();
-
-        return await conversationRepo.GetMyConversationsForClientAsync(
+        return await conversationService.GetMyConversationsForClientAsync(
             userId: userId,
             limit: request.Limit ?? 20,
             cursor: request.Cursor,

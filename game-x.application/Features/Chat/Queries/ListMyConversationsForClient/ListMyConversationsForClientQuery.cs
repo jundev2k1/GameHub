@@ -6,4 +6,4 @@ namespace game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
 
 public record ListMyConversationsForClientQuery(
     int? Limit,
-    string? Cursor = null) : IQuery<CursorResult<ConversationDto>>;
+    string? Cursor = null) : IQuery<CursorResult<ListedConversationDto>>;

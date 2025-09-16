@@ -1,5 +1,6 @@
 using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.Dtos;
@@ -11,7 +12,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace game_x.persistence.Repo;
 
-public sealed class UserRepo(GameXContext context, UserManager<User> userManager) : IUserRepo, IRepository
+public sealed class UserRepo(
+    GameXContext context, 
+    UserManager<User> userManager,
+    IFileStorageService fileStorage) : IUserRepo, IRepository
 {
     public async Task<User[]> GetUserByRole(string roleName, CancellationToken ct = default)
     {
@@ -27,6 +31,7 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
             .ThenInclude(ba => ba.FiatCurrency)
             .Include(u => u.UserExtend)
             .Include(u => u.UserRoles)
+            .Include(u => u.Avatar)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
@@ -96,6 +101,7 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
     {
         var targetUser = await context.Users
             .AsNoTracking()
+            .Include(u => u.Avatar)
             .Include(u => u.UserKyc)
             .Include(u => u.UserExtend)
             .Include(u => u.UserBankAccounts)
@@ -105,7 +111,19 @@ public sealed class UserRepo(GameXContext context, UserManager<User> userManager
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException();
+
+        string? avatarUrl = null;
+        if (targetUser.Avatar is not null)
+        {
+            avatarUrl = await fileStorage.GenerateDownloadUrlAsync(
+                bucketName: targetUser.Avatar.BucketName,
+                objectName: targetUser.Avatar.ObjectName,
+                expiry: TimeSpan.FromMinutes(300),
+                ct: ct);
+        }
+        
         var result = targetUser.Adapt<UserDetailDto>();
+        result.AvatarUrl = avatarUrl;
         return result;
     }
 
