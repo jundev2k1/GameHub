@@ -3,7 +3,6 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
-using game_x.application.Features.Chat.Commands.SendSupportMessageByGuest;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -19,8 +18,8 @@ public interface IChatClient
     Task ConversationUpdated(ConversationSignalDto signalDto);
     Task MemberAdded(ConversationMemberDto dto);
     /// <summary>Send it whenever a message is sent.</summary>
-    Task MessageCreated(MessageDto dto);
-    Task MessageFailed(MessageDto dto);
+    Task MessageCreated(MessageSignalDto dto);
+    Task MessageFailed(MessageFailedSignalDto signalDto);
     // Task MemberRemoved(ConversationMemberDto dto);
     //
     // Task MessageCreated(MessageDto dto);
@@ -127,85 +126,60 @@ public sealed class ChatHub(
     /// <summary>
     /// Send a support message by customer.
     /// Creates the user's support conversation if missing
-    /// Broadcast to all Admin/Cs role groups if this is a new conversation
-    /// Only send to the assigned CS representative if the conversation has been claimed
+    /// Broadcast to all Admin/Cs role groups
     /// </summary>
     [Authorize(Roles = AppRoles.User)]
     public async Task SendSupportMessage(SendSupportMessageCommand cmd)
     {
-        var ct = Context.ConnectionAborted;
-        
-        var result = await sender.Send(cmd, ct);
-    
-        await Clients.Caller.ConversationUpdated(result.Conv);
-        await Clients.Caller.MessageCreated(result.Message);
-        
-        await Clients.Group(GroupNames.Role(AppRoles.Admin)).ConversationUpdated(result.Conv);
-        await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
-        
-        await Clients.Group(GroupNames.Role(AppRoles.Cs)).ConversationUpdated(result.Conv);
-        await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
-        
-        // await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).ConversationUpdated(result.Conv);
-        // await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
+        try
+        {
+            var userId = userAccessor.GetUserId();
+            var ct = Context.ConnectionAborted;
+            await sender.Send(cmd with {SenderActorId = userId, SenderUserId = userId }, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error sending support message");
+            await Clients.Caller.MessageFailed(new MessageFailedSignalDto(ClientLocalId: cmd.ClientLocalId));
+        }
     }
     
     /// <summary>
     /// Send a support message by guest.
     /// Creates the guest's support conversation if missing
-    /// Broadcast to all Admin/Cs role groups if this is a new conversation
-    /// Only send to the assigned CS representative if the conversation has been claimed
+    /// Broadcast to all Admin/Cs role groups
     /// </summary>
-    public async Task SendSupportMessageByGuest(SendSupportMessageByGuestCommand cmd)
+    public async Task SendSupportMessageByGuest(SendSupportMessageCommand cmd)
     {
-        var guestId = Context.UserIdentifier;
-        if (string.IsNullOrWhiteSpace(guestId)) { return; }
-        
-        var ct = Context.ConnectionAborted;
-        
-        var result = await sender.Send(cmd with {GuestId = guestId}, ct);
-        
-        await Clients.Caller.ConversationUpdated(result.Conv);
-        await Clients.Caller.MessageCreated(result.Message);
-        
-        await Clients.Group(GroupNames.Role(AppRoles.Admin)).ConversationUpdated(result.Conv);
-        await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
-        
-        await Clients.Group(GroupNames.Role(AppRoles.Cs)).ConversationUpdated(result.Conv);
-        await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
-        
-        // await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).ConversationUpdated(result.Conv);
-        // await Clients.Group(GroupNames.Conversation(result.Message.ConversationId)).MessageCreated(result.Message);
+        try
+        {
+            var guestId = Context.UserIdentifier;
+            if (string.IsNullOrWhiteSpace(guestId)) { return; }
+            var ct = Context.ConnectionAborted;
+            await sender.Send(cmd with {SenderActorId = guestId}, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error sending support message");
+            await Clients.Caller.MessageFailed(new MessageFailedSignalDto(ClientLocalId: cmd.ClientLocalId));
+        }
     }
     
     /// <summary>Send a support message to customer.</summary>
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     public async Task SendSupportMessageToCustomer(SendMessageToCustomerCommand cmd)
     {
-        var ct = Context.ConnectionAborted;
-        
-        var result = await sender.Send(cmd, ct);
-        
-        // Notify all admins for now
-        await Clients.Group(GroupNames.Role(AppRoles.Admin)).ConversationUpdated(result.Conv);
-        await Clients.Group(GroupNames.Role(AppRoles.Admin)).MessageCreated(result.Message);
-        
-        // Notify all customer supports for now
-        await Clients.Group(GroupNames.Role(AppRoles.Cs)).ConversationUpdated(result.Conv);
-        await Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(result.Message);
-
-        // Notify the customer
-        if (result.Conv.CustomerId != null)
+        try
         {
-            await Clients.Group(GroupNames.Member(result.Conv.CustomerId)).ConversationUpdated(result.Conv);
-            await Clients.Group(GroupNames.Member(result.Conv.CustomerId)).MessageCreated(result.Message);
+            var ct = Context.ConnectionAborted;
+            await sender.Send(cmd, ct);
         }
-        
-        // Notify the guest
-        if (result.Conv.GuestId != null)
+        catch (Exception ex)
         {
-            await Clients.Group(GroupNames.Guest(result.Conv.GuestId)).ConversationUpdated(result.Conv);
-            await Clients.Group(GroupNames.Guest(result.Conv.GuestId)).MessageCreated(result.Message);
+            logger.LogError(ex, "Error sending support message");
+            await Clients.Caller.MessageFailed(new MessageFailedSignalDto(
+                ClientLocalId: cmd.ClientLocalId,
+                ConversationId: cmd.ConversationId));
         }
     }
     

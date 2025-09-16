@@ -1,8 +1,8 @@
 using game_x.application.Common.Abstractions;
-using game_x.application.Common.Abstractions.Pagination;
-using game_x.application.Common.Filters;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Exceptions;
+using game_x.application.Features.Chat.Dtos;
+using game_x.domain.Constants;
 using game_x.share.Helper;
 using Mapster;
 
@@ -15,23 +15,49 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
         await context.Messages.AddAsync(msg, ct);
     }
     
-    public async Task<CursorResult<MessageDto>> GetByCursorAsync(
+    public Task<IQueryable<MessageDto>> GetByCursorAsync(
         Guid convId, int limit, string? cursor, CancellationToken ct = default)
     {
-        var query = context.Messages.AsNoTracking()
-            .Include(x => x.Conversation)
-            .Where(m => m.Conversation.PublicId == convId);
-
-        var fp = CursorHelper.ComputeFp($"conv:{convId}");
-
-        return await SeekCursorBuilder<Message>
-            .For(query)
-            .Keys(m => m.SentAt, m => m.Id)
-            .Sort(desc1: true, desc2: false) // newest → older
-            .FromCursor(cursor, fp)
-            .WithPrev()
-            .Limit(limit)
-            .ExecuteAsync(m => m.Adapt<MessageDto>(), ct);
+        // Index lookup
+        var convDbId = context.Conversations
+            .Where(c => c.PublicId == convId)
+            .Select(c => c.Id)
+            .FirstOrDefault();
+        
+        var query = context.Messages
+            .AsNoTracking()
+            .Include(m => m.ReplyToMessage)
+            .Include(m => m.Attachments)
+                .ThenInclude(a => a.MediaFile)
+            .Where(m => m.ConversationId == convDbId)
+            .Select(m => new MessageDto
+            {
+                Id = m.Id,
+                PublicId = m.PublicId,
+                ConversationId = convId,
+                SenderActorId = m.SenderActorId,
+                SenderRole = m.SenderRole,
+                Kind = m.Kind,
+                Text = m.Text,
+                ReplyToMessageId = m.ReplyToMessage!.PublicId,
+                IsTombstone = m.IsTombstone,
+                SentAt = m.SentAt,
+                EditedAt = m.EditedAt,
+                EditCount = m.EditCount,
+                CurrentVersion = m.CurrentVersion,
+                Attachments = m.Attachments
+                    .Select(a => new MessageAttachmentDto
+                    {
+                        SortOrder = a.SortOrder,
+                        BindingStatus = a.BindingStatus,
+                        FileName = a.MediaFile != null ? a.MediaFile.FileName : null,
+                        BucketName = a.MediaFile != null ? a.MediaFile.BucketName : null,
+                        ObjectName = a.MediaFile != null ? a.MediaFile.ObjectName : null,
+                    })
+                    .ToList()
+            });
+            
+        return Task.FromResult(query);
     }
     
     // -------- Window/Anchor (jump to message) --------
@@ -90,7 +116,7 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
 
         // 5) Build window
         var items = older.Concat([anchorMsg]).Concat(newer)
-            .Select(m => m.Adapt<MessageDto>())
+            .Select(m => m.Adapt<ListedMessageDto>())
             .ToList();
 
         var fp = CursorHelper.ComputeFp($"conv:{convId}");
@@ -113,6 +139,16 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
             PrevCursor = prev,
             NextCursor = next
         };
+    }
+    
+    public async Task<Message> GetByIdAsync(Guid id, CancellationToken ct = default)
+    {
+        return await context.Messages.AsNoTracking()
+            .Include(x => x.Conversation)
+            .Where(m => m.PublicId == id)
+            .FirstOrDefaultAsync(ct)
+            ?? throw new NotFoundException(MessageCode.Chatting.MessageNotFound);
+
     }
     
     // --- Helpers ---

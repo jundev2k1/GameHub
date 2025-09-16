@@ -1,4 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Features.BankAccountVerifications.Dtos;
 using game_x.application.Features.Kyc.Dtos;
 

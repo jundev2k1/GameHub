@@ -17,9 +17,6 @@ public interface ISeekCursorBuilder<TModel> where TModel : notnull
     /// <summary>Apply a cursor token (optionally with a filter fingerprint).</summary>
     ISeekCursorBuilder<TModel> FromCursor(string? cursor, string? fp = null);
 
-    /// <summary>Enable prevCursor generation.</summary>
-    ISeekCursorBuilder<TModel> WithPrev(bool enable = true);
-
     ISeekCursorBuilder<TModel> Limit(int size);
 
     /// <summary>Execute query and project to DTO.</summary>

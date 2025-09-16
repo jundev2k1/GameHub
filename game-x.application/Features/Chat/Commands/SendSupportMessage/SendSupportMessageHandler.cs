@@ -1,7 +1,9 @@
 using game_x.application.Contract.Infrastructure.Logger;
-using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnSupportMessageCreated;
+using game_x.application.Features.Chat.Dtos;
 
 namespace game_x.application.Features.Chat.Commands.SendSupportMessage;
 
@@ -10,45 +12,83 @@ public sealed class SendSupportMessageHandler(
     IConversationRepo conversationRepo,
     IConversationMemberRepo conversationMemberRepo,
     IMessageRepo messageRepo,
+    IMessageService messageService,
     IAppLogger<Message> logger,
-    IUserAccessor userAccessor
+    IApplicationEventDispatcher eventDispatcher
     ) : IRequestHandler<SendSupportMessageCommand, SendSupportMessageResult>
 {
     public async Task<SendSupportMessageResult> Handle(SendSupportMessageCommand request, CancellationToken ct)
     {
-        var senderUserId = userAccessor.GetUserId();
+        var senderActorId = request.SenderActorId;
+        var senderUserId = request.SenderUserId;
         var now = DateTime.UtcNow;
 
         // Each customer has only one conversation with customer support; if none exists, a new one will be created
-        var conv = await conversationRepo.GetSupportConversationForClientAsync(senderUserId, ct);
+        var conv = await conversationRepo.GetSupportConversationAsync(senderActorId, ct);
+        // Only user need join into a group (guest is not allowed)
         ConversationMember? convMember = null;
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
             if (conv is null)
             {
-                conv = await CreateConversationAsync(senderUserId, ct);
-                convMember = await CreateConversationMemberAsync(conv, senderUserId, ct);
+                conv = await CreateConversationAsync(senderActorId, senderUserId, ct);
+                if (senderUserId is not null)
+                {
+                    convMember = await CreateConversationMemberAsync(conv, senderUserId, ct);
+                }
             }
 
-            if (convMember is null)
+            if (convMember is null && senderUserId is not null)
             {
                 var exists = await conversationMemberRepo.CheckExistMemberAsync(conv.Id, senderUserId, ct);
                 if (!exists)
                 {
-                    await CreateConversationMemberAsync(conv, senderUserId, ct);
+                    await CreateConversationMemberAsync(conv, senderActorId, ct);
                 }
             }
             
-            var message = await CreateMessageAsync(conv, senderUserId, request.Text, ct);
+            var message = await CreateMessageAsync(
+                conv: conv, 
+                actorId: senderActorId,
+                userId: senderUserId,
+                text: request.Text,
+                replyMessageId: request.ReplyToMessageId,
+                ct: ct);
+            
+            await messageService.CreateMessageAttachmentsAsync(msg: message, attachments: request.Attachments, ct);
             
             conv.LastMessageAt = now;
-
-            await unitOfWork.CommitAsync(ct);
             
-            return new SendSupportMessageResult(
-                message.Adapt<MessageDto>(), 
-                conv.Adapt<ConversationSignalDto>());
+            await unitOfWork.CommitAsync(ct);
+
+            var msgDto = new MessageDto
+            {
+                Id = message.Id,
+                PublicId = message.PublicId,
+                ConversationId = conv.PublicId,
+                SenderActorId = message.SenderActorId,
+                SenderRole = message.SenderRole,
+                Kind = message.Kind,
+                Text = message.Text,
+                ReplyToMessageId = request.ReplyToMessageId,
+                IsTombstone = message.IsTombstone,
+                SentAt = message.SentAt,
+                EditedAt = message.EditedAt,
+                EditCount = message.EditCount,
+                CurrentVersion = message.CurrentVersion,
+                Attachments = []
+            };
+            
+            var updatedConv = await conversationRepo.GetSupportConversationAsync(senderActorId, ct);
+            var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
+            var dto = new CreatedMessageSignalResult(
+                Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
+                Conv: updatedConv.Adapt<ConversationSignalDto>());
+            
+            await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
+            
+            return new SendSupportMessageResult(request.ClientLocalId);
             
         }
         catch(Exception ex)
@@ -59,11 +99,12 @@ public sealed class SendSupportMessageHandler(
         }
     }
     
-    private async Task<Conversation> CreateConversationAsync(string userId, CancellationToken ct)
+    private async Task<Conversation> CreateConversationAsync(string actorId, string? userId, CancellationToken ct)
     {
         var conv = Conversation.Create(
             type: ConversationType.Support,
-            senderUserId: userId);
+            senderUserId: userId,
+            senderGuestId: userId is null ? actorId : null);
                 
         await conversationRepo.AddAsync(conv, ct);
         return conv;
@@ -80,15 +121,30 @@ public sealed class SendSupportMessageHandler(
         return convMember;
     }
     
-    private async Task<Message> CreateMessageAsync(Conversation conv, string userId, string text, CancellationToken ct)
+    private async Task<Message> CreateMessageAsync(
+        Conversation conv, 
+        string actorId,
+        string? userId,
+        string? text,
+        Guid? replyMessageId,
+        CancellationToken ct)
     {
+        int? replyMessageIntId = null;
+        if (replyMessageId is not null && replyMessageId.Value != Guid.Empty)
+        {
+            var rid = replyMessageId.Value;
+            var replyMessage = await messageRepo.GetByIdAsync(rid, ct);
+            replyMessageIntId = replyMessage.Id;
+        }
+        
         var msg = Message.Create(
             conv: conv,
-            senderActorId: userId,
+            senderActorId: actorId,
             senderUserId: userId,
             text: text,
             kind: MessageKind.Text,
-            senderRole: RoleInConversation.Member
+            senderRole: RoleInConversation.Member,
+            replyToMessageId: replyMessageIntId
         );
         
         await messageRepo.AddAsync(msg, ct);

@@ -1,4 +1,8 @@
 using game_x.api.Common;
+using game_x.api.Dtos;
+using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListMyConversationsForGuest;
 
@@ -12,7 +16,7 @@ public class ConversationController : BaseApiController
     [HttpPost("start")]
     public IActionResult StartGuest()
     {
-        var guestId = Guid.NewGuid().ToString("N");
+        var guestId = Guid.NewGuid().ToString();
         return ApiResponseFactory.Ok(guestId);
     }
     
@@ -30,14 +34,39 @@ public class ConversationController : BaseApiController
     [HttpGet("conversations/{convId:guid}/messages")]
     public async Task<IActionResult> ListMessagesInConversationAsync(
         Guid convId,
+        [FromHeader] string guestId,
         [AsParameters] CursorCriteriaRequest parameters)
     {
         var query = new ListMessagesInConversationQuery(
+            ActorId: guestId,
             ConvId: convId,
             Limit: parameters.Limit,
             Cursor: parameters.Cursor
         );
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpPost("messages")]
+    public async Task<IActionResult> SendSupportMessagesAttachmentAsync([FromHeader] string guestId, [FromForm] MessageAttachmentRequest formData)
+    {
+        try
+        {
+            var command = formData.Adapt<SendSupportMessageCommand>() with
+            {
+                SenderActorId = guestId,
+                ClientLocalId = formData.ClientLocalId,
+                ReplyToMessageId = formData.ReplyToMessageId,
+                Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
+            };
+            var result = await Mediator.Send(command);
+            return ApiResponseFactory.Ok(result);
+        }
+        catch
+        {
+            return ApiResponseFactory.BadRequest(
+                code: MessageCode.Chatting.FailToSendMessage,
+                errorDetail: new {ClientLocalId = formData.ClientLocalId});
+        }
     }
 }

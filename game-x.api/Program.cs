@@ -39,9 +39,6 @@ app.UseApplicationPipeline();
 using var scope = app.Services.CreateScope();
 var serviceProvider = scope.ServiceProvider;
 
-// Hang fire
-HangfireRecurringJobRegistration.RegisterRecurringJobs(serviceProvider);
-
 // Seed data
 try
 {
@@ -59,6 +56,9 @@ try
     await gameProviderCache.RefreshGameTagList();
     await gameProviderCache.RefreshGameRecommendList();
     await gameProviderCache.RefreshGameList();
+
+    var refreshTokenManager = serviceProvider.GetRequiredService<IRefreshTokenManagerCacheService>();
+    refreshTokenManager.InitRefreshTokens();
 }
 catch (Exception ex)
 {
@@ -66,5 +66,8 @@ catch (Exception ex)
     logger.LogError("An error occurred during migration", ex);
     throw;
 }
+
+// Hang fire
+HangfireRecurringJobRegistration.RegisterRecurringJobs(serviceProvider);
 
 app.Run();
