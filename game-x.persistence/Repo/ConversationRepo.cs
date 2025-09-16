@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
+using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Chat.Dtos;
@@ -11,13 +12,57 @@ using Mapster;
 
 namespace game_x.persistence.Repo;
 
-public class ConversationRepo(GameXContext context): IConversationRepo, IRepository
+public class ConversationRepo(GameXContext context, IFileStorageService fileStorage): IConversationRepo, IRepository
 {
     /// <summary>Short preview helper</summary>
     private string Preview(string? text)
         => string.IsNullOrWhiteSpace(text) ? "[Attachment]"
             : text.Length <= 140 ? text
             : text[..140];
+
+    private async Task<string> GetAvatarUrl(MediaFile avatar, CancellationToken ct)
+    {
+        return await fileStorage.GenerateDownloadUrlAsync(
+            bucketName: avatar.BucketName,
+            objectName: avatar.ObjectName,
+            expiry: TimeSpan.FromMinutes(300),
+            ct: ct);
+    }
+    
+    private async Task<CursorResult<ConversationDto>> BuildConversations(
+        IQueryable<Conversation> query, 
+        int limit,
+        string? cursor, 
+        CancellationToken ct)
+    {
+        var src = query
+            .Include(c => c.Customer)
+            .ThenInclude(c => c!.Avatar)
+            .Include(c => c.Messages
+                .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
+                .Take(1))
+            .ThenInclude(x => x.SenderUser)
+            .Where(c => c.Messages.Any());
+        
+        var fp = CursorHelper.ComputeFp($"q:");
+        
+        return await SeekCursorBuilder<Conversation>
+            .For(src)
+            .Keys(
+                c => c.LastMessageAt,
+                c => c.Messages
+                    .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
+                    .Select(m => m.Id)
+                    .FirstOrDefault())
+            .Sort(desc1: true, desc2: true)
+            .FromCursor(cursor, fp)
+            .Limit(limit)
+            .ExecuteAsync(c =>
+            {
+                var dto = c.Adapt<ConversationDto>();
+                return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
+            }, ct);
+    }
     
     // ---- Cursor-based queue for unassigned support conversations (next-only) ----
     public async Task<CursorResult<SupportConversationDto>> GetUnassignedQueueByCursorAsync(
@@ -34,6 +79,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         
         var src = query
             .Include(c => c.Customer)
+                .ThenInclude(c => c!.Avatar)
             .Include(c => c.Messages
                 .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
                 .Take(1))
@@ -56,7 +102,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
             .ExecuteAsync(c =>
             {
                 var dto = c.Adapt<SupportConversationDto>();
-                return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
+;                return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
             }, ct);
         }
 
@@ -99,7 +145,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
             }, ct);
     }
 
-    public async Task<CursorResult<ConversationDto>> GetMyConversationsForClientAsync(
+    public async Task<CursorResult<ListedConversationDto>> GetMyConversationsForClientAsync(
         string userId,
         int limit,
         string? cursor,
@@ -138,12 +184,12 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
             .Limit(limit)
             .ExecuteAsync(c =>
             {
-                var dto = c.Adapt<ConversationDto>();
+                var dto = c.Adapt<ListedConversationDto>();
                 return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
             }, ct);
     }
 
-    public async Task<ConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
+    public async Task<ListedConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
     {
         IQueryable<Conversation> query = context.Conversations.AsNoTracking();
 
@@ -166,7 +212,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         if (src == null)
             return null;
         
-        var dto = src.Adapt<ConversationDto>();
+        var dto = src.Adapt<ListedConversationDto>();
         return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
     }
     

@@ -1,6 +1,8 @@
 using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
+using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Auth.Dtos;
 using game_x.share.Helper;
 using RefreshTokenEntity = game_x.domain.Entities.RefreshToken;
@@ -12,7 +14,8 @@ public sealed class UserLoginHandler(
     IJwtTokenGenerator jwtTokenGenerator,
     ITokenService tokenService,
     IRefreshTokenManagerCacheService refreshTokenManager,
-    IAuthService authService) : ICommandHandler<UserLoginCommand, UserLoginResult>
+    IAuthService authService,
+    IUserRepo userRepo) : ICommandHandler<UserLoginCommand, UserLoginResult>
 {
     public async Task<UserLoginResult> Handle(UserLoginCommand request, CancellationToken ct = default)
     {
@@ -30,12 +33,15 @@ public sealed class UserLoginHandler(
         var refreshToken = tokenService.GenerateRefreshToken(loginUser.Id);
         CreateRefreshToken(loginUser.Id, refreshToken, tokenInfo.JwtId);
 
+        var loggedUser = await userRepo.GetUserDetailAsync(loginUser.Id, ct);
+     
         return new UserLoginResult(
-            Email: loginUser.Email!,
-            UserId: loginUser.Id,
-            Nickname: loginUser.Nickname,
+            Email: loggedUser.Email!,
+            UserId: loggedUser.UserId,
+            Nickname: loggedUser.Nickname,
             AccessToken: tokenInfo.Token,
-            RefreshToken: refreshToken.Token);
+            RefreshToken: refreshToken.Token,
+            AvatarUrl: loggedUser.AvatarUrl);
     }
 
     private void CreateRefreshToken(string userId, RefreshTokenGenerateDto tokenInfo, string jwtId)

@@ -1,5 +1,3 @@
-using game_x.application.Features.Accounts.Dtos;
-
 namespace game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 
 public record GetSelfUserQuery : IQuery<GetSelfUserResult>;
@@ -26,4 +24,5 @@ public record GetSelfUserResult(
     bool IsEmailConfirmed,
     bool IsKycConfirmed,
     bool IsBankConfirmed,
-    string[] Roles);
+    string[] Roles,
+    string? AvatarUrl = null);

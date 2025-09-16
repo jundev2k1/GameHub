@@ -1,17 +1,13 @@
 namespace game_x.application.Features.Chat.Dtos;
 
-public sealed record ConversationDto(
+public sealed record ListedConversationDto(
     Guid ConversationId,
-    string? GuestId,
-    ConversationStatus Status,
     ConversationType Type,
-    RoleInConversation LastSenderRole,
-    string? CustomerId,
-    string? CustomerDisplayName,
-    string? CustomerAvatarUrl,
+    ConversationStatus Status,
     string LastUserId,
     string LastUserName,
     string? LastUserAvatarUrl,
+    RoleInConversation LastSenderRole,
     DateTime LastMessageAt,
     Guid LastMessageId,
     string LastMessagePreview );

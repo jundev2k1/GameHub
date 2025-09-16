@@ -1,7 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Features.Chat.Dtos;
 using game_x.share.Extensions;
-using ConversationDto = game_x.application.Features.Chat.Dtos.ConversationDto;
 
 namespace game_x.application.Features.Chat.Mapping;
 
@@ -46,7 +45,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault()!.PublicId)
             .Map(dest => dest.LastMessagePreview, src => src.Messages.FirstOrDefault()!.Text);
         
-        cfg.NewConfig<Conversation, ConversationDto>()
+        cfg.NewConfig<Conversation, ListedConversationDto>()
             .Map(dest => dest.ConversationId, src => src.PublicId)
             .Map(dest => dest.LastUserId, src => src.Messages.FirstOrDefault()!.SenderActorId)
             .Map(dest => dest.LastUserName, src => 

@@ -6,9 +6,9 @@ using game_x.application.Features.Chat.Dtos;
 namespace game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
 
 public sealed class ListMyConversationsHandler(IUserAccessor userAccessor, IConversationRepo conversationRepo)
-    : IRequestHandler<ListMyConversationsForClientQuery, CursorResult<ConversationDto>>
+    : IRequestHandler<ListMyConversationsForClientQuery, CursorResult<ListedConversationDto>>
 {
-    public async Task<CursorResult<ConversationDto>> Handle(ListMyConversationsForClientQuery request, CancellationToken ct)
+    public async Task<CursorResult<ListedConversationDto>> Handle(ListMyConversationsForClientQuery request, CancellationToken ct)
     {
         var userId = userAccessor.GetUserId();
 

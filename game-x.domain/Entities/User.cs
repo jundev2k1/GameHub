@@ -11,6 +11,8 @@ public class User : IdentityUser, IEntity, IAuditable
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public int? AvatarId { get; set; }
+    public MediaFile? Avatar { get; set; }
     public ICollection<Transaction> Transactions { get; set; } = [];
 
     /// <summary>The user's balance in all currencies in the system.</summary>

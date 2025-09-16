@@ -3,7 +3,6 @@ using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Files;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.FileStorage;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Chat.Dtos;
@@ -13,7 +12,7 @@ using game_x.share.Helper;
 
 namespace game_x.infrastructure.Identity;
 
-public class MessageService(
+public sealed class MessageService(
     IMessageRepo messageRepo,
     IMessageAttachmentRepo messageAttachmentRepo,
     IFileStorageService fileStorage

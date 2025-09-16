@@ -7,4 +7,5 @@ public record UserLoginResult(
     string UserId,
     string Nickname,
     string AccessToken,
-    string RefreshToken);
+    string RefreshToken,
+    string? AvatarUrl = null);
