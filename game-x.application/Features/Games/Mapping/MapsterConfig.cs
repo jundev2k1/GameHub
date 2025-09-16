@@ -17,10 +17,16 @@ public sealed class MapsterConfig : IRegister
 
     private static void RegisterGameMappings(TypeAdapterConfig cfg)
     {
+        cfg.NewConfig<MediaFile, ThumbnailInfo>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.BucketName, src => src.BucketName.Value)
+            .Map(dest => dest.ObjectName, src => src.ObjectName.Value);
+
         cfg.NewConfig<Game, GameInfoDto>()
             .Map(dest => dest.LocalId, src => src.Id)
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.Name, src => src.Name)
+            .Map(dest => dest.Thumbnail, src => src.Thumbnail.Adapt<ThumbnailInfo>())
             .Map(
                 dest => dest.Categories,
                 src => src.GameCategoryMappings

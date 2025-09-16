@@ -19,6 +19,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gtm => gtm.Type)
             .Include(g => g.GameTagMappings)
             .ThenInclude(gtm => gtm.Tag)
+            .Include(g => g.Thumbnail)
             .ToArrayAsync(ct);
     }
 
@@ -69,6 +70,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gtm => gtm.Type)
             .Include(g => g.GameTagMappings)
             .ThenInclude(gtm => gtm.Tag)
+            .Include(g => g.Thumbnail)
             .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
             ?? throw new NotFoundException(nameof(gameId), gameId);
 

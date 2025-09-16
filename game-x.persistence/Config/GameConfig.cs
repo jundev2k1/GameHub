@@ -46,11 +46,19 @@ public sealed class GameConfig : IEntityTypeConfiguration<Game>
             .IsRequired()
             .HasDefaultValue(0);
 
+        builder.Property(g => g.ThumbnailId)
+            .IsRequired(false);
+
         builder.Property(g => g.IsActive)
             .IsRequired()
             .HasConversion<short>()
             .HasDefaultValue(true);
 
         builder.HasIndex(g => g.PublicId).IsUnique();
+
+        builder.HasOne(g => g.Thumbnail)
+            .WithMany()
+            .HasForeignKey(g => g.ThumbnailId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
