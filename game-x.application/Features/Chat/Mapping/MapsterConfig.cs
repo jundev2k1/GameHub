@@ -9,7 +9,7 @@ public sealed class MapsterConfig : IRegister
 {
     public void Register(TypeAdapterConfig cfg)
     {
-        cfg.NewConfig<Conversation, ConversationSignalDto>()
+        cfg.NewConfig<Conversation, ConversationDetailDto>()
             .Map(dest => dest.ConversationId, src => src.PublicId)
             .Map(dest => dest.GuestId, src => src.GuestId ?? String.Empty)
             .Map(dest => dest.CustomerId, src => src.CustomerId ?? String.Empty)

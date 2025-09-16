@@ -22,6 +22,7 @@ public interface IConversationRepo
         CancellationToken ct = default);
 
     Task<Conversation?> GetSupportConversationAsync(string actorId, CancellationToken ct = default);
+    Task<ConversationDetailDto> GetConversationDetailAsync(Guid convId, CancellationToken ct = default);
     Task<ConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default);
     Task<Conversation> GetByIdAsync(Guid convId, CancellationToken ct = default);
     Task<Conversation> GetByIdAndActorIdAsync(string actorId, Guid convId, CancellationToken ct = default);
