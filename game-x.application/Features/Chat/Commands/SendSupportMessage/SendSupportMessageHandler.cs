@@ -13,6 +13,7 @@ public sealed class SendSupportMessageHandler(
     IConversationMemberRepo conversationMemberRepo,
     IMessageRepo messageRepo,
     IMessageService messageService,
+    IConversationService conversationService,
     IAppLogger<Message> logger,
     IApplicationEventDispatcher eventDispatcher
     ) : IRequestHandler<SendSupportMessageCommand, SendSupportMessageResult>
@@ -80,7 +81,7 @@ public sealed class SendSupportMessageHandler(
                 Attachments = message.Attachments.Adapt<List<MessageAttachmentDto>>()
             };
             
-            var updatedConv = await conversationRepo.GetConversationDetailAsync(conv.PublicId, ct);
+            var updatedConv = await conversationService.GetConversationDetailAsync(conv.PublicId, ct);
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
             var dto = new CreatedMessageSignalResult(
                 Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},

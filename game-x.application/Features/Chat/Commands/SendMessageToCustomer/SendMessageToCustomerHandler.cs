@@ -11,6 +11,7 @@ namespace game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 public sealed class SendMessageToCustomerHandler(
     IUnitOfWork unitOfWork,
     IConversationRepo conversationRepo,
+    IConversationService conversationService,
     IMessageRepo messageRepo,
     IMessageService messageService,
     IAppLogger<Message> logger,
@@ -63,7 +64,7 @@ public sealed class SendMessageToCustomerHandler(
                 Attachments = message.Attachments.Adapt<List<MessageAttachmentDto>>()
             };
             
-            var updatedConv = await conversationRepo.GetConversationDetailAsync(conv.PublicId, ct);
+            var updatedConv = await conversationService.GetConversationDetailAsync(conv.PublicId, ct);
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
             var dto = new CreatedMessageSignalResult(
                 Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
