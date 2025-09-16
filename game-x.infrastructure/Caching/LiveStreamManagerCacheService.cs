@@ -52,6 +52,29 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         Set(cacheKey, targetStream);
     }
 
+    public void AddBlackList(string streamKey, BlackListItemDto statusDto)
+    {
+        var targetStream = GetLiveStreamStatus(streamKey)
+            ?? throw new NotFoundException(nameof(streamKey), streamKey);
+        if (targetStream.BlackList.Any(bl => bl.UserId == statusDto.UserId && bl.Action == statusDto.Action))
+            throw new BadRequestException("Black list item exists.");
+
+        targetStream.BlackList = [.. targetStream.BlackList, statusDto];
+
+        var cacheKey = $"{LiveStreamPrefix}streams:{targetStream.StreamKey}";
+        Set(cacheKey, targetStream);
+    }
+
+    public void RemoveBlackList(string streamKey, string userId, BlackListAction action)
+    {
+        var targetStream = GetLiveStreamStatus(streamKey)
+            ?? throw new NotFoundException(nameof(streamKey), streamKey);
+        targetStream.BlackList = [.. targetStream.BlackList.Where(bl => bl.UserId == userId && bl.Action == action)];
+
+        var cacheKey = $"{LiveStreamPrefix}streams:{targetStream.StreamKey}";
+        Set(cacheKey, targetStream);
+    }
+
     public void RemoveLiveStream(string streamKey)
     {
         var streamList = GetAllStreamKeys()
