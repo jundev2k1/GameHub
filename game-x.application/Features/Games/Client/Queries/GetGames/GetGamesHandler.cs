@@ -13,16 +13,18 @@ public sealed class GetGamesHandler(
             .Where(GetFilterCondition(request))
             .ToArray();
         var totalItems = searchResult.Length;
+        var items = searchResult
+            .Skip((request.PageIndex - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .Select(MapToListItem)
+            .ToArray();
         var result = new PaginationResult<GetGamesItemDto>(
-            items: searchResult
-                .Skip((request.PageIndex - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .Select(game => new GetGamesItemDto(game)),
+            items: await Task.WhenAll(items) ?? [],
             totalItems: totalItems,
             totalPages: (int)Math.Ceiling((decimal)totalItems / request.PageSize),
             pageIndex: request.PageIndex,
             pageSize: request.PageSize);
-        return await Task.FromResult(result);
+        return result;
     }
 
     private static Func<GameInfoDto, bool> GetFilterCondition(GetGamesQuery request)
@@ -39,5 +41,16 @@ public sealed class GetGamesHandler(
             && ((request.Keyword == null)
                 || game.Id.ToString().Equals(request.Keyword.Trim(), StringComparison.InvariantCultureIgnoreCase)
                 || game.Name.Contains(request.Keyword.Trim(), StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task<GetGamesItemDto> MapToListItem(GameInfoDto game)
+    {
+        if (game.Thumbnail != null)
+        {
+            var thumbnailUrl = await gameProviderCache.GetGameThumbnail(game);
+            game.Thumbnail.Url = thumbnailUrl;
+        }
+        var result = new GetGamesItemDto(game);
+        return result;
     }
 }

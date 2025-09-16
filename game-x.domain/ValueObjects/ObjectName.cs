@@ -20,6 +20,8 @@ public sealed class ObjectName
         => Of($"user-kyc/{userId:N}/{fileName}");
     public static ObjectName BankAccountProfile(string userId, string fileName)
         => Of($"user-bank-account/{userId:N}/{fileName}");
+    public static ObjectName GameResource(Guid gameId, string fileName)
+        => Of($"games/{gameId:N}/thumbnail/{fileName}");
 
     public static ObjectName Of(string value)
     {
@@ -36,7 +38,7 @@ public sealed class ObjectName
 
     // Constants
     private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] ValidPrefixValues = ["user-kyc", "user-bank-account", "attachment", "avatar"];
+    private static readonly string[] ValidPrefixValues = ["user-kyc", "user-bank-account", "attachment", "games",  "avatar"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>

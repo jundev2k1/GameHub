@@ -17,6 +17,10 @@ public class GetGamesByCriteriaListItem
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Note { get; set; } = string.Empty;
+    public Guid PlatformId { get; set; }
+    public string PlatformName { get; set; } = string.Empty;
+    public int Priority { get; set; }
+    public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

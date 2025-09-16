@@ -16,6 +16,8 @@ public sealed class EntityName
     public static EntityName GameType => Of(nameof(Entities.GameType));
     public static EntityName GameCategory => Of(nameof(Entities.GameCategory));
     public static EntityName GameTag => Of(nameof(Entities.GameTag));
+    public static EntityName GameRecommend => Of(nameof(Entities.GameRecommend));
+    public static EntityName GameRecommendItem => Of(nameof(Entities.GameRecommendItem));
     public static EntityName UserBalance => Of(nameof(Entities.UserBalance));
     public static EntityName FiatCurrency => Of(nameof(Entities.FiatCurrency));
     public static EntityName UserBankAccount => Of(nameof(Entities.UserBankAccount));
@@ -47,6 +49,8 @@ public sealed class EntityName
         nameof(Entities.GameType),
         nameof(Entities.GameCategory),
         nameof(Entities.GameTag),
+        nameof(Entities.GameRecommend),
+        nameof(Entities.GameRecommendItem),
         nameof(Entities.UserBalance),
         nameof(Entities.FiatCurrency),
         nameof(Entities.UserBankAccount),

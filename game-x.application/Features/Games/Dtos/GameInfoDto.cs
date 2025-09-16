@@ -11,6 +11,7 @@ public class GameInfoDto
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Note { get; set; } = string.Empty;
+    public ThumbnailInfo? Thumbnail { get; set; }
     public Guid PlatformId { get; set; }
     public string PlatformName { get; set; } = string.Empty;
     public GameCategoryInfo[] Categories { get; set; } = [];
@@ -20,6 +21,19 @@ public class GameInfoDto
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+}
+
+public sealed class ThumbnailInfo
+{
+    [JsonIgnore]
+    public int LocalId { get; set; }
+    public string FileName { get; set; } = string.Empty;
+    public string Url { get; set; } = string.Empty;
+    public string Metadata { get; set; } = string.Empty;
+    [JsonIgnore]
+    public string BucketName { get; set; } = string.Empty;
+    [JsonIgnore]
+    public string ObjectName { get; set; } = string.Empty;
 }
 
 public sealed class GameCategoryInfo

@@ -54,6 +54,7 @@ try
     await gameProviderCache.RefreshGameCategoryList();
     await gameProviderCache.RefreshGameTypeList();
     await gameProviderCache.RefreshGameTagList();
+    await gameProviderCache.RefreshGameRecommendList();
     await gameProviderCache.RefreshGameList();
 
     var refreshTokenManager = serviceProvider.GetRequiredService<IRefreshTokenManagerCacheService>();

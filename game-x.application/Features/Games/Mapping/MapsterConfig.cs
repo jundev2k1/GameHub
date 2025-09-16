@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.Games.Dtos;
+﻿using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
+using game_x.application.Features.Games.Dtos;
 
 namespace game_x.application.Features.Games.Mapping;
 
@@ -12,14 +13,21 @@ public sealed class MapsterConfig : IRegister
         RegisterGameTypeMappings(cfg);
         RegisterGameTagMappings(cfg);
         RegisterGameTransactionMappings(cfg);
+        RegisterGameRecommendMappings(cfg);
     }
 
     private static void RegisterGameMappings(TypeAdapterConfig cfg)
     {
+        cfg.NewConfig<MediaFile, ThumbnailInfo>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.BucketName, src => src.BucketName.Value)
+            .Map(dest => dest.ObjectName, src => src.ObjectName.Value);
+
         cfg.NewConfig<Game, GameInfoDto>()
             .Map(dest => dest.LocalId, src => src.Id)
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.Name, src => src.Name)
+            .Map(dest => dest.Thumbnail, src => src.Thumbnail.Adapt<ThumbnailInfo>())
             .Map(
                 dest => dest.Categories,
                 src => src.GameCategoryMappings
@@ -38,6 +46,11 @@ public sealed class MapsterConfig : IRegister
                     .Select(x => x.Adapt<GameTagInfo>())
                     .OrderBy(g => g.IsPrimary)
                     .ThenBy(g => g.Priority))
+            .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
+            .Map(dest => dest.PlatformName, src => src.Platform.Name);
+
+        cfg.NewConfig<Game, GetGamesByCriteriaListItem>()
+            .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
             .Map(dest => dest.PlatformName, src => src.Platform.Name);
     }
@@ -118,5 +131,21 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.BalanceAfter, src => src.BalanceAfter)
             .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : Guid.Empty)
             .Map(dest => dest.GamePlatformName, src =>  src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : null);
+    }
+
+    private static void RegisterGameRecommendMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GameRecommend, GameRecommendDto>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Items, src => src.Items.Select(i => i.Adapt<GameRecommendItemDto>()));
+
+        cfg.NewConfig<GameRecommendItem, GameRecommendItemDto>()
+            .Map(dest => dest.LocalGameId, src => src.Game.PublicId)
+            .Map(dest => dest.GameId, src => src.GameId)
+            .Map(dest => dest.GameName, src => src.Game.Name)
+            .Map(dest => dest.LocalPlatformId, src => src.Game.PlatformId)
+            .Map(dest => dest.PlatformId, src => src.Game.Platform.PublicId)
+            .Map(dest => dest.PlatformName, src => src.Game.Platform.Name);
     }
 }

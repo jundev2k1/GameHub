@@ -1,4 +1,3 @@
-using game_x.application.Features.Games.Dtos;
 using game_x.share.Extensions;
 using System.Linq.Expressions;
 
@@ -6,7 +5,7 @@ namespace game_x.application.Extensions.FilterExtensions;
 
 public static class GameFilterExtensions
 {
-    public static readonly Dictionary<string, Func<object, Expression<Func<GameInfoDto, bool>>>> Options =
+    public static readonly Dictionary<string, Func<object, Expression<Func<Game, bool>>>> Options =
         new()
         {
             ["types"] = FilterByMultipleTypes,
@@ -14,7 +13,7 @@ public static class GameFilterExtensions
             ["tags"] = FilterByMultipleTags
         };
 
-    private static Expression<Func<GameInfoDto, bool>> FilterByMultipleTypes(object value)
+    private static Expression<Func<Game, bool>> FilterByMultipleTypes(object value)
     {
         var raw = value.ToStringOrEmpty();
         if (raw.IsNullOrWhiteSpace()) return _ => true;
@@ -27,10 +26,10 @@ public static class GameFilterExtensions
         if (idList.Count == 0)
             return _ => false;
 
-        return game => game.GameTypes.Any(gt => idList.Contains(gt.Id));
+        return game => game.GameTypeMappings.Any(gt => idList.Contains(gt.Type.PublicId));
     }
 
-    private static Expression<Func<GameInfoDto, bool>> FilterByMultipleCategories(object value)
+    private static Expression<Func<Game, bool>> FilterByMultipleCategories(object value)
     {
         var raw = value.ToStringOrEmpty();
         if (raw.IsNullOrWhiteSpace()) return _ => true;
@@ -43,10 +42,10 @@ public static class GameFilterExtensions
         if (idList.Count == 0)
             return _ => false;
 
-        return game => game.Categories.Any(gt => idList.Contains(gt.Id));
+        return game => game.GameCategoryMappings.Any(gc => idList.Contains(gc.Category.PublicId));
     }
 
-    private static Expression<Func<GameInfoDto, bool>> FilterByMultipleTags(object value)
+    private static Expression<Func<Game, bool>> FilterByMultipleTags(object value)
     {
         var raw = value.ToStringOrEmpty();
         if (raw.IsNullOrWhiteSpace()) return _ => true;
@@ -59,6 +58,6 @@ public static class GameFilterExtensions
         if (idList.Count == 0)
             return _ => false;
 
-        return game => game.GameTags.Any(gt => idList.Contains(gt.Id));
+        return game => game.GameTagMappings.Any(gt => idList.Contains(gt.Tag.PublicId));
     }
 }

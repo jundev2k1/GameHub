@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250908042635_AddGameRecommendSettingEntity")]
+    partial class AddGameRecommendSettingEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -605,10 +608,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("code")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<int?>("ThumbnailId")
-                        .HasColumnType("integer")
-                        .HasColumnName("thumbnail_id");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -622,9 +621,6 @@ namespace game_x.persistence.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("ix_games_code");
-
-                    b.HasIndex("ThumbnailId")
-                        .HasDatabaseName("ix_games_thumbnail_id");
 
                     b.ToTable("games", (string)null);
                 });
@@ -877,13 +873,12 @@ namespace game_x.persistence.Migrations
 
             modelBuilder.Entity("game_x.domain.Entities.GameRecommendItem", b =>
                 {
-                    b.Property<int>("GameRecommendId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("game_recommend_id");
+                        .HasColumnName("id");
 
-                    b.Property<int>("GameId")
-                        .HasColumnType("integer")
-                        .HasColumnName("game_id");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -893,6 +888,14 @@ namespace game_x.persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("custom_title");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
+
+                    b.Property<int>("GameRecommendId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_recommend_id");
 
                     b.Property<short>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -910,11 +913,14 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.HasKey("GameRecommendId", "GameId")
+                    b.HasKey("Id")
                         .HasName("pk_game_recommend_items");
 
                     b.HasIndex("GameId")
                         .HasDatabaseName("ix_game_recommend_items_game_id");
+
+                    b.HasIndex("GameRecommendId")
+                        .HasDatabaseName("ix_game_recommend_items_game_recommend_id");
 
                     b.ToTable("game_recommend_items", (string)null);
                 });
@@ -1139,208 +1145,6 @@ namespace game_x.persistence.Migrations
                     b.ToTable("game_type_mappings", (string)null);
                 });
 
-            modelBuilder.Entity("game_x.domain.Entities.LiveStreamCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasDefaultValue("")
-                        .HasColumnName("description");
-
-                    b.Property<short>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint")
-                        .HasDefaultValue((short)1)
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasDefaultValue("")
-                        .HasColumnName("name");
-
-                    b.Property<string>("Note")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasDefaultValue("")
-                        .HasColumnName("note");
-
-                    b.Property<int>("Priority")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("priority");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("code")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_livestream_categories");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_livestream_categories_code");
-
-                    b.ToTable("livestream_categories", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.LiveStreamCategoryMapping", b =>
-                {
-                    b.Property<int>("ScheduleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("schedule_id");
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("integer")
-                        .HasColumnName("category_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("IsPrimary")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_primary");
-
-                    b.Property<int>("Priority")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("priority");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("ScheduleId", "CategoryId")
-                        .HasName("pk_livestream_category_mappings");
-
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("ix_livestream_category_mappings_category_id");
-
-                    b.ToTable("livestream_category_mappings", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.LivestreamSchedule", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AssignedId")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("assigned_id");
-
-                    b.Property<string>("CancellationReason")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("cancellation_reason");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasColumnName("description");
-
-                    b.Property<DateTime?>("EndAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("end_at");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("end_time");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasColumnName("notes");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("code")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime?>("StartAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("start_at");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("start_time");
-
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
-
-                    b.Property<string>("StreamKey")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("stream_key");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("title");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("token");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_livestream_schedules");
-
-                    b.HasIndex("AssignedId")
-                        .HasDatabaseName("ix_livestream_schedules_assigned_id");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_livestream_schedules_code");
-
-                    b.ToTable("livestream_schedules", (string)null);
-                });
-
             modelBuilder.Entity("game_x.domain.Entities.MediaFile", b =>
                 {
                     b.Property<int>("Id")
@@ -1506,12 +1310,8 @@ namespace game_x.persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AddedByActorId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("added_by_actor_id");
-
                     b.Property<string>("AddedByUserId")
+                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("added_by_user_id");
@@ -2161,10 +1961,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("access_failed_count");
 
-                    b.Property<int?>("AvatarId")
-                        .HasColumnType("integer")
-                        .HasColumnName("avatar_id");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text")
@@ -2260,9 +2056,6 @@ namespace game_x.persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_users");
-
-                    b.HasIndex("AvatarId")
-                        .HasDatabaseName("ix_users_avatar_id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -2749,15 +2542,7 @@ namespace game_x.persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_games_game_platforms_platform_id");
 
-                    b.HasOne("game_x.domain.Entities.MediaFile", "Thumbnail")
-                        .WithMany()
-                        .HasForeignKey("ThumbnailId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_games_media_files_thumbnail_id");
-
                     b.Navigation("Platform");
-
-                    b.Navigation("Thumbnail");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.GameCategoryMapping", b =>
@@ -2855,38 +2640,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Type");
                 });
 
-            modelBuilder.Entity("game_x.domain.Entities.LiveStreamCategoryMapping", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.LiveStreamCategory", "Category")
-                        .WithMany("CategoryMappings")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_livestream_category_mappings_livestream_categories_category");
-
-                    b.HasOne("game_x.domain.Entities.LivestreamSchedule", "Schedule")
-                        .WithMany("CategoryMappings")
-                        .HasForeignKey("ScheduleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_livestream_category_mappings_live_stream_schedules_schedule");
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Schedule");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.LivestreamSchedule", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.User", "AssignedBy")
-                        .WithMany()
-                        .HasForeignKey("AssignedId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_livestream_schedules_asp_net_users_assigned_id");
-
-                    b.Navigation("AssignedBy");
-                });
-
             modelBuilder.Entity("game_x.domain.Entities.Message", b =>
                 {
                     b.HasOne("game_x.domain.Entities.Conversation", "Conversation")
@@ -2918,7 +2671,9 @@ namespace game_x.persistence.Migrations
                     b.HasOne("game_x.domain.Entities.User", "AddedByUser")
                         .WithMany()
                         .HasForeignKey("AddedByUserId")
-                        .HasConstraintName("fk_message_attachments_user_added_by_user_id");
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_message_attachments_asp_net_users_added_by_user_id");
 
                     b.HasOne("game_x.domain.Entities.MediaFile", "MediaFile")
                         .WithMany()
@@ -3072,17 +2827,6 @@ namespace game_x.persistence.Migrations
                         .HasConstraintName("fk_transactions_internal_transactions_id");
 
                     b.Navigation("Transaction");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.User", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.MediaFile", "Avatar")
-                        .WithMany()
-                        .HasForeignKey("AvatarId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_users_media_files_avatar_id");
-
-                    b.Navigation("Avatar");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.UserBalance", b =>
@@ -3252,16 +2996,6 @@ namespace game_x.persistence.Migrations
             modelBuilder.Entity("game_x.domain.Entities.GameType", b =>
                 {
                     b.Navigation("GameTypeMappings");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.LiveStreamCategory", b =>
-                {
-                    b.Navigation("CategoryMappings");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.LivestreamSchedule", b =>
-                {
-                    b.Navigation("CategoryMappings");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.Message", b =>
