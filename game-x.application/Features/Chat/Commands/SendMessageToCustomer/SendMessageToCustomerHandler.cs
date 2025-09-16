@@ -35,7 +35,7 @@ public sealed class SendMessageToCustomerHandler(
             var message = await CreateMessageAsync(
                 conv: conv, 
                 userId: senderUserId,
-                text: request.Text,
+                text: request.Text ?? string.Empty,
                 replyMessageId: request.ReplyToMessageId,
                 ct: ct);
             
@@ -60,7 +60,7 @@ public sealed class SendMessageToCustomerHandler(
                 EditedAt = message.EditedAt,
                 EditCount = message.EditCount,
                 CurrentVersion = message.CurrentVersion,
-                Attachments = []
+                Attachments = message.Attachments.Adapt<List<MessageAttachmentDto>>()
             };
             
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);

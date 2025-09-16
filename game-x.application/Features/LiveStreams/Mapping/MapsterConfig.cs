@@ -1,4 +1,5 @@
 ﻿using game_x.application.Features.LiveStreams.Dtos;
+using game_x.application.Features.LiveStreams.Queries.GetScheduleDetail;
 
 namespace game_x.application.Features.LiveStreams.Mapping;
 
@@ -10,6 +11,9 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Id, src => src.PublicId);
 
         cfg.NewConfig<LivestreamSchedule, LiveStreamScheduleDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
+
+        cfg.NewConfig<LivestreamSchedule, GetScheduleDetailResult>()
             .Map(dest => dest.Id, src => src.PublicId);
 
         cfg.NewConfig<LiveStreamCategory, LiveStreamCategoryListItemDto>()

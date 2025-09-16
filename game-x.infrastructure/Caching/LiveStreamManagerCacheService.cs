@@ -19,14 +19,25 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         return result;
     }
 
-    public void ConnectLiveStream(LiveStreamStatusDto streamInfo)
+    public void InitLiveStream(LiveStreamStatusDto streamInfo)
     {
         if (streamInfo.StreamKey.IsNullOrWhiteSpace())
             throw new ArgumentException("Stream key cannot be null or empty.", streamInfo.StreamKey);
 
-        streamInfo.IsLive = true;
-
         var cacheKey = $"{LiveStreamPrefix}streams:{streamInfo.StreamKey}";
+        Set(cacheKey, streamInfo);
+    }
+
+    public void ConnectLiveStream(string streamKey)
+    {
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
+        var streamInfo = Get<LiveStreamStatusDto?>(cacheKey)
+            ?? throw new NotFoundException(nameof(streamKey), streamKey);
+
+        if (streamInfo.StreamKey.IsNullOrWhiteSpace())
+            throw new ArgumentException("Stream key cannot be null or empty.", streamInfo.StreamKey);
+
+        streamInfo.IsLive = true;
         Set(cacheKey, streamInfo);
     }
 
@@ -62,9 +73,16 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         Remove(viewerListCacheKey);
     }
 
+    public bool IsExistLiveStream(string streamKey)
+    {
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
+        return Get<LiveStreamStatusDto?>(cacheKey) != null;
+    }
+
     public LiveStreamStatusDto? GetLiveStreamStatus(string streamKey)
     {
-        return Get<LiveStreamStatusDto>(streamKey);
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
+        return Get<LiveStreamStatusDto?>(cacheKey);
     }
 
     public LiveStreamViewerDto? GetViewerInfo(string streamKey, string token)
@@ -100,7 +118,8 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
             && updatedViewers[viewer.ViewerId].Contains(viewer.Token);
         if (isExist) return;
 
-        updatedViewers[viewer.ViewerId] = [.. updatedViewers[viewer.ViewerId], viewer.Token];
+        var targetViewersArray = updatedViewers.FirstOrDefault(kvp => kvp.Key == viewer.ViewerId).Value ?? [];
+        updatedViewers[viewer.ViewerId] = [.. targetViewersArray, viewer.Token];
         var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
         Set(viewerListCacheKey, updatedViewers);
     }
@@ -117,7 +136,9 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         // Update viewer list for the stream
         var updatedViewers = GetAllViewersByStreamKey(viewer.StreamKey) ?? [];
-        updatedViewers[viewer.ViewerId] = [.. updatedViewers[viewer.ViewerId].Where(t => t != viewer.Token)];
+
+        var targetViewersArray = updatedViewers.FirstOrDefault(kvp => kvp.Key == viewer.ViewerId).Value ?? [];
+        updatedViewers[viewer.ViewerId] = [.. targetViewersArray.Where(t => t != viewer.Token)];
         var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
         Set(viewerListCacheKey, updatedViewers);
     }

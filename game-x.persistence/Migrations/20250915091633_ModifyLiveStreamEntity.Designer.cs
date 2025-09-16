@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250915091633_ModifyLiveStreamEntity")]
+    partial class ModifyLiveStreamEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -797,119 +800,6 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_game_platforms_code");
 
                     b.ToTable("game_platforms", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.GameRecommend", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("BannerId")
-                        .HasColumnType("integer")
-                        .HasColumnName("banner_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasDefaultValue("")
-                        .HasColumnName("description");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("end_date");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasDefaultValue("")
-                        .HasColumnName("name");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("code")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("start_date");
-
-                    b.Property<short>("Status")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint")
-                        .HasDefaultValue((short)0)
-                        .HasColumnName("status");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_game_recommends");
-
-                    b.HasIndex("BannerId")
-                        .HasDatabaseName("ix_game_recommends_banner_id");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_game_recommends_code");
-
-                    b.ToTable("game_recommends", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.GameRecommendItem", b =>
-                {
-                    b.Property<int>("GameRecommendId")
-                        .HasColumnType("integer")
-                        .HasColumnName("game_recommend_id");
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("integer")
-                        .HasColumnName("game_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CustomTitle")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("custom_title");
-
-                    b.Property<short>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint")
-                        .HasDefaultValue((short)1)
-                        .HasColumnName("is_active");
-
-                    b.Property<int>("Priority")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("priority");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("GameRecommendId", "GameId")
-                        .HasName("pk_game_recommend_items");
-
-                    b.HasIndex("GameId")
-                        .HasDatabaseName("ix_game_recommend_items_game_id");
-
-                    b.ToTable("game_recommend_items", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.GameTag", b =>
@@ -2759,38 +2649,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Game");
                 });
 
-            modelBuilder.Entity("game_x.domain.Entities.GameRecommend", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.MediaFile", "Banner")
-                        .WithMany()
-                        .HasForeignKey("BannerId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_game_recommends_media_files_banner_id");
-
-                    b.Navigation("Banner");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.GameRecommendItem", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_game_recommend_items_games_game_id");
-
-                    b.HasOne("game_x.domain.Entities.GameRecommend", "GameRecommend")
-                        .WithMany("Items")
-                        .HasForeignKey("GameRecommendId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_game_recommend_items_game_recommends_game_recommend_id");
-
-                    b.Navigation("Game");
-
-                    b.Navigation("GameRecommend");
-                });
-
             modelBuilder.Entity("game_x.domain.Entities.GameTagMapping", b =>
                 {
                     b.HasOne("game_x.domain.Entities.Game", "Game")
@@ -3204,11 +3062,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Games");
 
                     b.Navigation("TransactionExternals");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.GameRecommend", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.GameTag", b =>

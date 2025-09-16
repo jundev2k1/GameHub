@@ -46,14 +46,7 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
                 EditCount = m.EditCount,
                 CurrentVersion = m.CurrentVersion,
                 Attachments = m.Attachments
-                    .Select(a => new MessageAttachmentDto
-                    {
-                        SortOrder = a.SortOrder,
-                        BindingStatus = a.BindingStatus,
-                        FileName = a.MediaFile != null ? a.MediaFile.FileName : null,
-                        BucketName = a.MediaFile != null ? a.MediaFile.BucketName : null,
-                        ObjectName = a.MediaFile != null ? a.MediaFile.ObjectName : null,
-                    })
+                    .Select(a => a.Adapt<MessageAttachmentDto>())
                     .ToList()
             });
             

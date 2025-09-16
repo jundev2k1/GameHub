@@ -48,6 +48,10 @@ public sealed class LiveStreamScheduleConfig : IEntityTypeConfiguration<Livestre
             .IsRequired()
             .HasMaxLength(255);
 
+        builder.Property(ls => ls.Token)
+            .IsRequired()
+            .HasMaxLength(255);
+
         builder.Property(ls => ls.Status)
             .IsRequired()
             .HasConversion<short>();
