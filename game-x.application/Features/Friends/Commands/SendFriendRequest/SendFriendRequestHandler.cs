@@ -33,20 +33,20 @@ public sealed class SendFriendRequestHandler(
             if (existed.State == SocialLinkState.Accepted) 
                 throw new BadRequestException(MessageCode.Chatting.AlreadyFriend);
             
-            // Reopen if previously rejected
-            existed.State = SocialLinkState.Pending;
-            existed.RequesterUserId = me;
-            existed.AddresseeUserId = req.TargetUserId;
-            existed.RespondedAt = null;
-            
             try
             {
+                await socialLinkRepo.UpdateAsync(existed.PublicId, x =>
+                {
+                    x.State = SocialLinkState.Pending;
+                    x.RequesterUserId = me;
+                    x.AddresseeUserId = req.TargetUserId;
+                    x.RespondedAt = null;
+                }, ct);
                 await unitOfWork.SaveChangesAsync(ct);
             }
             catch (Exception e)
             {
                 logger.LogError(e.Message);
-                await unitOfWork.RollbackAsync(ct);
                 throw new BadRequestException(MessageCode.System.SystemError);
             }
             await dispatcher.Publish(new OnSendFriendRequestEvent(existed.Adapt<SocialLinkDto>()), ct);
@@ -69,7 +69,6 @@ public sealed class SendFriendRequestHandler(
         catch (Exception e)
         {
             logger.LogError(e.Message);
-            await unitOfWork.RollbackAsync(ct);
             throw new BadRequestException(MessageCode.System.SystemError);
         }
         

@@ -5,43 +5,43 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Events.OnSendFriendRequest;
+namespace game_x.application.Events.OnRespondRequest;
 
-public sealed class OnSendFriendRequestHandler(
+public sealed class OnRespondRequestHandler(
     IUnitOfWork unitOfWork,
     IChatHubService chatHubService,
     IClientHubService clientHubService,
     INotificationRepo notificationRepo
     )
-    : IApplicationEventHandler<OnSendFriendRequestEvent>
+    : IApplicationEventHandler<OnRespondRequestEvent>
 {
-    public async Task Handle(OnSendFriendRequestEvent @event, CancellationToken ct = default)
+    public async Task Handle(OnRespondRequestEvent @event, CancellationToken ct = default)
     {
-        var dto = @event.Dto.Adapt<FriendRequestSignalDto>();
+        var dto = @event.Dto.Adapt<FriendResponseSignalDto>();
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await SendNotificationToAddressee(dto, ct);
+            await SendNotificationToRequester(dto, ct);
         }, ct);
     }
     
-    private async Task SendNotificationToAddressee(FriendRequestSignalDto dto, CancellationToken ct)
+    private async Task SendNotificationToRequester(FriendResponseSignalDto dto, CancellationToken ct)
     {
-        if (dto.AddresseeUserId is not null)
+        if (dto.RequesterUserId is not null)
         {
-            var metadata = JsonSerializer.Serialize(dto.Adapt<FriendRequestNotificationDto>());
+            var metadata = JsonSerializer.Serialize(dto.Adapt<FriendResponseNotificationDto>());
             var notification = Notification.Create(
-                NotificationMessageKey.Friend_Request_Created,
-                dto.AddresseeUserId,
+                NotificationMessageKey.Friend_Request_Accepted,
+                dto.RequesterUserId,
                 NotificationType.SocialLink,
                 NotificationSeverity.Success,
                 metadata);
             await notificationRepo.AddNotificationAsync(notification, ct);
 
             await clientHubService.SendNotificationToMemberAsync(
-                dto.AddresseeUserId,
+                dto.RequesterUserId,
                 notification.Adapt<NotificationDto>());
             
-            await chatHubService.SendFriendRequestAsync(dto);
+            await chatHubService.SendFriendResponseAsync(dto);
         }
     }
 }

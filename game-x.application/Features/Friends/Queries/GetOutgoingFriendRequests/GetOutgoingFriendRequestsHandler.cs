@@ -5,18 +5,18 @@ using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Extensions;
 using game_x.application.Features.Friends.Dtos;
 
-namespace game_x.application.Features.Friends.Queries.GetFriendRequests;
+namespace game_x.application.Features.Friends.Queries.GetOutgoingFriendRequests;
 
-public sealed class GetFriendRequestsHandler(
+public sealed class GetOutgoingFriendRequestsHandler(
     IUserAccessor userAccessor,
     ISocialLinkRepo socialLinkRepo, 
-    ICriteriaBuilder<SocialLinkDto> builder): IQueryHandler<GetFriendRequestsQuery, PaginationResult<FriendRequestDto>>
+    ICriteriaBuilder<SocialLinkDto> builder): IQueryHandler<GetOutgoingFriendRequestsQuery, PaginationResult<OutgoingFriendRequestDto>>
 {
-    public async Task<PaginationResult<FriendRequestDto>> Handle(GetFriendRequestsQuery request, CancellationToken ct)
+    public async Task<PaginationResult<OutgoingFriendRequestDto>> Handle(GetOutgoingFriendRequestsQuery request, CancellationToken ct)
     {
         var userId = userAccessor.GetUserId();
-        var items = await socialLinkRepo.GetRequestsByCriteriaAsync(
-            addresseeUserId: userId,
+        var items = await socialLinkRepo.GetOutgoingRequestsByCriteriaAsync(
+            requesterUserId: userId,
             query => builder.Apply(
                 query,
                 request.Filters,
@@ -27,6 +27,6 @@ public sealed class GetFriendRequestsHandler(
             request.PageSize ?? 20,
             ct);
 
-        return items.Transform(items.Items.Adapt<IEnumerable<FriendRequestDto>>()); 
+        return items.Transform(items.Items.Adapt<IEnumerable<OutgoingFriendRequestDto>>()); 
     }
 }

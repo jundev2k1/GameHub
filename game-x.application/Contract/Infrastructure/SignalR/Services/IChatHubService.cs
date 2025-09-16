@@ -7,4 +7,5 @@ public interface IChatHubService
 {
     Task SendSupportMessageAsync(CreatedMessageSignalResult res);
     Task SendFriendRequestAsync(FriendRequestSignalDto dto);
+    Task SendFriendResponseAsync(FriendResponseSignalDto dto);
 }

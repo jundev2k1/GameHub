@@ -10,7 +10,54 @@ namespace game_x.persistence.Repo;
 
 public class SocialLinkRepo(GameXContext context): ISocialLinkRepo, IRepository
 {
-    public async Task<PaginationResult<SocialLinkDto>> GetRequestsByCriteriaAsync(
+    public async Task<PaginationResult<FriendDto>> GetFriendshipsAsync(
+        string userId,
+        Func<IQueryable<FriendDto>, IQueryable<FriendDto>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var friendLinks = context.SocialLinks
+            .AsNoTracking()
+            .Where(sl => 
+                sl.Kind == SocialLinkKind.Friendship &&
+                sl.State == SocialLinkState.Accepted &&
+                (sl.UserIdMin == userId || sl.UserIdMax == userId))
+            .Select(sl => new {
+                sl.PublicId,
+                sl.RespondedAt,
+                OtherUserId = sl.UserIdMin == userId ? sl.UserIdMax : sl.UserIdMin});
+
+        var query = friendLinks.Join(
+            context.Users.AsNoTracking(),
+            x => x.OtherUserId,
+            u => u.Id,
+            (x, u) => new FriendDto{
+                UserId = u.Id,
+                Nickname = u.Nickname,
+                RespondedAt = x.RespondedAt,
+                LinkId = x.PublicId,
+                AvatarUrl = String.Empty
+            }).AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<FriendDto>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
+    
+    public async Task<PaginationResult<SocialLinkDto>> GetIncomingRequestsByCriteriaAsync(
         string addresseeUserId,
         Func<IQueryable<SocialLinkDto>, IQueryable<SocialLinkDto>>? queryBuilder = null,
         int page = 1,
@@ -18,16 +65,54 @@ public class SocialLinkRepo(GameXContext context): ISocialLinkRepo, IRepository
         CancellationToken ct = default)
     {
         var baseQuery = context.SocialLinks
-            .Include(u => u.AddresseeUser)
-            .Include(u => u.RequesterUser)
-            .Where(u => 
-                u.Kind == SocialLinkKind.Friendship &&
-                u.State == SocialLinkState.Pending &&
-                u.AddresseeUserId == addresseeUserId)
+            .AsNoTracking()
+            .Include(sl => sl.AddresseeUser)
+            .Include(sl => sl.RequesterUser)
+            .Where(sl => 
+                sl.Kind == SocialLinkKind.Friendship &&
+                sl.State == SocialLinkState.Pending &&
+                sl.AddresseeUserId == addresseeUserId)
             .AsQueryable();
 
         var query = baseQuery
-            .Select(u => u.Adapt<SocialLinkDto>());
+            .Select(x => x.Adapt<SocialLinkDto>());
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<SocialLinkDto>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
+    
+    public async Task<PaginationResult<SocialLinkDto>> GetOutgoingRequestsByCriteriaAsync(
+        string requesterUserId,
+        Func<IQueryable<SocialLinkDto>, IQueryable<SocialLinkDto>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var baseQuery = context.SocialLinks
+            .AsNoTracking()
+            .Include(x => x.AddresseeUser)
+            .Include(x => x.RequesterUser)
+            .Where(x => 
+                x.Kind == SocialLinkKind.Friendship &&
+                x.State == SocialLinkState.Pending &&
+                x.RequesterUserId == requesterUserId)
+            .AsQueryable();
+
+        var query = baseQuery
+            .Select(x => x.Adapt<SocialLinkDto>());
 
         if (queryBuilder != null)
             query = queryBuilder(query);
@@ -73,19 +158,15 @@ public class SocialLinkRepo(GameXContext context): ISocialLinkRepo, IRepository
         await context.SocialLinks.AddAsync(link, ct);
     }
     
-    public async Task PatchUpdateAsync(Guid publicId, Action<SocialLink> updateAction, CancellationToken ct = default)
+    public async Task<SocialLink> UpdateAsync(Guid publicId, Action<SocialLink> updateAction, CancellationToken ct = default)
     {
-        var conv = await context.SocialLinks
+        var link = await context.SocialLinks
                        .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
                    ?? throw new NotFoundException(MessageCode.Chatting.SocialLinkNotFound);
 
-        updateAction.Invoke(conv);
+        updateAction.Invoke(link);
         await context.SaveChangesAsync(ct);
+        return link;
     }
-    
-    public async Task PutUpdateAsync(SocialLink link, CancellationToken ct = default)
-    {
-        context.Entry(link).State = EntityState.Modified;
-        await context.SaveChangesAsync(ct);
-    }
+
 }

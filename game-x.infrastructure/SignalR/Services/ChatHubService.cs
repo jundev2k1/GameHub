@@ -2,7 +2,6 @@
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Friend;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
-using game_x.application.Features.Friends.Dtos;
 using game_x.infrastructure.SignalR.Hubs;
 using game_x.share.Extensions;
 using Microsoft.AspNetCore.SignalR;
@@ -38,5 +37,10 @@ public sealed class ChatHubService(IHubContext<ChatHub, IChatClient> hubContext)
     public async Task SendFriendRequestAsync(FriendRequestSignalDto dto)
     {
         await hubContext.Clients.Group($"member-{dto.AddresseeUserId}").FriendRequest(dto);
+    }
+    
+    public async Task SendFriendResponseAsync(FriendResponseSignalDto dto)
+    {
+        await hubContext.Clients.Group($"member-{dto.AddresseeUserId}").FriendResponse(dto);
     }
 }

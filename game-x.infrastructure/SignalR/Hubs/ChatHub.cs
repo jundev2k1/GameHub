@@ -23,6 +23,7 @@ public interface IChatClient
     Task MessageFailed(MessageFailedSignalDto signalDto);
     /// <summary>Notify that the user received a friend request</summary>
     Task FriendRequest(FriendRequestSignalDto dto);
+    Task FriendResponse(FriendResponseSignalDto dto);
     // Task MemberRemoved(ConversationMemberDto dto);
     //
     // Task MessageCreated(MessageDto dto);

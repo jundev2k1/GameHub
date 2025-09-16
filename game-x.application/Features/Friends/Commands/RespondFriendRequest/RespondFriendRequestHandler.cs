@@ -1,5 +1,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnRespondRequest;
+using game_x.application.Features.Friends.Dtos;
 using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Friends.Commands.RespondFriendRequest;
@@ -8,6 +10,7 @@ public class RespondFriendRequestHandler(
     IUnitOfWork unitOfWork,
     IUserAccessor userAccessor,
     ISocialLinkRepo socialLinkRepo,
+    IApplicationEventDispatcher dispatcher,
     ILogger<SocialLink> logger): IRequestHandler<RespondFriendRequestCommand, Unit>
 {
     public async Task<Unit> Handle(RespondFriendRequestCommand cmd, CancellationToken ct)
@@ -23,8 +26,9 @@ public class RespondFriendRequestHandler(
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
-            await socialLinkRepo.PatchUpdateAsync(link.PublicId, x => { x.Respond(cmd.Accept); }, ct);
+            var updatedLink = await socialLinkRepo.UpdateAsync(link.PublicId, x => { x.Respond(cmd.Accept); }, ct);
             await unitOfWork.CommitAsync(ct);
+            await dispatcher.Publish(new OnRespondRequestEvent(updatedLink.Adapt<SocialLinkDto>()), ct);
             return Unit.Value;
         }
         catch (Exception ex)
