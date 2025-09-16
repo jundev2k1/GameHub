@@ -17,7 +17,7 @@ public sealed class LiveStreamController : BaseApiController
 
     [Authorize(Roles = AppRoles.User)]
     [HttpPost("{streamId}/viewers/{viewerId}/actions")]
-    public async Task<IActionResult> KickViewerAsync(Guid streamId, string viewerId, PerformActionCommand command)
+    public async Task<IActionResult> PerformActionAsync(Guid streamId, string viewerId, PerformActionCommand command)
     {
         await Mediator.Send(command with { StreamId = streamId, ViewerId = viewerId });
         return ApiResponseFactory.NoContent();
