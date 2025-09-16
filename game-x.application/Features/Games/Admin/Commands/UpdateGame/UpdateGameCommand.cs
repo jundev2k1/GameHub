@@ -1,17 +1,19 @@
-﻿using System.Text.Json.Serialization;
+﻿using game_x.application.Common.Files;
+using System.Text.Json.Serialization;
 
 namespace game_x.application.Features.Games.Admin.Commands.UpdateGame;
 
 public record UpdateGameCommand(
     [property: JsonIgnore] Guid Id,
-    string Name,
-    string Description,
-    string Note,
-    int Priority,
-    bool IsActive,
-    GameCategoryItem[] Categories,
-    GameTypeItem[] Types,
-    GameTagItem[] Tags) : ICommand;
+    string? Name,
+    string? Description,
+    string? Note,
+    int? Priority,
+    bool? IsActive,
+    FileUpload? Thumbnail,
+    GameCategoryItem[]? Categories,
+    GameTypeItem[]? Types,
+    GameTagItem[]? Tags) : ICommand;
 
 public record GameTagItem(
     Guid Id,

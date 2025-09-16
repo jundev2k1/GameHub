@@ -7,6 +7,7 @@ public class UserDetailDto
     public string Email { get; set; } = string.Empty;
     public string Nickname { get; set; } = string.Empty;
     public string? FullName { get; set; } = string.Empty;
+    public string? AvatarUrl { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string? ResidentialAddress { get; set; } = string.Empty;
     public bool IsEmailConfirmed { get; set; }

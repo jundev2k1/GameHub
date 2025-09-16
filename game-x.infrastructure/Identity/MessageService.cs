@@ -3,7 +3,6 @@ using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Files;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.FileStorage;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Chat.Dtos;
@@ -36,7 +35,7 @@ public sealed class MessageService(
             entityResult.Items.Select(m => GetMessageDtoAsync(m, ct))
         );
 
-        return entityResult.Transform(dtoItems.Reverse()); 
+        return entityResult.Transform(dtoItems.Reverse());
     }
     
     public async Task<ListedMessageDto> GetMessageDtoAsync(MessageDto msg, CancellationToken ct)

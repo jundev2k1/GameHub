@@ -2,4 +2,9 @@
 
 namespace game_x.application.Features.LiveStreams.Queries.GetScheduleDetail;
 
-public record GetScheduleDetailQuery(Guid Id) : IQuery<LiveStreamScheduleDto>;
+public record GetScheduleDetailQuery(Guid Id) : IQuery<GetScheduleDetailResult>;
+
+public class GetScheduleDetailResult : LiveStreamScheduleDto
+{
+    public string StreamUrl { get; set; } = string.Empty;
+}

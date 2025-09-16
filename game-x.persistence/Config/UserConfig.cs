@@ -26,5 +26,10 @@ public class UserConfig : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasConversion<short>()
             .HasDefaultValue(UserStatus.Active);
+        
+        builder.HasOne(uk => uk.Avatar)
+            .WithMany()
+            .HasForeignKey(u => u.AvatarId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

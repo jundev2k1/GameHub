@@ -12,12 +12,16 @@ public sealed class ObjectName
     public string Extension => Path.GetExtension(Value);
 
     // Factories
+    public static ObjectName Avatar(string userId, string fileName)
+        => Of($"avatar/{userId:N}/{fileName}");
     public static ObjectName Attachment(string userId, string fileName)
         => Of($"attachment/{userId:N}/{fileName}");
     public static ObjectName KycProfile(string userId, string fileName)
         => Of($"user-kyc/{userId:N}/{fileName}");
     public static ObjectName BankAccountProfile(string userId, string fileName)
         => Of($"user-bank-account/{userId:N}/{fileName}");
+    public static ObjectName GameResource(Guid gameId, string fileName)
+        => Of($"games/{gameId:N}/thumbnail/{fileName}");
 
     public static ObjectName Of(string value)
     {
@@ -34,7 +38,7 @@ public sealed class ObjectName
 
     // Constants
     private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] ValidPrefixValues = ["user-kyc", "user-bank-account", "attachment"];
+    private static readonly string[] ValidPrefixValues = ["user-kyc", "user-bank-account", "attachment", "games",  "avatar"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>

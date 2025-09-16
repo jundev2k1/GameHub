@@ -1,4 +1,5 @@
 ﻿using game_x.api.Dtos;
+using game_x.application.Common.Files;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Admin.Commands.UpdateGame;
 using game_x.application.Features.Games.Admin.Queries.GetGameDetail;
@@ -45,9 +46,20 @@ public sealed class GameController : BaseApiController
 
     [Authorize(Roles = AppRoles.Admin)]
     [HttpPut("{gameId}")]
-    public async Task<IActionResult> UpdateGameAsync(Guid gameId, UpdateGameCommand command)
+    public async Task<IActionResult> UpdateGameAsync(Guid gameId, [FromForm] UpdateGameRequest request)
     {
-        await Mediator.Send(command with { Id = gameId });
+        var command = new UpdateGameCommand(
+            gameId,
+            request.Name,
+            request.Description,
+            request.Note,
+            request.Priority,
+            request.IsActive,
+            request.Thumbnail != null ? FileUpload.FromFormFile(request.Thumbnail) : null,
+            request.Categories != null ? [.. request.Categories.Select(cate => new GameCategoryItem(cate.Id, cate.IsPrimary, cate.Priority))] : null,
+            request.Types != null ? [.. request.Types.Select(type => new GameTypeItem(type.Id, type.IsPrimary, type.Priority))] : null,
+            request.Tags != null ? [.. request.Tags.Select(tag => new GameTagItem(tag.Id, tag.IsPrimary, tag.Priority))] : null);
+        await Mediator.Send(command);
         return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
 

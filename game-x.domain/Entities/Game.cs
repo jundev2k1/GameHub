@@ -9,6 +9,8 @@ public sealed class Game : BaseEntity<int>, IAuditable
     public GamePlatform Platform { get; private set; } = default!;
     public string Description { get; private set; } = string.Empty;
     public string Note { get; private set; } = string.Empty;
+    public int? ThumbnailId { get; private set; }
+    public MediaFile? Thumbnail { get; private set; }
     public int Priority { get; private set; }
     public bool IsActive { get; private set; } = true;
 
@@ -16,7 +18,7 @@ public sealed class Game : BaseEntity<int>, IAuditable
     public ICollection<GameTypeMapping> GameTypeMappings { get; private set; } = default!;
     public ICollection<GameTagMapping> GameTagMappings { get; private set; } = default!;
 
-    public static Game Create(string name, string gameCode, string desc, string note, int priority)
+    public static Game Create(string name, string gameCode, string desc, string note, int priority, int? thumbnailId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
         ArgumentException.ThrowIfNullOrWhiteSpace(gameCode, nameof(gameCode));
@@ -28,43 +30,50 @@ public sealed class Game : BaseEntity<int>, IAuditable
             Description = desc,
             Note = note,
             Priority = priority,
+            ThumbnailId = thumbnailId,
         };
     }
 
     public void UpdateGame(
-        string name,
-        string desc,
-        string note,
-        int priority,
-        bool isActive,
-        ICollection<GameCategoryMapping> categories,
-        ICollection<GameTypeMapping> types,
-        ICollection<GameTagMapping> tags)
+        string? name,
+        string? desc,
+        string? note,
+        int? priority,
+        bool? isActive,
+        ICollection<GameCategoryMapping>? categories,
+        ICollection<GameTypeMapping>? types,
+        ICollection<GameTagMapping>? tags,
+        int? thumbnailId = null)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name, "Name is required.");
         if (priority < 0)
             throw new ArgumentException("Priority must be greater than or equal to 0.", nameof(priority));
-        if (categories.Count == 0 || categories.Count(c => c.IsPrimary) != 1)
+        if (categories != null && (categories.Count == 0 || categories.Count(c => c.IsPrimary) != 1))
             throw new ArgumentException("There must be exactly one primary category.", nameof(categories));
-        if (types.Count == 0 || types.Count(t => t.IsPrimary) != 1)
+        if (types != null &&  (types.Count == 0 || types.Count(t => t.IsPrimary) != 1))
             throw new ArgumentException("There must be exactly one primary type.", nameof(types));
-        if (tags.Count == 0 || tags.Count(t => t.IsPrimary) != 1)
+        if (tags != null && (tags.Count == 0 || tags.Count(t => t.IsPrimary) != 1))
             throw new ArgumentException("There must be exactly one primary tag.", nameof(tags));
-        if (categories.Select(c => c.CategoryId).Distinct().Count() != categories.Count)
+        if (categories != null && (categories.Select(c => c.CategoryId).Distinct().Count() != categories.Count))
             throw new ArgumentException("Categories contains duplicate category IDs.", nameof(categories));
-        if (types.Select(t => t.TypeId).Distinct().Count() != types.Count)
+        if (types != null && (types.Select(t => t.TypeId).Distinct().Count() != types.Count))
             throw new ArgumentException("Types contains duplicate type IDs.", nameof(types));
-        if (tags.Select(t => t.TagId).Distinct().Count() != tags.Count)
+        if (tags != null && (tags.Select(t => t.TagId).Distinct().Count() != tags.Count))
             throw new ArgumentException("Tags contains duplicate tag IDs.", nameof(tags));
 
-        Name = name;
-        Description = desc;
-        Note = note;
-        Priority = priority;
-        IsActive = isActive;
-        GameCategoryMappings = categories;
-        GameTypeMappings = types;
-        GameTagMappings = tags;
+        Name = name ?? Name;
+        Description = desc ?? Description;
+        Note = note ?? Note;
+        Priority = priority ?? Priority;
+        IsActive = isActive ?? IsActive;
+        ThumbnailId = thumbnailId ?? ThumbnailId;
+        GameCategoryMappings = categories ?? GameCategoryMappings;
+        GameTypeMappings = types ?? GameTypeMappings;
+        GameTagMappings = tags ?? GameTagMappings;
+    }
+
+    public void UpdateThumbnail(MediaFile thumbnail)
+    {
+        Thumbnail = thumbnail;
     }
 
     public void UpdatePlatform(GamePlatform platform)

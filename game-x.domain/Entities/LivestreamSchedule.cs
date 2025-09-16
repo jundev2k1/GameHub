@@ -10,6 +10,7 @@ public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
     public DateTime EndTime { get; private set; }
     public DateTime? StartAt { get; private set; }
     public string StreamKey { get; private set; } = string.Empty;
+    public string Token { get; private set; } = string.Empty;
     public DateTime? EndAt { get; private set; }
     public LiveStreamStatus Status { get; private set; }
     public string? CancellationReason { get; private set; }
@@ -40,6 +41,7 @@ public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
             Notes = notes,
             Status = LiveStreamStatus.Scheduled,
             StreamKey = GenerateStreamKey(),
+            Token = GenerateToken(),
             CategoryMappings = categories ?? [],
         };
     }
@@ -110,5 +112,10 @@ public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
     private static string GenerateStreamKey()
     {
         return Convert.ToBase64String(Guid.NewGuid().ToByteArray()).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+    }
+
+    private static string GenerateToken()
+    {
+        return Guid.NewGuid().ToString("N");
     }
 }

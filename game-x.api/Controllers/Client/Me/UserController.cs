@@ -1,8 +1,10 @@
+using game_x.application.Common.Files;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Commands.RevokeAllOtherToken;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
+using game_x.application.Features.Accounts.User.Commands.UploadAvatar;
 using game_x.application.Features.Accounts.User.Commands.UserSelfUpdate;
 using game_x.application.Features.Accounts.User.Queries.GetAllActiveTokens;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
@@ -69,13 +71,13 @@ public sealed class UserController(
     {
         var userId = userAccessor.GetUserId();
         var currentJwtId = userAccessor.GetJwtId();
-        var tokens = refreshTokenManager.GetsByUserId(userId!);
+        var tokens = refreshTokenManager.GetsByUserId(userId);
         var targetToken = tokens.FirstOrDefault(t => t.PublicId == tokenId);
 
         if (targetToken!.JwtId == currentJwtId)
             return ApiResponseFactory.Forbidden(MessageCode.System.Forbidden);
 
-        var command = new RevokeTokenCommand(userId!, tokenId);
+        var command = new RevokeTokenCommand(userId, tokenId);
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
     }
@@ -85,5 +87,12 @@ public sealed class UserController(
     {
         await Mediator.Send(new RevokeAllOtherTokenCommand());
         return ApiResponseFactory.NoContent();
+    }
+    
+    [HttpPost("avatar")]
+    public async Task<IActionResult> UploadAvatarAsync(IFormFile file)
+    {
+        var result = await Mediator.Send(new UploadAvatarCommand(FileUpload.FromFormFile(file)));
+        return ApiResponseFactory.Ok(result);
     }
 }

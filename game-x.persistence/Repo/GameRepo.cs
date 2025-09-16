@@ -2,7 +2,6 @@
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using System.Linq.Expressions;
 
 namespace game_x.persistence.Repo;
 
@@ -19,13 +18,14 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gtm => gtm.Type)
             .Include(g => g.GameTagMappings)
             .ThenInclude(gtm => gtm.Tag)
+            .Include(g => g.Thumbnail)
             .ToArrayAsync(ct);
     }
 
     public async Task<PaginationResult<Game>> GetsByCriteriaAsync(
-        Expression<Func<Game, bool>> condition,
-        int page,
-        int pageSize,
+        Func<IQueryable<Game>, IQueryable<Game>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
         CancellationToken ct = default)
     {
         var query = context.Games
@@ -37,20 +37,20 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gtm => gtm.Type)
             .Include(g => g.GameTagMappings)
             .ThenInclude(gtm => gtm.Tag)
-            .Where(condition)
-            .OrderBy(g => g.Priority)
-            .ThenBy(g => g.Name)
             .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
 
         var totalCount = await query.CountAsync(ct);
         var totalPageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
-        var result = await query
+        var items = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToArrayAsync(ct);
 
         return new PaginationResult<Game>(
-            result,
+            items,
             totalCount,
             totalPageCount,
             page,
@@ -69,6 +69,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gtm => gtm.Type)
             .Include(g => g.GameTagMappings)
             .ThenInclude(gtm => gtm.Tag)
+            .Include(g => g.Thumbnail)
             .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
             ?? throw new NotFoundException(nameof(gameId), gameId);
 

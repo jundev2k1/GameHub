@@ -19,7 +19,13 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
 
-        var command = new PublishStreamCommand(request.App, request.Stream);
+        var query = HttpUtility.ParseQueryString(request.Param);
+        var token = query.Get("token");
+        if (token.IsNullOrWhiteSpace())
+            throw new BadRequestException("Token is required");
+
+        logger.LogInformation($"Token: {token}");
+        var command = new PublishStreamCommand(request.Stream, token!);
         await Mediator.Send(command);
         return Ok(0);
     }

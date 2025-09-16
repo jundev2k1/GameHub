@@ -25,12 +25,23 @@ public record GetGamesItemDto(
     string Description,
     Guid PlatformId,
     string PlatformName,
+    string? GameThumbnailUrl,
     GetGamesCategoryItemDto[] Categories,
     GetGamesTypeItemDto[] GameTypes,
     GetGamesTagItemDto[] Tags)
 {
     public GetGamesItemDto(GameInfoDto game)
-        : this(game.Id, game.GameCode, game.Name, game.Description, game.PlatformId, game.PlatformName, [], [], [])
+        : this(
+            game.Id,
+            game.GameCode,
+            game.Name,
+            game.Description,
+            game.PlatformId,
+            game.PlatformName,
+            game.Thumbnail?.Url,
+            [],
+            [],
+            [])
     {
         Categories = [.. game.Categories
             .OrderByDescending(cate => cate.IsPrimary)
