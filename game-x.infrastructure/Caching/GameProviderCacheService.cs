@@ -1,7 +1,9 @@
 using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Games.Dtos;
+using game_x.share.Extensions;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace game_x.infrastructure.Caching;
@@ -13,10 +15,11 @@ public sealed class GameProviderCacheService(
     IGameTypeRepo gameTypeRepo,
     IGameTagRepo gameTagRepo,
     IGameRecommendRepo gameRecommendRepo,
-    IGameRepo gameRepo)
+    IGameRepo gameRepo,
+    IFileStorageService fileStorage)
     : CacheService(cache), IGameProviderCacheService
 {
-    private readonly string _prefixCache = "external:game-provider:";
+    private readonly string _prefixCache = "external:game-provider";
 
     public string GetLanguage(string account)
     {
@@ -77,9 +80,39 @@ public sealed class GameProviderCacheService(
 
     public async Task RefreshGameList()
     {
-        var cacheKey = $"{_prefixCache}:game:list";
         var gameList = await gameRepo.GetAllAsync();
+
+        // Clear all game thumbnail cache
+        foreach (var game in gameList)
+        {
+            var cacheThumnailKey = $"{_prefixCache}:game:{game.PublicId}:thumbnail";
+            Remove(cacheThumnailKey);
+        }
+
+        var cacheKey = $"{_prefixCache}:game:list";
         Set(cacheKey, gameList.Select(g => g.Adapt<GameInfoDto>()).ToArray());
+    }
+
+    public async Task<string> GetGameThumbnail(GameInfoDto game)
+    {
+        // No thumbnail
+        if (game.Thumbnail is null) return string.Empty;
+
+        // Get thumbnail from cache
+        var cacheKey = $"{_prefixCache}:game:{game.Id}:thumbnail";
+        var thumbnailUrl = Get<string>(cacheKey);
+        if (thumbnailUrl.IsNotNullOrEmpty()) return thumbnailUrl!;
+
+        // Generate new thumbnail url and cache it
+        var url = await fileStorage.GenerateDownloadUrlAsync(
+            BucketName.Of(game.Thumbnail.BucketName),
+            ObjectName.Of(game.Thumbnail.ObjectName),
+            TimeSpan.FromHours(8));
+        Set(cacheKey, thumbnailUrl!, new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(8)
+        });
+        return url;
     }
 
     public GamePlatformDto[] PlatformList

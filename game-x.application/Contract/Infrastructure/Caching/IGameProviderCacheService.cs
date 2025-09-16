@@ -24,6 +24,8 @@ public interface IGameProviderCacheService
 
     Task RefreshGameList();
 
+    Task<string> GetGameThumbnail(GameInfoDto game);
+
     GamePlatformDto[] PlatformList { get; }
     GameCategoryDto[] CategoryList { get; }
     GameTypeDto[] GameTypeList { get; }
