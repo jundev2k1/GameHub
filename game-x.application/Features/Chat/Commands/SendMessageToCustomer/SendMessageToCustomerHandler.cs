@@ -63,10 +63,11 @@ public sealed class SendMessageToCustomerHandler(
                 Attachments = message.Attachments.Adapt<List<MessageAttachmentDto>>()
             };
             
+            var updatedConv = await conversationRepo.GetConversationDetailAsync(conv.PublicId, ct);
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
             var dto = new CreatedMessageSignalResult(
                 Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
-                Conv: conv.Adapt<ConversationSignalDto>());
+                Conv: updatedConv.Adapt<ConversationSignalDto>());
             
             await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
             

@@ -180,6 +180,20 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 c.CustomerId == actorId || c.GuestId == actorId, ct);
     }
     
+    public async Task<ConversationDetailDto> GetConversationDetailAsync(Guid convId, CancellationToken ct = default)
+    {
+        var conv = await context.Conversations
+                       .AsTracking()
+                       .Include(c => c.Messages
+                           .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
+                           .Take(1))
+                       .FirstOrDefaultAsync(c => c.PublicId == convId, ct)
+                   ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+        
+        var dto = conv.Adapt<ConversationDetailDto>();
+        return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
+    }
+    
     public async Task<Conversation> GetByIdAsync(Guid convId, CancellationToken ct = default)
     {
         return await context.Conversations
