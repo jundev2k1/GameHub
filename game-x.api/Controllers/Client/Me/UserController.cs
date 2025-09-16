@@ -90,7 +90,7 @@ public sealed class UserController(
     }
     
     [HttpPost("avatar")]
-    public async Task<IActionResult> UploadAvatarAsync([FromForm] IFormFile file)
+    public async Task<IActionResult> UploadAvatarAsync(IFormFile file)
     {
         var result = await Mediator.Send(new UploadAvatarCommand(FileUpload.FromFormFile(file)));
         return ApiResponseFactory.Ok(result);
