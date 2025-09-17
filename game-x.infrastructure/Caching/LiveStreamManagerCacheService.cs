@@ -26,6 +26,12 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         var cacheKey = $"{LiveStreamPrefix}streams:{streamInfo.StreamKey}";
         Set(cacheKey, streamInfo);
+
+        var cacheListKey = $"{LiveStreamPrefix}streams";
+        var streamList = GetAllStreamKeys();
+        if (!streamList.Contains(streamInfo.StreamKey))
+            streamList = [.. streamList, streamInfo.StreamKey];
+        Set(cacheListKey, streamList);
     }
 
     public void ConnectLiveStream(string streamKey)
