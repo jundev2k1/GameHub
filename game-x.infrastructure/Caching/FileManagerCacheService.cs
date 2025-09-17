@@ -3,7 +3,6 @@ using game_x.application.Contract.Infrastructure.Dto;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Repo;
 using Microsoft.Extensions.Caching.Memory;
-using System.Text.Json.Serialization;
 
 namespace game_x.infrastructure.Caching;
 
@@ -13,37 +12,38 @@ public sealed class FileManagerCacheService(
     IFileStorageService storageService) : CacheService(cache), IFileManagerCacheService
 {
     private const string CacheKeyPrefix = "fileManager:";
+    private readonly TimeSpan _defaultExpiredTime = TimeSpan.FromHours(24);
 
-    public async Task RefreshImage(MediaFile file, TimeSpan? ExpiredTime = null, CancellationToken ct = default)
+    public async Task RefreshImage(MediaFile file, TimeSpan? expiredTime = null, CancellationToken ct = default)
     {
         var url = await storageService.GenerateDownloadUrlAsync(
             file.BucketName,
             file.ObjectName,
-            ExpiredTime ?? TimeSpan.FromHours(24),
+            expiredTime ?? _defaultExpiredTime,
             ct);
 
         var cacheKey = $"{CacheKeyPrefix}{file.Id}";
         var fileInfo = new MediaFileInfo(file.Id, file.FileName, url);
         var options = new MemoryCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = ExpiredTime ?? TimeSpan.FromHours(24)
+            AbsoluteExpirationRelativeToNow = expiredTime ?? _defaultExpiredTime
         };
         Set(cacheKey, fileInfo, options);
     }
-    public async Task RefreshImage(int fileId, TimeSpan? ExpiredTime = null, CancellationToken ct = default)
+    public async Task RefreshImage(int fileId, TimeSpan? expiredTime = null, CancellationToken ct = default)
     {
         var file = await mediaFileRepo.FindAsync(fileId, ct);
         var url = await storageService.GenerateDownloadUrlAsync(
             file.BucketName,
             file.ObjectName,
-            ExpiredTime ?? TimeSpan.FromHours(24),
+            expiredTime ?? _defaultExpiredTime,
             ct);
 
         var cacheKey = $"{CacheKeyPrefix}{file.Id}";
         var fileInfo = new MediaFileInfo(file.Id, file.FileName, url);
         var options = new MemoryCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = ExpiredTime ?? TimeSpan.FromHours(24)
+            AbsoluteExpirationRelativeToNow = expiredTime ?? _defaultExpiredTime
         };
         Set(cacheKey, fileInfo, options);
     }
