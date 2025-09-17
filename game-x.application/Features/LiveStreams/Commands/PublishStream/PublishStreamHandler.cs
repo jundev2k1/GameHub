@@ -44,8 +44,11 @@ public sealed class PublishStreamHandler(
         {
             StreamKey = streamSetting.StreamKey,
             OfflineAt = null,
+            StartTime = streamSetting.StartTime,
+            EndTime = streamSetting.EndTime,
             TalentId = streamSetting.AssignedId!,
             TalentName = streamSetting.AssignedTo?.Nickname ?? string.Empty,
+            Categories = [.. streamSetting.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())]
         };
         liveStreamManager.InitLiveStream(streamInfo);
     }

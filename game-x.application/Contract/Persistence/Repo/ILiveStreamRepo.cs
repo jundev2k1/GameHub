@@ -1,12 +1,9 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
-using System.Linq.Expressions;
 
 namespace game_x.application.Contract.Persistence.Repo;
 
 public interface ILiveStreamRepo
 {
-    Task<LivestreamSchedule[]> GetUnexpiredAsync(CancellationToken ct = default);
-
     Task<PaginationResult<LivestreamSchedule>> GetsByCriteriaAsync(
         Func<IQueryable<LivestreamSchedule>, IQueryable<LivestreamSchedule>>? builder = null,
         int page = 1,

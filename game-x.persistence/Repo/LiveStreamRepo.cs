@@ -7,18 +7,6 @@ namespace game_x.persistence.Repo;
 
 public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRepository
 {
-    public async Task<LivestreamSchedule[]> GetUnexpiredAsync(CancellationToken ct = default)
-    {
-        var result = await context.LiveStreamSchedules
-            .AsNoTracking()
-            .Include(ls => ls.CategoryMappings)
-            .ThenInclude(lsm => lsm.Category)
-            .Include(ls => ls.AssignedTo)
-            .Where(ls => ls.StartAt >= DateTime.UtcNow)
-            .ToArrayAsync(ct);
-        return result;
-    }
-
     public async Task<PaginationResult<LivestreamSchedule>> GetsByCriteriaAsync(
         Func<IQueryable<LivestreamSchedule>, IQueryable<LivestreamSchedule>>? queryBuilder = null,
         int page = 1,

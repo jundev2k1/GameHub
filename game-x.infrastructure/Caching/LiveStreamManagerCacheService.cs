@@ -176,8 +176,9 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
     {
         var allKeys = GetAllViewersByStreamKey(streamKey);
         var viewers = allKeys
-            .Select(key => Get<LiveStreamViewerDto>(
-                $"{LiveStreamViewersPrefix}{streamKey}:{key}"))
+            .SelectMany(kvp => kvp.Value)
+            .Select(token => Get<LiveStreamViewerDto>(
+                $"{LiveStreamViewersPrefix}{streamKey}:{token}"))
             .Where(dto => dto != null)
             .ToArray();
         return viewers!;
@@ -186,6 +187,6 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
     public int GetViewerCount(string streamKey)
     {
         var streamViewers = GetAllViewerInfosByStreamKey(streamKey);
-        return streamViewers.Count(v => v.IsWatching);
+        return streamViewers.GroupBy(v => v.ViewerId).Count(gr => gr.Any(v => v.IsWatching));
     }
 }
