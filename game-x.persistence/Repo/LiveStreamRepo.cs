@@ -13,7 +13,7 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             .AsNoTracking()
             .Include(ls => ls.CategoryMappings)
             .ThenInclude(lsm => lsm.Category)
-            .Include(ls => ls.AssignedBy)
+            .Include(ls => ls.AssignedTo)
             .Where(ls => ls.StartAt >= DateTime.UtcNow)
             .ToArrayAsync(ct);
         return result;
@@ -29,7 +29,7 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             .AsNoTracking()
             .Include(g => g.CategoryMappings)
             .ThenInclude(lsm => lsm.Category)
-            .Include(g => g.AssignedBy)
+            .Include(g => g.AssignedTo)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -56,7 +56,7 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             .AsNoTracking()
             .Include(ls => ls.CategoryMappings)
             .ThenInclude(lsm => lsm.Category)
-            .Include(ls => ls.AssignedBy)
+            .Include(ls => ls.AssignedTo)
             .FirstOrDefaultAsync(ls => ls.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
     }
@@ -67,7 +67,7 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             .AsNoTracking()
             .Include(ls => ls.CategoryMappings)
             .ThenInclude(lsm => lsm.Category)
-            .Include(ls => ls.AssignedBy)
+            .Include(ls => ls.AssignedTo)
             .FirstOrDefaultAsync(ls => ls.StreamKey == streamKey, ct)
             ?? throw new NotFoundException(nameof(streamKey), streamKey);
     }
@@ -82,7 +82,7 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
         var targetSchedule = await context.LiveStreamSchedules
             .Include(ls => ls.CategoryMappings)
             .ThenInclude(lsm => lsm.Category)
-            .Include(ls => ls.AssignedBy)
+            .Include(ls => ls.AssignedTo)
             .FirstOrDefaultAsync(ls => ls.PublicId == scheduleId, ct)
             ?? throw new NotFoundException(nameof(scheduleId), scheduleId);
 

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250917034625_ModifyLiveStreamScheduleField")]
+    partial class ModifyLiveStreamScheduleField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2161,10 +2164,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("access_failed_count");
 
-                    b.Property<int?>("AvatarId")
-                        .HasColumnType("integer")
-                        .HasColumnName("avatar_id");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text")
@@ -2260,9 +2259,6 @@ namespace game_x.persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_users");
-
-                    b.HasIndex("AvatarId")
-                        .HasDatabaseName("ix_users_avatar_id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -3072,17 +3068,6 @@ namespace game_x.persistence.Migrations
                         .HasConstraintName("fk_transactions_internal_transactions_id");
 
                     b.Navigation("Transaction");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.User", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.MediaFile", "Avatar")
-                        .WithMany()
-                        .HasForeignKey("AvatarId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_users_media_files_avatar_id");
-
-                    b.Navigation("Avatar");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.UserBalance", b =>
