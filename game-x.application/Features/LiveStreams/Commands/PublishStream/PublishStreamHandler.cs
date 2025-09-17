@@ -45,7 +45,7 @@ public sealed class PublishStreamHandler(
             StreamKey = streamSetting.StreamKey,
             OfflineAt = null,
             TalentId = streamSetting.AssignedId!,
-            TalentName = streamSetting.AssignedBy?.Nickname ?? string.Empty,
+            TalentName = streamSetting.AssignedTo?.Nickname ?? string.Empty,
         };
         liveStreamManager.InitLiveStream(streamInfo);
     }
