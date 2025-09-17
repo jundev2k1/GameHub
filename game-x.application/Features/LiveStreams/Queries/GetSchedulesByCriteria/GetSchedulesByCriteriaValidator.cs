@@ -7,6 +7,7 @@ public sealed class GetSchedulesByCriteriaValidator : AbstractValidator<GetSched
     private readonly string[] _allowFields =
     {
         "search",
+        "statuses",
         nameof(LivestreamSchedule.PublicId),
         nameof(LivestreamSchedule.Title),
         nameof(LivestreamSchedule.Description),

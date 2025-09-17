@@ -2,6 +2,7 @@
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Extensions.FilterExtensions;
 using game_x.application.Features.Games.Mapping;
 using game_x.application.Features.LiveStreams.Dtos;
 using game_x.application.Features.LiveStreams.Mapping;
@@ -22,7 +23,8 @@ public sealed class GetSchedulesByCriteriaHandler(
                 query,
                 filters: request.Filters,
                 sorts: request.Sorts,
-                keyword => ls => ls.Title.ToLowerInvariant().Contains(keyword.ToLowerInvariant())),
+                keyword => ls => ls.Title.ToLower().Contains(keyword.ToLower()),
+                LiveStreamFilterExtensions.Options),
             request.PageIndex,
             request.PageSize,
             ct);

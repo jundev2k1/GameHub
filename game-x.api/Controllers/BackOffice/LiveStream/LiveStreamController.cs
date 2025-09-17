@@ -1,4 +1,5 @@
 ﻿using game_x.api.Common;
+using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.LiveStreams.Commands.AssignTalent;
 using game_x.application.Features.LiveStreams.Commands.CancelSchedule;
@@ -15,9 +16,13 @@ public sealed class LiveStreamController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet]
-    public async Task<IActionResult> GetSchedulesByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    public async Task<IActionResult> GetSchedulesByCriteriaAsync([AsParameters] GetLiveStreamsByCriteriaRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.Statuses.IsNotNullOrEmpty())
+            paramExtends.Add("statuses", parameters.Statuses!);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetSchedulesByCriteriaQuery(
             filters,
