@@ -1,13 +1,16 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Accounts.Dtos;
 using game_x.application.Features.LiveStreams.Dtos;
+using System.Threading.Tasks;
 
 namespace game_x.application.Features.LiveStreams.Commands.PublishStream;
 
 public sealed class PublishStreamHandler(
     IUnitOfWork unitOfWork,
     ILiveStreamRepo liveStreamRepo,
-    ILiveStreamManagerCacheService liveStreamManager) : ICommandHandler<PublishStreamCommand>
+    ILiveStreamManagerCacheService liveStreamManager,
+    IFileManagerCacheService fileManagerCache) : ICommandHandler<PublishStreamCommand>
 {
     public async Task<Unit> Handle(PublishStreamCommand request, CancellationToken ct = default)
     {
@@ -20,7 +23,7 @@ public sealed class PublishStreamHandler(
 
         // Initialize stream info in cache if not exists
         if (!liveStreamManager.IsExistLiveStream(streamSetting.StreamKey))
-            InitStreamInfo(streamSetting);
+            await InitStreamInfo(streamSetting, ct);
 
         // Connect to the stream if not connected
         liveStreamManager.ConnectLiveStream(streamSetting.StreamKey);
@@ -38,18 +41,24 @@ public sealed class PublishStreamHandler(
         return Unit.Value;
     }
 
-    private void InitStreamInfo(LivestreamSchedule streamSetting)
+    private async Task InitStreamInfo(LivestreamSchedule streamSetting, CancellationToken ct)
     {
         var streamInfo = new LiveStreamStatusDto
         {
+            Id = streamSetting.PublicId,
             StreamKey = streamSetting.StreamKey,
             OfflineAt = null,
             StartTime = streamSetting.StartTime,
             EndTime = streamSetting.EndTime,
-            TalentId = streamSetting.AssignedId!,
-            TalentName = streamSetting.AssignedTo?.Nickname ?? string.Empty,
+            AssignedTo = streamSetting.AssignedTo?.Adapt<UserSummaryInfo>(),
             Categories = [.. streamSetting.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())]
         };
+        if (streamSetting.AssignedTo != null && streamSetting.AssignedTo.Avatar != null)
+        {
+            var avatar = await fileManagerCache.GetImageUrl(streamSetting.AssignedTo.Avatar, ct);
+            streamInfo.AssignedTo!.Avatar = avatar?.Url;
+        }
+
         liveStreamManager.InitLiveStream(streamInfo);
     }
 }

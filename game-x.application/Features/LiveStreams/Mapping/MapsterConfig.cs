@@ -12,10 +12,6 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.AssignedTo, src => src.AssignedTo.Adapt<UserSummaryInfo>());
 
-        cfg.NewConfig<LivestreamSchedule, LiveStreamScheduleClientItemDto>()
-            .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.AssignedTo, src => src.AssignedTo.Adapt<UserSummaryInfo>());
-
         cfg.NewConfig<LivestreamSchedule, LiveStreamScheduleDto>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.AssignedTo, src => src.AssignedTo.Adapt<UserSummaryInfo>());
