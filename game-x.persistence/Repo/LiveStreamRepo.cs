@@ -18,6 +18,7 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             .Include(g => g.CategoryMappings)
             .ThenInclude(lsm => lsm.Category)
             .Include(g => g.AssignedTo)
+            .ThenInclude(u => u != null ? u.Avatar : null)
             .AsQueryable();
 
         if (queryBuilder != null)
