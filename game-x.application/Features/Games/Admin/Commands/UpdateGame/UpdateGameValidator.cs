@@ -9,20 +9,16 @@ public sealed class UpdateGameValidator : AbstractValidator<UpdateGameCommand>
 
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage($"{nameof(UpdateGameCommand.Name)} is required.")
-            .MaximumLength(256).WithMessage($"{nameof(UpdateGameCommand.Name)} must not exceed 256 characters.")
-            .When(x => x.Name is not null);
+            .MaximumLength(256).WithMessage($"{nameof(UpdateGameCommand.Name)} must not exceed 256 characters.");
 
         RuleFor(x => x.Description)
-            .MaximumLength(4000).WithMessage($"{nameof(UpdateGameCommand.Description)} must not exceed 4000 characters.")
-            .When(x => x.Description is not null);
+            .MaximumLength(4000).WithMessage($"{nameof(UpdateGameCommand.Description)} must not exceed 4000 characters.");
 
         RuleFor(x => x.Note)
-            .MaximumLength(4000).WithMessage($"{nameof(UpdateGameCommand.Note)} must not exceed 4000 characters.")
-            .When(x => x.Note is not null);
+            .MaximumLength(4000).WithMessage($"{nameof(UpdateGameCommand.Note)} must not exceed 4000 characters.");
 
         RuleFor(x => x.Priority)
-            .GreaterThanOrEqualTo(0).WithMessage($"{nameof(UpdateGameCommand.Priority)} must be greater than or equal to 0.")
-            .When(x => x.Priority is not null);
+            .GreaterThanOrEqualTo(0).WithMessage($"{nameof(UpdateGameCommand.Priority)} must be greater than or equal to 0.");
 
         RuleFor(x => x.Categories)
             .Must(items => items!.Length > 0 && items.Count(item => item.IsPrimary) == 1)

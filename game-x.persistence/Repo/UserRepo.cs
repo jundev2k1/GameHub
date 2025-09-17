@@ -1,7 +1,6 @@
 using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.Dtos;
@@ -16,7 +15,6 @@ namespace game_x.persistence.Repo;
 public sealed class UserRepo(
     GameXContext context,
     UserManager<User> userManager,
-    IFileStorageService fileStorage,
     IFileManagerCacheService fileManagerCache) : IUserRepo, IRepository
 {
     public async Task<User[]> GetUserByRole(string roleName, CancellationToken ct = default)

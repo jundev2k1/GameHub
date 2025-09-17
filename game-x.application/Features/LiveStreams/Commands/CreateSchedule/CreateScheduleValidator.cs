@@ -11,7 +11,6 @@ public sealed class CreateScheduleValidator : AbstractValidator<CreateScheduleCo
             .MaximumLength(255).WithMessage("Title cannot exceed 255 characters.");
 
         RuleFor(x => x.Description)
-            .NotEmpty().WithMessage("Description is required.")
             .MaximumLength(4000).WithMessage("Description cannot exceed 4000 characters.");
 
         RuleFor(x => x.Note)
