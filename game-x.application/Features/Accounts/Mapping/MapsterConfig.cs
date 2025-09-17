@@ -61,5 +61,12 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.UserId, src => src.Id)
             .Map(dest => dest.Username, src => src.UserName)
             .Map(dest => dest.Roles, src => src.UserRoles.Select(ur => ur.Role.Name).ToArray());
+
+        cfg.NewConfig<UserEntity, UserSummaryForAdmin>()
+            .Map(dest => dest.Roles, src => src.UserRoles.Select(ur => ur.Role.Name))
+            .Map(dest => dest.IsEmailConfirmed, src => src.EmailConfirmed)
+            .Map(dest => dest.IsKycConfirmed, src => src.UserKyc != null && src.UserKyc.Status == KycStatus.Approved)
+            .Map(dest => dest.IsBankAccountConfirmed, src => src.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved))
+            .Map(dest => dest.IsActive, src => src.Status == UserStatus.Active);
     }
 }
