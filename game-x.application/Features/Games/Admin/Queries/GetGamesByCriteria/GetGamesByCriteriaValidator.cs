@@ -1,5 +1,4 @@
 ﻿using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Dtos;
 
 namespace game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
 
@@ -11,14 +10,14 @@ public sealed class GetGamesByCriteriaValidator : AbstractValidator<GetGamesByCr
         "types",
         "categories",
         "tags",
-        nameof(GameInfoDto.Id),
-        nameof(GameInfoDto.GameCode),
-        nameof(GameInfoDto.Priority),
-        nameof(GameInfoDto.Name),
-        nameof(GameInfoDto.Description),
-        nameof(GameInfoDto.PlatformName),
-        nameof(GameInfoDto.CreatedAt),
-        nameof(GameInfoDto.UpdatedAt),
+        nameof(Game.PublicId),
+        nameof(Game.GameCode),
+        nameof(Game.Priority),
+        nameof(Game.Name),
+        nameof(Game.Description),
+        nameof(Game.PlatformId),
+        nameof(Game.CreatedAt),
+        nameof(Game.UpdatedAt),
     };
 
     public GetGamesByCriteriaValidator()
