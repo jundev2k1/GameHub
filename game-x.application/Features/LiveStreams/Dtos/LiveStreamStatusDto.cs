@@ -1,4 +1,6 @@
-﻿namespace game_x.application.Features.LiveStreams.Dtos;
+﻿using game_x.application.Features.LiveStreams.Enum;
+
+namespace game_x.application.Features.LiveStreams.Dtos;
 
 public sealed class LiveStreamStatusDto
 {
@@ -7,16 +9,16 @@ public sealed class LiveStreamStatusDto
     public DateTime? OfflineAt { get; set; }
     public string TalentId { get; set; } = string.Empty;
     public string TalentName { get; set; } = string.Empty;
-    public List<string> BlackList { get; set; } = [];
+    public List<BlackListItemDto> BlackList { get; set; } = [];
 }
 
 public sealed class BlackListItemDto
 {
-    public string StreamKey { get; set; } = string.Empty;
     public string UserId { get; set; } = string.Empty;
-    public string UserName { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
     public BlackListAction Action { get; set; }
     public DateTime BlockTo { get; set; }
+    public BlockReasonEnum Reason { get; set; }
 }
 
 public enum BlackListAction

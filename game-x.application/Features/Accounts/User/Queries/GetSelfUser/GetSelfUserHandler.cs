@@ -1,8 +1,6 @@
 using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 
 namespace game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 

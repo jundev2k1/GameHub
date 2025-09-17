@@ -15,7 +15,7 @@ public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
     public LiveStreamStatus Status { get; private set; }
     public string? CancellationReason { get; private set; }
     public string? AssignedId { get; private set; }
-    public User? AssignedBy { get; private set; }
+    public User? AssignedTo { get; private set; }
 
     public ICollection<LiveStreamCategoryMapping> CategoryMappings { get; private set; } = [];
 

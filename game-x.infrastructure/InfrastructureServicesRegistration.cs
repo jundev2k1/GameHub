@@ -35,6 +35,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using game_x.infrastructure.Security;
 using Microsoft.AspNetCore.SignalR;
+using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
+using game_x.infrastructure.ExternalApi.Srs;
 
 namespace game_x.infrastructure;
 
@@ -78,6 +80,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IEmailService, EngageLabEmailService>();
         services.AddScoped<IUxmService, UxmService>();
         services.AddScoped<IGameProviderService, GameProviderService>();
+        services.AddScoped<ISrsService, SrsService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
 
         // Add security services
@@ -166,6 +169,7 @@ public static class InfrastructureServicesRegistration
             })
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
+        // Game Provider API
         services.AddTransient<CustomApiResponseHandler>();
         services.AddRefitClient<IGameProviderApi>()
             .ConfigureHttpClient(c =>
@@ -177,6 +181,18 @@ public static class InfrastructureServicesRegistration
                 c.BaseAddress = new Uri(baseUrl);
                 c.Timeout = TimeSpan.FromSeconds(5);
                 c.DefaultRequestHeaders.Add("Authorization", apiToken);
+            })
+            .AddHttpMessageHandler<CustomApiResponseHandler>()
+            .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
+
+        // SRS API
+        services.AddRefitClient<ISrsApi>()
+            .ConfigureHttpClient(c =>
+            {
+                var baseUrl = configuration["SrsSettings:Host"]
+                    ?? throw new InvalidOperationException("SrsSettings:Host not configured");
+                c.BaseAddress = new Uri(baseUrl);
+                c.Timeout = TimeSpan.FromSeconds(5);
             })
             .AddHttpMessageHandler<CustomApiResponseHandler>()
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());

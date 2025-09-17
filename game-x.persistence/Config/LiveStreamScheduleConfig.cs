@@ -64,7 +64,7 @@ public sealed class LiveStreamScheduleConfig : IEntityTypeConfiguration<Livestre
             .IsRequired(false)
             .HasMaxLength(255);
 
-        builder.HasOne(ls => ls.AssignedBy)
+        builder.HasOne(ls => ls.AssignedTo)
             .WithMany()
             .HasForeignKey(ls => ls.AssignedId)
             .OnDelete(DeleteBehavior.Restrict);

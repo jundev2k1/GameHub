@@ -16,7 +16,7 @@ public class LiveStreamScheduleDto
     public DateTime? EndAt { get; set; }
     public LiveStreamStatus Status { get; set; }
     public string? CancellationReason { get; set; }
-    public UserSummaryInfo? AssignedBy { get; set; }
+    public UserSummaryInfo? AssignedTo { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

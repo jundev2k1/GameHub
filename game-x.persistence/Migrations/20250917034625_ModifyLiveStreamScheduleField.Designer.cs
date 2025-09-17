@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250917034625_ModifyLiveStreamScheduleField")]
+    partial class ModifyLiveStreamScheduleField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1427,10 +1430,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_tombstone");
 
-                    b.Property<short>("Kind")
+                    b.Property<int>("Kind")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint")
-                        .HasDefaultValue((short)1)
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
                         .HasColumnName("kind");
 
                     b.Property<string>("PayloadJson")
@@ -1601,8 +1604,8 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("message_id");
 
-                    b.Property<short>("MessageKind")
-                        .HasColumnType("smallint")
+                    b.Property<int>("MessageKind")
+                        .HasColumnType("integer")
                         .HasColumnName("message_kind");
 
                     b.Property<string>("PayloadJson")
@@ -1883,16 +1886,19 @@ namespace game_x.persistence.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AddresseeUserId")
+                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("addressee_user_id");
 
                     b.Property<string>("BlockedUserId")
+                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("blocked_user_id");
 
                     b.Property<string>("BlockerUserId")
+                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("blocker_user_id");
@@ -1901,8 +1907,8 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<short>("Kind")
-                        .HasColumnType("smallint")
+                    b.Property<int>("Kind")
+                        .HasColumnType("integer")
                         .HasColumnName("kind");
 
                     b.Property<Guid>("PublicId")
@@ -1912,16 +1918,17 @@ namespace game_x.persistence.Migrations
                         .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("RequesterUserId")
+                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("requester_user_id");
 
-                    b.Property<DateTime?>("RespondedAt")
+                    b.Property<DateTime>("RespondedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("responded_at");
 
-                    b.Property<short>("State")
-                        .HasColumnType("smallint")
+                    b.Property<int>("State")
+                        .HasColumnType("integer")
                         .HasColumnName("state");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -2157,10 +2164,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("access_failed_count");
 
-                    b.Property<int?>("AvatarId")
-                        .HasColumnType("integer")
-                        .HasColumnName("avatar_id");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text")
@@ -2256,9 +2259,6 @@ namespace game_x.persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_users");
-
-                    b.HasIndex("AvatarId")
-                        .HasDatabaseName("ix_users_avatar_id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -2983,24 +2983,28 @@ namespace game_x.persistence.Migrations
                         .WithMany("ReceivedRequests")
                         .HasForeignKey("AddresseeUserId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
                         .HasConstraintName("fk_social_links_asp_net_users_addressee_user_id");
 
                     b.HasOne("game_x.domain.Entities.User", "BlockedUser")
                         .WithMany("BlocksToMe")
                         .HasForeignKey("BlockedUserId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
                         .HasConstraintName("fk_social_links_asp_net_users_blocked_user_id");
 
                     b.HasOne("game_x.domain.Entities.User", "BlockerUser")
                         .WithMany("BlocksByMe")
                         .HasForeignKey("BlockerUserId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
                         .HasConstraintName("fk_social_links_asp_net_users_blocker_user_id");
 
                     b.HasOne("game_x.domain.Entities.User", "RequesterUser")
                         .WithMany("RequestedLinks")
                         .HasForeignKey("RequesterUserId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
                         .HasConstraintName("fk_social_links_asp_net_users_requester_user_id");
 
                     b.Navigation("AddresseeUser");
@@ -3064,17 +3068,6 @@ namespace game_x.persistence.Migrations
                         .HasConstraintName("fk_transactions_internal_transactions_id");
 
                     b.Navigation("Transaction");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.User", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.MediaFile", "Avatar")
-                        .WithMany()
-                        .HasForeignKey("AvatarId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_users_media_files_avatar_id");
-
-                    b.Navigation("Avatar");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.UserBalance", b =>

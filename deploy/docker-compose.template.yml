@@ -39,7 +39,8 @@ services:
       - MinioSettings__SecretKey=${Minio_SecretKey}
       - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
       - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
-
+      
+      - SrsSettings__Host=${Srs_Host}
       - SrsSettings__StreamServer=${Srs_StreamServer}
 
       - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}

@@ -12,6 +12,10 @@ public interface ILiveStreamManagerCacheService
 
     void DisconnnectLiveStream(string streamKey);
 
+    void AddBlackList(string streamKey, BlackListItemDto statusDto);
+
+    void RemoveBlackList(string streamKey, string userId, BlackListAction action);
+
     void RemoveLiveStream(string streamKey);
 
     bool IsExistLiveStream(string streamKey);
