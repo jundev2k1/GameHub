@@ -2,6 +2,8 @@ using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Files;
 using game_x.application.Common.Filters;
+using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.Dto;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
@@ -15,7 +17,8 @@ namespace game_x.infrastructure.Identity;
 public sealed class MessageService(
     IMessageRepo messageRepo,
     IMessageAttachmentRepo messageAttachmentRepo,
-    IFileStorageService fileStorage
+    IFileStorageService fileStorage,
+    IFileManagerCacheService fileCache
     ): IMessageService, IServices
 {
     public async Task<CursorResult<ListedMessageDto>> GetByCursorAsync(Guid convId, int limit, string? cursor, CancellationToken ct)
@@ -43,22 +46,18 @@ public sealed class MessageService(
         var attachmentTasks = msg.Attachments
             .Select(async item =>
             {
-                string? url = null;
-                if (item.BucketName is not null && item.ObjectName is not null)
+                MediaFileInfo? file = null;
+                if (item.Attachment is not null)
                 {
-                    url = await fileStorage.GenerateDownloadUrlAsync(
-                        bucketName: item.BucketName,
-                        objectName: item.ObjectName,
-                        expiry: TimeSpan.FromMinutes(60),
-                        ct: ct);
+                    file = await fileCache.GetImageUrl(item.Attachment, ct);
                 }
                 
                 return new ListedMessageAttachmentDto
                 (
                     SortOrder: item.SortOrder,
                     BindingStatus: item.BindingStatus.ToString().ToCamelCase(),
-                    FileName: item.FileName,
-                    Url: url
+                    FileName: file?.FileName,
+                    Url: file?.Url
                 );
             });
         

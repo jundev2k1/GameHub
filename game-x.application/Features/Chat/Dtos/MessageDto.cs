@@ -23,7 +23,5 @@ public class MessageAttachmentDto
 {
     public int SortOrder { get; set; }
     public AttachmentBindingStatus BindingStatus { get; set; }
-    public string? FileName { get; set; }
-    public BucketName? BucketName { get; set; }
-    public ObjectName? ObjectName { get; set; }
+    public MediaFile? Attachment { get; set; }
 };
