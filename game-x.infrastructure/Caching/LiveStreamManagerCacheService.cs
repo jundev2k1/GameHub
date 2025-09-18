@@ -10,7 +10,6 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
     : CacheService(cache), ILiveStreamManagerCacheService
 {
     private const string LiveStreamPrefix = "livestream:";
-    private const string LiveStreamViewersPrefix = "livestream:viewers:";
 
     public string[] GetAllStreamKeys()
     {
@@ -92,7 +91,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         var streamDetailCacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
         Remove(streamDetailCacheKey);
 
-        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{streamKey}";
+        var viewerListCacheKey = $"{LiveStreamPrefix}{streamKey}:viewers";
         var allViewersByStreamKey = GetAllViewersByStreamKey(streamKey);
         foreach (var viewerId in allViewersByStreamKey)
         {
@@ -116,7 +115,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
     public LiveStreamViewerDto? GetViewerInfo(string streamKey, string token)
     {
-        var viewerCacheKey = $"{LiveStreamViewersPrefix}{streamKey}:{token}";
+        var viewerCacheKey = $"{LiveStreamPrefix}{streamKey}:viewers:{token}";
         return Get<LiveStreamViewerDto?>(viewerCacheKey);
     }
 
@@ -126,7 +125,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         viewer.JoinAt = null;
         viewer.OutAt = null;
 
-        var viewerCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.Token}";
+        var viewerCacheKey = $"{LiveStreamPrefix}{viewer.StreamKey}:viewers:{viewer.Token}";
         Set(viewerCacheKey, viewer);
     }
 
@@ -138,7 +137,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
             viewer.JoinAt = DateTime.UtcNow;
 
         // Store viewer info
-        var viewerCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.Token}";
+        var viewerCacheKey = $"{LiveStreamPrefix}{viewer.StreamKey}:viewers:{viewer.Token}";
         Set(viewerCacheKey, viewer);
 
         // Update viewer list for the stream
@@ -149,14 +148,14 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         var targetViewersArray = updatedViewers.FirstOrDefault(kvp => kvp.Key == viewer.ViewerId).Value ?? [];
         updatedViewers[viewer.ViewerId] = [.. targetViewersArray, viewer.Token];
-        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
+        var viewerListCacheKey = $"{LiveStreamPrefix}{viewer.StreamKey}:viewers";
         Set(viewerListCacheKey, updatedViewers);
     }
 
     public void UnwatchLiveStream(LiveStreamViewerDto viewer)
     {
         // Retrieve viewer info
-        var viewersKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.Token}";
+        var viewersKey = $"{LiveStreamPrefix}{viewer.StreamKey}:viewers:{viewer.Token}";
 
         // Mark viewer as not watching
         viewer.IsWatching = false;
@@ -168,13 +167,13 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         var targetViewersArray = updatedViewers.FirstOrDefault(kvp => kvp.Key == viewer.ViewerId).Value ?? [];
         updatedViewers[viewer.ViewerId] = [.. targetViewersArray.Where(t => t != viewer.Token)];
-        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
+        var viewerListCacheKey = $"{LiveStreamPrefix}{viewer.StreamKey}:viewers";
         Set(viewerListCacheKey, updatedViewers);
     }
 
     public Dictionary<string, string[]> GetAllViewersByStreamKey(string streamKey)
     {
-        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{streamKey}";
+        var viewerListCacheKey = $"{LiveStreamPrefix}{streamKey}:viewers";
         return Get<Dictionary<string, string[]>>(viewerListCacheKey) ?? [];
     }
 
@@ -184,10 +183,22 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         var viewers = allKeys
             .SelectMany(kvp => kvp.Value)
             .Select(token => Get<LiveStreamViewerDto>(
-                $"{LiveStreamViewersPrefix}{streamKey}:{token}"))
+                $"{LiveStreamPrefix}{streamKey}:viewers:{token}"))
             .Where(dto => dto != null)
             .ToArray();
         return viewers!;
+    }
+
+    public void RemoveViewersByStreamKey(string streamKey)
+    {
+        var viewerListCacheKey = $"{LiveStreamPrefix}{streamKey}:viewers";
+        var allViewersByStreamKey = GetAllViewersByStreamKey(streamKey);
+        foreach (var viewerId in allViewersByStreamKey)
+        {
+            var viewerCacheKey = $"{viewerListCacheKey}:{viewerId}";
+            Remove(viewerCacheKey);
+        }
+        Remove(viewerListCacheKey);
     }
 
     public int GetViewerCount(string streamKey)

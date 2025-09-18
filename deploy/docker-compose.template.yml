@@ -45,11 +45,17 @@ services:
 
       - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
       - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
+      - RecurringJobSettings__StreamTimeoutCheckerJob=${RecurringJob_StreamTimeoutCheckerJob}
 
       - EngageLabSettings__BaseUrl=${EngageLab_BaseUrl}
       - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
       - EngageLabSettings__ApiKey=${EngageLab_ApiKey}
       - EngageLabSettings__From=${EngageLab_From}
+
+      - SpamProtectionSettings_MaxVerifyAttempts=${SpamProtection_MaxVerifyAttempts}
+      - SpamProtectionSettings_VerifyLockMinutes=${SpamProtection_VerifyLockMinutes}
+      - SpamProtectionSettings_VerifySlidingMinutes=${SpamProtection_VerifySlidingMinutes}
+
   # ========================
   # PostgreSQL Service
   # ========================

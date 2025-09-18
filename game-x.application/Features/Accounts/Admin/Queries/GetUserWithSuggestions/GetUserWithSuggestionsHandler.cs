@@ -11,7 +11,7 @@ public sealed class GetUserWithSuggestionsHandler(IUserRepo userRepo)
         var items = await userRepo.GetUserWithSuggestionsAsync(
             request.Keyword ?? string.Empty,
             request.IsKycConfirmed,
-            request.IBankAccountConfirmed,
+            request.IsBankAccountConfirmed,
             request.PageSize,
             true,
             ct);

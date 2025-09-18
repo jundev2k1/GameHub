@@ -10,8 +10,8 @@ public sealed class LiveStreamStatusDto
     public string StreamKey { get; set; } = string.Empty;
     public bool IsLive { get; set; }
     public DateTime? OfflineAt { get; set; }
-    public DateTime? StartTime { get; set; }
-    public DateTime? EndTime { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
     public LiveStreamCategorySummaryDto[] Categories { get; set; } = [];
     public UserSummaryInfo? AssignedTo { get; set; }
     public string TalentId { get; set; } = string.Empty;

@@ -21,5 +21,7 @@ public interface ILiveStreamRepo
         Func<LivestreamSchedule, Task> updateAction,
         CancellationToken ct = default);
 
+    Task BulkUpdateEndedStreams((Guid Id, DateTime EndTime)[] streamInfos, CancellationToken ct = default);
+
     Task DeleteAsync(Guid scheduleId, CancellationToken ct = default);
 }

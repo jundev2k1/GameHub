@@ -31,7 +31,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
       - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
-      
+      - RecurringJobSettings__StreamTimeoutCheckerJob=${RecurringJob_StreamTimeoutCheckerJob}
+
       - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
       - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
       - MinioSettings__AccessKey=${Minio_AccessKey}

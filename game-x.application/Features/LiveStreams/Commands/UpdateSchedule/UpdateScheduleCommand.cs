@@ -7,7 +7,7 @@ public record UpdateScheduleCommand(
     [property: JsonIgnore] Guid Id,
     string? Title,
     string? Description,
-    string? Note,
+    string? Notes,
     DateTime? StartTime,
     DateTime? EndTime,
     ScheduleCategoryDto[]? Categories) : ICommand;
