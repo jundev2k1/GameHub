@@ -22,7 +22,7 @@ public sealed class UpdateScheduleHandler(
                     request.StartTime,
                     request.EndTime,
                     request.Description,
-                    request.Note,
+                    request.Notes,
                     categoryMappings);
             }, ct);
         }, ct);

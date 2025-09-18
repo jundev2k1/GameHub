@@ -32,5 +32,7 @@ public interface ILiveStreamManagerCacheService
 
     Dictionary<string, string[]> GetAllViewersByStreamKey(string streamKey);
 
+    void RemoveViewersByStreamKey(string streamKey);
+
     int GetViewerCount(string streamKey);
 }

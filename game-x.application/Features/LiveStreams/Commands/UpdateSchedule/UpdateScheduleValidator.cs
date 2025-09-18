@@ -15,9 +15,9 @@ public sealed class UpdateScheduleValidator : AbstractValidator<UpdateScheduleCo
             .MaximumLength(4000).WithMessage("Description cannot exceed 4000 characters.")
             .When(x => x.Description is not null);
 
-        RuleFor(x => x.Note)
+        RuleFor(x => x.Notes)
             .MaximumLength(4000).WithMessage("Note cannot exceed 4000 characters.")
-            .When(x => x.Note is not null);
+            .When(x => x.Notes is not null);
 
         RuleFor(x => x.StartTime)
             .LessThan(x => x.EndTime).WithMessage("Start time must be before the end time.")

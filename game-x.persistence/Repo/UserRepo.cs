@@ -145,7 +145,7 @@ public sealed class UserRepo(
             query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Name == AppRoles.User));
 
         if (keyword.IsNotNullOrEmpty())
-            query = query.Where(u => u.Nickname.Contains(keyword, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(u => u.Nickname.ToLower().Contains(keyword.ToLower()));
 
         if (isKycConfirmed != null)
             query = query.Where(u => isKycConfirmed == true

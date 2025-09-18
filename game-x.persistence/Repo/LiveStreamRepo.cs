@@ -1,4 +1,5 @@
-﻿using game_x.application.Common.Abstractions;
+﻿using EFCore.BulkExtensions;
+using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
@@ -76,6 +77,20 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             ?? throw new NotFoundException(nameof(scheduleId), scheduleId);
 
         await updateAction.Invoke(targetSchedule);
+    }
+
+    public async Task BulkUpdateEndedStreams((Guid Id, DateTime EndTime)[] streamInfos, CancellationToken ct = default)
+    {
+        var scheduleIds = streamInfos.Select(si => si.Id);
+        var targetSchedules = await context.LiveStreamSchedules
+            .Where(ls => scheduleIds.Contains(ls.PublicId))
+            .ToListAsync(ct);
+        targetSchedules.ForEach(schedule =>
+        {
+            var (id, endTime) = streamInfos.FirstOrDefault(si => si.Id == schedule.PublicId);
+            schedule.EndStream(endTime);
+        });
+        await context.BulkUpdateAsync(targetSchedules, cancellationToken: ct);
     }
 
     public async Task DeleteAsync(Guid scheduleId, CancellationToken ct = default)

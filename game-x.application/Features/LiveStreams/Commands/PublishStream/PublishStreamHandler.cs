@@ -20,6 +20,8 @@ public sealed class PublishStreamHandler(
             throw new ForbiddenException("Token is invalid.");
         if (streamSetting.AssignedId is null)
             throw new ForbiddenException("Stream key is not assigned to any talent.");
+        if (streamSetting.Status == LiveStreamStatus.Ended || streamSetting.Status == LiveStreamStatus.Cancelled)
+            throw new ForbiddenException("Stream has ended or been canceled.");
 
         // Initialize stream info in cache if not exists
         if (!liveStreamManager.IsExistLiveStream(streamSetting.StreamKey))
