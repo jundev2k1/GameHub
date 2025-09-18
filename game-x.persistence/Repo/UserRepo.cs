@@ -31,6 +31,7 @@ public sealed class UserRepo(
             .ThenInclude(ba => ba.FiatCurrency)
             .Include(u => u.UserExtend)
             .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
             .Include(u => u.Avatar)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);

@@ -7,19 +7,19 @@ public static class LiveStreamMapping
 {
     public static PaginationResult<LiveStreamScheduleListItemDto> ToSearchResult(
         this PaginationResult<LivestreamSchedule> data,
-        (Guid Id, string? Url)[] avatars)
+        (Guid Id, string? Thumbnail, string? Avatar)[] avatars)
     {
         LiveStreamScheduleListItemDto MapToDto(LivestreamSchedule schedule)
         {
             var dto = schedule.Adapt<LiveStreamScheduleListItemDto>();
             if (dto.AssignedTo is null) return dto;
 
-            var (Id, Url) = avatars.FirstOrDefault(avt => avt.Id == dto.Id);
-            dto.AssignedTo.Avatar = Url;
+            var (id, thumbnail, avatar) = avatars.FirstOrDefault(avt => avt.Id == dto.Id);
+            dto.AssignedTo.Avatar = avatar;
+            dto.Thumbnail = thumbnail;
 
             return dto;
         }
-        ;
 
         var result = new PaginationResult<LiveStreamScheduleListItemDto>(
             items: [.. data.Items.Select(MapToDto)],

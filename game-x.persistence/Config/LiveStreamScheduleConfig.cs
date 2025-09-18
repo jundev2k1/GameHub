@@ -26,6 +26,9 @@ public sealed class LiveStreamScheduleConfig : IEntityTypeConfiguration<Livestre
             .IsRequired()
             .HasMaxLength(255);
 
+        builder.Property(ls => ls.ThumbnailId)
+            .IsRequired(false);
+
         builder.Property(ls => ls.Description)
             .HasMaxLength(4000);
 
@@ -68,5 +71,10 @@ public sealed class LiveStreamScheduleConfig : IEntityTypeConfiguration<Livestre
             .WithMany()
             .HasForeignKey(ls => ls.AssignedId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(ls => ls.Thumbnail)
+            .WithMany()
+            .HasForeignKey(ls => ls.ThumbnailId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

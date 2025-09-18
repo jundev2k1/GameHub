@@ -17,7 +17,7 @@ public sealed class LiveStreamController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPost("{id:guid}")]
+    [HttpPost("{id:guid}/join")]
     public async Task<IActionResult> JoinLiveStreamAsync(Guid id)
     {
         var query = new JoinLiveStreamCommand(id);
