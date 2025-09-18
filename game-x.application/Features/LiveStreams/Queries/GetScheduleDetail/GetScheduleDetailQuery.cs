@@ -7,4 +7,5 @@ public record GetScheduleDetailQuery(Guid Id) : IQuery<GetScheduleDetailResult>;
 public class GetScheduleDetailResult : LiveStreamScheduleDto
 {
     public string StreamUrl { get; set; } = string.Empty;
+    public string? ThumbnailUrl { get; set; }
 }

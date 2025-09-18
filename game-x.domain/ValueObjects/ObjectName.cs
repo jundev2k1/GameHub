@@ -22,6 +22,8 @@ public sealed class ObjectName
         => Of($"user-bank-account/{userId:N}/{fileName}");
     public static ObjectName GameResource(Guid gameId, string fileName)
         => Of($"games/{gameId:N}/thumbnail/{fileName}");
+    public static ObjectName LiveStreamThumbnail(Guid scheduleId, string fileName)
+        => Of($"settings/{scheduleId:N}/thumbnail/{fileName}");
 
     public static ObjectName Of(string value)
     {
@@ -38,7 +40,13 @@ public sealed class ObjectName
 
     // Constants
     private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] ValidPrefixValues = ["user-kyc", "user-bank-account", "attachment", "games",  "avatar"];
+    private static readonly string[] ValidPrefixValues = [
+        "user-kyc",
+        "user-bank-account",
+        "attachment",
+        "games",
+        "avatar",
+        "settings"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>

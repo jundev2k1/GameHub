@@ -48,6 +48,8 @@ public sealed class PublishStreamHandler(
         var streamInfo = new LiveStreamStatusDto
         {
             Id = streamSetting.PublicId,
+            Title = streamSetting.Title,
+            ThumbnailId = streamSetting.ThumbnailId,
             StreamKey = streamSetting.StreamKey,
             OfflineAt = null,
             StartTime = streamSetting.StartTime,

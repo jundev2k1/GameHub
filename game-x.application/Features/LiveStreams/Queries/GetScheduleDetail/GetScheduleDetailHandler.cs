@@ -16,11 +16,21 @@ public sealed class GetScheduleDetailHandler(
         var result = targetStream.Adapt<GetScheduleDetailResult>();
         result.StreamUrl = options.Value.StreamServer;
         result.StreamKey = $"{result.StreamKey}?token={targetStream.Token}";
+
+        // Load avatar for assigned talent
         if ((targetStream.AssignedTo != null) && (targetStream.AssignedTo.Avatar != null))
         {
             var avatarInfo = await fileManagerCache.GetImageUrl(targetStream.AssignedTo.Avatar!, ct);
             result.AssignedTo!.Avatar = avatarInfo?.Url;
         }
+
+        // Load thumbnail
+        if (targetStream.ThumbnailId.HasValue)
+        {
+            var thumbnail = await fileManagerCache.GetImageUrl(targetStream.ThumbnailId.Value, ct);
+            result.ThumbnailUrl = thumbnail?.Url;
+        }
+
         return result;
     }
 }

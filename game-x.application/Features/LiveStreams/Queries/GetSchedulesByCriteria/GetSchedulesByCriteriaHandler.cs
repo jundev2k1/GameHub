@@ -28,15 +28,25 @@ public sealed class GetSchedulesByCriteriaHandler(
             request.PageIndex,
             request.PageSize,
             ct);
-        Task<(Guid Id, string? Url)>[] avatarTasks = [.. searchResult.Items.Select(async item =>
+        Task<(Guid Id, string? Thumbnail, string? AssignedAvatar)>[] avatarTasks = [.. searchResult.Items.Select(async item =>
         {
-            if (item.AssignedTo is null || item.AssignedTo.Avatar is null)
-                return (item.PublicId, (string?)null);
+            // Get thumbnail
+            string? thumbnail = null;
+            if (item.Thumbnail != null)
+            {
+                var thumbnailInfo = await fileManagerCache.GetImageUrl(item.Thumbnail);
+                thumbnail = thumbnailInfo?.Url;
+            }
 
-            var avatarInfo = await fileManagerCache.GetImageUrl(item.AssignedTo.Avatar);
-            if (avatarInfo is null) return (item.PublicId, (string?)null);
+            // Get assigned talent avatar
+            string? avatar = null;
+            if (item.AssignedTo != null && item.AssignedTo.Avatar != null)
+            {
+                var avatarInfo = await fileManagerCache.GetImageUrl(item.AssignedTo.Avatar);
+                avatar = avatarInfo?.Url;
+            }
 
-            return (item.PublicId, avatarInfo.Url);
+            return (item.PublicId, thumbnail, avatar);
         })];
         var avatars = await Task.WhenAll(avatarTasks);
         var result = searchResult.ToSearchResult(avatars);

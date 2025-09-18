@@ -1,11 +1,13 @@
 ﻿using game_x.api.Common;
 using game_x.api.Dtos;
+using game_x.application.Common.Files;
 using game_x.application.Common.Filters;
 using game_x.application.Features.LiveStreams.Commands.AssignTalent;
 using game_x.application.Features.LiveStreams.Commands.CancelSchedule;
 using game_x.application.Features.LiveStreams.Commands.CreateSchedule;
 using game_x.application.Features.LiveStreams.Commands.DeleteSchedule;
 using game_x.application.Features.LiveStreams.Commands.UpdateSchedule;
+using game_x.application.Features.LiveStreams.Commands.UpdateScheduleThumbnail;
 using game_x.application.Features.LiveStreams.Queries.GetScheduleDetail;
 using game_x.application.Features.LiveStreams.Queries.GetSchedulesByCriteria;
 
@@ -64,6 +66,15 @@ public sealed class LiveStreamController : BaseApiController
     {
         await Mediator.Send(command with { Id = id });
         return ApiResponseFactory.NoContent();
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.User}")]
+    [HttpPatch("{id:guid}/thumbnail")]
+    public async Task<IActionResult> UpdateScheduleThumbnailAsync(Guid id, UpdateThumbnailRequest request)
+    {
+        var command = new UpdateScheduleThumbnailCommand(id, FileUpload.FromFormFile(request.Thumbnail));
+        var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result);
     }
 
     [Authorize(Roles = AppRoles.Admin)]
