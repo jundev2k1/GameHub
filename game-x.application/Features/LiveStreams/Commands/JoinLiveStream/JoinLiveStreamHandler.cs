@@ -25,9 +25,15 @@ public sealed class JoinLiveStreamHandler(
         if (streamSetting.StartAt > DateTime.UtcNow)
             throw new BadRequestException("Live stream has not started yet.");
 
-        var streamInfo = liveStreamManager.GetLiveStreamStatus(streamSetting.StreamKey);
-        if (streamInfo is null || !streamInfo.IsLive)
-            throw new NotFoundException("Live stream is offline.");
+        var streamInfo = liveStreamManager.GetLiveStreamStatus(streamSetting.StreamKey)
+            ?? throw new NotFoundException("Live stream is not found.");
+
+        // Check if the stream is live
+        var isInterrupted = !streamInfo.IsLive
+            && streamInfo.OfflineAt.HasValue
+            && (DateTime.UtcNow - streamInfo.OfflineAt.Value).TotalMinutes < 8;
+        if (isInterrupted)
+            throw new ForbiddenException(MessageCode.System.Forbidden,"Live streaming is interrupted.", new { isInterrupted = true });
 
         var viewer = await CreateViewer(streamSetting);
         return viewer.Url;
