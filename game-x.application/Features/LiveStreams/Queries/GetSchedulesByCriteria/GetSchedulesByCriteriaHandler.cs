@@ -28,13 +28,13 @@ public sealed class GetSchedulesByCriteriaHandler(
             request.PageIndex,
             request.PageSize,
             ct);
-        Task<(Guid Id, string Url)>[] avatarTasks = [.. searchResult.Items.Select(async item =>
+        Task<(Guid Id, string? Url)>[] avatarTasks = [.. searchResult.Items.Select(async item =>
         {
             if (item.AssignedTo is null || item.AssignedTo.Avatar is null)
-                return (item.PublicId, string.Empty);
+                return (item.PublicId, (string?)null);
 
             var avatarInfo = await fileManagerCache.GetImageUrl(item.AssignedTo.Avatar);
-            if (avatarInfo is null) return (item.PublicId, string.Empty);
+            if (avatarInfo is null) return (item.PublicId, (string?)null);
 
             return (item.PublicId, avatarInfo.Url);
         })];

@@ -1,4 +1,5 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Features.LiveStreams.Dtos;
 
 namespace game_x.application.Contract.Persistence.Repo;
 
@@ -11,6 +12,8 @@ public interface ILiveStreamRepo
         CancellationToken ct = default);
 
     Task<LivestreamSchedule> GetByIdAsync(Guid id, CancellationToken ct = default);
+
+    Task<LivestreamSchedule> GetDetailByIdAsync(Guid id, CancellationToken ct = default);
 
     Task<LivestreamSchedule> GetByStreamKeyAsync(string streamKey, CancellationToken ct = default);
 
