@@ -24,6 +24,9 @@ public interface IChatClient
     /// <summary>Notify that the user received a friend request</summary>
     Task FriendRequest(FriendRequestSignalDto dto);
     Task FriendResponse(FriendResponseSignalDto dto);
+    Task Unfriend(UnfriendSignalDto dto);
+    Task FriendBlocked(FriendBlockedSignalDto dto);
+    Task FriendUnblocked(FriendBlockedSignalDto dto);
     // Task MemberRemoved(ConversationMemberDto dto);
     //
     // Task MessageCreated(MessageDto dto);

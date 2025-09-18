@@ -1,3 +1,4 @@
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnRespondRequest;
@@ -11,13 +12,18 @@ public class RespondFriendRequestHandler(
     IUserAccessor userAccessor,
     ISocialLinkRepo socialLinkRepo,
     IApplicationEventDispatcher dispatcher,
+    IFileManagerCacheService fileCache,
     ILogger<SocialLink> logger): IRequestHandler<RespondFriendRequestCommand, Unit>
 {
     public async Task<Unit> Handle(RespondFriendRequestCommand cmd, CancellationToken ct)
     {
         var me = userAccessor.GetUserId();
-        var link = await socialLinkRepo.GetByIdAsync(cmd.LinkPublicId, SocialLinkKind.Friendship, ct);
+        var link = await socialLinkRepo.GetByIdAsync(cmd.LinkPublicId, ct);
 
+        if(link.Kind == SocialLinkKind.Block)
+            throw new NotFoundException(MessageCode.Chatting.SocialLinkBlocked);
+        if(link.Kind != SocialLinkKind.Friendship)
+            throw new NotFoundException(MessageCode.Chatting.SocialLinkNotFound);
         if (link.State != SocialLinkState.Pending)
             throw new BadRequestException(MessageCode.Chatting.FriendRequestAlreadyRespond);
         if (link.AddresseeUserId != me)
@@ -26,9 +32,14 @@ public class RespondFriendRequestHandler(
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
-            var updatedLink = await socialLinkRepo.UpdateAsync(link.PublicId, x => { x.Respond(cmd.Accept); }, ct);
+            await socialLinkRepo.UpdateAsync(link.PublicId, x => { x.Respond(cmd.Accept); }, ct);
             await unitOfWork.CommitAsync(ct);
-            await dispatcher.Publish(new OnRespondRequestEvent(updatedLink.Adapt<SocialLinkDto>()), ct);
+            var updatedLink = await socialLinkRepo.GetByIdAsync(link.PublicId, ct);
+            var avatarUrl = 
+                updatedLink.AddresseeUser?.Avatar != null 
+                ? await fileCache.GetImageUrl(updatedLink.AddresseeUser.Avatar, ct) 
+                : null;
+            await dispatcher.Publish(new OnRespondRequestEvent(updatedLink.Adapt<SocialLinkDto>() with {AddresseeAvatarUrl = avatarUrl?.Url}), ct);
             return Unit.Value;
         }
         catch (Exception ex)

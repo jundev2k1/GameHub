@@ -1,8 +1,12 @@
 using game_x.api.Common;
 using game_x.application.Common.Filters;
+using game_x.application.Features.Friends.Commands.Block;
 using game_x.application.Features.Friends.Commands.RespondFriendRequest;
 using game_x.application.Features.Friends.Commands.SendFriendRequest;
+using game_x.application.Features.Friends.Commands.Unblock;
+using game_x.application.Features.Friends.Commands.Unfriend;
 using game_x.application.Features.Friends.Queries.FriendSearch;
+using game_x.application.Features.Friends.Queries.GetBlockedFriends;
 using game_x.application.Features.Friends.Queries.GetFriendships;
 using game_x.application.Features.Friends.Queries.GetIncomingFriendRequests;
 using game_x.application.Features.Friends.Queries.GetOutgoingFriendRequests;
@@ -82,6 +86,42 @@ public class FriendController : BaseApiController
     public async Task<IActionResult> RespondAsync(Guid linkPublicId, [FromBody] RespondFriendRequestCommand cmd)
     {
         cmd.LinkPublicId = linkPublicId;
+        var result = await Mediator.Send(cmd);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpPost("friendships/unfriend")]
+    public async Task<IActionResult> UnfriendAsync([FromBody] UnfriendCommand cmd)
+    {
+        var result = await Mediator.Send(cmd);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    
+    [HttpGet("friendships/block")]
+    public async Task<IActionResult> GetBlockedFriendsAsync([AsParameters] SearchCriteriaRequest parameters)
+    {
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var sorts = QueryConverter.ToSorts(parameters.Sorts);
+        var query = new GetBlockedFriendsQuery(
+            filters,
+            sorts,
+            parameters.PageNumber,
+            parameters.PageSize);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpPost("friendships/block")]
+    public async Task<IActionResult> BlockAsync([FromBody] BlockCommand cmd)
+    {
+        var result = await Mediator.Send(cmd);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpPost("friendships/unblock")]
+    public async Task<IActionResult> BlockAsync([FromBody] UnblockCommand cmd)
+    {
         var result = await Mediator.Send(cmd);
         return ApiResponseFactory.Ok(result);
     }

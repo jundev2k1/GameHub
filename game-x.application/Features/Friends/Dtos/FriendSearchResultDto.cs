@@ -1,8 +1,12 @@
 namespace game_x.application.Features.Friends.Dtos;
 
 public record FriendSearchResultDto(
-    string Id, 
+    string UserId,
     string Nickname, 
-    string UserName, 
-    string Email, 
-    string? AvatarUrl);
+    string? Email, 
+    string? AvatarUrl,
+    Guid? LinkId,
+    SocialLinkState? State,
+    string? RequesterUserId,
+    string? AddresseeUserId,
+    DateTime? LinkCreatedAt);

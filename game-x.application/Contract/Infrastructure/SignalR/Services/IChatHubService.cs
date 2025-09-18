@@ -8,4 +8,7 @@ public interface IChatHubService
     Task SendSupportMessageAsync(CreatedMessageSignalResult res);
     Task SendFriendRequestAsync(FriendRequestSignalDto dto);
     Task SendFriendResponseAsync(FriendResponseSignalDto dto);
+    Task SendUnfriendAsync(UnfriendSignalDto dto);
+    Task SendFriendBlockedAsync(FriendBlockedSignalDto dto);
+    Task SendFriendUnblockedAsync(FriendBlockedSignalDto dto);
 }

@@ -1,4 +1,5 @@
 using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
@@ -11,6 +12,7 @@ public class UploadAvatarHandler(
     IUserAccessor userAccessor,
     IUserRepo userRepo,
     IFileStorageService fileStorage,
+    IFileManagerCacheService fileCache,
     ILogger<domain.Entities.User> logger): IRequestHandler<UploadAvatarCommand, string>
 {
     public async Task<string> Handle(UploadAvatarCommand request, CancellationToken ct)
@@ -25,12 +27,9 @@ public class UploadAvatarHandler(
                 targetUser.Avatar = mediaFile;
             }, ct);
             await unitOfWork.SaveChangesAsync(ct);
-        
-            return await fileStorage.GenerateDownloadUrlAsync(
-                bucketName: mediaFile.BucketName,
-                objectName: mediaFile.ObjectName,
-                expiry: TimeSpan.FromMinutes(300),
-                ct: ct);
+
+            var avatar = await fileCache.GetImageUrl(mediaFile, ct);
+            return avatar?.Url ??  string.Empty;
         }
         catch (Exception e)
         {

@@ -91,7 +91,7 @@ public sealed class FileStorageService(
         var deleteFiles = await GetAllFileNamesAsync(bucketName, prefix, ct);
         if (deleteFiles.Length == 0) return;
 
-        // Batch delete it to avoid exceeding API limits
+        // Batch deletes it to avoid exceeding API limits
         foreach (var groupFiles in deleteFiles.Chunk(DefaultChunkSize))
         {
             var deleteObjects = groupFiles
@@ -109,7 +109,7 @@ public sealed class FileStorageService(
     public async Task<string> GenerateDownloadUrlAsync(
         BucketName bucketName,
         ObjectName objectName,
-        TimeSpan expiry,
+        TimeSpan? expiry = null,
         CancellationToken ct = default)
     {
         var urlClient = CreatePublicClient();
@@ -117,7 +117,7 @@ public sealed class FileStorageService(
         var args = new PresignedGetObjectArgs()
             .WithBucket(bucketName.Value)
             .WithObject(objectName.Value)
-            .WithExpiry((int)expiry.TotalSeconds);
+            .WithExpiry((int)(expiry ?? TimeSpan.FromMinutes(300)).TotalSeconds);
         var result = await urlClient.PresignedGetObjectAsync(args);
         return result;
     }

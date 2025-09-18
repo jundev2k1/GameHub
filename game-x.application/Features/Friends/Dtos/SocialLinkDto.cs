@@ -1,7 +1,7 @@
 namespace game_x.application.Features.Friends.Dtos;
 
 public record SocialLinkDto(
-    Guid Id,
+    Guid LinkId,
     SocialLinkKind Kind,
     SocialLinkState State,
     string? RequesterUserId,

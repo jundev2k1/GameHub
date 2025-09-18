@@ -42,7 +42,8 @@ public sealed class SocialLink: BaseEntity<int>, IAuditable
         string? requesterUserId = null,
         string? addresseeUserId = null,
         string? blockerUserId = null,
-        string? blockedUserId = null
+        string? blockedUserId = null,
+        DateTime? respondedAt = null
     )
     {
         var link = new SocialLink
@@ -55,6 +56,7 @@ public sealed class SocialLink: BaseEntity<int>, IAuditable
             AddresseeUserId = addresseeUserId,
             BlockerUserId = blockerUserId,
             BlockedUserId = blockedUserId,
+            RespondedAt = respondedAt
         };
         return link;
     }
@@ -64,6 +66,8 @@ public sealed class SocialLink: BaseEntity<int>, IAuditable
         State = accept ? SocialLinkState.Accepted : SocialLinkState.Declined;
         RespondedAt = DateTime.UtcNow;
     }
+
+    public bool IsFriend => Kind == SocialLinkKind.Friendship && State == SocialLinkState.Accepted;
 }
 
 public static class SocialLinkPair

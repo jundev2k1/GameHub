@@ -6,27 +6,25 @@ using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Extensions;
 using game_x.application.Features.Friends.Dtos;
 
-namespace game_x.application.Features.Friends.Queries.GetFriendships;
+namespace game_x.application.Features.Friends.Queries.GetBlockedFriends;
 
-public class GetFriendshipsHandler(
-    IUserAccessor userAccessor, 
+public sealed class GetBlockedFriendsHandler(
+    IUserAccessor userAccessor,
     ISocialLinkRepo socialLinkRepo,
     IFileManagerCacheService fileCache,
-    ICriteriaBuilder<FriendDto> builder): IQueryHandler<GetFriendshipsQuery, PaginationResult<ListedFriendDto>>
+    ICriteriaBuilder<SocialLink> builder): IQueryHandler<GetBlockedFriendsQuery, PaginationResult<BlockedFriendDto>>
 {
-    public async Task<PaginationResult<ListedFriendDto>> Handle(GetFriendshipsQuery request, CancellationToken ct)
+    public async Task<PaginationResult<BlockedFriendDto>> Handle(GetBlockedFriendsQuery request, CancellationToken ct)
     {
-        string userId = userAccessor.GetUserId();
-        
-        var items = await socialLinkRepo.GetFriendshipsAsync(
+        var userId = userAccessor.GetUserId();
+        var items = await socialLinkRepo.GetBlockedFriendsAsync(
             userId,
             query => builder.Apply(
                 query,
                 request.Filters,
                 request.Sorts,
                 keyword =>
-                    user =>
-                        (user.Nickname.Contains(keyword))),
+                    link => link.BlockedUser!.Nickname.Contains(keyword)),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);
@@ -34,11 +32,12 @@ public class GetFriendshipsHandler(
         var dtoItems = await Task.WhenAll(
             items.Items.Select(async m =>
             {
-                var avatar = m.Avatar != null ? await fileCache.GetImageUrl(m.Avatar, ct) : null;
-                return m.Adapt<ListedFriendDto>() with {AvatarUrl = avatar?.Url};
+                var avatar = m.BlockedUser?.Avatar != null ? await fileCache.GetImageUrl(m.BlockedUser.Avatar, ct) : null;
+                var linkDto = m.Adapt<SocialLinkDto>();
+                return linkDto.Adapt<BlockedFriendDto>() with {BlockedAvatarUrl = avatar?.Url};
             })
         );
-
+        
         return items.Transform(dtoItems);
     }
 }

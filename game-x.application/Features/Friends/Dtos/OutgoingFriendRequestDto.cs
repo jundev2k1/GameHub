@@ -1,7 +1,7 @@
 namespace game_x.application.Features.Friends.Dtos;
 
 public record OutgoingFriendRequestDto(
-    Guid Id,
+    Guid LinkId,
     string? AddresseeUserId,
     string? AddresseeNickname,
     string? AddresseeAvatarUrl,

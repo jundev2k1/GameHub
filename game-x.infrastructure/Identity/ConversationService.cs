@@ -19,7 +19,7 @@ public sealed class ConversationService(
     public async Task<Guid> EnsureForPair(string userA, string userB, CancellationToken ct)
     {
         if (userA == userB)
-            throw new BadRequestException(MessageCode.Chatting.FailToStartSelfDm);
+            throw new BadRequestException(MessageCode.Chatting.FailToTargetMyself);
 
         // Find a direct conversation with exactly two members, A and B
         var existing = await conversationRepo.FindForPairAsync(userA, userB, ct);
@@ -129,7 +129,6 @@ public sealed class ConversationService(
             avatarUrl = await fileStorage.GenerateDownloadUrlAsync(
                 bucketName: file.BucketName,
                 objectName: file.ObjectName,
-                expiry: TimeSpan.FromMinutes(300),
                 ct: ct);
         }
         return avatarUrl;

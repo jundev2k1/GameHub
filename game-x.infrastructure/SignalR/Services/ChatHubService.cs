@@ -36,11 +36,26 @@ public sealed class ChatHubService(IHubContext<ChatHub, IChatClient> hubContext)
     
     public async Task SendFriendRequestAsync(FriendRequestSignalDto dto)
     {
-        await hubContext.Clients.Group($"member-{dto.AddresseeUserId}").FriendRequest(dto);
+        await hubContext.Clients.Group(GroupNames.Member(dto.AddresseeUserId!)).FriendRequest(dto);
     }
     
     public async Task SendFriendResponseAsync(FriendResponseSignalDto dto)
     {
-        await hubContext.Clients.Group($"member-{dto.AddresseeUserId}").FriendResponse(dto);
+        await hubContext.Clients.Group(GroupNames.Member(dto.RequesterUserId!)).FriendResponse(dto);
+    }
+    
+    public async Task SendUnfriendAsync(UnfriendSignalDto dto)
+    {
+        await hubContext.Clients.Group(GroupNames.Member(dto.UnfriendedUserId!)).Unfriend(dto);
+    }
+    
+    public async Task SendFriendBlockedAsync(FriendBlockedSignalDto dto)
+    {
+        await hubContext.Clients.Group(GroupNames.Member(dto.BlockedUserId!)).FriendBlocked(dto);
+    }
+    
+    public async Task SendFriendUnblockedAsync(FriendBlockedSignalDto dto)
+    {
+        await hubContext.Clients.Group(GroupNames.Member(dto.BlockedUserId!)).FriendUnblocked(dto);
     }
 }

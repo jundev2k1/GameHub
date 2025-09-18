@@ -1,7 +1,7 @@
 namespace game_x.application.Features.Friends.Dtos;
 
 public record IncomingFriendRequestDto(
-    Guid Id,
+    Guid LinkId,
     string? RequesterUserId,
     string? RequesterNickname,
     string? RequesterAvatarUrl,

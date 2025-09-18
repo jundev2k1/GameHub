@@ -337,27 +337,30 @@ public static class MessageCode
         /// <summary>Message not found.</summary>
         [EnumMetadata("Fail to send the message.")]
         FailToSendMessage = 10504,
-        /// <summary>Cannot friend yourself.</summary>
-        [EnumMetadata("Cannot friend yourself.")]
-        FailToFriendYourself = 10505,
+        /// <summary>Fail to target myself.</summary>
+        [EnumMetadata("Fail to target myself.")]
+        FailToTargetMyself = 10505,
         /// <summary>The request is pending acceptance.</summary>
         [EnumMetadata("The request is pending acceptance.")]
         WaitToAccept = 10506,
         /// <summary>Already friends.</summary>
         [EnumMetadata("Already friends.")]
         AlreadyFriend = 10507,
-        /// <summary>Cannot start DM with yourself.</summary>
-        [EnumMetadata("Cannot start DM with yourself.")]
-        FailToStartSelfDm = 10508,
         /// <summary>Social link not found.</summary>
         [EnumMetadata("Social link not found.")]
-        SocialLinkNotFound = 10509,
+        SocialLinkNotFound = 10508,
         /// <summary>Request already responded.</summary>
         [EnumMetadata("Request already responded.")]
-        FriendRequestAlreadyRespond = 10510,
+        FriendRequestAlreadyRespond = 1059,
         /// <summary>Not the addressee.</summary>
         [EnumMetadata("Not the addressee.")]
-        NotAddressee = 10511,
+        NotAddressee = 10510,
+        /// <summary>The user is still not a friend.</summary>
+        [EnumMetadata("The user is still not a friend.")]
+        StillNotFriend = 10511,
+        /// <summary>The user is still not a friend.</summary>
+        [EnumMetadata("Social link is blocked.")]
+        SocialLinkBlocked = 10512,
         #endregion
     }
 }

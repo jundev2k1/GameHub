@@ -19,11 +19,10 @@ internal static class GroupNames
     public static string Guest(string guestId) => Build("guest", San(guestId));
     public static string Admin(string userId) => Build("admin", San(userId));
     public static string Cs(string userId) => Build("cs", San(userId));
-    public static string Role(string roleName) => Build("role", San(roleName));            // e.g., Admin, User
+    public static string Role(string roleName) => Build("role", San(roleName)); // e.g., Admin, User
 
     // ---------- Chat-specific ----------
     public static string Conversation(Guid conversationId) => Build("chat", "conv", conversationId.ToString());
-    public static string SupportQueue(string status) => Build("chat", "queue", San(status));     // e.g., Open, Waiting, Assigned
 
     // ---------- Admin / Client service areas (optional clarity) ----------
     public static string AdminUser(string userId) => Build("admin", "user", San(userId));

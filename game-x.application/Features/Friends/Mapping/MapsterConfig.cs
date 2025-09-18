@@ -11,7 +11,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.AvatarUrl, src => ""); 
         
         cfg.NewConfig<SocialLink, SocialLinkDto>()
-            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.LinkId, src => src.PublicId)
             .Map(dest => dest.AddresseeNickname, src => src.AddresseeUser!.Nickname)
             .Map(dest => dest.AddresseeAvatarUrl, src => string.Empty)
             .Map(dest => dest.RequesterNickname, src => src.RequesterUser!.Nickname)
