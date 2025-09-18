@@ -1,6 +1,7 @@
 using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
@@ -10,7 +11,10 @@ using game_x.share.Helper;
 
 namespace game_x.infrastructure.Identity;
 
-public sealed class ConversationService(IConversationRepo conversationRepo, IFileStorageService fileStorage): IConversationService, IServices
+public sealed class ConversationService(
+    IConversationRepo conversationRepo,
+    IFileStorageService fileStorage,
+    IFileManagerCacheService fileManagerCache): IConversationService, IServices
 {
     public async Task<CursorResult<SupportConversationDto>> GetUnassignedQueueByCursorAsync(
         int limit,
@@ -98,16 +102,10 @@ public sealed class ConversationService(IConversationRepo conversationRepo, IFil
 
     private async Task<string?> GetAvatarUrl(MediaFile? file, CancellationToken ct)
     {
-        string? avatarUrl = null;
-        if (file != null)
-        {
-            avatarUrl = await fileStorage.GenerateDownloadUrlAsync(
-                bucketName: file.BucketName,
-                objectName: file.ObjectName,
-                expiry: TimeSpan.FromMinutes(300),
-                ct: ct);
-        }
-        return avatarUrl;
+        if (file is null) return null;
+
+        var avatar = await fileManagerCache.GetImageUrl(file, ct);
+        return avatar?.Url;
     }
     
     private async Task<ConversationDto> BuildConversationDto(Conversation conv, CancellationToken ct)

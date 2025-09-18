@@ -28,7 +28,7 @@ public sealed class ThumbnailInfo
     [JsonIgnore]
     public int LocalId { get; set; }
     public string FileName { get; set; } = string.Empty;
-    public string Url { get; set; } = string.Empty;
+    public string? Url { get; set; } = string.Empty;
     public string Metadata { get; set; } = string.Empty;
     [JsonIgnore]
     public string BucketName { get; set; } = string.Empty;
