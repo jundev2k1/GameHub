@@ -9,7 +9,7 @@ namespace game_x.application.Features.Friends.Commands.Block;
 
 public sealed class BlockHandler(
     IUnitOfWork unitOfWork,
-    IUserRepo useRepo,
+    IUserRepo userRepo,
     ISocialLinkRepo socialLinkRepo,
     IUserAccessor userAccessor,
     IApplicationEventDispatcher dispatcher,
@@ -21,7 +21,7 @@ public sealed class BlockHandler(
         var me = userAccessor.GetUserId();
         if (me == req.TargetUserId) throw new BadRequestException(MessageCode.Chatting.FailToTargetMyself);
 
-        var isExistedTargetUser = await useRepo.IsExistUserIdAsync(req.TargetUserId, ct);
+        var isExistedTargetUser = await userRepo.IsExistUserIdAsync(req.TargetUserId, ct);
         if(!isExistedTargetUser)
             throw new NotFoundException(MessageCode.User.UserNotFound);
         

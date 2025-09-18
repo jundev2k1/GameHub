@@ -1,7 +1,6 @@
 using game_x.api.Common;
 using game_x.api.Dtos;
 using game_x.application.Common.Files;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListMyConversationsForGuest;
@@ -66,7 +65,7 @@ public class ConversationController : BaseApiController
         {
             return ApiResponseFactory.BadRequest(
                 code: MessageCode.Chatting.FailToSendMessage,
-                errorDetail: new {ClientLocalId = formData.ClientLocalId});
+                errorDetail: new {formData.ClientLocalId});
         }
     }
 }

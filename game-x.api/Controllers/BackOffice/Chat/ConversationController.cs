@@ -103,7 +103,7 @@ public class ConversationController : BaseApiController
                 code: MessageCode.Chatting.FailToSendMessage,
                 errorDetail: new
                 {
-                    ClientLocalId = formData.ClientLocalId,
+                    formData.ClientLocalId,
                     ConversationId = convId,
                 });
         }

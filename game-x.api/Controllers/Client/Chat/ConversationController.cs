@@ -83,7 +83,7 @@ public class ConversationController(
         {
             return ApiResponseFactory.BadRequest(
                 code: MessageCode.Chatting.FailToSendMessage,
-                errorDetail: new {ClientLocalId = formData.ClientLocalId});
+                errorDetail: new {formData.ClientLocalId});
         }
     }
 

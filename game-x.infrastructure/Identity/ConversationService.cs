@@ -13,25 +13,36 @@ namespace game_x.infrastructure.Identity;
 
 public sealed class ConversationService(
     IUnitOfWork unitOfWork,
-    IConversationRepo conversationRepo, 
+    IConversationRepo conversationRepo,
+    ISocialLinkRepo socialLinkRepo,
+    IUserRepo userRepo,
     IFileStorageService fileStorage): IConversationService, IServices
 {
-    public async Task<Guid> EnsureForPair(string userA, string userB, CancellationToken ct)
+    public async Task<Guid> EnsureForPair(string me, string targetedUserId, CancellationToken ct)
     {
-        if (userA == userB)
+        if (me == targetedUserId)
             throw new BadRequestException(MessageCode.Chatting.FailToTargetMyself);
 
+        var isExistedTargetUser = await userRepo.IsExistUserIdAsync(targetedUserId, ct);
+        if(!isExistedTargetUser)
+            throw new NotFoundException(MessageCode.User.UserNotFound);
+        
+        var (min, max) = SocialLinkPair.Normalize(me, targetedUserId);
+        var link = await socialLinkRepo.GetByKeyPairAsync(min, max, ct);
+        if(link == null || !link.IsFriend)
+            throw new NotFoundException(MessageCode.Chatting.StillNotFriend);
+        
         // Find a direct conversation with exactly two members, A and B
-        var existing = await conversationRepo.FindForPairAsync(userA, userB, ct);
-        if (existing != null) return existing.PublicId;
+        var existedConv = await conversationRepo.FindForPairAsync(me, targetedUserId, ct);
+        if (existedConv != null) return existedConv.PublicId;
 
         // Create new if missing
         var conv = Conversation.Create(ConversationType.Direct);
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await conversationRepo.AddAsync(conv, ct);
-            conv.Members.Add(ConversationMember.Create(conv, userA, RoleInConversation.Member));
-            conv.Members.Add(ConversationMember.Create(conv, userB, RoleInConversation.Member));
+            conv.Members.Add(ConversationMember.Create(conv, me, RoleInConversation.Member));
+            conv.Members.Add(ConversationMember.Create(conv, targetedUserId, RoleInConversation.Member));
         }, ct);
         
         return conv.PublicId;
