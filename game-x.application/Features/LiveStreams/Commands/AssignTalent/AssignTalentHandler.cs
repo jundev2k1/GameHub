@@ -1,20 +1,24 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Accounts.Dtos;
 
 namespace game_x.application.Features.LiveStreams.Commands.AssignTalent;
 
 public sealed class AssignTalentHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
-    ILiveStreamRepo liveStreamRepo) : ICommandHandler<AssignTalentCommand>
+    ILiveStreamRepo liveStreamRepo,
+    IFileManagerCacheService fileManagerCache) : ICommandHandler<AssignTalentCommand, UserSummaryInfo>
 {
-    public async Task<Unit> Handle(AssignTalentCommand request, CancellationToken ct = default)
+    public async Task<UserSummaryInfo> Handle(AssignTalentCommand request, CancellationToken ct = default)
     {
+        User? talent = null;
         await liveStreamRepo.UpdateAsync(request.Id, async livestream =>
         {
             if (livestream.Status != LiveStreamStatus.Scheduled)
                 throw new BadRequestException("Only scheduled livestream can be assigned talent.");
 
-            var talent = await userRepo.GetUserByIdAsync(request.TalentId, ct);
+            talent = await userRepo.GetUserByIdAsync(request.TalentId, ct);
             if ((talent.UserKyc == null) || talent.UserKyc.Status != KycStatus.Approved)
                 throw new BadRequestException("User must be kyc verified.");
 
@@ -27,6 +31,13 @@ public sealed class AssignTalentHandler(
             await unitOfWork.SaveChangesAsync(ct);
         }, ct);
 
-        return Unit.Value;
+        var result = talent.Adapt<UserSummaryInfo>();
+        if (talent!.Avatar != null)
+        {
+            var avatarInfo = await fileManagerCache.GetImageUrl(talent.Avatar, ct);
+            result.Avatar = avatarInfo?.Url;
+        }
+
+        return result;
     }
 }

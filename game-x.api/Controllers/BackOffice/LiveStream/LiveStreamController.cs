@@ -54,8 +54,8 @@ public sealed class LiveStreamController : BaseApiController
     [HttpPatch("{id:guid}/talent")]
     public async Task<IActionResult> AssignTalentToScheduleAsync(Guid id, AssignTalentCommand command)
     {
-        await Mediator.Send(command with { Id = id });
-        return ApiResponseFactory.NoContent();
+        var result = await Mediator.Send(command with { Id = id });
+        return ApiResponseFactory.Ok(result);
     }
 
     [Authorize(Roles = AppRoles.Admin)]

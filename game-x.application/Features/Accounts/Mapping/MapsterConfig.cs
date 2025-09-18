@@ -68,5 +68,9 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.IsKycConfirmed, src => src.UserKyc != null && src.UserKyc.Status == KycStatus.Approved)
             .Map(dest => dest.IsBankAccountConfirmed, src => src.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved))
             .Map(dest => dest.IsActive, src => src.Status == UserStatus.Active);
+
+        cfg.NewConfig<UserEntity, UserSummaryInfo>()
+            .Map(dest => dest.IsKycConfirmed, src => src.UserKyc != null && src.UserKyc.Status == KycStatus.Approved)
+            .Map(dest => dest.IsBankAccountConfirmed, src => src.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved));
     }
 }

@@ -1,4 +1,4 @@
-﻿using game_x.application.Contract.Infrastructure.FileStorage;
+﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.BankAccountVerifications.Dtos;
 
@@ -6,7 +6,7 @@ namespace game_x.application.Features.BankAccountVerifications.Queries.GetBankAc
 
 public sealed class GetBankAccountDetailHandler(
     IUserBankAccountRepo userBankAccountRepo,
-    IFileStorageService fileStorage) : IQueryHandler<GetBankAccountDetailQuery, BankAccountProfileDto>
+    IFileManagerCacheService fileManagerCache) : IQueryHandler<GetBankAccountDetailQuery, BankAccountProfileDto>
 {
     public async Task<BankAccountProfileDto> Handle(GetBankAccountDetailQuery request, CancellationToken ct = default)
     {
@@ -22,10 +22,7 @@ public sealed class GetBankAccountDetailHandler(
     {
         if (file is null) return string.Empty;
 
-        var url = await fileStorage.GenerateDownloadUrlAsync(
-            bucketName: file.BucketName,
-            objectName: file.ObjectName,
-            expiry: TimeSpan.FromHours(1));
-        return url;
+        var image = await fileManagerCache.GetImageUrl(file);
+        return image!.Url;
     }
 }
