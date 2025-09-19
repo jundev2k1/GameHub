@@ -17,9 +17,8 @@ public sealed class LiveStreamStatusDto
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public LiveStreamCategorySummaryDto[] Categories { get; set; } = [];
+    public string ClientId { get; set; } = string.Empty;
     public UserSummaryInfo? AssignedTo { get; set; }
-    public string TalentId { get; set; } = string.Empty;
-    public string TalentName { get; set; } = string.Empty;
     public List<BlackListItemDto> BlackList { get; set; } = [];
 }
 

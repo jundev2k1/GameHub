@@ -22,12 +22,31 @@ public sealed class JoinLiveStreamHandler(
         if (streamSetting.Status != LiveStreamStatus.Live)
             throw new BadRequestException("Live stream is offline.");
 
+        // Check if the live stream has started
         if (streamSetting.StartAt > DateTime.UtcNow)
             throw new BadRequestException("Live stream has not started yet.");
 
-        var streamInfo = liveStreamManager.GetLiveStreamStatus(streamSetting.StreamKey);
-        if (streamInfo is null || !streamInfo.IsLive)
-            throw new NotFoundException("Live stream is offline.");
+        // Get the live stream status from cache
+        var streamInfo = liveStreamManager.GetLiveStreamStatus(streamSetting.StreamKey)
+            ?? throw new NotFoundException("Live stream is not found.");
+
+        // Check if the user is blocked from viewing the stream
+        var targetBlackListItem = streamInfo.BlackList
+            .FirstOrDefault(i => i.UserId == userAccessor.GetUserId()
+                && i.Action == BlackListAction.View
+                && i.BlockTo < DateTime.UtcNow);
+        if (targetBlackListItem != null)
+            throw new ForbiddenException(
+                MessageCode.System.Forbidden,
+                "You are blocked from viewing this live stream.",
+                new { Time = targetBlackListItem.BlockTo });
+
+        // Check if the stream is live
+        var isInterrupted = !streamInfo.IsLive
+            && streamInfo.OfflineAt.HasValue
+            && (DateTime.UtcNow - streamInfo.OfflineAt.Value).TotalMinutes < 8;
+        if (isInterrupted)
+            throw new ForbiddenException(MessageCode.System.Forbidden,"Live streaming is interrupted.", new { isInterrupted = true });
 
         var viewer = await CreateViewer(streamSetting);
         return viewer.Url;

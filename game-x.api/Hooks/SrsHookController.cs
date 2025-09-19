@@ -25,7 +25,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
             throw new BadRequestException("Token is required");
 
         logger.LogInformation($"Token: {token}");
-        var command = new PublishStreamCommand(request.Stream, token!);
+        var command = new PublishStreamCommand(request.Stream, token!, request.ClientId);
         await Mediator.Send(command);
         return Ok(0);
     }

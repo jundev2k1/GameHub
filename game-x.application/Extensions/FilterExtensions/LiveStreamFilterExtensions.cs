@@ -18,8 +18,8 @@ public static class LiveStreamFilterExtensions
 
         var statusList = raw
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(s => Enum.TryParse<LiveStreamStatus>(s, out _))
-            .Select(Enum.Parse<LiveStreamStatus>)
+            .Where(s => Enum.TryParse<LiveStreamStatus>(s, true, out _))
+            .Select(s => Enum.Parse<LiveStreamStatus>(s, true))
             .ToArray();
         if (statusList.Length == 0)
             return _ => false;

@@ -1,18 +1,48 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
+using game_x.application.Contract.Persistence.Repo;
 
 namespace game_x.application.Features.LiveStreams.Commands.CancelSchedule;
 
 public sealed class CancelScheduleHandler(
     IUnitOfWork unitOfWork,
-    ILiveStreamRepo liveStreamRepo) : ICommandHandler<CancelScheduleCommand>
+    ILiveStreamRepo liveStreamRepo,
+    ILiveStreamManagerCacheService liveStreamManager,
+    ISrsService srsService) : ICommandHandler<CancelScheduleCommand>
 {
     public async Task<Unit> Handle(CancelScheduleCommand request, CancellationToken ct = default)
     {
+        var streamKey = string.Empty;
         await liveStreamRepo.UpdateAsync(request.Id, async liveStream =>
         {
             liveStream.CancelStream(request.Reason);
             await unitOfWork.SaveChangesAsync(ct);
+            streamKey = liveStream.StreamKey;
         }, ct);
+
+        await StopStream(streamKey);
         return Unit.Value;
+    }
+
+    private async Task StopStream(string streamKey)
+    {
+        // Update the stream status in cache
+        var streamInfo = liveStreamManager.GetLiveStreamStatus(streamKey);
+        if (streamInfo is null) return;
+
+        // Stop the stream in SRS
+        await srsService.KickClientAsync(streamInfo.ClientId);
+
+        // Kick all viewers
+        var viewers = liveStreamManager.GetAllViewersByStreamKey(streamInfo.StreamKey)
+            .SelectMany(v => v.Value)
+            .Select(token => liveStreamManager.GetViewerInfo(streamInfo.StreamKey, token))
+            .ToArray();
+        foreach (var viewer in viewers)
+        {
+            if (viewer is null) continue;
+
+            await srsService.KickClientAsync(viewer.ClientId);
+        }
     }
 }

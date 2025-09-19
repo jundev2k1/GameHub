@@ -2,7 +2,6 @@
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.Dtos;
 using game_x.application.Features.LiveStreams.Dtos;
-using System.Threading.Tasks;
 
 namespace game_x.application.Features.LiveStreams.Commands.PublishStream;
 
@@ -25,7 +24,7 @@ public sealed class PublishStreamHandler(
 
         // Initialize stream info in cache if not exists
         if (!liveStreamManager.IsExistLiveStream(streamSetting.StreamKey))
-            await InitStreamInfo(streamSetting, ct);
+            await InitStreamInfo(streamSetting, request.ClientId, ct);
 
         // Connect to the stream if not connected
         liveStreamManager.ConnectLiveStream(streamSetting.StreamKey);
@@ -43,7 +42,7 @@ public sealed class PublishStreamHandler(
         return Unit.Value;
     }
 
-    private async Task InitStreamInfo(LivestreamSchedule streamSetting, CancellationToken ct)
+    private async Task InitStreamInfo(LivestreamSchedule streamSetting, string clientId, CancellationToken ct)
     {
         var streamInfo = new LiveStreamStatusDto
         {
@@ -54,6 +53,7 @@ public sealed class PublishStreamHandler(
             OfflineAt = null,
             StartTime = streamSetting.StartTime,
             EndTime = streamSetting.EndTime,
+            ClientId = clientId,
             AssignedTo = streamSetting.AssignedTo?.Adapt<UserSummaryInfo>(),
             Categories = [.. streamSetting.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())]
         };
