@@ -10,6 +10,8 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
     public string Message { get; private set; } = string.Empty;
     public LiveStreamChatMessageType MessageType { get; private set; }
     public decimal? DonationAmount { get; private set; }
+    public bool IsDeleted { get; private set; } = false;
+    public string? DeleteReason { get; private set; }
     public DateTime SentAt { get; private set; }
 
     public static LiveStreamChatMessage Create(
@@ -37,5 +39,14 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
             DonationAmount = donationAmount,
             SentAt = DateTime.UtcNow
         };
+    }
+
+    public void MarkAsDeleted(string reason)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Reason for deletion cannot be null or empty.", nameof(reason));
+
+        IsDeleted = true;
+        DeleteReason = reason;
     }
 }

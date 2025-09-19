@@ -11,6 +11,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 {
     private const string LiveStreamPrefix = "livestream:";
 
+    #region Stream Management
     public string[] GetAllStreamKeys()
     {
         var cacheKey = $"{LiveStreamPrefix}streams";
@@ -112,7 +113,9 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
         return Get<LiveStreamStatusDto?>(cacheKey);
     }
+    #endregion
 
+    #region Viewer Management
     public LiveStreamViewerDto? GetViewerInfo(string streamKey, string token)
     {
         var viewerCacheKey = $"{LiveStreamPrefix}{streamKey}:viewers:{token}";
@@ -206,4 +209,80 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         var streamViewers = GetAllViewerInfosByStreamKey(streamKey);
         return streamViewers.GroupBy(v => v.ViewerId).Count(gr => gr.Any(v => v.IsWatching));
     }
+    #endregion
+
+    #region Chat Management
+    public void InitMessagesForStream(string streamKey, CancellationToken ct = default)
+    {
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:messages";
+        Set(cacheKey, new Dictionary<Guid, DateTime>());
+    }
+
+    public Dictionary<Guid, DateTime> GetAllMessageKey(string streamKey)
+    {
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:messages";
+        var result = Get<Dictionary<Guid, DateTime>>(cacheKey) ?? [];
+        return result;
+    }
+
+    public LiveStreamChatMessageDto? GetMessageDetail(string streamKey, Guid messageId, CancellationToken ct = default)
+    {
+        var messageCacheKey = $"{LiveStreamPrefix}{streamKey}:messages:{messageId}";
+        return Get<LiveStreamChatMessageDto?>(messageCacheKey);
+    }
+
+    public LiveStreamChatMessageDto[] GetAdjacentMessages(string streamKey, Guid messageId, bool isNext, int count = 20, CancellationToken ct = default)
+    {
+        var allMessageKeys = GetAllMessageKey(streamKey)
+            .Select((kvp, index) => (Index: index, MessageId: kvp.Key, SentAt: kvp.Value))
+            .OrderByDescending(i => i.SentAt)
+            .ToArray();
+        if (allMessageKeys.Length == 0) return [];
+
+        // Find the target message
+        var targetItem = allMessageKeys.FirstOrDefault(kvp => kvp.MessageId == messageId);
+        if (targetItem.MessageId == Guid.Empty)
+            throw new NotFoundException(nameof(messageId), messageId);
+
+        // Calculate skip count based on direction
+        // If isNext is true, skip 1 to move to the next item
+        // If isNext is false, skip -count to move to the previous items
+        var skipCount = isNext ? 1 : -count;
+
+        // Take adjacent messages
+        var result = allMessageKeys
+            .Skip(skipCount)
+            .Take(count)
+            .Select(kvp => GetMessageDetail(streamKey, kvp.MessageId, ct))
+            .Where(dto => dto != null)
+            .ToArray();
+        return result!;
+    }
+
+    public void AddMessageToStream(string streamKey, LiveStreamChatMessageDto message, CancellationToken ct = default)
+    {
+        // Store message detail
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:messages:{message.Id}";
+        Set(cacheKey, message);
+
+        // Update message keys list
+        var allMessageKeys = GetAllMessageKey(streamKey);
+        allMessageKeys[message.Id] = message.SentAt;
+        var allMessageKeysCacheKey = $"{LiveStreamPrefix}{streamKey}:messages";
+        Set(allMessageKeysCacheKey, allMessageKeys);
+    }
+
+    public void RemoveMessageFromStream(string streamKey, Guid messageId, CancellationToken ct = default)
+    {
+        // Remove message detail
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:messages:{messageId}";
+        Remove(cacheKey);
+
+        // Update message keys list
+        var allMessageKeys = GetAllMessageKey(streamKey);
+        allMessageKeys.Remove(messageId);
+        var allMessageKeysCacheKey = $"{LiveStreamPrefix}{streamKey}:messages";
+        Set(allMessageKeysCacheKey, allMessageKeys);
+    }
+    #endregion
 }

@@ -4,6 +4,7 @@ namespace game_x.application.Contract.Infrastructure.Caching;
 
 public interface ILiveStreamManagerCacheService
 {
+    #region Stream Management
     string[] GetAllStreamKeys();
 
     void InitLiveStream(LiveStreamStatusDto streamInfo);
@@ -21,7 +22,9 @@ public interface ILiveStreamManagerCacheService
     bool IsExistLiveStream(string streamKey);
 
     LiveStreamStatusDto? GetLiveStreamStatus(string streamKey);
+    #endregion
 
+    #region Viewer Management
     LiveStreamViewerDto? GetViewerInfo(string streamKey, string token);
 
     void InitViewerLiveStream(LiveStreamViewerDto viewer);
@@ -35,4 +38,20 @@ public interface ILiveStreamManagerCacheService
     void RemoveViewersByStreamKey(string streamKey);
 
     int GetViewerCount(string streamKey);
+    #endregion
+
+    #region Chat Message Management
+    void InitMessagesForStream(string streamKey, CancellationToken ct = default);
+
+    LiveStreamChatMessageDto[] GetAdjacentMessages(
+        string streamKey,
+        Guid messageId,
+        bool isNext,
+        int count = 20,
+        CancellationToken ct = default);
+
+    void AddMessageToStream(string streamKey, LiveStreamChatMessageDto message, CancellationToken ct = default);
+
+    void RemoveMessageFromStream(string streamKey, Guid messageId, CancellationToken ct = default);
+    #endregion
 }

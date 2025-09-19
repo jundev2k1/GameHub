@@ -39,6 +39,14 @@ public sealed class LiveStreamChatMessageConfig : IEntityTypeConfiguration<LiveS
         builder.Property(lcm => lcm.DonationAmount)
             .IsRequired(false);
 
+        builder.Property(lcm => lcm.IsDeleted)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(lcm => lcm.DeleteReason)
+            .IsRequired(false)
+            .HasMaxLength(255);
+
         builder.Property(lcm => lcm.SentAt)
             .IsRequired();
 
