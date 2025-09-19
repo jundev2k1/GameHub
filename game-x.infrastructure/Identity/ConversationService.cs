@@ -85,11 +85,7 @@ public sealed class ConversationService(
     public async Task<ListedConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
     {
         var src = await conversationRepo.GetMyConversationsForGuestAsync(guestId, ct);
-        if (src == null)
-            return null;
-        
-        var dto = src.Adapt<ConversationDto>().Adapt<ListedConversationDto>();
-        return dto with { LastMessagePreview = Preview(dto.LastMessagePreview) };
+        return src?.Adapt<ConversationDto>().Adapt<ListedConversationDto>();
     }
     
     public async Task<ConversationDetailDto> GetConversationDetailAsync(Guid convId, CancellationToken ct = default)
@@ -125,12 +121,6 @@ public sealed class ConversationService(
             result.Items.Select(async conv => await BuildConversationDto(conv, ct)));
         return result.Transform(dtoItems);
     }
-    
-    /// <summary>Short preview helper</summary>
-    private string Preview(string? text)
-        => string.IsNullOrWhiteSpace(text) ? "[Attachment]"
-            : text.Length <= 140 ? text
-            : text[..140];
 
     private async Task<string?> GetAvatarUrl(MediaFile? file, CancellationToken ct)
     {
@@ -150,7 +140,6 @@ public sealed class ConversationService(
         var dto = conv.Adapt<ConversationDto>();
         return dto with
         {
-            LastMessagePreview = Preview(dto.LastMessagePreview), 
             CustomerAvatarUrl = await GetAvatarUrl(conv.Customer?.Avatar, ct),
             LastUserAvatarUrl = await GetAvatarUrl(conv.Messages.FirstOrDefault()?.SenderUser?.Avatar, ct)
         };

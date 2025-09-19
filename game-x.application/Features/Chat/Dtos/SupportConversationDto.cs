@@ -12,4 +12,5 @@ public sealed record SupportConversationDto(
     RoleInConversation LastSenderRole,
     DateTime LastMessageAt,
     Guid LastMessageId,
-    string LastMessagePreview );
+    string LastMessageText,
+    MessageKind LastMessageKind);

@@ -25,7 +25,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.LastUserAvatarUrl, src => string.Empty)
             .Map(dest => dest.LastMessageAt, src => src.LastMessageAt)
             .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault()!.PublicId)
-            .Map(dest => dest.LastMessagePreview, src => src.Messages.FirstOrDefault()!.Text);
+            .Map(dest => dest.LastMessageText, src => src.Messages.FirstOrDefault()!.Text)
+            .Map(dest => dest.LastMessageKind, src => src.Messages.FirstOrDefault()!.Kind);
 
         cfg.NewConfig<MessageDto, ListedMessageDto>()
             .Map(dest => dest.Id, src => src.PublicId);

@@ -38,6 +38,7 @@ public sealed class SendMessageToCustomerHandler(
                 userId: senderUserId,
                 text: request.Text ?? string.Empty,
                 replyMessageId: request.ReplyToMessageId,
+                hasAttachment: request.Attachments?.Count > 0,
                 ct: ct);
             
             conv.LastMessageAt = now;
@@ -87,13 +88,14 @@ public sealed class SendMessageToCustomerHandler(
         string userId, 
         string text,
         Guid? replyMessageId,
+        bool hasAttachment,
         CancellationToken ct)
     {
         int? replyMessageIntId = null;
         if (replyMessageId is not null && replyMessageId.Value != Guid.Empty)
         {
-            var rid = replyMessageId.Value;
-            var replyMessage = await messageRepo.GetByIdAsync(rid, ct);
+            var rId = replyMessageId.Value;
+            var replyMessage = await messageRepo.GetByIdAsync(rId, ct);
             replyMessageIntId = replyMessage.Id;
         }
         
@@ -102,7 +104,7 @@ public sealed class SendMessageToCustomerHandler(
             senderActorId: userId,
             senderUserId: userId,
             text: text,
-            kind: MessageKind.Text,
+            kind: hasAttachment ? MessageKind.Attachment : MessageKind.Text,
             senderRole: RoleInConversation.Agent,
             replyToMessageId: replyMessageIntId
         );

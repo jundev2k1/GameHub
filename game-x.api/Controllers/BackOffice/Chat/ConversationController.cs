@@ -35,9 +35,7 @@ public class ConversationController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
     
-    /// <summary>
-    /// List conversations for current logged-in user
-    /// </summary>
+    /// <summary> List conversations for current logged-in user </summary>
     [HttpGet("me")]
     public async Task<IActionResult> GetSupportConversationAsync([AsParameters] CursorCriteriaRequest parameters)
     {

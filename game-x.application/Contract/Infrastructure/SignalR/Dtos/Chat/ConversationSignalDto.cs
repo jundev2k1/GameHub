@@ -14,4 +14,5 @@ public sealed record ConversationSignalDto(
     string? LastUserAvatarUrl,
     DateTime LastMessageAt,
     Guid LastMessageId,
-    string LastMessagePreview );
+    string LastMessageText,
+    MessageKind LastMessageKind);

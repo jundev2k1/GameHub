@@ -55,6 +55,7 @@ public sealed class SendSupportMessageHandler(
                 userId: senderUserId,
                 text: request.Text,
                 replyMessageId: request.ReplyToMessageId,
+                hasAttachment: request.Attachments?.Count > 0,
                 ct: ct);
             
             await messageService.CreateMessageAttachmentsAsync(msg: message, attachments: request.Attachments, ct);
@@ -90,7 +91,6 @@ public sealed class SendSupportMessageHandler(
             await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
             
             return new SendSupportMessageResult(request.ClientLocalId);
-            
         }
         catch(Exception ex)
         {
@@ -128,6 +128,7 @@ public sealed class SendSupportMessageHandler(
         string? userId,
         string? text,
         Guid? replyMessageId,
+        bool hasAttachment,
         CancellationToken ct)
     {
         int? replyMessageIntId = null;
@@ -143,7 +144,7 @@ public sealed class SendSupportMessageHandler(
             senderActorId: actorId,
             senderUserId: userId,
             text: text,
-            kind: MessageKind.Text,
+            kind: hasAttachment ? MessageKind.Attachment : MessageKind.Text,
             senderRole: RoleInConversation.Member,
             replyToMessageId: replyMessageIntId
         );
