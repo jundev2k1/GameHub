@@ -117,7 +117,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
             .AsTracking()
             .FirstOrDefaultAsync(c => 
                 c.PublicId == convId
-                && (c.CustomerId == actorId 
+                && (c.CustomerId == actorId
                     || c.GuestId == actorId
                     || context.ConversationMembers.Any(m => m.ConversationId == c.Id && m.UserId == actorId)), 
                 ct)

@@ -1,5 +1,7 @@
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Exceptions;
+using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
@@ -10,10 +12,48 @@ public class ConversationMemberRepo(GameXContext context): IConversationMemberRe
         await context.ConversationMembers.AddAsync(convMember, ct);
     }
     
-    public async Task<bool> CheckExistMemberAsync(int conversationId, string userId, CancellationToken ct = default)
+    public async Task<bool> CheckExistMemberAsync(int convId, string userId, CancellationToken ct = default)
     {
         return await context.ConversationMembers
             .AsNoTracking()
-            .AnyAsync(m => m.ConversationId == conversationId && m.UserId == userId, ct);
+            .AnyAsync(m => m.ConversationId == convId && m.UserId == userId, ct);
+    }
+    
+    public async Task<ConversationMember?> GetByConvIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default)
+    {
+        return await context.ConversationMembers
+            .AsNoTracking()
+            .Include(x => x.Conversation)
+            .FirstOrDefaultAsync(m => m.Conversation.PublicId == convId && m.UserId == userId, ct);
+    }
+    
+    public async Task<string[]> GetMemberIdsAsync(Guid convId, CancellationToken ct = default)
+    {
+        if (convId == Guid.Empty) return [];
+        
+        var convPk = await context.Conversations
+            .AsNoTracking()
+            .Where(c => c.PublicId == convId)
+            .Select(c => c.Id)
+            .SingleOrDefaultAsync(ct);
+        
+        if (EqualityComparer<object>.Default.Equals(convPk, null)) return [];
+        
+        var memberIds = await context.ConversationMembers
+            .AsNoTracking()
+            .Where(m => m.ConversationId.Equals(convPk))
+            .Select(m => m.UserId)
+            .ToArrayAsync(ct);
+        return memberIds;
+    }
+    
+    public async Task UpdateAsync(int id, Action<ConversationMember> updateAction, CancellationToken ct = default)
+    {
+        var convMember = await context.ConversationMembers
+                       .FirstOrDefaultAsync(c => c.Id == id, ct)
+                   ?? throw new NotFoundException(MessageCode.Chatting.ConversationMemberNotFound);
+
+        updateAction.Invoke(convMember);
+        await context.SaveChangesAsync(ct);
     }
 }

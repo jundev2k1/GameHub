@@ -2,6 +2,7 @@ using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.FileStorage;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
@@ -14,8 +15,10 @@ namespace game_x.infrastructure.Identity;
 public sealed class ConversationService(
     IUnitOfWork unitOfWork,
     IConversationRepo conversationRepo,
+    IConversationMemberRepo conversationMemberRepo,
     ISocialLinkRepo socialLinkRepo,
     IUserRepo userRepo,
+    IAppLogger<Conversation> logger,
     IFileStorageService fileStorage): IConversationService, IServices
 {
     public async Task<Guid> EnsureForPair(string me, string targetedUserId, CancellationToken ct)
@@ -45,6 +48,59 @@ public sealed class ConversationService(
             conv.Members.Add(ConversationMember.Create(conv, targetedUserId, RoleInConversation.Member));
         }, ct);
         
+        return conv.PublicId;
+    }
+    
+    public async Task<Guid> EnsureForSupport(string actorId, string? userId, CancellationToken ct)
+    {
+        // Each customer has only one conversation with customer support; if none exists, a new one will be created
+        var conv = await conversationRepo.GetSupportConversationAsync(actorId, ct);
+        // Only user need join into a group (guest is not allowed)
+        ConversationMember? convMember = null;
+        await unitOfWork.BeginTransactionAsync(ct);
+        try
+        {
+            if (conv is null)
+            {
+                conv = Conversation.Create(
+                    type: ConversationType.Support,
+                    senderUserId: userId,
+                    senderGuestId: userId is null ? actorId : null);
+                
+                await conversationRepo.AddAsync(conv, ct);
+                if (userId is not null)
+                {
+                    convMember = ConversationMember.Create(
+                        conv: conv,
+                        userId: userId,
+                        role: RoleInConversation.Member);
+        
+                    await conversationMemberRepo.AddAsync(convMember, ct);
+                }
+            }
+
+            if (convMember is null && userId is not null)
+            {
+                var exists = await conversationMemberRepo.CheckExistMemberAsync(conv.Id, userId, ct);
+                if (!exists)
+                {
+                    convMember = ConversationMember.Create(
+                        conv: conv,
+                        userId: userId,
+                        role: RoleInConversation.Member);
+        
+                    await conversationMemberRepo.AddAsync(convMember, ct);
+                }
+            }
+            await unitOfWork.CommitAsync(ct);
+        }
+        catch(Exception ex)
+        {
+            await unitOfWork.RollbackAsync(ct);
+            logger.LogError("Failed to create the message: {Ex}", ex);
+            throw new BadRequestException(MessageCode.System.SystemError);
+        }
+
         return conv.PublicId;
     }
     

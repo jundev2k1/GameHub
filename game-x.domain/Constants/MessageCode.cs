@@ -361,6 +361,12 @@ public static class MessageCode
         /// <summary>The user is still not a friend.</summary>
         [EnumMetadata("Social link is blocked.")]
         SocialLinkBlocked = 10512,
+        /// <summary>The user is not a member.</summary>
+        [EnumMetadata("The user is not a member.")]
+        IsNotMember = 10513,
+        /// <summary>CryptoToken configuration not found.</summary>
+        [EnumMetadata("Conversation member not found.")]
+        ConversationMemberNotFound = 10514,
         #endregion
     }
 }

@@ -14,7 +14,7 @@ internal static class GroupNames
     public static readonly string Prefix =
         Environment.GetEnvironmentVariable("HUB_GROUP_PREFIX") ?? "gx";
 
-    // ---------- Common groups ----------
+    // ---------- Actor groups ----------
     public static string Member(string userId) => Build("member", San(userId));
     public static string Guest(string guestId) => Build("guest", San(guestId));
     public static string Admin(string userId) => Build("admin", San(userId));
@@ -22,18 +22,12 @@ internal static class GroupNames
     public static string Role(string roleName) => Build("role", San(roleName)); // e.g., Admin, User
 
     // ---------- Chat-specific ----------
+    public const string Public = "public";
+    public const string OnlineAll = "online";
+    public static string Dm(Guid convId) => $"dm:{convId}";
     public static string Conversation(Guid conversationId) => Build("chat", "conv", conversationId.ToString());
-
-    // ---------- Admin / Client service areas (optional clarity) ----------
-    public static string AdminUser(string userId) => Build("admin", "user", San(userId));
-    public static string ClientUser(string userId) => Build("client", "user", San(userId));
-
-    // ---------- Escape hatch for custom groups ----------
-    public static string Custom(params string[] parts) => Build(parts);
-
-    // =======================================================
-    // Internals
-    // =======================================================
+    
+    // ---------- Helpers ----------
 
     private static string Build(params string[] parts)
     {

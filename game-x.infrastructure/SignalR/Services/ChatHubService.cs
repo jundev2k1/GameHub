@@ -34,6 +34,19 @@ public sealed class ChatHubService(IHubContext<ChatHub, IChatClient> hubContext)
         await hubContext.Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(msgDto);
     }
     
+    public async Task SendDirectMessageAsync(CreatedMessageSignalResult res, string[] memberIds)
+    {
+        var msgDto = res.Msg;
+        var conv = res.Conv;
+        
+        await hubContext.Clients.Group(GroupNames.Conversation(conv.ConversationId)).MessageCreated(msgDto);
+        
+        foreach (var uid in memberIds)
+        {
+            await hubContext.Clients.Group(GroupNames.Member(uid)).ConversationUpdated(conv);
+        }
+    }
+    
     public async Task SendFriendRequestAsync(FriendRequestSignalDto dto)
     {
         await hubContext.Clients.Group(GroupNames.Member(dto.AddresseeUserId!)).FriendRequest(dto);

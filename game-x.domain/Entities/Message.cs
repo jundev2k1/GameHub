@@ -54,7 +54,7 @@ public sealed class Message: BaseEntity<int>, IAuditable
             SenderUserId = senderUserId,
             SenderRole = senderRole,
             Kind = kind,
-            Text = text,
+            Text = text?.Trim(),
             SentAt = DateTime.UtcNow,
             IsTombstone = false,
             EditCount = 0,

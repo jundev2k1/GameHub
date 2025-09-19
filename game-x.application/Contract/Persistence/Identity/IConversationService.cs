@@ -6,6 +6,7 @@ namespace game_x.application.Contract.Persistence.Identity;
 public interface IConversationService
 {
     Task<Guid> EnsureForPair(string me, string targetedUserId, CancellationToken ct);
+    Task<Guid> EnsureForSupport(string actorId, string? userId, CancellationToken ct);
     Task<CursorResult<SupportConversationDto>> GetUnassignedQueueByCursorAsync(int limit, string? cursor, CancellationToken ct);
     Task<CursorResult<SupportConversationDto>> GetSupportConversationsAsync(int limit, string? cursor, CancellationToken ct);
     Task<CursorResult<ListedConversationDto>> GetMyConversationsForClientAsync(string userId, int limit, string? cursor, CancellationToken ct = default);
