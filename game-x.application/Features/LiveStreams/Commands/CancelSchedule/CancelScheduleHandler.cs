@@ -33,6 +33,9 @@ public sealed class CancelScheduleHandler(
         // Stop the stream in SRS
         await srsService.KickClientAsync(streamInfo.ClientId);
 
+        // Remove the stream from cache
+        liveStreamManager.RemoveLiveStream(streamKey);
+
         // Kick all viewers
         var viewers = liveStreamManager.GetAllViewersByStreamKey(streamInfo.StreamKey)
             .SelectMany(v => v.Value)
