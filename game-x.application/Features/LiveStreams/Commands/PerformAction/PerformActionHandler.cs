@@ -16,9 +16,12 @@ public sealed class PerformActionHandler(
     public async Task<Unit> Handle(PerformActionCommand request, CancellationToken ct = default)
     {
         // Check if the stream exists and is live
-        var targetSchedule = await liveStreamRepo.GetByIdAsync(request.StreamId, ct);
+        var targetSchedule = await liveStreamRepo.GetByIdAsync(request.StreamId!.Value, ct);
         if (targetSchedule.AssignedId != userAccessor.GetUserId())
             throw new BadRequestException("You are not the owner of this stream.");
+
+        if (targetSchedule.AssignedId == request.ViewerId)
+            throw new BadRequestException("You cannot perform action on yourself.");
 
         if (targetSchedule.Status != LiveStreamStatus.Live)
             throw new BadRequestException("The stream is not live.");
@@ -51,7 +54,7 @@ public sealed class PerformActionHandler(
                 break;
 
             case PerformActionEnum.Unkick:
-                UnkickViewer(targetSchedule.StreamKey, request.ViewerId);
+                UnkickViewer(targetSchedule.StreamKey, request.ViewerId!);
                 break;
 
             case PerformActionEnum.Mute:
@@ -59,7 +62,7 @@ public sealed class PerformActionHandler(
                 break;
 
             case PerformActionEnum.Unmute:
-                UnmuteViewer(targetSchedule.StreamKey, request.ViewerId);
+                UnmuteViewer(targetSchedule.StreamKey, request.ViewerId!);
                 break;
 
             case PerformActionEnum.BlockDonation:
@@ -67,7 +70,7 @@ public sealed class PerformActionHandler(
                 break;
 
             case PerformActionEnum.UnblockDonation:
-                UnblockDonation(targetSchedule.StreamKey, request.ViewerId);
+                UnblockDonation(targetSchedule.StreamKey, request.ViewerId!);
                 break;
 
             default:

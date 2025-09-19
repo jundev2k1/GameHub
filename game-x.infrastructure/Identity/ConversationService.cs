@@ -2,7 +2,6 @@ using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Chat.Dtos;
@@ -13,7 +12,6 @@ namespace game_x.infrastructure.Identity;
 
 public sealed class ConversationService(
     IConversationRepo conversationRepo,
-    IFileStorageService fileStorage,
     IFileManagerCacheService fileManagerCache): IConversationService, IServices
 {
     public async Task<CursorResult<SupportConversationDto>> GetUnassignedQueueByCursorAsync(
