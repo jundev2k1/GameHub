@@ -10,15 +10,13 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
     public string Message { get; private set; } = string.Empty;
     public LiveStreamChatMessageType MessageType { get; private set; }
     public decimal? DonationAmount { get; private set; }
-    public CurrencyUnit? Currency { get; private set; }
     public DateTime SentAt { get; private set; }
 
     public static LiveStreamChatMessage Create(
         string senderId,
         string message,
         LiveStreamChatMessageType messageType,
-        decimal? donationAmount = null,
-        CurrencyUnit? currency = null)
+        decimal? donationAmount = null)
     {
         if (string.IsNullOrWhiteSpace(senderId))
             throw new ArgumentException("SenderId cannot be null or empty.", nameof(senderId));
@@ -29,8 +27,6 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
         {
             if (donationAmount == null || donationAmount <= 0)
                 throw new ArgumentException("Donation amount must be greater than zero for donation messages.", nameof(donationAmount));
-            if (currency == null)
-                throw new ArgumentException("Currency must be specified for donation messages.", nameof(currency));
         }
 
         return new LiveStreamChatMessage
@@ -39,7 +35,6 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
             Message = message,
             MessageType = messageType,
             DonationAmount = donationAmount,
-            Currency = currency,
             SentAt = DateTime.UtcNow
         };
     }

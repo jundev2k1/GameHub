@@ -39,12 +39,6 @@ public sealed class LiveStreamChatMessageConfig : IEntityTypeConfiguration<LiveS
         builder.Property(lcm => lcm.DonationAmount)
             .IsRequired(false);
 
-        builder.Property(lcm => lcm.Currency)
-            .IsRequired(false)
-            .HasConversion(
-                cu => cu != null ? cu.Value : null,
-                v => v != null ? CurrencyUnit.Of(v) : null);
-
         builder.Property(lcm => lcm.SentAt)
             .IsRequired();
 
