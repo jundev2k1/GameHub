@@ -1,4 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.share.Extensions;
 
 namespace game_x.application.Features.LiveStreams.Commands.PlayStream;
 
@@ -11,6 +12,13 @@ public sealed class PlayStreamHandler(
             ?? throw new BadRequestException("Viewer information was not found.");
         if (viewer.Token != request.Token)
             throw new ForbiddenException("Token is invalid.");
+
+        if (viewer.ClientId.IsNotNullOrEmpty() && viewer.ClientId != request.ClientId)
+            throw new ForbiddenException("Client ID is invalid.");
+
+        // Update client ID if not exists
+        if (viewer.ClientId.IsNullOrEmpty())
+            viewer.ClientId = request.ClientId;
 
         liveStreamManager.WatchLiveStream(viewer);
 

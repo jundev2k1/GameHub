@@ -55,7 +55,8 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
         var command = new PlayStreamCommand(
             request.App,
             request.Stream,
-            token!);
+            token!,
+            request.ClientId);
         await Mediator.Send(command);
         return Ok(0);
     }
