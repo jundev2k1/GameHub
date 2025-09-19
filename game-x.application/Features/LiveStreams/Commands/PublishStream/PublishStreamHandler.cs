@@ -48,8 +48,10 @@ public sealed class PublishStreamHandler(
         {
             Id = streamSetting.PublicId,
             Title = streamSetting.Title,
+            Description = streamSetting.Description ?? string.Empty,
             ThumbnailId = streamSetting.ThumbnailId,
             StreamKey = streamSetting.StreamKey,
+            LiveAt = streamSetting.StartAt ?? DateTime.UtcNow,
             OfflineAt = null,
             StartTime = streamSetting.StartTime,
             EndTime = streamSetting.EndTime,

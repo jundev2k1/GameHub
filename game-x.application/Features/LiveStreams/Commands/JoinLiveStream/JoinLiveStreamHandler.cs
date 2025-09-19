@@ -13,18 +13,27 @@ public sealed class JoinLiveStreamHandler(
     ILiveStreamManagerCacheService liveStreamManager,
     IUserAccessor userAccessor,
     IUserRepo userRepo,
-    IOptions<SrsSettings> options) : ICommandHandler<JoinLiveStreamCommand, string>
+    IOptions<SrsSettings> options) : ICommandHandler<JoinLiveStreamCommand, JoinLiveStreamResult>
 {
-    public async Task<string> Handle(JoinLiveStreamCommand request, CancellationToken ct = default)
+    public async Task<JoinLiveStreamResult> Handle(JoinLiveStreamCommand request, CancellationToken ct = default)
     {
         var streamSetting = await liveStreamRepo
             .GetByIdAsync(request.Id, ct);
         if (streamSetting.Status != LiveStreamStatus.Live)
-            throw new BadRequestException("Live stream is offline.");
+            throw new ForbiddenException("Live stream is offline.");
+
+        if (streamSetting.Status == LiveStreamStatus.Cancelled)
+            throw new ForbiddenException(
+                MessageCode.System.Forbidden,
+                "Live stream has been canceled.",
+                new { streamSetting.CancellationReason });
 
         // Check if the live stream has started
-        if (streamSetting.StartAt > DateTime.UtcNow)
-            throw new BadRequestException("Live stream has not started yet.");
+        if (streamSetting.StartTime > DateTime.UtcNow)
+            throw new ForbiddenException(
+                MessageCode.System.Forbidden,
+                "Live stream has not started yet.",
+                new { streamSetting.StartTime });
 
         // Get the live stream status from cache
         var streamInfo = liveStreamManager.GetLiveStreamStatus(streamSetting.StreamKey)
@@ -39,17 +48,28 @@ public sealed class JoinLiveStreamHandler(
             throw new ForbiddenException(
                 MessageCode.System.Forbidden,
                 "You are blocked from viewing this live stream.",
-                new { Time = targetBlackListItem.BlockTo });
+                new { targetBlackListItem.Action, targetBlackListItem.BlockTo, targetBlackListItem.Reason });
 
         // Check if the stream is live
         var isInterrupted = !streamInfo.IsLive
             && streamInfo.OfflineAt.HasValue
             && (DateTime.UtcNow - streamInfo.OfflineAt.Value).TotalMinutes < 8;
         if (isInterrupted)
-            throw new ForbiddenException(MessageCode.System.Forbidden,"Live streaming is interrupted.", new { isInterrupted = true });
+            throw new ForbiddenException(
+                MessageCode.System.Forbidden,
+                "Live streaming is interrupted.",
+                new { isInterrupted = true });
 
         var viewer = await CreateViewer(streamSetting);
-        return viewer.Url;
+        return new JoinLiveStreamResult(
+            streamInfo.Title,
+            streamInfo.Description,
+            streamInfo.Thumbnail,
+            streamInfo.LiveAt ?? DateTime.UtcNow,
+            streamInfo.AssignedTo?.Id ?? string.Empty,
+            streamInfo.AssignedTo?.Nickname ?? string.Empty,
+            liveStreamManager.GetViewerCount(streamInfo.StreamKey),
+            viewer.Url);
     }
 
     private async Task<LiveStreamViewerDto> CreateViewer(LivestreamSchedule schedule)
