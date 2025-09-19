@@ -7,5 +7,5 @@ public record PerformActionCommand(
     [property: JsonIgnore] Guid StreamId,
     [property: JsonIgnore] string ViewerId,
     PerformActionEnum Action,
-    int BlockTime,
-    BlockReasonEnum Reason) : ICommand;
+    int? BlockTime,
+    BlockReasonEnum? Reason) : ICommand;

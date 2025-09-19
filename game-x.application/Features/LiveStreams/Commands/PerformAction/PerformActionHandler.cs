@@ -47,7 +47,7 @@ public sealed class PerformActionHandler(
         switch (request.Action)
         {
             case PerformActionEnum.Kick:
-                await KickViewer(targetSchedule.StreamKey, targetViewer, request.BlockTime, request.Reason);
+                await KickViewer(targetSchedule.StreamKey, targetViewer, request.BlockTime!.Value, request.Reason!.Value);
                 break;
 
             case PerformActionEnum.Unkick:
@@ -55,7 +55,7 @@ public sealed class PerformActionHandler(
                 break;
 
             case PerformActionEnum.Mute:
-                MuteViewer(targetSchedule.StreamKey, targetViewer, request.BlockTime, request.Reason);
+                MuteViewer(targetSchedule.StreamKey, targetViewer, request.BlockTime!.Value, request.Reason!.Value);
                 break;
 
             case PerformActionEnum.Unmute:
@@ -63,7 +63,7 @@ public sealed class PerformActionHandler(
                 break;
 
             case PerformActionEnum.BlockDonation:
-                BlockDonation(targetSchedule.StreamKey, targetViewer, request.BlockTime, request.Reason);
+                BlockDonation(targetSchedule.StreamKey, targetViewer, request.BlockTime!.Value, request.Reason!.Value);
                 break;
 
             case PerformActionEnum.UnblockDonation:
