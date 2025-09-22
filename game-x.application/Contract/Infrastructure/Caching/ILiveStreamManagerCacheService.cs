@@ -41,17 +41,20 @@ public interface ILiveStreamManagerCacheService
     #endregion
 
     #region Chat Message Management
-    void InitMessagesForStream(string streamKey, CancellationToken ct = default);
+    void InitMessagesForStream(string streamKey);
+
+    Dictionary<Guid, DateTime> GetAllMessageKey(string streamKey);
 
     LiveStreamChatMessageDto[] GetAdjacentMessages(
         string streamKey,
         Guid messageId,
         bool isNext,
-        int count = 20,
-        CancellationToken ct = default);
+        int count = 20);
 
-    void AddMessageToStream(string streamKey, LiveStreamChatMessageDto message, CancellationToken ct = default);
+    LiveStreamChatMessageDto? GetMessageDetail(string streamKey, Guid messageId);
 
-    void RemoveMessageFromStream(string streamKey, Guid messageId, CancellationToken ct = default);
+    void AddMessageToStream(string streamKey, LiveStreamChatMessageDto message);
+
+    void RemoveMessageFromStream(string streamKey, Guid messageId);
     #endregion
 }

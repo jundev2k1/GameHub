@@ -212,7 +212,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
     #endregion
 
     #region Chat Management
-    public void InitMessagesForStream(string streamKey, CancellationToken ct = default)
+    public void InitMessagesForStream(string streamKey)
     {
         var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}:messages";
         Set(cacheKey, new Dictionary<Guid, DateTime>());
@@ -225,13 +225,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         return result;
     }
 
-    public LiveStreamChatMessageDto? GetMessageDetail(string streamKey, Guid messageId, CancellationToken ct = default)
-    {
-        var messageCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:messages:{messageId}";
-        return Get<LiveStreamChatMessageDto?>(messageCacheKey);
-    }
-
-    public LiveStreamChatMessageDto[] GetAdjacentMessages(string streamKey, Guid messageId, bool isNext, int count = 20, CancellationToken ct = default)
+    public LiveStreamChatMessageDto[] GetAdjacentMessages(string streamKey, Guid messageId, bool isNext, int count = 20)
     {
         var allMessageKeys = GetAllMessageKey(streamKey)
             .Select((kvp, index) => (Index: index, MessageId: kvp.Key, SentAt: kvp.Value))
@@ -259,7 +253,13 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         return result!;
     }
 
-    public void AddMessageToStream(string streamKey, LiveStreamChatMessageDto message, CancellationToken ct = default)
+    public LiveStreamChatMessageDto? GetMessageDetail(string streamKey, Guid messageId)
+    {
+        var messageCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:messages:{messageId}";
+        return Get<LiveStreamChatMessageDto?>(messageCacheKey);
+    }
+
+    public void AddMessageToStream(string streamKey, LiveStreamChatMessageDto message)
     {
         // Store message detail
         var cacheKey = $"{LiveStreamPrefix}{streamKey}:messages:{message.Id}";
@@ -272,7 +272,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         Set(allMessageKeysCacheKey, allMessageKeys);
     }
 
-    public void RemoveMessageFromStream(string streamKey, Guid messageId, CancellationToken ct = default)
+    public void RemoveMessageFromStream(string streamKey, Guid messageId)
     {
         // Remove message detail
         var cacheKey = $"{LiveStreamPrefix}{streamKey}:messages:{messageId}";
