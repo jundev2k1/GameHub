@@ -1,4 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.Dtos;
 using game_x.application.Features.LiveStreams.Dtos;
@@ -9,7 +10,8 @@ public sealed class PublishStreamHandler(
     IUnitOfWork unitOfWork,
     ILiveStreamRepo liveStreamRepo,
     ILiveStreamManagerCacheService liveStreamManager,
-    IFileManagerCacheService fileManagerCache) : ICommandHandler<PublishStreamCommand>
+    IFileManagerCacheService fileManagerCache,
+    ILiveStreamHubService liveStreamHub) : ICommandHandler<PublishStreamCommand>
 {
     public async Task<Unit> Handle(PublishStreamCommand request, CancellationToken ct = default)
     {
@@ -33,11 +35,15 @@ public sealed class PublishStreamHandler(
         if (streamSetting.Status == LiveStreamStatus.Live)
             return Unit.Value;
 
+        // Update stream status to live
         await liveStreamRepo.UpdateAsync(streamSetting.PublicId, async schedule =>
         {
             schedule.StartStream();
             await unitOfWork.SaveChangesAsync(ct);
         }, ct);
+
+        // Notify clients that the stream is reconnected
+        await liveStreamHub.NotifyStreamReconnected(streamSetting.StreamKey);
 
         return Unit.Value;
     }

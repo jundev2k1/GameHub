@@ -18,4 +18,6 @@ public interface ILiveStreamHubService
     Task PerformActionMember(string streamKey, string viewerId, LiveStreamBanInfo banInfo);
 
     Task RefreshViewCount(string streamKey, int viewCount);
+
+    Task SendChatMessage(string streamKey, LiveStreamChatMessageDto message);
 }

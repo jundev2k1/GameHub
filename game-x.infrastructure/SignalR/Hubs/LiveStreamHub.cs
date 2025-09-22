@@ -35,6 +35,8 @@ public interface ILiveStreamHub
     Task ReceiveViewerBatch(LiveStreamViewerInfoDto[] viewers);
 
     Task OnViewerBatchComplete();
+
+    Task SendMessageForStream(LiveStreamChatMessageDto viewer);
 }
 
 [Authorize(Roles = AppRoles.User)]

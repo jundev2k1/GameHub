@@ -1,9 +1,13 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Events.OnLiveStreamLeft;
 
 namespace game_x.application.Features.LiveStreams.Commands.StopStream;
 
 public sealed class StopStreamHandler(
-    ILiveStreamManagerCacheService liveStreamManager) : ICommandHandler<StopStreamCommand>
+    ILiveStreamManagerCacheService liveStreamManager,
+    ILiveStreamHubService liveStreamHub,
+    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<StopStreamCommand>
 {
     public async Task<Unit> Handle(StopStreamCommand request, CancellationToken ct = default)
     {
@@ -14,7 +18,10 @@ public sealed class StopStreamHandler(
 
         liveStreamManager.UnwatchLiveStream(viewer);
 
-        await Task.CompletedTask;
+        // Add chat and notify for host
+        var @event = new OnLiveStreamLeftEvent(request.StreamKey, viewer);
+        await eventDispatcher.Publish(@event, ct);
+
         return Unit.Value;
     }
 }

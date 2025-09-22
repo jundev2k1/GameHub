@@ -65,4 +65,12 @@ public sealed class LiveStreamHubService(IHubContext<LiveStreamHub, ILiveStreamH
             .Group($"stream-{streamKey}")
             .OnViewChange(viewCount);
     }
+
+    public async Task SendChatMessage(string streamKey, LiveStreamChatMessageDto message)
+    {
+        // Notify all viewers in the stream
+        await hubContext.Clients
+            .Group($"stream-{streamKey}")
+            .SendMessageForStream(message);
+    }
 }

@@ -4,5 +4,7 @@ public enum LiveStreamChatMessageType : short
 {
     UserMessage,
     Donation,
-    SystemMessage
+    SystemMessage,
+    UserJoined,
+    UserLeft,
 }

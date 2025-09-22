@@ -1,11 +1,15 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnLiveStreamJoined;
 using game_x.application.Features.LiveStreams.Dtos;
 using game_x.share.Extensions;
 
 namespace game_x.application.Features.LiveStreams.Commands.PlayStream;
 
 public sealed class PlayStreamHandler(
-    ILiveStreamManagerCacheService liveStreamManager) : ICommandHandler<PlayStreamCommand>
+    ILiveStreamManagerCacheService liveStreamManager,
+    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<PlayStreamCommand>
 {
     public async Task<Unit> Handle(PlayStreamCommand request, CancellationToken ct = default)
     {
@@ -37,9 +41,13 @@ public sealed class PlayStreamHandler(
                 "You are blocked from viewing this live stream.",
                 new { Time = targetBlackListItem.BlockTo });
 
+        // Mark as watching stream
         liveStreamManager.WatchLiveStream(viewer);
 
-        await Task.CompletedTask;
+        // Add chat and notify for host
+        var @event = new OnLiveStreamJoinedEvent(request.StreamKey, viewer);
+        await eventDispatcher.Publish(@event, ct);
+
         return Unit.Value;
     }
 }

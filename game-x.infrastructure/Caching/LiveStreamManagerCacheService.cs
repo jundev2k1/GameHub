@@ -180,6 +180,15 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         return Get<Dictionary<string, string[]>>(viewerListCacheKey) ?? [];
     }
 
+    public string[] GetViewerDevicesByViewerId(string streamKey, string viewerId)
+    {
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers";
+        var targetViewer = GetAllViewersByStreamKey(streamKey)
+            .FirstOrDefault(kvp => kvp.Key == viewerId);
+
+        return targetViewer.Value;
+    }
+
     public LiveStreamViewerDto[] GetAllViewerInfosByStreamKey(string streamKey)
     {
         var allKeys = GetAllViewersByStreamKey(streamKey);
