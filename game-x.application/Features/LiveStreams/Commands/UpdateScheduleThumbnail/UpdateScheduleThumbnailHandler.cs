@@ -13,6 +13,7 @@ public sealed class UpdateScheduleThumbnailHandler(
     IUnitOfWork unitOfWork,
     IFileStorageService storageService,
     IFileManagerCacheService fileManagerCache,
+    ILiveStreamManagerCacheService liveStreamManager,
     IUserAccessor userAccessor) : ICommandHandler<UpdateScheduleThumbnailCommand, UpdateScheduleThumbnailResult>
 {
     public async Task<UpdateScheduleThumbnailResult> Handle(UpdateScheduleThumbnailCommand request, CancellationToken ct = default)
@@ -36,6 +37,8 @@ public sealed class UpdateScheduleThumbnailHandler(
         // Refresh cache and get new url
         await fileManagerCache.RefreshImage(schedule!.Thumbnail!, ct: ct);
         var thumbnail = await fileManagerCache.GetImageUrl(schedule!.Thumbnail!, ct: ct);
+        RefreshLiveStreamCache(schedule.StreamKey, schedule.Thumbnail!.Id, thumbnail?.Url);
+
         return new UpdateScheduleThumbnailResult(thumbnail!.FileName, thumbnail.Url);
     }
 
@@ -62,5 +65,14 @@ public sealed class UpdateScheduleThumbnailHandler(
             newFile.ObjectName,
             newFile.MimeType,
             ct);
+    }
+
+    private void RefreshLiveStreamCache(string streamKey, int thumbnailId, string? thumbnailUrl)
+    {
+        var streamInfo = liveStreamManager.GetLiveStreamStatus(streamKey);
+        if (streamInfo is null) return;
+
+        streamInfo.ThumbnailId = thumbnailId;
+        streamInfo.Thumbnail = thumbnailUrl;
     }
 }

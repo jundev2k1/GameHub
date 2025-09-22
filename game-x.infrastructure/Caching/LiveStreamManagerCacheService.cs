@@ -247,7 +247,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         var result = allMessageKeys
             .Skip(skipCount)
             .Take(count)
-            .Select(kvp => GetMessageDetail(streamKey, kvp.MessageId, ct))
+            .Select(kvp => GetMessageDetail(streamKey, kvp.MessageId))
             .Where(dto => dto != null)
             .ToArray();
         return result!;
