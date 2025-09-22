@@ -1,6 +1,8 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.LiveStream;
+using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.LiveStreams.Dtos;
 using game_x.application.Features.LiveStreams.Enum;
@@ -11,7 +13,8 @@ public sealed class PerformActionHandler(
     IUserAccessor userAccessor,
     ILiveStreamRepo liveStreamRepo,
     ILiveStreamManagerCacheService liveStreamManager,
-    ISrsService srsService) : ICommandHandler<PerformActionCommand>
+    ISrsService srsService,
+    ILiveStreamHubService liveStreamHub) : ICommandHandler<PerformActionCommand>
 {
     public async Task<Unit> Handle(PerformActionCommand request, CancellationToken ct = default)
     {
@@ -54,23 +57,23 @@ public sealed class PerformActionHandler(
                 break;
 
             case PerformActionEnum.Unkick:
-                UnkickViewer(targetSchedule.StreamKey, request.ViewerId!);
+                await UnkickViewer(targetSchedule.StreamKey, request.ViewerId!);
                 break;
 
             case PerformActionEnum.Mute:
-                MuteViewer(targetSchedule.StreamKey, targetViewer, request.BlockTime!.Value, request.Reason!.Value);
+                await MuteViewer(targetSchedule.StreamKey, targetViewer, request.BlockTime!.Value, request.Reason!.Value);
                 break;
 
             case PerformActionEnum.Unmute:
-                UnmuteViewer(targetSchedule.StreamKey, request.ViewerId!);
+                await UnmuteViewer(targetSchedule.StreamKey, request.ViewerId!);
                 break;
 
             case PerformActionEnum.BlockDonation:
-                BlockDonation(targetSchedule.StreamKey, targetViewer, request.BlockTime!.Value, request.Reason!.Value);
+                await BlockDonation(targetSchedule.StreamKey, targetViewer, request.BlockTime!.Value, request.Reason!.Value);
                 break;
 
             case PerformActionEnum.UnblockDonation:
-                UnblockDonation(targetSchedule.StreamKey, request.ViewerId!);
+                await UnblockDonation(targetSchedule.StreamKey, request.ViewerId!);
                 break;
 
             default:
@@ -94,14 +97,26 @@ public sealed class PerformActionHandler(
 
         // Kick the viewer from SRS
         await srsService.KickClientAsync(viewer.ClientId);
+
+        // Notify the viewer via SignalR
+        await liveStreamHub.PerformActionMember(
+            streamKey,
+            blackListItem.UserId,
+            new LiveStreamBanInfo { Action = PerformActionEnum.Kick, BanUntil = blackListItem.BlockTo, Reason = reason });
     }
 
-    private void UnkickViewer(string streamKey, string viewerId)
+    private async Task UnkickViewer(string streamKey, string viewerId)
     {
         liveStreamManager.RemoveBlackList(streamKey, viewerId, BlackListAction.View);
+
+        // Notify the viewer via SignalR
+        await liveStreamHub.PerformActionMember(
+            streamKey,
+            viewerId,
+            new LiveStreamBanInfo { Action = PerformActionEnum.Unkick, BanUntil = null, Reason = null });
     }
 
-    private void MuteViewer(string streamKey, LiveStreamViewerDto viewer, int minutes, BlockReasonEnum reason)
+    private async Task MuteViewer(string streamKey, LiveStreamViewerDto viewer, int minutes, BlockReasonEnum reason)
     {
         var blackListItem = new BlackListItemDto
         {
@@ -112,14 +127,26 @@ public sealed class PerformActionHandler(
             Reason = reason,
         };
         liveStreamManager.AddBlackList(streamKey, blackListItem);
+
+        // Notify the viewer via SignalR
+        await liveStreamHub.PerformActionMember(
+            streamKey,
+            blackListItem.UserId,
+            new LiveStreamBanInfo { Action = PerformActionEnum.Mute, BanUntil = blackListItem.BlockTo, Reason = reason });
     }
 
-    private void UnmuteViewer(string streamKey, string viewerId)
+    private async Task UnmuteViewer(string streamKey, string viewerId)
     {
         liveStreamManager.RemoveBlackList(streamKey, viewerId, BlackListAction.Chat);
+
+        // Notify the viewer via SignalR
+        await liveStreamHub.PerformActionMember(
+            streamKey,
+            viewerId,
+            new LiveStreamBanInfo { Action = PerformActionEnum.Unmute, BanUntil = null, Reason = null });
     }
 
-    private void BlockDonation(string streamKey, LiveStreamViewerDto viewer, int minutes, BlockReasonEnum reason)
+    private async Task BlockDonation(string streamKey, LiveStreamViewerDto viewer, int minutes, BlockReasonEnum reason)
     {
         var blackListItem = new BlackListItemDto
         {
@@ -130,10 +157,22 @@ public sealed class PerformActionHandler(
             Reason = reason,
         };
         liveStreamManager.AddBlackList(streamKey, blackListItem);
+
+        // Notify the viewer via SignalR
+        await liveStreamHub.PerformActionMember(
+            streamKey,
+            blackListItem.UserId,
+            new LiveStreamBanInfo { Action = PerformActionEnum.BlockDonation, BanUntil = blackListItem.BlockTo, Reason = reason });
     }
 
-    private void UnblockDonation(string streamKey, string viewerId)
+    private async Task UnblockDonation(string streamKey, string viewerId)
     {
         liveStreamManager.RemoveBlackList(streamKey, viewerId, BlackListAction.Donate);
+
+        // Notify the viewer via SignalR
+        await liveStreamHub.PerformActionMember(
+            streamKey,
+            viewerId,
+            new LiveStreamBanInfo { Action = PerformActionEnum.UnblockDonation, BanUntil = null, Reason = null });
     }
 }
