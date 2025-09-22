@@ -130,9 +130,6 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         var viewerCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers:{viewer.Token}";
         Set(viewerCacheKey, viewer);
-
-        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers";
-        Set(viewerListCacheKey, new Dictionary<string, string[]>());
     }
 
     public void WatchLiveStream(LiveStreamViewerDto viewer)
