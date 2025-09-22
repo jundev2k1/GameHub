@@ -1,10 +1,10 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.LiveStream;
 using game_x.application.Exceptions;
 using game_x.application.Features.LiveStreams.Commands.PerformAction;
 using game_x.application.Features.LiveStreams.Dtos;
-using game_x.application.Features.LiveStreams.Enum;
 using game_x.application.Features.LiveStreams.Queries.GetViewersByStream;
 using game_x.share.Extensions;
 using MediatR;
@@ -18,13 +18,19 @@ public interface ILiveStreamHub
 {
     Task NotifyMessageFailed(MessageFailedSignalDto signalDto);
 
-    Task OnMemberAction();
+    Task OnMemberAction(LiveStreamBanInfo banInfo);
 
     Task OnStreamReconnected();
 
     Task OnStreamDisconnected();
 
-    Task OnStreamCanceled(BlockReasonEnum reason);
+    Task OnStreamCanceled(string reason);
+
+    Task OnUserJoined(LiveStreamViewerInfoDto viewer);
+
+    Task OnUserLeft(string viewerId);
+
+    Task OnViewChange(int viewCount);
 
     Task ReceiveViewerBatch(LiveStreamViewerInfoDto[] viewers);
 
@@ -53,11 +59,13 @@ public sealed class LiveStreamHub(
         var streamInfo = liveStreamManager.GetLiveStreamStatus(streamKey!)
             ?? throw new ForbiddenException("Stream not found.");
 
+        // Add to groups, one for all members, one for the specific member
         await Groups.AddToGroupAsync(Context.ConnectionId, $"stream-{streamKey}");
         await Groups.AddToGroupAsync(Context.ConnectionId, $"stream-{streamKey}-member-{userId}");
 
+        // If the user is the host, add to host group
         if (userId == streamInfo.AssignedTo?.Id)
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"stream-{streamKey}-host-{userId}");
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"stream-{streamKey}-host");
 
         logger.LogInformation("LiveStreamHub {StreamKey} connected: {UserId}", streamKey!, userId);
         await base.OnConnectedAsync();
