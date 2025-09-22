@@ -92,7 +92,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         var streamDetailCacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
         Remove(streamDetailCacheKey);
 
-        var viewerListCacheKey = $"{LiveStreamPrefix}{streamKey}:viewers";
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers";
         var allViewersByStreamKey = GetAllViewersByStreamKey(streamKey);
         foreach (var viewerId in allViewersByStreamKey)
         {
@@ -118,7 +118,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
     #region Viewer Management
     public LiveStreamViewerDto? GetViewerInfo(string streamKey, string token)
     {
-        var viewerCacheKey = $"{LiveStreamPrefix}{streamKey}:viewers:{token}";
+        var viewerCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers:{token}";
         return Get<LiveStreamViewerDto?>(viewerCacheKey);
     }
 
@@ -128,8 +128,11 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         viewer.JoinAt = null;
         viewer.OutAt = null;
 
-        var viewerCacheKey = $"{LiveStreamPrefix}{viewer.StreamKey}:viewers:{viewer.Token}";
+        var viewerCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers:{viewer.Token}";
         Set(viewerCacheKey, viewer);
+
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers";
+        Set(viewerListCacheKey, new Dictionary<string, string[]>());
     }
 
     public void WatchLiveStream(LiveStreamViewerDto viewer)
@@ -140,7 +143,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
             viewer.JoinAt = DateTime.UtcNow;
 
         // Store viewer info
-        var viewerCacheKey = $"{LiveStreamPrefix}{viewer.StreamKey}:viewers:{viewer.Token}";
+        var viewerCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers:{viewer.Token}";
         Set(viewerCacheKey, viewer);
 
         // Update viewer list for the stream
@@ -151,14 +154,14 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         var targetViewersArray = updatedViewers.FirstOrDefault(kvp => kvp.Key == viewer.ViewerId).Value ?? [];
         updatedViewers[viewer.ViewerId] = [.. targetViewersArray, viewer.Token];
-        var viewerListCacheKey = $"{LiveStreamPrefix}{viewer.StreamKey}:viewers";
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers";
         Set(viewerListCacheKey, updatedViewers);
     }
 
     public void UnwatchLiveStream(LiveStreamViewerDto viewer)
     {
         // Retrieve viewer info
-        var viewersKey = $"{LiveStreamPrefix}{viewer.StreamKey}:viewers:{viewer.Token}";
+        var viewersKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers:{viewer.Token}";
 
         // Mark viewer as not watching
         viewer.IsWatching = false;
@@ -170,13 +173,13 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         var targetViewersArray = updatedViewers.FirstOrDefault(kvp => kvp.Key == viewer.ViewerId).Value ?? [];
         updatedViewers[viewer.ViewerId] = [.. targetViewersArray.Where(t => t != viewer.Token)];
-        var viewerListCacheKey = $"{LiveStreamPrefix}{viewer.StreamKey}:viewers";
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers";
         Set(viewerListCacheKey, updatedViewers);
     }
 
     public Dictionary<string, string[]> GetAllViewersByStreamKey(string streamKey)
     {
-        var viewerListCacheKey = $"{LiveStreamPrefix}{streamKey}:viewers";
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers";
         return Get<Dictionary<string, string[]>>(viewerListCacheKey) ?? [];
     }
 
@@ -186,7 +189,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         var viewers = allKeys
             .SelectMany(kvp => kvp.Value)
             .Select(token => Get<LiveStreamViewerDto>(
-                $"{LiveStreamPrefix}{streamKey}:viewers:{token}"))
+                $"{LiveStreamPrefix}streams:{streamKey}:viewers:{token}"))
             .Where(dto => dto != null)
             .ToArray();
         return viewers!;
@@ -194,7 +197,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
     public void RemoveViewersByStreamKey(string streamKey)
     {
-        var viewerListCacheKey = $"{LiveStreamPrefix}{streamKey}:viewers";
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers";
         var allViewersByStreamKey = GetAllViewersByStreamKey(streamKey);
         foreach (var viewerId in allViewersByStreamKey)
         {
@@ -214,20 +217,20 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
     #region Chat Management
     public void InitMessagesForStream(string streamKey, CancellationToken ct = default)
     {
-        var cacheKey = $"{LiveStreamPrefix}{streamKey}:messages";
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}:messages";
         Set(cacheKey, new Dictionary<Guid, DateTime>());
     }
 
     public Dictionary<Guid, DateTime> GetAllMessageKey(string streamKey)
     {
-        var cacheKey = $"{LiveStreamPrefix}{streamKey}:messages";
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}:messages";
         var result = Get<Dictionary<Guid, DateTime>>(cacheKey) ?? [];
         return result;
     }
 
     public LiveStreamChatMessageDto? GetMessageDetail(string streamKey, Guid messageId, CancellationToken ct = default)
     {
-        var messageCacheKey = $"{LiveStreamPrefix}{streamKey}:messages:{messageId}";
+        var messageCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:messages:{messageId}";
         return Get<LiveStreamChatMessageDto?>(messageCacheKey);
     }
 
