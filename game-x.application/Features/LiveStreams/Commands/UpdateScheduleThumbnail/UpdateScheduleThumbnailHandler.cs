@@ -30,9 +30,10 @@ public sealed class UpdateScheduleThumbnailHandler(
                 throw new ForbiddenException("You are not allowed to update this livestream.");
 
             await UploadNewThumbnail(stream, request.FileUpload, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+
             schedule = stream;
         }, ct);
-        await unitOfWork.SaveChangesAsync(ct);
 
         // Refresh cache and get new url
         await fileManagerCache.RefreshImage(schedule!.Thumbnail!, ct: ct);
