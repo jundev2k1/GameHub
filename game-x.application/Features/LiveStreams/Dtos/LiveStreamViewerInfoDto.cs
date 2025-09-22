@@ -4,7 +4,7 @@ public sealed class LiveStreamViewerInfoDto
 {
     public string ViewerId { get; set; } = string.Empty;
     public string ViewerName { get; set; } = string.Empty;
-    public string ViewerAvatar { get; set; } = string.Empty;
+    public string? ViewerAvatar { get; set; } = string.Empty;
     public ViewerDeviceInfoDto[] DeviceInfos { get; set; } = [];
     public bool IsWatching => DeviceInfos.Any(di => di.IsWatching);
     public DateTime? JoinAt => DeviceInfos.Length > 0 ? DeviceInfos.Min(di => di.JoinAi) : null;

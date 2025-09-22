@@ -42,6 +42,7 @@ services:
 
       - SrsSettings__Host=${Srs_Host}
       - SrsSettings__StreamServer=${Srs_StreamServer}
+      - SrsSettings__ClientUrl=${Srs_ClientUrl}
 
       - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
       - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}

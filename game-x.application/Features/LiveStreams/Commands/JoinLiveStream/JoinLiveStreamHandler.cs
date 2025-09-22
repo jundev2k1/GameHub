@@ -11,6 +11,7 @@ namespace game_x.application.Features.LiveStreams.Commands.JoinLiveStream;
 public sealed class JoinLiveStreamHandler(
     ILiveStreamRepo liveStreamRepo,
     ILiveStreamManagerCacheService liveStreamManager,
+    IFileManagerCacheService fileManagerCache,
     IUserAccessor userAccessor,
     IUserRepo userRepo,
     IOptions<SrsSettings> options) : ICommandHandler<JoinLiveStreamCommand, JoinLiveStreamResult>
@@ -77,6 +78,9 @@ public sealed class JoinLiveStreamHandler(
     {
         var targetUser = await userRepo.GetUserByIdAsync(userAccessor.GetUserId());
         var token = GenerateToken();
+        var avatarInfo = targetUser.Avatar != null
+            ? await fileManagerCache.GetImageUrl(targetUser.Avatar)
+            : null;
         var viewerDto = new LiveStreamViewerDto
         {
             StreamKey = schedule.StreamKey,
@@ -84,7 +88,7 @@ public sealed class JoinLiveStreamHandler(
             Url = GenerateUrl(schedule.StreamKey, token),
             ViewerId = targetUser.Id,
             ViewerName = targetUser.Nickname,
-            ViewerAvatar = string.Empty,
+            ViewerAvatar = avatarInfo?.Url,
             DeviceInfo = userAccessor.GetDeviceInfo()
         };
         liveStreamManager.InitViewerLiveStream(viewerDto);
@@ -100,5 +104,5 @@ public sealed class JoinLiveStreamHandler(
                 .Replace('/', '_');
 
     private string GenerateUrl(string streamKey, string token) =>
-        $"{options.Value.Host}/{streamKey}.flv?token={token}";
+        $"{options.Value.ClientUrl}/{streamKey}.flv?token={token}";
 }
