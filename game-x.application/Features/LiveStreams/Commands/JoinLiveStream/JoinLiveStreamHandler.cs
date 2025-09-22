@@ -68,6 +68,7 @@ public sealed class JoinLiveStreamHandler(
             streamInfo.LiveAt ?? DateTime.UtcNow,
             streamInfo.AssignedTo?.Id ?? string.Empty,
             streamInfo.AssignedTo?.Nickname ?? string.Empty,
+            streamInfo.AssignedTo?.Avatar ?? string.Empty,
             liveStreamManager.GetViewerCount(streamInfo.StreamKey),
             viewer.Url);
     }
