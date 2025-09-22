@@ -16,7 +16,7 @@ public sealed class PerformActionHandler(
     public async Task<Unit> Handle(PerformActionCommand request, CancellationToken ct = default)
     {
         // Check if the stream exists and is live
-        var targetSchedule = await liveStreamRepo.GetByIdAsync(request.StreamId!.Value, ct);
+        var targetSchedule = await liveStreamRepo.GetByStreamKeyAsync(request.StreamKey!, ct);
         if (targetSchedule.AssignedId != userAccessor.GetUserId())
             throw new BadRequestException("You are not the owner of this stream.");
 

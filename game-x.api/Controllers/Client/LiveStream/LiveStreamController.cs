@@ -27,17 +27,6 @@ public sealed class LiveStreamController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPost("{streamId:guid}/viewers/{viewerId}/actions")]
-    public async Task<IActionResult> PerformActionAsync(
-        Guid streamId,
-        string viewerId,
-        [FromBody] PerformActionCommand command)
-    {
-        await Mediator.Send(command with { StreamId = streamId, ViewerId = viewerId });
-        return ApiResponseFactory.NoContent();
-    }
-
-    [Authorize(Roles = AppRoles.User)]
     [HttpGet("{streamKey}/chats")]
     public async Task<IActionResult> GetChatsInStreamAsync(string streamKey, [FromQuery] GetChatMessageInStreamQuery query)
     {
