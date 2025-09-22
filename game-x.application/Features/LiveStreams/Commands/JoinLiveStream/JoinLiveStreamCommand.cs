@@ -10,5 +10,5 @@ public record JoinLiveStreamResult(
     string TalentId,
     string TalentName,
     string TalentAvatar,
-    int ViewerCount,
+    int ViewCount,
     string Url);
