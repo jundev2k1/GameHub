@@ -212,6 +212,32 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         }
         Remove(viewerListCacheKey);
     }
+    #endregion
+
+    #region View management
+    public string[] GetViewerChangeList()
+    {
+        var cacheKey = $"{LiveStreamPrefix}viewer-change-list";
+        return Get<string[]>(cacheKey) ?? [];
+    }
+
+    public void CleanViewerChangeList()
+    {
+        var cacheKey = $"{LiveStreamPrefix}viewer-change-list";
+        Set(cacheKey, Array.Empty<string>());
+    }
+
+    public void MarkAsStreamViewChange(string streamKey)
+    {
+        var cacheKey = $"{LiveStreamPrefix}viewer-change-list";
+        var streamKeys = GetViewerChangeList();
+
+        if (!streamKeys.Contains(streamKey))
+        {
+            string[] newList = [.. streamKeys, streamKey];
+            Set(cacheKey, newList);
+        }
+    }
 
     public int GetViewerCount(string streamKey)
     {

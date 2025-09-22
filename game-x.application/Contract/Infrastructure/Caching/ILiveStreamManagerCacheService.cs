@@ -38,6 +38,14 @@ public interface ILiveStreamManagerCacheService
     string[] GetViewerDevicesByViewerId(string streamKey, string viewerId);
 
     void RemoveViewersByStreamKey(string streamKey);
+    #endregion
+
+    #region View management
+    string[] GetViewerChangeList();
+
+    void CleanViewerChangeList();
+
+    void MarkAsStreamViewChange(string streamKey);
 
     int GetViewerCount(string streamKey);
     #endregion

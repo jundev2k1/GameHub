@@ -16,6 +16,9 @@ public sealed class OnLiveStreamJoinedHandler(
         var streamKey = @event.StreamKey;
         var viewer = @event.Viewer;
 
+        // Mark as stream view change to update viewer count
+        liveStreamManager.MarkAsStreamViewChange(streamKey);
+
         await CreateStreamMessage(streamKey, viewer, ct);
         await NotifyUserJoinedForHost(streamKey, viewer);
     }
