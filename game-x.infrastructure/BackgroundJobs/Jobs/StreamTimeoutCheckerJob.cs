@@ -2,7 +2,6 @@
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Jobs;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.LiveStreams.Dtos;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 
@@ -23,43 +22,45 @@ public sealed class StreamTimeoutCheckerJob(
 
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
-        // Get all streams that are offline for more than StreamTimeoutMinutes
-        var allStreams = liveStreamManager.GetAllStreamKeys()
+        var expiredStreams = await liveStreamRepo.GetExpiredStreams(ct);
+
+        // Get all active streams from cache which are live or offline less than timeout minutes
+        var allActiveStreams = liveStreamManager.GetAllStreamKeys()
             .Select(liveStreamManager.GetLiveStreamStatus)
-            .Where(s => s is not null)
-            .ToArray();
-        var endedStreams = allStreams
-            .Where(s => !s!.IsLive
+            .Where(s => s is not null
                 && s.EndTime > DateTime.UtcNow
-                && s.OfflineAt.HasValue
-                && (DateTime.UtcNow - s.OfflineAt.Value).Minutes > StreamTimeoutMinutes)
+                && (s.IsLive
+                    || (s.OfflineAt.HasValue && (DateTime.UtcNow - s.OfflineAt.Value).Minutes < StreamTimeoutMinutes)))
+            .Select(s => s!.Id)
+            .ToArray();
+        var endedStreams = expiredStreams
+            .Where(s => !allActiveStreams.Contains(s.PublicId))
             .ToArray();
         if (endedStreams.Length == 0) return;
 
         foreach (var streamList in endedStreams.Chunk(500))
         {
             // Update stream status to ended
-            (Guid Id, DateTime EndTime)[] streamInfos =
-                [.. streamList.Select(si => (si!.Id, si.OfflineAt! ?? si.EndTime))];
+            var streamIds = streamList.Select(s => s.PublicId).ToArray();
             await unitOfWork.WithTransactionAsync(async () =>
             {
-                await liveStreamRepo.BulkUpdateEndedStreams(streamInfos, ct);
+                await liveStreamRepo.BulkUpdateEndedStreams(streamIds, ct);
             }, ct);
 
             // Cleanup cache
-            CleanupCaches(streamList!);
+            CleanupCaches([.. streamList.Select(s => s.StreamKey)]);
 
             // Log info
             logger.LogInformation($"Stream timeout checker job ended {streamList.Length} streams.");
         }
     }
 
-    private void CleanupCaches(LiveStreamStatusDto[] streams)
+    private void CleanupCaches(string[] streamKeys)
     {
-        foreach (var stream in streams)
+        foreach (var streamKey in streamKeys)
         {
-            liveStreamManager.RemoveLiveStream(stream.StreamKey);
-            liveStreamManager.RemoveViewersByStreamKey(stream.StreamKey);
+            liveStreamManager.RemoveLiveStream(streamKey);
+            liveStreamManager.RemoveViewersByStreamKey(streamKey);
         }
     }
 }

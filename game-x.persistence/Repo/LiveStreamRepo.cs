@@ -41,6 +41,34 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             pageSize);
     }
 
+    public async Task<LivestreamSchedule[]> GetExpiredStreams(CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+        var query = context.LiveStreamSchedules
+            .AsNoTracking()
+            .Where(ls => ls.Status != LiveStreamStatus.Ended
+                && ls.Status != LiveStreamStatus.Cancelled
+                && ls.EndTime > now)
+            .AsQueryable();
+        var count = await query.CountAsync(ct);
+        if (count <= 500) return await query.ToArrayAsync(ct);
+
+        var result = new List<LivestreamSchedule>();
+        var index = 0;
+        var loopCount = (int)Math.Ceiling((decimal)count / 500);
+        while (index < loopCount)
+        {
+            var chunk = await query
+                .Skip(result.Count)
+                .Take(500)
+                .ToArrayAsync(ct);
+            result.AddRange(chunk);
+
+            index++;
+        }
+        return [.. result];
+    }
+
     public async Task<LivestreamSchedule> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await context.LiveStreamSchedules
@@ -106,17 +134,12 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
         await updateAction.Invoke(targetSchedule);
     }
 
-    public async Task BulkUpdateEndedStreams((Guid Id, DateTime EndTime)[] streamInfos, CancellationToken ct = default)
+    public async Task BulkUpdateEndedStreams(Guid[] streamIds, CancellationToken ct = default)
     {
-        var scheduleIds = streamInfos.Select(si => si.Id);
         var targetSchedules = await context.LiveStreamSchedules
-            .Where(ls => scheduleIds.Contains(ls.PublicId))
+            .Where(ls => streamIds.Contains(ls.PublicId))
             .ToListAsync(ct);
-        targetSchedules.ForEach(schedule =>
-        {
-            var (id, endTime) = streamInfos.FirstOrDefault(si => si.Id == schedule.PublicId);
-            schedule.EndStream(endTime);
-        });
+        targetSchedules.ForEach(schedule => schedule.EndStream());
         await context.BulkUpdateAsync(targetSchedules, cancellationToken: ct);
     }
 

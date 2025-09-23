@@ -95,13 +95,23 @@ public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
         StartAt = DateTime.UtcNow;
     }
 
+    public void DisconnectStream()
+    {
+        if (Status != LiveStreamStatus.Live)
+            throw new InvalidOperationException("Only live streams can be disconnected.");
+
+        EndAt = DateTime.UtcNow;
+    }
+
     public void EndStream(DateTime? endTime = null)
     {
         if (Status != LiveStreamStatus.Live)
             throw new InvalidOperationException("Only live streams can be ended.");
 
         Status = LiveStreamStatus.Ended;
-        EndAt = endTime ?? DateTime.UtcNow;
+
+        if (!EndAt.HasValue)
+            EndAt = endTime ?? DateTime.UtcNow;
     }
 
     public void CancelStream(string reason)

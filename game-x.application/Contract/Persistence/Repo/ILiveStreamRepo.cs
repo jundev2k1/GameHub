@@ -1,5 +1,4 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
-using game_x.application.Features.LiveStreams.Dtos;
 
 namespace game_x.application.Contract.Persistence.Repo;
 
@@ -10,6 +9,8 @@ public interface ILiveStreamRepo
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default);
+
+    Task<LivestreamSchedule[]> GetExpiredStreams(CancellationToken ct = default);
 
     Task<LivestreamSchedule> GetByIdAsync(Guid id, CancellationToken ct = default);
 
@@ -24,7 +25,7 @@ public interface ILiveStreamRepo
         Func<LivestreamSchedule, Task> updateAction,
         CancellationToken ct = default);
 
-    Task BulkUpdateEndedStreams((Guid Id, DateTime EndTime)[] streamInfos, CancellationToken ct = default);
+    Task BulkUpdateEndedStreams(Guid[] streamIds, CancellationToken ct = default);
 
     Task DeleteAsync(Guid scheduleId, CancellationToken ct = default);
 }
