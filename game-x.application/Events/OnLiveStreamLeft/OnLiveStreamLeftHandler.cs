@@ -36,7 +36,8 @@ public sealed class OnLiveStreamLeftHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         // Add message to cache in stream
-        var chatMessageDto = chatMessage.Adapt<LiveStreamChatMessageDto>();
+        var newMessage = await liveStreamChatRepo.GetByIdAsync(chatMessage.PublicId, ct);
+        var chatMessageDto = newMessage.Adapt<LiveStreamChatMessageDto>();
         liveStreamManager.AddMessageToStream(streamKey, chatMessageDto);
         await liveStreamHub.SendChatMessage(streamKey, chatMessageDto);
     }

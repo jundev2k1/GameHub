@@ -6,6 +6,7 @@ public record JoinLiveStreamResult(
     string Title,
     string? Description,
     string? Thumbnail,
+    string StreamKey,
     DateTime LiveAt,
     string TalentId,
     string TalentName,

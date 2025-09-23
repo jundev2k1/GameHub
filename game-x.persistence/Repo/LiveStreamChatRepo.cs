@@ -37,6 +37,16 @@ public sealed class LiveStreamChatRepo(GameXContext context) : ILiveStreamChatRe
             pageSize);
     }
 
+    public async Task<LiveStreamChatMessage> GetByIdAsync(Guid id, CancellationToken ct = default)
+    {
+        return await context.LiveStreamChatMessages
+            .AsNoTracking()
+            .Include(ls => ls.LiveStream)
+            .Include(ls => ls.Sender)
+            .FirstOrDefaultAsync(ls => ls.PublicId == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+    }
+
     public async Task CreateAsync(LiveStreamChatMessage message, CancellationToken ct = default)
     {
         await context.LiveStreamChatMessages.AddAsync(message, ct);

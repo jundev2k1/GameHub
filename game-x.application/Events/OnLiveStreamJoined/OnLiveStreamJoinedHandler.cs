@@ -36,7 +36,10 @@ public sealed class OnLiveStreamJoinedHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         // Add message to cache in stream
-        liveStreamManager.AddMessageToStream(streamKey, chatMessage.Adapt<LiveStreamChatMessageDto>());
+        var newMessage = await liveStreamChatRepo.GetByIdAsync(chatMessage.PublicId, ct);
+        var chatMessageDto = newMessage.Adapt<LiveStreamChatMessageDto>();
+        liveStreamManager.AddMessageToStream(streamKey, chatMessageDto);
+        await liveStreamHub.SendChatMessage(streamKey, chatMessageDto);
     }
 
     private async Task NotifyUserJoinedForHost(string streamKey, LiveStreamViewerDto viewer)

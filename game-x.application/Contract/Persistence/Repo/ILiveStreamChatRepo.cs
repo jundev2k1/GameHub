@@ -10,6 +10,8 @@ public interface ILiveStreamChatRepo
         int pageSize = 20,
         CancellationToken ct = default);
 
+    Task<LiveStreamChatMessage> GetByIdAsync(Guid id, CancellationToken ct = default);
+
     Task CreateAsync(LiveStreamChatMessage message, CancellationToken ct = default);
 
     Task DeleteAsync(Guid messageId, CancellationToken ct = default);

@@ -66,6 +66,7 @@ public sealed class JoinLiveStreamHandler(
             streamInfo.Title,
             streamInfo.Description,
             streamInfo.Thumbnail,
+            streamInfo.StreamKey,
             streamInfo.LiveAt ?? DateTime.UtcNow,
             streamInfo.AssignedTo?.Id ?? string.Empty,
             streamInfo.AssignedTo?.Nickname ?? string.Empty,
