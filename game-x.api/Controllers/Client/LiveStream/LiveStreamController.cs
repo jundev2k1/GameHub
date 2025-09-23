@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.LiveStreams.Commands.JoinLiveStream;
+﻿using game_x.api.Dtos;
+using game_x.application.Features.LiveStreams.Commands.JoinLiveStream;
 using game_x.application.Features.LiveStreams.Queries.GetChatMessageInStream;
 
 namespace game_x.api.Controllers.Client.LiveStream;
@@ -17,9 +18,14 @@ public sealed class LiveStreamController : BaseApiController
 
     [Authorize(Roles = AppRoles.User)]
     [HttpGet("{streamKey}/chats")]
-    public async Task<IActionResult> GetChatsInStreamAsync(string streamKey, [FromQuery] GetChatMessageInStreamQuery query)
+    public async Task<IActionResult> GetChatsInStreamAsync(string streamKey, [FromQuery] GetChatMessageInStreamRequest request)
     {
-        var result = await Mediator.Send(query with { StreamKey = streamKey });
+        var query = new GetChatMessageInStreamQuery(
+            streamKey,
+            request.MessageId,
+            request.IsNext,
+            request.PageSize);
+        var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
 }
