@@ -22,7 +22,8 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
     {
         if (string.IsNullOrWhiteSpace(senderId))
             throw new ArgumentException("SenderId cannot be null or empty.", nameof(senderId));
-        if (string.IsNullOrWhiteSpace(message))
+
+        if (messageType == LiveStreamChatMessageType.UserMessage && message.IsNullOrWhiteSpace())
             throw new ArgumentException("Message cannot be null or empty.", nameof(message));
 
         if (messageType == LiveStreamChatMessageType.Donation)
