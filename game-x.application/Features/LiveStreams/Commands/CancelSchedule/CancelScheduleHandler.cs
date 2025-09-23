@@ -1,5 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
+using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
 namespace game_x.application.Features.LiveStreams.Commands.CancelSchedule;
@@ -8,7 +9,8 @@ public sealed class CancelScheduleHandler(
     IUnitOfWork unitOfWork,
     ILiveStreamRepo liveStreamRepo,
     ILiveStreamManagerCacheService liveStreamManager,
-    ISrsService srsService) : ICommandHandler<CancelScheduleCommand>
+    ISrsService srsService,
+    ILiveStreamHubService liveStreamHub) : ICommandHandler<CancelScheduleCommand>
 {
     public async Task<Unit> Handle(CancelScheduleCommand request, CancellationToken ct = default)
     {
@@ -21,6 +23,9 @@ public sealed class CancelScheduleHandler(
         }, ct);
 
         await StopStream(streamKey);
+
+        // Notify all viewers and host
+        await liveStreamHub.NotifyCancelStream(streamKey, request.Reason);
         return Unit.Value;
     }
 
