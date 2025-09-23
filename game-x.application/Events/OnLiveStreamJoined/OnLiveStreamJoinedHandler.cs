@@ -8,7 +8,6 @@ namespace game_x.application.Events.OnLiveStreamJoined;
 public sealed class OnLiveStreamJoinedHandler(
     ILiveStreamManagerCacheService liveStreamManager,
     IUnitOfWork unitOfWork,
-    ILiveStreamRepo liveStreamRepo,
     ILiveStreamChatRepo liveStreamChatRepo,
     ILiveStreamHubService liveStreamHub) : IApplicationEventHandler<OnLiveStreamJoinedEvent>
 {
@@ -26,9 +25,12 @@ public sealed class OnLiveStreamJoinedHandler(
 
     private async Task CreateStreamMessage(string streamKey, LiveStreamViewerDto viewer, CancellationToken ct)
     {
-        var streamSchedule = await liveStreamRepo.GetByStreamKeyAsync(streamKey, ct);
+        var streamInfo = liveStreamManager.GetLiveStreamStatus(streamKey);
+        if (streamInfo is null) return;
+
+        // Create chat message for user joined
         var chatMessage = LiveStreamChatMessage.Create(
-            streamSchedule.Id,
+            streamInfo!.LocalId,
             viewer.ViewerId,
             string.Empty,
             LiveStreamChatMessageType.UserJoined);

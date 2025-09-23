@@ -78,6 +78,14 @@ public sealed class LiveStreamHubService(IHubContext<LiveStreamHub, ILiveStreamH
         // Notify all viewers in the stream
         await hubContext.Clients
             .Group($"stream-{streamKey}")
-            .SendMessageForStream(message);
+            .OnReceiveMessage(message);
+    }
+
+    public async Task NotifyMessageFailed(string streamKey, string userId, string messageId)
+    {
+        // Notify for the viewer who sent the message
+        await hubContext.Clients
+            .Group($"stream-{streamKey}-member-{userId}")
+            .NotifyMessageFailed(messageId);
     }
 }

@@ -52,6 +52,7 @@ public sealed class PublishStreamHandler(
     {
         var streamInfo = new LiveStreamStatusDto
         {
+            LocalId = streamSetting.Id,
             Id = streamSetting.PublicId,
             Title = streamSetting.Title,
             Description = streamSetting.Description ?? string.Empty,

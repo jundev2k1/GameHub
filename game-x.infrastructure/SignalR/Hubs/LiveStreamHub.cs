@@ -5,6 +5,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos.LiveStream;
 using game_x.application.Exceptions;
 using game_x.application.Features.LiveStreams.Commands.EndStream;
 using game_x.application.Features.LiveStreams.Commands.PerformAction;
+using game_x.application.Features.LiveStreams.Commands.SendChatMessage;
 using game_x.application.Features.LiveStreams.Dtos;
 using game_x.application.Features.LiveStreams.Queries.GetViewersByStream;
 using game_x.share.Extensions;
@@ -17,7 +18,7 @@ namespace game_x.infrastructure.SignalR.Hubs;
 
 public interface ILiveStreamHub
 {
-    Task NotifyMessageFailed(MessageFailedSignalDto signalDto);
+    Task NotifyMessageFailed(string MessageId);
 
     Task OnMemberAction(LiveStreamBanInfo banInfo);
 
@@ -39,7 +40,7 @@ public interface ILiveStreamHub
 
     Task OnViewerBatchComplete();
 
-    Task SendMessageForStream(LiveStreamChatMessageDto viewer);
+    Task OnReceiveMessage(LiveStreamChatMessageDto viewer);
 }
 
 [Authorize(Roles = AppRoles.User)]
@@ -117,6 +118,16 @@ public sealed class LiveStreamHub(
             throw new ForbiddenException("Stream key is required.");
 
         var command = new EndStreamCommand(streamKey!);
+        await sender.Send(command);
+    }
+
+    public async Task SendChatMessage(LiveStreamChatMessageInputDto input)
+    {
+        var streamKey = httpContext.HttpContext?.Request.Query[StreamKeyParamKey].FirstOrDefault();
+        if (streamKey.IsNullOrWhiteSpace())
+            throw new ForbiddenException("Stream key is required.");
+
+        var command = new SendChatMessageCommand(streamKey!, input.MessageId, input.Message);
         await sender.Send(command);
     }
 }

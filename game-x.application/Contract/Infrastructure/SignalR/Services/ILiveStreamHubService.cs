@@ -22,4 +22,6 @@ public interface ILiveStreamHubService
     Task RefreshViewCount(string streamKey, int viewCount);
 
     Task SendChatMessage(string streamKey, LiveStreamChatMessageDto message);
+
+    Task NotifyMessageFailed(string streamKey, string userId, string messageId);
 }
