@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.LiveStream;
 using game_x.application.Exceptions;
+using game_x.application.Features.LiveStreams.Commands.DeleteChatMessage;
 using game_x.application.Features.LiveStreams.Commands.EndStream;
 using game_x.application.Features.LiveStreams.Commands.PerformAction;
 using game_x.application.Features.LiveStreams.Commands.SendChatMessage;
@@ -41,6 +42,8 @@ public interface ILiveStreamHub
     Task OnViewerBatchComplete();
 
     Task OnReceiveMessage(LiveStreamChatMessageDto viewer);
+
+    Task OnMessageDeleted(Guid messageId);
 }
 
 [Authorize(Roles = AppRoles.User)]
@@ -128,6 +131,16 @@ public sealed class LiveStreamHub(
             throw new ForbiddenException("Stream key is required.");
 
         var command = new SendChatMessageCommand(streamKey!, input.MessageId, input.Message);
+        await sender.Send(command);
+    }
+
+    public async Task DeleteChatMessage(Guid messageId)
+    {
+        var streamKey = httpContext.HttpContext?.Request.Query[StreamKeyParamKey].FirstOrDefault();
+        if (streamKey.IsNullOrWhiteSpace())
+            throw new ForbiddenException("Stream key is required.");
+
+        var command = new DeleteChatMessageCommand(streamKey!, messageId);
         await sender.Send(command);
     }
 }

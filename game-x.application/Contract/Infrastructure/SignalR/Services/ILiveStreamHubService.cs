@@ -24,4 +24,6 @@ public interface ILiveStreamHubService
     Task SendChatMessage(string streamKey, LiveStreamChatMessageDto message);
 
     Task NotifyMessageFailed(string streamKey, string userId, string messageId);
+
+    Task NotifyMessageDeleted(string streamKey, Guid messageId);
 }

@@ -54,7 +54,7 @@ public sealed class LiveStreamHubService(IHubContext<LiveStreamHub, ILiveStreamH
     {
         await hubContext.Clients
             .Group($"stream-{streamKey}")
-            .OnStreamCanceled(reason); ;
+            .OnStreamEnded();
     }
 
     public async Task PerformActionMember(string streamKey, string viewerId, LiveStreamBanInfo banInfo)
@@ -87,5 +87,12 @@ public sealed class LiveStreamHubService(IHubContext<LiveStreamHub, ILiveStreamH
         await hubContext.Clients
             .Group($"stream-{streamKey}-member-{userId}")
             .NotifyMessageFailed(messageId);
+    }
+
+    public async Task NotifyMessageDeleted(string streamKey, Guid messageId)
+    {
+        await hubContext.Clients
+            .Group($"stream-{streamKey}")
+            .OnMessageDeleted(messageId);
     }
 }
