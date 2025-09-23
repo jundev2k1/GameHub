@@ -15,6 +15,7 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
     public DateTime SentAt { get; private set; }
 
     public static LiveStreamChatMessage Create(
+        int streamId,
         string senderId,
         string message,
         LiveStreamChatMessageType messageType,
@@ -34,6 +35,7 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
 
         return new LiveStreamChatMessage
         {
+            LiveStreamId = streamId,
             SenderId = senderId,
             Message = message,
             MessageType = messageType,

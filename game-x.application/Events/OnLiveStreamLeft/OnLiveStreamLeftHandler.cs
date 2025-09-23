@@ -9,7 +9,8 @@ public sealed class OnLiveStreamLeftHandler(
     ILiveStreamManagerCacheService liveStreamManager,
     IUnitOfWork unitOfWork,
     ILiveStreamChatRepo liveStreamChatRepo,
-    ILiveStreamHubService liveStreamHub) : IApplicationEventHandler<OnLiveStreamLeftEvent>
+    ILiveStreamHubService liveStreamHub,
+    ILiveStreamRepo liveStreamRepo) : IApplicationEventHandler<OnLiveStreamLeftEvent>
 {
     public async Task Handle(OnLiveStreamLeftEvent @event, CancellationToken ct = default)
     {
@@ -25,7 +26,9 @@ public sealed class OnLiveStreamLeftHandler(
 
     private async Task CreateStreamMessage(string streamKey, LiveStreamViewerDto viewer, CancellationToken ct)
     {
+        var schedule = await liveStreamRepo.GetByStreamKeyAsync(streamKey, ct);
         var chatMessage = LiveStreamChatMessage.Create(
+            schedule.Id,
             viewer.ViewerId,
             string.Empty,
             LiveStreamChatMessageType.UserLeft);

@@ -31,6 +31,9 @@ public sealed class PublishStreamHandler(
         // Connect to the stream if not connected
         liveStreamManager.ConnectLiveStream(streamSetting.StreamKey);
 
+        // Notify clients that the stream is reconnected
+        await liveStreamHub.NotifyStreamReconnected(streamSetting.StreamKey);
+
         // Update stream status to live if not live
         if (streamSetting.Status == LiveStreamStatus.Live)
             return Unit.Value;
@@ -41,9 +44,6 @@ public sealed class PublishStreamHandler(
             schedule.StartStream();
             await unitOfWork.SaveChangesAsync(ct);
         }, ct);
-
-        // Notify clients that the stream is reconnected
-        await liveStreamHub.NotifyStreamReconnected(streamSetting.StreamKey);
 
         return Unit.Value;
     }
