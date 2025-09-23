@@ -1,12 +1,10 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Events.OnLiveStreamLeft;
 
 namespace game_x.application.Features.LiveStreams.Commands.StopStream;
 
 public sealed class StopStreamHandler(
     ILiveStreamManagerCacheService liveStreamManager,
-    ILiveStreamHubService liveStreamHub,
     IApplicationEventDispatcher eventDispatcher) : ICommandHandler<StopStreamCommand>
 {
     public async Task<Unit> Handle(StopStreamCommand request, CancellationToken ct = default)

@@ -57,7 +57,7 @@ public interface ILiveStreamManagerCacheService
 
     LiveStreamChatMessageDto[] GetAdjacentMessages(
         string streamKey,
-        Guid messageId,
+        Guid? messageId,
         bool isNext,
         int count = 20);
 

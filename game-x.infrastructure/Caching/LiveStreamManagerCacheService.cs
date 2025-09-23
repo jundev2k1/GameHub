@@ -260,7 +260,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         return result;
     }
 
-    public LiveStreamChatMessageDto[] GetAdjacentMessages(string streamKey, Guid messageId, bool isNext, int count = 20)
+    public LiveStreamChatMessageDto[] GetAdjacentMessages(string streamKey, Guid? messageId, bool isNext, int count = 20)
     {
         var allMessageKeys = GetAllMessageKey(streamKey)
             .Select((kvp, index) => (Index: index, MessageId: kvp.Key, SentAt: kvp.Value))
@@ -269,14 +269,14 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         if (allMessageKeys.Length == 0) return [];
 
         // Find the target message
-        var targetItem = allMessageKeys.FirstOrDefault(kvp => kvp.MessageId == messageId);
-        if (targetItem.MessageId == Guid.Empty)
-            throw new NotFoundException(nameof(messageId), messageId);
+        var targetItemIndex = messageId != null
+            ? allMessageKeys.FirstOrDefault(kvp => kvp.MessageId == messageId).Index + 1
+            : 1;
 
         // Calculate skip count based on direction
         // If isNext is true, skip 1 to move to the next item
         // If isNext is false, skip -count to move to the previous items
-        var skipCount = isNext ? 1 : -count;
+        var skipCount = targetItemIndex + (isNext ? 1 : -count);
 
         // Take adjacent messages
         var result = allMessageKeys
