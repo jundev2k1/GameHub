@@ -15,6 +15,8 @@ public interface ILiveStreamHubService
 
     Task NotifyCancelStream(string streamKey, string reason);
 
+    Task NotifyEndStream(string streamKey);
+
     Task PerformActionMember(string streamKey, string viewerId, LiveStreamBanInfo banInfo);
 
     Task RefreshViewCount(string streamKey, int viewCount);

@@ -50,6 +50,13 @@ public sealed class LiveStreamHubService(IHubContext<LiveStreamHub, ILiveStreamH
             .OnStreamCanceled(reason);
     }
 
+    public async Task NotifyEndStream(string streamKey)
+    {
+        await hubContext.Clients
+            .Group($"stream-{streamKey}")
+            .OnStreamCanceled(reason); ;
+    }
+
     public async Task PerformActionMember(string streamKey, string viewerId, LiveStreamBanInfo banInfo)
     {
         // Notify for the viewer who is banned/muted/kicked

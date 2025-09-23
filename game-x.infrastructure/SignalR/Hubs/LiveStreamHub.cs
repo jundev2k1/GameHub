@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.LiveStream;
 using game_x.application.Exceptions;
+using game_x.application.Features.LiveStreams.Commands.EndStream;
 using game_x.application.Features.LiveStreams.Commands.PerformAction;
 using game_x.application.Features.LiveStreams.Dtos;
 using game_x.application.Features.LiveStreams.Queries.GetViewersByStream;
@@ -25,6 +26,8 @@ public interface ILiveStreamHub
     Task OnStreamDisconnected();
 
     Task OnStreamCanceled(string reason);
+
+    Task OnStreamEnded();
 
     Task OnUserJoined(LiveStreamViewerInfoDto viewer);
 
@@ -105,5 +108,15 @@ public sealed class LiveStreamHub(
         }
 
         await Clients.Caller.OnViewerBatchComplete();
+    }
+
+    public async Task EndStream()
+    {
+        var streamKey = httpContext.HttpContext?.Request.Query[StreamKeyParamKey].FirstOrDefault();
+        if (streamKey.IsNullOrWhiteSpace())
+            throw new ForbiddenException("Stream key is required.");
+
+        var command = new EndStreamCommand(streamKey!);
+        await sender.Send(command);
     }
 }
