@@ -133,6 +133,18 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
 
         await updateAction.Invoke(targetSchedule);
     }
+    public async Task UpdateAsync(string streamKey, Func<LivestreamSchedule, Task> updateAction, CancellationToken ct = default)
+    {
+        var targetSchedule = await context.LiveStreamSchedules
+            .Include(ls => ls.CategoryMappings)
+            .ThenInclude(lsm => lsm.Category)
+            .Include(ls => ls.AssignedTo)
+            .Include(ls => ls.Thumbnail)
+            .FirstOrDefaultAsync(ls => ls.StreamKey == streamKey, ct)
+            ?? throw new NotFoundException(nameof(streamKey), streamKey);
+
+        await updateAction.Invoke(targetSchedule);
+    }
 
     public async Task BulkUpdateEndedStreams(Guid[] streamIds, CancellationToken ct = default)
     {

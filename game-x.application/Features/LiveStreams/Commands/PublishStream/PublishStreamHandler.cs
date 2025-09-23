@@ -58,7 +58,7 @@ public sealed class PublishStreamHandler(
             ThumbnailId = streamSetting.ThumbnailId,
             StreamKey = streamSetting.StreamKey,
             LiveAt = streamSetting.StartAt ?? DateTime.UtcNow,
-            OfflineAt = null,
+            OfflineAt = streamSetting.EndAt,
             StartTime = streamSetting.StartTime,
             EndTime = streamSetting.EndTime,
             ClientId = clientId,
