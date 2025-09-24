@@ -20,7 +20,8 @@ public sealed class LiveStreamGiftRepo(
     {
         var query = context.LiveStreamGifts
             .AsNoTracking()
-            .Include(lsg => lsg.Image)
+            .Include(lsg => lsg.Icon)
+            .Include(lsg => lsg.Animation)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -45,6 +46,8 @@ public sealed class LiveStreamGiftRepo(
     {
         return await context.LiveStreamGifts
             .AsNoTracking()
+            .Include(lsg => lsg.Icon)
+            .Include(lsg => lsg.Animation)
             .FirstOrDefaultAsync(lsg => lsg.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
     }
@@ -53,14 +56,21 @@ public sealed class LiveStreamGiftRepo(
     {
         var target = await context.LiveStreamGifts
             .AsNoTracking()
+            .Include(lsg => lsg.Icon)
+            .Include(lsg => lsg.Animation)
             .FirstOrDefaultAsync(g => g.PublicId == id && g.IsDeleted == false, ct)
             ?? throw new NotFoundException(nameof(id), id);
-        var dto = target.Adapt<LiveStreamGiftDetailDto>();
 
-        if (target.Image != null)
+        var dto = target.Adapt<LiveStreamGiftDetailDto>();
+        if (target.Icon != null)
         {
-            var imageInfo = await fileManager.GetImageUrl(target.Image, ct);
-            dto.ImageUrl = imageInfo?.Url;
+            var imageInfo = await fileManager.GetImageUrl(target.Icon, ct);
+            dto.IconUrl = imageInfo?.Url;
+        }
+        if (target.Animation != null)
+        {
+            var imageInfo = await fileManager.GetImageUrl(target.Animation, ct);
+            dto.AnimationUrl = imageInfo?.Url;
         }
         return dto;
     }
@@ -72,10 +82,12 @@ public sealed class LiveStreamGiftRepo(
 
     public async Task UpdateAsync(Guid id, Func<LiveStreamGift, Task> updateAction, CancellationToken ct)
     {
-        var targetCategory = await context.LiveStreamGifts
+        var targetGift = await context.LiveStreamGifts
+            .Include(lsg => lsg.Icon)
+            .Include(lsg => lsg.Animation)
             .FirstOrDefaultAsync(lsg => lsg.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
 
-        await updateAction.Invoke(targetCategory);
+        await updateAction.Invoke(targetGift);
     }
 }

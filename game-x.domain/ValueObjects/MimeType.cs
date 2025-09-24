@@ -17,7 +17,7 @@ public sealed class MimeType
         return new MimeType(value);
     }
 
-    private static readonly string[] ValidValues = ["image/jpeg", "image/png", "image/webp"];
+    private static readonly string[] ValidValues = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
     public override bool Equals(object? obj) =>
         (obj != null) && (obj is MimeType type) && (Value == type.Value);

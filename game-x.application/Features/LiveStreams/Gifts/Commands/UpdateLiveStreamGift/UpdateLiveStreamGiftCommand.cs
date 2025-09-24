@@ -1,3 +1,10 @@
-﻿namespace game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGift;
+﻿using System.Text.Json.Serialization;
 
-public record UpdateLiveStreamGiftCommand() : ICommand;
+namespace game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGift;
+
+public record UpdateLiveStreamGiftCommand(
+    [property: JsonIgnore] Guid Id,
+    string Name,
+    string? Notes,
+    decimal CoinCost,
+    int Priority) : ICommand;

@@ -71,7 +71,7 @@ public sealed class LiveStreamController : BaseApiController
     [HttpPatch("{id:guid}/thumbnail")]
     public async Task<IActionResult> UpdateScheduleThumbnailAsync(Guid id, UpdateImageRequest request)
     {
-        var command = new UpdateScheduleThumbnailCommand(id, FileUpload.FromFormFile(request.Thumbnail));
+        var command = new UpdateScheduleThumbnailCommand(id, FileUpload.FromFormFile(request.Image));
         var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result);
     }

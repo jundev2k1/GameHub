@@ -5,11 +5,11 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.LiveStreams.Gifts.Commands.CreateLiveStreamGift;
 using game_x.application.Features.LiveStreams.Gifts.Commands.DeleteLiveStreamGift;
 using game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGift;
+using game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGiftAnimation;
+using game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGiftIcon;
 using game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGiftStatus;
 using game_x.application.Features.LiveStreams.Gifts.Queries.GetLiveStreamGiftDetail;
-using game_x.application.Features.LiveStreams.Schedules.Commands.CreateSchedule;
-using game_x.application.Features.LiveStreams.Schedules.Commands.DeleteSchedule;
-using game_x.application.Features.LiveStreams.Schedules.Commands.UpdateSchedule;
+using game_x.application.Features.LiveStreams.Gifts.Queries.GetLiveStreamGiftsByCriteria;
 using game_x.application.Features.LiveStreams.Schedules.Commands.UpdateScheduleThumbnail;
 using game_x.application.Features.LiveStreams.Schedules.Queries.GetSchedulesByCriteria;
 
@@ -24,7 +24,7 @@ public sealed class LiveStreamGiftController : BaseApiController
     {
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
-        var query = new GetSchedulesByCriteriaQuery(
+        var query = new GetLiveStreamGiftsByCriteriaQuery(
             filters,
             sorts,
             parameters.PageNumber ?? 1,
@@ -59,10 +59,19 @@ public sealed class LiveStreamGiftController : BaseApiController
     }
 
     [Authorize(Roles = $"{AppRoles.Admin}")]
-    [HttpPatch("{id:guid}/image")]
-    public async Task<IActionResult> UpdateGiftImageAsync(Guid id, UpdateImageRequest request)
+    [HttpPatch("{id:guid}/icon")]
+    public async Task<IActionResult> UpdateGiftIconAsync(Guid id, UpdateImageRequest request)
     {
-        var command = new UpdateScheduleThumbnailCommand(id, FileUpload.FromFormFile(request.Thumbnail));
+        var command = new UpdateLiveStreamGiftIconCommand(id, FileUpload.FromFormFile(request.Image));
+        var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin}")]
+    [HttpPatch("{id:guid}/animation")]
+    public async Task<IActionResult> UpdateGiftAnimationAsync(Guid id, UpdateImageRequest request)
+    {
+        var command = new UpdateLiveStreamGiftAnimationCommand(id, FileUpload.FromFormFile(request.Image));
         var result = await Mediator.Send(command);
         return ApiResponseFactory.Ok(result);
     }

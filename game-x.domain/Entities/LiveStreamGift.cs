@@ -5,8 +5,10 @@ public sealed class LiveStreamGift : BaseEntity<int>, IAuditable
     public Guid PublicId { get; private set; } = Guid.NewGuid();
     public string Name { get; private set; } = string.Empty;
     public string? Notes { get; private set; }
-    public int? ImageId { get; private set; }
-    public MediaFile? Image { get; private set; } = default!;
+    public int? IconId { get; private set; }
+    public MediaFile? Icon { get; private set; } = default!;
+    public int? AnimationId { get; private set; }
+    public MediaFile? Animation { get; private set; } = default!;
     public decimal CoinCost { get; private set; }
     public int Priority { get; private set; }
     public bool IsActive { get; private set; } = true;
@@ -31,9 +33,14 @@ public sealed class LiveStreamGift : BaseEntity<int>, IAuditable
         Priority = priority;
     }
 
-    public void UpdateImage(MediaFile image)
+    public void UpdateIcon(MediaFile image)
     {
-        Image = image;
+        Icon = image;
+    }
+
+    public void UpdateAnimation(MediaFile file)
+    {
+        Animation = file;
     }
 
     public void Enable() => IsActive = true;

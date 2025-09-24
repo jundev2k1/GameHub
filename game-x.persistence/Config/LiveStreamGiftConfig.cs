@@ -42,12 +42,20 @@ public sealed class LiveStreamGiftConfig : IEntityTypeConfiguration<LiveStreamGi
         builder.Property(g => g.IsDeleted)
             .IsRequired();
 
-        builder.Property(g => g.ImageId)
+        builder.Property(g => g.IconId)
             .IsRequired(false);
 
-        builder.HasOne(g => g.Image)
+        builder.Property(g => g.AnimationId)
+            .IsRequired(false);
+
+        builder.HasOne(g => g.Icon)
             .WithMany()
-            .HasForeignKey(g => g.ImageId)
+            .HasForeignKey(g => g.IconId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(g => g.Animation)
+            .WithMany()
+            .HasForeignKey(g => g.AnimationId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

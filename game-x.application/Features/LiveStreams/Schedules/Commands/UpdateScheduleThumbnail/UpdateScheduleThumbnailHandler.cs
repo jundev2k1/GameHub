@@ -19,7 +19,6 @@ public sealed class UpdateScheduleThumbnailHandler(
     public async Task<UpdateScheduleThumbnailResult> Handle(UpdateScheduleThumbnailCommand request, CancellationToken ct = default)
     {
         // Validate and update thumbnail
-        LivestreamSchedule? schedule = null;
         await liveStreamRepo.UpdateAsync(request.Id, async stream =>
         {
             if (stream.Status != LiveStreamStatus.Scheduled && stream.Status != LiveStreamStatus.Live)
@@ -31,14 +30,13 @@ public sealed class UpdateScheduleThumbnailHandler(
 
             await UploadNewThumbnail(stream, request.FileUpload, ct);
             await unitOfWork.SaveChangesAsync(ct);
-
-            schedule = stream;
         }, ct);
 
         // Refresh cache and get new url
-        await fileManagerCache.RefreshImage(schedule!.Thumbnail!, ct: ct);
-        var thumbnail = await fileManagerCache.GetImageUrl(schedule!.Thumbnail!, ct: ct);
-        RefreshLiveStreamCache(schedule.StreamKey, schedule.Thumbnail!.Id, thumbnail?.Url);
+        var scheduleAfterUpdate = await liveStreamRepo.GetByIdAsync(request.Id, ct);
+        await fileManagerCache.RefreshImage(scheduleAfterUpdate!.Thumbnail!, ct: ct);
+        var thumbnail = await fileManagerCache.GetImageUrl(scheduleAfterUpdate!.Thumbnail!, ct: ct);
+        RefreshLiveStreamCache(scheduleAfterUpdate.StreamKey, scheduleAfterUpdate.Thumbnail!.Id, thumbnail?.Url);
 
         return new UpdateScheduleThumbnailResult(thumbnail!.FileName, thumbnail.Url);
     }

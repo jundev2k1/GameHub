@@ -2,5 +2,5 @@
 
 public sealed class UpdateImageRequest
 {
-    public IFormFile Thumbnail { get; set; } = default!;
+    public IFormFile Image { get; set; } = default!;
 }

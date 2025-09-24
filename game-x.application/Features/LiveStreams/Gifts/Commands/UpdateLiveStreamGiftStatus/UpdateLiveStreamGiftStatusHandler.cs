@@ -1,10 +1,26 @@
-﻿namespace game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGiftStatus;
+﻿using game_x.application.Contract.Persistence.Repo;
 
-public sealed class UpdateLiveStreamGiftStatusHandler : ICommandHandler<UpdateLiveStreamGiftStatusCommand>
+namespace game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGiftStatus;
+
+public sealed class UpdateLiveStreamGiftStatusHandler(
+    IUnitOfWork unitOfWork,
+    ILiveStreamGiftRepo liveStreamGiftRepo) : ICommandHandler<UpdateLiveStreamGiftStatusCommand>
 {
     public async Task<Unit> Handle(UpdateLiveStreamGiftStatusCommand request, CancellationToken ct = default)
     {
-        await Task.CompletedTask;
+        await liveStreamGiftRepo.UpdateAsync(request.Id, async gift =>
+        {
+            if (request.IsActive)
+            {
+                gift.Enable();
+            }
+            else
+            {
+                gift.Disable();
+            }
+
+            await unitOfWork.SaveChangesAsync(ct);
+        }, ct);
         return Unit.Value;
     }
 }
