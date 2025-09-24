@@ -14,6 +14,14 @@ public sealed class LiveStreamGiftConfig : IEntityTypeConfiguration<LiveStreamGi
             .IsRequired()
             .ValueGeneratedOnAdd();
 
+        builder.Property(g => g.PublicId)
+            .IsRequired()
+            .HasColumnName("code")
+            .HasDefaultValueSql("gen_random_uuid()");
+
+        builder.HasIndex(g => g.PublicId)
+            .IsUnique();
+
         builder.Property(g => g.Name)
             .IsRequired()
             .HasMaxLength(255);
@@ -29,6 +37,9 @@ public sealed class LiveStreamGiftConfig : IEntityTypeConfiguration<LiveStreamGi
             .IsRequired();
 
         builder.Property(g => g.IsActive)
+            .IsRequired();
+
+        builder.Property(g => g.IsDeleted)
             .IsRequired();
 
         builder.Property(g => g.ImageId)

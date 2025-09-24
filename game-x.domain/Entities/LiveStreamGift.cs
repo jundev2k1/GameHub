@@ -2,6 +2,7 @@
 
 public sealed class LiveStreamGift : BaseEntity<int>, IAuditable
 {
+    public Guid PublicId { get; private set; } = Guid.NewGuid();
     public string Name { get; private set; } = string.Empty;
     public string? Notes { get; private set; }
     public int? ImageId { get; private set; }
@@ -9,6 +10,7 @@ public sealed class LiveStreamGift : BaseEntity<int>, IAuditable
     public decimal CoinCost { get; private set; }
     public int Priority { get; private set; }
     public bool IsActive { get; private set; } = true;
+    public bool IsDeleted { get; private set; } = false;
 
     public static LiveStreamGift Create(string name, string? notes, decimal coinCost, int priority)
     {
@@ -37,4 +39,6 @@ public sealed class LiveStreamGift : BaseEntity<int>, IAuditable
     public void Enable() => IsActive = true;
 
     public void Disable() => IsActive = false;
+
+    public void Delete() => IsDeleted = true;
 }

@@ -5,24 +5,19 @@ using game_x.application.Exceptions;
 
 namespace game_x.persistence.Repo;
 
-public sealed class LiveStreamCategoryRepo(GameXContext context) : ILiveStreamCategoryRepo, IRepository
+public sealed class LiveStreamDonationRepo(GameXContext context) : ILiveStreamDonationRepo, IRepository
 {
-    public async Task<LiveStreamCategory[]> GetAllAsync(CancellationToken ct)
-    {
-        var result = await context.LiveStreamCategories
-            .AsNoTracking()
-            .ToArrayAsync(ct);
-        return result;
-    }
-
-    public async Task<PaginationResult<LiveStreamCategory>> GetsByCriteriaAsync(
-        Func<IQueryable<LiveStreamCategory>, IQueryable<LiveStreamCategory>>? queryBuilder = null,
+    public async Task<PaginationResult<LiveStreamDonation>> GetsByCriteriaAsync(
+        Func<IQueryable<LiveStreamDonation>, IQueryable<LiveStreamDonation>>? queryBuilder = null,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default)
     {
-        var query = context.LiveStreamCategories
+        var query = context.LiveStreamDonations
             .AsNoTracking()
+            .Include(lsd => lsd.LivestreamSchedule)
+            .Include(lsd => lsd.Donor)
+            .Include(lsd => lsd.Gift)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -35,7 +30,7 @@ public sealed class LiveStreamCategoryRepo(GameXContext context) : ILiveStreamCa
             .Take(pageSize)
             .ToArrayAsync(ct);
 
-        return new PaginationResult<LiveStreamCategory>(
+        return new PaginationResult<LiveStreamDonation>(
             result,
             totalCount,
             totalPageCount,
@@ -43,31 +38,22 @@ public sealed class LiveStreamCategoryRepo(GameXContext context) : ILiveStreamCa
             pageSize);
     }
 
-    public async Task<LiveStreamCategory[]> GetByIdsAsync(Guid[] ids, CancellationToken ct = default)
+    public async Task<LiveStreamDonation> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var result = await context.LiveStreamCategories
-            .AsNoTracking()
-            .Where(lsc => ids.Contains(lsc.PublicId) && lsc.IsActive)
-            .ToArrayAsync(ct);
-        return result;
-    }
-
-    public async Task<LiveStreamCategory> GetByIdAsync(Guid id, CancellationToken ct = default)
-    {
-        return await context.LiveStreamCategories
+        return await context.LiveStreamDonations
             .AsNoTracking()
             .FirstOrDefaultAsync(lsc => lsc.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
     }
 
-    public async Task CreateAsync(LiveStreamCategory category, CancellationToken ct)
+    public async Task CreateAsync(LiveStreamDonation category, CancellationToken ct)
     {
-        await context.LiveStreamCategories.AddAsync(category, ct);
+        await context.LiveStreamDonations.AddAsync(category, ct);
     }
 
-    public async Task UpdateAsync(Guid categoryId, Func<LiveStreamCategory, Task> updateAction, CancellationToken ct)
+    public async Task UpdateAsync(Guid categoryId, Func<LiveStreamDonation, Task> updateAction, CancellationToken ct)
     {
-        var targetCategory = await context.LiveStreamCategories
+        var targetCategory = await context.LiveStreamDonations
             .FirstOrDefaultAsync(lsc => lsc.PublicId == categoryId, ct)
             ?? throw new NotFoundException(nameof(categoryId), categoryId);
 
