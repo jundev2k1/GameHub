@@ -1,7 +1,7 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.LiveStream;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
-using game_x.application.Features.LiveStreams.Dtos;
+using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.SignalR;
 

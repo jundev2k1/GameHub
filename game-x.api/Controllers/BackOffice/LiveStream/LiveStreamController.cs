@@ -1,15 +1,14 @@
-﻿using game_x.api.Common;
-using game_x.api.Dtos;
+﻿using game_x.api.Dtos;
 using game_x.application.Common.Files;
 using game_x.application.Common.Filters;
-using game_x.application.Features.LiveStreams.Commands.AssignTalent;
-using game_x.application.Features.LiveStreams.Commands.CancelSchedule;
-using game_x.application.Features.LiveStreams.Commands.CreateSchedule;
-using game_x.application.Features.LiveStreams.Commands.DeleteSchedule;
-using game_x.application.Features.LiveStreams.Commands.UpdateSchedule;
-using game_x.application.Features.LiveStreams.Commands.UpdateScheduleThumbnail;
-using game_x.application.Features.LiveStreams.Queries.GetScheduleDetail;
-using game_x.application.Features.LiveStreams.Queries.GetSchedulesByCriteria;
+using game_x.application.Features.LiveStreams.Schedules.Commands.AssignTalent;
+using game_x.application.Features.LiveStreams.Schedules.Commands.CancelSchedule;
+using game_x.application.Features.LiveStreams.Schedules.Commands.CreateSchedule;
+using game_x.application.Features.LiveStreams.Schedules.Commands.DeleteSchedule;
+using game_x.application.Features.LiveStreams.Schedules.Commands.UpdateSchedule;
+using game_x.application.Features.LiveStreams.Schedules.Commands.UpdateScheduleThumbnail;
+using game_x.application.Features.LiveStreams.Schedules.Queries.GetScheduleDetail;
+using game_x.application.Features.LiveStreams.Schedules.Queries.GetSchedulesByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.LiveStream;
 

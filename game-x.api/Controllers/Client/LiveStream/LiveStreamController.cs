@@ -1,6 +1,6 @@
 ﻿using game_x.api.Dtos;
-using game_x.application.Features.LiveStreams.Commands.JoinLiveStream;
-using game_x.application.Features.LiveStreams.Queries.GetChatMessageInStream;
+using game_x.application.Features.LiveStreams.Streaming.Commands.JoinLiveStream;
+using game_x.application.Features.LiveStreams.Streaming.Queries.GetChatMessageInStream;
 
 namespace game_x.api.Controllers.Client.LiveStream;
 

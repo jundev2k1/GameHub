@@ -1,4 +1,4 @@
-﻿using game_x.application.Features.LiveStreams.Queries.GetActiveStreams;
+﻿using game_x.application.Features.LiveStreams.Streaming.Queries.GetActiveStreams;
 
 namespace game_x.api.Controllers.Common;
 

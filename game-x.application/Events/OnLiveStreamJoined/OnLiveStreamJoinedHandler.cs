@@ -1,7 +1,7 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Features.LiveStreams.Dtos;
+using game_x.application.Features.LiveStreams.Streaming.Dtos;
 
 namespace game_x.application.Events.OnLiveStreamJoined;
 

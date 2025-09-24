@@ -1,10 +1,10 @@
 ﻿using game_x.api.Common;
 using game_x.api.Controllers;
 using game_x.application.Exceptions;
-using game_x.application.Features.LiveStreams.Commands.PlayStream;
-using game_x.application.Features.LiveStreams.Commands.PublishStream;
-using game_x.application.Features.LiveStreams.Commands.StopStream;
-using game_x.application.Features.LiveStreams.Commands.UnpublishStream;
+using game_x.application.Features.LiveStreams.Streaming.Commands.PlayStream;
+using game_x.application.Features.LiveStreams.Streaming.Commands.PublishStream;
+using game_x.application.Features.LiveStreams.Streaming.Commands.StopStream;
+using game_x.application.Features.LiveStreams.Streaming.Commands.UnpublishStream;
 using System.Text.Json;
 using System.Web;
 

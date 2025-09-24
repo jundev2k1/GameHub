@@ -1,4 +1,4 @@
-﻿using game_x.application.Features.LiveStreams.Enum;
+﻿using game_x.application.Features.LiveStreams.Streaming.Enum;
 
 namespace game_x.application.Contract.Infrastructure.SignalR.Dtos.LiveStream;
 

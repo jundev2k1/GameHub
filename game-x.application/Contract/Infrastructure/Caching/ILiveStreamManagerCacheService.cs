@@ -1,4 +1,4 @@
-﻿using game_x.application.Features.LiveStreams.Dtos;
+﻿using game_x.application.Features.LiveStreams.Streaming.Dtos;
 
 namespace game_x.application.Contract.Infrastructure.Caching;
 
