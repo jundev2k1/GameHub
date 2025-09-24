@@ -44,6 +44,8 @@ public sealed class GameXContext(
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<LivestreamSchedule> LiveStreamSchedules { get; set; }
     public DbSet<LiveStreamCategory> LiveStreamCategories { get; set; }
+    public DbSet<LiveStreamGift> LiveStreamGifts { get; set; }
+    public DbSet<LiveStreamDonation> LiveStreamDonations { get; set; }
     public DbSet<LiveStreamChatMessage> LiveStreamChatMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
