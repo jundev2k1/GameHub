@@ -33,4 +33,45 @@ public sealed class SocialLink: BaseEntity<int>, IAuditable
     public User? BlockedUser { get; set; }
     
     public DateTime? RespondedAt { get; set; }
+    
+    public static SocialLink Create(
+        string min,
+        string max,
+        SocialLinkState state,
+        SocialLinkKind kind,
+        string? requesterUserId = null,
+        string? addresseeUserId = null,
+        string? blockerUserId = null,
+        string? blockedUserId = null,
+        DateTime? respondedAt = null
+    )
+    {
+        var link = new SocialLink
+        {
+            UserIdMin = min,
+            UserIdMax = max,
+            Kind = kind,
+            State = state,
+            RequesterUserId = requesterUserId,
+            AddresseeUserId = addresseeUserId,
+            BlockerUserId = blockerUserId,
+            BlockedUserId = blockedUserId,
+            RespondedAt = respondedAt
+        };
+        return link;
+    }
+
+    public void Respond(bool accept)
+    {
+        State = accept ? SocialLinkState.Accepted : SocialLinkState.Declined;
+        RespondedAt = DateTime.UtcNow;
+    }
+
+    public bool IsFriend => Kind == SocialLinkKind.Friendship && State == SocialLinkState.Accepted;
+}
+
+public static class SocialLinkPair
+{
+    public static (string Min, string Max) Normalize(string a, string b)
+        => string.CompareOrdinal(a, b) < 0 ? (a, b) : (b, a);
 }

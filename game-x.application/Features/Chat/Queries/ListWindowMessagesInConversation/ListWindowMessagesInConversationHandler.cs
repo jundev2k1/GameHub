@@ -11,9 +11,9 @@ public sealed class ListWindowMessagesInConversationHandler(IMessageRepo message
         return await messageRepo.GetWindowAsync(
             convId: request.ConvId,
             anchorId: request.AnchorId,
-            anchor: request.Anchor,
-            before: request.Before,
-            after: request.After,
+            anchor: request.Anchor ?? WindowAnchorType.Self,
+            before: request.Before ?? 10,
+            after: request.After ?? 10,
             ct: ct);
     }
 }

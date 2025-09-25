@@ -14,27 +14,24 @@ internal static class GroupNames
     public static readonly string Prefix =
         Environment.GetEnvironmentVariable("HUB_GROUP_PREFIX") ?? "gx";
 
-    // ---------- Common groups ----------
+    // ---------- Actor groups ----------
     public static string Member(string userId) => Build("member", San(userId));
     public static string Guest(string guestId) => Build("guest", San(guestId));
     public static string Admin(string userId) => Build("admin", San(userId));
     public static string Cs(string userId) => Build("cs", San(userId));
-    public static string Role(string roleName) => Build("role", San(roleName));            // e.g., Admin, User
+    public static string Role(string roleName) => Build("role", San(roleName)); // e.g., Admin, User
 
     // ---------- Chat-specific ----------
+    public const string Public = "public:conv";
+    public const string PublicIdle = "public:idle"; // Get upserted inbox
+    public const string OnlineAll = "online";
+    public const string IdleAgent = "idle-agent";
+    public const string AgentInbox = "agent-inbox"; // is on Agent Inbox screen
+    public static string IdleMember(string userId) => Build("idle-member", San(userId));
+    public static string MemberInbox(string userId) => Build("member-inbox", San(userId)); // is on Inbox screen
     public static string Conversation(Guid conversationId) => Build("chat", "conv", conversationId.ToString());
-    public static string SupportQueue(string status) => Build("chat", "queue", San(status));     // e.g., Open, Waiting, Assigned
-
-    // ---------- Admin / Client service areas (optional clarity) ----------
-    public static string AdminUser(string userId) => Build("admin", "user", San(userId));
-    public static string ClientUser(string userId) => Build("client", "user", San(userId));
-
-    // ---------- Escape hatch for custom groups ----------
-    public static string Custom(params string[] parts) => Build(parts);
-
-    // =======================================================
-    // Internals
-    // =======================================================
+    
+    // ---------- Helpers ----------
 
     private static string Build(params string[] parts)
     {

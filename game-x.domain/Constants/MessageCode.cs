@@ -337,6 +337,39 @@ public static class MessageCode
         /// <summary>Message not found.</summary>
         [EnumMetadata("Fail to send the message.")]
         FailToSendMessage = 10504,
+        /// <summary>Fail to target myself.</summary>
+        [EnumMetadata("Fail to target myself.")]
+        FailToTargetMyself = 10505,
+        /// <summary>The request is pending acceptance.</summary>
+        [EnumMetadata("The request is pending acceptance.")]
+        WaitToAccept = 10506,
+        /// <summary>Already friends.</summary>
+        [EnumMetadata("Already friends.")]
+        AlreadyFriend = 10507,
+        /// <summary>Social link not found.</summary>
+        [EnumMetadata("Social link not found.")]
+        SocialLinkNotFound = 10508,
+        /// <summary>Request already responded.</summary>
+        [EnumMetadata("Request already responded.")]
+        FriendRequestAlreadyRespond = 1059,
+        /// <summary>Not the addressee.</summary>
+        [EnumMetadata("Not the addressee.")]
+        NotAddressee = 10510,
+        /// <summary>The user is still not a friend.</summary>
+        [EnumMetadata("The user is still not a friend.")]
+        StillNotFriend = 10511,
+        /// <summary>The user is still not a friend.</summary>
+        [EnumMetadata("Social link is blocked.")]
+        SocialLinkBlocked = 10512,
+        /// <summary>The user is not a member.</summary>
+        [EnumMetadata("The user is not a member.")]
+        IsNotMember = 10513,
+        /// <summary>CryptoToken configuration not found.</summary>
+        [EnumMetadata("Conversation member not found.")]
+        ConversationMemberNotFound = 10514,
+        /// <summary>The conversation was closed.</summary>
+        [EnumMetadata("The conversation was closed.")]
+        ConversationClosed = 10515,
         #endregion
     }
 }

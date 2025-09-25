@@ -53,24 +53,24 @@ public sealed class SocialLinkConfig : IEntityTypeConfiguration<SocialLink>
         
         builder.Property(x => x.RequesterUserId)
             .HasColumnName("requester_user_id")
-            .IsRequired();
+            .IsRequired(false);
         
         builder.Property(x => x.AddresseeUserId)
             .HasColumnName("addressee_user_id")
-            .IsRequired();
+            .IsRequired(false);
         
         builder.Property(x => x.BlockerUserId)
             .HasColumnName("blocker_user_id")
-            .IsRequired();
+            .IsRequired(false);
         
         builder.Property(x => x.BlockedUserId)
             .HasColumnName("blocked_user_id")
-            .IsRequired();
+            .IsRequired(false);
         
         builder.Property(x => x.RespondedAt)
             .HasColumnName("responded_at")
             .HasColumnType("timestamp with time zone")
-            .IsRequired();
+            .IsRequired(false);
         
         // Relationships
         builder.HasOne(x => x.RequesterUser)

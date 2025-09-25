@@ -39,6 +39,9 @@ public static class Seed
         await SeedGameTypes(context);
         await SeedGames(context);
 
+        // Seed public conversation
+        await SeedPublicConversation(context);
+        
         // Save changes to the database
         await context.SaveChangesAsync();
     }
@@ -274,5 +277,15 @@ public static class Seed
         await CreateEntity("PC蛋蛋", "ALEGG", GameConstants.PLATFORM_ID_G598);
         await CreateEntity("澳洲幸運10番攤", "AL10FT", GameConstants.PLATFORM_ID_G598);
         await CreateEntity("澳洲幸運5番攤", "AL5FT", GameConstants.PLATFORM_ID_G598);
+    }
+    
+    private static async Task SeedPublicConversation(GameXContext db, CancellationToken ct = default)
+    {
+        var exists = await db.Conversations.AnyAsync(c => c.Type == ConversationType.Public, ct);
+        if (!exists)
+        {
+            var conv = Conversation.Create(type: ConversationType.Public);
+            db.Conversations.Add(conv);
+        }
     }
 }

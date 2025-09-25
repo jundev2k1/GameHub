@@ -1,5 +1,6 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Friend;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.infrastructure.SignalR.Hubs;
 using game_x.share.Extensions;
@@ -10,6 +11,14 @@ namespace game_x.infrastructure.SignalR.Services;
 public sealed class ChatHubService(IHubContext<ChatHub, IChatClient> hubContext)
     : IChatHubService, IHubServices
 {
+    public async Task SendPublicMessageAsync(CreatedMessageSignalResult res)
+    {
+        var msgDto = res.Msg;
+        var inboxUpsert = res.InboxUpsert;
+        await hubContext.Clients.Group(GroupNames.Public).MessageCreated(msgDto);
+        await hubContext.Clients.Group(GroupNames.PublicIdle).InboxUpsert(inboxUpsert);
+    }
+    
     public async Task SendSupportMessageAsync(CreatedMessageSignalResult res)
     {
         var msgDto = res.Msg;
@@ -31,5 +40,67 @@ public sealed class ChatHubService(IHubContext<ChatHub, IChatClient> hubContext)
         
         await hubContext.Clients.Group(GroupNames.Role(AppRoles.Cs)).ConversationUpdated(conv);
         await hubContext.Clients.Group(GroupNames.Role(AppRoles.Cs)).MessageCreated(msgDto);
+    }
+    
+    public async Task SendSupportMessageV2Async(CreatedMessageSignalResult res)
+    {
+        var msgDto = res.Msg;
+        var conv = res.Conv;
+        var inboxUpsert = res.InboxUpsert;
+
+        await hubContext.Clients.Group(GroupNames.Conversation(conv.ConversationId)).MessageCreated(msgDto);
+        await hubContext.Clients.Group(GroupNames.AgentInbox).ConversationUpdated(conv);
+        await hubContext.Clients.Group(GroupNames.IdleAgent).InboxUpsert(inboxUpsert);
+        
+        if (conv.CustomerId.IsNotNullOrEmpty())
+        {
+            await hubContext.Clients.Group(GroupNames.MemberInbox(conv.CustomerId!)).ConversationUpdated(conv);
+            await hubContext.Clients.Group(GroupNames.IdleMember(conv.CustomerId!)).InboxUpsert(inboxUpsert);
+        }
+        else if (conv.GuestId.IsNotNullOrEmpty())
+        {
+            await hubContext.Clients.Group(GroupNames.MemberInbox(conv.GuestId!)).ConversationUpdated(conv);
+            await hubContext.Clients.Group(GroupNames.IdleMember(conv.GuestId!)).InboxUpsert(inboxUpsert);
+        }
+    }
+    
+    public async Task SendDirectMessageAsync(CreatedMessageSignalResult res, string[] memberIds)
+    {
+        var msgDto = res.Msg;
+        var conv = res.Conv;
+        var upsertedInbox = res.InboxUpsert;
+        
+        await hubContext.Clients.Group(GroupNames.Conversation(conv.ConversationId)).MessageCreated(msgDto);
+        
+        foreach (var uid in memberIds)
+        {
+            await hubContext.Clients.Group(GroupNames.MemberInbox(uid)).ConversationUpdated(conv);
+            await hubContext.Clients.Group(GroupNames.IdleMember(uid)).InboxUpsert(upsertedInbox);
+        }
+    }
+    
+    public async Task SendFriendRequestAsync(FriendRequestSignalDto dto)
+    {
+        await hubContext.Clients.Group(GroupNames.Member(dto.AddresseeUserId!)).FriendRequest(dto);
+    }
+    
+    public async Task SendFriendResponseAsync(FriendResponseSignalDto dto)
+    {
+        await hubContext.Clients.Group(GroupNames.Member(dto.RequesterUserId!)).FriendResponse(dto);
+    }
+    
+    public async Task SendUnfriendAsync(UnfriendSignalDto dto)
+    {
+        await hubContext.Clients.Group(GroupNames.Member(dto.UnfriendedUserId!)).Unfriend(dto);
+    }
+    
+    public async Task SendFriendBlockedAsync(FriendBlockedSignalDto dto)
+    {
+        await hubContext.Clients.Group(GroupNames.Member(dto.BlockedUserId!)).FriendBlocked(dto);
+    }
+    
+    public async Task SendFriendUnblockedAsync(FriendBlockedSignalDto dto)
+    {
+        await hubContext.Clients.Group(GroupNames.Member(dto.BlockedUserId!)).FriendUnblocked(dto);
     }
 }

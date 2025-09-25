@@ -112,7 +112,7 @@ public sealed class UserRepo(
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException();
-
+        
         string? avatarUrl = null;
         if (targetUser.Avatar is not null)
         {
@@ -396,7 +396,7 @@ public sealed class UserRepo(
             .FirstOrDefaultAsync(user => user.Id == userId, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
-        updateAction?.Invoke(targetUser);
+        updateAction.Invoke(targetUser);
     }
 
     public async Task UpdateByEmailAsync(string email, Action<User> updateAction, CancellationToken ct = default)
@@ -404,7 +404,7 @@ public sealed class UserRepo(
         var targetUser = await userManager.FindByEmailAsync(email)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
-        updateAction?.Invoke(targetUser);
+        updateAction.Invoke(targetUser);
     }
 
     public async Task UpdateKycAsync(string userId, Action<UserKyc> updateAction, CancellationToken ct = default)
@@ -415,6 +415,6 @@ public sealed class UserRepo(
             .FirstOrDefaultAsync(uk => uk.UserId == userId && !uk.User.IsDeleted, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
-        updateAction?.Invoke(targetKyc);
+        updateAction.Invoke(targetKyc);
     }
 }

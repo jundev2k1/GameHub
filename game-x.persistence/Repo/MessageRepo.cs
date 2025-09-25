@@ -55,24 +55,26 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
     
     // -------- Window/Anchor (jump to message) --------
     public async Task<MessageWindowDto> GetWindowAsync(
-        Guid convId, Guid anchorId, int before, int after, string anchor = "self", CancellationToken ct = default)
+        Guid convId, Guid anchorId, int before, int after, WindowAnchorType anchor, CancellationToken ct = default)
     {
-        var baseQuery = context.Messages.AsNoTracking()
+        var baseQuery = context.Messages
+            .AsNoTracking()
+            .Include(m => m.ReplyToMessage)
+            .Include(m => m.SenderUser)
             .Include(x => x.Conversation)
             .AsQueryable();
         
         // 1) Resolve anchor pivot (self or reply target)
         var meta = await baseQuery
-            .Where(m => m.Conversation.PublicId == convId && m.PublicId == anchorId)
-            .Select(m => new { m.Id, m.SentAt, m.ReplyToMessageId })
-            .SingleOrDefaultAsync(ct);
-
-        if (meta is null) throw new KeyNotFoundException("Message not found");
+                .Where(m => m.Conversation.PublicId == convId && m.PublicId == anchorId)
+                .Select(m => new { m.Id, m.PublicId, m.SentAt, m.ReplyToMessageId })
+                .SingleOrDefaultAsync(ct)
+            ?? throw new NotFoundException(MessageCode.Chatting.MessageNotFound);
 
         var pivotId = meta.Id;
         var pivotAt = meta.SentAt;
 
-        if (anchor.Equals("replyTarget", StringComparison.OrdinalIgnoreCase) && meta.ReplyToMessageId != null)
+        if (anchor.Equals(WindowAnchorType.ReplyToTarget) && meta.ReplyToMessageId != null)
         {
             var target = await baseQuery
                 .Where(m => m.Conversation.PublicId == convId && m.Id == meta.ReplyToMessageId.Value)
@@ -109,7 +111,11 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
 
         // 5) Build window
         var items = older.Concat([anchorMsg]).Concat(newer)
-            .Select(m => m.Adapt<ListedMessageDto>())
+            .Select(m =>
+            {
+                var msgDto = m.Adapt<MessageDto>();
+                return msgDto.Adapt<ListedMessageDto>();
+            })
             .ToList();
 
         var fp = CursorHelper.ComputeFp($"conv:{convId}");

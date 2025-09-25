@@ -19,7 +19,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 .Take(1))
                 .ThenInclude(x => x.SenderUser)
                     .ThenInclude(x => x!.Avatar)
-            .Where(c => c.Messages.Any());
+            .Where(c => c.Messages.Any() && c.Type != ConversationType.Public);
     }
     
     // ---- Cursor-based queue for unassigned support conversations (next-only) ----
@@ -92,6 +92,24 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                    ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
     }
     
+    public async Task<Conversation?> FindForPairAsync(string userA, string userB, CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .Include(c => c.Members)
+            .Where(c => c.Type == ConversationType.Direct)
+            .FirstOrDefaultAsync(c =>
+                c.Members.Count == 2 &&
+                c.Members.Any(m => m.UserId == userA) &&
+                c.Members.Any(m => m.UserId == userB), ct);
+    }
+    
+    public async Task<Conversation?> FindPublicAsync(CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .Where(c => c.Type == ConversationType.Public)
+            .FirstOrDefaultAsync(ct);
+    }
+    
     public async Task<Conversation> GetByIdAsync(Guid convId, CancellationToken ct = default)
     {
         return await context.Conversations
@@ -106,7 +124,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
             .AsTracking()
             .FirstOrDefaultAsync(c => 
                 c.PublicId == convId
-                && (c.CustomerId == actorId 
+                && (c.CustomerId == actorId
                     || c.GuestId == actorId
                     || context.ConversationMembers.Any(m => m.ConversationId == c.Id && m.UserId == actorId)), 
                 ct)

@@ -45,7 +45,7 @@ public interface IFileStorageService
     Task<string> GenerateDownloadUrlAsync(
         BucketName bucketName,
         ObjectName objectName,
-        TimeSpan expiry,
+        TimeSpan? expiry = null,
         CancellationToken ct = default);
 
     /// <summary>
