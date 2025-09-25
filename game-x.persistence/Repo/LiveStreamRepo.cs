@@ -48,7 +48,7 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             .AsNoTracking()
             .Where(ls => ls.Status != LiveStreamStatus.Ended
                 && ls.Status != LiveStreamStatus.Cancelled
-                && ls.EndTime > now)
+                && ls.EndTime < now)
             .AsQueryable();
         var count = await query.CountAsync(ct);
         if (count <= 500) return await query.ToArrayAsync(ct);
@@ -151,7 +151,14 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
         var targetSchedules = await context.LiveStreamSchedules
             .Where(ls => streamIds.Contains(ls.PublicId))
             .ToListAsync(ct);
-        targetSchedules.ForEach(schedule => schedule.EndStream());
+        targetSchedules.ForEach(schedule =>
+        {
+            if (schedule.Status == LiveStreamStatus.Live)
+                schedule.EndStream();
+
+            if (schedule.Status == LiveStreamStatus.Scheduled)
+                schedule.CancelStream("Expired.");
+        });
         await context.BulkUpdateAsync(targetSchedules, cancellationToken: ct);
     }
 
