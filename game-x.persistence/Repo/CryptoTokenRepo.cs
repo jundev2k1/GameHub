@@ -5,13 +5,13 @@ using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
-public sealed class CryptoTokenRepo(GameXContext context): ICryptoTokenRepo, IRepository
+public sealed class CryptoTokenRepo(GameXContext context) : ICryptoTokenRepo, IRepository
 {
     public async Task<IReadOnlyList<CryptoToken>> GetAsync()
     {
         return await context.CryptoTokens.AsNoTracking().ToListAsync();
     }
-    
+
     public IQueryable<CryptoToken> Query()
     {
         return context.CryptoTokens;
@@ -23,13 +23,21 @@ public sealed class CryptoTokenRepo(GameXContext context): ICryptoTokenRepo, IRe
             .AsNoTracking()
             .ToListAsync(ct);
     }
-    
+
     public async Task<CryptoToken?> GetBySymbolAndNetworkAsync(string symbol, NetworkType network, CancellationToken ct = default)
     {
         return await context.CryptoTokens.AsNoTracking()
             .FirstOrDefaultAsync(t => t.Symbol == symbol && t.Network == network, ct);
     }
-    
+
+    public async Task<CryptoToken[]> GetByIdsAsync(Guid[] ids, CancellationToken ct = default)
+    {
+        return await context.CryptoTokens
+            .AsNoTracking()
+            .Where(ct => ids.Contains(ct.PublicId) && ct.Status == CryptoTokenStatus.Active)
+            .ToArrayAsync(ct);
+    }
+
     public async Task<CryptoToken> GetByIdAsync(Guid cryptoTokenId, CancellationToken ct = default)
     {
         return await context.CryptoTokens.AsNoTracking()

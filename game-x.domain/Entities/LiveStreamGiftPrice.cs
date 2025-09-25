@@ -12,7 +12,8 @@ public sealed class LiveStreamGiftPrice : BaseEntity<object>, IAuditable
     public static LiveStreamGiftPrice Create(
         int liveStreamGiftId,
         int cryptoTokenId,
-        decimal tokenCost)
+        decimal tokenCost,
+        bool isActive = true)
     {
         if (tokenCost <= 0)
             throw new ArgumentException("Token cost must be greater than zero.", nameof(tokenCost));
@@ -22,6 +23,7 @@ public sealed class LiveStreamGiftPrice : BaseEntity<object>, IAuditable
             LiveStreamGiftId = liveStreamGiftId,
             CryptoTokenId = cryptoTokenId,
             TokenCost = tokenCost,
+            IsActive = isActive,
         };
     }
 
