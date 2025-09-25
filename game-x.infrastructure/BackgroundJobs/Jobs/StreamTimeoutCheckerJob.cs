@@ -23,6 +23,7 @@ public sealed class StreamTimeoutCheckerJob(
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
         var expiredStreams = await liveStreamRepo.GetExpiredStreams(ct);
+        logger.LogInformation($"Expired streams: {expiredStreams.Length}");
 
         // Get all active streams from cache which are live or offline less than timeout minutes
         var allActiveStreams = liveStreamManager.GetAllStreamKeys()

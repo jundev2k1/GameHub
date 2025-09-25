@@ -27,7 +27,20 @@ public sealed class PublishStreamHandler(
 
         // Initialize stream info in cache if not exists
         if (!liveStreamManager.IsExistLiveStream(streamSetting.StreamKey))
+        {
+            if (streamSetting.EndTime < DateTime.UtcNow)
+                throw new ForbiddenException("Stream has ended.");
+
             await InitStreamInfo(streamSetting, request.ClientId, ct);
+        }
+
+        // Check if the stream has ended for more than 10 minutes
+        var streamInfo = liveStreamManager.GetLiveStreamStatus(streamSetting.StreamKey);
+        if (!streamInfo!.IsLive
+            && streamInfo.EndTime < DateTime.UtcNow
+            && streamInfo.OfflineAt.HasValue
+            && ((DateTime.UtcNow - streamInfo.OfflineAt.Value).Minutes > 10))
+            throw new ForbiddenException("Stream has ended.");
 
         // Connect to the stream if not connected
         liveStreamManager.ConnectLiveStream(streamSetting.StreamKey);
