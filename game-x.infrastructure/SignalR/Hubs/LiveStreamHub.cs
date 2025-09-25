@@ -129,7 +129,7 @@ public sealed class LiveStreamHub(
         if (streamKey.IsNullOrWhiteSpace())
             throw new ForbiddenException("Stream key is required.");
 
-        var command = new SendChatMessageCommand(streamKey!, input.MessageId, input.Message);
+        var command = new SendChatMessageCommand(streamKey!, input.Id, input.Message);
         await sender.Send(command);
     }
 

@@ -30,6 +30,7 @@ public sealed class OnLiveStreamJoinedHandler(
 
         // Create chat message for user joined
         var chatMessage = LiveStreamChatMessage.Create(
+            Guid.NewGuid(),
             streamInfo!.LocalId,
             viewer.ViewerId,
             string.Empty,

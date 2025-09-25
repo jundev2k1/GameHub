@@ -7,8 +7,9 @@ public sealed class SendChatMessageValidator : AbstractValidator<SendChatMessage
         RuleFor(x => x.StreamKey)
             .NotEmpty().WithMessage("Stream key cannot empty.");
 
-        RuleFor(x => x.MessageId)
-            .NotEmpty().WithMessage("Message Id cannot empty.");
+        RuleFor(x => x.Id)
+            .NotEmpty().WithMessage("Id cannot empty.")
+            .Must(id => Guid.TryParse(id, out _)).WithMessage("Id must be an uuid string.");
 
         RuleFor(x => x.Message)
             .NotEmpty().WithMessage("Message cannot be empty.")

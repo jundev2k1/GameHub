@@ -26,6 +26,7 @@ public sealed class SendChatMessageHandler(
         try
         {
             var chatMessage = LiveStreamChatMessage.Create(
+                Guid.Parse(request.Id),
                 streamSetting.LocalId,
                 targetUser.Id,
                 request.Message.Trim(),
@@ -44,7 +45,7 @@ public sealed class SendChatMessageHandler(
         catch
         {
             await unitOfWork.RollbackAsync(ct);
-            await liveStreamHubService.NotifyMessageFailed(request.StreamKey, targetUser.Id, request.MessageId);
+            await liveStreamHubService.NotifyMessageFailed(request.StreamKey, targetUser.Id, request.Id);
         }
 
         return Unit.Value;

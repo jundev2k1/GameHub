@@ -28,6 +28,7 @@ public sealed class OnLiveStreamLeftHandler(
     {
         var schedule = await liveStreamRepo.GetByStreamKeyAsync(streamKey, ct);
         var chatMessage = LiveStreamChatMessage.Create(
+            Guid.NewGuid(),
             schedule.Id,
             viewer.ViewerId,
             string.Empty,
