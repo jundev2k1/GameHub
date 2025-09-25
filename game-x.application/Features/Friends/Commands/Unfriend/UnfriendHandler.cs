@@ -52,7 +52,7 @@ public sealed class UnfriendHandler(
             
             User? actor = existed.RequesterUserId == me ? existed.RequesterUser : existed.AddresseeUser;
             if (actor is null) throw new NotFoundException(MessageCode.User.UserNotFound);
-            var avatar = actor.Avatar != null ? await fileCache.GetImageUrl(actor.Avatar, ct) : null;
+            var avatarUrl = actor.Avatar != null ? await fileCache.GetFileUrl(actor.Avatar, ct) : null;
         
             await unitOfWork.CommitAsync(ct);
             await dispatcher.Publish(new OnUnfriendEvent(new UnfriendSignalDto
@@ -60,7 +60,7 @@ public sealed class UnfriendHandler(
                 LinkId: existed.PublicId,
                 UnfrienderId: actor.Id,
                 UnfrienderNickname: actor.Nickname,
-                UnfrienderAvatarUrl: avatar?.Url,
+                UnfrienderAvatarUrl: avatarUrl,
                 UnfriendedUserId: existed.RequesterUserId == actor.Id ? existed.AddresseeUserId : existed.RequesterUserId
             )), ct);
             return Unit.Value;

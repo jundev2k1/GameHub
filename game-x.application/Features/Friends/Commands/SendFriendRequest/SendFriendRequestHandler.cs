@@ -50,12 +50,12 @@ public sealed class SendFriendRequestHandler(
                 }, ct);
                 await unitOfWork.CommitAsync(ct);
                 
-                var existedAvatar = 
+                var existedAvatarUrl = 
                     existed.RequesterUser?.Avatar != null 
-                        ? await fileCache.GetImageUrl(existed.RequesterUser.Avatar, ct) 
+                        ? await fileCache.GetFileUrl(existed.RequesterUser.Avatar, ct) 
                         : null;
 
-                socialLinkDto = existed.Adapt<SocialLinkDto>() with { RequesterAvatarUrl = existedAvatar?.Url };
+                socialLinkDto = existed.Adapt<SocialLinkDto>() with { RequesterAvatarUrl = existedAvatarUrl };
             }
             else
             {
@@ -71,12 +71,12 @@ public sealed class SendFriendRequestHandler(
                 await unitOfWork.CommitAsync(ct);
                 
                 var createdLink = await socialLinkRepo.GetByKeyPairAsync(min, max, ct);
-                var requesterAvatar = 
+                var requesterAvatarUrl = 
                     createdLink?.RequesterUser?.Avatar != null 
-                        ? await fileCache.GetImageUrl(createdLink.RequesterUser.Avatar, ct) 
+                        ? await fileCache.GetFileUrl(createdLink.RequesterUser.Avatar, ct) 
                         : null;
 
-                socialLinkDto = createdLink.Adapt<SocialLinkDto>() with { RequesterAvatarUrl = requesterAvatar?.Url };
+                socialLinkDto = createdLink.Adapt<SocialLinkDto>() with { RequesterAvatarUrl = requesterAvatarUrl };
             }
             await dispatcher.Publish(new OnSendFriendRequestEvent(socialLinkDto), ct);
             return Unit.Value;

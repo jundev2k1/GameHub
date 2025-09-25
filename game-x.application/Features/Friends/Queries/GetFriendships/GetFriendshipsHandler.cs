@@ -34,8 +34,8 @@ public class GetFriendshipsHandler(
         var dtoItems = await Task.WhenAll(
             items.Items.Select(async m =>
             {
-                var avatar = m.Avatar != null ? await fileCache.GetImageUrl(m.Avatar, ct) : null;
-                return m.Adapt<ListedFriendDto>() with {AvatarUrl = avatar?.Url};
+                var avatarUrl = m.Avatar != null ? await fileCache.GetFileUrl(m.Avatar, ct) : null;
+                return m.Adapt<ListedFriendDto>() with {AvatarUrl = avatarUrl};
             })
         );
 

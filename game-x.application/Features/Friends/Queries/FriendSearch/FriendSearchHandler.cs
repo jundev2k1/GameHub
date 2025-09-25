@@ -32,8 +32,8 @@ public class FriendSearchHandler(
         var dtoItems = await Task.WhenAll(
             items.Items.Select(async m =>
             {
-                var avatar = m.Avatar != null ? await fileCache.GetImageUrl(m.Avatar, ct) : null;
-                return m.Adapt<FriendSearchResultDto>() with {AvatarUrl = avatar?.Url};
+                var avatarUrl = m.Avatar != null ? await fileCache.GetFileUrl(m.Avatar, ct) : null;
+                return m.Adapt<FriendSearchResultDto>() with {AvatarUrl = avatarUrl};
             })
         );
         

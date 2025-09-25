@@ -41,12 +41,12 @@ public sealed class UnblockHandler(
             }, ct);
             
             await unitOfWork.CommitAsync(ct);
-            var existedAvatar = 
+            var existedAvatarUrl = 
                 existed.BlockerUser?.Avatar != null 
-                    ? await fileCache.GetImageUrl(existed.BlockerUser.Avatar, ct) 
+                    ? await fileCache.GetFileUrl(existed.BlockerUser.Avatar, ct) 
                     : null;
             
-            await dispatcher.Publish(new OnFriendUnblockedEvent(existed.Adapt<SocialLinkDto>() with {BlockerAvatarUrl = existedAvatar?.Url}), ct);
+            await dispatcher.Publish(new OnFriendUnblockedEvent(existed.Adapt<SocialLinkDto>() with {BlockerAvatarUrl = existedAvatarUrl}), ct);
             return Unit.Value;
         }
         catch (Exception ex)

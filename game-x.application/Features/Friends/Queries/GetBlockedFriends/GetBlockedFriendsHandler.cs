@@ -32,9 +32,9 @@ public sealed class GetBlockedFriendsHandler(
         var dtoItems = await Task.WhenAll(
             items.Items.Select(async m =>
             {
-                var avatar = m.BlockedUser?.Avatar != null ? await fileCache.GetImageUrl(m.BlockedUser.Avatar, ct) : null;
+                var avatarUrl = m.BlockedUser?.Avatar != null ? await fileCache.GetFileUrl(m.BlockedUser.Avatar, ct) : null;
                 var linkDto = m.Adapt<SocialLinkDto>();
-                return linkDto.Adapt<BlockedFriendDto>() with {BlockedAvatarUrl = avatar?.Url};
+                return linkDto.Adapt<BlockedFriendDto>() with {BlockedAvatarUrl = avatarUrl};
             })
         );
         

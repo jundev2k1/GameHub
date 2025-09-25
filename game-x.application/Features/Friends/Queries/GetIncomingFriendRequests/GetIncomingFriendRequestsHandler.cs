@@ -32,9 +32,9 @@ public sealed class GetIncomingFriendRequestsHandler(
         var dtoItems = await Task.WhenAll(
             items.Items.Select(async m =>
             {
-                var avatar = m.RequesterUser?.Avatar != null ? await fileCache.GetImageUrl(m.RequesterUser.Avatar, ct) : null;
+                var avatarUrl = m.RequesterUser?.Avatar != null ? await fileCache.GetFileUrl(m.RequesterUser.Avatar, ct) : null;
                 var linkDto = m.Adapt<SocialLinkDto>();
-                return linkDto.Adapt<IncomingFriendRequestDto>() with {RequesterAvatarUrl = avatar?.Url};
+                return linkDto.Adapt<IncomingFriendRequestDto>() with {RequesterAvatarUrl = avatarUrl};
             })
         );
         

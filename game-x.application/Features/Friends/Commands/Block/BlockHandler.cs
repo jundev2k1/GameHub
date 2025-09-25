@@ -57,12 +57,12 @@ public sealed class BlockHandler(
                     x.RespondedAt = DateTime.UtcNow;
                 }, ct);
                 await unitOfWork.CommitAsync(ct);
-                var existedAvatar = 
+                var existedAvatarUrl = 
                     existed.BlockerUser?.Avatar != null 
-                        ? await fileCache.GetImageUrl(existed.BlockerUser.Avatar, ct) 
+                        ? await fileCache.GetFileUrl(existed.BlockerUser.Avatar, ct) 
                         : null;
 
-                linkDto = existed.Adapt<SocialLinkDto>() with { BlockerAvatarUrl = existedAvatar?.Url };
+                linkDto = existed.Adapt<SocialLinkDto>() with { BlockerAvatarUrl = existedAvatarUrl };
             }
             else
             {
@@ -77,12 +77,12 @@ public sealed class BlockHandler(
                 await socialLinkRepo.AddAsync(link, ct);
                 await unitOfWork.CommitAsync(ct);
                 var createdLink = await socialLinkRepo.GetByKeyPairAsync(min, max, ct);
-                var blockerAvatar = 
+                var blockerAvatarUrl = 
                     createdLink?.BlockerUser?.Avatar != null 
-                        ? await fileCache.GetImageUrl(createdLink.BlockerUser.Avatar, ct) 
+                        ? await fileCache.GetFileUrl(createdLink.BlockerUser.Avatar, ct) 
                         : null;
         
-                linkDto = createdLink.Adapt<SocialLinkDto>() with {BlockerAvatarUrl = blockerAvatar?.Url};
+                linkDto = createdLink.Adapt<SocialLinkDto>() with {BlockerAvatarUrl = blockerAvatarUrl};
             }
             
             await dispatcher.Publish(new OnFriendBlockedEvent(linkDto), ct);

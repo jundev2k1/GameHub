@@ -49,7 +49,7 @@ public sealed class MessageService(
                 MediaFileInfo? file = null;
                 if (item.Attachment is not null)
                 {
-                    file = await fileCache.GetImageUrl(item.Attachment, ct);
+                    file = await fileCache.GetFileInfo(item.Attachment, ct);
                 }
                 
                 return new ListedMessageAttachmentDto

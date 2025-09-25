@@ -48,9 +48,9 @@ public class RespondFriendRequestHandler(
             var updatedLink = await socialLinkRepo.GetByIdAsync(link.PublicId, ct);
             var avatarUrl = 
                 updatedLink.AddresseeUser?.Avatar != null 
-                ? await fileCache.GetImageUrl(updatedLink.AddresseeUser.Avatar, ct) 
+                ? await fileCache.GetFileUrl(updatedLink.AddresseeUser.Avatar, ct) 
                 : null;
-            await dispatcher.Publish(new OnRespondRequestEvent(updatedLink.Adapt<SocialLinkDto>() with {AddresseeAvatarUrl = avatarUrl?.Url}), ct);
+            await dispatcher.Publish(new OnRespondRequestEvent(updatedLink.Adapt<SocialLinkDto>() with {AddresseeAvatarUrl = avatarUrl}), ct);
             return Unit.Value;
         }
         catch (Exception ex)
