@@ -159,7 +159,6 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             if (schedule.Status == LiveStreamStatus.Scheduled)
                 schedule.CancelStream("Expired.");
         });
-        await context.BulkUpdateAsync(targetSchedules, cancellationToken: ct);
     }
 
     public async Task DeleteAsync(Guid scheduleId, CancellationToken ct = default)
