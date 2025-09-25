@@ -22,7 +22,7 @@ public sealed class GetKycProfileHandler(
     {
         if (file is null) return string.Empty;
 
-        var image = await fileManagerCache.GetFileUrl(file);
+        var image = await fileManagerCache.GetFileInfo(file);
         return image!.Url;
     }
 }

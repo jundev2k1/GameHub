@@ -25,7 +25,7 @@ public sealed class UpdateLiveStreamGiftIconHandler(
         // Refresh cache and get new url
         var giftAfterUpdate = await liveStreamGiftRepo.GetByIdAsync(request.Id, ct);
         await fileManagerCache.RefreshImage(giftAfterUpdate!.Icon!, ct: ct);
-        var thumbnail = await fileManagerCache.GetFileUrl(giftAfterUpdate!.Icon!, ct: ct);
+        var thumbnail = await fileManagerCache.GetFileInfo(giftAfterUpdate!.Icon!, ct: ct);
         await liveStreamManager.RefreshGiftCacheAsync(ct);
 
         return new UpdateLiveStreamGiftIconResult(thumbnail!.FileName, thumbnail.Url);

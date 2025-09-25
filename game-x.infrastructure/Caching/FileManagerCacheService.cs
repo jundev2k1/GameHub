@@ -47,7 +47,7 @@ public sealed class FileManagerCacheService(
         Set(cacheKey, fileInfo, options);
     }
 
-    public async Task<MediaFileInfo?> GetFileUrl(MediaFile file, CancellationToken ct = default)
+    public async Task<MediaFileInfo?> GetFileInfo(MediaFile file, CancellationToken ct = default)
     {
         var cacheKey = $"{CacheKeyPrefix}{file.Id}";
         var fileInfo = Get<MediaFileInfo?>(cacheKey);
@@ -55,13 +55,28 @@ public sealed class FileManagerCacheService(
 
         return Get<MediaFileInfo?>(cacheKey);
     }
-    public async Task<MediaFileInfo?> GetFileUrl(int fileId, CancellationToken ct = default)
+    public async Task<MediaFileInfo?> GetFileInfo(int fileId, CancellationToken ct = default)
     {
         var cacheKey = $"{CacheKeyPrefix}{fileId}";
         var file = Get<MediaFileInfo?>(cacheKey);
         if (file is null) await RefreshImage(fileId, null, ct);
 
         return Get<MediaFileInfo?>(cacheKey);
+    }
+
+    public async Task<string?> GetFileUrl(MediaFile? file, CancellationToken ct = default)
+    {
+        if (file is null) return null;
+
+        var fileInfo = await GetFileInfo(file, ct);
+        return fileInfo?.Url;
+    }
+    public async Task<string?> GetFileUrl(int? fileId, CancellationToken ct = default)
+    {
+        if (!fileId.HasValue) return null;
+
+        var fileInfo = await GetFileInfo(fileId.Value, ct);
+        return fileInfo?.Url;
     }
 
     public void RemoveImage(int fileId)

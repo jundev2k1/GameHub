@@ -333,17 +333,8 @@ public sealed class LiveStreamManagerCacheService(
         var dtos = Get<LiveStreamGiftClientDto[]>(cacheKey) ?? [];
         foreach (var dto in dtos)
         {
-            if (dto.IconId.HasValue)
-            {
-                var imageInfo = await fileManagerCache.GetFileUrl(dto.IconId.Value, ct);
-                dto.IconUrl = imageInfo?.Url;
-            }
-
-            if (dto.AnimationId.HasValue)
-            {
-                var imageInfo = await fileManagerCache.GetFileUrl(dto.AnimationId.Value, ct);
-                dto.AnimationUrl = imageInfo?.Url;
-            }
+            dto.IconUrl = await fileManagerCache.GetFileUrl(dto.IconId, ct);
+            dto.AnimationUrl = await fileManagerCache.GetFileUrl(dto.AnimationId, ct);
         }
         return dtos;
     }

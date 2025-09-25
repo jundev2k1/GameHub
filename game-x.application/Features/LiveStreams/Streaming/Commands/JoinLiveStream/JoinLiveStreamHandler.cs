@@ -63,25 +63,23 @@ public sealed class JoinLiveStreamHandler(
 
         var viewer = await CreateViewer(streamSetting);
         return new JoinLiveStreamResult(
-            streamInfo.Title,
-            streamInfo.Description,
-            streamInfo.Thumbnail,
-            streamInfo.StreamKey,
-            streamInfo.LiveAt ?? DateTime.UtcNow,
-            streamInfo.AssignedTo?.Id ?? string.Empty,
-            streamInfo.AssignedTo?.Nickname ?? string.Empty,
-            streamInfo.AssignedTo?.Avatar ?? string.Empty,
-            liveStreamManager.GetViewerCount(streamInfo.StreamKey),
-            viewer.Url);
+            Title: streamInfo.Title,
+            Description: streamInfo.Description,
+            Thumbnail: streamInfo.Thumbnail,
+            StreamKey: streamInfo.StreamKey,
+            LiveAt: streamInfo.LiveAt ?? DateTime.UtcNow,
+            TalentId: streamInfo.AssignedTo?.Id ?? string.Empty,
+            TalentName: streamInfo.AssignedTo?.Nickname ?? string.Empty,
+            TalentAvatar: await fileManagerCache.GetFileUrl(streamInfo.AssignedTo?.AvatarId, ct),
+            ViewCount: liveStreamManager.GetViewerCount(streamInfo.StreamKey),
+            Url: viewer.Url);
     }
 
     private async Task<LiveStreamViewerDto> CreateViewer(LivestreamSchedule schedule)
     {
         var targetUser = await userRepo.GetUserByIdAsync(userAccessor.GetUserId());
         var token = GenerateToken();
-        var avatarInfo = targetUser.Avatar != null
-            ? await fileManagerCache.GetFileUrl(targetUser.Avatar)
-            : null;
+        var avatarUrl = await fileManagerCache.GetFileUrl(targetUser.Avatar);
         var viewerDto = new LiveStreamViewerDto
         {
             StreamKey = schedule.StreamKey,
@@ -89,7 +87,7 @@ public sealed class JoinLiveStreamHandler(
             Url = GenerateUrl(schedule.StreamKey, token),
             ViewerId = targetUser.Id,
             ViewerName = targetUser.Nickname,
-            ViewerAvatar = avatarInfo?.Url,
+            ViewerAvatar = avatarUrl,
             DeviceInfo = userAccessor.GetDeviceInfo()
         };
         liveStreamManager.InitViewerLiveStream(viewerDto);

@@ -13,9 +13,9 @@ public class UploadAvatarHandler(
     IUserRepo userRepo,
     IFileStorageService fileStorage,
     IFileManagerCacheService fileManagerCache,
-    IAppLogger<domain.Entities.User> logger): IRequestHandler<UploadAvatarCommand, string>
+    IAppLogger<domain.Entities.User> logger): ICommandHandler<UploadAvatarCommand, string?>
 {
-    public async Task<string> Handle(UploadAvatarCommand request, CancellationToken ct)
+    public async Task<string?> Handle(UploadAvatarCommand request, CancellationToken ct)
     {
         try
         {
@@ -28,9 +28,9 @@ public class UploadAvatarHandler(
             }, ct);
             await unitOfWork.SaveChangesAsync(ct);
             await fileManagerCache.RefreshImage(mediaFile, ct: ct);
-            var avatarInfo = await fileManagerCache.GetFileUrl(mediaFile, ct);
 
-            return avatarInfo?.Url ?? string.Empty;
+            var avatarUrl = await fileManagerCache.GetFileUrl(mediaFile, ct);
+            return avatarUrl;
         }
         catch (Exception e)
         {

@@ -35,7 +35,7 @@ public sealed class UpdateScheduleThumbnailHandler(
         // Refresh cache and get new url
         var scheduleAfterUpdate = await liveStreamRepo.GetByIdAsync(request.Id, ct);
         await fileManagerCache.RefreshImage(scheduleAfterUpdate!.Thumbnail!, ct: ct);
-        var thumbnail = await fileManagerCache.GetFileUrl(scheduleAfterUpdate!.Thumbnail!, ct: ct);
+        var thumbnail = await fileManagerCache.GetFileInfo(scheduleAfterUpdate!.Thumbnail!, ct: ct);
         RefreshLiveStreamCache(scheduleAfterUpdate.StreamKey, scheduleAfterUpdate.Thumbnail!.Id, thumbnail?.Url);
 
         return new UpdateScheduleThumbnailResult(thumbnail!.FileName, thumbnail.Url);

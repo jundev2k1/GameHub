@@ -10,6 +10,6 @@ public record JoinLiveStreamResult(
     DateTime LiveAt,
     string TalentId,
     string TalentName,
-    string TalentAvatar,
+    string? TalentAvatar,
     int ViewCount,
     string Url);

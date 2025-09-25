@@ -49,10 +49,11 @@ public sealed class GetActiveStreamsHandler(
 
         // Get thumbnail
         if (stream != null && stream.ThumbnailId.HasValue)
-        {
-            var thumbnail = await fileManagerCache.GetFileUrl(stream.ThumbnailId.Value);
-            stream.Thumbnail = thumbnail?.Url;
-        }
+            stream.Thumbnail = await fileManagerCache.GetFileUrl(stream.ThumbnailId.Value);
+
+        //Get talent avatar
+        if (stream != null && stream.AssignedTo?.AvatarId != null)
+            stream.AssignedTo.Avatar = await fileManagerCache.GetFileUrl(stream.AssignedTo.AvatarId.Value);
 
         // Map to DTO
         var dto = stream.Adapt<LiveStreamScheduleClientItemDto>();

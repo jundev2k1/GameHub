@@ -69,7 +69,7 @@ public sealed class PublishStreamHandler(
         };
         if (streamSetting.AssignedTo != null && streamSetting.AssignedTo.Avatar != null)
         {
-            var avatar = await fileManagerCache.GetFileUrl(streamSetting.AssignedTo.Avatar, ct);
+            var avatar = await fileManagerCache.GetFileInfo(streamSetting.AssignedTo.Avatar, ct);
             streamInfo.AssignedTo!.Avatar = avatar?.Url;
         }
 

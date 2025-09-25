@@ -25,7 +25,7 @@ public sealed class UpdateLiveStreamGiftAnimationHandler(
         // Refresh cache and get new url
         var giftAfterUpdate = await liveStreamGiftRepo.GetByIdAsync(request.Id, ct);
         await fileManagerCache.RefreshImage(giftAfterUpdate!.Icon!, ct: ct);
-        var animation = await fileManagerCache.GetFileUrl(giftAfterUpdate!.Icon!, ct: ct);
+        var animation = await fileManagerCache.GetFileInfo(giftAfterUpdate!.Icon!, ct: ct);
         await liveStreamManager.RefreshGiftCacheAsync(ct);
 
         return new UpdateLiveStreamGiftAnimationResult(animation!.FileName, animation.Url);

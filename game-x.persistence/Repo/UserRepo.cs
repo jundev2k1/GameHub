@@ -116,7 +116,7 @@ public sealed class UserRepo(
         string? avatarUrl = null;
         if (targetUser.Avatar is not null)
         {
-            var avatar = await fileManagerCache.GetFileUrl(targetUser.Avatar, ct);
+            var avatar = await fileManagerCache.GetFileInfo(targetUser.Avatar, ct);
             avatarUrl = avatar?.Url;
         }
 
@@ -166,7 +166,7 @@ public sealed class UserRepo(
             var dto = user.Adapt<UserSummaryForAdmin>();
             if (user.Avatar is null) return dto;
 
-            var avatar = await fileManagerCache.GetFileUrl(user.Avatar, ct);
+            var avatar = await fileManagerCache.GetFileInfo(user.Avatar, ct);
             if (avatar != null) dto.Avatar = avatar.Url;
 
             return dto;

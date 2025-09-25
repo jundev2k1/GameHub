@@ -18,16 +18,8 @@ public sealed class GetBankAccountProfileHandler(
 
         var result = targetBankAccount.Adapt<GetBankAccountProfileResult>() with
         {
-            ImageUrl = await GetImageUrl(targetBankAccount.Image),
+            ImageUrl = await fileManagerCache.GetFileUrl(targetBankAccount.Image, ct),
         };
         return result;
-    }
-
-    private async Task<string> GetImageUrl(MediaFile? file)
-    {
-        if (file is null) return string.Empty;
-
-        var image = await fileManagerCache.GetFileUrl(file);
-        return image!.Url;
     }
 }

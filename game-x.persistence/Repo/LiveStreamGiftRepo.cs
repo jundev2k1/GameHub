@@ -74,12 +74,12 @@ public sealed class LiveStreamGiftRepo(
         var dto = target.Adapt<LiveStreamGiftDetailDto>();
         if (target.Icon != null)
         {
-            var imageInfo = await fileManager.GetFileUrl(target.Icon, ct);
+            var imageInfo = await fileManager.GetFileInfo(target.Icon, ct);
             dto.IconUrl = imageInfo?.Url;
         }
         if (target.Animation != null)
         {
-            var imageInfo = await fileManager.GetFileUrl(target.Animation, ct);
+            var imageInfo = await fileManager.GetFileInfo(target.Animation, ct);
             dto.AnimationUrl = imageInfo?.Url;
         }
         return dto;
