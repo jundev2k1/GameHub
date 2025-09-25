@@ -1,4 +1,5 @@
 ﻿using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
@@ -13,7 +14,8 @@ public sealed class SubmitKycHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IApplicationEventDispatcher eventDispatcher,
-    IFileStorageService fileStorage) : ICommandHandler<SubmitKycCommand>
+    IFileStorageService fileStorage,
+    IFileManagerCacheService fileManagerCache) : ICommandHandler<SubmitKycCommand>
 {
     public async Task<Unit> Handle(SubmitKycCommand request, CancellationToken ct = default)
     {
@@ -47,6 +49,13 @@ public sealed class SubmitKycHandler(
         }, ct);
         var userKycDto = createdKyc?.Adapt<UserKycListItemDto>();
 
+        // Refresh cache image
+        if (createdKyc!.FrontImage != null)
+            await fileManagerCache.RefreshImage(createdKyc!.FrontImage, ct: ct);
+        if (createdKyc!.BackImage != null)
+            await fileManagerCache.RefreshImage(createdKyc!.BackImage, ct: ct);
+
+        // Publish event after kyc submission
         await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.Kyc, userKycDto), ct);
         return Unit.Value;
     }

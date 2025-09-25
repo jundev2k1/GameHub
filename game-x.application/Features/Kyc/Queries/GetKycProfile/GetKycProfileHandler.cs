@@ -1,4 +1,4 @@
-﻿using game_x.application.Contract.Infrastructure.FileStorage;
+﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Kyc.Dtos;
 
@@ -6,7 +6,7 @@ namespace game_x.application.Features.Kyc.Queries.GetKycProfile;
 
 public sealed class GetKycProfileHandler(
     IUserRepo userRepo,
-    IFileStorageService fileStorage) : IQueryHandler<GetKycProfileQuery, UserKycDto>
+    IFileManagerCacheService fileManagerCache) : IQueryHandler<GetKycProfileQuery, UserKycDto>
 {
     public async Task<UserKycDto> Handle(GetKycProfileQuery request, CancellationToken ct = default)
     {
@@ -22,10 +22,7 @@ public sealed class GetKycProfileHandler(
     {
         if (file is null) return string.Empty;
 
-        var url = await fileStorage.GenerateDownloadUrlAsync(
-            bucketName: file.BucketName,
-            objectName: file.ObjectName,
-            expiry: TimeSpan.FromHours(1));
-        return url;
+        var image = await fileManagerCache.GetFileInfo(file);
+        return image!.Url;
     }
 }

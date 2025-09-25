@@ -1,4 +1,5 @@
 ﻿using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
@@ -14,7 +15,8 @@ public sealed class ResubmitKycHandler(
     IUserAccessor userAccessor,
     IMediaFileRepo mediaFileRepo,
     IApplicationEventDispatcher eventDispatcher,
-    IFileStorageService fileStorage) : ICommandHandler<ResubmitKycCommand>
+    IFileStorageService fileStorage,
+    IFileManagerCacheService fileManagerCache) : ICommandHandler<ResubmitKycCommand>
 {
     public async Task<Unit> Handle(ResubmitKycCommand request, CancellationToken ct = default)
     {
@@ -43,6 +45,13 @@ public sealed class ResubmitKycHandler(
         }, ct);
         var userKycDto = updateKyc?.Adapt<UserKycListItemDto>();
 
+        // Refresh cache image
+        if (updateKyc!.FrontImage != null)
+            await fileManagerCache.RefreshImage(updateKyc!.FrontImage, ct: ct);
+        if (updateKyc!.BackImage != null)
+            await fileManagerCache.RefreshImage(updateKyc!.BackImage, ct: ct);
+
+        // Publish event after kyc submission
         await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.Kyc, userKycDto), ct);
         return Unit.Value;
     }

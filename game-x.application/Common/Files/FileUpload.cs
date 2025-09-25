@@ -4,8 +4,8 @@ namespace game_x.application.Common.Files;
 
 public sealed class FileUpload
 {
-    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] AllowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+    private static readonly string[] AllowedMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     private const int MaxFileSize = 10 * 1024 * 1024; // 10 MB
 
     public Stream Content { get; init; } = default!;

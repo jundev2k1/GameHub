@@ -1,15 +1,15 @@
-using Moq;
-using game_x.application.Features.Auth.Client.Commands.UserLogin;
+using FluentAssertions;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
+using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using FluentAssertions;
-using game_x.application.Common.Abstractions.Events;
+using game_x.application.Features.Auth.Client.Commands.UserLogin;
 using game_x.domain.Constants;
 using game_x.domain.Entities;
 using game_x.domain.Enum;
 using game_x.domain.ValueObjects;
-using game_x.application.Contract.Infrastructure.Caching;
+using Moq;
 
 namespace Test.UnitTests.Application.Auth.Client.Commands.UserLogin;
 
@@ -20,6 +20,7 @@ public sealed class UserLoginHandlerTests
     private readonly Mock<ITokenService> _tokenServiceMock = new();
     private readonly Mock<IRefreshTokenManagerCacheService> _refreshTokenManagerMock = new();
     private readonly Mock<IAuthService> _authServiceMock = new();
+    private readonly Mock<IUserRepo> _userRepoMock = new();
     private readonly UserLoginHandler _handler;
 
     public UserLoginHandlerTests()
@@ -29,7 +30,8 @@ public sealed class UserLoginHandlerTests
             jwtTokenGenerator: _jwtTokenGeneratorMock.Object,
             tokenService: _tokenServiceMock.Object,
             refreshTokenManager: _refreshTokenManagerMock.Object,
-            authService: _authServiceMock.Object);
+            authService: _authServiceMock.Object,
+            userRepo: _userRepoMock.Object);
     }
 
     [Fact]

@@ -24,6 +24,14 @@ public interface IUserRepo
 
     Task<UserDetailDto> GetUserDetailAsync(string userId, CancellationToken ct = default);
 
+    Task<UserSummaryForAdmin[]> GetUserWithSuggestionsAsync(
+        string keyword,
+        bool? isKycConfirmed,
+        bool? isBankAccountConfirmed,
+        int size = 10,
+        bool isIncludeAdmin = false,
+        CancellationToken ct = default);
+
     Task<UserExtend> GetUserExtendAsync(string userId, CancellationToken ct = default);
 
     Task<PaginationResult<UserKyc>> GetUserKycByCriteria(

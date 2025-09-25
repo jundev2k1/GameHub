@@ -5,11 +5,11 @@ namespace game_x.application.Features.Games.Admin.Commands.UpdateGame;
 
 public record UpdateGameCommand(
     [property: JsonIgnore] Guid Id,
-    string? Name,
-    string? Description,
-    string? Note,
-    int? Priority,
-    bool? IsActive,
+    string Name,
+    string Description,
+    string Note,
+    int Priority,
+    bool IsActive,
     FileUpload? Thumbnail,
     GameCategoryItem[]? Categories,
     GameTypeItem[]? Types,

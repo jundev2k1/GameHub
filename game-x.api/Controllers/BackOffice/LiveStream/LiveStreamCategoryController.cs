@@ -1,11 +1,11 @@
 ﻿using game_x.api.Common;
 using game_x.application.Common.Filters;
-using game_x.application.Features.LiveStreams.Commands.CreateCategory;
-using game_x.application.Features.LiveStreams.Commands.DeleteCategory;
-using game_x.application.Features.LiveStreams.Commands.UpdateCategory;
-using game_x.application.Features.LiveStreams.Commands.UpdateCategoryStatus;
-using game_x.application.Features.LiveStreams.Queries.GetCategoriesByCriteria;
-using game_x.application.Features.LiveStreams.Queries.GetCategoryDetail;
+using game_x.application.Features.LiveStreams.Categories.Commands.CreateCategory;
+using game_x.application.Features.LiveStreams.Categories.Commands.DeleteCategory;
+using game_x.application.Features.LiveStreams.Categories.Commands.UpdateCategory;
+using game_x.application.Features.LiveStreams.Categories.Commands.UpdateCategoryStatus;
+using game_x.application.Features.LiveStreams.Categories.Queries.GetCategoriesByCriteria;
+using game_x.application.Features.LiveStreams.Categories.Queries.GetCategoryDetail;
 
 namespace game_x.api.Controllers.BackOffice.LiveStream;
 

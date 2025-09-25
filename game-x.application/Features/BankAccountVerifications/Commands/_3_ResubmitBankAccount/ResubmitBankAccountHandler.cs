@@ -1,4 +1,5 @@
 ﻿using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
@@ -14,7 +15,8 @@ public sealed class ResubmitBankAccountHandler(
     IUserAccessor userAccessor,
     IMediaFileRepo mediaFileRepo,
     IApplicationEventDispatcher eventDispatcher,
-    IFileStorageService fileStorage) : ICommandHandler<ResubmitBankAccountCommand>
+    IFileStorageService fileStorage,
+    IFileManagerCacheService fileManagerCache) : ICommandHandler<ResubmitBankAccountCommand>
 {
     public async Task<Unit> Handle(ResubmitBankAccountCommand request, CancellationToken ct = default)
     {
@@ -39,12 +41,17 @@ public sealed class ResubmitBankAccountHandler(
             if (request.Image != null)
                 await ReupImage(updateBankAccount, request.Image, ct);
         }, ct);
-        if (updateBankAccount != null)
-        {
-            var bankAccountAfterUpdated = await bankAccountRepo.GetByIdAsync(updateBankAccount.PublicId, ct);
-            var userBankAccountItemDto = bankAccountAfterUpdated?.Adapt<BankAccountListItemDto>();
-            await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.BankAccount, null, userBankAccountItemDto), ct);
-        }
+
+        if (updateBankAccount is null) return Unit.Value;
+
+        // Refresh image cache
+        if (updateBankAccount.Image != null)
+            await fileManagerCache.RefreshImage(updateBankAccount.Image, ct: ct);
+
+        // Publish event after submission
+        var bankAccountAfterUpdated = await bankAccountRepo.GetByIdAsync(updateBankAccount.PublicId, ct);
+        var userBankAccountItemDto = bankAccountAfterUpdated?.Adapt<BankAccountListItemDto>();
+        await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.BankAccount, null, userBankAccountItemDto), ct);
 
         return Unit.Value;
     }

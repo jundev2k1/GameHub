@@ -2,7 +2,6 @@
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using System.Linq.Expressions;
 
 namespace game_x.persistence.Repo;
 

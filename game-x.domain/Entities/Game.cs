@@ -35,11 +35,11 @@ public sealed class Game : BaseEntity<int>, IAuditable
     }
 
     public void UpdateGame(
-        string? name,
-        string? desc,
-        string? note,
-        int? priority,
-        bool? isActive,
+        string name,
+        string desc,
+        string note,
+        int priority,
+        bool isActive,
         ICollection<GameCategoryMapping>? categories,
         ICollection<GameTypeMapping>? types,
         ICollection<GameTagMapping>? tags,
@@ -60,11 +60,11 @@ public sealed class Game : BaseEntity<int>, IAuditable
         if (tags != null && (tags.Select(t => t.TagId).Distinct().Count() != tags.Count))
             throw new ArgumentException("Tags contains duplicate tag IDs.", nameof(tags));
 
-        Name = name ?? Name;
-        Description = desc ?? Description;
-        Note = note ?? Note;
-        Priority = priority ?? Priority;
-        IsActive = isActive ?? IsActive;
+        Name = name;
+        Description = desc;
+        Note = note;
+        Priority = priority;
+        IsActive = isActive;
         ThumbnailId = thumbnailId ?? ThumbnailId;
         GameCategoryMappings = categories ?? GameCategoryMappings;
         GameTypeMappings = types ?? GameTypeMappings;

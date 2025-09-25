@@ -10,7 +10,7 @@ public record GetBankAccountProfileResult(
     string AccountNumber,
     string CurrencyCode,
     string ImageName,
-    string ImageUrl,
+    string? ImageUrl,
     UserBankAccountStatus Status,
     string? RejectionReason,
     string? RejectDetails,

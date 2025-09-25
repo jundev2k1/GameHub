@@ -31,6 +31,7 @@ public sealed class UserRepo(
             .ThenInclude(ba => ba.FiatCurrency)
             .Include(u => u.UserExtend)
             .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
             .Include(u => u.Avatar)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
@@ -115,13 +116,63 @@ public sealed class UserRepo(
         string? avatarUrl = null;
         if (targetUser.Avatar is not null)
         {
-            var avatar = await fileManagerCache.GetImageUrl(targetUser.Avatar, ct);
+            var avatar = await fileManagerCache.GetFileInfo(targetUser.Avatar, ct);
             avatarUrl = avatar?.Url;
         }
 
         var result = targetUser.Adapt<UserDetailDto>();
         result.AvatarUrl = avatarUrl;
         return result;
+    }
+
+    public async Task<UserSummaryForAdmin[]> GetUserWithSuggestionsAsync(
+        string keyword,
+        bool? isKycConfirmed,
+        bool? isBankAccountConfirmed,
+        int size = 10,
+        bool isIncludeAdmin = false,
+        CancellationToken ct = default)
+    {
+        var query = context.Users
+            .AsNoTracking()
+            .Include(u => u.Avatar)
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .Include(u => u.UserKyc)
+            .Include(u => u.UserBankAccounts)
+            .Where(u => u.Status == UserStatus.Active && !u.UserRoles.Any(ur => ur.Role.Name == AppRoles.Root))
+            .AsQueryable();
+        if (!isIncludeAdmin)
+            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Name == AppRoles.User));
+
+        if (keyword.IsNotNullOrEmpty())
+            query = query.Where(u => u.Nickname.ToLower().Contains(keyword.ToLower()));
+
+        if (isKycConfirmed != null)
+            query = query.Where(u => isKycConfirmed == true
+                ? u.UserKyc != null && u.UserKyc.Status == KycStatus.Approved
+                : u.UserKyc == null || u.UserKyc.Status != KycStatus.Approved);
+
+        if (isBankAccountConfirmed != null)
+            query = query.Where(u => isBankAccountConfirmed == true
+                ? u.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved)
+                : !u.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved));
+        var users = await query
+            .Take(size)
+            .ToArrayAsync(ct);
+
+        var mappingTasks = users.Select(async user =>
+        {
+            var dto = user.Adapt<UserSummaryForAdmin>();
+            if (user.Avatar is null) return dto;
+
+            var avatar = await fileManagerCache.GetFileInfo(user.Avatar, ct);
+            if (avatar != null) dto.Avatar = avatar.Url;
+
+            return dto;
+        });
+
+        return await Task.WhenAll(mappingTasks);
     }
 
     public async Task<UserExtend> GetUserExtendAsync(string userId, CancellationToken ct = default)

@@ -9,6 +9,7 @@ public sealed class AdminStatistics(GameXContext context) : IAdminStatistics, IS
     public async Task<(int WithdrawalCount, int KycCount, int BankAccountCount)> GetUnderReviewStatisticsAsync(CancellationToken ct = default)
     {
         var statistic = await context.UserBankAccounts
+            .OrderByDescending(ba => ba.CreatedAt)
             .GroupBy(_ => 1)
             .Select(baGroup => Tuple.Create(
                 context.Transactions

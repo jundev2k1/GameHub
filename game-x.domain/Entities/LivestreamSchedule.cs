@@ -4,14 +4,16 @@ public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
 {
     public Guid PublicId { get; private set; } = Guid.NewGuid();
     public string Title { get; private set; } = string.Empty;
+    public int? ThumbnailId { get; private set; }
+    public MediaFile? Thumbnail { get; private set; }
     public string? Description { get; private set; }
     public string? Notes { get; private set; }
     public DateTime StartTime { get; private set; }
     public DateTime EndTime { get; private set; }
     public DateTime? StartAt { get; private set; }
+    public DateTime? EndAt { get; private set; }
     public string StreamKey { get; private set; } = string.Empty;
     public string Token { get; private set; } = string.Empty;
-    public DateTime? EndAt { get; private set; }
     public LiveStreamStatus Status { get; private set; }
     public string? CancellationReason { get; private set; }
     public string? AssignedId { get; private set; }
@@ -69,6 +71,11 @@ public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
             CategoryMappings = categories;
     }
 
+    public void UpdateThumbnail(MediaFile thumbnail)
+    {
+        Thumbnail = thumbnail;
+    }
+
     public void AssignStream(string assignedId)
     {
         if (string.IsNullOrWhiteSpace(assignedId))
@@ -88,13 +95,23 @@ public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
         StartAt = DateTime.UtcNow;
     }
 
-    public void EndStream()
+    public void DisconnectStream()
+    {
+        if (Status != LiveStreamStatus.Live)
+            throw new InvalidOperationException("Only live streams can be disconnected.");
+
+        EndAt = DateTime.UtcNow;
+    }
+
+    public void EndStream(DateTime? endTime = null)
     {
         if (Status != LiveStreamStatus.Live)
             throw new InvalidOperationException("Only live streams can be ended.");
 
         Status = LiveStreamStatus.Ended;
-        EndAt = DateTime.UtcNow;
+
+        if (!EndAt.HasValue)
+            EndAt = endTime ?? DateTime.UtcNow;
     }
 
     public void CancelStream(string reason)

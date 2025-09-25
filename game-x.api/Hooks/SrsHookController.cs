@@ -1,10 +1,10 @@
 ﻿using game_x.api.Common;
 using game_x.api.Controllers;
 using game_x.application.Exceptions;
-using game_x.application.Features.LiveStreams.Commands.PlayStream;
-using game_x.application.Features.LiveStreams.Commands.PublishStream;
-using game_x.application.Features.LiveStreams.Commands.StopStream;
-using game_x.application.Features.LiveStreams.Commands.UnpublishStream;
+using game_x.application.Features.LiveStreams.Streaming.Commands.PlayStream;
+using game_x.application.Features.LiveStreams.Streaming.Commands.PublishStream;
+using game_x.application.Features.LiveStreams.Streaming.Commands.StopStream;
+using game_x.application.Features.LiveStreams.Streaming.Commands.UnpublishStream;
 using System.Text.Json;
 using System.Web;
 
@@ -25,7 +25,7 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
             throw new BadRequestException("Token is required");
 
         logger.LogInformation($"Token: {token}");
-        var command = new PublishStreamCommand(request.Stream, token!);
+        var command = new PublishStreamCommand(request.Stream, token!, request.ClientId);
         await Mediator.Send(command);
         return Ok(0);
     }
@@ -55,7 +55,8 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
         var command = new PlayStreamCommand(
             request.App,
             request.Stream,
-            token!);
+            token!,
+            request.ClientId);
         await Mediator.Send(command);
         return Ok(0);
     }
@@ -65,10 +66,16 @@ public sealed class SrsHookController(ILogger<SrsHookController> logger) : BaseA
     {
         logger.LogInformation("=====SRS server=====");
         logger.LogInformation(JsonSerializer.Serialize(request));
+
+        var query = HttpUtility.ParseQueryString(request.Param);
+        var token = query.Get("token");
+        if (token.IsNullOrWhiteSpace())
+            throw new BadRequestException("Token is required");
+
         var command = new StopStreamCommand(
             request.App,
             request.Stream,
-            request.Param);
+            token!);
         await Mediator.Send(command);
         return Ok(0);
     }
