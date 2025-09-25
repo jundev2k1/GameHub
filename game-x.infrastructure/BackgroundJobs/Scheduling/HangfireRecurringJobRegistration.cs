@@ -1,5 +1,4 @@
-﻿using game_x.application.Contract.Infrastructure.Logger;
-using game_x.application.Contract.Jobs;
+﻿using game_x.application.Contract.Jobs;
 using game_x.share.Extensions;
 using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +11,6 @@ public static class HangfireRecurringJobRegistration
     {
         var jobManager = serviceProvider.GetRequiredService<IRecurringJobManager>();
         var allJobs = serviceProvider.GetServices<IRecurringJob>();
-        var logger = serviceProvider.GetRequiredService<IAppLogger<IRecurringJobManager>>();
         foreach (var job in allJobs)
         {
             // Register the job if it has a Cron expression
@@ -22,14 +20,14 @@ public static class HangfireRecurringJobRegistration
                     job.JobId,
                     () => job.ExecuteAsync(CancellationToken.None),
                     job.CronExpression);
-                logger.LogInformation($"Registered recurring job: {job.JobId} with Cron: {job.CronExpression}");
+                Console.WriteLine($"Registered recurring job: {job.JobId} with Cron: {job.CronExpression}");
             }
 
             // Execute the job immediately if it's marked as init
             if (job.IsInit)
             {
                 BackgroundJob.Enqueue(() => job.ExecuteAsync(CancellationToken.None));
-                logger.LogInformation($"Job run when application starts: {job.CronExpression}");
+                Console.WriteLine($"Job run when application starts: {job.JobId} with Cron: {job.CronExpression}");
             }
         }
     }
