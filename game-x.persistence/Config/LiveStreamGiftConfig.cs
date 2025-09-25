@@ -29,10 +29,6 @@ public sealed class LiveStreamGiftConfig : IEntityTypeConfiguration<LiveStreamGi
         builder.Property(g => g.Notes)
             .HasMaxLength(4000);
 
-        builder.Property(g => g.CoinCost)
-            .IsRequired()
-            .HasColumnType("decimal(18,2)");
-
         builder.Property(g => g.Priority)
             .IsRequired();
 

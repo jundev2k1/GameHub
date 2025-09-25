@@ -13,8 +13,8 @@ public sealed class CreateLiveStreamGiftHandler(
         var newGift = LiveStreamGift.Create(
             request.Name.Trim(),
             request.Notes?.Trim(),
-            request.CoinCost,
-            request.Priority);
+            request.Priority,
+            []);
         await liveStreamGiftRepo.CreateAsync(newGift, ct);
         await unitOfWork.SaveChangesAsync(ct);
 

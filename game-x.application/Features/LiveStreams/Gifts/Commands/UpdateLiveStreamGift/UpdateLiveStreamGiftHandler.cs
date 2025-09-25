@@ -15,8 +15,8 @@ public sealed class UpdateLiveStreamGiftHandler(
             gift.Update(
                 request.Name.Trim(),
                 request.Notes?.Trim(),
-                request.CoinCost,
-                request.Priority);
+                request.Priority,
+                []);
             await unitOfWork.SaveChangesAsync(ct);
         }, ct);
 

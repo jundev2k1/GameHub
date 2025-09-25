@@ -6,5 +6,4 @@ public record UpdateLiveStreamGiftCommand(
     [property: JsonIgnore] Guid Id,
     string Name,
     string? Notes,
-    decimal CoinCost,
     int Priority) : ICommand;

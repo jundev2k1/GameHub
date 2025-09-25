@@ -3,5 +3,4 @@
 public record CreateLiveStreamGiftCommand(
     string Name,
     string? Notes,
-    decimal CoinCost,
     int Priority) : ICommand;
