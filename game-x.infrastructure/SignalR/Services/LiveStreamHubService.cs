@@ -47,7 +47,7 @@ public sealed class LiveStreamHubService(IHubContext<LiveStreamHub, ILiveStreamH
         // Notify all viewers in the stream
         await hubContext.Clients
             .Group($"stream-{streamKey}")
-            .OnStreamCanceled(reason);
+            .OnStreamCancelled(reason);
     }
 
     public async Task NotifyEndStream(string streamKey)

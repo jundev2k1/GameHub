@@ -26,7 +26,7 @@ public interface ILiveStreamHub
 
     Task OnStreamDisconnected();
 
-    Task OnStreamCanceled(string reason);
+    Task OnStreamCancelled(string reason);
 
     Task OnStreamEnded();
 
