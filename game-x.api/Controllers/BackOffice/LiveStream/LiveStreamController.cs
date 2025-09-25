@@ -1,12 +1,14 @@
-﻿using game_x.api.Common;
+﻿using game_x.api.Dtos;
+using game_x.application.Common.Files;
 using game_x.application.Common.Filters;
-using game_x.application.Features.LiveStreams.Commands.AssignTalent;
-using game_x.application.Features.LiveStreams.Commands.CancelSchedule;
-using game_x.application.Features.LiveStreams.Commands.CreateSchedule;
-using game_x.application.Features.LiveStreams.Commands.DeleteSchedule;
-using game_x.application.Features.LiveStreams.Commands.UpdateSchedule;
-using game_x.application.Features.LiveStreams.Queries.GetScheduleDetail;
-using game_x.application.Features.LiveStreams.Queries.GetSchedulesByCriteria;
+using game_x.application.Features.LiveStreams.Schedules.Commands.AssignTalent;
+using game_x.application.Features.LiveStreams.Schedules.Commands.CancelSchedule;
+using game_x.application.Features.LiveStreams.Schedules.Commands.CreateSchedule;
+using game_x.application.Features.LiveStreams.Schedules.Commands.DeleteSchedule;
+using game_x.application.Features.LiveStreams.Schedules.Commands.UpdateSchedule;
+using game_x.application.Features.LiveStreams.Schedules.Commands.UpdateScheduleThumbnail;
+using game_x.application.Features.LiveStreams.Schedules.Queries.GetScheduleDetail;
+using game_x.application.Features.LiveStreams.Schedules.Queries.GetSchedulesByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.LiveStream;
 
@@ -15,9 +17,13 @@ public sealed class LiveStreamController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     [HttpGet]
-    public async Task<IActionResult> GetSchedulesByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    public async Task<IActionResult> GetSchedulesByCriteriaAsync([AsParameters] GetLiveStreamsByCriteriaRequest parameters)
     {
-        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.Statuses.IsNotNullOrEmpty())
+            paramExtends.Add("statuses", parameters.Statuses!);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
         var query = new GetSchedulesByCriteriaQuery(
             filters,
@@ -49,8 +55,8 @@ public sealed class LiveStreamController : BaseApiController
     [HttpPatch("{id:guid}/talent")]
     public async Task<IActionResult> AssignTalentToScheduleAsync(Guid id, AssignTalentCommand command)
     {
-        await Mediator.Send(command with { Id = id });
-        return ApiResponseFactory.NoContent();
+        var result = await Mediator.Send(command with { Id = id });
+        return ApiResponseFactory.Ok(result);
     }
 
     [Authorize(Roles = AppRoles.Admin)]
@@ -59,6 +65,15 @@ public sealed class LiveStreamController : BaseApiController
     {
         await Mediator.Send(command with { Id = id });
         return ApiResponseFactory.NoContent();
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.User}")]
+    [HttpPatch("{id:guid}/thumbnail")]
+    public async Task<IActionResult> UpdateScheduleThumbnailAsync(Guid id, UpdateImageRequest request)
+    {
+        var command = new UpdateScheduleThumbnailCommand(id, FileUpload.FromFormFile(request.Image));
+        var result = await Mediator.Send(command);
+        return ApiResponseFactory.Ok(result);
     }
 
     [Authorize(Roles = AppRoles.Admin)]

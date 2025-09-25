@@ -51,8 +51,8 @@ public sealed class GameController : BaseApiController
         var command = new UpdateGameCommand(
             gameId,
             request.Name,
-            request.Description,
-            request.Note,
+            request.Description ?? string.Empty,
+            request.Note ?? string.Empty,
             request.Priority,
             request.IsActive,
             request.Thumbnail != null ? FileUpload.FromFormFile(request.Thumbnail) : null,

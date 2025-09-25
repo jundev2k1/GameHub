@@ -1,17 +1,22 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using game_x.application.Features.LiveStreams.Dtos;
+using game_x.application.Features.LiveStreams.Gifts.Dtos;
+using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.share.Extensions;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace game_x.infrastructure.Caching;
 
-public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
+public sealed class LiveStreamManagerCacheService(
+    IMemoryCache cache,
+    ILiveStreamGiftRepo liveStreamGiftRepo,
+    IFileManagerCacheService fileManagerCache)
     : CacheService(cache), ILiveStreamManagerCacheService
 {
     private const string LiveStreamPrefix = "livestream:";
-    private const string LiveStreamViewersPrefix = "livestream:viewers:";
 
+    #region Stream Management
     public string[] GetAllStreamKeys()
     {
         var cacheKey = $"{LiveStreamPrefix}streams";
@@ -26,6 +31,12 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         var cacheKey = $"{LiveStreamPrefix}streams:{streamInfo.StreamKey}";
         Set(cacheKey, streamInfo);
+
+        var cacheListKey = $"{LiveStreamPrefix}streams";
+        var streamList = GetAllStreamKeys();
+        if (!streamList.Contains(streamInfo.StreamKey))
+            streamList = [.. streamList, streamInfo.StreamKey];
+        Set(cacheListKey, streamList);
     }
 
     public void ConnectLiveStream(string streamKey)
@@ -86,7 +97,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         var streamDetailCacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
         Remove(streamDetailCacheKey);
 
-        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{streamKey}";
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers";
         var allViewersByStreamKey = GetAllViewersByStreamKey(streamKey);
         foreach (var viewerId in allViewersByStreamKey)
         {
@@ -107,10 +118,12 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
         return Get<LiveStreamStatusDto?>(cacheKey);
     }
+    #endregion
 
+    #region Viewer Management
     public LiveStreamViewerDto? GetViewerInfo(string streamKey, string token)
     {
-        var viewerCacheKey = $"{LiveStreamViewersPrefix}{streamKey}:{token}";
+        var viewerCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers:{token}";
         return Get<LiveStreamViewerDto?>(viewerCacheKey);
     }
 
@@ -120,7 +133,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         viewer.JoinAt = null;
         viewer.OutAt = null;
 
-        var viewerCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.Token}";
+        var viewerCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers:{viewer.Token}";
         Set(viewerCacheKey, viewer);
     }
 
@@ -132,7 +145,7 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
             viewer.JoinAt = DateTime.UtcNow;
 
         // Store viewer info
-        var viewerCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.Token}";
+        var viewerCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers:{viewer.Token}";
         Set(viewerCacheKey, viewer);
 
         // Update viewer list for the stream
@@ -143,14 +156,14 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         var targetViewersArray = updatedViewers.FirstOrDefault(kvp => kvp.Key == viewer.ViewerId).Value ?? [];
         updatedViewers[viewer.ViewerId] = [.. targetViewersArray, viewer.Token];
-        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers";
         Set(viewerListCacheKey, updatedViewers);
     }
 
     public void UnwatchLiveStream(LiveStreamViewerDto viewer)
     {
         // Retrieve viewer info
-        var viewersKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}:{viewer.Token}";
+        var viewersKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers:{viewer.Token}";
 
         // Mark viewer as not watching
         viewer.IsWatching = false;
@@ -162,30 +175,178 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
 
         var targetViewersArray = updatedViewers.FirstOrDefault(kvp => kvp.Key == viewer.ViewerId).Value ?? [];
         updatedViewers[viewer.ViewerId] = [.. targetViewersArray.Where(t => t != viewer.Token)];
-        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{viewer.StreamKey}";
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{viewer.StreamKey}:viewers";
         Set(viewerListCacheKey, updatedViewers);
     }
 
     public Dictionary<string, string[]> GetAllViewersByStreamKey(string streamKey)
     {
-        var viewerListCacheKey = $"{LiveStreamViewersPrefix}{streamKey}";
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers";
         return Get<Dictionary<string, string[]>>(viewerListCacheKey) ?? [];
+    }
+
+    public string[] GetViewerDevicesByViewerId(string streamKey, string viewerId)
+    {
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers";
+        var targetViewer = GetAllViewersByStreamKey(streamKey)
+            .FirstOrDefault(kvp => kvp.Key == viewerId);
+
+        return targetViewer.Value;
     }
 
     public LiveStreamViewerDto[] GetAllViewerInfosByStreamKey(string streamKey)
     {
         var allKeys = GetAllViewersByStreamKey(streamKey);
         var viewers = allKeys
-            .Select(key => Get<LiveStreamViewerDto>(
-                $"{LiveStreamViewersPrefix}{streamKey}:{key}"))
+            .SelectMany(kvp => kvp.Value)
+            .Select(token => Get<LiveStreamViewerDto>(
+                $"{LiveStreamPrefix}streams:{streamKey}:viewers:{token}"))
             .Where(dto => dto != null)
             .ToArray();
         return viewers!;
     }
 
+    public void RemoveViewersByStreamKey(string streamKey)
+    {
+        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers";
+        var allViewersByStreamKey = GetAllViewersByStreamKey(streamKey);
+        foreach (var viewerId in allViewersByStreamKey)
+        {
+            var viewerCacheKey = $"{viewerListCacheKey}:{viewerId}";
+            Remove(viewerCacheKey);
+        }
+        Remove(viewerListCacheKey);
+    }
+    #endregion
+
+    #region View management
+    public string[] GetViewerChangeList()
+    {
+        var cacheKey = $"{LiveStreamPrefix}viewer-change-list";
+        return Get<string[]>(cacheKey) ?? [];
+    }
+
+    public void CleanViewerChangeList()
+    {
+        var cacheKey = $"{LiveStreamPrefix}viewer-change-list";
+        Set(cacheKey, Array.Empty<string>());
+    }
+
+    public void MarkAsStreamViewChange(string streamKey)
+    {
+        var cacheKey = $"{LiveStreamPrefix}viewer-change-list";
+        var streamKeys = GetViewerChangeList();
+
+        if (!streamKeys.Contains(streamKey))
+        {
+            string[] newList = [.. streamKeys, streamKey];
+            Set(cacheKey, newList);
+        }
+    }
+
     public int GetViewerCount(string streamKey)
     {
         var streamViewers = GetAllViewerInfosByStreamKey(streamKey);
-        return streamViewers.Count(v => v.IsWatching);
+        return streamViewers.GroupBy(v => v.ViewerId).Count(gr => gr.Any(v => v.IsWatching));
     }
+    #endregion
+
+    #region Chat Management
+    public void InitMessagesForStream(string streamKey)
+    {
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}:messages";
+        Set(cacheKey, new Dictionary<Guid, DateTime>());
+    }
+
+    public Dictionary<Guid, DateTime> GetAllMessageKey(string streamKey)
+    {
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}:messages";
+        var result = Get<Dictionary<Guid, DateTime>>(cacheKey) ?? [];
+        return result;
+    }
+
+    public LiveStreamChatMessageDto[] GetAdjacentMessages(string streamKey, Guid? messageId, bool isNext, int count = 20)
+    {
+        var allMessageKeys = GetAllMessageKey(streamKey)
+            .Select((kvp, index) => (Index: index, MessageId: kvp.Key, SentAt: kvp.Value))
+            .OrderByDescending(i => i.SentAt)
+            .ToArray();
+        if (allMessageKeys.Length == 0) return [];
+
+        // Find the target message
+        var targetItemIndex = messageId != null
+            ? allMessageKeys.FirstOrDefault(kvp => kvp.MessageId == messageId).Index + 1
+            : 1;
+
+        // Calculate skip count based on direction
+        // If isNext is true, skip 1 to move to the next item
+        // If isNext is false, skip -count to move to the previous items
+        var skipCount = targetItemIndex + (isNext ? 1 : -count);
+
+        // Take adjacent messages
+        var result = allMessageKeys
+            .Skip(skipCount)
+            .Take(count)
+            .Select(kvp => GetMessageDetail(streamKey, kvp.MessageId))
+            .Where(dto => dto != null)
+            .ToArray();
+        return result!;
+    }
+
+    public LiveStreamChatMessageDto? GetMessageDetail(string streamKey, Guid messageId)
+    {
+        var messageCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:messages:{messageId}";
+        return Get<LiveStreamChatMessageDto?>(messageCacheKey);
+    }
+
+    public void AddMessageToStream(string streamKey, LiveStreamChatMessageDto message)
+    {
+        // Store message detail
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:messages:{message.Id}";
+        Set(cacheKey, message);
+
+        // Update message keys list
+        var allMessageKeys = GetAllMessageKey(streamKey);
+        allMessageKeys[message.Id] = message.SentAt;
+        var allMessageKeysCacheKey = $"{LiveStreamPrefix}{streamKey}:messages";
+        Set(allMessageKeysCacheKey, allMessageKeys);
+    }
+
+    public void RemoveMessageFromStream(string streamKey, Guid messageId)
+    {
+        // Remove message detail
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:messages:{messageId}";
+        Remove(cacheKey);
+
+        // Update message keys list
+        var allMessageKeys = GetAllMessageKey(streamKey);
+        allMessageKeys.Remove(messageId);
+        var allMessageKeysCacheKey = $"{LiveStreamPrefix}{streamKey}:messages";
+        Set(allMessageKeysCacheKey, allMessageKeys);
+    }
+    #endregion
+
+    #region Gift Management
+    public async Task<LiveStreamGiftClientDto[]> GetAllActiveGiftsAsync(CancellationToken ct = default)
+    {
+        var cacheKey = $"{LiveStreamPrefix}gifts:active";
+        var dtos = Get<LiveStreamGiftClientDto[]>(cacheKey) ?? [];
+        foreach (var dto in dtos)
+        {
+            dto.IconUrl = await fileManagerCache.GetFileUrl(dto.IconId, ct);
+            dto.AnimationUrl = await fileManagerCache.GetFileUrl(dto.AnimationId, ct);
+        }
+        return dtos;
+    }
+
+    public async Task RefreshGiftCacheAsync(CancellationToken ct = default)
+    {
+        var gifts = await liveStreamGiftRepo.GetAllActivesAsync(ct);
+        var giftDtos = gifts
+            .Select(g => g.Adapt<LiveStreamGiftClientDto>())
+            .ToArray();
+        var cacheKey = $"{LiveStreamPrefix}gifts:active";
+        Set(cacheKey, giftDtos);
+    }
+    #endregion
 }

@@ -12,7 +12,7 @@ public sealed class BankAccountProfileDto
     public string CurrencySymbol { get; set; } = string.Empty;
     public UserBankAccountStatus Status { get; set; }
     public string ImageName { get; set; } = string.Empty;
-    public string ImageUrl { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; } = string.Empty;
     public string? RejectionReason { get; set; }
     public string? RejectDetails { get; set; }
     public DateTime? SubmittedAt { get; set; }

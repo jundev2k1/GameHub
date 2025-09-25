@@ -1,4 +1,5 @@
 ﻿using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
@@ -15,7 +16,8 @@ public sealed class SubmitBankAccountHandler(
     IUserBankAccountRepo userBankAccountRepo,
     IFiatCurrencyRepo currencyRepo,
     IApplicationEventDispatcher eventDispatcher,
-    IFileStorageService fileStorage) : ICommandHandler<SubmitBankAccountCommand>
+    IFileStorageService fileStorage,
+    IFileManagerCacheService fileManagerCache) : ICommandHandler<SubmitBankAccountCommand>
 {
     public async Task<Unit> Handle(SubmitBankAccountCommand request, CancellationToken ct = default)
     {
@@ -49,12 +51,17 @@ public sealed class SubmitBankAccountHandler(
                 userBankAccountDto = userBankAccount;
             }, ct);
         }, ct);
-        if (userBankAccountDto != null)
-        {
-            var bankAccountAfterUpdated = await userBankAccountRepo.GetByIdAsync(userBankAccountDto.PublicId, ct);
-            var userBankAccountItemDto = bankAccountAfterUpdated?.Adapt<BankAccountListItemDto>();
-            await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.BankAccount, null, userBankAccountItemDto), ct);
-        }
+
+        if (userBankAccountDto is null) return Unit.Value;
+
+        // Refresh image cache
+        if (userBankAccountDto.Image != null)
+            await fileManagerCache.RefreshImage(userBankAccountDto.Image, ct: ct);
+
+        // Publish event after bank submission
+        var bankAccountAfterUpdated = await userBankAccountRepo.GetByIdAsync(userBankAccountDto.PublicId, ct);
+        var userBankAccountItemDto = bankAccountAfterUpdated?.Adapt<BankAccountListItemDto>();
+        await eventDispatcher.Publish(new OnVerifyCreatedEvent(userId, VerificationStatusType.BankAccount, null, userBankAccountItemDto), ct);
 
         return Unit.Value;
     }

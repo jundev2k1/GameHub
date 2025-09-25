@@ -7,8 +7,11 @@ public interface IFileManagerCacheService
     Task RefreshImage(MediaFile file, TimeSpan? ExpiredTime = null, CancellationToken ct = default);
     Task RefreshImage(int fileId, TimeSpan? ExpiredTime = null, CancellationToken ct = default);
 
-    Task<MediaFileInfo?> GetImageUrl(MediaFile file, CancellationToken ct = default);
-    Task<MediaFileInfo?> GetImageUrl(int fileId, CancellationToken ct = default);
+    Task<MediaFileInfo?> GetFileInfo(MediaFile file, CancellationToken ct = default);
+    Task<MediaFileInfo?> GetFileInfo(int fileId, CancellationToken ct = default);
+
+    Task<string?> GetFileUrl(MediaFile? file, CancellationToken ct = default);
+    Task<string?> GetFileUrl(int? fileId, CancellationToken ct = default);
 
     void RemoveImage(int fileId);
 }

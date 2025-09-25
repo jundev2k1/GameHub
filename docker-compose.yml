@@ -31,7 +31,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
       - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
-      
+      - RecurringJobSettings__StreamTimeoutCheckerJob=${RecurringJob_StreamTimeoutCheckerJob}
+
       - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
       - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
       - MinioSettings__AccessKey=${Minio_AccessKey}
@@ -41,6 +42,7 @@ services:
 
       - SrsSettings__Host=${Srs_Host}
       - SrsSettings__StreamServer=${Srs_StreamServer}
+      - SrsSettings__ClientUrl=${Srs_ClientUrl}
 
       - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
       - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}

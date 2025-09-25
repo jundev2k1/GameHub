@@ -1,8 +1,9 @@
 using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Accounts.User.Commands.UploadAvatar;
 
@@ -11,9 +12,10 @@ public class UploadAvatarHandler(
     IUserAccessor userAccessor,
     IUserRepo userRepo,
     IFileStorageService fileStorage,
-    ILogger<domain.Entities.User> logger): IRequestHandler<UploadAvatarCommand, string>
+    IFileManagerCacheService fileManagerCache,
+    IAppLogger<domain.Entities.User> logger): ICommandHandler<UploadAvatarCommand, string?>
 {
-    public async Task<string> Handle(UploadAvatarCommand request, CancellationToken ct)
+    public async Task<string?> Handle(UploadAvatarCommand request, CancellationToken ct)
     {
         try
         {
@@ -25,12 +27,10 @@ public class UploadAvatarHandler(
                 targetUser.Avatar = mediaFile;
             }, ct);
             await unitOfWork.SaveChangesAsync(ct);
-        
-            return await fileStorage.GenerateDownloadUrlAsync(
-                bucketName: mediaFile.BucketName,
-                objectName: mediaFile.ObjectName,
-                expiry: TimeSpan.FromMinutes(300),
-                ct: ct);
+            await fileManagerCache.RefreshImage(mediaFile, ct: ct);
+
+            var avatarUrl = await fileManagerCache.GetFileUrl(mediaFile, ct);
+            return avatarUrl;
         }
         catch (Exception e)
         {

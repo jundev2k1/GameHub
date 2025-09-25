@@ -62,6 +62,7 @@ public static class ApplicationPipeline
         app.MapHub<CsAdminHub>(CsAdminHub.Path);
         app.MapHub<ClientHub>(ClientHub.Path);
         app.MapHub<ChatHub>(ChatHub.Path);
+        app.MapHub<LiveStreamHub>(LiveStreamHub.Path);
         return app;
     }
 }

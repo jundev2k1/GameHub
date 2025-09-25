@@ -1,6 +1,6 @@
-﻿using game_x.application.Features.LiveStreams.Commands.JoinLiveStream;
-using game_x.application.Features.LiveStreams.Commands.PerformAction;
-using game_x.application.Features.LiveStreams.Queries.GetViewersByStream;
+﻿using game_x.api.Dtos;
+using game_x.application.Features.LiveStreams.Streaming.Commands.JoinLiveStream;
+using game_x.application.Features.LiveStreams.Streaming.Queries.GetChatMessageInStream;
 
 namespace game_x.api.Controllers.Client.LiveStream;
 
@@ -8,16 +8,7 @@ namespace game_x.api.Controllers.Client.LiveStream;
 public sealed class LiveStreamController : BaseApiController
 {
     [Authorize(Roles = AppRoles.User)]
-    [HttpGet("{streamKey}/viewers")]
-    public async Task<IActionResult> GetViewersByStreamAsync(string streamKey)
-    {
-        var query = new GetViewersByStreamQuery(streamKey);
-        var result = await Mediator.Send(query);
-        return ApiResponseFactory.Ok(result);
-    }
-
-    [Authorize(Roles = AppRoles.User)]
-    [HttpPost("{id:guid}")]
+    [HttpPost("{id:guid}/join")]
     public async Task<IActionResult> JoinLiveStreamAsync(Guid id)
     {
         var query = new JoinLiveStreamCommand(id);
@@ -26,10 +17,15 @@ public sealed class LiveStreamController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPost("{streamId:guid}/viewers/{viewerId}/actions")]
-    public async Task<IActionResult> PerformActionAsync(Guid streamId, string viewerId, PerformActionCommand command)
+    [HttpGet("{streamKey}/chats")]
+    public async Task<IActionResult> GetChatsInStreamAsync(string streamKey, [FromQuery] GetChatMessageInStreamRequest request)
     {
-        await Mediator.Send(command with { StreamId = streamId, ViewerId = viewerId });
-        return ApiResponseFactory.NoContent();
+        var query = new GetChatMessageInStreamQuery(
+            streamKey,
+            request.MessageId,
+            request.IsNext,
+            request.PageSize);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
     }
 }

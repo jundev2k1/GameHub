@@ -1247,6 +1247,218 @@ namespace game_x.persistence.Migrations
                     b.ToTable("livestream_category_mappings", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.LiveStreamChatMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DeleteReason")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("delete_reason");
+
+                    b.Property<decimal?>("DonationAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("donation_amount");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<int>("LiveStreamId")
+                        .HasColumnType("integer")
+                        .HasColumnName("live_stream_id");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("message");
+
+                    b.Property<short>("MessageType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("message_type");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sender_id");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_livestream_chat_messages");
+
+                    b.HasIndex("LiveStreamId")
+                        .HasDatabaseName("ix_livestream_chat_messages_live_stream_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_livestream_chat_messages_code");
+
+                    b.HasIndex("SenderId")
+                        .HasDatabaseName("ix_livestream_chat_messages_sender_id");
+
+                    b.ToTable("livestream_chat_messages", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.LiveStreamDonation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("DonatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("donated_at");
+
+                    b.Property<string>("DonorId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("donor_id");
+
+                    b.Property<int?>("GiftId")
+                        .HasColumnType("integer")
+                        .HasColumnName("gift_id");
+
+                    b.Property<int>("LivestreamScheduleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("livestream_schedule_id");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("message");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_livestream_donations");
+
+                    b.HasIndex("DonorId")
+                        .HasDatabaseName("ix_livestream_donations_donor_id");
+
+                    b.HasIndex("GiftId")
+                        .HasDatabaseName("ix_livestream_donations_gift_id");
+
+                    b.HasIndex("LivestreamScheduleId")
+                        .HasDatabaseName("ix_livestream_donations_livestream_schedule_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_livestream_donations_code");
+
+                    b.ToTable("livestream_donations", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.LiveStreamGift", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AnimationId")
+                        .HasColumnType("integer")
+                        .HasColumnName("animation_id");
+
+                    b.Property<decimal>("CoinCost")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("coin_cost");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int?>("IconId")
+                        .HasColumnType("integer")
+                        .HasColumnName("icon_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("notes");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer")
+                        .HasColumnName("priority");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_livestream_gifts");
+
+                    b.HasIndex("AnimationId")
+                        .HasDatabaseName("ix_livestream_gifts_animation_id");
+
+                    b.HasIndex("IconId")
+                        .HasDatabaseName("ix_livestream_gifts_icon_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_livestream_gifts_code");
+
+                    b.ToTable("livestream_gifts", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.LivestreamSchedule", b =>
                 {
                     b.Property<int>("Id")
@@ -1312,6 +1524,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("stream_key");
 
+                    b.Property<int?>("ThumbnailId")
+                        .HasColumnType("integer")
+                        .HasColumnName("thumbnail_id");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -1337,6 +1553,9 @@ namespace game_x.persistence.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("ix_livestream_schedules_code");
+
+                    b.HasIndex("ThumbnailId")
+                        .HasDatabaseName("ix_livestream_schedules_thumbnail_id");
 
                     b.ToTable("livestream_schedules", (string)null);
                 });
@@ -2876,6 +3095,75 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Schedule");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.LiveStreamChatMessage", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.LivestreamSchedule", "LiveStream")
+                        .WithMany()
+                        .HasForeignKey("LiveStreamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_livestream_chat_messages_live_stream_schedules_live_stream_");
+
+                    b.HasOne("game_x.domain.Entities.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_livestream_chat_messages_asp_net_users_sender_id");
+
+                    b.Navigation("LiveStream");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.LiveStreamDonation", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.User", "Donor")
+                        .WithMany()
+                        .HasForeignKey("DonorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_livestream_donations_asp_net_users_donor_id");
+
+                    b.HasOne("game_x.domain.Entities.LiveStreamGift", "Gift")
+                        .WithMany()
+                        .HasForeignKey("GiftId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_livestream_donations_live_stream_gifts_gift_id");
+
+                    b.HasOne("game_x.domain.Entities.LivestreamSchedule", "LivestreamSchedule")
+                        .WithMany()
+                        .HasForeignKey("LivestreamScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_livestream_donations_live_stream_schedules_livestream_sched");
+
+                    b.Navigation("Donor");
+
+                    b.Navigation("Gift");
+
+                    b.Navigation("LivestreamSchedule");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.LiveStreamGift", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.MediaFile", "Animation")
+                        .WithMany()
+                        .HasForeignKey("AnimationId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_livestream_gifts_media_files_animation_id");
+
+                    b.HasOne("game_x.domain.Entities.MediaFile", "Icon")
+                        .WithMany()
+                        .HasForeignKey("IconId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_livestream_gifts_media_files_icon_id");
+
+                    b.Navigation("Animation");
+
+                    b.Navigation("Icon");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.LivestreamSchedule", b =>
                 {
                     b.HasOne("game_x.domain.Entities.User", "AssignedTo")
@@ -2884,7 +3172,15 @@ namespace game_x.persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_livestream_schedules_asp_net_users_assigned_id");
 
+                    b.HasOne("game_x.domain.Entities.MediaFile", "Thumbnail")
+                        .WithMany()
+                        .HasForeignKey("ThumbnailId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_livestream_schedules_media_files_thumbnail_id");
+
                     b.Navigation("AssignedTo");
+
+                    b.Navigation("Thumbnail");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.Message", b =>
