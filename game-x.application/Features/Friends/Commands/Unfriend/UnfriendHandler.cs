@@ -11,6 +11,7 @@ public sealed class UnfriendHandler(
     IUnitOfWork unitOfWork,
     IUserRepo useRepo,
     ISocialLinkRepo socialLinkRepo,
+    IConversationRepo conversationRepo,
     IUserAccessor userAccessor,
     IFileManagerCacheService fileCache,
     IApplicationEventDispatcher dispatcher,
@@ -31,6 +32,8 @@ public sealed class UnfriendHandler(
         if (existed is null || !existed.IsFriend) 
             throw new BadRequestException(MessageCode.Chatting.StillNotFriend);
         
+        var existedConv = await conversationRepo.FindForPairAsync(me, req.TargetUserId, ct);
+        
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
@@ -38,6 +41,15 @@ public sealed class UnfriendHandler(
             {
                 x.State = SocialLinkState.Declined;
             }, ct);
+
+            if (existedConv != null)
+            {
+                await conversationRepo.PatchUpdateAsync(existedConv.PublicId, x =>
+                {
+                    x.Status = ConversationStatus.Closed;
+                }, ct);
+            }
+            
             User? actor = existed.RequesterUserId == me ? existed.RequesterUser : existed.AddresseeUser;
             if (actor is null) throw new NotFoundException(MessageCode.User.UserNotFound);
             var avatar = actor.Avatar != null ? await fileCache.GetImageUrl(actor.Avatar, ct) : null;

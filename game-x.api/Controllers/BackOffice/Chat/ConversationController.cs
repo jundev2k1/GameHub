@@ -2,6 +2,7 @@ using game_x.api.Common;
 using game_x.api.Dtos;
 using game_x.application.Common.Files;
 using game_x.application.Features.Chat.Commands.ClaimConversationById;
+using game_x.application.Features.Chat.Commands.SendMessage;
 using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListSupportConversations;
@@ -86,6 +87,33 @@ public class ConversationController : BaseApiController
         try
         {
             var command = formData.Adapt<SendMessageToCustomerCommand>() with
+            {
+                ConversationId = convId,
+                ClientLocalId = formData.ClientLocalId,
+                ReplyToMessageId = formData.ReplyToMessageId,
+                Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
+            };
+            var result = await Mediator.Send(command);
+            return ApiResponseFactory.Ok(result);
+        }
+        catch
+        {
+            return ApiResponseFactory.BadRequest(
+                code: MessageCode.Chatting.FailToSendMessage,
+                errorDetail: new
+                {
+                    formData.ClientLocalId,
+                    ConversationId = convId,
+                });
+        }
+    }
+    
+    [HttpPost("{convId:guid}/messages-v2")]
+    public async Task<IActionResult> SendMessageAttachmentsAsync(Guid convId, [FromForm] MessageAttachmentRequest formData)
+    {
+        try
+        {
+            var command = formData.Adapt<SendMessageCommand>() with
             {
                 ConversationId = convId,
                 ClientLocalId = formData.ClientLocalId,

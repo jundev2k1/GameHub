@@ -20,7 +20,7 @@ public interface IChatClient
     ///     Send it whenever there is any update in the conversation, such as sending a message, reacting, etc.
     /// </summary>
     Task ConversationUpdated(ConversationSignalDto signalDto); // sidebar badge/preview
-    // Task InboxUpsert(InboxSignalDto signalDto); // sidebar badge/preview
+    Task InboxUpsert(InboxUpsertSignalDto signalDto); // sidebar badge/preview
     Task MemberAdded(ConversationMemberDto dto);
     /// <summary>Send it whenever a message is sent.</summary>
     Task MessageCreated(MessageSignalDto dto);
@@ -91,7 +91,7 @@ public sealed class ChatHub(
     {
         var user = Context.User;
         AppRole? role;
-        string? userId;
+        string userId;
 
         if (user?.Identity?.IsAuthenticated == true)
         {
@@ -100,7 +100,7 @@ public sealed class ChatHub(
         }
         else
         {
-            userId = Context.UserIdentifier;
+            userId = Context.UserIdentifier ?? throw new NullReferenceException();
             role = AppRole.Of(AppRoles.Guest);
         }
         logger.LogInformation("ChatHub {Role} disconnected: {UserId}",role.ToString(), userId);
@@ -110,51 +110,292 @@ public sealed class ChatHub(
     public Task<string> Ping(object payload) => Task.FromResult($"pong:{JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true })}");
     
     // --- Subscription ---
-    public Task JoinPublic() => Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Public);
+    [AllowAnonymous]
+    public async Task JoinIdle()
+    {
+        try
+        {
+            var user = Context.User;
+            AppRole? role;
+            string userId;
+
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                userId = userAccessor.GetUserId();
+                role = userAccessor.GetRoles();
+            }
+            else
+            {
+                userId = Context.UserIdentifier ?? throw new NullReferenceException();
+                role = AppRole.Of(AppRoles.Guest);
+            }
+            
+            if(role.IsCs || role.IsAdmin)
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.IdleAgent);
+            else
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.IdleMember(userId));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error leaving idle");
+            throw;
+        }
+    }
     
-    public async Task<Guid> OpenDm(string peerUserId)
+    [Authorize(Roles = AppRoles.User)]
+    public async Task JoinPublicIdle()
+    {
+        try
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.PublicIdle);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error joining public idle");
+            throw;
+        }
+    }
+    
+    [AllowAnonymous]
+    public async Task LeaveIdle()
+    {
+        try
+        {
+            var user = Context.User;
+            AppRole? role;
+            string userId;
+
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                userId = userAccessor.GetUserId();
+                role = userAccessor.GetRoles();
+            }
+            else
+            {
+                userId = Context.UserIdentifier ?? throw new NullReferenceException();
+                role = AppRole.Of(AppRoles.Guest);
+            }
+            
+            if(role.IsCs || role.IsAdmin)
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.IdleAgent);
+            else
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.IdleMember(userId));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error leaving idle");
+            throw;
+        }
+    }
+    
+    [Authorize(Roles = AppRoles.User)]
+    public async Task LeavePublicIdle()
+    {
+        try
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.PublicIdle);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error leaving public idle");
+            throw;
+        }
+    }
+    
+    [Authorize(Roles = AppRoles.User)]
+    public async Task<Guid> OpenPublic()
+    {
+        try
+        {
+            var ct = Context.ConnectionAborted;
+            return await convService.EnsureForPublic(ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error opening public");
+            throw;
+        }
+    }
+
+    [Authorize(Roles = AppRoles.User)]
+    public Task JoinPublic()
+    {
+        try
+        {
+            return Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Public);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error joining public");
+            throw;
+        }
+    }
+    
+    [Authorize(Roles = AppRoles.User)]
+    public Task LeavePublic()
+    {
+        try
+        {
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Public);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error leaving public");
+            throw;
+        }
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs},{AppRoles.User}")]
+    public Task JoinInbox()
+    {
+        try
+        {
+            var role = userAccessor.GetRoles();
+            if (role.IsUser)
+            {
+                var me = userAccessor.GetUserId();
+                return Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.MemberInbox(me));
+            }
+            return Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.AgentInbox);
+            
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error joining inbox");
+            throw;
+        }
+    }
+    
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs},{AppRoles.User}")]
+    public Task LeaveInbox()
+    {
+        try
+        {
+            var role = userAccessor.GetRoles();
+            if (role.IsUser)
+            {
+                var me = userAccessor.GetUserId();
+                return Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.MemberInbox(me));
+            }
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.AgentInbox);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error leaving inbox");
+            throw;
+        }
+    }
+    
+    [Authorize(Roles = AppRoles.User)]
+    public async Task<Guid> OpenConversation(string peerUserId)
     {
         var me = userAccessor.GetUserId();
-        var ct = Context.ConnectionAborted;
-        return await convService.EnsureForPair(me, peerUserId, ct);
+        try
+        {
+            var ct = Context.ConnectionAborted;
+            return await convService.EnsureForPair(me, peerUserId, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error opening conversation between ${me} and ${peerUserId}");
+            throw;
+        }
     }
     
-    public async Task<Guid> OpenSupport()
-    {
-        var user = Context.User;
-        string? actorId;
-        string? userId = null;
-
-        if (user?.Identity?.IsAuthenticated == true)
-        {
-            actorId = userAccessor.GetUserId();
-            userId = userAccessor.GetUserId();
-        }
-        else
-        {
-            actorId = Context.UserIdentifier;
-        }
-
-        var ct = Context.ConnectionAborted;
-        return await convService.EnsureForSupport(actorId ?? string.Empty, userId, ct);
-    }
-    
+    [Authorize(Roles = AppRoles.User)]
     public async Task JoinConversation(Guid convId)
     {
-        await sender.Send(new TouchDeliveryCommand(convId));
-        await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(convId));
+        try
+        {
+            var user = Context.User;
+
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                await sender.Send(new TouchDeliveryCommand(convId));
+            }
+            
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(convId));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error joining conversation ${convId}");
+            throw;
+        }
+    }
+
+    [Authorize(Roles = AppRoles.User)]
+    public Task LeaveConversation(Guid convId)
+    { 
+        try
+        {
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Conversation(convId));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error leaving conversation ${convId}");
+            throw;
+        }
     }
     
-    public Task LeaveConversation(Guid convId)
-        => Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Conversation(convId));
+    [AllowAnonymous]
+    public async Task<Guid> OpenSupport()
+    {
+        try
+        {
+            var user = Context.User;
+            string? actorId;
+            string? userId = null;
+
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                actorId = userAccessor.GetUserId();
+                userId = userAccessor.GetUserId();
+            }
+            else
+            {
+                actorId = Context.UserIdentifier;
+            }
+
+            var ct = Context.ConnectionAborted;
+            return await convService.EnsureForSupport(actorId ?? string.Empty, userId, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error opening support conversation");
+            throw;
+        }
+    }
     
-    // --- Customer Support ---
+    /// <summary>Join the support conversation</summary>
+    [AllowAnonymous]
+    public async Task JoinSupport(Guid convId)
+    {
+        try
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(convId));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error joining conversation ${convId}");
+            throw;
+        }
+    }
     
-    /// <summary>
-    /// Send a support message by customer.
-    /// Creates the user's support conversation if missing
-    /// Broadcast to all Admin/Cs role groups
-    /// </summary>
+    [AllowAnonymous]
+    public Task LeaveSupport(Guid convId)
+    { 
+        try
+        {
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Conversation(convId));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error leaving conversation ${convId}");
+            throw;
+        }
+    }
+    
+    // --- Customer Support - V1 ---
     [Authorize(Roles = AppRoles.User)]
     public async Task SendSupportMessage(SendSupportMessageCommand cmd)
     {
@@ -171,11 +412,6 @@ public sealed class ChatHub(
         }
     }
     
-    /// <summary>
-    /// Send a support message by guest.
-    /// Creates the guest's support conversation if missing
-    /// Broadcast to all Admin/Cs role groups
-    /// </summary>
     public async Task SendSupportMessageByGuest(SendSupportMessageCommand cmd)
     {
         try
@@ -210,9 +446,9 @@ public sealed class ChatHub(
         }
     }
     
-    // --- Conversations & membership ---
-
-    public async Task SendMessage(SendMessageCommand cmd)
+    // --- Conversations & membership - V2 ---
+    [Authorize(Roles = AppRoles.User)]
+    public async Task SendMessageByMember(SendMessageCommand cmd)
     {
         try
         {
@@ -224,6 +460,44 @@ public sealed class ChatHub(
         {
             logger.LogError(ex, "An error when sending message");
             await Clients.Caller.MessageFailed(new MessageFailedSignalDto(cmd.ClientLocalId, cmd.ConversationId));
+        }
+    }
+    
+    /// <summary>
+    /// Send a support message by guest.
+    /// Creates the guest's support conversation if missing
+    /// Broadcast to all Admin/Cs role groups
+    /// </summary>
+    public async Task SendMessageByGuest(SendMessageCommand cmd)
+    {
+        try
+        {
+            var guestId = Context.UserIdentifier;
+            if (string.IsNullOrWhiteSpace(guestId)) { return; }
+            var ct = Context.ConnectionAborted;
+            await sender.Send(cmd with {SenderActorId = guestId}, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error sending support message");
+            await Clients.Caller.MessageFailed(new MessageFailedSignalDto(ClientLocalId: cmd.ClientLocalId));
+        }
+    }
+    
+    /// <summary>Send a support message to customer.</summary>
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    public async Task SendMessageByAgent(SendMessageCommand cmd)
+    {
+        try
+        {
+            var userId = userAccessor.GetUserId();
+            var ct = Context.ConnectionAborted;
+            await sender.Send(cmd with {IsAgent = true, SenderActorId = userId, SenderUserId = userId }, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error sending support message");
+            await Clients.Caller.MessageFailed(new MessageFailedSignalDto( cmd.ClientLocalId, cmd.ConversationId));
         }
     }
 }

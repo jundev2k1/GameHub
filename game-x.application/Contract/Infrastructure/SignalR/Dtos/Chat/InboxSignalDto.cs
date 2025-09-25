@@ -1,6 +1,9 @@
 namespace game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 
-public record InboxSignalDto(
+public sealed record InboxUpsertSignalDto(
     Guid ConversationId,
-    string Preview,
-    DateTime At);
+    ConversationStatus Status,
+    MessageKind LastMessageKind,
+    DateTime LastMessageAt,
+    Guid LastMessageId,
+    string LastMessageText);

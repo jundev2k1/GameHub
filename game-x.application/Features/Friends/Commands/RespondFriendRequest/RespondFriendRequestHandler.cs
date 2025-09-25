@@ -11,6 +11,7 @@ public class RespondFriendRequestHandler(
     IUnitOfWork unitOfWork,
     IUserAccessor userAccessor,
     ISocialLinkRepo socialLinkRepo,
+    IConversationRepo conversationRepo,
     IApplicationEventDispatcher dispatcher,
     IFileManagerCacheService fileCache,
     ILogger<SocialLink> logger): IRequestHandler<RespondFriendRequestCommand, Unit>
@@ -29,10 +30,20 @@ public class RespondFriendRequestHandler(
         if (link.AddresseeUserId != me)
             throw new BadRequestException(MessageCode.Chatting.NotAddressee);
 
+        var existedConv = link.RequesterUserId != null ? await conversationRepo.FindForPairAsync(me, link.RequesterUserId, ct) : null;
+        
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
             await socialLinkRepo.UpdateAsync(link.PublicId, x => { x.Respond(cmd.Accept); }, ct);
+            if (existedConv?.Status == ConversationStatus.Closed)
+            {
+                await conversationRepo.PatchUpdateAsync(existedConv.PublicId, x =>
+                {
+                    x.Status = ConversationStatus.Open;
+                }, ct);
+            }
+            
             await unitOfWork.CommitAsync(ct);
             var updatedLink = await socialLinkRepo.GetByIdAsync(link.PublicId, ct);
             var avatarUrl = 

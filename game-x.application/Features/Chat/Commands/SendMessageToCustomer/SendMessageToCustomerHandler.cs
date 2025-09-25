@@ -69,7 +69,8 @@ public sealed class SendMessageToCustomerHandler(
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
             var dto = new CreatedMessageSignalResult(
                 Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
-                Conv: updatedConv.Adapt<ConversationSignalDto>());
+                Conv: updatedConv.Adapt<ConversationSignalDto>(),
+                InboxUpsert: updatedConv.Adapt<InboxUpsertSignalDto>());
             
             await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
             

@@ -6,6 +6,7 @@ namespace game_x.application.Features.Chat.Commands.SendMessage;
 public sealed record SendMessageCommand(
     [property: JsonIgnore] string SenderActorId, // guest or user
     [property: JsonIgnore] string? SenderUserId,
+    [property: JsonIgnore] bool? IsAgent,
     Guid ConversationId,
     string? Text,
     Guid? ReplyToMessageId,

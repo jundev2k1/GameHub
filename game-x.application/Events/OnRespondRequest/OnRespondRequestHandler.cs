@@ -28,18 +28,20 @@ public sealed class OnRespondRequestHandler(
     {
         if (dto.RequesterUserId is not null)
         {
-            var metadata = JsonSerializer.Serialize(dto.Adapt<FriendResponseNotificationDto>());
-            var notification = Notification.Create(
-                NotificationMessageKey.Friend_Request_Accepted,
-                dto.RequesterUserId,
-                NotificationType.SocialLink,
-                NotificationSeverity.Success,
-                metadata);
-            await notificationRepo.AddNotificationAsync(notification, ct);
-
-            await clientHubService.SendNotificationToMemberAsync(
-                dto.RequesterUserId,
-                notification.Adapt<NotificationDto>());
+            if (dto.State == SocialLinkState.Accepted)
+            {
+                var metadata = JsonSerializer.Serialize(dto.Adapt<FriendResponseNotificationDto>());
+                var notification = Notification.Create(
+                    NotificationMessageKey.Friend_Request_Accepted,
+                    dto.RequesterUserId,
+                    NotificationType.SocialLink,
+                    NotificationSeverity.Success,
+                    metadata);
+                await notificationRepo.AddNotificationAsync(notification, ct);
+                await clientHubService.SendNotificationToMemberAsync(
+                    dto.RequesterUserId,
+                    notification.Adapt<NotificationDto>());
+            }
             
             await chatHubService.SendFriendResponseAsync(dto);
         }

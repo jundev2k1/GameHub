@@ -3,6 +3,7 @@ using game_x.api.Dtos;
 using game_x.application.Common.Files;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
+using game_x.application.Features.Chat.Commands.SendMessage;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
@@ -70,6 +71,32 @@ public class ConversationController(
             var userId = userAccessor.GetUserId();
             var command = formData.Adapt<SendSupportMessageCommand>() with
             {
+                SenderActorId = userId,
+                SenderUserId = userId,
+                ClientLocalId = formData.ClientLocalId,
+                ReplyToMessageId = formData.ReplyToMessageId,
+                Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
+            };
+            var result = await Mediator.Send(command);
+            return ApiResponseFactory.Ok(result);
+        }
+        catch
+        {
+            return ApiResponseFactory.BadRequest(
+                code: MessageCode.Chatting.FailToSendMessage,
+                errorDetail: new {formData.ClientLocalId});
+        }
+    }
+    
+    [HttpPost("conversations/{convId:guid}/messages")]
+    public async Task<IActionResult> SendMessagesAttachmentAsync(Guid convId, [FromForm] MessageAttachmentRequest formData)
+    {
+        try
+        {
+            var userId = userAccessor.GetUserId();
+            var command = formData.Adapt<SendMessageCommand>() with
+            {
+                ConversationId = convId,
                 SenderActorId = userId,
                 SenderUserId = userId,
                 ClientLocalId = formData.ClientLocalId,

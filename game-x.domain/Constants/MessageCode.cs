@@ -367,6 +367,9 @@ public static class MessageCode
         /// <summary>CryptoToken configuration not found.</summary>
         [EnumMetadata("Conversation member not found.")]
         ConversationMemberNotFound = 10514,
+        /// <summary>The conversation was closed.</summary>
+        [EnumMetadata("The conversation was closed.")]
+        ConversationClosed = 10515,
         #endregion
     }
 }

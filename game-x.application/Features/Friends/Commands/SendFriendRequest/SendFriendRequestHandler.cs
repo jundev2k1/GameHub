@@ -28,18 +28,19 @@ public sealed class SendFriendRequestHandler(
         var (min, max) = SocialLinkPair.Normalize(me, req.TargetUserId);
         var existed = await socialLinkRepo.GetByKeyPairAsync(min, max, ct);
         
-        if (existed != null)
+        await unitOfWork.BeginTransactionAsync(ct);
+        try
         {
-            if (existed.Kind == SocialLinkKind.Block)
-                throw new BadRequestException(MessageCode.Chatting.SocialLinkBlocked);   
-            if (existed.State == SocialLinkState.Pending)
-                throw new BadRequestException(MessageCode.Chatting.WaitToAccept);
-            if (existed.State == SocialLinkState.Accepted) 
-                throw new BadRequestException(MessageCode.Chatting.AlreadyFriend);
-            
-            await unitOfWork.BeginTransactionAsync(ct);
-            try
+            SocialLinkDto? socialLinkDto;
+            if (existed != null)
             {
+                if (existed.Kind == SocialLinkKind.Block)
+                    throw new BadRequestException(MessageCode.Chatting.SocialLinkBlocked);   
+                if (existed.State == SocialLinkState.Pending)
+                    throw new BadRequestException(MessageCode.Chatting.WaitToAccept);
+                if (existed.State == SocialLinkState.Accepted) 
+                    throw new BadRequestException(MessageCode.Chatting.AlreadyFriend);
+                
                 await socialLinkRepo.UpdateAsync(existed.PublicId, x =>
                 {
                     x.State = SocialLinkState.Pending;
@@ -53,45 +54,38 @@ public sealed class SendFriendRequestHandler(
                     existed.RequesterUser?.Avatar != null 
                         ? await fileCache.GetImageUrl(existed.RequesterUser.Avatar, ct) 
                         : null;
-            
-                await dispatcher.Publish(new OnSendFriendRequestEvent(existed.Adapt<SocialLinkDto>() with {RequesterAvatarUrl = existedAvatar?.Url}), ct);
-                return Unit.Value;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, ex.Message);
-                await unitOfWork.RollbackAsync(ct);
-                throw new BadRequestException(MessageCode.System.SystemError);
-            }
-        }
-        
-        var link = SocialLink.Create(
-            min: min,
-            max: max,
-            kind: SocialLinkKind.Friendship,
-            state: SocialLinkState.Pending,
-            requesterUserId: me,
-            addresseeUserId: req.TargetUserId);
 
-        try
-        {
-            await socialLinkRepo.AddAsync(link, ct);
-            await unitOfWork.CommitAsync(ct);
+                socialLinkDto = existed.Adapt<SocialLinkDto>() with { RequesterAvatarUrl = existedAvatar?.Url };
+            }
+            else
+            {
+                var link = SocialLink.Create(
+                    min: min,
+                    max: max,
+                    kind: SocialLinkKind.Friendship,
+                    state: SocialLinkState.Pending,
+                    requesterUserId: me,
+                    addresseeUserId: req.TargetUserId);
                 
-            var createdLink = await socialLinkRepo.GetByKeyPairAsync(min, max, ct);
-            var requesterAvatar = 
-                createdLink?.RequesterUser?.Avatar != null 
-                    ? await fileCache.GetImageUrl(createdLink.RequesterUser.Avatar, ct) 
-                    : null;
-        
-            await dispatcher.Publish(new OnSendFriendRequestEvent(createdLink.Adapt<SocialLinkDto>() with {RequesterAvatarUrl = requesterAvatar?.Url}), ct);
+                await socialLinkRepo.AddAsync(link, ct);
+                await unitOfWork.CommitAsync(ct);
+                
+                var createdLink = await socialLinkRepo.GetByKeyPairAsync(min, max, ct);
+                var requesterAvatar = 
+                    createdLink?.RequesterUser?.Avatar != null 
+                        ? await fileCache.GetImageUrl(createdLink.RequesterUser.Avatar, ct) 
+                        : null;
+
+                socialLinkDto = createdLink.Adapt<SocialLinkDto>() with { RequesterAvatarUrl = requesterAvatar?.Url };
+            }
+            await dispatcher.Publish(new OnSendFriendRequestEvent(socialLinkDto), ct);
             return Unit.Value;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, ex.Message);
             await unitOfWork.RollbackAsync(ct);
-            throw new BadRequestException(MessageCode.System.SystemError);
+            throw;
         }
     }
 }

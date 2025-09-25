@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.Chat.Dtos;
+﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Features.Chat.Dtos;
 using game_x.share.Extensions;
 
 namespace game_x.application.Features.Chat.Mapping;
@@ -27,7 +28,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault()!.PublicId)
             .Map(dest => dest.LastMessageText, src => src.Messages.FirstOrDefault()!.Text)
             .Map(dest => dest.LastMessageKind, src => src.Messages.FirstOrDefault()!.Kind);
-
+        
         cfg.NewConfig<MessageDto, ListedMessageDto>()
             .Map(dest => dest.Id, src => src.PublicId);
         

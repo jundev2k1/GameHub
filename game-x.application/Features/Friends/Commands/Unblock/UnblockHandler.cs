@@ -30,7 +30,7 @@ public sealed class UnblockHandler(
         
         if(existed == null || existed.Kind != SocialLinkKind.Block || existed.BlockerUserId != me)
             throw new NotFoundException(MessageCode.Chatting.SocialLinkNotFound);
-        
+
         try
         {
             await socialLinkRepo.UpdateAsync(existed.PublicId, x =>
@@ -39,6 +39,7 @@ public sealed class UnblockHandler(
                 x.Kind = SocialLinkKind.Friendship;
                 x.RespondedAt = null;
             }, ct);
+            
             await unitOfWork.CommitAsync(ct);
             var existedAvatar = 
                 existed.BlockerUser?.Avatar != null 

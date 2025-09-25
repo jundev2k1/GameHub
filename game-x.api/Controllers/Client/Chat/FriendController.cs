@@ -82,10 +82,10 @@ public class FriendController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
     
-    [HttpPost("friend-requests/{linkPublicId:guid}/respond")]
-    public async Task<IActionResult> RespondAsync(Guid linkPublicId, [FromBody] RespondFriendRequestCommand cmd)
+    [HttpPost("friend-requests/{linkId:guid}/respond")]
+    public async Task<IActionResult> RespondAsync(Guid linkId, [FromBody] RespondFriendRequestCommand cmd)
     {
-        cmd.LinkPublicId = linkPublicId;
+        cmd.LinkPublicId = linkId;
         var result = await Mediator.Send(cmd);
         return ApiResponseFactory.Ok(result);
     }
@@ -96,7 +96,6 @@ public class FriendController : BaseApiController
         var result = await Mediator.Send(cmd);
         return ApiResponseFactory.Ok(result);
     }
-    
     
     [HttpGet("friendships/block")]
     public async Task<IActionResult> GetBlockedFriendsAsync([AsParameters] SearchCriteriaRequest parameters)

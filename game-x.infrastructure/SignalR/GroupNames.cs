@@ -22,9 +22,13 @@ internal static class GroupNames
     public static string Role(string roleName) => Build("role", San(roleName)); // e.g., Admin, User
 
     // ---------- Chat-specific ----------
-    public const string Public = "public";
+    public const string Public = "public:conv";
+    public const string PublicIdle = "public:idle"; // Get upserted inbox
     public const string OnlineAll = "online";
-    public static string Dm(Guid convId) => $"dm:{convId}";
+    public const string IdleAgent = "idle-agent";
+    public const string AgentInbox = "agent-inbox"; // is on Agent Inbox screen
+    public static string IdleMember(string userId) => Build("idle-member", San(userId));
+    public static string MemberInbox(string userId) => Build("member-inbox", San(userId)); // is on Inbox screen
     public static string Conversation(Guid conversationId) => Build("chat", "conv", conversationId.ToString());
     
     // ---------- Helpers ----------

@@ -11,6 +11,7 @@ public sealed class BlockHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     ISocialLinkRepo socialLinkRepo,
+    IConversationRepo conversationRepo,
     IUserAccessor userAccessor,
     IApplicationEventDispatcher dispatcher,
     IFileManagerCacheService fileCache,
@@ -28,12 +29,24 @@ public sealed class BlockHandler(
         var (min, max) = SocialLinkPair.Normalize(me, req.TargetUserId);
         var existed = await socialLinkRepo.GetByKeyPairAsync(min, max, ct);
         
-        if (existed != null)
+        if (existed?.Kind == SocialLinkKind.Block)
+            throw new BadRequestException(MessageCode.Chatting.SocialLinkBlocked);
+        
+        var existedConv = await conversationRepo.FindForPairAsync(me, req.TargetUserId, ct);
+        
+        await unitOfWork.BeginTransactionAsync(ct);
+        try
         {
-            if (existed.Kind == SocialLinkKind.Block)
-                throw new BadRequestException(MessageCode.Chatting.SocialLinkBlocked);
-            await unitOfWork.BeginTransactionAsync(ct);
-            try
+            SocialLinkDto? linkDto;
+            if (existedConv != null)
+            {
+                await conversationRepo.PatchUpdateAsync(existedConv.PublicId, x =>
+                {
+                    x.Status = ConversationStatus.Closed;
+                }, ct);
+            }
+            
+            if (existed != null)
             {
                 await socialLinkRepo.UpdateAsync(existed.PublicId, x =>
                 {
@@ -48,39 +61,31 @@ public sealed class BlockHandler(
                     existed.BlockerUser?.Avatar != null 
                         ? await fileCache.GetImageUrl(existed.BlockerUser.Avatar, ct) 
                         : null;
-            
-                await dispatcher.Publish(new OnFriendBlockedEvent(existed.Adapt<SocialLinkDto>() with {BlockerAvatarUrl = existedAvatar?.Url}), ct);
-                return Unit.Value;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, ex.Message);
-                await unitOfWork.RollbackAsync(ct);
-                throw new BadRequestException(MessageCode.System.SystemError);
-            }
-        }
-        
-        var link = SocialLink.Create(
-            min: min,
-            max: max,
-            kind: SocialLinkKind.Block,
-            state: SocialLinkState.Blocked,
-            blockerUserId: me,
-            blockedUserId: req.TargetUserId,
-            respondedAt: DateTime.UtcNow);
 
-        await unitOfWork.BeginTransactionAsync(ct);
-        try
-        {
-            await socialLinkRepo.AddAsync(link, ct);
-            await unitOfWork.CommitAsync(ct);
-            var createdLink = await socialLinkRepo.GetByKeyPairAsync(min, max, ct);
-            var blockerAvatar = 
-                createdLink?.BlockerUser?.Avatar != null 
-                    ? await fileCache.GetImageUrl(createdLink.BlockerUser.Avatar, ct) 
-                    : null;
+                linkDto = existed.Adapt<SocialLinkDto>() with { BlockerAvatarUrl = existedAvatar?.Url };
+            }
+            else
+            {
+                var link = SocialLink.Create(
+                    min: min,
+                    max: max,
+                    kind: SocialLinkKind.Block,
+                    state: SocialLinkState.Blocked,
+                    blockerUserId: me,
+                    blockedUserId: req.TargetUserId,
+                    respondedAt: DateTime.UtcNow);
+                await socialLinkRepo.AddAsync(link, ct);
+                await unitOfWork.CommitAsync(ct);
+                var createdLink = await socialLinkRepo.GetByKeyPairAsync(min, max, ct);
+                var blockerAvatar = 
+                    createdLink?.BlockerUser?.Avatar != null 
+                        ? await fileCache.GetImageUrl(createdLink.BlockerUser.Avatar, ct) 
+                        : null;
         
-            await dispatcher.Publish(new OnFriendBlockedEvent(createdLink.Adapt<SocialLinkDto>() with {BlockerAvatarUrl = blockerAvatar?.Url}), ct);
+                linkDto = createdLink.Adapt<SocialLinkDto>() with {BlockerAvatarUrl = blockerAvatar?.Url};
+            }
+            
+            await dispatcher.Publish(new OnFriendBlockedEvent(linkDto), ct);
             return Unit.Value;
         }
         catch (Exception ex)

@@ -3,6 +3,7 @@ using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
@@ -13,6 +14,7 @@ using game_x.share.Helper;
 namespace game_x.infrastructure.Identity;
 
 public sealed class ConversationService(
+    IUserAccessor userAccessor,
     IUnitOfWork unitOfWork,
     IConversationRepo conversationRepo,
     IConversationMemberRepo conversationMemberRepo,
@@ -21,6 +23,39 @@ public sealed class ConversationService(
     IAppLogger<Conversation> logger,
     IFileStorageService fileStorage): IConversationService, IServices
 {
+    public async Task<Guid> EnsureForPublic(CancellationToken ct)
+    {
+        var me = userAccessor.GetUserId();
+        var existedConv = await conversationRepo.FindPublicAsync(ct);
+        await unitOfWork.BeginTransactionAsync(ct);
+        try
+        {
+            Guid returnConvId;
+            if (existedConv != null)
+            {
+                bool isExistedMember = await conversationMemberRepo.CheckExistMemberAsync(existedConv.Id, me, ct);
+                if (!isExistedMember)
+                    existedConv.Members.Add(ConversationMember.Create(existedConv, me, RoleInConversation.Member));
+                returnConvId = existedConv.PublicId;
+            }
+            else
+            {
+                var conv = Conversation.Create(ConversationType.Public);
+                await conversationRepo.AddAsync(conv, ct);
+                conv.Members.Add(ConversationMember.Create(conv, me, RoleInConversation.Member));
+                returnConvId = conv.PublicId;
+            }
+            await unitOfWork.CommitAsync(ct);
+            return returnConvId;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e.Message);
+            await unitOfWork.RollbackAsync(ct);
+            throw;
+        }
+    }
+    
     public async Task<Guid> EnsureForPair(string me, string targetedUserId, CancellationToken ct)
     {
         if (me == targetedUserId)

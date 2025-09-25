@@ -5,7 +5,9 @@ namespace game_x.application.Contract.Infrastructure.SignalR.Services;
 
 public interface IChatHubService
 {
+    Task SendPublicMessageAsync(CreatedMessageSignalResult res);
     Task SendSupportMessageAsync(CreatedMessageSignalResult res);
+    Task SendSupportMessageV2Async(CreatedMessageSignalResult res);
     Task SendDirectMessageAsync(CreatedMessageSignalResult res, string[] memberIds);
     Task SendFriendRequestAsync(FriendRequestSignalDto dto);
     Task SendFriendResponseAsync(FriendResponseSignalDto dto);
