@@ -59,6 +59,10 @@ try
 
     var refreshTokenManager = serviceProvider.GetRequiredService<IRefreshTokenManagerCacheService>();
     refreshTokenManager.InitRefreshTokens();
+
+    var liveStreamManager = serviceProvider.GetRequiredService<ILiveStreamManagerCacheService>();
+    await liveStreamManager.RefreshGiftCacheAsync();
+
 }
 catch (Exception ex)
 {

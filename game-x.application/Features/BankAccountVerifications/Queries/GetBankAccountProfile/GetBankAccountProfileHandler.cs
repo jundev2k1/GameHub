@@ -27,7 +27,7 @@ public sealed class GetBankAccountProfileHandler(
     {
         if (file is null) return string.Empty;
 
-        var image = await fileManagerCache.GetImageUrl(file);
+        var image = await fileManagerCache.GetFileUrl(file);
         return image!.Url;
     }
 }

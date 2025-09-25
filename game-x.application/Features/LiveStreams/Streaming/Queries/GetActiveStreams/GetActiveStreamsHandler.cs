@@ -50,7 +50,7 @@ public sealed class GetActiveStreamsHandler(
         // Get thumbnail
         if (stream != null && stream.ThumbnailId.HasValue)
         {
-            var thumbnail = await fileManagerCache.GetImageUrl(stream.ThumbnailId.Value);
+            var thumbnail = await fileManagerCache.GetFileUrl(stream.ThumbnailId.Value);
             stream.Thumbnail = thumbnail?.Url;
         }
 

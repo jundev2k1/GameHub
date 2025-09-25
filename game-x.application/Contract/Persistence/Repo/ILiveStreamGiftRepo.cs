@@ -11,6 +11,8 @@ public interface ILiveStreamGiftRepo
         int pageSize = 20,
         CancellationToken ct = default);
 
+    Task<LiveStreamGift[]> GetAllActivesAsync(CancellationToken ct = default);
+
     Task<LiveStreamGift> GetByIdAsync(Guid id, CancellationToken ct = default);
 
     Task<LiveStreamGiftDetailDto> GetDetailByIdAsync(Guid id, CancellationToken ct = default);

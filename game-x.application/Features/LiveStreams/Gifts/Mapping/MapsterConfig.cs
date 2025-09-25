@@ -11,5 +11,8 @@ public sealed class MapsterConfig : IRegister
 
         cfg.NewConfig<LiveStreamGift, LiveStreamGiftDetailDto>()
             .Inherits<LiveStreamGift, LiveStreamGiftDto>();
+
+        cfg.NewConfig<LiveStreamGift, LiveStreamGiftClientDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
     }
 }

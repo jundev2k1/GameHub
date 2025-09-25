@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.LiveStreams.Streaming.Dtos;
+﻿using game_x.application.Features.LiveStreams.Gifts.Dtos;
+using game_x.application.Features.LiveStreams.Streaming.Dtos;
 
 namespace game_x.application.Contract.Infrastructure.Caching;
 
@@ -66,5 +67,15 @@ public interface ILiveStreamManagerCacheService
     void AddMessageToStream(string streamKey, LiveStreamChatMessageDto message);
 
     void RemoveMessageFromStream(string streamKey, Guid messageId);
+    #endregion
+
+    #region Gift Management
+    Task<LiveStreamGiftClientDto[]> GetAllActiveGiftsAsync(CancellationToken ct = default);
+
+    Task RefreshGiftCacheAsync(CancellationToken ct = default);
+    #endregion
+
+    #region Donation Management
+
     #endregion
 }

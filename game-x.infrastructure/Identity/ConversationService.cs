@@ -102,7 +102,7 @@ public sealed class ConversationService(
     {
         if (file is null) return null;
 
-        var avatar = await fileManagerCache.GetImageUrl(file, ct);
+        var avatar = await fileManagerCache.GetFileUrl(file, ct);
         return avatar?.Url;
     }
     

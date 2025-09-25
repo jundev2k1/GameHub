@@ -10,7 +10,8 @@ public sealed class UpdateLiveStreamGiftIconHandler(
     IMediaFileRepo mediaFileRepo,
     IUnitOfWork unitOfWork,
     IFileStorageService storageService,
-    IFileManagerCacheService fileManagerCache) : ICommandHandler<UpdateLiveStreamGiftIconCommand, UpdateLiveStreamGiftIconResult>
+    IFileManagerCacheService fileManagerCache,
+    ILiveStreamManagerCacheService liveStreamManager) : ICommandHandler<UpdateLiveStreamGiftIconCommand, UpdateLiveStreamGiftIconResult>
 {
     public async Task<UpdateLiveStreamGiftIconResult> Handle(UpdateLiveStreamGiftIconCommand request, CancellationToken ct = default)
     {
@@ -24,7 +25,8 @@ public sealed class UpdateLiveStreamGiftIconHandler(
         // Refresh cache and get new url
         var giftAfterUpdate = await liveStreamGiftRepo.GetByIdAsync(request.Id, ct);
         await fileManagerCache.RefreshImage(giftAfterUpdate!.Icon!, ct: ct);
-        var thumbnail = await fileManagerCache.GetImageUrl(giftAfterUpdate!.Icon!, ct: ct);
+        var thumbnail = await fileManagerCache.GetFileUrl(giftAfterUpdate!.Icon!, ct: ct);
+        await liveStreamManager.RefreshGiftCacheAsync(ct);
 
         return new UpdateLiveStreamGiftIconResult(thumbnail!.FileName, thumbnail.Url);
     }

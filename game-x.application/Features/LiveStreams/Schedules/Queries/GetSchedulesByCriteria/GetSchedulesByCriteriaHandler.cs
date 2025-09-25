@@ -34,7 +34,7 @@ public sealed class GetSchedulesByCriteriaHandler(
             string? thumbnail = null;
             if (item.Thumbnail != null)
             {
-                var thumbnailInfo = await fileManagerCache.GetImageUrl(item.Thumbnail);
+                var thumbnailInfo = await fileManagerCache.GetFileUrl(item.Thumbnail);
                 thumbnail = thumbnailInfo?.Url;
             }
 
@@ -42,7 +42,7 @@ public sealed class GetSchedulesByCriteriaHandler(
             string? avatar = null;
             if (item.AssignedTo != null && item.AssignedTo.Avatar != null)
             {
-                var avatarInfo = await fileManagerCache.GetImageUrl(item.AssignedTo.Avatar);
+                var avatarInfo = await fileManagerCache.GetFileUrl(item.AssignedTo.Avatar);
                 avatar = avatarInfo?.Url;
             }
 

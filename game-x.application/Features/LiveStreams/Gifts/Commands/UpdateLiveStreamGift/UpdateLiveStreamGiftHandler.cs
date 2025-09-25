@@ -1,10 +1,12 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
 
 namespace game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGift;
 
 public sealed class UpdateLiveStreamGiftHandler(
     IUnitOfWork unitOfWork,
-    ILiveStreamGiftRepo liveStreamGiftRepo) : ICommandHandler<UpdateLiveStreamGiftCommand>
+    ILiveStreamGiftRepo liveStreamGiftRepo,
+    ILiveStreamManagerCacheService liveStreamManager) : ICommandHandler<UpdateLiveStreamGiftCommand>
 {
     public async Task<Unit> Handle(UpdateLiveStreamGiftCommand request, CancellationToken ct = default)
     {
@@ -18,6 +20,7 @@ public sealed class UpdateLiveStreamGiftHandler(
             await unitOfWork.SaveChangesAsync(ct);
         }, ct);
 
+        await liveStreamManager.RefreshGiftCacheAsync(ct);
         return Unit.Value;
     }
 }

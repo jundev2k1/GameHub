@@ -34,7 +34,7 @@ public sealed class AssignTalentHandler(
         var result = talent.Adapt<UserSummaryInfo>();
         if (talent!.Avatar != null)
         {
-            var avatarInfo = await fileManagerCache.GetImageUrl(talent.Avatar, ct);
+            var avatarInfo = await fileManagerCache.GetFileUrl(talent.Avatar, ct);
             result.Avatar = avatarInfo?.Url;
         }
 

@@ -28,7 +28,7 @@ public class UploadAvatarHandler(
             }, ct);
             await unitOfWork.SaveChangesAsync(ct);
             await fileManagerCache.RefreshImage(mediaFile, ct: ct);
-            var avatarInfo = await fileManagerCache.GetImageUrl(mediaFile, ct);
+            var avatarInfo = await fileManagerCache.GetFileUrl(mediaFile, ct);
 
             return avatarInfo?.Url ?? string.Empty;
         }

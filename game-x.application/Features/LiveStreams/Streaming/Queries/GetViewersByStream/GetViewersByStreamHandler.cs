@@ -42,7 +42,7 @@ public sealed class GetViewersByStreamHandler(
             {
                 DeviceName = v!.DeviceInfo,
                 IsWatching = v.IsWatching,
-                JoinAi = v.JoinAt,
+                JoinAt = v.JoinAt,
                 OutAt = v.OutAt
             })
             .ToArray();

@@ -63,7 +63,7 @@ public sealed class OnLiveStreamJoinedHandler(
             {
                 DeviceName = ud!.DeviceInfo,
                 IsWatching = ud!.IsWatching,
-                JoinAi = ud!.JoinAt,
+                JoinAt = ud!.JoinAt,
                 OutAt = ud!.OutAt
             })],
         };

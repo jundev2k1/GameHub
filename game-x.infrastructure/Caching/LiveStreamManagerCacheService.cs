@@ -1,12 +1,17 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.application.Features.LiveStreams.Gifts.Dtos;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.share.Extensions;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace game_x.infrastructure.Caching;
 
-public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
+public sealed class LiveStreamManagerCacheService(
+    IMemoryCache cache,
+    ILiveStreamGiftRepo liveStreamGiftRepo,
+    IFileManagerCacheService fileManagerCache)
     : CacheService(cache), ILiveStreamManagerCacheService
 {
     private const string LiveStreamPrefix = "livestream:";
@@ -318,6 +323,39 @@ public sealed class LiveStreamManagerCacheService(IMemoryCache cache)
         allMessageKeys.Remove(messageId);
         var allMessageKeysCacheKey = $"{LiveStreamPrefix}{streamKey}:messages";
         Set(allMessageKeysCacheKey, allMessageKeys);
+    }
+    #endregion
+
+    #region Gift Management
+    public async Task<LiveStreamGiftClientDto[]> GetAllActiveGiftsAsync(CancellationToken ct = default)
+    {
+        var cacheKey = $"{LiveStreamPrefix}gifts:active";
+        var dtos = Get<LiveStreamGiftClientDto[]>(cacheKey) ?? [];
+        foreach (var dto in dtos)
+        {
+            if (dto.IconId.HasValue)
+            {
+                var imageInfo = await fileManagerCache.GetFileUrl(dto.IconId.Value, ct);
+                dto.IconUrl = imageInfo?.Url;
+            }
+
+            if (dto.AnimationId.HasValue)
+            {
+                var imageInfo = await fileManagerCache.GetFileUrl(dto.AnimationId.Value, ct);
+                dto.AnimationUrl = imageInfo?.Url;
+            }
+        }
+        return dtos;
+    }
+
+    public async Task RefreshGiftCacheAsync(CancellationToken ct = default)
+    {
+        var gifts = await liveStreamGiftRepo.GetAllActivesAsync(ct);
+        var giftDtos = gifts
+            .Select(g => g.Adapt<LiveStreamGiftClientDto>())
+            .ToArray();
+        var cacheKey = $"{LiveStreamPrefix}gifts:active";
+        Set(cacheKey, giftDtos);
     }
     #endregion
 }

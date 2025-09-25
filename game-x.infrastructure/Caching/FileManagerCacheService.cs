@@ -47,7 +47,7 @@ public sealed class FileManagerCacheService(
         Set(cacheKey, fileInfo, options);
     }
 
-    public async Task<MediaFileInfo?> GetImageUrl(MediaFile file, CancellationToken ct = default)
+    public async Task<MediaFileInfo?> GetFileUrl(MediaFile file, CancellationToken ct = default)
     {
         var cacheKey = $"{CacheKeyPrefix}{file.Id}";
         var fileInfo = Get<MediaFileInfo?>(cacheKey);
@@ -55,7 +55,7 @@ public sealed class FileManagerCacheService(
 
         return Get<MediaFileInfo?>(cacheKey);
     }
-    public async Task<MediaFileInfo?> GetImageUrl(int fileId, CancellationToken ct = default)
+    public async Task<MediaFileInfo?> GetFileUrl(int fileId, CancellationToken ct = default)
     {
         var cacheKey = $"{CacheKeyPrefix}{fileId}";
         var file = Get<MediaFileInfo?>(cacheKey);

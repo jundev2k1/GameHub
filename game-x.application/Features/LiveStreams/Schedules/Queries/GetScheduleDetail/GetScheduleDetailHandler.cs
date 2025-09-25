@@ -20,14 +20,14 @@ public sealed class GetScheduleDetailHandler(
         // Load avatar for assigned talent
         if (targetStream.AssignedTo != null && targetStream.AssignedTo.Avatar != null)
         {
-            var avatarInfo = await fileManagerCache.GetImageUrl(targetStream.AssignedTo.Avatar!, ct);
+            var avatarInfo = await fileManagerCache.GetFileUrl(targetStream.AssignedTo.Avatar!, ct);
             result.AssignedTo!.Avatar = avatarInfo?.Url;
         }
 
         // Load thumbnail
         if (targetStream.ThumbnailId.HasValue)
         {
-            var thumbnail = await fileManagerCache.GetImageUrl(targetStream.ThumbnailId.Value, ct);
+            var thumbnail = await fileManagerCache.GetFileUrl(targetStream.ThumbnailId.Value, ct);
             result.ThumbnailUrl = thumbnail?.Url;
         }
 

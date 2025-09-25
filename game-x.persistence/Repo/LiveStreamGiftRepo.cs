@@ -42,6 +42,16 @@ public sealed class LiveStreamGiftRepo(
             pageSize);
     }
 
+    public async Task<LiveStreamGift[]> GetAllActivesAsync(CancellationToken ct = default)
+    {
+        return await context.LiveStreamGifts
+            .AsNoTracking()
+            .Include(lsg => lsg.Icon)
+            .Include(lsg => lsg.Animation)
+            .Where(lsg => lsg.IsDeleted == false && lsg.IsActive)
+            .ToArrayAsync(ct);
+    }
+
     public async Task<LiveStreamGift> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await context.LiveStreamGifts
@@ -64,12 +74,12 @@ public sealed class LiveStreamGiftRepo(
         var dto = target.Adapt<LiveStreamGiftDetailDto>();
         if (target.Icon != null)
         {
-            var imageInfo = await fileManager.GetImageUrl(target.Icon, ct);
+            var imageInfo = await fileManager.GetFileUrl(target.Icon, ct);
             dto.IconUrl = imageInfo?.Url;
         }
         if (target.Animation != null)
         {
-            var imageInfo = await fileManager.GetImageUrl(target.Animation, ct);
+            var imageInfo = await fileManager.GetFileUrl(target.Animation, ct);
             dto.AnimationUrl = imageInfo?.Url;
         }
         return dto;

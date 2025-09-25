@@ -80,7 +80,7 @@ public sealed class JoinLiveStreamHandler(
         var targetUser = await userRepo.GetUserByIdAsync(userAccessor.GetUserId());
         var token = GenerateToken();
         var avatarInfo = targetUser.Avatar != null
-            ? await fileManagerCache.GetImageUrl(targetUser.Avatar)
+            ? await fileManagerCache.GetFileUrl(targetUser.Avatar)
             : null;
         var viewerDto = new LiveStreamViewerDto
         {
