@@ -4,9 +4,8 @@ public sealed class LiveStreamChatMessageDto
 {
     public Guid Id { get; set; }
     public Guid StreamId { get; set; }
-    public string StreamKey { get; set; } = string.Empty;
     public string SenderId { get; set; } = string.Empty;
-    public string NickName { get; set; } = string.Empty;
+    public string Nickname { get; set; } = string.Empty;
     public bool IsHost { get; set; }
     public string Message { get; set; } = string.Empty;
     public LiveStreamChatMessageType MessageType { get; set; }
