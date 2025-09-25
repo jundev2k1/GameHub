@@ -3,58 +3,46 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Accounts.User.Commands.UploadAvatar;
 
-public class UploadAvatarHandler(
+public sealed class UploadAvatarHandler(
     IUnitOfWork unitOfWork,
     IUserAccessor userAccessor,
     IUserRepo userRepo,
     IFileStorageService fileStorage,
-    IFileManagerCacheService fileCache,
-    ILogger<domain.Entities.User> logger): IRequestHandler<UploadAvatarCommand, string?>
+    IFileManagerCacheService fileManagerCache) : ICommandHandler<UploadAvatarCommand, string>
 {
-    public async Task<string?> Handle(UploadAvatarCommand request, CancellationToken ct)
+    public async Task<string> Handle(UploadAvatarCommand request, CancellationToken ct)
     {
-        try
-        {
-            var userId = userAccessor.GetUserId();
-            var mediaFile = await UploadFiles(userId, request.File, ct);
-            
-            await userRepo.UpdateAsync(userId, targetUser =>
-            {
-                targetUser.Avatar = mediaFile;
-            }, ct);
-            await unitOfWork.SaveChangesAsync(ct);
-            
-            await fileCache.RefreshImage(mediaFile, ct: ct);
+        var userId = userAccessor.GetUserId();
+        var mediaFile = await UploadFiles(userId, request.File, ct);
 
-            var avatarUrl = await fileCache.GetFileUrl(mediaFile, ct);
-            return avatarUrl;
-        }
-        catch (Exception e)
+        // Update user avatar
+        await userRepo.UpdateAsync(userId, targetUser =>
         {
-            logger.LogError(e.Message);
-            throw new BadRequestException(MessageCode.System.SystemError);
-        }
+            targetUser.Avatar = mediaFile;
+        }, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+
+        // Refresh cache
+        await fileManagerCache.RefreshImage(mediaFile, ct: ct);
+
+        // Get url
+        var avatarUrl = await fileManagerCache.GetFileUrl(mediaFile, ct);
+        return avatarUrl ?? string.Empty;
     }
-    
+
     private async Task<MediaFile> UploadFiles(string userId, FileUpload file, CancellationToken ct)
     {
         var newFileName = Guid.NewGuid() + file.Extension;
-        var objectName = ObjectName.Avatar(userId, newFileName);
-        await fileStorage.UploadFileAsync(file.Content, BucketName.User, objectName, MimeType.Of(file.ContentType), ct);
-        return CreateMediaFile(file, objectName);
-    }
-    
-    private static MediaFile CreateMediaFile(FileUpload file, ObjectName objectName)
-    {
-        return MediaFile.Create(
+        var newFile = MediaFile.Create(
             bucketName: BucketName.User,
-            objectName: objectName,
+            objectName: ObjectName.Avatar(userId, newFileName),
             fileName: file.FileName,
             mimeType: MimeType.Of(file.ContentType),
             sizeBytes: Convert.ToInt32(file.Length));
+        await fileStorage.UploadFileAsync(file.Content, newFile.BucketName, newFile.ObjectName, newFile.MimeType, ct);
+        return newFile;
     }
 }
