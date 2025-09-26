@@ -24,7 +24,7 @@ public sealed class SendChatMessageHandler(
         var isMute = streamInfo.BlackList.Any(bl =>
             bl.UserId == targetUser.Id
             && bl.BlockTo > DateTime.UtcNow
-            && bl.Action == BlackListAction.Chat);
+            && (bl.Action == BlackListAction.Chat || bl.Action == BlackListAction.View));
         if (isMute)
             throw new ForbiddenException("You are muted in this live stream.");
 
