@@ -1,9 +1,13 @@
-﻿using game_x.application.Contract.Infrastructure.Caching;
+﻿using FluentValidation;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Jobs;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace game_x.infrastructure.BackgroundJobs.Jobs;
 
@@ -11,6 +15,9 @@ public sealed class StreamTimeoutCheckerJob(
     ILiveStreamManagerCacheService liveStreamManager,
     IUnitOfWork unitOfWork,
     ILiveStreamRepo liveStreamRepo,
+    ILiveStreamHubService liveStreamHub,
+    INotificationRepo notificationRepo,
+    IClientHubService clientHub,
     IOptions<RecurringJobSettings> jobOptions,
     IAppLogger<StreamTimeoutCheckerJob> logger) : IRecurringJob
 {
@@ -49,20 +56,74 @@ public sealed class StreamTimeoutCheckerJob(
                 await liveStreamRepo.BulkUpdateEndedStreams(streamIds, ct);
             }, ct);
 
-            // Cleanup cache
-            CleanupCaches([.. streamList.Select(s => s.StreamKey)]);
+            // Cleanup cache and notify talent
+            await CleanupCacheAndNotifyForTalent(streamList, ct);
 
             // Log info
             logger.LogInformation($"Stream timeout checker job ended {streamList.Length} streams.");
         }
     }
 
-    private void CleanupCaches(string[] streamKeys)
+    private async Task CleanupCacheAndNotifyForTalent(LivestreamSchedule[] streamInfos, CancellationToken ct)
     {
-        foreach (var streamKey in streamKeys)
+        foreach (var streamInfo in streamInfos)
         {
-            liveStreamManager.RemoveLiveStream(streamKey);
-            liveStreamManager.RemoveViewersByStreamKey(streamKey);
+            liveStreamManager.RemoveLiveStream(streamInfo.StreamKey);
+            liveStreamManager.RemoveViewersByStreamKey(streamInfo.StreamKey);
+
+            // Notify talent and viewers if live
+            if (streamInfo.Status == LiveStreamStatus.Live)
+            {
+                await liveStreamHub.NotifyEndStream(streamInfo.StreamKey);
+
+                var message = new Dictionary<string, object>
+                {
+                    { "Title", streamInfo.Title }
+                };
+                await NotifyForTalent(
+                    streamInfo.AssignedId!,
+                    NotificationMessageKey.LiveStream_Ended,
+                    JsonSerializer.Serialize(message),
+                    NotificationSeverity.Info,
+                    ct);
+            }
+
+            // Notify talent for timeout cancelled
+            if (streamInfo.Status == LiveStreamStatus.Scheduled)
+            {
+                var message = new Dictionary<string, object>
+                {
+                    { "Title", streamInfo.Title },
+                    { "Message", "Stream cancelled due to timeout." }
+                };
+                await NotifyForTalent(
+                    streamInfo.AssignedId!,
+                    NotificationMessageKey.LiveStream_TimeoutCancelled,
+                    JsonSerializer.Serialize(message),
+                    NotificationSeverity.Error,
+                    ct);
+            }
         }
+    }
+
+    private async Task NotifyForTalent(
+        string userId,
+        NotificationMessageKey message,
+        string? detail = null,
+        NotificationSeverity severity = NotificationSeverity.Info,
+        CancellationToken ct = default)
+    {
+        var notification = Notification.Create(
+            message,
+            userId,
+            NotificationType.System,
+            severity,
+            detail);
+        await notificationRepo.AddNotificationAsync(notification, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+
+        await clientHub.SendNotificationToMemberAsync(
+            userId,
+            notification.Adapt<NotificationDto>());
     }
 }

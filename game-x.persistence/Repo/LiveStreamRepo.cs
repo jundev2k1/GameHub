@@ -156,7 +156,7 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
                 schedule.EndStream();
 
             if (schedule.Status == LiveStreamStatus.Scheduled)
-                schedule.CancelStream("Expired.");
+                schedule.CancelStream("Stream cancelled due to timeout.");
         });
     }
 
