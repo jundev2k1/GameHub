@@ -88,7 +88,7 @@ public sealed class LiveStreamHub(
         await base.OnDisconnectedAsync(ex);
     }
 
-    public async Task PerformActionAsync(PerformActionCommand command)
+    public async Task PerformAction(PerformActionCommand command)
     {
         var streamKey = httpContext.HttpContext?.Request.Query[StreamKeyParamKey].FirstOrDefault();
         if (streamKey.IsNullOrWhiteSpace())
