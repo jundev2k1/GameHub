@@ -16,9 +16,4 @@ public record JoinLiveStreamResult(
     string? TalentAvatar,
     int ViewCount,
     string Url,
-    ViewerBanInfo[] BanInfos);
-
-public record ViewerBanInfo(
-    BlackListAction Action,
-    DateTime BlockTo,
-    BlockReasonEnum Reason);
+    LiveStreamBanInfoDto[] BanInfos);

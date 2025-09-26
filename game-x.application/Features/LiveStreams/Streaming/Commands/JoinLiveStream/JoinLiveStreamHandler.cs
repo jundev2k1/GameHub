@@ -67,7 +67,7 @@ public sealed class JoinLiveStreamHandler(
         // Get viewer ban info
         var banInfos = streamInfo.BlackList
             .Where(b => (b.UserId == viewer.ViewerId) && (b.BlockTo > DateTime.UtcNow))
-            .Select(b => new ViewerBanInfo(b.Action, b.BlockTo, b.Reason))
+            .Select(b => new LiveStreamBanInfoDto(b.Action, b.BlockTo, b.Reason))
             .ToArray();
 
         return new JoinLiveStreamResult(
