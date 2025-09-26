@@ -49,7 +49,7 @@ public sealed class JoinLiveStreamHandler(
             throw new ForbiddenException(
                 MessageCode.System.Forbidden,
                 "You are blocked from viewing this live stream.",
-                new { targetBlackListItem.Action, targetBlackListItem.BlockTo, targetBlackListItem.Reason });
+                new { targetBlackListItem.Action, targetBlackListItem.BlockTo, Reason = targetBlackListItem.Reason.ToString() });
 
         // Check if the stream is live
         var isInterrupted = !streamInfo.IsLive
