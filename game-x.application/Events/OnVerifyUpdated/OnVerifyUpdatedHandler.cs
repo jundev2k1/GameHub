@@ -26,8 +26,8 @@ public sealed class OnVerifyUpdatedHandler(
         var notificationDto = new VerificationNotificationDto
         {
             CurrencyCode = verificationDto.CurrencyCode,
-            Type = verificationDto.Type.ToString().ToCamelCase(),
-            Status = verificationDto.Status.ToString().ToCamelCase(),
+            Type = verificationDto.Type.ToCamelCase(),
+            Status = verificationDto.Status.ToCamelCase(),
             IsVerified = verificationDto.IsVerified
         };
 

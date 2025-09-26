@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
+using game_x.share.Extensions;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
@@ -49,7 +50,7 @@ public sealed class JoinLiveStreamHandler(
             throw new ForbiddenException(
                 MessageCode.System.Forbidden,
                 "You are blocked from viewing this live stream.",
-                new { targetBlackListItem.Action, targetBlackListItem.BlockTo, Reason = targetBlackListItem.Reason.ToString() });
+                new { Action = targetBlackListItem.Action.ToCamelCase(), targetBlackListItem.BlockTo, Reason = targetBlackListItem.Reason.ToCamelCase() });
 
         // Check if the stream is live
         var isInterrupted = !streamInfo.IsLive
