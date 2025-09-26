@@ -1,5 +1,4 @@
-﻿using EFCore.BulkExtensions;
-using game_x.application.Common.Abstractions;
+﻿using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;

@@ -28,7 +28,7 @@ public sealed class UpdateLiveStreamGiftHandler(
                 {
                     var targetToken = cryptoTokens.FirstOrDefault(ct => ct.PublicId == gp.CryptoTokenId)
                         ?? throw new NotFoundException("Crypto token not found.");
-                    return LiveStreamGiftPrice.Create(default, targetToken.Id, gp.TokenCost, gp.IsActive);
+                    return LiveStreamGiftPrice.Create(gift.Id, targetToken.Id, gp.TokenCost, gp.IsActive);
                 })
                 .ToList();
 

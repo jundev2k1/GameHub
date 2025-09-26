@@ -12,5 +12,5 @@ public class LiveStreamGiftClientDto
     [JsonIgnore]
     public int? AnimationId { get; set; } = default!;
     public string? AnimationUrl { get; set; }
-    public decimal CoinCost { get; set; }
+    public LiveStreamGiftPriceClientDto[] GiftPrices { get; set; } = [];
 }

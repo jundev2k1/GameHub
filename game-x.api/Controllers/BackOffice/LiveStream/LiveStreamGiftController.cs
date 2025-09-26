@@ -10,8 +10,6 @@ using game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGif
 using game_x.application.Features.LiveStreams.Gifts.Commands.UpdateLiveStreamGiftStatus;
 using game_x.application.Features.LiveStreams.Gifts.Queries.GetLiveStreamGiftDetail;
 using game_x.application.Features.LiveStreams.Gifts.Queries.GetLiveStreamGiftsByCriteria;
-using game_x.application.Features.LiveStreams.Schedules.Commands.UpdateScheduleThumbnail;
-using game_x.application.Features.LiveStreams.Schedules.Queries.GetSchedulesByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.LiveStream;
 
@@ -51,7 +49,7 @@ public sealed class LiveStreamGiftController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.Admin)]
-    [HttpPatch("{id:guid}")]
+    [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateGiftAsync(Guid id, UpdateLiveStreamGiftCommand command)
     {
         await Mediator.Send(command with { Id = id });

@@ -42,9 +42,10 @@ public sealed class GetActiveStreamsHandler(
 
         // Skip offline streams or streams that have been offline for more than 5 minutes
         if (stream is null
-            || !stream.IsLive
+            || stream.StartTime > DateTime.UtcNow
+            || (!stream.IsLive
                 && stream.OfflineAt.HasValue
-                && (DateTime.UtcNow - stream.OfflineAt.Value).Minutes > 5)
+                && (DateTime.UtcNow - stream.OfflineAt.Value).Minutes > 5))
             return null;
 
         // Get thumbnail

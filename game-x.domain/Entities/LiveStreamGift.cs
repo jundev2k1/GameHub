@@ -42,11 +42,6 @@ public sealed class LiveStreamGift : BaseEntity<int>, IAuditable
         GiftPrices = giftPrices;
     }
 
-    public void UpdateGiftPrice(List<LiveStreamGiftPrice> giftPrices)
-    {
-        GiftPrices = giftPrices;
-    }
-
     public void UpdateIcon(MediaFile image)
     {
         Icon = image;
