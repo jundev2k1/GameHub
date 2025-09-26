@@ -44,7 +44,7 @@ public sealed class JoinLiveStreamHandler(
         var targetBlackListItem = streamInfo.BlackList
             .FirstOrDefault(i => i.UserId == userAccessor.GetUserId()
                 && i.Action == BlackListAction.View
-                && i.BlockTo < DateTime.UtcNow);
+                && i.BlockTo > DateTime.UtcNow);
         if (targetBlackListItem != null)
             throw new ForbiddenException(
                 MessageCode.System.Forbidden,
