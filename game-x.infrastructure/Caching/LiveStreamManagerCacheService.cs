@@ -80,7 +80,7 @@ public sealed class LiveStreamManagerCacheService(
     {
         var targetStream = GetLiveStreamStatus(streamKey)
             ?? throw new NotFoundException(nameof(streamKey), streamKey);
-        targetStream.BlackList = [.. targetStream.BlackList.Where(bl => bl.UserId == userId && bl.Action == action)];
+        targetStream.BlackList = [.. targetStream.BlackList.Where(bl => !(bl.UserId == userId && bl.Action == action))];
 
         var cacheKey = $"{LiveStreamPrefix}streams:{targetStream.StreamKey}";
         Set(cacheKey, targetStream);
