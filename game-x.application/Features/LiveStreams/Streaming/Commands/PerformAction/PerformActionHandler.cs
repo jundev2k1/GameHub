@@ -40,11 +40,10 @@ public sealed class PerformActionHandler(
 
         // Find the viewer in the list
         LiveStreamViewerDto? targetViewer = null;
-        var index = 0;
-        while (targetViewer != null)
+        foreach (var token in targetViewerInfo.Value)
         {
-            targetViewer = liveStreamManager.GetViewerInfo(targetSchedule.StreamKey, targetViewerInfo.Value[index]);
-            index++;
+            targetViewer = liveStreamManager.GetViewerInfo(targetSchedule.StreamKey, token);
+            if (targetViewer != null) break;
         }
         if (targetViewer is null)
             throw new BadRequestException("The viewer is not watching this stream.");
