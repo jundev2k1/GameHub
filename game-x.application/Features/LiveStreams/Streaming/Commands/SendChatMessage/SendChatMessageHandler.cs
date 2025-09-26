@@ -19,8 +19,6 @@ public sealed class SendChatMessageHandler(
         var targetUser = await userRepo.GetUserByIdAsync(userAccessor.GetUserId(), ct);
         var streamSetting = liveStreamManager.GetLiveStreamStatus(request.StreamKey)
             ?? throw new NotFoundException("Live stream is not found.");
-        if (!streamSetting.IsLive)
-            throw new ForbiddenException("Live stream is offline.");
 
         await unitOfWork.BeginTransactionAsync(ct);
         try
