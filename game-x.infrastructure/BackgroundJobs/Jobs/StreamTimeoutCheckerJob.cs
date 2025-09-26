@@ -4,7 +4,6 @@ using game_x.application.Contract.Jobs;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 namespace game_x.infrastructure.BackgroundJobs.Jobs;
 
@@ -30,17 +29,15 @@ public sealed class StreamTimeoutCheckerJob(
         var allActiveStreams = liveStreamManager.GetAllStreamKeys()
             .Select(liveStreamManager.GetLiveStreamStatus)
             .Where(s => s is not null
-                && s.EndTime > DateTime.UtcNow
+                && s.EndTime < DateTime.UtcNow
                 && (s.IsLive
                     || (!s.IsLive && (s.OfflineAt.HasValue && (DateTime.UtcNow - s.OfflineAt.Value).Minutes < StreamTimeoutMinutes))))
             .Select(s => s!.StreamKey)
             .ToArray();
-        logger.LogInformation($"== DEBUG ==\nCache Data List:\n{JsonSerializer.Serialize(allActiveStreams)}\n== DEBUG ==");
 
         var endedStreams = expiredStreams
             .Where(s => !allActiveStreams.Contains(s.StreamKey))
             .ToArray();
-        logger.LogInformation($"== DEBUG ==\nActual Data List:\n{JsonSerializer.Serialize(endedStreams)}\n== DEBUG ==");
         if (endedStreams.Length == 0) return;
 
         foreach (var streamList in endedStreams.Chunk(500))
