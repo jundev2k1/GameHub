@@ -92,6 +92,7 @@ public sealed class PerformActionHandler(
             BlockTo = DateTime.UtcNow.AddMinutes(minutes),
             Reason = reason,
         };
+        liveStreamManager.RemoveBlackList(streamKey, blackListItem.UserId, BlackListAction.View);
         liveStreamManager.AddBlackList(streamKey, blackListItem);
 
         // Kick the viewer from SRS
@@ -125,6 +126,7 @@ public sealed class PerformActionHandler(
             BlockTo = DateTime.UtcNow.AddMinutes(minutes),
             Reason = reason,
         };
+        liveStreamManager.RemoveBlackList(streamKey, blackListItem.UserId, BlackListAction.Chat);
         liveStreamManager.AddBlackList(streamKey, blackListItem);
 
         // Notify the viewer via SignalR
@@ -155,6 +157,7 @@ public sealed class PerformActionHandler(
             BlockTo = DateTime.UtcNow.AddMinutes(minutes),
             Reason = reason,
         };
+        liveStreamManager.RemoveBlackList(streamKey, blackListItem.UserId, BlackListAction.Donate);
         liveStreamManager.AddBlackList(streamKey, blackListItem);
 
         // Notify the viewer via SignalR
