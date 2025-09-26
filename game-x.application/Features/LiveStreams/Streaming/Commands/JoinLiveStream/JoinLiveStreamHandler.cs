@@ -61,7 +61,15 @@ public sealed class JoinLiveStreamHandler(
                 "Live streaming is interrupted.",
                 new { isInterrupted = true });
 
+        // Create viewer
         var viewer = await CreateViewer(streamSetting);
+
+        // Get viewer ban info
+        var banInfos = streamInfo.BlackList
+            .Where(b => b.BlockTo > DateTime.UtcNow)
+            .Select(b => new ViewerBanInfo(b.Action, b.BlockTo, b.Reason))
+            .ToArray();
+
         return new JoinLiveStreamResult(
             Title: streamInfo.Title,
             Description: streamInfo.Description,
@@ -72,7 +80,8 @@ public sealed class JoinLiveStreamHandler(
             TalentName: streamInfo.AssignedTo?.Nickname ?? string.Empty,
             TalentAvatar: await fileManagerCache.GetFileUrl(streamInfo.AssignedTo?.AvatarId, ct),
             ViewCount: liveStreamManager.GetViewerCount(streamInfo.StreamKey),
-            Url: viewer.Url);
+            Url: viewer.Url,
+            BanInfos: banInfos);
     }
 
     private async Task<LiveStreamViewerDto> CreateViewer(LivestreamSchedule schedule)
