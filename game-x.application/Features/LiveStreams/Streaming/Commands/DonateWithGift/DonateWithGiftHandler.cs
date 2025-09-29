@@ -15,8 +15,8 @@ public sealed class DonateWithGiftHandler(
 {
     public async Task<Unit> Handle(DonateWithGiftCommand request, CancellationToken ct = default)
     {
-        var streamInfo = liveStreamManager.GetLiveStreamStatus(request.StreamKey)
-            ?? throw new NotFoundException(nameof(request.StreamKey), request.StreamKey);
+        var streamInfo = liveStreamManager.GetLiveStreamStatus(request.StreamKey!)
+            ?? throw new NotFoundException(nameof(request.StreamKey), request.StreamKey!);
 
         var userId = userAccessor.GetUserId();
         var targetCrypto = await cryptoTokenRepo.GetByIdAsync(request.CryptoTokenId, ct);

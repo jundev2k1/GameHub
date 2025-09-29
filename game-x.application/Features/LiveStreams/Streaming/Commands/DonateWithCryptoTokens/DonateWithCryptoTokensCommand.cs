@@ -3,7 +3,7 @@
 namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithFiatCurrency;
 
 public record DonateWithCryptoTokensCommand(
-    [property: JsonIgnore] string StreamKey,
+    [property: JsonIgnore] string? StreamKey,
     decimal Amount,
     string Message,
     Guid CryptoTokenId) : ICommand;
