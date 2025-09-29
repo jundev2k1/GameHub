@@ -45,12 +45,12 @@ public sealed class JoinLiveStreamHandler(
         var targetBlackListItem = streamInfo.BlackList
             .FirstOrDefault(i => i.UserId == userAccessor.GetUserId()
                 && i.Action == BlackListAction.View
-                && i.BlockTo > DateTime.UtcNow);
+                && i.BanUntil > DateTime.UtcNow);
         if (targetBlackListItem != null)
             throw new ForbiddenException(
                 MessageCode.System.Forbidden,
                 "You are blocked from viewing this live stream.",
-                new { Action = targetBlackListItem.Action.ToCamelCase(), targetBlackListItem.BlockTo, Reason = targetBlackListItem.Reason.ToCamelCase() });
+                new { Action = targetBlackListItem.Action.ToCamelCase(), targetBlackListItem.BanUntil, Reason = targetBlackListItem.Reason.ToCamelCase() });
 
         // Check if the stream is live
         var isInterrupted = !streamInfo.IsLive
@@ -67,8 +67,8 @@ public sealed class JoinLiveStreamHandler(
 
         // Get viewer ban info
         var banInfos = streamInfo.BlackList
-            .Where(b => (b.UserId == viewer.ViewerId) && (b.BlockTo > DateTime.UtcNow))
-            .Select(b => new LiveStreamBanInfoDto(b.Action, b.BlockTo, b.Reason))
+            .Where(b => (b.UserId == viewer.ViewerId) && (b.BanUntil > DateTime.UtcNow))
+            .Select(b => new LiveStreamBanInfoDto(b.Action, b.BanUntil, b.Reason))
             .ToArray();
 
         return new JoinLiveStreamResult(

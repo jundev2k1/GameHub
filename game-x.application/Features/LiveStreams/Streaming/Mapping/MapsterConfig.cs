@@ -11,5 +11,12 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.StreamId, src => src.LiveStream.PublicId)
             .Map(dest => dest.IsHost, src => src.SenderId == src.LiveStream.AssignedId)
             .Map(dest => dest.Nickname, src => src.Sender.Nickname);
+
+        cfg.NewConfig<LiveStreamDonation, LiveStreamDonationDto>()
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.LivestreamScheduleId, src => src.LivestreamSchedule.PublicId)
+            .Map(dest => dest.DonorId, src => src.DonorId)
+            .Map(dest => dest.DonorName, src => src.Donor.Nickname)
+            .Map(dest => dest.GiftId, src => src.Gift != null ? src.Gift.PublicId : (Guid?)null);
     }
 }

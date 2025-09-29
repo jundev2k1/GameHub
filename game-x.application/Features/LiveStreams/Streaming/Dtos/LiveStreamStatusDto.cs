@@ -32,7 +32,7 @@ public sealed class BlackListItemDto
     public string UserId { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
     public BlackListAction Action { get; set; }
-    public DateTime BlockTo { get; set; }
+    public DateTime BanUntil { get; set; }
     public BlockReasonEnum Reason { get; set; }
 }
 

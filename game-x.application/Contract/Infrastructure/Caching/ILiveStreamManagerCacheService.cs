@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.LiveStreams.Gifts.Dtos;
+﻿using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.LiveStreams.Gifts.Dtos;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
 
 namespace game_x.application.Contract.Infrastructure.Caching;
@@ -66,6 +67,8 @@ public interface ILiveStreamManagerCacheService
 
     void AddMessageToStream(string streamKey, LiveStreamChatMessageDto message);
 
+    void RemoveAllMessageByStreamKey(string streamKey);
+
     void RemoveMessageFromStream(string streamKey, Guid messageId);
     #endregion
 
@@ -76,6 +79,16 @@ public interface ILiveStreamManagerCacheService
     #endregion
 
     #region Donation Management
+    Dictionary<Guid, DateTime> GetStreamDonationKeys(string streamKey);
 
+    Task SetInitDonations(string streamKey, CancellationToken ct = default);
+
+    void AddDonationToStream(string streamKey, LiveStreamDonationDto donation);
+
+    LiveStreamDonationDto? GetDonationDetail(string streamKey, Guid donationId);
+
+    void RemoveDonationsByStreamKey(string streamKey);
+
+    void RemoveDonationFromStream(string streamKey, Guid donationId);
     #endregion
 }

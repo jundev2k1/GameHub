@@ -38,6 +38,8 @@ public enum NotificationMessageKey : short
     LiveStream_Ended = 902,
     LiveStream_Assigned = 903,
     LiveStream_ScheduleCancelled = 904,
+    LiveStream_DonationSuccessful = 905,
+    LiveStream_DonationReceived = 906,
 
     // Enum group key: ...
 }

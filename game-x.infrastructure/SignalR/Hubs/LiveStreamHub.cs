@@ -47,6 +47,8 @@ public interface ILiveStreamHub
     Task OnReceiveMessage(LiveStreamChatMessageDto viewer);
 
     Task OnMessageDeleted(Guid messageId);
+
+    Task OnDonationCompleted(LiveStreamDonationDto donation);
 }
 
 [Authorize(Roles = AppRoles.User)]

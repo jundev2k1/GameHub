@@ -95,4 +95,11 @@ public sealed class LiveStreamHubService(IHubContext<LiveStreamHub, ILiveStreamH
             .Group($"stream-{streamKey}")
             .OnMessageDeleted(messageId);
     }
+
+    public async Task NotifyDonationCompleted(string streamKey, LiveStreamDonationDto donation)
+    {
+        await hubContext.Clients
+            .Group($"stream-{streamKey}")
+            .OnDonationCompleted(donation);
+    }
 }

@@ -89,7 +89,7 @@ public sealed class PerformActionHandler(
             UserId = viewer.ViewerId,
             Username = viewer.ViewerName,
             Action = BlackListAction.View,
-            BlockTo = DateTime.UtcNow.AddMinutes(minutes),
+            BanUntil = DateTime.UtcNow.AddMinutes(minutes),
             Reason = reason,
         };
         liveStreamManager.RemoveBlackList(streamKey, blackListItem.UserId, BlackListAction.View);
@@ -102,7 +102,7 @@ public sealed class PerformActionHandler(
         await liveStreamHub.PerformActionMember(
             streamKey,
             blackListItem.UserId,
-            new LiveStreamBanInfo { Action = PerformActionEnum.Kick, BanUntil = blackListItem.BlockTo, Reason = reason });
+            new LiveStreamBanInfo { Action = PerformActionEnum.Kick, BanUntil = blackListItem.BanUntil, Reason = reason });
     }
 
     private async Task UnkickViewer(string streamKey, string viewerId)
@@ -123,7 +123,7 @@ public sealed class PerformActionHandler(
             UserId = viewer.ViewerId,
             Username = viewer.ViewerName,
             Action = BlackListAction.Chat,
-            BlockTo = DateTime.UtcNow.AddMinutes(minutes),
+            BanUntil = DateTime.UtcNow.AddMinutes(minutes),
             Reason = reason,
         };
         liveStreamManager.RemoveBlackList(streamKey, blackListItem.UserId, BlackListAction.Chat);
@@ -133,7 +133,7 @@ public sealed class PerformActionHandler(
         await liveStreamHub.PerformActionMember(
             streamKey,
             blackListItem.UserId,
-            new LiveStreamBanInfo { Action = PerformActionEnum.Mute, BanUntil = blackListItem.BlockTo, Reason = reason });
+            new LiveStreamBanInfo { Action = PerformActionEnum.Mute, BanUntil = blackListItem.BanUntil, Reason = reason });
     }
 
     private async Task UnmuteViewer(string streamKey, string viewerId)
@@ -154,7 +154,7 @@ public sealed class PerformActionHandler(
             UserId = viewer.ViewerId,
             Username = viewer.ViewerName,
             Action = BlackListAction.Donate,
-            BlockTo = DateTime.UtcNow.AddMinutes(minutes),
+            BanUntil = DateTime.UtcNow.AddMinutes(minutes),
             Reason = reason,
         };
         liveStreamManager.RemoveBlackList(streamKey, blackListItem.UserId, BlackListAction.Donate);
@@ -164,7 +164,7 @@ public sealed class PerformActionHandler(
         await liveStreamHub.PerformActionMember(
             streamKey,
             blackListItem.UserId,
-            new LiveStreamBanInfo { Action = PerformActionEnum.BlockDonation, BanUntil = blackListItem.BlockTo, Reason = reason });
+            new LiveStreamBanInfo { Action = PerformActionEnum.BlockDonation, BanUntil = blackListItem.BanUntil, Reason = reason });
     }
 
     private async Task UnblockDonation(string streamKey, string viewerId)

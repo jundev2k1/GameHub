@@ -1,3 +1,9 @@
-﻿namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithGift;
+﻿using System.Text.Json.Serialization;
 
-public record DonateWithGiftCommand(string StreamKey, Guid GiftId, string Message) : ICommand;
+namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithGift;
+
+public record DonateWithGiftCommand(
+    [property: JsonIgnore] string? StreamKey,
+    Guid GiftId,
+    string Message,
+    Guid CryptoTokenId) : ICommand;

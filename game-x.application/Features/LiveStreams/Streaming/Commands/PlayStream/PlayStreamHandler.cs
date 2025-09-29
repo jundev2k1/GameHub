@@ -34,12 +34,12 @@ public sealed class PlayStreamHandler(
         var targetBlackListItem = streamInfo.BlackList
             .FirstOrDefault(i => i.UserId == viewer.ViewerId
                 && i.Action == BlackListAction.View
-                && i.BlockTo > DateTime.UtcNow);
+                && i.BanUntil > DateTime.UtcNow);
         if (targetBlackListItem != null)
             throw new ForbiddenException(
                 MessageCode.System.Forbidden,
                 "You are blocked from viewing this live stream.",
-                new { Time = targetBlackListItem.BlockTo });
+                new { Time = targetBlackListItem.BanUntil });
 
         // Mark as watching stream
         liveStreamManager.WatchLiveStream(viewer);
