@@ -107,6 +107,16 @@ public class Transaction: BaseEntity<int>, IAuditable
             TransactionInternal.ConfirmedAt = confirmedAt ?? TransactionInternal.ConfirmedAt;
         }
     }
+
+    public void ConfirmTx(decimal actualAmount, DateTime confirmedAt)
+    {
+        ActualAmount = actualAmount;
+        Status = TransactionStatus.Completed;
+        if (TransactionInternal != null)
+        {
+            TransactionInternal.ConfirmedAt = confirmedAt;
+        }
+    }
 }
 
 public class TransactionMeta

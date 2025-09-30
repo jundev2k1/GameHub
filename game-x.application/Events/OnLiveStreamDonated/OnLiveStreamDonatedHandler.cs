@@ -68,6 +68,7 @@ public sealed class OnLiveStreamDonatedHandler(
             fromAddress: string.Empty,
             toAddress: string.Empty);
         transaction.AddTxInternal(transactionInternal);
+        transaction.ConfirmTx(amount, DateTime.UtcNow);
 
         await transactionRepo.AddAsync(transaction, ct);
     }
