@@ -1,5 +1,6 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.LiveStreams.Gifts.Dtos;
 using game_x.application.Features.LiveStreams.Gifts.Mapping;
@@ -8,7 +9,8 @@ namespace game_x.application.Features.LiveStreams.Gifts.Queries.GetLiveStreamGif
 
 public sealed class GetLiveStreamGiftsByCriteriaHandler(
     ICriteriaBuilder<LiveStreamGift> builder,
-    ILiveStreamGiftRepo liveStreamGiftRepo) : IQueryHandler<GetLiveStreamGiftsByCriteriaQuery, PaginationResult<LiveStreamGiftDto>>
+    ILiveStreamGiftRepo liveStreamGiftRepo,
+    IFileManagerCacheService fileManagerCache) : IQueryHandler<GetLiveStreamGiftsByCriteriaQuery, PaginationResult<LiveStreamGiftDto>>
 {
     public async Task<PaginationResult<LiveStreamGiftDto>> Handle(GetLiveStreamGiftsByCriteriaQuery request, CancellationToken ct = default)
     {
@@ -21,6 +23,13 @@ public sealed class GetLiveStreamGiftsByCriteriaHandler(
             request.PageIndex,
             request.PageSize,
             ct);
-        return result.ToSearchResult();
+        Task<(Guid PublicId, string? Icon)>[] giftFileTasks = [.. result.Items
+            .Select(async i =>
+            {
+                var iconImage = await fileManagerCache.GetFileUrl(i.Icon);
+                return (i.PublicId, iconImage);
+            })];
+        var giftFiles = await Task.WhenAll(giftFileTasks);
+        return result.ToSearchResult(giftFiles);
     }
 }

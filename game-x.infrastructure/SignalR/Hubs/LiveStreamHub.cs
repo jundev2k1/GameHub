@@ -26,7 +26,7 @@ public interface ILiveStreamHub
 
     Task OnStreamDisconnected();
 
-    Task OnStreamCanceled(string reason);
+    Task OnStreamCancelled(string reason);
 
     Task OnStreamEnded();
 
@@ -40,9 +40,15 @@ public interface ILiveStreamHub
 
     Task OnViewerBatchComplete();
 
+    Task ReceiveBlackListBatch(BlackListItemDto[] banInfo);
+
+    Task OnBlackListBatchComplete();
+
     Task OnReceiveMessage(LiveStreamChatMessageDto viewer);
 
     Task OnMessageDeleted(Guid messageId);
+
+    Task OnDonationCompleted(LiveStreamDonationDto donation);
 }
 
 [Authorize(Roles = AppRoles.User)]
@@ -88,7 +94,7 @@ public sealed class LiveStreamHub(
         await base.OnDisconnectedAsync(ex);
     }
 
-    public async Task PerformActionAsync(PerformActionCommand command)
+    public async Task PerformAction(PerformActionCommand command)
     {
         var streamKey = httpContext.HttpContext?.Request.Query[StreamKeyParamKey].FirstOrDefault();
         if (streamKey.IsNullOrWhiteSpace())
@@ -105,12 +111,29 @@ public sealed class LiveStreamHub(
 
         var query = new GetViewersByStreamQuery(streamKey!);
         var allViewers = await sender.Send(query);
-        foreach (var viewers in allViewers.Chunk(250))
+        foreach (var viewers in allViewers.Chunk(100))
         {
             await Clients.Caller.ReceiveViewerBatch(viewers);
         }
 
         await Clients.Caller.OnViewerBatchComplete();
+    }
+
+    public async Task StreamAllBlackList()
+    {
+        var streamKey = httpContext.HttpContext?.Request.Query[StreamKeyParamKey].FirstOrDefault();
+        if (streamKey.IsNullOrWhiteSpace())
+            throw new ForbiddenException("Stream key is required.");
+
+        var streamInfo = liveStreamManager.GetLiveStreamStatus(streamKey!)
+            ?? throw new NotFoundException("Live stream is not found.");
+
+        foreach (var banInfos in streamInfo.BlackList.Chunk(100))
+        {
+            await Clients.Caller.ReceiveBlackListBatch(banInfos);
+        }
+
+        await Clients.Caller.OnBlackListBatchComplete();
     }
 
     public async Task EndStream()

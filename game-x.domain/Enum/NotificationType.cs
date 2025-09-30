@@ -12,4 +12,5 @@ public enum NotificationType : short
     UserLedger = 7,
     UserBalance = 8,
     SocialLink = 9,
+    LiveStream = 10,
 }

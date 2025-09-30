@@ -11,6 +11,7 @@ namespace game_x.infrastructure.Caching;
 public sealed class LiveStreamManagerCacheService(
     IMemoryCache cache,
     ILiveStreamGiftRepo liveStreamGiftRepo,
+    ILiveStreamDonationRepo liveStreamDonationRepo,
     IFileManagerCacheService fileManagerCache)
     : CacheService(cache), ILiveStreamManagerCacheService
 {
@@ -80,7 +81,7 @@ public sealed class LiveStreamManagerCacheService(
     {
         var targetStream = GetLiveStreamStatus(streamKey)
             ?? throw new NotFoundException(nameof(streamKey), streamKey);
-        targetStream.BlackList = [.. targetStream.BlackList.Where(bl => bl.UserId == userId && bl.Action == action)];
+        targetStream.BlackList = [.. targetStream.BlackList.Where(bl => !(bl.UserId == userId && bl.Action == action))];
 
         var cacheKey = $"{LiveStreamPrefix}streams:{targetStream.StreamKey}";
         Set(cacheKey, targetStream);
@@ -97,14 +98,9 @@ public sealed class LiveStreamManagerCacheService(
         var streamDetailCacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
         Remove(streamDetailCacheKey);
 
-        var viewerListCacheKey = $"{LiveStreamPrefix}streams:{streamKey}:viewers";
-        var allViewersByStreamKey = GetAllViewersByStreamKey(streamKey);
-        foreach (var viewerId in allViewersByStreamKey)
-        {
-            var viewerCacheKey = $"{viewerListCacheKey}:{viewerId}";
-            Remove(viewerCacheKey);
-        }
-        Remove(viewerListCacheKey);
+        RemoveViewersByStreamKey(streamKey);
+        RemoveAllMessageByStreamKey(streamKey);
+        RemoveDonationsByStreamKey(streamKey);
     }
 
     public bool IsExistLiveStream(string streamKey)
@@ -219,7 +215,7 @@ public sealed class LiveStreamManagerCacheService(
     }
     #endregion
 
-    #region View management
+    #region View Count Management
     public string[] GetViewerChangeList()
     {
         var cacheKey = $"{LiveStreamPrefix}viewer-change-list";
@@ -312,6 +308,18 @@ public sealed class LiveStreamManagerCacheService(
         Set(allMessageKeysCacheKey, allMessageKeys);
     }
 
+    public void RemoveAllMessageByStreamKey(string streamKey)
+    {
+        var allMessageKeys = GetAllMessageKey(streamKey);
+        foreach (var messageId in allMessageKeys.Keys)
+        {
+            RemoveMessageFromStream(streamKey, messageId);
+        }
+
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}:messages";
+        Remove(cacheKey);
+    }
+
     public void RemoveMessageFromStream(string streamKey, Guid messageId)
     {
         // Remove message detail
@@ -347,6 +355,63 @@ public sealed class LiveStreamManagerCacheService(
             .ToArray();
         var cacheKey = $"{LiveStreamPrefix}gifts:active";
         Set(cacheKey, giftDtos);
+    }
+    #endregion
+
+    #region Donation Management
+    public Dictionary<Guid, DateTime> GetStreamDonationKeys(string streamKey)
+    {
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:donations";
+        return Get<Dictionary<Guid, DateTime>>(cacheKey) ?? [];
+    }
+
+    public async Task SetInitDonations(string streamKey, CancellationToken ct = default)
+    {
+        var a = await liveStreamDonationRepo.GetsByCriteriaAsync(query => query.Where(lsd => lsd.LivestreamSchedule.StreamKey == streamKey));
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:donations";
+    }
+
+    public void AddDonationToStream(string streamKey, LiveStreamDonationDto donation)
+    {
+        // Store donation detail
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:donations:{donation.Id}";
+        Set(cacheKey, donation);
+
+        // Update donation keys list
+        var allDonationKeys = GetStreamDonationKeys(streamKey);
+        allDonationKeys[donation.Id] = donation.DonatedAt;
+        var allDonationKeysCacheKey = $"{LiveStreamPrefix}{streamKey}:donations";
+        Set(allDonationKeysCacheKey, allDonationKeys);
+    }
+
+    public LiveStreamDonationDto? GetDonationDetail(string streamKey, Guid donationId)
+    {
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:donations:{donationId}";
+        return Get<LiveStreamDonationDto?>(cacheKey);
+    }
+
+    public void RemoveDonationsByStreamKey(string streamKey)
+    {
+        var allDonationKeys = GetStreamDonationKeys(streamKey);
+        foreach (var donationId in allDonationKeys.Keys)
+        {
+            RemoveDonationFromStream(streamKey, donationId);
+        }
+
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamKey}:donations";
+        Remove(cacheKey);
+    }
+
+    public void RemoveDonationFromStream(string streamKey, Guid donationId)
+    {
+        // Remove donation detail
+        var cacheKey = $"{LiveStreamPrefix}{streamKey}:donations:{donationId}";
+        Remove(cacheKey);
+        // Update donation keys list
+        var allDonationKeys = GetStreamDonationKeys(streamKey);
+        allDonationKeys.Remove(donationId);
+        var allDonationKeysCacheKey = $"{LiveStreamPrefix}{streamKey}:donations";
+        Set(allDonationKeysCacheKey, allDonationKeys);
     }
     #endregion
 }

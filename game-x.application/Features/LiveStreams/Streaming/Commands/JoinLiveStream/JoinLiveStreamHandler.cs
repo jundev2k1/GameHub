@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
+using game_x.share.Extensions;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
@@ -44,12 +45,12 @@ public sealed class JoinLiveStreamHandler(
         var targetBlackListItem = streamInfo.BlackList
             .FirstOrDefault(i => i.UserId == userAccessor.GetUserId()
                 && i.Action == BlackListAction.View
-                && i.BlockTo < DateTime.UtcNow);
+                && i.BanUntil > DateTime.UtcNow);
         if (targetBlackListItem != null)
             throw new ForbiddenException(
                 MessageCode.System.Forbidden,
                 "You are blocked from viewing this live stream.",
-                new { targetBlackListItem.Action, targetBlackListItem.BlockTo, targetBlackListItem.Reason });
+                new { Action = targetBlackListItem.Action.ToCamelCase(), targetBlackListItem.BanUntil, Reason = targetBlackListItem.Reason.ToCamelCase() });
 
         // Check if the stream is live
         var isInterrupted = !streamInfo.IsLive
@@ -61,7 +62,15 @@ public sealed class JoinLiveStreamHandler(
                 "Live streaming is interrupted.",
                 new { isInterrupted = true });
 
+        // Create viewer
         var viewer = await CreateViewer(streamSetting);
+
+        // Get viewer ban info
+        var banInfos = streamInfo.BlackList
+            .Where(b => (b.UserId == viewer.ViewerId) && (b.BanUntil > DateTime.UtcNow))
+            .Select(b => new LiveStreamBanInfoDto(b.Action, b.BanUntil, b.Reason))
+            .ToArray();
+
         return new JoinLiveStreamResult(
             Title: streamInfo.Title,
             Description: streamInfo.Description,
@@ -72,7 +81,8 @@ public sealed class JoinLiveStreamHandler(
             TalentName: streamInfo.AssignedTo?.Nickname ?? string.Empty,
             TalentAvatar: await fileManagerCache.GetFileUrl(streamInfo.AssignedTo?.AvatarId, ct),
             ViewCount: liveStreamManager.GetViewerCount(streamInfo.StreamKey),
-            Url: viewer.Url);
+            Url: viewer.Url,
+            BanInfos: banInfos);
     }
 
     private async Task<LiveStreamViewerDto> CreateViewer(LivestreamSchedule schedule)

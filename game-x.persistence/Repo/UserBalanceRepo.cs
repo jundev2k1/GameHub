@@ -2,17 +2,11 @@ using EFCore.BulkExtensions;
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
 public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IRepository
 {
-    public IQueryable<UserBalance> Query()
-    {
-        return context.UserBalances;
-    }
-
     public async Task<IEnumerable<UserBalance>> GetBalancesByUserIdAsync(string userId, CancellationToken ct = default)
     {
         return await context.UserBalances
@@ -21,30 +15,19 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
             .Where(x => x.UserId == userId)
             .ToListAsync(ct);
     }
-    
+
     public async Task<UserBalance?> GetByUserIdAndTokenIdAsync(string userId, int cryptoTokenId, CancellationToken ct = default)
     {
         return await context.UserBalances
             .Include(x => x.CryptoToken)
             .FirstOrDefaultAsync(x => x.UserId == userId && x.CryptoTokenId == cryptoTokenId, ct);
     }
-
-    public async Task<(decimal totalUserAmount, decimal totalUserForzenAmount)> GetTotalUserAndAgentAvailableBalanceAsync(CancellationToken ct)
+    public async Task<UserBalance> GetByUserIdAndTokenIdAsync(string userId, Guid cryptoTokenId, CancellationToken ct = default)
     {
-        var allUsers = await context.Users
-            .Include(u => u.UserBalances)
-            .Include(u => u.UserRoles)
-            .ThenInclude(r => r.Role)
-            .Where(u => u.IsUser)
-            .ToListAsync(ct);
-
-        var userList = allUsers.Where(u => u.IsUser).ToList();
-
-        var userAmount = userList.SelectMany(u => u.UserBalances).Sum(b => b.Amount);
-
-        var userFrozenAmount = userList.SelectMany(u => u.UserBalances).Sum(b => b.FrozenAmount);
-
-        return (userAmount, userFrozenAmount);
+        return await context.UserBalances
+            .Include(x => x.CryptoToken)
+            .FirstOrDefaultAsync(x => x.UserId == userId && x.CryptoToken.PublicId == cryptoTokenId, ct)
+            ?? throw new NotFoundException(nameof(cryptoTokenId), cryptoTokenId);
     }
 
     public async Task BulkInsertAsync(IEnumerable<UserBalance>? userBalances)
@@ -63,18 +46,21 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
         await context.BulkInsertAsync(list, config);
     }
 
-    public async Task CreateAsync(UserBalance userBalance)
+    public async Task UpdateAsync(Guid id, Action<UserBalance> updateAction, CancellationToken ct = default)
     {
-        await context.AddAsync(userBalance);
+        var targetBalance = await context.UserBalances
+            .FirstOrDefaultAsync(x => x.PublicId == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+
+        updateAction.Invoke(targetBalance);
     }
-
-    public async Task PatchUpdateAsync(Guid publicId, Action<UserBalance> updateAction, CancellationToken ct = default)
+    public async Task UpdateAsync(Guid id, Func<UserBalance, Task> updateAction, CancellationToken ct = default)
     {
-        var userBalance = await context.UserBalances
-            .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
-            ?? throw new NotFoundException(MessageCode.Accounting.BalanceNotFound);
+        var targetBalance = await context.UserBalances
+            .FirstOrDefaultAsync(x => x.PublicId == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
 
-        updateAction.Invoke(userBalance);
+        await updateAction.Invoke(targetBalance);
     }
 
     public async Task PutUpdateAsync(UserBalance ub, CancellationToken ct = default)

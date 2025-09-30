@@ -1407,10 +1407,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("animation_id");
 
-                    b.Property<decimal>("CoinCost")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("coin_cost");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -1466,6 +1462,41 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_livestream_gifts_code");
 
                     b.ToTable("livestream_gifts", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.LiveStreamGiftPrice", b =>
+                {
+                    b.Property<int>("LiveStreamGiftId")
+                        .HasColumnType("integer")
+                        .HasColumnName("live_stream_gift_id");
+
+                    b.Property<int>("CryptoTokenId")
+                        .HasColumnType("integer")
+                        .HasColumnName("crypto_token_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<decimal>("TokenCost")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("token_cost");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("LiveStreamGiftId", "CryptoTokenId")
+                        .HasName("pk_livestream_gift_prices");
+
+                    b.HasIndex("CryptoTokenId")
+                        .HasDatabaseName("ix_livestream_gift_prices_crypto_token_id");
+
+                    b.ToTable("livestream_gift_prices", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.LivestreamSchedule", b =>
@@ -3172,6 +3203,27 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Icon");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.LiveStreamGiftPrice", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
+                        .WithMany()
+                        .HasForeignKey("CryptoTokenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_livestream_gift_prices_crypto_tokens_crypto_token_id");
+
+                    b.HasOne("game_x.domain.Entities.LiveStreamGift", "LiveStreamGift")
+                        .WithMany("GiftPrices")
+                        .HasForeignKey("LiveStreamGiftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_livestream_gift_prices_livestream_gifts_live_stream_gift_id");
+
+                    b.Navigation("CryptoToken");
+
+                    b.Navigation("LiveStreamGift");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.LivestreamSchedule", b =>
                 {
                     b.HasOne("game_x.domain.Entities.User", "AssignedTo")
@@ -3557,6 +3609,11 @@ namespace game_x.persistence.Migrations
             modelBuilder.Entity("game_x.domain.Entities.LiveStreamCategory", b =>
                 {
                     b.Navigation("CategoryMappings");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.LiveStreamGift", b =>
+                {
+                    b.Navigation("GiftPrices");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.LivestreamSchedule", b =>

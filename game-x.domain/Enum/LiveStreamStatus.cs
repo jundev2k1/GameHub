@@ -1,6 +1,6 @@
 ﻿namespace game_x.domain.Enum;
 
-public enum LiveStreamStatus
+public enum LiveStreamStatus : short
 {
     Scheduled = 0,
     Live = 1,

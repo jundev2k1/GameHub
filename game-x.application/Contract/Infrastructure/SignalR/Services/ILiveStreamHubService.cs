@@ -26,4 +26,6 @@ public interface ILiveStreamHubService
     Task NotifyMessageFailed(string streamKey, string userId, string messageId);
 
     Task NotifyMessageDeleted(string streamKey, Guid messageId);
+
+    Task NotifyDonationCompleted(string streamKey, LiveStreamDonationDto donation);
 }

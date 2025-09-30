@@ -9,7 +9,6 @@ public sealed class GetLiveStreamGiftsByCriteriaValidator : AbstractValidator<Ge
         "search",
         nameof(LiveStreamGift.PublicId),
         nameof(LiveStreamGift.Name),
-        nameof(LiveStreamGift.CoinCost),
         nameof(LiveStreamGift.Priority),
         nameof(LiveStreamGift.IsActive),
         nameof(LiveStreamGift.CreatedAt),

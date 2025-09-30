@@ -1,5 +1,4 @@
-﻿using EFCore.BulkExtensions;
-using game_x.application.Common.Abstractions;
+﻿using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
@@ -157,9 +156,8 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
                 schedule.EndStream();
 
             if (schedule.Status == LiveStreamStatus.Scheduled)
-                schedule.CancelStream("Expired.");
+                schedule.CancelStream("Stream cancelled due to timeout.");
         });
-        await context.BulkUpdateAsync(targetSchedules, cancellationToken: ct);
     }
 
     public async Task DeleteAsync(Guid scheduleId, CancellationToken ct = default)

@@ -22,6 +22,8 @@ public sealed class LiveStreamGiftRepo(
             .AsNoTracking()
             .Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
+            .Include(lsg => lsg.GiftPrices)
+            .ThenInclude(gp => gp.CryptoToken)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -48,6 +50,8 @@ public sealed class LiveStreamGiftRepo(
             .AsNoTracking()
             .Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
+            .Include(lsg => lsg.GiftPrices)
+            .ThenInclude(gp => gp.CryptoToken)
             .Where(lsg => lsg.IsDeleted == false && lsg.IsActive)
             .ToArrayAsync(ct);
     }
@@ -58,6 +62,8 @@ public sealed class LiveStreamGiftRepo(
             .AsNoTracking()
             .Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
+            .Include(lsg => lsg.GiftPrices)
+            .ThenInclude(gp => gp.CryptoToken)
             .FirstOrDefaultAsync(lsg => lsg.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
     }
@@ -68,6 +74,8 @@ public sealed class LiveStreamGiftRepo(
             .AsNoTracking()
             .Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
+            .Include(lsg => lsg.GiftPrices)
+            .ThenInclude(gp => gp.CryptoToken)
             .FirstOrDefaultAsync(g => g.PublicId == id && g.IsDeleted == false, ct)
             ?? throw new NotFoundException(nameof(id), id);
 
@@ -95,6 +103,8 @@ public sealed class LiveStreamGiftRepo(
         var targetGift = await context.LiveStreamGifts
             .Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
+            .Include(lsg => lsg.GiftPrices)
+            .ThenInclude(gp => gp.CryptoToken)
             .FirstOrDefaultAsync(lsg => lsg.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
 

@@ -55,7 +55,7 @@ public sealed class MessageService(
                 return new ListedMessageAttachmentDto
                 (
                     SortOrder: item.SortOrder,
-                    BindingStatus: item.BindingStatus.ToString().ToCamelCase(),
+                    BindingStatus: item.BindingStatus.ToCamelCase(),
                     FileName: file?.FileName,
                     Url: file?.Url
                 );

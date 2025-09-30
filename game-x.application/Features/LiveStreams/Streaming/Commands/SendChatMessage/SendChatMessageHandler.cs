@@ -17,17 +17,25 @@ public sealed class SendChatMessageHandler(
     public async Task<Unit> Handle(SendChatMessageCommand request, CancellationToken ct = default)
     {
         var targetUser = await userRepo.GetUserByIdAsync(userAccessor.GetUserId(), ct);
-        var streamSetting = liveStreamManager.GetLiveStreamStatus(request.StreamKey)
+        var streamInfo = liveStreamManager.GetLiveStreamStatus(request.StreamKey)
             ?? throw new NotFoundException("Live stream is not found.");
-        if (!streamSetting.IsLive)
-            throw new ForbiddenException("Live stream is offline.");
 
+        // Check if user is muted in this stream
+        var isMute = streamInfo.BlackList.Any(bl =>
+            bl.UserId == targetUser.Id
+            && bl.BanUntil > DateTime.UtcNow
+            && (bl.Action == BlackListAction.Chat || bl.Action == BlackListAction.View));
+        if (isMute)
+            throw new ForbiddenException("You are muted in this live stream.");
+
+        // Handle create and broadcast message
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
+            // Create chat message
             var chatMessage = LiveStreamChatMessage.Create(
                 Guid.Parse(request.Id),
-                streamSetting.LocalId,
+                streamInfo.LocalId,
                 targetUser.Id,
                 request.Message.Trim(),
                 LiveStreamChatMessageType.UserMessage);
@@ -35,6 +43,7 @@ public sealed class SendChatMessageHandler(
             await streamChatRepo.CreateAsync(chatMessage, ct);
             await unitOfWork.SaveChangesAsync(ct);
 
+            // Broadcast to group
             var newChatMessage = await streamChatRepo.GetByIdAsync(chatMessage.PublicId, ct);
             var chatMessageDto = newChatMessage.Adapt<LiveStreamChatMessageDto>();
             liveStreamManager.AddMessageToStream(request.StreamKey, chatMessageDto);
@@ -44,6 +53,7 @@ public sealed class SendChatMessageHandler(
         }
         catch
         {
+            // In case of any error, rollback and notify failure
             await unitOfWork.RollbackAsync(ct);
             await liveStreamHubService.NotifyMessageFailed(request.StreamKey, targetUser.Id, request.Id);
         }

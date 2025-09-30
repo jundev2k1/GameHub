@@ -15,14 +15,20 @@ public static class HangfireRecurringJobRegistration
         {
             // Register the job if it has a Cron expression
             if (job.CronExpression.IsNotNullOrEmpty())
+            {
                 jobManager.AddOrUpdate(
                     job.JobId,
                     () => job.ExecuteAsync(CancellationToken.None),
                     job.CronExpression);
+                Console.WriteLine($"Registered recurring job: {job.JobId} with Cron: {job.CronExpression}");
+            }
 
             // Execute the job immediately if it's marked as init
             if (job.IsInit)
+            {
                 BackgroundJob.Enqueue(() => job.ExecuteAsync(CancellationToken.None));
+                Console.WriteLine($"Job run when application starts: {job.JobId} with Cron: {job.CronExpression}");
+            }
         }
     }
 }

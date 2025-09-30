@@ -47,7 +47,7 @@ public sealed class LiveStreamHubService(IHubContext<LiveStreamHub, ILiveStreamH
         // Notify all viewers in the stream
         await hubContext.Clients
             .Group($"stream-{streamKey}")
-            .OnStreamCanceled(reason);
+            .OnStreamCancelled(reason);
     }
 
     public async Task NotifyEndStream(string streamKey)
@@ -94,5 +94,12 @@ public sealed class LiveStreamHubService(IHubContext<LiveStreamHub, ILiveStreamH
         await hubContext.Clients
             .Group($"stream-{streamKey}")
             .OnMessageDeleted(messageId);
+    }
+
+    public async Task NotifyDonationCompleted(string streamKey, LiveStreamDonationDto donation)
+    {
+        await hubContext.Clients
+            .Group($"stream-{streamKey}")
+            .OnDonationCompleted(donation);
     }
 }
