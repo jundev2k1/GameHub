@@ -16,9 +16,8 @@ public sealed class TouchDeliveryHandler(
         var me = userAccessor.GetUserId();
 
         // Each customer has only one conversation with customer support; if none exists, a new one will be created
-        var member = await convMemberRepo.GetByConvIdAndUserIdAsync(request.ConversationId, me, ct);
-        if (member is null)
-            throw new BadRequestException(MessageCode.Chatting.IsNotMember);
+        var member = await convMemberRepo.GetByConvIdAndUserIdAsync(request.ConversationId, me, ct)
+            ?? throw new BadRequestException(MessageCode.Chatting.IsNotMember);
 
         try
         {
@@ -27,6 +26,7 @@ public sealed class TouchDeliveryHandler(
                 await convMemberRepo.UpdateAsync(member.Id, m =>
                 {
                     m.LastDeliveredAt = DateTime.UtcNow;
+                    m.LastSeenAt = m.LastDeliveredAt;
                 }, ct);
             },ct);
             return Unit.Value;

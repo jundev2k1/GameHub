@@ -3,10 +3,14 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Friend;
 using game_x.application.Contract.Persistence.Identity;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Exceptions;
+using game_x.application.Features.Chat.Commands.MarkMessageAsRead;
 using game_x.application.Features.Chat.Commands.SendMessage;
 using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Commands.TouchDelivery;
+using game_x.application.Features.Chat.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -24,6 +28,7 @@ public interface IChatClient
     Task MemberAdded(ConversationMemberDto dto);
     /// <summary>Send it whenever a message is sent.</summary>
     Task MessageCreated(MessageSignalDto dto);
+    Task MarkAsRead(ConvUnreadDto dto);
     Task MessageFailed(MessageFailedSignalDto signalDto);
     /// <summary>Notify that the user received a friend request</summary>
     Task FriendRequest(FriendRequestSignalDto dto);
@@ -37,6 +42,7 @@ public sealed class ChatHub(
     ISender sender,
     IUserAccessor userAccessor,
     IConversationService convService,
+    IConversationRepo conversationRepo,
     ILogger<ChatHub> logger) : Hub<IChatClient>
 {
     public const string Path = "/hubs/chat";
@@ -218,11 +224,16 @@ public sealed class ChatHub(
     }
 
     [Authorize(Roles = AppRoles.User)]
-    public Task JoinPublic()
+    public async Task JoinPublic()
     {
         try
         {
-            return Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Public);
+            var ct = Context.ConnectionAborted;
+            var existedConv = await conversationRepo.FindPublicAsync(ct)
+                ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+            
+            await sender.Send(new TouchDeliveryCommand(existedConv.PublicId), ct);
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Public, ct);
         }
         catch (Exception ex)
         {
@@ -396,6 +407,7 @@ public sealed class ChatHub(
     }
     
     // --- Customer Support - V1 ---
+    [Obsolete("Use SendMessageByUser instead")]
     [Authorize(Roles = AppRoles.User)]
     public async Task SendSupportMessage(SendSupportMessageCommand cmd)
     {
@@ -412,6 +424,7 @@ public sealed class ChatHub(
         }
     }
     
+    [Obsolete("Use SendMessageByGuest instead")]
     public async Task SendSupportMessageByGuest(SendSupportMessageCommand cmd)
     {
         try
@@ -429,6 +442,7 @@ public sealed class ChatHub(
     }
     
     /// <summary>Send a support message to customer.</summary>
+    [Obsolete("Use SendMessageByAgent instead")]
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
     public async Task SendSupportMessageToCustomer(SendMessageToCustomerCommand cmd)
     {
@@ -498,6 +512,20 @@ public sealed class ChatHub(
         {
             logger.LogError(ex, "Error sending support message");
             await Clients.Caller.MessageFailed(new MessageFailedSignalDto( cmd.ClientLocalId, cmd.ConversationId));
+        }
+    }
+    
+    [Authorize(Roles = AppRoles.User)]
+    public async Task MarkAsRead(MarkMessageAsReadCommand cmd)
+    {
+        try
+        {
+            await sender.Send(cmd);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error reading message");
+            throw;
         }
     }
 }

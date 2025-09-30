@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Friend;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Features.Chat.Dtos;
 using game_x.infrastructure.SignalR.Hubs;
 using game_x.share.Extensions;
 using Microsoft.AspNetCore.SignalR;
@@ -11,6 +12,11 @@ namespace game_x.infrastructure.SignalR.Services;
 public sealed class ChatHubService(IHubContext<ChatHub, IChatClient> hubContext)
     : IChatHubService, IHubServices
 {
+    public async Task SendMarkAsReadAsync(ConvUnreadDto res, string userId)
+    {
+        await hubContext.Clients.Group(GroupNames.Member(userId)).MarkAsRead(res);
+    }
+    
     public async Task SendPublicMessageAsync(CreatedMessageSignalResult res)
     {
         var msgDto = res.Msg;

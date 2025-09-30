@@ -8,10 +8,11 @@ namespace game_x.persistence.Repo;
 
 public class ConversationRepo(GameXContext context): IConversationRepo, IRepository
 {
-    private IQueryable<Conversation> BuildConversationListing(IQueryable<Conversation> query)
+    private IQueryable<Conversation> BuildConversationListing(IQueryable<Conversation> query, string userId)
     {
         return query
             .AsNoTracking()
+            .Include(c => c.Members)
             .Include(c => c.Customer)
                 .ThenInclude(c => c!.Avatar)
             .Include(c => c.Messages
@@ -19,25 +20,57 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 .Take(1))
                 .ThenInclude(x => x.SenderUser)
                     .ThenInclude(x => x!.Avatar)
-            .Where(c => c.Messages.Any() && c.Type != ConversationType.Public);
+            .Where(c => c.Messages.Any() && c.Type != ConversationType.Public)
+            .Select(c => new Conversation
+            {
+                Id = c.Id,
+                PublicId  = c.PublicId,
+                Type = c.Type,
+                CustomerId = c.CustomerId,
+                Customer = c.Customer,
+                GuestId = c.GuestId,
+                AssignedAgentId = c.AssignedAgentId,
+                AssignedAgent = c.AssignedAgent,
+                LastMessageAt = c.LastMessageAt,
+                Messages = c.Messages,
+                UnreadCount = context.Messages.Count(m =>
+                    m.ConversationId == c.Id &&
+                    context.ConversationMembers.Any(cm =>
+                        cm.ConversationId == c.Id &&
+                        cm.UserId == userId &&
+                        (cm.LastReadMessageId == null || m.Id > cm.LastReadMessageId)
+                    ))
+            });
     }
     
     // ---- Cursor-based queue for unassigned support conversations (next-only) ----
-    public IQueryable<Conversation> GetUnassignedQueueByCursorAsync(CancellationToken ct = default)
+    public IQueryable<Conversation> GetUnassignedQueueByCursorAsync(string userId, CancellationToken ct = default)
     {
         // --- Base feed: only open, unassigned support conversations ---
         var query = context.Conversations
             .Where(c => c.Type == ConversationType.Support
                      && c.Status == ConversationStatus.Open
                      && c.AssignedAgentId == null);
-        return BuildConversationListing(query);
+        return BuildConversationListing(query, userId);
     }
 
-    public IQueryable<Conversation> GetSupportConversationsAsync(CancellationToken ct = default)
+    public IQueryable<Conversation> GetSupportConversationsAsync(string userId, CancellationToken ct = default)
     {
         IQueryable<Conversation> query = context.Conversations
             .Where(c => c.Type == ConversationType.Support && c.Status == ConversationStatus.Claimed);
-        return BuildConversationListing(query);
+        return BuildConversationListing(query, userId);
+    }
+
+    public IQueryable<Conversation> GetHiddenConversationsForClientAsync(string userId, CancellationToken ct = default)
+    {
+        // Retrieve all private hidden conversations and group chats
+        Expression<Func<Conversation, bool>> minePredicate =
+            c => context.ConversationMembers.Any(m => 
+                m.ConversationId == c.Id && 
+                m.UserId == userId &&
+                m.IsHidden == true);
+        IQueryable<Conversation> query = context.Conversations.Where(minePredicate);
+        return BuildConversationListing(query, userId);
     }
 
     public IQueryable<Conversation> GetMyConversationsForClientAsync(string userId, CancellationToken ct = default)
@@ -45,9 +78,12 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         // Retrieve all private conversations and group chats
         Expression<Func<Conversation, bool>> minePredicate =
             c => c.CustomerId == userId
-              || context.ConversationMembers.Any(m => m.ConversationId == c.Id && m.UserId == userId);
+              || context.ConversationMembers.Any(m => 
+                  m.ConversationId == c.Id && 
+                  m.UserId == userId &&
+                  m.IsHidden != true);
         IQueryable<Conversation> query = context.Conversations.Where(minePredicate);
-        return BuildConversationListing(query);
+        return BuildConversationListing(query, userId);
     }
 
     public async Task<Conversation?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)

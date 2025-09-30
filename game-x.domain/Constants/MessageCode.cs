@@ -370,6 +370,12 @@ public static class MessageCode
         /// <summary>The conversation was closed.</summary>
         [EnumMetadata("The conversation was closed.")]
         ConversationClosed = 10515,
+        /// <summary>No message is found.</summary>
+        [EnumMetadata("No message is found.")]
+        NoMessageFound = 10516,
+        /// <summary>The message is already read.</summary>
+        [EnumMetadata("The message is already read.")]
+        MessageAlreadyRead = 10517,
         #endregion
     }
 }

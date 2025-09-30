@@ -12,7 +12,7 @@ public sealed class ConversationMemberConfig : IEntityTypeConfiguration<Conversa
         // Uniqueness: one membership per user per conversation
         builder.HasIndex(x => new { x.ConversationId, x.UserId }).IsUnique();
         // Fast lookups: all convos for a user
-        builder.HasIndex(x => new { x.UserId, x.ConversationId });
+        builder.HasIndex(x => new { x.UserId, x.ConversationId }).IsUnique();
         
         // Properties
         builder.Property(x => x.Id)
@@ -48,6 +48,14 @@ public sealed class ConversationMemberConfig : IEntityTypeConfiguration<Conversa
         
         builder.Property(x => x.LastDeliveredAt)
             .HasColumnName("last_delivered_at")
+            .IsRequired(false);
+        
+        builder.Property(x => x.LastSeenAt)
+            .HasColumnName("last_seen_at")
+            .IsRequired(false);
+        
+        builder.Property(x => x.IsHidden)
+            .HasColumnName("is_hidden")
             .IsRequired(false);
     }
 }

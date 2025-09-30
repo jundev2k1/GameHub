@@ -42,7 +42,11 @@ public sealed class ConversationService(
             {
                 var conv = Conversation.Create(ConversationType.Public);
                 await conversationRepo.AddAsync(conv, ct);
-                conv.Members.Add(ConversationMember.Create(conv, me, RoleInConversation.Member));
+                conv.Members.Add(ConversationMember.Create(
+                    conv: conv, 
+                    userId: me, 
+                    role: RoleInConversation.Member,
+                    lastDeliveredAt: DateTime.UtcNow));
                 returnConvId = conv.PublicId;
             }
             await unitOfWork.CommitAsync(ct);
@@ -144,7 +148,8 @@ public sealed class ConversationService(
         string? cursor,
         CancellationToken ct = default)
     {
-        var src = conversationRepo.GetUnassignedQueueByCursorAsync(ct);
+        var me = userAccessor.GetUserId();
+        var src = conversationRepo.GetUnassignedQueueByCursorAsync(me, ct);
         var result = await BuildConversationListing(src, limit, cursor, ct);
         var dtoItems = result.Items.Adapt<IEnumerable<SupportConversationDto>>();
         return result.Transform(dtoItems);
@@ -155,9 +160,22 @@ public sealed class ConversationService(
         string? cursor,
         CancellationToken ct = default)
     {
-        var src = conversationRepo.GetSupportConversationsAsync(ct);
+        var me = userAccessor.GetUserId();
+        var src = conversationRepo.GetSupportConversationsAsync(me, ct);
         var result = await BuildConversationListing(src, limit, cursor, ct);
         var dtoItems = result.Items.Adapt<IEnumerable<SupportConversationDto>>();
+        return result.Transform(dtoItems);
+    }
+    
+    public async Task<CursorResult<ListedConversationDto>> GetHiddenConversationsForClientAsync(
+        string userId,
+        int limit,
+        string? cursor,
+        CancellationToken ct = default)
+    {
+        var src = conversationRepo.GetHiddenConversationsForClientAsync(userId, ct);
+        var result = await BuildConversationListing(src, limit, cursor, ct);
+        var dtoItems = result.Items.Adapt<IEnumerable<ListedConversationDto>>();
         return result.Transform(dtoItems);
     }
     
@@ -172,7 +190,7 @@ public sealed class ConversationService(
         var dtoItems = result.Items.Adapt<IEnumerable<ListedConversationDto>>();
         return result.Transform(dtoItems);
     }
-    
+
     public async Task<ListedConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
     {
         var src = await conversationRepo.GetMyConversationsForGuestAsync(guestId, ct);
