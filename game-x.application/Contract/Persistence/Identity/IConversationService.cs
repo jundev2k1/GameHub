@@ -13,5 +13,6 @@ public interface IConversationService
     Task<CursorResult<ListedConversationDto>> GetHiddenConversationsForClientAsync(string userId, int limit, string? cursor, CancellationToken ct = default);
     Task<CursorResult<ListedConversationDto>> GetMyConversationsForClientAsync(string userId, int limit, string? cursor, CancellationToken ct = default);
     Task<ListedConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default);
-    Task<ConversationDetailDto> GetConversationDetailAsync(Guid convId, CancellationToken ct = default);
+    Task<ConversationDetailDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default);
+    Task<ConversationDetailDto> GetConvByIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default);
 }

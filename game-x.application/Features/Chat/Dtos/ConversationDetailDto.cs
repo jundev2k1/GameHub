@@ -15,4 +15,5 @@ public sealed record ConversationDetailDto(
     DateTime LastMessageAt,
     Guid LastMessageId,
     string LastMessageText,
-    MessageKind LastMessageKind);
+    MessageKind LastMessageKind,
+    bool? IsHidden);

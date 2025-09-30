@@ -43,6 +43,7 @@ public sealed class ChatHub(
     IUserAccessor userAccessor,
     IConversationService convService,
     IConversationRepo conversationRepo,
+    IConversationMemberRepo convMemberRepo,
     ILogger<ChatHub> logger) : Hub<IChatClient>
 {
     public const string Path = "/hubs/chat";
@@ -153,7 +154,14 @@ public sealed class ChatHub(
     {
         try
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.PublicIdle);
+            var ct = Context.ConnectionAborted;
+            var userId = userAccessor.GetUserId();
+            var existedConv = await conversationRepo.FindPublicAsync(ct)
+                ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+            var member = await convMemberRepo.GetByConvIdAndUserIdAsync(existedConv.PublicId, userId, ct);
+            
+            if(member?.IsHidden != true)
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.PublicIdle, ct);
         }
         catch (Exception ex)
         {

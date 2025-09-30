@@ -53,7 +53,7 @@ public class ConversationMemberRepo(GameXContext context): IConversationMemberRe
             .FirstOrDefaultAsync(m => m.Conversation.PublicId == convId && m.UserId == userId, ct);
     }
     
-    public async Task<string[]> GetMemberIdsAsync(Guid convId, CancellationToken ct = default)
+    public async Task<ConvMemberDto[]> GetMembersByConvIdAsync(Guid convId, CancellationToken ct = default)
     {
         if (convId == Guid.Empty) return [];
         
@@ -65,12 +65,15 @@ public class ConversationMemberRepo(GameXContext context): IConversationMemberRe
         
         if (EqualityComparer<object>.Default.Equals(convPk, null)) return [];
         
-        var memberIds = await context.ConversationMembers
+        return await context.ConversationMembers
             .AsNoTracking()
             .Where(m => m.ConversationId.Equals(convPk))
-            .Select(m => m.UserId)
+            .Select(m => new ConvMemberDto
+            {
+                UserId = m.UserId, 
+                IsHidden = m.IsHidden
+            })
             .ToArrayAsync(ct);
-        return memberIds;
     }
     
     public async Task AddAsync(ConversationMember convMember, CancellationToken ct = default)

@@ -12,8 +12,8 @@ public sealed class OnDirectMessageCreatedHandler(
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            var memberIds = await convMemberRepo.GetMemberIdsAsync(@event.Res.Conv.ConversationId, ct);
-            await chatHubService.SendDirectMessageAsync(@event.Res, memberIds);
+            var members = await convMemberRepo.GetMembersByConvIdAsync(@event.Res.Conv.ConversationId, ct);
+            await chatHubService.SendDirectMessageAsync(@event.Res, members);
         }, ct);
     }
 }

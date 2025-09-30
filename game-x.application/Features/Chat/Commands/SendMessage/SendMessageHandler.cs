@@ -137,7 +137,7 @@ public sealed class SendMessageHandler(
             Attachments = message.Attachments.Adapt<List<MessageAttachmentDto>>()
         };
         
-        var updatedConv = await conversationService.GetConversationDetailAsync(request.ConversationId, ct);
+        var updatedConv = await conversationService.GetConvByIdAsync(request.ConversationId, ct);
         var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
         return new CreatedMessageSignalResult(
             Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
