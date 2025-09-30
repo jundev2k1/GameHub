@@ -15,8 +15,7 @@ public sealed class InteractionCharacter : BaseEntity<int>, IAuditable
     public static InteractionCharacter Create(
         string name,
         string desc,
-        string notes,
-        MediaFile defaultPose)
+        string notes)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
 
@@ -25,7 +24,6 @@ public sealed class InteractionCharacter : BaseEntity<int>, IAuditable
             Name = name.Trim(),
             Description = desc.Trim(),
             Notes = notes.Trim(),
-            DefaultPose = defaultPose
         };
     }
 

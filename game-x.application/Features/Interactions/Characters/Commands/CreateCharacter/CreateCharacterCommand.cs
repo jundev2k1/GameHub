@@ -1,3 +1,9 @@
-﻿namespace game_x.application.Features.Interactions.Characters.Commands.CreateCharacter;
+﻿using game_x.application.Common.Files;
 
-public record CreateCharacterCommand() : ICommand;
+namespace game_x.application.Features.Interactions.Characters.Commands.CreateCharacter;
+
+public record CreateCharacterCommand(
+    string Name,
+    string Description,
+    string Notes,
+    FileUpload File) : ICommand;

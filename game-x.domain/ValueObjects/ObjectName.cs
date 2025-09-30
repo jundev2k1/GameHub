@@ -27,9 +27,11 @@ public sealed class ObjectName
 
     public static ObjectName LiveStreamGiftIcon(Guid giftId, string fileName)
         => Of($"gifts/{giftId:N}/icon/{fileName}");
-
     public static ObjectName LiveStreamGiftAnimation(Guid giftId, string fileName)
         => Of($"gifts/{giftId:N}/animation/{fileName}");
+
+    public static ObjectName InteractionCharacter(Guid characterId, string fileName)
+        => Of($"characters/{characterId:N}/poses/{fileName}");
 
     public static ObjectName Of(string value)
     {
@@ -53,7 +55,8 @@ public sealed class ObjectName
         "games",
         "avatar",
         "schedules",
-        "gifts"];
+        "gifts",
+        "characters"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>
