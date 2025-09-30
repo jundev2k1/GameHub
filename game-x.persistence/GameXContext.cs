@@ -48,6 +48,8 @@ public sealed class GameXContext(
     public DbSet<LiveStreamGift> LiveStreamGifts { get; set; }
     public DbSet<LiveStreamDonation> LiveStreamDonations { get; set; }
     public DbSet<LiveStreamChatMessage> LiveStreamChatMessages { get; set; }
+    public DbSet<InteractionCharacter> InteractionCharacters { get; set; }
+    public DbSet<InteractionCharacterPose> InteractionCharacterPoses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
