@@ -27,7 +27,8 @@ public sealed class OnLiveStreamDonatedHandler(
                 ub.AdjustAmount(@event.Amount, false);
             }, ct);
 
-            await CreateTransaction(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
+            await CreateTransaction(TransactionType.TransferSent, @event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
+            await CreateTransaction(TransactionType.TransferReceived, @event.Amount, @event.StreamInfo.AssignedTo!.Id, feeAmount: 0, @event.CryptoId, ct);
             await CreateDonation(@event.StreamInfo, @event.Amount, @event.UserId, @event.Message, @event.GiftId, ct);
             await CreateNotificationForDoner(@event.UserId, this.StreamDonation!, ct);
             await CreateNotificationForStreamer(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
@@ -48,6 +49,7 @@ public sealed class OnLiveStreamDonatedHandler(
     }
 
     private async Task CreateTransaction(
+        TransactionType type,
         decimal amount,
         string userId,
         decimal feeAmount,
@@ -56,19 +58,20 @@ public sealed class OnLiveStreamDonatedHandler(
     {
         var transaction = Transaction.Create(
             sourceType: TransactionSourceType.GameX,
-            type: TransactionType.Transfer,
+            type: type,
             userId: userId,
             amount: amount,
             fee: feeAmount,
             cryptoTokenId: tokenId,
             note: "Livestream donations.");
         var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
+        var lastedBalanceAfter = await transactionRepo.GetLatestBalanceAfterAsync(transaction.UserId, ct);
         var transactionInternal = TransactionInternal.Create(
             orderNumber: orderNumber,
             fromAddress: string.Empty,
             toAddress: string.Empty);
         transaction.AddTxInternal(transactionInternal);
-        transaction.ConfirmTx(amount, DateTime.UtcNow);
+        transaction.ConfirmTx(amount, lastedBalanceAfter, DateTime.UtcNow);
 
         await transactionRepo.AddAsync(transaction, ct);
     }

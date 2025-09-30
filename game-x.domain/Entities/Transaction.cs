@@ -108,9 +108,10 @@ public class Transaction: BaseEntity<int>, IAuditable
         }
     }
 
-    public void ConfirmTx(decimal actualAmount, DateTime confirmedAt)
+    public void ConfirmTx(decimal actualAmount, decimal balanceAfter, DateTime confirmedAt)
     {
         ActualAmount = actualAmount;
+        BalanceAfter = balanceAfter;
         Status = TransactionStatus.Completed;
         if (TransactionInternal != null)
         {
