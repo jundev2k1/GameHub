@@ -4,6 +4,6 @@ public enum MessageKind: short
 {
     Text = 1, 
     Attachment = 2, 
-    System = 3, 
-    Sticker = 4
+    Sticker = 3,
+    System = 4
 }

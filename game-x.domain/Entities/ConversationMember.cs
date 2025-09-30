@@ -17,17 +17,23 @@ public sealed class ConversationMember: BaseEntity<int>, IAuditable
     // Membership lifecycle
     public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     public DateTime? LeftAt { get; set; }
+    public bool? IsHidden { get; set; }
     
     // Read pointers
     public int? LastReadMessageId { get; set; }
     public Message? LastReadMessage { get; set; }
     
+    /// <summary>Mark the last time the conversation was seen</summary>
+    public DateTime? LastSeenAt { get; set; }
+    
+    /// <summary>The last time the conversation was opened</summary>
     public DateTime? LastDeliveredAt { get; set; }
     
     public static ConversationMember Create(
         Conversation conv,
         string userId,
-        RoleInConversation role
+        RoleInConversation role,
+        DateTime? lastDeliveredAt = null
     )
     {
         var convMember = new ConversationMember
@@ -35,7 +41,8 @@ public sealed class ConversationMember: BaseEntity<int>, IAuditable
             Conversation = conv,
             UserId = userId,
             Role = role,
-            JoinedAt = DateTime.UtcNow
+            JoinedAt = DateTime.UtcNow,
+            LastDeliveredAt = lastDeliveredAt,
         };
         return convMember;
     }

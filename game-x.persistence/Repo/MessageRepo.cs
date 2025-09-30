@@ -140,6 +140,20 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
         };
     }
     
+    public async Task<Message?> CheckExistByConvIdAsync(Guid convId, Guid msgId, CancellationToken ct = default)
+    {
+        var convPk = await context.Conversations
+            .AsNoTracking()
+            .Where(c => c.PublicId == convId)
+            .Select(c => c.Id)
+            .SingleOrDefaultAsync(ct);
+        
+        return await context.Messages.AsNoTracking()
+            .Where(m => m.ConversationId == convPk && m.PublicId == msgId)
+            .FirstOrDefaultAsync(ct);
+
+    }
+    
     public async Task<Message> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await context.Messages.AsNoTracking()
@@ -148,6 +162,14 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
             .FirstOrDefaultAsync(ct)
             ?? throw new NotFoundException(MessageCode.Chatting.MessageNotFound);
 
+    }
+    
+    public async Task<Message?> GetLastedMessageAsync(int convId, CancellationToken ct = default)
+    {
+        return await context.Messages.AsNoTracking()
+            .Where(m => m.ConversationId == convId)
+            .OrderByDescending(m => m.SentAt)
+            .FirstOrDefaultAsync(ct);
     }
     
     // --- Helpers ---

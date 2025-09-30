@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace game_x.domain.Entities;
 
@@ -30,6 +31,8 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
     /// <summary>Linked users (for both Support & Direct)</summary>
     public ICollection<ConversationMember> Members { get; set; } = new List<ConversationMember>();
     public ICollection<Message> Messages { get; set; } = new List<Message>();
+    [NotMapped]
+    public int? UnreadCount { get; set; }
     
     public static Conversation Create(
         ConversationType type,

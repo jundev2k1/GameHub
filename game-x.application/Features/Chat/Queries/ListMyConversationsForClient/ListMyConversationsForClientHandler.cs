@@ -5,7 +5,7 @@ using game_x.application.Features.Chat.Dtos;
 
 namespace game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
 
-public sealed class ListMyConversationsHandler(IUserAccessor userAccessor, IConversationService conversationService)
+public sealed class ListMyConversationsForClientHandler(IUserAccessor userAccessor, IConversationService conversationService)
     : IRequestHandler<ListMyConversationsForClientQuery, CursorResult<ListedConversationDto>>
 {
     public async Task<CursorResult<ListedConversationDto>> Handle(ListMyConversationsForClientQuery request, CancellationToken ct)

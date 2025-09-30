@@ -2,8 +2,9 @@ namespace game_x.application.Contract.Persistence.Repo;
 
 public interface IConversationRepo
 {
-    IQueryable<Conversation> GetUnassignedQueueByCursorAsync(CancellationToken ct = default); 
-    IQueryable<Conversation> GetSupportConversationsAsync(CancellationToken ct = default);
+    IQueryable<Conversation> GetUnassignedQueueByCursorAsync(string userId, CancellationToken ct = default); 
+    IQueryable<Conversation> GetSupportConversationsAsync(string userId, CancellationToken ct = default);
+    IQueryable<Conversation> GetHiddenConversationsForClientAsync(string userId, CancellationToken ct = default);
     IQueryable<Conversation> GetMyConversationsForClientAsync(string userId, CancellationToken ct = default);
     Task<Conversation?> GetSupportConversationAsync(string actorId, CancellationToken ct = default);
     Task<Conversation> GetConversationDetailAsync(Guid convId, CancellationToken ct = default);

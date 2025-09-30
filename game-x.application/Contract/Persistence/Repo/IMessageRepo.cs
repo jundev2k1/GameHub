@@ -18,5 +18,7 @@ public interface IMessageRepo
     Task<MessageWindowDto> GetWindowAsync(
         Guid convId, Guid anchorId, int before, int after, WindowAnchorType anchor, CancellationToken ct = default);
     
+    Task<Message?> CheckExistByConvIdAsync(Guid convId, Guid msgId, CancellationToken ct = default);
     Task<Message> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<Message?> GetLastedMessageAsync(int convId, CancellationToken ct = default);
 }

@@ -11,4 +11,5 @@ public sealed record ListedConversationDto(
     DateTime LastMessageAt,
     Guid LastMessageId,
     string LastMessageText,
-    MessageKind LastMessageKind );
+    MessageKind LastMessageKind,
+    int? UnreadCount);

@@ -14,6 +14,7 @@ public sealed class MessageConfig : IEntityTypeConfiguration<Message>
         
         // Indexes
         builder.HasIndex(x => new { x.ConversationId, x.SentAt });
+        builder.HasIndex(x => new { x.ConversationId, x.Id });
         builder.HasIndex(x => x.ReplyToMessageId);
         
         // Properties
