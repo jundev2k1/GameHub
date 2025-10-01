@@ -6,9 +6,6 @@ public sealed class UpdateDefaultPoseCharacterValidator : AbstractValidator<Upda
 {
     public UpdateDefaultPoseCharacterValidator()
     {
-        RuleFor(x => x.Id)
-            .NotEmpty().WithMessage($"{nameof(UpdateDefaultPoseCharacterCommand.Id)} is required.");
-
         RuleFor(x => x.File)
             .Must(BeAValidFileType).WithMessage("Invalid file type.")
             .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 10 MB.");

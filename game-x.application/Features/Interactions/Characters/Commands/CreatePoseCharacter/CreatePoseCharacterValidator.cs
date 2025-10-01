@@ -1,30 +1,26 @@
 ﻿using game_x.application.Common.Files;
 
-namespace game_x.application.Features.Interactions.Characters.Commands.UpdatePoseCharacter;
+namespace game_x.application.Features.Interactions.Characters.Commands.CreatePoseCharacter;
 
-public sealed class UpdatePoseCharacterValidator : AbstractValidator<UpdatePoseCharacterCommand>
+public sealed class CreatePoseCharacterValidator : AbstractValidator<CreatePoseCharacterCommand>
 {
-    public UpdatePoseCharacterValidator()
+    public CreatePoseCharacterValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name cannot be empty.")
-            .MaximumLength(255).WithMessage("Name cannot exceed 255 characters.")
-            .When(x => x.Name is not null);
+            .MaximumLength(255).WithMessage("Name cannot exceed 255 characters.");
 
         RuleFor(x => x.Description)
             .NotEmpty().WithMessage("Description cannot be empty.")
-            .MaximumLength(1000).WithMessage("Description cannot exceed 1000 characters.")
-            .When(x => x.Description is not null);
+            .MaximumLength(1000).WithMessage("Description cannot exceed 1000 characters.");
 
         RuleFor(x => x.Notes)
             .NotEmpty().WithMessage("Notes cannot be empty.")
-            .MaximumLength(4000).WithMessage("Notes cannot exceed 4000 characters.")
-            .When(x => x.Notes is not null);
+            .MaximumLength(4000).WithMessage("Notes cannot exceed 4000 characters.");
 
         RuleFor(x => x.File)
             .Must(BeAValidFileType).WithMessage("Invalid file type.")
-            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 10 MB.")
-            .When(x => x.File is not null);
+            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 10 MB.");
     }
 
     private bool BeAValidFileType(FileUpload? file)

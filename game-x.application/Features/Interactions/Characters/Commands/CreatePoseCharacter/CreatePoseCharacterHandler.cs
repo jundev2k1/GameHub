@@ -3,32 +3,32 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Features.Interactions.Characters.Commands.UpdatePoseCharacter;
+namespace game_x.application.Features.Interactions.Characters.Commands.CreatePoseCharacter;
 
-public sealed class UpdatePoseCharacterHandler(
+public sealed class CreatePoseCharacterHandler(
     IUnitOfWork unitOfWork,
     IInteractionCharacterRepo characterRepo,
     IFileStorageService fileStorage,
-    IFileManagerCacheService fileManagerCache) : ICommandHandler<UpdatePoseCharacterCommand>
+    IFileManagerCacheService fileManagerCache) : ICommandHandler<CreatePoseCharacterCommand>
 {
-    public async Task<Unit> Handle(UpdatePoseCharacterCommand request, CancellationToken ct = default)
+    public async Task<Unit> Handle(CreatePoseCharacterCommand request, CancellationToken ct = default)
     {
         MediaFile? fileAfterUpdated = null;
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await characterRepo.UpdateAsync(request.Id!.Value, async character =>
             {
-                character.Update(
+                var poseFile = await CreateNewDefaultPose(character.PublicId, request.File, ct);
+                var priority = character.Poses.Count != 0 ? character.Poses.Max(x => x.Priority) + 1 : 1;
+                var poseItem = InteractionCharacterPose.Create(
                     request.Name,
                     request.Description,
-                    request.Notes);
+                    request.Notes,
+                    priority,
+                    poseFile);
+                character.AddPose(poseItem);
 
-                if (request.File is not null)
-                {
-                    var poseFile = await CreateNewDefaultPose(character.PublicId, request.File, ct);
-                    character.SetPose(request.PoseId!.Value, poseFile);
-                    fileAfterUpdated = poseFile;
-                }
+                fileAfterUpdated = poseItem.Pose;
             }, ct);
         }, ct);
 
