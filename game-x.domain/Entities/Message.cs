@@ -14,19 +14,21 @@ public sealed class Message: BaseEntity<int>, IAuditable
     public string? SenderUserId { get; set; }
     public User? SenderUser { get; set; }
     public RoleInConversation SenderRole { get; set; } = RoleInConversation.Member;
-
-    public MessageKind Kind { get; set; } = MessageKind.Text; // Determines how clients render and what fields are relevant
+    /// <summary>Determines how clients render and what fields are relevant</summary>
+    public MessageKind Kind { get; set; } = MessageKind.Text;
     [MaxLength(4096)] 
-    public string? Text { get; set; } // Message text when Kind=Text
-    public string? PayloadJson { get; set; } // Structured extras (quick replies, buttons, templates, system payloads)
-    
-    public int? ReplyToMessageId { get; set; } // Support “reply/quote” threads
+    public string? Text { get; set; }
+    /// <summary>Structured extras (quick replies, buttons, templates, system payloads)</summary>
+    public string? PayloadJson { get; set; }
+    /// <summary>Support “reply/quote” threads</summary>
+    public int? ReplyToMessageId { get; set; }
     public Message? ReplyToMessage { get; set; }
-
-    public bool IsTombstone { get; set; } // True when revoked/removed for everyone. Clients render a “message removed” stub
-    
-    public DateTime SentAt { get; set; } = DateTime.UtcNow; // Timeline ordering
-
+    /// <summary>True when revoked/removed for everyone. Clients render a “message removed” stub</summary>
+    public bool IsTombstone { get; set; }
+    /// <summary>Timeline ordering</summary>
+    public DateTime SentAt { get; set; } = DateTime.UtcNow;
+    /// <summary>Mention all members (in Public Channel)</summary>
+    public bool? IsMentionAll { get; set; }
     // Edit info
     public DateTime? EditedAt { get; set; }
     public int EditCount { get; set; }
@@ -35,6 +37,7 @@ public sealed class Message: BaseEntity<int>, IAuditable
     public Dictionary<string, HashSet<string>> Reactions { get; set; } = new(StringComparer.Ordinal);
     
     public List<MessageAttachment> Attachments { get; set; } = new();
+    public List<MessageMention> Mentions { get; set; } = new();
     public List<MessageEditSnapshot> EditHistory { get; set; } = new();
     
     public static Message Create(
@@ -44,7 +47,8 @@ public sealed class Message: BaseEntity<int>, IAuditable
         MessageKind kind,
         string? text = null,
         string? senderUserId = null,
-        int? replyToMessageId = null
+        int? replyToMessageId = null,
+        bool? isMentionAll = null
     )
     {
         var msg = new Message
@@ -59,7 +63,8 @@ public sealed class Message: BaseEntity<int>, IAuditable
             IsTombstone = false,
             EditCount = 0,
             CurrentVersion = 1,
-            ReplyToMessageId = replyToMessageId
+            ReplyToMessageId = replyToMessageId,
+            IsMentionAll = isMentionAll
         };
         return msg;
     }

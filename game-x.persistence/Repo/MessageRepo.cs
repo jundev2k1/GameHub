@@ -26,6 +26,7 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
         
         var query = context.Messages
             .AsNoTracking()
+            .Include(m => m.Mentions)
             .Include(m => m.ReplyToMessage)
             .Include(m => m.Attachments)
                 .ThenInclude(a => a.MediaFile)
@@ -44,7 +45,13 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
                 SentAt = m.SentAt,
                 EditedAt = m.EditedAt,
                 EditCount = m.EditCount,
+                IsMentionAll = m.IsMentionAll,
                 CurrentVersion = m.CurrentVersion,
+                DirectMentions =  m.Mentions.Select(x => new DirectMention
+                (
+                    x.UserId,
+                    x.Display ?? string.Empty
+                )).ToList(),
                 Attachments = m.Attachments
                     .Select(a => a.Adapt<MessageAttachmentDto>())
                     .ToList()

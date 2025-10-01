@@ -28,10 +28,11 @@ public enum NotificationMessageKey : short
     User_VerifyStatus_Changed = 700,
     User_Verify_Created = 701,
 
-    // Enum group key: SocialLink module
+    // Enum group key: Chatting module
     Friend_Request_Created = 800,
     Friend_Request_Accepted = 801,
-
+    Direct_Mention = 802,
+    
     // Enum group key: Live Stream
     LiveStream_Upcoming = 900,
     LiveStream_TimeoutCancelled = 901,
@@ -41,5 +42,6 @@ public enum NotificationMessageKey : short
     LiveStream_DonationSuccessful = 905,
     LiveStream_DonationReceived = 906,
 
+    
     // Enum group key: ...
 }
