@@ -51,6 +51,9 @@ public sealed class InteractionCharacterRepo(GameXContext context) : IInteractio
     public async Task UpdateAsync(Guid id, Action<InteractionCharacter> updateAction, CancellationToken ct = default)
     {
         var character = await context.InteractionCharacters
+            .Include(ic => ic.DefaultPose)
+            .Include(ic => ic.Poses)
+            .ThenInclude(p => p.Pose)
             .FirstOrDefaultAsync(c => c.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
 
@@ -59,6 +62,9 @@ public sealed class InteractionCharacterRepo(GameXContext context) : IInteractio
     public async Task UpdateAsync(Guid id, Func<InteractionCharacter, Task> updateAction, CancellationToken ct = default)
     {
         var character = await context.InteractionCharacters
+            .Include(ic => ic.DefaultPose)
+            .Include(ic => ic.Poses)
+            .ThenInclude(p => p.Pose)
             .FirstOrDefaultAsync(c => c.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
 

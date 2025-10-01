@@ -46,4 +46,20 @@ public sealed class InteractionCharacter : BaseEntity<int>, IAuditable
     {
         DefaultPose = defaultPose;
     }
+
+    public void AddPose(InteractionCharacterPose pose)
+    {
+        if (Poses.Any(x => x.PublicId == pose.PublicId))
+            throw new ArgumentException($"Pose Id ({pose.PublicId}) already exists.");
+
+        Poses.Add(pose);
+    }
+
+    public void SetPose(Guid poseId, MediaFile pose)
+    {
+        var targetPose = Poses.FirstOrDefault(x => x.PublicId == poseId)
+            ?? throw new ArgumentException($"Pose Id ({poseId}) not found.");
+
+        targetPose.UpdatePose(pose);
+    }
 }
