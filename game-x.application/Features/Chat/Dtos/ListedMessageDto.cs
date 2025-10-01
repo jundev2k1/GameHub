@@ -13,6 +13,8 @@ public record ListedMessageDto(
     DateTime? EditedAt, 
     int EditCount, 
     int CurrentVersion,
+    bool? IsMentionAll,
+    IReadOnlyList<DirectMention>? DirectMentions,
     IReadOnlyList<ListedMessageAttachmentDto> Attachments);
     
 public record ListedMessageAttachmentDto(

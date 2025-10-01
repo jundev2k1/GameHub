@@ -10,7 +10,7 @@ public interface IChatHubService
     Task SendPublicMessageAsync(CreatedMessageSignalResult res);
     Task SendSupportMessageAsync(CreatedMessageSignalResult res);
     Task SendSupportMessageV2Async(CreatedMessageSignalResult res);
-    Task SendDirectMessageAsync(CreatedMessageSignalResult res, string[] memberIds);
+    Task SendDirectMessageAsync(CreatedMessageSignalResult res, ConvMemberDto[] members);
     Task SendFriendRequestAsync(FriendRequestSignalDto dto);
     Task SendFriendResponseAsync(FriendResponseSignalDto dto);
     Task SendUnfriendAsync(UnfriendSignalDto dto);

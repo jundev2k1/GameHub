@@ -5,6 +5,7 @@ using game_x.application.Features.Friends.Commands.RespondFriendRequest;
 using game_x.application.Features.Friends.Commands.SendFriendRequest;
 using game_x.application.Features.Friends.Commands.Unblock;
 using game_x.application.Features.Friends.Commands.Unfriend;
+using game_x.application.Features.Friends.Queries.CheckFriendSocialLink;
 using game_x.application.Features.Friends.Queries.FriendSearch;
 using game_x.application.Features.Friends.Queries.GetBlockedFriends;
 using game_x.application.Features.Friends.Queries.GetFriendships;
@@ -17,6 +18,13 @@ namespace game_x.api.Controllers.Client.Chat;
 [Route("api/user")]
 public class FriendController : BaseApiController
 {
+    [HttpGet("friendships/{userId}/check")]
+    public async Task<IActionResult> FriedCheckAsync(string userId)
+    {
+        var result = await Mediator.Send(new CheckFriendSocialLinkQuery(userId));
+        return ApiResponseFactory.Ok(result);
+    }
+    
     [HttpGet("friendships/search")]
     public async Task<IActionResult> SearchFriendsAsync([AsParameters] SearchCriteriaRequest parameters)
     {

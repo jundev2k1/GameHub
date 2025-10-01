@@ -13,6 +13,7 @@ public sealed class SendMessageHandler(
     IUnitOfWork unitOfWork,
     IConversationRepo conversationRepo,
     IMessageRepo messageRepo,
+    IMessageMentionRepo messageMentionRepo,
     IMessageService messageService,
     IConversationService conversationService,
     IAppLogger<Message> logger,
@@ -48,9 +49,13 @@ public sealed class SendMessageHandler(
                 replyMessageId: request.ReplyToMessageId,
                 hasAttachment: request.Attachments?.Count > 0,
                 isAgent: request.IsAgent,
+                hasAll: request.Mention?.IsAll,
                 ct: ct);
             
             await messageService.CreateMessageAttachmentsAsync(msg: message, attachments: request.Attachments, ct);
+            
+            if(request.Mention != null)
+                await BulkCreateMentionsAsync(msg: message, request.Mention, ct);
             
             conv.LastMessageAt = DateTime.UtcNow;
             
@@ -76,6 +81,7 @@ public sealed class SendMessageHandler(
         Guid? replyMessageId,
         bool hasAttachment,
         bool? isAgent,
+        bool? hasAll,
         CancellationToken ct)
     {
         int? replyMessageIntId = null;
@@ -93,11 +99,31 @@ public sealed class SendMessageHandler(
             text: text,
             kind: hasAttachment ? MessageKind.Attachment : MessageKind.Text,
             senderRole: isAgent == true ? RoleInConversation.Agent : RoleInConversation.Member,
-            replyToMessageId: replyMessageIntId
+            replyToMessageId: replyMessageIntId,
+            isMentionAll: conv.Type == ConversationType.Public ? hasAll : null
         );
         
         await messageRepo.AddAsync(msg, ct);
         return msg;
+    }
+    
+    private async Task BulkCreateMentionsAsync(Message msg, MentionRequest mentionRequest, CancellationToken ct)
+    {
+        IList<MessageMention> mentions = [];
+        
+        foreach (var item in mentionRequest.Direct ?? [])
+        {
+            var direct = MessageMention.Create(
+                msg: msg,
+                userId: item.UserId,
+                kind: MentionKind.Direct,
+                display: item.Display
+            );
+            mentions.Add(direct);
+        }
+        
+        if(mentions.Count > 0)
+            await messageMentionRepo.BulkAddAsync(mentions, ct);
     }
     
     private async Task SendSignalAsync(SendMessageCommand request, Conversation conv, Message message, CancellationToken ct)
@@ -134,10 +160,12 @@ public sealed class SendMessageHandler(
             EditedAt = message.EditedAt,
             EditCount = message.EditCount,
             CurrentVersion = message.CurrentVersion,
+            IsMentionAll =  message.IsMentionAll,
+            DirectMentions = request.Mention?.Direct,
             Attachments = message.Attachments.Adapt<List<MessageAttachmentDto>>()
         };
         
-        var updatedConv = await conversationService.GetConversationDetailAsync(request.ConversationId, ct);
+        var updatedConv = await conversationService.GetConvByIdAsync(request.ConversationId, ct);
         var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
         return new CreatedMessageSignalResult(
             Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},

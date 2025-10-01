@@ -339,43 +339,40 @@ public static class MessageCode
         ConversationMemberNotFound = 10504,
         /// <summary>Message not found.</summary>
         [EnumMetadata("Message not found.")]
-        MessageNotFound = 10505,    
+        MessageNotFound = 10505,
         /// <summary>Message not found.</summary>
         [EnumMetadata("Fail to send the message.")]
         FailToSendMessage = 10506,
-        /// <summary>No message is found.</summary>
-        [EnumMetadata("No message is found.")]
-        NoMessageFound = 10507,
         /// <summary>The message is already read.</summary>
         [EnumMetadata("The message is already read.")]
-        MessageAlreadyRead = 10508,
+        MessageAlreadyRead = 10507,
         /// <summary>Fail to target myself.</summary>
         [EnumMetadata("Fail to target myself.")]
-        FailToTargetMyself = 10509,
+        FailToTargetMyself = 10508,
         /// <summary>The request is pending acceptance.</summary>
         [EnumMetadata("The request is pending acceptance.")]
-        WaitToAccept = 10510,
+        WaitToAccept = 10509,
         /// <summary>Already friends.</summary>
         [EnumMetadata("Already friends.")]
-        AlreadyFriend = 10511,
+        AlreadyFriend = 10510,
         /// <summary>Social link not found.</summary>
         [EnumMetadata("Social link not found.")]
-        SocialLinkNotFound = 10512,
+        SocialLinkNotFound = 10511,
         /// <summary>Request already responded.</summary>
         [EnumMetadata("Request already responded.")]
-        FriendRequestAlreadyRespond = 10513,
+        FriendRequestAlreadyRespond = 10512,
         /// <summary>Not the addressee.</summary>
         [EnumMetadata("Not the addressee.")]
-        NotAddressee = 10514,
+        NotAddressee = 10513,
         /// <summary>The user is still not a friend.</summary>
         [EnumMetadata("The user is still not a friend.")]
-        StillNotFriend = 10515,
+        StillNotFriend = 10514,
         /// <summary>The user is still not a friend.</summary>
         [EnumMetadata("Social link is blocked.")]
-        SocialLinkBlocked = 10516,
+        SocialLinkBlocked = 10515,
         /// <summary>The user is not a member.</summary>
         [EnumMetadata("The user is not a member.")]
-        IsNotMember = 10517,
+        IsNotMember = 10516,
         #endregion
     }
 }

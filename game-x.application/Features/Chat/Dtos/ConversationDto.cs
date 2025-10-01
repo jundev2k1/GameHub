@@ -16,4 +16,5 @@ public sealed record ConversationDto(
     Guid LastMessageId,
     string LastMessageText,
     MessageKind LastMessageKind,
-    int? UnreadCount);
+    int? UnreadCount,
+    bool? IsHidden);

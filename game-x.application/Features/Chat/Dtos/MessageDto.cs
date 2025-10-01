@@ -15,6 +15,8 @@ public class MessageDto
     public DateTime SentAt { get; set; }
     public DateTime? EditedAt { get; set; }
     public int EditCount { get; set; }
+    public bool? IsMentionAll { get; set; }
+    public IReadOnlyList<DirectMention>? DirectMentions { get; set; }
     public int CurrentVersion { get; set; }
     public List<MessageAttachmentDto> Attachments { get; set; } = new();
 };

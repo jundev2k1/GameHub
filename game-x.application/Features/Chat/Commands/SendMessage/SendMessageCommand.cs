@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using game_x.application.Common.Files;
+using game_x.application.Features.Chat.Dtos;
 
 namespace game_x.application.Features.Chat.Commands.SendMessage;
 
@@ -11,7 +12,12 @@ public sealed record SendMessageCommand(
     string? Text,
     Guid? ReplyToMessageId,
     string ClientLocalId,
-    IReadOnlyList<FileUpload>? Attachments
+    IReadOnlyList<FileUpload>? Attachments,
+    MentionRequest? Mention
 ) : IRequest<SendMessageResult>;
 
-public record SendMessageResult(string ClientLocalId, Guid ConversationId);
+public sealed record SendMessageResult(string ClientLocalId, Guid ConversationId);
+public sealed record MentionRequest(
+    bool IsAll,
+    IReadOnlyList<DirectMention>? Direct // userIds to mention
+);

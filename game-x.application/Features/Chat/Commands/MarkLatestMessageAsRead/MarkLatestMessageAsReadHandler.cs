@@ -19,7 +19,7 @@ public sealed class MarkLatestMessageAsReadHandler(
         var lastedMessage = await messageRepo.GetLastedMessageAsync(conversation.Id, ct);
 
         if (lastedMessage == null)
-            throw new NotFoundException(MessageCode.Chatting.NoMessageFound);
+            throw new NotFoundException(MessageCode.Chatting.MessageNotFound);
         await sender.Send(new MarkMessageAsReadCommand(conversation.PublicId, lastedMessage.PublicId), ct);
    
         return lastedMessage.PublicId;

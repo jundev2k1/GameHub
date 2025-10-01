@@ -7,6 +7,7 @@ using game_x.application.Features.Chat.Commands.MarkLatestMessageAsRead;
 using game_x.application.Features.Chat.Commands.SendMessage;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Queries.GetAllUnReads;
+using game_x.application.Features.Chat.Queries.GetConversationDetail;
 using game_x.application.Features.Chat.Queries.ListHiddenConversationsForClient;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
@@ -78,6 +79,13 @@ public class ConversationController(IUserAccessor userAccessor
             Cursor: parameters.Cursor
         );
         var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpGet("conversations/{convId:guid}")]
+    public async Task<IActionResult> GetConversationDetailsAsync(Guid convId)
+    {
+        var result = await Mediator.Send(new GetConversationDetailQuery(convId));
         return ApiResponseFactory.Ok(result);
     }
     

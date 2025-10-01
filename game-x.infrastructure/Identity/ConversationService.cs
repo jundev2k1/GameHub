@@ -197,9 +197,17 @@ public sealed class ConversationService(
         return src?.Adapt<ConversationDto>().Adapt<ListedConversationDto>();
     }
     
-    public async Task<ConversationDetailDto> GetConversationDetailAsync(Guid convId, CancellationToken ct = default)
+    public async Task<ConversationDetailDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default)
     {
-        var conv = await conversationRepo.GetConversationDetailAsync(convId, ct);
+        var conv = await conversationRepo.GetConvByIdAsync(convId, ct);
+        var convDto = await BuildConversationDto(conv, ct);
+        return convDto.Adapt<ConversationDetailDto>();
+    }
+    
+    public async Task<ConversationDetailDto> GetConvByIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default)
+    {
+        var conv = await conversationRepo.GetConvByIdAndUserIdAsync(convId, userId, ct)
+            ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
         var convDto = await BuildConversationDto(conv, ct);
         return convDto.Adapt<ConversationDetailDto>();
     }

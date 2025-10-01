@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.application.Features.Chat.Dtos;
 using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
@@ -113,7 +114,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 c.CustomerId == actorId || c.GuestId == actorId, ct);
     }
     
-    public async Task<Conversation> GetConversationDetailAsync(Guid convId, CancellationToken ct = default)
+    public async Task<Conversation> GetConvByIdAsync(Guid convId, CancellationToken ct = default)
     {
         return await context.Conversations
                        .AsTracking()
@@ -126,6 +127,31 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                                 .ThenInclude(x => x!.Avatar)
                        .FirstOrDefaultAsync(c => c.PublicId == convId, ct)
                    ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+    }
+    
+    public async Task<Conversation?> GetConvByIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default)
+    {
+        var result = await context.Conversations
+                       .AsTracking()
+                       .Include(x => x.Members)
+                       .Include(c => c.Customer)
+                           .ThenInclude(c => c!.Avatar)
+                       .Include(c => c.Messages
+                           .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
+                           .Take(1))
+                           .ThenInclude(x => x.SenderUser)
+                                .ThenInclude(x => x!.Avatar)
+                       .Where(c => c.PublicId == convId && c.Members.Any(cm => cm.UserId == userId))
+                       .Select(x => new
+                       {
+                           conv = x,
+                           member = x.Members.FirstOrDefault(x => x.UserId == userId)
+                       })
+                       .FirstOrDefaultAsync(ct)
+                   ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+
+        result.conv.IsHidden = result?.member?.IsHidden;
+        return result?.conv;
     }
     
     public async Task<Conversation?> FindForPairAsync(string userA, string userB, CancellationToken ct = default)
