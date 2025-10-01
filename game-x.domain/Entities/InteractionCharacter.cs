@@ -27,6 +27,21 @@ public sealed class InteractionCharacter : BaseEntity<int>, IAuditable
         };
     }
 
+    public void Update(
+        string? name = null,
+        string? desc = null,
+        string? notes = null)
+    {
+        if (name is not null)
+            Name = name.Trim();
+
+        if (desc is not null)
+            Description = desc.Trim();
+
+        if (notes is not null)
+            Notes = notes.Trim();
+    }
+
     public void SetDefaultPose(MediaFile defaultPose)
     {
         DefaultPose = defaultPose;

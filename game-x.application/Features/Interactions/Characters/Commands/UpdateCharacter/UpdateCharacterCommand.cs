@@ -1,3 +1,9 @@
-﻿namespace game_x.application.Features.Interactions.Characters.Commands.UpdateCharacter;
+﻿using System.Text.Json.Serialization;
 
-public record UpdateCharacterCommand() : ICommand;
+namespace game_x.application.Features.Interactions.Characters.Commands.UpdateCharacter;
+
+public record UpdateCharacterCommand(
+    [property: JsonIgnore] Guid? Id,
+    string? Name,
+    string? Description,
+    string? Notes) : ICommand;
