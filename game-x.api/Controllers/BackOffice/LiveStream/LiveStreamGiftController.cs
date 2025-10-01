@@ -13,7 +13,7 @@ using game_x.application.Features.LiveStreams.Gifts.Queries.GetLiveStreamGiftsBy
 
 namespace game_x.api.Controllers.BackOffice.LiveStream;
 
-[Route("/api/back-office/livestream-gifts")]
+[Route("api/back-office/livestream-gifts")]
 public sealed class LiveStreamGiftController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]

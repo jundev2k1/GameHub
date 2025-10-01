@@ -9,7 +9,7 @@ using game_x.application.Features.LiveStreams.Categories.Queries.GetCategoryDeta
 
 namespace game_x.api.Controllers.BackOffice.LiveStream;
 
-[Route("/back-office/livestream-categories")]
+[Route("api/back-office/livestream-categories")]
 public sealed class LiveStreamCategoryController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]

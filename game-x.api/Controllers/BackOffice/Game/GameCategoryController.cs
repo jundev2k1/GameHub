@@ -8,7 +8,7 @@ using game_x.application.Features.Games.Admin.Queries.GetGameCategoryDetail;
 
 namespace game_x.api.Controllers.BackOffice.Game;
 
-[Route("/api/back-office/game-categories")]
+[Route("api/back-office/game-categories")]
 public sealed class GameCategoryController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]

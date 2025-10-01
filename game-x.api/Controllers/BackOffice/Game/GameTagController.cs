@@ -8,7 +8,7 @@ using game_x.application.Features.Games.Admin.Queries.GetGameTagsByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Game;
 
-[Route("/api/back-office/game-tags")]
+[Route("api/back-office/game-tags")]
 public sealed class GameTagController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]

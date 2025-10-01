@@ -8,7 +8,7 @@ using game_x.application.Features.Games.Admin.Queries.GetRecommendsByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Game;
 
-[Route("/api/back-office/game-recommends")]
+[Route("api/back-office/game-recommends")]
 public sealed class GameRecommendController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]

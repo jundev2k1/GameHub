@@ -8,7 +8,7 @@ using game_x.application.Features.Games.Admin.Queries.GetTypeByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Game;
 
-[Route("/api/back-office/game-platforms")]
+[Route("api/back-office/game-platforms")]
 public sealed class GamePlatformController(
     IGameProviderCacheService gameProviderCache) : BaseApiController
 {

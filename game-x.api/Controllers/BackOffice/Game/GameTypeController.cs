@@ -8,7 +8,7 @@ using game_x.application.Features.Games.Admin.Queries.GetTypeByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Game;
 
-[Route("/api/back-office/game-types")]
+[Route("api/back-office/game-types")]
 public sealed class GameTypeController : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
