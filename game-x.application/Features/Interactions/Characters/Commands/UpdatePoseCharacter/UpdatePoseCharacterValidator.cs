@@ -8,18 +8,15 @@ public sealed class UpdatePoseCharacterValidator : AbstractValidator<UpdatePoseC
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name cannot be empty.")
-            .MaximumLength(255).WithMessage("Name cannot exceed 255 characters.")
-            .When(x => x.Name is not null);
+            .MaximumLength(255).WithMessage("Name cannot exceed 255 characters.");
 
         RuleFor(x => x.Description)
             .NotEmpty().WithMessage("Description cannot be empty.")
-            .MaximumLength(1000).WithMessage("Description cannot exceed 1000 characters.")
-            .When(x => x.Description is not null);
+            .MaximumLength(1000).WithMessage("Description cannot exceed 1000 characters.");
 
         RuleFor(x => x.Notes)
             .NotEmpty().WithMessage("Notes cannot be empty.")
-            .MaximumLength(4000).WithMessage("Notes cannot exceed 4000 characters.")
-            .When(x => x.Notes is not null);
+            .MaximumLength(4000).WithMessage("Notes cannot exceed 4000 characters.");
 
         RuleFor(x => x.File)
             .Must(BeAValidFileType).WithMessage("Invalid file type.")

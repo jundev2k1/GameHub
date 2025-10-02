@@ -19,23 +19,28 @@ public sealed class UpdatePoseCharacterHandler(
         {
             await characterRepo.UpdateAsync(request.Id!.Value, async character =>
             {
+                var targetPose = character.Poses.FirstOrDefault(p => p.PublicId == request.PoseId)
+                    ?? throw new NotFoundException(nameof(request.PoseId), request.PoseId!);
+
                 // Update character info
-                character.Update(
-                    request.Name,
-                    request.Description,
-                    request.Notes);
+                targetPose.Update(
+                    request.Name?.Trim() ?? string.Empty,
+                    request.Description?.Trim() ?? string.Empty,
+                    request.Notes?.Trim() ?? string.Empty,
+                    targetPose.Priority);
 
                 // Only update the pose file if there's a new file provided
                 if (request.File is not null)
                 {
-                    // Remove old file if any
-                    var targetPose = character.Poses.FirstOrDefault(p => p.PublicId == request.PoseId)
-                        ?? throw new NotFoundException(nameof(request.PoseId), request.PoseId!);
-                    await mediaFileRepo.RemoveAsync(targetPose.PoseId, ct);
+                    var oldId = targetPose.PoseId;
 
                     // Create new file
                     var poseFile = await CreateNewDefaultPose(character.PublicId, request.File, ct);
-                    character.SetPose(request.PoseId!.Value, poseFile);
+                    targetPose.UpdatePose(poseFile);
+
+                    // Remove old file if any
+                    await mediaFileRepo.RemoveAsync(oldId, ct);
+
                     fileAfterUpdated = poseFile;
                 }
             }, ct);

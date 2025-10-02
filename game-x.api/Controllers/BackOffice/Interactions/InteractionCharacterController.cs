@@ -5,6 +5,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.Interactions.Characters.Commands.CreateCharacter;
 using game_x.application.Features.Interactions.Characters.Commands.CreatePoseCharacter;
 using game_x.application.Features.Interactions.Characters.Commands.DeleteCharacter;
+using game_x.application.Features.Interactions.Characters.Commands.DeletePose;
 using game_x.application.Features.Interactions.Characters.Commands.UpdateCharacter;
 using game_x.application.Features.Interactions.Characters.Commands.UpdateDefaultPoseCharacter;
 using game_x.application.Features.Interactions.Characters.Commands.UpdatePoseCharacter;
@@ -108,6 +109,15 @@ public sealed class InteractionCharacterController : BaseApiController
             request.Description.Trim(),
             request.Notes.Trim(),
             request.Pose is not null ? FileUpload.FromFormFile(request.Pose) : null);
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpDelete("poses/{poseId:guid}")]
+    public async Task<IActionResult> DeletePoseAsync(Guid poseId)
+    {
+        var command = new DeletePoseCommand(poseId);
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
     }

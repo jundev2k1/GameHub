@@ -79,4 +79,13 @@ public sealed class InteractionCharacterRepo(GameXContext context) : IInteractio
 
         context.InteractionCharacters.Remove(character);
     }
+
+    public async Task DeletePoseAsync(Guid id, CancellationToken ct = default)
+    {
+        var character = await context.InteractionCharacterPoses
+            .FirstOrDefaultAsync(c => c.PublicId == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+
+        context.InteractionCharacterPoses.Remove(character);
+    }
 }

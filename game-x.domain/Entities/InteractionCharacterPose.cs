@@ -33,7 +33,7 @@ public sealed class InteractionCharacterPose : BaseEntity<int>, IAuditable
         };
     }
 
-    public void Update(string displayName, string desc, string notes, int priority, MediaFile pose)
+    public void Update(string displayName, string desc, string notes, int priority)
     {
         ArgumentException.ThrowIfNullOrEmpty(displayName);
         if (priority < 0)
@@ -43,7 +43,6 @@ public sealed class InteractionCharacterPose : BaseEntity<int>, IAuditable
         Description = desc.Trim();
         Notes = notes.Trim();
         Priority = priority;
-        Pose = pose;
     }
 
     public void UpdatePose(MediaFile pose) => Pose = pose;

@@ -6,7 +6,7 @@ namespace game_x.application.Features.Interactions.Characters.Commands.UpdatePos
 public record UpdatePoseCharacterCommand(
     [property: JsonIgnore] Guid? Id,
     [property: JsonIgnore] Guid? PoseId,
-    string? Name,
-    string? Description,
-    string? Notes,
+    string Name,
+    string Description,
+    string Notes,
     FileUpload? File) : ICommand;

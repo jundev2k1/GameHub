@@ -54,12 +54,4 @@ public sealed class InteractionCharacter : BaseEntity<int>, IAuditable
 
         Poses.Add(pose);
     }
-
-    public void SetPose(Guid poseId, MediaFile pose)
-    {
-        var targetPose = Poses.FirstOrDefault(x => x.PublicId == poseId)
-            ?? throw new ArgumentException($"Pose Id ({poseId}) not found.");
-
-        targetPose.UpdatePose(pose);
-    }
 }

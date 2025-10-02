@@ -18,4 +18,6 @@ public interface IInteractionCharacterRepo
     Task UpdateAsync(Guid id, Func<InteractionCharacter, Task> updateAction, CancellationToken ct = default);
 
     Task DeleteAsync(Guid id, CancellationToken ct = default);
+
+    Task DeletePoseAsync(Guid id, CancellationToken ct = default);
 }

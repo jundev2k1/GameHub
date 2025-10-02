@@ -19,12 +19,14 @@ public sealed class UpdateDefaultPoseCharacterHandler(
         {
             await characterRepo.UpdateAsync(request.Id!.Value, async character =>
             {
-                // Remove old file if any
-                await mediaFileRepo.RemoveAsync(character.DefaultPoseId, ct);
+                var oldPoseId = character.DefaultPoseId;
 
                 // Create new file
                 var poseFile = await CreateNewDefaultPose(character.PublicId, request.File, ct);
                 character.SetDefaultPose(poseFile);
+
+                // Remove old file if any
+                await mediaFileRepo.RemoveAsync(oldPoseId, ct);
 
                 // Save new file info to db for caching purpose
                 fileAfterUpdated = character.DefaultPose;
