@@ -6,6 +6,8 @@ public record ListedMessageDto(
     string SenderActorId,
     MessageKind Kind,
     RoleInConversation SenderRole,
+    string? SenderUserNickname,
+    string? SenderUserAvatarUrl,
     string? Text,
     Guid? ReplyToMessageId, 
     bool IsTombstone, 

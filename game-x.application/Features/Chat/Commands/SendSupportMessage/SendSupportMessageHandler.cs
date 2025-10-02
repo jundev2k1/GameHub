@@ -136,7 +136,7 @@ public sealed class SendSupportMessageHandler(
         if (replyMessageId is not null && replyMessageId.Value != Guid.Empty)
         {
             var rid = replyMessageId.Value;
-            var replyMessage = await messageRepo.GetByIdAsync(rid, ct);
+            var replyMessage = await messageRepo.CheckExistAsync(rid, ct);
             replyMessageIntId = replyMessage.Id;
         }
         

@@ -29,8 +29,15 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.LastMessageText, src => src.Messages.FirstOrDefault()!.Text)
             .Map(dest => dest.LastMessageKind, src => src.Messages.FirstOrDefault()!.Kind);
         
+        cfg.NewConfig<Message, MessageDto>()
+            .Map(dest => dest.ConversationId, src => src.Conversation.PublicId)
+            .Map(dest => dest.ReplyToMessageId, src => src.ReplyToMessage!.PublicId)
+            .Map(dest => dest.DirectMentions, src => src.Attachments.Adapt<List<DirectMention>>())
+            .Map(dest => dest.Attachments, src => src.Attachments.Adapt<List<MessageAttachmentDto>>());
+  
         cfg.NewConfig<MessageDto, ListedMessageDto>()
-            .Map(dest => dest.Id, src => src.PublicId);
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.SenderUserNickname, src => src.SenderUser!.Nickname);
         
         cfg.NewConfig<MessageAttachment, MessageAttachmentDto>()
             .Map(dest => dest.Attachment, src => src.MediaFile);

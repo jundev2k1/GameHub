@@ -7,6 +7,7 @@ public class MessageDto
     public Guid PublicId { get; set; }
     public Guid ConversationId { get; set; }
     public string SenderActorId { get; set; } = null!;
+    public User? SenderUser { get; set; }
     public MessageKind Kind { get; set; }
     public RoleInConversation SenderRole { get; set; }
     public string? Text { get; set; }
