@@ -1,4 +1,6 @@
-﻿namespace game_x.domain.ValueObjects;
+﻿using game_x.domain.Entities;
+
+namespace game_x.domain.ValueObjects;
 
 public sealed class EntityName
 {
@@ -17,33 +19,35 @@ public sealed class EntityName
     }
 
     private static readonly string[] ValidValues = [
-        nameof(Entities.User),
-        nameof(Entities.MediaFile),
-        nameof(Entities.UserKyc),
-        nameof(Entities.Transaction),
-        nameof(Entities.TransactionInternal),
-        nameof(Entities.TransactionExternal),
-        nameof(Entities.Game),
-        nameof(Entities.GameType),
-        nameof(Entities.GameCategory),
-        nameof(Entities.GameTag),
-        nameof(Entities.GameRecommend),
-        nameof(Entities.GameRecommendItem),
-        nameof(Entities.UserBalance),
-        nameof(Entities.FiatCurrency),
-        nameof(Entities.UserBankAccount),
-        nameof(Entities.Conversation),
-        nameof(Entities.ConversationMember),
-        nameof(Entities.Message),
-        nameof(Entities.MessageAttachment),
-        nameof(Entities.LivestreamSchedule),
-        nameof(Entities.LiveStreamCategory),
-        nameof(Entities.LiveStreamCategoryMapping),
-        nameof(Entities.LiveStreamGift),
-        nameof(Entities.LiveStreamGiftPrice),
-        nameof(Entities.SocialLink),
-        nameof(Entities.InteractionCharacter),
-        nameof(Entities.InteractionCharacterPose),
+        nameof(User),
+        nameof(MediaFile),
+        nameof(UserKyc),
+        nameof(Transaction),
+        nameof(TransactionInternal),
+        nameof(TransactionExternal),
+        nameof(Game),
+        nameof(GameType),
+        nameof(GameCategory),
+        nameof(GameTag),
+        nameof(GameRecommend),
+        nameof(GameRecommendItem),
+        nameof(UserBalance),
+        nameof(FiatCurrency),
+        nameof(UserBankAccount),
+        nameof(Conversation),
+        nameof(ConversationMember),
+        nameof(Message),
+        nameof(MessageAttachment),
+        nameof(LivestreamSchedule),
+        nameof(LiveStreamCategory),
+        nameof(LiveStreamCategoryMapping),
+        nameof(LiveStreamGift),
+        nameof(LiveStreamGiftPrice),
+        nameof(SocialLink),
+        nameof(InteractionCharacter),
+        nameof(InteractionCharacterPose),
+        nameof(InteractionRule),
+        nameof(InteractionRuleMessage),
     ];
 
     public override bool Equals(object? obj) =>
