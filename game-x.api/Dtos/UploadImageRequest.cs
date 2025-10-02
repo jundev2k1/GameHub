@@ -1,6 +1,6 @@
 ﻿namespace game_x.api.Dtos;
 
-public sealed class UpdateImageRequest
+public sealed class UploadImageRequest
 {
     public IFormFile Image { get; set; } = default!;
 }

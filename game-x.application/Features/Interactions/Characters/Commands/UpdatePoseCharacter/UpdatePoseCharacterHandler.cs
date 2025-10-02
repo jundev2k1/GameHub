@@ -8,6 +8,7 @@ namespace game_x.application.Features.Interactions.Characters.Commands.UpdatePos
 public sealed class UpdatePoseCharacterHandler(
     IUnitOfWork unitOfWork,
     IInteractionCharacterRepo characterRepo,
+    IMediaFileRepo mediaFileRepo,
     IFileStorageService fileStorage,
     IFileManagerCacheService fileManagerCache) : ICommandHandler<UpdatePoseCharacterCommand>
 {
@@ -18,13 +19,21 @@ public sealed class UpdatePoseCharacterHandler(
         {
             await characterRepo.UpdateAsync(request.Id!.Value, async character =>
             {
+                // Update character info
                 character.Update(
                     request.Name,
                     request.Description,
                     request.Notes);
 
+                // Only update the pose file if there's a new file provided
                 if (request.File is not null)
                 {
+                    // Remove old file if any
+                    var targetPose = character.Poses.FirstOrDefault(p => p.PublicId == request.PoseId)
+                        ?? throw new NotFoundException(nameof(request.PoseId), request.PoseId!);
+                    await mediaFileRepo.RemoveAsync(targetPose.PoseId, ct);
+
+                    // Create new file
                     var poseFile = await CreateNewDefaultPose(character.PublicId, request.File, ct);
                     character.SetPose(request.PoseId!.Value, poseFile);
                     fileAfterUpdated = poseFile;

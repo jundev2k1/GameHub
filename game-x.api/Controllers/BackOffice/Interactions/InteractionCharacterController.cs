@@ -66,9 +66,9 @@ public sealed class InteractionCharacterController : BaseApiController
 
     [Authorize(Roles = AppRoles.Admin)]
     [HttpPatch("{id:guid}/default-pose")]
-    public async Task<IActionResult> UpdateDefaultPoseAsync(Guid id, [FromForm] IFormFile file)
+    public async Task<IActionResult> UpdateDefaultPoseAsync(Guid id, [FromForm] UploadImageRequest request)
     {
-        var command = new UpdateDefaultPoseCharacterCommand(id, FileUpload.FromFormFile(file));
+        var command = new UpdateDefaultPoseCharacterCommand(id, FileUpload.FromFormFile(request.Image));
         await Mediator.Send(command);
 
         return ApiResponseFactory.NoContent();

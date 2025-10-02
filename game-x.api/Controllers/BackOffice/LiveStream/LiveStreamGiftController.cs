@@ -58,7 +58,7 @@ public sealed class LiveStreamGiftController : BaseApiController
 
     [Authorize(Roles = $"{AppRoles.Admin}")]
     [HttpPatch("{id:guid}/icon")]
-    public async Task<IActionResult> UpdateGiftIconAsync(Guid id, UpdateImageRequest request)
+    public async Task<IActionResult> UpdateGiftIconAsync(Guid id, UploadImageRequest request)
     {
         var command = new UpdateLiveStreamGiftIconCommand(id, FileUpload.FromFormFile(request.Image));
         var result = await Mediator.Send(command);
@@ -67,7 +67,7 @@ public sealed class LiveStreamGiftController : BaseApiController
 
     [Authorize(Roles = $"{AppRoles.Admin}")]
     [HttpPatch("{id:guid}/animation")]
-    public async Task<IActionResult> UpdateGiftAnimationAsync(Guid id, UpdateImageRequest request)
+    public async Task<IActionResult> UpdateGiftAnimationAsync(Guid id, UploadImageRequest request)
     {
         var command = new UpdateLiveStreamGiftAnimationCommand(id, FileUpload.FromFormFile(request.Image));
         var result = await Mediator.Send(command);

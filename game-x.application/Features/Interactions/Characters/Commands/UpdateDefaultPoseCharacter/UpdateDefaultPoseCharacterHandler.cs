@@ -8,6 +8,7 @@ namespace game_x.application.Features.Interactions.Characters.Commands.UpdateDef
 public sealed class UpdateDefaultPoseCharacterHandler(
     IUnitOfWork unitOfWork,
     IInteractionCharacterRepo characterRepo,
+    IMediaFileRepo mediaFileRepo,
     IFileStorageService fileStorage,
     IFileManagerCacheService fileManagerCache) : ICommandHandler<UpdateDefaultPoseCharacterCommand>
 {
@@ -18,9 +19,14 @@ public sealed class UpdateDefaultPoseCharacterHandler(
         {
             await characterRepo.UpdateAsync(request.Id!.Value, async character =>
             {
+                // Remove old file if any
+                await mediaFileRepo.RemoveAsync(character.DefaultPoseId, ct);
+
+                // Create new file
                 var poseFile = await CreateNewDefaultPose(character.PublicId, request.File, ct);
                 character.SetDefaultPose(poseFile);
 
+                // Save new file info to db for caching purpose
                 fileAfterUpdated = character.DefaultPose;
             }, ct);
         }, ct);
