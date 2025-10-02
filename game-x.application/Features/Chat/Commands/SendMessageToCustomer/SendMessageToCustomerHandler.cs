@@ -96,7 +96,7 @@ public sealed class SendMessageToCustomerHandler(
         if (replyMessageId is not null && replyMessageId.Value != Guid.Empty)
         {
             var rId = replyMessageId.Value;
-            var replyMessage = await messageRepo.GetByIdAsync(rId, ct);
+            var replyMessage = await messageRepo.CheckExistAsync(rId, ct);
             replyMessageIntId = replyMessage.Id;
         }
         

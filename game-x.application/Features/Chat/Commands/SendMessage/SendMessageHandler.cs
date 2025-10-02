@@ -88,7 +88,7 @@ public sealed class SendMessageHandler(
         if (replyMessageId is not null && replyMessageId.Value != Guid.Empty)
         {
             var rid = replyMessageId.Value;
-            var replyMessage = await messageRepo.GetByIdAsync(rid, ct);
+            var replyMessage = await messageRepo.CheckExistAsync(rid, ct);
             replyMessageIntId = replyMessage.Id;
         }
         
@@ -145,28 +145,9 @@ public sealed class SendMessageHandler(
     
     private async Task<CreatedMessageSignalResult> GetMessageDtoAsync(SendMessageCommand request, Message message, CancellationToken ct)
     {
-        var msgDto = new MessageDto
-        {
-            Id = message.Id,
-            PublicId = message.PublicId,
-            ConversationId = request.ConversationId,
-            SenderActorId = message.SenderActorId,
-            SenderRole = message.SenderRole,
-            Kind = message.Kind,
-            Text = message.Text,
-            ReplyToMessageId = request.ReplyToMessageId,
-            IsTombstone = message.IsTombstone,
-            SentAt = message.SentAt,
-            EditedAt = message.EditedAt,
-            EditCount = message.EditCount,
-            CurrentVersion = message.CurrentVersion,
-            IsMentionAll =  message.IsMentionAll,
-            DirectMentions = request.Mention?.Direct,
-            Attachments = message.Attachments.Adapt<List<MessageAttachmentDto>>()
-        };
-        
+        var msg = await messageRepo.GetByIdAsync(message.PublicId, ct);
         var updatedConv = await conversationService.GetConvByIdAsync(request.ConversationId, ct);
-        var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
+        var msgSignalDto = await messageService.GetMessageDtoAsync(msg.Adapt<MessageDto>(), ct);
         return new CreatedMessageSignalResult(
             Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
             Conv: updatedConv.Adapt<ConversationSignalDto>(),
