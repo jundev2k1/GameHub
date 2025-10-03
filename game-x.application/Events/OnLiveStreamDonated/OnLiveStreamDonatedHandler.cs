@@ -22,9 +22,15 @@ public sealed class OnLiveStreamDonatedHandler(
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
+            // Decrease user balance
             await userBalanceRepo.UpdateAsync(@event.UserBalanceId, ub =>
             {
                 ub.AdjustAmount(@event.Amount, false);
+            }, ct);
+            // Increase talent balance
+            await userBalanceRepo.UpdateAsync(@event.TalentBalanceId, ub =>
+            {
+                ub.AdjustAmount(@event.Amount, true);
             }, ct);
 
             await CreateTransaction(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
@@ -37,9 +43,11 @@ public sealed class OnLiveStreamDonatedHandler(
         if (this.DonerNotification != null)
             await clientHub.SendNotificationToMemberAsync(@event.UserId, this.DonerNotification);
 
+        // Notify talent
         if (this.TalentNotification != null)
             await clientHub.SendNotificationToMemberAsync(@event.StreamInfo.AssignedTo!.Id, this.TalentNotification);
 
+        // Notify stream
         if (this.StreamDonation != null)
         {
             liveStreamManager.AddDonationToStream(@event.StreamInfo.StreamKey, this.StreamDonation);
