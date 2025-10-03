@@ -118,9 +118,8 @@ public sealed class OnLiveStreamDonatedHandler(
             streamInfo.LocalId,
             donor.Id,
             message,
-            amount);
-        if (gift != null)
-            donation.SetGift(gift);
+            amount,
+            gift?.Id);
 
         await liveStreamDonationRepo.CreateAsync(donation, ct);
         this.StreamDonation = donation.Adapt<LiveStreamDonationDto>();

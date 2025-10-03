@@ -18,7 +18,8 @@ public sealed class LiveStreamDonation : BaseEntity<int>
         int livestreamScheduleId,
         string donorId,
         string message,
-        decimal amount)
+        decimal amount,
+        int? giftId = null)
     {
         if (string.IsNullOrWhiteSpace(donorId))
             throw new ArgumentException("Donor id is required.", donorId);
@@ -31,12 +32,8 @@ public sealed class LiveStreamDonation : BaseEntity<int>
             DonorId = donorId,
             Message = message,
             Amount = amount,
+            GiftId = giftId,
             DonatedAt = DateTime.UtcNow
         };
-    }
-
-    public void SetGift(LiveStreamGift gift)
-    {
-        Gift = gift;
     }
 }
