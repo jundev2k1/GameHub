@@ -18,6 +18,8 @@ public interface ILiveStreamRepo
 
     Task<LivestreamSchedule> GetByStreamKeyAsync(string streamKey, CancellationToken ct = default);
 
+    Task<LivestreamSchedule[]> GetsByTalentIdAsync(string talentId, CancellationToken ct = default);
+
     Task CreateAsync(LivestreamSchedule schedule, CancellationToken ct = default);
 
     Task UpdateAsync(
