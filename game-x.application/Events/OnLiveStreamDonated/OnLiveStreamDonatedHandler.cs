@@ -41,7 +41,7 @@ public sealed class OnLiveStreamDonatedHandler(
             await CreateTransaction(TransactionType.TransferSent, @event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
             await CreateTransaction(TransactionType.TransferReceived, @event.Amount, @event.StreamInfo.AssignedTo!.Id, feeAmount: 0, @event.CryptoId, ct);
             await CreateDonation(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
-            await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Gift);
+            await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift);
             await CreateNotificationForDonor(@event.UserId, this.StreamDonation!, ct);
             await CreateNotificationForStreamer(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
         }, ct);
@@ -132,6 +132,7 @@ public sealed class OnLiveStreamDonatedHandler(
         LiveStreamStatusDto streamInfo,
         decimal amount,
         User donor,
+        string message,
         LiveStreamGift? gift = null)
     {
         string? giftSnapshot = null;
@@ -148,7 +149,7 @@ public sealed class OnLiveStreamDonatedHandler(
             Guid.NewGuid(),
             streamInfo.LocalId,
             donor.Id,
-            $"A donation of {amount} has been made!",
+            message.Trim(),
             LiveStreamChatMessageType.Donation,
             amount,
             giftSnapshot);
@@ -166,7 +167,8 @@ public sealed class OnLiveStreamDonatedHandler(
             SenderId = chatMessage.SenderId,
             DeleteReason = chatMessage.DeleteReason,
             IsDeleted = chatMessage.IsDeleted,
-            SentAt = chatMessage.SentAt
+            SentAt = chatMessage.SentAt,
+            Metadata = giftSnapshot
         };
     }
 

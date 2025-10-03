@@ -13,4 +13,5 @@ public sealed class LiveStreamChatMessageDto
     public bool IsDeleted { get; set; }
     public string? DeleteReason { get; set; }
     public DateTime SentAt { get; set; }
+    public string? Metadata { get; set; }
 }
