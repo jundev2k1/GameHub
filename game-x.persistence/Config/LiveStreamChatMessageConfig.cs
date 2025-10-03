@@ -51,7 +51,8 @@ public sealed class LiveStreamChatMessageConfig : IEntityTypeConfiguration<LiveS
             .IsRequired();
 
         builder.Property(lcm => lcm.Metadata)
-            .IsRequired();
+            .HasColumnType("jsonb")
+            .IsRequired(false);
 
         builder.Ignore(lcm => lcm.CreatedAt);
         builder.Ignore(lcm => lcm.UpdatedAt);
