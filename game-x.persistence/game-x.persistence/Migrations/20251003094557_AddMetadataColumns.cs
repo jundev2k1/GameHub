@@ -10,18 +10,15 @@ namespace game_x.persistence.gamex.persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
+            migrationBuilder.DropColumn(
+                name: "metadata",
+                table: "media_files");
+
+            migrationBuilder.AddColumn<string>(
                 name: "metadata",
                 table: "media_files",
                 type: "jsonb",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
-
-            migrationBuilder.DropColumn(
-                name: "metadata",
-                table: "livestream_chat_messages");
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "metadata",
