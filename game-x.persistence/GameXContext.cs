@@ -41,6 +41,7 @@ public sealed class GameXContext(
     public DbSet<ConversationMember> ConversationMembers { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<MessageAttachment> MessageAttachments { get; set; }
+    public DbSet<MessageMention> MessageMentions { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<LivestreamSchedule> LiveStreamSchedules { get; set; }
     public DbSet<LiveStreamCategory> LiveStreamCategories { get; set; }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20250930110416_AddMessageMention")]
+    partial class AddMessageMention
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1146,242 +1149,6 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_game_type_mappings_type_id");
 
                     b.ToTable("game_type_mappings", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.InteractionCharacter", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("DefaultPoseId")
-                        .HasColumnType("integer")
-                        .HasColumnName("default_pose_id");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("name");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasColumnName("notes");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("code")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_interaction_characters");
-
-                    b.HasIndex("DefaultPoseId")
-                        .HasDatabaseName("ix_interaction_characters_default_pose_id");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_interaction_characters_code");
-
-                    b.ToTable("interaction_characters", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.InteractionCharacterPose", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CharacterId")
-                        .HasColumnType("integer")
-                        .HasColumnName("character_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("display_name");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasColumnName("notes");
-
-                    b.Property<int>("PoseId")
-                        .HasColumnType("integer")
-                        .HasColumnName("pose_id");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("integer")
-                        .HasColumnName("priority");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("code")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_interaction_character_poses");
-
-                    b.HasIndex("CharacterId")
-                        .HasDatabaseName("ix_interaction_character_poses_character_id");
-
-                    b.HasIndex("PoseId")
-                        .HasDatabaseName("ix_interaction_character_poses_pose_id");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_interaction_character_poses_code");
-
-                    b.ToTable("interaction_character_poses", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.InteractionRule", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ConditionExpression")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasColumnName("condition_expression");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<short>("EventType")
-                        .HasColumnType("smallint")
-                        .HasColumnName("event_type");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("integer")
-                        .HasColumnName("priority");
-
-                    b.Property<Guid>("PublicId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("code")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<short>("RepeatPolicy")
-                        .HasColumnType("smallint")
-                        .HasColumnName("repeat_policy");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_interaction_rules");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_interaction_rules_code");
-
-                    b.ToTable("interaction_rules", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.InteractionRuleMessage", b =>
-                {
-                    b.Property<int>("RuleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("rule_id");
-
-                    b.Property<string>("LanguageCode")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("language_code");
-
-                    b.Property<int>("CharacterId")
-                        .HasColumnType("integer")
-                        .HasColumnName("character_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<int?>("PoseId")
-                        .HasColumnType("integer")
-                        .HasColumnName("pose_id");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
-                        .HasColumnName("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<int?>("VoiceMediaId")
-                        .HasColumnType("integer")
-                        .HasColumnName("voice_media_id");
-
-                    b.HasKey("RuleId", "LanguageCode")
-                        .HasName("pk_interaction_rule_messages");
-
-                    b.HasIndex("CharacterId")
-                        .HasDatabaseName("ix_interaction_rule_messages_character_id");
-
-                    b.HasIndex("PoseId")
-                        .HasDatabaseName("ix_interaction_rule_messages_pose_id");
-
-                    b.HasIndex("VoiceMediaId")
-                        .HasDatabaseName("ix_interaction_rule_messages_voice_media_id");
-
-                    b.ToTable("interaction_rule_messages", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.LiveStreamCategory", b =>
@@ -3413,76 +3180,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Type");
                 });
 
-            modelBuilder.Entity("game_x.domain.Entities.InteractionCharacter", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.MediaFile", "DefaultPose")
-                        .WithMany()
-                        .HasForeignKey("DefaultPoseId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired()
-                        .HasConstraintName("fk_interaction_characters_media_files_default_pose_id");
-
-                    b.Navigation("DefaultPose");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.InteractionCharacterPose", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.InteractionCharacter", "Character")
-                        .WithMany("Poses")
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_interaction_character_poses_interaction_characters_characte");
-
-                    b.HasOne("game_x.domain.Entities.MediaFile", "Pose")
-                        .WithMany()
-                        .HasForeignKey("PoseId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired()
-                        .HasConstraintName("fk_interaction_character_poses_media_files_pose_id");
-
-                    b.Navigation("Character");
-
-                    b.Navigation("Pose");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.InteractionRuleMessage", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.InteractionCharacter", "Character")
-                        .WithMany()
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_interaction_rule_messages_interaction_characters_character_");
-
-                    b.HasOne("game_x.domain.Entities.InteractionCharacterPose", "Pose")
-                        .WithMany()
-                        .HasForeignKey("PoseId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_interaction_rule_messages_interaction_character_poses_pose_");
-
-                    b.HasOne("game_x.domain.Entities.InteractionRule", "Rule")
-                        .WithMany("Messages")
-                        .HasForeignKey("RuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_interaction_rule_messages_interaction_rules_rule_id");
-
-                    b.HasOne("game_x.domain.Entities.MediaFile", "VoiceMedia")
-                        .WithMany()
-                        .HasForeignKey("VoiceMediaId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_interaction_rule_messages_media_files_voice_media_id");
-
-                    b.Navigation("Character");
-
-                    b.Navigation("Pose");
-
-                    b.Navigation("Rule");
-
-                    b.Navigation("VoiceMedia");
-                });
-
             modelBuilder.Entity("game_x.domain.Entities.LiveStreamCategoryMapping", b =>
                 {
                     b.HasOne("game_x.domain.Entities.LiveStreamCategory", "Category")
@@ -3995,16 +3692,6 @@ namespace game_x.persistence.Migrations
             modelBuilder.Entity("game_x.domain.Entities.GameType", b =>
                 {
                     b.Navigation("GameTypeMappings");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.InteractionCharacter", b =>
-                {
-                    b.Navigation("Poses");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.InteractionRule", b =>
-                {
-                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.LiveStreamCategory", b =>

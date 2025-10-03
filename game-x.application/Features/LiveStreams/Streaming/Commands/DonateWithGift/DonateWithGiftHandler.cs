@@ -22,6 +22,8 @@ public sealed class DonateWithGiftHandler(
         var targetCrypto = await cryptoTokenRepo.GetByIdAsync(request.CryptoTokenId, ct);
         var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, targetCrypto.Id, ct)
             ?? throw new NotFoundException("User banlance not found.");
+        var talentBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(streamInfo.AssignedTo!.Id, targetCrypto.Id, ct)
+            ?? throw new NotFoundException("Talent balance not found.");
 
         var gift = await liveStreamGiftRepo.GetByIdAsync(request.GiftId, ct);
         var targetGiftPrice = gift.GiftPrices
@@ -39,6 +41,7 @@ public sealed class DonateWithGiftHandler(
             streamInfo,
             userId,
             userBalance.PublicId,
+            talentBalance.PublicId,
             targetGiftPrice.TokenCost,
             targetCrypto.Id,
             request.Message.Trim(),

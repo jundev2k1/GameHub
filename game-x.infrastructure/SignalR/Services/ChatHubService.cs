@@ -70,7 +70,7 @@ public sealed class ChatHubService(IHubContext<ChatHub, IChatClient> hubContext)
         }
     }
     
-    public async Task SendDirectMessageAsync(CreatedMessageSignalResult res, string[] memberIds)
+    public async Task SendDirectMessageAsync(CreatedMessageSignalResult res, ConvMemberDto[] members)
     {
         var msgDto = res.Msg;
         var conv = res.Conv;
@@ -78,10 +78,11 @@ public sealed class ChatHubService(IHubContext<ChatHub, IChatClient> hubContext)
         
         await hubContext.Clients.Group(GroupNames.Conversation(conv.ConversationId)).MessageCreated(msgDto);
         
-        foreach (var uid in memberIds)
+        foreach (var member in members)
         {
-            await hubContext.Clients.Group(GroupNames.MemberInbox(uid)).ConversationUpdated(conv);
-            await hubContext.Clients.Group(GroupNames.IdleMember(uid)).InboxUpsert(upsertedInbox);
+            await hubContext.Clients.Group(GroupNames.MemberInbox(member.UserId)).ConversationUpdated(conv);
+            if(member.IsHidden != true)
+                await hubContext.Clients.Group(GroupNames.IdleMember(member.UserId)).InboxUpsert(upsertedInbox);
         }
     }
     

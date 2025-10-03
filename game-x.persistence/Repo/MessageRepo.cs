@@ -26,6 +26,9 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
         
         var query = context.Messages
             .AsNoTracking()
+            .Include(m => m.SenderUser)
+                .ThenInclude(m => m!.Avatar)
+            .Include(m => m.Mentions)
             .Include(m => m.ReplyToMessage)
             .Include(m => m.Attachments)
                 .ThenInclude(a => a.MediaFile)
@@ -37,6 +40,7 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
                 ConversationId = convId,
                 SenderActorId = m.SenderActorId,
                 SenderRole = m.SenderRole,
+                SenderUser = m.SenderUser,
                 Kind = m.Kind,
                 Text = m.Text,
                 ReplyToMessageId = m.ReplyToMessage!.PublicId,
@@ -44,7 +48,11 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
                 SentAt = m.SentAt,
                 EditedAt = m.EditedAt,
                 EditCount = m.EditCount,
+                IsMentionAll = m.IsMentionAll,
                 CurrentVersion = m.CurrentVersion,
+                DirectMentions =  m.Mentions
+                    .Select(x => new DirectMention(x.UserId, x.Display ?? string.Empty))
+                    .ToList(),
                 Attachments = m.Attachments
                     .Select(a => a.Adapt<MessageAttachmentDto>())
                     .ToList()
@@ -154,10 +162,26 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
 
     }
     
+    public async Task<Message> CheckExistAsync(Guid id, CancellationToken ct = default)
+    {
+        return await context.Messages.AsNoTracking()
+            .Include(x => x.Conversation)
+            .Where(m => m.PublicId == id)
+            .FirstOrDefaultAsync(ct)
+            ?? throw new NotFoundException(MessageCode.Chatting.MessageNotFound);
+
+    }
+    
     public async Task<Message> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await context.Messages.AsNoTracking()
             .Include(x => x.Conversation)
+            .Include(x => x.SenderUser)
+                .ThenInclude(x => x!.Avatar)
+            .Include(x => x.Attachments)
+                .ThenInclude(x => x!.MediaFile)
+            .Include(x => x.Mentions)
+            .Include(x => x.ReplyToMessage)
             .Where(m => m.PublicId == id)
             .FirstOrDefaultAsync(ct)
             ?? throw new NotFoundException(MessageCode.Chatting.MessageNotFound);
@@ -170,23 +194,5 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
             .Where(m => m.ConversationId == convId)
             .OrderByDescending(m => m.SentAt)
             .FirstOrDefaultAsync(ct);
-    }
-    
-    // --- Helpers ---
-
-    // Simple snippet around the first match (case-insensitive).
-    private static string BuildSnippet(string text, string term, int ctxChars = 30, int maxLen = 140)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return "[Attachment]";
-        var idx = text.IndexOf(term, StringComparison.OrdinalIgnoreCase);
-        if (idx < 0)
-            return text.Length <= maxLen ? text : text[..maxLen];
-
-        var start = Math.Max(0, idx - ctxChars);
-        var end = Math.Min(text.Length, idx + term.Length + ctxChars);
-        var snippet = text[start..end];
-        if (start > 0) snippet = "…" + snippet;
-        if (end < text.Length) snippet += "…";
-        return snippet.Length <= maxLen ? snippet : snippet[..maxLen];
     }
 }

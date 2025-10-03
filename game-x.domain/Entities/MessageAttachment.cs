@@ -12,7 +12,7 @@ public sealed class MessageAttachment : BaseEntity<int>, IAuditable
 
     public int SortOrder { get; set; }
 
-    [MaxLength(64)] 
+    [MaxLength(64)]
     public string? AddedByActorId { get; set; }
     [MaxLength(64)] 
     public string? AddedByUserId { get; set; }

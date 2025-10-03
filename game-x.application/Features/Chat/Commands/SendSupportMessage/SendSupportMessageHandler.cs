@@ -82,7 +82,7 @@ public sealed class SendSupportMessageHandler(
                 Attachments = message.Attachments.Adapt<List<MessageAttachmentDto>>()
             };
             
-            var updatedConv = await conversationService.GetConversationDetailAsync(conv.PublicId, ct);
+            var updatedConv = await conversationService.GetConvByIdAsync(conv.PublicId, ct);
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
             var dto = new CreatedMessageSignalResult(
                 Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
@@ -136,7 +136,7 @@ public sealed class SendSupportMessageHandler(
         if (replyMessageId is not null && replyMessageId.Value != Guid.Empty)
         {
             var rid = replyMessageId.Value;
-            var replyMessage = await messageRepo.GetByIdAsync(rid, ct);
+            var replyMessage = await messageRepo.CheckExistAsync(rid, ct);
             replyMessageIntId = replyMessage.Id;
         }
         

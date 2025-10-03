@@ -62,8 +62,9 @@ public sealed class MessageService(
             });
         
         var attachmentsDto = await Task.WhenAll(attachmentTasks);
+        var avatarUrl = msg.SenderUser?.Avatar != null ? await fileCache.GetFileUrl(msg.SenderUser.Avatar, ct) : null;
         
-        return msg.Adapt<ListedMessageDto>() with { Attachments = attachmentsDto };
+        return msg.Adapt<ListedMessageDto>() with { Attachments = attachmentsDto, SenderUserAvatarUrl = avatarUrl};
     }
     
     public async Task CreateMessageAttachmentsAsync(

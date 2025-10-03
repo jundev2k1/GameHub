@@ -101,7 +101,7 @@ public class SocialLinkRepo(GameXContext context): ISocialLinkRepo, IRepository
                 {
                     UserId = x.u.Id,
                     Nickname = x.u.Nickname,
-                    Email = x.u.Email,
+                    Email = x.u.Email!,
                     Avatar = x.u.Avatar,
                     LinkId = fl == null ? null : fl.PublicId,
                     State = fl == null ? null : fl.State,

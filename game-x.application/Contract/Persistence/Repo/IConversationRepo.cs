@@ -7,7 +7,8 @@ public interface IConversationRepo
     IQueryable<Conversation> GetHiddenConversationsForClientAsync(string userId, CancellationToken ct = default);
     IQueryable<Conversation> GetMyConversationsForClientAsync(string userId, CancellationToken ct = default);
     Task<Conversation?> GetSupportConversationAsync(string actorId, CancellationToken ct = default);
-    Task<Conversation> GetConversationDetailAsync(Guid convId, CancellationToken ct = default);
+    Task<Conversation> GetConvByIdAsync(Guid convId, CancellationToken ct = default);
+    Task<Conversation?> GetConvByIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default);
     Task<Conversation?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default);
     Task<Conversation?> FindForPairAsync(string userA, string userB, CancellationToken ct = default);
     Task<Conversation?> FindPublicAsync(CancellationToken ct = default);

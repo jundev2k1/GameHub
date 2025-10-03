@@ -1,14 +1,14 @@
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Events.OnDirectMessageCreated;
+namespace game_x.application.Events.OnMentionMembers;
 
-public sealed class OnDirectMessageCreatedHandler(
+public sealed class OnMentionMembersHandler(
     IUnitOfWork unitOfWork,
     IChatHubService chatHubService,
-    IConversationMemberRepo convMemberRepo) : IApplicationEventHandler<OnDirectMessageCreatedEvent>
+    IConversationMemberRepo convMemberRepo) : IApplicationEventHandler<OnMentionMembersEvent>
 {
-    public async Task Handle(OnDirectMessageCreatedEvent @event, CancellationToken ct = default)
+    public async Task Handle(OnMentionMembersEvent @event, CancellationToken ct = default)
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {

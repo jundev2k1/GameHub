@@ -33,6 +33,8 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
     public ICollection<Message> Messages { get; set; } = new List<Message>();
     [NotMapped]
     public int? UnreadCount { get; set; }
+    [NotMapped]
+    public bool? IsHidden { get; set; }
     
     public static Conversation Create(
         ConversationType type,
