@@ -154,10 +154,20 @@ public sealed class OnLiveStreamDonatedHandler(
             giftSnapshot);
         await liveStreamChatRepo.CreateAsync(chatMessage);
 
-        this.ChatMessage = chatMessage.Adapt<LiveStreamChatMessageDto>();
-        this.ChatMessage.StreamId = streamInfo.Id;
-        this.ChatMessage.Nickname = donor.Nickname;
-        this.ChatMessage.DonationAmount = amount;
+        this.ChatMessage = new LiveStreamChatMessageDto()
+        {
+            Id = chatMessage.PublicId,
+            StreamId = streamInfo.Id,
+            Nickname = donor.Nickname,
+            DonationAmount = amount,
+            IsHost = donor.Id == streamInfo.AssignedTo?.Id,
+            Message = chatMessage.Message,
+            MessageType = chatMessage.MessageType,
+            SenderId = chatMessage.SenderId,
+            DeleteReason = chatMessage.DeleteReason,
+            IsDeleted = chatMessage.IsDeleted,
+            SentAt = chatMessage.SentAt
+        };
     }
 
     private async Task CreateNotificationForDonor(
