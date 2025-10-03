@@ -45,7 +45,7 @@ public sealed class DonateWithGiftHandler(
             targetGiftPrice.TokenCost,
             targetCrypto.Id,
             request.Message.Trim(),
-            gift.Id);
+            gift);
         await eventDispatcher.Publish(@event, ct);
 
         return Unit.Value;

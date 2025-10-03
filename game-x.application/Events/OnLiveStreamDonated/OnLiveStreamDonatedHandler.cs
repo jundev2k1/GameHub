@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.application.Utils;
 using System.Text.Json;
@@ -10,16 +11,20 @@ namespace game_x.application.Events.OnLiveStreamDonated;
 
 public sealed class OnLiveStreamDonatedHandler(
     IUnitOfWork unitOfWork,
+    IUserRepo userRepo,
     IUserBalanceRepo userBalanceRepo,
     ITransactionRepo transactionRepo,
     INotificationRepo notificationRepo,
+    ILiveStreamChatRepo liveStreamChatRepo,
     ILiveStreamDonationRepo liveStreamDonationRepo,
     ILiveStreamManagerCacheService liveStreamManager,
     IClientHubService clientHub,
-    ILiveStreamHubService liveStreamHub) : IApplicationEventHandler<OnLiveStreamDonatedEvent>
+    ILiveStreamHubService liveStreamHub,
+    IApplicationEventDispatcher eventDispatcher) : IApplicationEventHandler<OnLiveStreamDonatedEvent>
 {
     public async Task Handle(OnLiveStreamDonatedEvent @event, CancellationToken ct = default)
     {
+        var donorInfo = await userRepo.GetUserByIdAsync(@event.UserId, ct);
         await unitOfWork.WithTransactionAsync(async () =>
         {
             // Decrease user balance
@@ -35,14 +40,15 @@ public sealed class OnLiveStreamDonatedHandler(
 
             await CreateTransaction(TransactionType.TransferSent, @event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
             await CreateTransaction(TransactionType.TransferReceived, @event.Amount, @event.StreamInfo.AssignedTo!.Id, feeAmount: 0, @event.CryptoId, ct);
-            await CreateDonation(@event.StreamInfo, @event.Amount, @event.UserId, @event.Message, @event.GiftId, ct);
-            await CreateNotificationForDoner(@event.UserId, this.StreamDonation!, ct);
+            await CreateDonation(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
+            await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Gift);
+            await CreateNotificationForDonor(@event.UserId, this.StreamDonation!, ct);
             await CreateNotificationForStreamer(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
         }, ct);
 
-        // Notify doner
-        if (this.DonerNotification != null)
-            await clientHub.SendNotificationToMemberAsync(@event.UserId, this.DonerNotification);
+        // Notify donor
+        if (this.DonorNotification != null)
+            await clientHub.SendNotificationToMemberAsync(@event.UserId, this.DonorNotification);
 
         // Notify talent
         if (this.TalentNotification != null)
@@ -53,6 +59,22 @@ public sealed class OnLiveStreamDonatedHandler(
         {
             liveStreamManager.AddDonationToStream(@event.StreamInfo.StreamKey, this.StreamDonation);
             await liveStreamHub.NotifyDonationCompleted(@event.StreamInfo.StreamKey, this.StreamDonation);
+        }
+
+        // Notify chat message for stream
+        if (this.ChatMessage != null)
+        {
+            liveStreamManager.AddMessageToStream(@event.StreamInfo.StreamKey, this.ChatMessage);
+            await liveStreamHub.SendChatMessage(@event.StreamInfo.StreamKey, this.ChatMessage);
+        }
+
+        // Refresh balance for talent and donor
+        if (@event.StreamInfo.AssignedTo!.Id != @event.UserId)
+        {
+            var talentBalanceChangeEvent = new OnUserBalanceUpdatedEvent(@event.StreamInfo.AssignedTo.Id);
+            await eventDispatcher.Publish(talentBalanceChangeEvent, ct);
+            var donorBalanceChangeEvent = new OnUserBalanceUpdatedEvent(@event.UserId);
+            await eventDispatcher.Publish(donorBalanceChangeEvent, ct);
         }
     }
 
@@ -87,22 +109,59 @@ public sealed class OnLiveStreamDonatedHandler(
     private async Task CreateDonation(
         LiveStreamStatusDto streamInfo,
         decimal amount,
-        string userId,
+        User donor,
         string message = "",
-        int? giftId = null,
+        LiveStreamGift? gift = null,
         CancellationToken ct = default)
     {
         var donation = LiveStreamDonation.Create(
             streamInfo.LocalId,
-            userId,
+            donor.Id,
             message,
-            amount,
-            giftId);
+            amount);
+        if (gift != null)
+            donation.SetGift(gift);
+
         await liveStreamDonationRepo.CreateAsync(donation, ct);
         this.StreamDonation = donation.Adapt<LiveStreamDonationDto>();
+        this.StreamDonation.DonorName = donor.Nickname;
+        this.StreamDonation.LivestreamScheduleId = streamInfo.Id;
+        this.StreamDonation.GiftId = gift?.PublicId;
     }
 
-    private async Task CreateNotificationForDoner(
+    private async Task CreateStreamMessage(
+        LiveStreamStatusDto streamInfo,
+        decimal amount,
+        User donor,
+        LiveStreamGift? gift = null)
+    {
+        string? giftSnapshot = null;
+        if (gift != null)
+        {
+            var giftInfo = new Dictionary<string, string>()
+            {
+                { "giftName", gift.Name }
+            };
+            giftSnapshot = JsonSerializer.Serialize(giftInfo);
+        }
+
+        var chatMessage = LiveStreamChatMessage.Create(
+            Guid.NewGuid(),
+            streamInfo.LocalId,
+            donor.Id,
+            $"A donation of {amount} has been made!",
+            LiveStreamChatMessageType.Donation,
+            amount,
+            giftSnapshot);
+        await liveStreamChatRepo.CreateAsync(chatMessage);
+
+        this.ChatMessage = chatMessage.Adapt<LiveStreamChatMessageDto>();
+        this.ChatMessage.StreamId = streamInfo.Id;
+        this.ChatMessage.Nickname = donor.Nickname;
+        this.ChatMessage.DonationAmount = amount;
+    }
+
+    private async Task CreateNotificationForDonor(
         string userId,
         LiveStreamDonationDto donationDto,
         CancellationToken ct = default)
@@ -114,7 +173,7 @@ public sealed class OnLiveStreamDonatedHandler(
             NotificationSeverity.Info,
             JsonSerializer.Serialize(donationDto));
         await notificationRepo.AddNotificationAsync(notification, ct);
-        this.DonerNotification = notification.Adapt<NotificationDto>();
+        this.DonorNotification = notification.Adapt<NotificationDto>();
     }
 
     private async Task CreateNotificationForStreamer(
@@ -132,7 +191,8 @@ public sealed class OnLiveStreamDonatedHandler(
         this.TalentNotification = notification.Adapt<NotificationDto>();
     }
 
-    private NotificationDto? DonerNotification { get; set; }
+    private NotificationDto? DonorNotification { get; set; }
     private NotificationDto? TalentNotification { get; set; }
     private LiveStreamDonationDto? StreamDonation { get; set; }
+    private LiveStreamChatMessageDto? ChatMessage { get; set; }
 }

@@ -50,6 +50,9 @@ public sealed class LiveStreamChatMessageConfig : IEntityTypeConfiguration<LiveS
         builder.Property(lcm => lcm.SentAt)
             .IsRequired();
 
+        builder.Property(lcm => lcm.Metadata)
+            .IsRequired();
+
         builder.Ignore(lcm => lcm.CreatedAt);
         builder.Ignore(lcm => lcm.UpdatedAt);
 

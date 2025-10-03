@@ -13,6 +13,7 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
     public bool IsDeleted { get; private set; } = false;
     public string? DeleteReason { get; private set; }
     public DateTime SentAt { get; private set; }
+    public string? Metadata { get; private set; }
 
     public static LiveStreamChatMessage Create(
         Guid publicId,
@@ -20,7 +21,8 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
         string senderId,
         string message,
         LiveStreamChatMessageType messageType,
-        decimal? donationAmount = null)
+        decimal? donationAmount = null,
+        string? metadata = null)
     {
         if (string.IsNullOrWhiteSpace(senderId))
             throw new ArgumentException("SenderId cannot be null or empty.", nameof(senderId));
@@ -42,7 +44,8 @@ public sealed class LiveStreamChatMessage : BaseEntity<int>
             Message = message,
             MessageType = messageType,
             DonationAmount = donationAmount,
-            SentAt = DateTime.UtcNow
+            SentAt = DateTime.UtcNow,
+            Metadata = metadata,
         };
     }
 

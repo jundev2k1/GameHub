@@ -34,6 +34,7 @@ public sealed class MediaFileConfig : IEntityTypeConfiguration<MediaFile>
             .IsRequired();
 
         builder.Property(m => m.Metadata)
+            .HasColumnType("jsonb")
             .IsRequired(false);
     }
 }

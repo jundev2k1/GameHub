@@ -10,4 +10,4 @@ public record OnLiveStreamDonatedEvent(
     decimal Amount,
     int CryptoId,
     string Message = "",
-    int? GiftId = null) : IApplicationEvent;
+    LiveStreamGift? Gift = null) : IApplicationEvent;
