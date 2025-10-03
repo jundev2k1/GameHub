@@ -1,6 +1,6 @@
 ﻿namespace game_x.domain.Entities;
 
-public sealed class InteractionRuleMessage : BaseEntity<int>, IAuditable
+public sealed class InteractionRuleMessage : BaseEntity<object>, IAuditable
 {
     public int RuleId { get; private set; }
     public InteractionRule Rule { get; private set; } = default!;
