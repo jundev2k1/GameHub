@@ -19,6 +19,10 @@ namespace game_x.persistence.gamex.persistence.Migrations
                 oldType: "text",
                 oldNullable: true);
 
+            migrationBuilder.DropColumn(
+                name: "metadata",
+                table: "livestream_chat_messages");
+
             migrationBuilder.AddColumn<string>(
                 name: "metadata",
                 table: "livestream_chat_messages",
