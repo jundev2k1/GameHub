@@ -34,6 +34,7 @@ public sealed class StreamTimeoutCheckerJob(
 
         // Get all active streams from cache which are live or offline less than timeout minutes
         var allActiveStreams = liveStreamManager.GetAllStreamKeys()
+            .SelectMany(kvp => kvp.Value)
             .Select(liveStreamManager.GetLiveStreamStatus)
             .Where(s => s is not null
                 && s.EndTime < DateTime.UtcNow

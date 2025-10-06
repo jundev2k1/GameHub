@@ -7,7 +7,7 @@ namespace game_x.application.Contract.Infrastructure.Caching;
 public interface ILiveStreamManagerCacheService
 {
     #region Stream Management
-    string[] GetAllStreamKeys();
+    Dictionary<string, string[]> GetAllStreamKeys();
 
     void InitLiveStream(LiveStreamStatusDto streamInfo);
 

@@ -12,6 +12,7 @@ public sealed class GetActiveStreamsHandler(
     {
         // Get all active streams
         var streamTasks = liveStreamManager.GetAllStreamKeys()
+            .SelectMany(kvp => kvp.Value)
             .Select(GetSearchItem);
         var allActiveStreams = await Task.WhenAll(streamTasks);
         var streamList = allActiveStreams.Where(stream => stream is not null);

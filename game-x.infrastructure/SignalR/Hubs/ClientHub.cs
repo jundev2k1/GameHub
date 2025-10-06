@@ -1,9 +1,9 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.LiveStream;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.User.Dtos;
-using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
 using game_x.share.Extensions;
@@ -28,13 +28,14 @@ public interface IClientHub
 
     Task GameBalanceUpdated(GameBalanceNotificationDto notificationDto);
 
-    Task OnReceiveLiveStreamingShortcuts(LiveStreamStatusDto[] streamInfo);
+    Task OnReceiveLiveStreamingShortcuts(LiveStreamShortcutInfo[] streamInfo);
 }
 
 [Authorize(Roles = AppRoles.User)]
 public sealed class ClientHub(
     ISender sender,
     ILiveStreamRepo liveStreamRepo,
+    IFileManagerCacheService fileManagerCache,
     ILiveStreamManagerCacheService liveStreamManager,
     IAppLogger<ClientHub> logger) : Hub<IClientHub>
 {
@@ -57,11 +58,22 @@ public sealed class ClientHub(
 
     private async Task HandleSendLiveStreamShortcut(string userId)
     {
-        var streamList = await liveStreamRepo.GetsByTalentIdAsync(userId);
-        var streamStatusList = streamList
-            .Select(s => liveStreamManager.GetLiveStreamStatus(s.StreamKey))
+        var streamList = liveStreamManager.GetAllStreamKeys();
+        if (!streamList.TryGetValue(userId, out var activeStreamKeys))
+            return;
+
+        var streamStatusTaskList = activeStreamKeys
+            .Select(async streamKey =>
+            {
+                var streamInfo = liveStreamManager.GetLiveStreamStatus(streamKey);
+                if (streamInfo == null) return null;
+
+                streamInfo.Thumbnail = await fileManagerCache.GetFileUrl(streamInfo.ThumbnailId);
+                return streamInfo.Adapt<LiveStreamShortcutInfo>();
+            })
             .Where(s => s is not null)
             .ToArray();
+        var streamStatusList = await Task.WhenAll(streamStatusTaskList);
         if (streamStatusList.Length == 0) return;
 
         await Clients.Caller.OnReceiveLiveStreamingShortcuts(streamStatusList!);

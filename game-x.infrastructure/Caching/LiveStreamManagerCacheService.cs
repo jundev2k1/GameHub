@@ -18,10 +18,10 @@ public sealed class LiveStreamManagerCacheService(
     private const string LiveStreamPrefix = "livestream:";
 
     #region Stream Management
-    public string[] GetAllStreamKeys()
+    public Dictionary<string, string[]> GetAllStreamKeys()
     {
         var cacheKey = $"{LiveStreamPrefix}streams";
-        var result = Get<string[]>(cacheKey) ?? [];
+        var result = Get<Dictionary<string, string[]>>(cacheKey) ?? [];
         return result;
     }
 
@@ -29,15 +29,18 @@ public sealed class LiveStreamManagerCacheService(
     {
         if (streamInfo.StreamKey.IsNullOrWhiteSpace())
             throw new ArgumentException("Stream key cannot be null or empty.", streamInfo.StreamKey);
+        if ((streamInfo.AssignedTo?.Id).IsNullOrEmpty())
+            throw new ArgumentException("Stream key is not assigned to any talent.");
 
         var cacheKey = $"{LiveStreamPrefix}streams:{streamInfo.StreamKey}";
         Set(cacheKey, streamInfo);
 
         var cacheListKey = $"{LiveStreamPrefix}streams";
-        var streamList = GetAllStreamKeys();
-        if (!streamList.Contains(streamInfo.StreamKey))
-            streamList = [.. streamList, streamInfo.StreamKey];
-        Set(cacheListKey, streamList);
+        var streamDic = GetAllStreamKeys();
+        streamDic[streamInfo.AssignedTo!.Id] = streamDic.TryGetValue(streamInfo.AssignedTo!.Id, out var streamList)
+            ? [.. streamList, streamInfo.StreamKey]
+            : [streamInfo.StreamKey];
+        Set(cacheListKey, streamDic);
     }
 
     public void ConnectLiveStream(string streamKey)
@@ -89,11 +92,23 @@ public sealed class LiveStreamManagerCacheService(
 
     public void RemoveLiveStream(string streamKey)
     {
-        var streamList = GetAllStreamKeys()
-            .Where(key => key != streamKey)
-            .ToArray();
+        var streamDic = GetAllStreamKeys();
+        foreach (var kvp in streamDic)
+        {
+            if (!kvp.Value.Contains(streamKey)) continue;
+
+            var streamKeyList = kvp.Value.Where(sk => sk != streamKey).ToArray();
+            if (streamKeyList.Length == 0)
+            {
+                streamDic.Remove(streamKey);
+                continue;
+            }
+
+            streamDic[kvp.Key] = [.. kvp.Value.Where(sk => sk != streamKey)];
+        }
+
         var streamListCacheKey = $"{LiveStreamPrefix}streams";
-        Set(streamListCacheKey, streamList);
+        Set(streamListCacheKey, streamDic);
 
         var streamDetailCacheKey = $"{LiveStreamPrefix}streams:{streamKey}";
         Remove(streamDetailCacheKey);
