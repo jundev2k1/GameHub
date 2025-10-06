@@ -19,6 +19,7 @@ public sealed class JoinLiveStreamHandler(
 {
     public async Task<JoinLiveStreamResult> Handle(JoinLiveStreamCommand request, CancellationToken ct = default)
     {
+        var userId = userAccessor.GetUserId();
         var streamSetting = await liveStreamRepo
             .GetByIdAsync(request.Id, ct);
         if (streamSetting.Status != LiveStreamStatus.Live)
@@ -31,7 +32,7 @@ public sealed class JoinLiveStreamHandler(
                 new { streamSetting.CancellationReason });
 
         // Check if the live stream has started
-        if (streamSetting.StartTime > DateTime.UtcNow)
+        if ((streamSetting.AssignedId != userId) && (streamSetting.StartTime > DateTime.UtcNow))
             throw new ForbiddenException(
                 MessageCode.System.Forbidden,
                 "Live stream has not started yet.",
@@ -43,7 +44,7 @@ public sealed class JoinLiveStreamHandler(
 
         // Check if the user is blocked from viewing the stream
         var targetBlackListItem = streamInfo.BlackList
-            .FirstOrDefault(i => i.UserId == userAccessor.GetUserId()
+            .FirstOrDefault(i => i.UserId == userId
                 && i.Action == BlackListAction.View
                 && i.BanUntil > DateTime.UtcNow);
         if (targetBlackListItem != null)

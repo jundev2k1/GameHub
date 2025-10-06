@@ -115,6 +115,14 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             ?? throw new NotFoundException(nameof(streamKey), streamKey);
     }
 
+    public async Task<LivestreamSchedule[]> GetsByTalentIdAsync(string talentId, CancellationToken ct = default)
+    {
+        return await context.LiveStreamSchedules
+            .AsNoTracking()
+            .Where(ls => ls.AssignedId == talentId)
+            .ToArrayAsync(ct);
+    }
+
     public async Task CreateAsync(LivestreamSchedule schedule, CancellationToken ct = default)
     {
         await context.LiveStreamSchedules.AddAsync(schedule, ct);
