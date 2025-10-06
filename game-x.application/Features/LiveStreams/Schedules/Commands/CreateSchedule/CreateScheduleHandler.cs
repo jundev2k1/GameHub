@@ -12,6 +12,11 @@ public sealed class CreateScheduleHandler(
 {
     public async Task<Unit> Handle(CreateScheduleCommand request, CancellationToken ct = default)
     {
+        // Check overlapping times before assigning talent
+        if (request.TalentId.IsNotNullOrEmpty())
+            await CheckOverlapTime(request.TalentId!, request.StartTime, request.EndTime);
+
+        // check if exist categories
         var categoryIds = request.Categories
             .Select(c => c.Id)
             .ToArray();
@@ -65,6 +70,27 @@ public sealed class CreateScheduleHandler(
                 category.IsPrimary,
                 category.Priority);
             yield return categoryMapping;
+        }
+    }
+
+    private async Task CheckOverlapTime(string talentId, DateTime startTime, DateTime endTime)
+    {
+        var streams = await liveStreamRepo.GetsByTalentIdAsync(talentId);
+        foreach (var stream in streams)
+        {
+            var isOverlaps = startTime <= stream.EndTime && endTime >= stream.StartTime;
+            if (isOverlaps)
+            {
+                throw new BadRequestException(
+                    MessageCode.System.ValidateFailed,
+                    new
+                    {
+                        IsOverlapTime = true,
+                        stream.Title,
+                        stream.StartTime,
+                        stream.EndTime
+                    });
+            }
         }
     }
 }

@@ -15,6 +15,10 @@ public sealed class AssignTalentHandler(
         User? talent = null;
         await liveStreamRepo.UpdateAsync(request.Id, async livestream =>
         {
+            // Check overlapping times before assigning talent
+            await CheckOverlapTime(request.TalentId, livestream.StartTime, livestream.EndTime);
+
+            // Check if valid status, only allow Scheduled status
             if (livestream.Status != LiveStreamStatus.Scheduled)
                 throw new BadRequestException("Only scheduled livestream can be assigned talent.");
 
@@ -40,5 +44,26 @@ public sealed class AssignTalentHandler(
         }
 
         return result;
+    }
+
+    private async Task CheckOverlapTime(string talentId, DateTime startTime, DateTime endTime)
+    {
+        var streams = await liveStreamRepo.GetsByTalentIdAsync(talentId);
+        foreach (var stream in streams)
+        {
+            var isOverlaps = startTime <= stream.EndTime && endTime >= stream.StartTime;
+            if (isOverlaps)
+            {
+                throw new BadRequestException(
+                    MessageCode.System.ValidateFailed,
+                    new
+                    {
+                        IsOverlapTime = true,
+                        stream.Title,
+                        stream.StartTime,
+                        stream.EndTime
+                    });
+            }
+        }
     }
 }
