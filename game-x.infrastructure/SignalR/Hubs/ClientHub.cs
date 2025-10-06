@@ -2,7 +2,6 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.LiveStream;
-using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
@@ -34,7 +33,6 @@ public interface IClientHub
 [Authorize(Roles = AppRoles.User)]
 public sealed class ClientHub(
     ISender sender,
-    ILiveStreamRepo liveStreamRepo,
     IFileManagerCacheService fileManagerCache,
     ILiveStreamManagerCacheService liveStreamManager,
     IAppLogger<ClientHub> logger) : Hub<IClientHub>
