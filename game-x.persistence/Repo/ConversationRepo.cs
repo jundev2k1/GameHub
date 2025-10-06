@@ -34,6 +34,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 AssignedAgent = c.AssignedAgent,
                 LastMessageAt = c.LastMessageAt,
                 Messages = c.Messages,
+                Status = c.Status,
                 UnreadCount = context.Messages.Count(m =>
                     m.ConversationId == c.Id &&
                     context.ConversationMembers.Any(cm =>
