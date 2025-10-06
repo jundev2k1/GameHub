@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnLiveStreamDonated;
+using game_x.share.Extensions;
 
 namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithFiatCurrency;
 
@@ -17,8 +18,20 @@ public sealed class DonateWithCryptoTokensHandler(
         var streamInfo = liveStreamManager.GetLiveStreamStatus(request.StreamKey!)
             ?? throw new NotFoundException(nameof(request.StreamKey), request.StreamKey!);
 
-        // Get user balance and talent balance
         var userId = userAccessor.GetUserId();
+
+        // Check if the user is blocked from viewing the stream
+        var banInfo = streamInfo.BlackList.FirstOrDefault(
+            bl => bl.UserId == userId
+            && bl.Action == Dtos.BlackListAction.Donate
+            && bl.BanUntil > DateTime.UtcNow);
+        if (banInfo != null)
+            throw new ForbiddenException(
+                MessageCode.System.Forbidden,
+                "You are blocked from donating this live stream.",
+                new { Action = banInfo.Action.ToCamelCase(), banInfo.BanUntil, Reason = banInfo.Reason.ToCamelCase() });
+
+        // Get user balance and talent balance
         var targetCrypto = await cryptoTokenRepo.GetByIdAsync(request.CryptoTokenId, ct);
         var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, targetCrypto.Id, ct)
             ?? throw new NotFoundException("User banlance not found.");
