@@ -21,11 +21,9 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.LiveStreamGiftLocalId, src => src.Id)
             .Map(dest => dest.LiveStreamGiftId, src => src.LiveStreamGift.PublicId)
             .Map(dest => dest.CryptoTokenLocalId, src => src.CryptoTokenId)
-            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
-            .Map(dest => dest.CoinCost, src => src.TokenCost);
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId);
 
         cfg.NewConfig<LiveStreamGiftPrice, LiveStreamGiftPriceClientDto>()
-            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
-            .Map(dest => dest.CoinCost, src => src.TokenCost);
+            .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId);
     }
 }

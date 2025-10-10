@@ -10,7 +10,7 @@ public class LiveStreamGiftPriceDto
     [JsonIgnore]
     public int LiveStreamGiftLocalId { get; set; }
     public Guid LiveStreamGiftId { get; set; }
-    public decimal CoinCost { get; set; }
+    public decimal TokenCost { get; set; }
     public bool IsActive { get; set; }
     public DateTime UpdatedAt { get; set; }
     public DateTime CreatedAt { get; set; }

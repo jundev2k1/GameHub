@@ -11,7 +11,6 @@ public sealed class GetLiveStreamGiftsByCriteriaValidator : AbstractValidator<Ge
         nameof(LiveStreamGift.Name),
         nameof(LiveStreamGift.Priority),
         nameof(LiveStreamGift.IsActive),
-        nameof(LiveStreamGift.IsDeleted),
         nameof(LiveStreamGift.CreatedAt),
         nameof(LiveStreamGift.UpdatedAt),
     };

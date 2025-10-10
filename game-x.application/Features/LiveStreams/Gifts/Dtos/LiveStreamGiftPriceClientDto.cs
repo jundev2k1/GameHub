@@ -3,5 +3,5 @@
 public sealed class LiveStreamGiftPriceClientDto
 {
     public Guid CryptoTokenId { get; set; }
-    public decimal CoinCost { get; set; }
+    public decimal TokenCost { get; set; }
 }
