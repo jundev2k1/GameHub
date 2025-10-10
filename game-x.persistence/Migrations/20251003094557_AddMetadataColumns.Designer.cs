@@ -10,7 +10,7 @@ using game_x.persistence;
 
 #nullable disable
 
-namespace game_x.persistence.gamex.persistence.Migrations
+namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
     [Migration("20251003094557_AddMetadataColumns")]

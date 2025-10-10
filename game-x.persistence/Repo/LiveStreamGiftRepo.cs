@@ -20,6 +20,7 @@ public sealed class LiveStreamGiftRepo(
     {
         var query = context.LiveStreamGifts
             .AsNoTracking()
+            .Where(lsg => lsg.IsDeleted == false)
             .Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
             .Include(lsg => lsg.GiftPrices)
@@ -48,11 +49,11 @@ public sealed class LiveStreamGiftRepo(
     {
         return await context.LiveStreamGifts
             .AsNoTracking()
-            .Include(lsg => lsg.Icon)
+			.Where(lsg => lsg.IsDeleted == false && lsg.IsActive)
+			.Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
             .Include(lsg => lsg.GiftPrices)
             .ThenInclude(gp => gp.CryptoToken)
-            .Where(lsg => lsg.IsDeleted == false && lsg.IsActive)
             .ToArrayAsync(ct);
     }
 

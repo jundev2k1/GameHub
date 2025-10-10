@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace game_x.persistence.gamex.persistence.Migrations
+namespace game_x.persistence.Migrations
 {
     /// <inheritdoc />
     public partial class AddMetadataColumns : Migration
