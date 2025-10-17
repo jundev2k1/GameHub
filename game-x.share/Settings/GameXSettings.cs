@@ -9,5 +9,5 @@ public sealed class GameXSettings : BaseSettings
     [Required]
     public string PaymentGatewayApiKey { get; set; } = string.Empty;
     [Required]
-    public int PaymentGatewayPlatformId { get; set; }
+    public string PaymentGatewayPlatformId { get; set; } = string.Empty;
 }

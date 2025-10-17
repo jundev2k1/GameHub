@@ -99,7 +99,7 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
         var apiKey = gameXSettings.Value.PaymentGatewayApiKey;
         var payload = tx.ToPaymentGatewayWithdrawalOrderRequest(
             merchantNumber: merchantNumber,
-            platformId: platformId,
+            platformId: int.Parse(platformId), 
             providerId: (int)providerId);
         var signature = asymmetricCryptoService.PaymentGatewaySign(apiKey, payload);
         return new SecureRequest<WithdrawalOrderRequest>

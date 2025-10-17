@@ -10,14 +10,14 @@ public static class TransactionMapping
     public static DepositOrderRequest ToPaymentGatewayDepositOrderRequest(
         this Transaction tx,
         string merchantNumber,
-        int platformId,
+        string platformId,
         int providerId)
     {
         var result = tx.Adapt<DepositOrderRequest>();
         return result with
         {
             UserId = tx.UserId,
-            PlatformId = platformId,
+            PlatformId = Int32.Parse(platformId),
             MerchantId = merchantNumber,
             OrderNumber = tx.TransactionInternal?.OrderNumber ?? string.Empty,
             Amount = tx.Amount,
