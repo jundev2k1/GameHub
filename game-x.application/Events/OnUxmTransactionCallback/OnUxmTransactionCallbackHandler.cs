@@ -53,9 +53,9 @@ public sealed class OnUxmTransactionCallbackHandler(
                 await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
                 {
                     order.UpdateStatus(TransactionStatus.Completed);
-                    order.UpdateUxmResponse(
+                    order.UpdateProviderResponse(
                         actualAmount: @event.ActualAmount,
-                        orderUid: @event.OrderUid,
+                        providerOrderId: @event.ProviderOrderId,
                         hash: @event.Hash,
                         confirmedAt: @event.ConfirmedAt
                     );

@@ -7,7 +7,7 @@
       },
       "launchUrl": "swagger",
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5112"
+      "applicationUrl": "http://[::]:5112"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",

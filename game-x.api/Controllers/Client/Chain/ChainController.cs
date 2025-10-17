@@ -1,7 +1,6 @@
-using game_x.api.Common;
 using game_x.application.Common.Filters;
-using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWithdrawal;
-using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtDeposit;
+using game_x.application.Features.ChainTransactions.Client.Commands.TraceV1.TronUsdtWithdrawal;
+using game_x.application.Features.ChainTransactions.Client.Commands.TraceV1.TronUsdtDeposit;
 using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactionDetail;
 using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactions;
 using game_x.api.Dtos;

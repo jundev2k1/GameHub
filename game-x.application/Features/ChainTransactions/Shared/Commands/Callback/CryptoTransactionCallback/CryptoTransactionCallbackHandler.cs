@@ -21,7 +21,7 @@ public sealed class CryptoTransactionCallbackHandler(
             throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
 
         await eventDispatcher.Publish(new OnUxmTransactionCallbackEvent(
-            OrderUid: requestData.OrderUid,
+            ProviderOrderId: requestData.OrderUid,
             Hash: requestData.Hash,
             OrderNumber: requestData.OrderNumber,
             ActualAmount: requestData.ActualAmount,

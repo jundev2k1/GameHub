@@ -5,7 +5,9 @@ namespace game_x.domain.Entities;
 public class TransactionInternal: BaseEntity<int>, IAuditable
 {
     public Transaction Transaction { get; set; } = null!;
-    /// <summary>UXM's Order ID: The Order ID is returned from the UXM service.</summary>
+    /// <summary>Payment Gateway ProviderId.</summary>
+    public PaymentGatewayProvider ProviderId { get; set; }
+    /// <summary>Provider Order Id (e.g. Uxm Service).</summary>
     public string? OrderUid { get; set; }
     /// <summary>Used to link and identify the order with other services.</summary>
     public string OrderNumber { get; set; } = string.Empty;
@@ -20,15 +22,17 @@ public class TransactionInternal: BaseEntity<int>, IAuditable
     
     public static TransactionInternal Create(
         string orderNumber,
+        PaymentGatewayProvider? providerId = null,
         string? fromAddress = null,
-        string? toAddress = null
-    )
+        string? toAddress = null)
     {
         var txInternal = new TransactionInternal
         {
             OrderNumber = orderNumber,
             FromAddress = fromAddress,
             ToAddress = toAddress,
+            ProviderId = providerId ?? PaymentGatewayProvider.Uxm,
+            
         };
         return txInternal;
     }

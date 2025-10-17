@@ -33,9 +33,11 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using game_x.application.Contract.Infrastructure.ExternalApi.PaymentGateway;
 using game_x.infrastructure.Security;
 using Microsoft.AspNetCore.SignalR;
 using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
+using game_x.infrastructure.ExternalApi.PaymentGateway;
 using game_x.infrastructure.ExternalApi.Srs;
 
 namespace game_x.infrastructure;
@@ -79,6 +81,7 @@ public static class InfrastructureServicesRegistration
         // Add external services
         services.AddScoped<IEmailService, EngageLabEmailService>();
         services.AddScoped<IUxmService, UxmService>();
+        services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
         services.AddScoped<IGameProviderService, GameProviderService>();
         services.AddScoped<ISrsService, SrsService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
@@ -139,6 +142,17 @@ public static class InfrastructureServicesRegistration
             })
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
+        // Payment Gateway API
+        services.AddRefitClient<IPaymentGatewayApi>()
+            .ConfigureHttpClient(c =>
+            {
+                var baseUrl = configuration["PaymentGatewaySettings:Host"]
+                              ?? throw new InvalidOperationException("PaymentGatewaySettings:Host is not configured");
+                c.BaseAddress = new Uri(baseUrl);
+                c.Timeout = TimeSpan.FromSeconds(5);
+            })
+            .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
+        
         // EngageLab API
         services
             .AddRefitClient<IEngageLabEmailApi>(new RefitSettings

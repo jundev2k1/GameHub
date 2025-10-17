@@ -1,4 +1,4 @@
-namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWithdrawal;
+namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV1.TronUsdtWithdrawal;
 
 public sealed class TronUsdtWithdrawalValidator : AbstractValidator<TronUsdtWithdrawalCommand>
 {

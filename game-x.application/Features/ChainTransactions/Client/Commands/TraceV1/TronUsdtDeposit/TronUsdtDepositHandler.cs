@@ -9,7 +9,7 @@ using game_x.share.ExternalApi.Uxm.Dtos;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 
-namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtDeposit;
+namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV1.TronUsdtDeposit;
 
 public sealed class CreateDepositChainTransactionHandler(
     IUxmService uxmService,
@@ -38,9 +38,9 @@ public sealed class CreateDepositChainTransactionHandler(
             var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
             if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
             
-            tx.UpdateUxmResponse(
+            tx.UpdateProviderResponse(
                 amount: result.Data.Amount,
-                orderUid: result.Data.OrderUid,
+                providerOrderId: result.Data.OrderUid,
                 to: result.Data.To);
             
             await unitOfWork.CommitAsync(ct);

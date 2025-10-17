@@ -5,7 +5,7 @@ using game_x.application.Events.OnTransactionInternalCreated;
 using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.application.Utils;
 
-namespace game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtWithdrawal;
+namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV1.TronUsdtWithdrawal;
 
 public sealed class TronUsdtWithdrawalHandler(
     IUserBalanceService userBalanceService,

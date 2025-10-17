@@ -35,8 +35,7 @@ public class Transaction: BaseEntity<int>, IAuditable
         TransactionType type,
         TransactionStatus? status = null,
         decimal? fee = null,
-        string? note = null
-    )
+        string? note = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
 
@@ -89,10 +88,10 @@ public class Transaction: BaseEntity<int>, IAuditable
         TransactionExternal =  txExternal;
     }
     
-    public void UpdateUxmResponse(
+    public void UpdateProviderResponse(
         decimal? amount = null,
         decimal? actualAmount = null,
-        string? orderUid = null, 
+        string? providerOrderId = null, 
         string? hash = null,
         string? to = null,
         DateTime? confirmedAt = null)
@@ -101,7 +100,7 @@ public class Transaction: BaseEntity<int>, IAuditable
         ActualAmount = actualAmount ?? ActualAmount;
         if (TransactionInternal != null)
         {
-            TransactionInternal.OrderUid = orderUid ?? TransactionInternal.OrderUid;
+            TransactionInternal.OrderUid = providerOrderId ?? TransactionInternal.OrderUid;
             TransactionInternal.Hash = hash ?? TransactionInternal.Hash;
             TransactionInternal.ToAddress = to ?? TransactionInternal.ToAddress;
             TransactionInternal.ConfirmedAt = confirmedAt ?? TransactionInternal.ConfirmedAt;

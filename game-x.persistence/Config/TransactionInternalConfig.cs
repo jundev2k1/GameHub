@@ -35,6 +35,10 @@ public sealed class TransactionInternalConfig : IEntityTypeConfiguration<Transac
             .HasColumnType("timestamp with time zone")
             .IsRequired(false);
         
+        builder.Property(x => x.ProviderId)
+            .HasColumnName("provider_id")
+            .IsRequired();
+        
         builder.HasOne(i => i.Transaction)
             .WithOne(t => t.TransactionInternal)
             .HasForeignKey<TransactionInternal>(i => i.Id)

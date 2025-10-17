@@ -1,7 +1,7 @@
 namespace game_x.application.Events.OnUxmTransactionCallback;
 
 public record OnUxmTransactionCallbackEvent(
-    string? OrderUid,
+    string? ProviderOrderId,
     string? OrderNumber,
     string? Hash,
     decimal ActualAmount,

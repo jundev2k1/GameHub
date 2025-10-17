@@ -30,8 +30,7 @@ public static class JsonSignatureNormalizer
 
         return camelAndSorted;
     }
-
-
+    
     private static string ToCamelCase(string input)
     {
         if (string.IsNullOrEmpty(input) || input.Length < 2) return input;
@@ -43,5 +42,4 @@ public static class JsonSignatureNormalizer
         return obj.GetType().GetProperties()
             .ToDictionary(p => p.Name, p => p.GetValue(obj));
     }
-
 }
