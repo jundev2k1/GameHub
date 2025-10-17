@@ -45,7 +45,7 @@ services:
       - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
       - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}
       - GameProviderSettings__AesKey=${GAMEPROVIDER_AESKEY}
-      - GameProviderSettings__Iv=${GAMEPROVIDER_IV}
+      - GameProviderSettings__Iv={GAMEPROVIDER_IV}
       - GameProviderSettings__RevertProxyUrl=${GAMEPROVIDER_REVERTPROXYURL}
 
       - UxmSettings__Host=${UXM_HOST}
