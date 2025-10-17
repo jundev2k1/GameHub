@@ -5,9 +5,9 @@ using game_x.application.Events.OnTransactionInternalCreated;
 using game_x.application.Features.ChainTransactions.Dtos;
 using game_x.application.Utils;
 
-namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtWithdrawal;
+namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtWithdrawalV2;
 
-public sealed class TronUsdtWithdrawalHandler(
+public sealed class TronUsdtWithdrawalV2Handler(
     IUserBalanceService userBalanceService,
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
@@ -15,16 +15,16 @@ public sealed class TronUsdtWithdrawalHandler(
     ITransactionRepo transactionRepo,
     ICryptoTokenRepo cryptoTokenRepo,
     IUserBalanceRepo userBalanceRepo,
-    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<TronUsdtWithdrawalCommand, ListTransactionInternalDto>
+    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<TronUsdtWithdrawalV2Command, ListTransactionInternalDto>
 {
-    public async Task<ListTransactionInternalDto> Handle(TronUsdtWithdrawalCommand request, CancellationToken ct)
+    public async Task<ListTransactionInternalDto> Handle(TronUsdtWithdrawalV2Command request, CancellationToken ct)
     {
         string userId = userAccessor.GetUserId();
         int minimumAmount = 10;
         if(request.Amount < minimumAmount)
             throw new BadRequestException(MessageCode.Accounting.InvalidAmount);
 
-        // await ValidateKyc(userId, ct);
+        await ValidateKyc(userId, ct);
         
         var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(
             userId: userId, 
@@ -66,7 +66,7 @@ public sealed class TronUsdtWithdrawalHandler(
     }
     
     private async Task<Transaction> CreateTransaction(
-        TronUsdtWithdrawalCommand request, 
+        TronUsdtWithdrawalV2Command request, 
         string userId, 
         decimal feeAmount,
         int tokenId,

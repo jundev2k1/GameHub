@@ -1,8 +1,8 @@
 using game_x.application.Features.ChainTransactions.Dtos;
 
-namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtWithdrawal;
+namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtWithdrawalV2;
 
-public record TronUsdtWithdrawalCommand(
+public record TronUsdtWithdrawalV2Command(
     string To,
     decimal Amount,
     Guid CryptoTokenId,

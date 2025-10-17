@@ -1,4 +1,3 @@
-
 using game_x.application.Contract.Infrastructure.ExternalApi.PaymentGateway;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
@@ -11,9 +10,9 @@ using game_x.share.ExternalApi.PaymentGateway.Dtos;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 
-namespace game_x.application.Features.ChainTransactions.Admin.Commands.TraceV2.AdminReviewWithdrawalOrder;
+namespace game_x.application.Features.ChainTransactions.Admin.Commands.TraceV2.AdminReviewWithdrawalOrderV2;
 
-public sealed class AdminReviewWithdrawalOrderHandler(
+public sealed class AdminReviewWithdrawalOrderV2Handler(
     IPaymentGatewayService pgService,
     IUnitOfWork unitOfWork,
     IUserBalanceService userBalanceService,
@@ -23,9 +22,9 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     IAppLogger<Transaction> logger,
     IOptions<GameXSettings> gameXSettings,
     IAsymmetricCryptoService asymmetricCryptoService)
-    : ICommandHandler<AdminReviewWithdrawalOrderCommand, ListTransactionInternalDto>
+    : ICommandHandler<AdminReviewWithdrawalOrderV2Command, ListTransactionInternalDto>
 {
-    public async Task<ListTransactionInternalDto> Handle(AdminReviewWithdrawalOrderCommand request, CancellationToken ct = default)
+    public async Task<ListTransactionInternalDto> Handle(AdminReviewWithdrawalOrderV2Command request, CancellationToken ct = default)
     {
         var tx = await transactionRepo.GetInternalByIdAsync(request.OrderId ?? Guid.Empty, ct);
         

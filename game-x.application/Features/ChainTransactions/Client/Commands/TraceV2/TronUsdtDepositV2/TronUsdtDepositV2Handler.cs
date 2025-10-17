@@ -8,7 +8,7 @@ using game_x.share.ExternalApi.PaymentGateway.Dtos;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 
-namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtDeposit;
+namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtDepositV2;
 
 public sealed class CreateDepositChainTransactionHandler(
     IPaymentGatewayService pgService,
@@ -18,9 +18,9 @@ public sealed class CreateDepositChainTransactionHandler(
     ITransactionRepo transactionRepo,
     IAsymmetricCryptoService asymmetricCryptoService,
     IOptions<GameXSettings> gameXSettings
-) : ICommandHandler<TronUsdtDepositCommand, DepositChainTransactionResponseDto>
+) : ICommandHandler<TronUsdtDepositV2Command, DepositChainTransactionResponseDto>
 {
-    public async Task<DepositChainTransactionResponseDto> Handle(TronUsdtDepositCommand request, CancellationToken ct)
+    public async Task<DepositChainTransactionResponseDto> Handle(TronUsdtDepositV2Command request, CancellationToken ct)
     {
         await unitOfWork.BeginTransactionAsync(ct);
         try
@@ -55,7 +55,7 @@ public sealed class CreateDepositChainTransactionHandler(
     }
 
     private async Task<Transaction> CreateTransaction(
-        TronUsdtDepositCommand request, 
+        TronUsdtDepositV2Command request, 
         string userId,
         CancellationToken ct)
     {

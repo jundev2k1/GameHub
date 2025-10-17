@@ -1,8 +1,8 @@
 ﻿using game_x.application.Features.ChainTransactions.Dtos;
 
-namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtDeposit;
+namespace game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtDepositV2;
 
-public record TronUsdtDepositCommand(
+public record TronUsdtDepositV2Command(
     decimal Amount, 
     string Note,
     Guid CryptoTokenId,

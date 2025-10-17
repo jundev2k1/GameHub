@@ -1,5 +1,5 @@
-using game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtWithdrawal;
-using game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtDeposit;
+using game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtWithdrawalV2;
+using game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtDepositV2;
 using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactionDetail;
 
 namespace game_x.api.Controllers.Client.Chain;
@@ -9,16 +9,16 @@ namespace game_x.api.Controllers.Client.Chain;
 public sealed class ChainV2Controller : BaseApiController
 {
     [HttpPost("withdrawal")]
-    public async Task<IActionResult> CreateWithdrawalTransactionAsync(TronUsdtWithdrawalCommand command, CancellationToken ct)
+    public async Task<IActionResult> CreateWithdrawalTransactionAsync(TronUsdtWithdrawalV2Command v2Command, CancellationToken ct)
     {
-        var result = await Mediator.Send(command, ct);
+        var result = await Mediator.Send(v2Command, ct);
         return ApiResponseFactory.Ok(result);
     }
 
     [HttpPost("deposit")]
-    public async Task<IActionResult> CreateDepositTransactionAsync(TronUsdtDepositCommand command, CancellationToken ct)
+    public async Task<IActionResult> CreateDepositTransactionAsync(TronUsdtDepositV2Command v2Command, CancellationToken ct)
     {
-        var result = await Mediator.Send(command, ct);
+        var result = await Mediator.Send(v2Command, ct);
         return ApiResponseFactory.Ok(result);
     }
     
