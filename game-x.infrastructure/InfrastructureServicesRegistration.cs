@@ -148,7 +148,7 @@ public static class InfrastructureServicesRegistration
             {
                 var baseUrl = configuration["PaymentGatewaySettings:Host"]
                               ?? throw new InvalidOperationException("PaymentGatewaySettings:Host is not configured");
-                c.BaseAddress = new Uri("http://14.224.183.55:5007/");
+                c.BaseAddress = new Uri(baseUrl);
                 c.Timeout = TimeSpan.FromSeconds(5);
             })
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());

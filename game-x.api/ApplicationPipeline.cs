@@ -48,7 +48,7 @@ public static class ApplicationPipeline
     /// </summary>
     private static WebApplication UseMiddlewares(this WebApplication app)
     {
-        //app.UseMiddleware<ExceptionMiddleware>();
+        app.UseMiddleware<ExceptionMiddleware>();
         app.UseMiddleware<AuditSourceMiddleware>();
         return app;
     }
