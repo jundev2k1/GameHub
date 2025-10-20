@@ -76,8 +76,8 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
         {
             var pgRequest = CreatePaymentGatewayRequest(tx, tx.TransactionInternal!.ProviderId);
             var result = await pgService.ProxyWithdrawalAsync(pgRequest);
-            var apiKey = gameXSettings.Value.PaymentGatewayApiKey;
-            bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(apiKey, result.Data, result.Signature);
+            var secretKey = gameXSettings.Value.PaymentGatewaySecretKey;
+            bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(secretKey, result.Data, result.Signature);
             if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
         }
         catch (Exception ex)
@@ -94,19 +94,10 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
     
     private SecureRequest<WithdrawalOrderRequest> CreatePaymentGatewayRequest(Transaction tx, PaymentGatewayProvider providerId)
     {
-        var merchantNumber = gameXSettings.Value.MerchantNumber;
-        var platformId = gameXSettings.Value.PaymentGatewayPlatformId;
-        var apiKey = gameXSettings.Value.PaymentGatewayApiKey;
-        var payload = tx.ToPaymentGatewayWithdrawalOrderRequest(
-            merchantNumber: merchantNumber,
-            platformId: platformId, 
-            providerId: (int)providerId);
-        var signature = asymmetricCryptoService.PaymentGatewaySign(apiKey, payload);
-        return new SecureRequest<WithdrawalOrderRequest>
-        {
-            Data = payload,
-            Signature = signature
-        };
+        var secretKey = gameXSettings.Value.PaymentGatewaySecretKey;
+        var payload = tx.ToPaymentGatewayWithdrawalOrderRequest(providerId: (int)providerId);
+        var signature = asymmetricCryptoService.PaymentGatewaySign(secretKey, payload);
+        return new SecureRequest<WithdrawalOrderRequest> { Data = payload, Signature = signature };
     }
     
     private async Task TryRefundFrozenBalanceAsync(Transaction tx, CancellationToken ct)

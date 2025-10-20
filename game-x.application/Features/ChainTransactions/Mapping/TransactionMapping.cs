@@ -7,18 +7,12 @@ namespace game_x.application.Features.ChainTransactions.Mapping;
 
 public static class TransactionMapping
 {
-    public static DepositOrderRequest ToPaymentGatewayDepositOrderRequest(
-        this Transaction tx,
-        string merchantNumber,
-        int platformId,
-        int providerId)
+    public static DepositOrderRequest ToPaymentGatewayDepositOrderRequest(this Transaction tx, int providerId)
     {
         var result = tx.Adapt<DepositOrderRequest>();
         return result with
         {
             UserId = tx.UserId,
-            PlatformId = platformId,
-            MerchantId = merchantNumber,
             OrderNumber = tx.TransactionInternal?.OrderNumber ?? string.Empty,
             Amount = tx.Amount,
             ProviderId = providerId,
@@ -26,17 +20,11 @@ public static class TransactionMapping
         };
     }
     
-    public static WithdrawalOrderRequest ToPaymentGatewayWithdrawalOrderRequest(
-        this Transaction tx,
-        string merchantNumber,
-        int platformId,
-        int providerId)
+    public static WithdrawalOrderRequest ToPaymentGatewayWithdrawalOrderRequest(this Transaction tx, int providerId)
     {
         var result = tx.Adapt<WithdrawalOrderRequest>();
         return result with
         {
-            PlatformId = platformId,
-            MerchantId = merchantNumber,
             WalletAddress = tx.TransactionInternal?.ToAddress,
             OrderNumber = tx.TransactionInternal?.OrderNumber ?? string.Empty,
             Amount = tx.Amount,
