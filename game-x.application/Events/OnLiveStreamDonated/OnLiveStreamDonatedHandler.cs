@@ -101,7 +101,14 @@ public sealed class OnLiveStreamDonatedHandler(
             fromAddress: string.Empty,
             toAddress: string.Empty);
         transaction.AddTxInternal(transactionInternal);
-        transaction.ConfirmTx(amount, lastedBalanceAfter, DateTime.UtcNow);
+
+        var balanceAfter = type switch
+        {
+            TransactionType.TransferSent => lastedBalanceAfter - amount,
+            TransactionType.TransferReceived => lastedBalanceAfter + amount,
+            _ => throw new NotSupportedException("Invalid type.")
+        };
+        transaction.ConfirmTx(amount, balanceAfter, DateTime.UtcNow);
 
         await transactionRepo.AddAsync(transaction, ct);
     }
