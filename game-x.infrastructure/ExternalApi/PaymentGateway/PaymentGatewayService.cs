@@ -36,7 +36,7 @@ public class PaymentGatewayService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message);
+            logger.LogError("Failed to send deposit request to Payment Gateway: {Ex}", ex);
             throw;
         }
     }
@@ -63,7 +63,7 @@ public class PaymentGatewayService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message);
+            logger.LogError("Failed to send withdrawal request to Payment Gateway: {Ex}", ex);
             throw;
         }
     }
