@@ -1,35 +1,38 @@
 version: "3.8"
 
 services:
-  game-x.api:
-    image: khoidang2110/gamexapi:latest
+  gamex.api:
+    image: game-x.api
     container_name: game-x.api
-    build:
-      context: .
-      dockerfile: game-x.api/Dockerfile
+    restart: always
+    ports:
+      - 8008:8080
+    networks:
+      - dls-gamex
     environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
       - ConnectionStrings__HangfireConnection=${HANGFIREDB_CONNECTION_STRING}
-      - API_PORT=${API_PORT}
-      - HANGFIRE_KEY=${HANGFIRE_KEY}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_ISSUER=${JWT_ISSUER}
-      - JWT_AUDIENCE=${JWT_AUDIENCE}
-      - JWT_PROVIDER=${JWT_PROVIDER}
-      - JWT_VERSION=${JWT_VERSION}
-      - JWT_EXPIRED_MINUTES=${JWT_EXPIRED_MINUTES}
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-     
+
+      - HangfireSettings__Key=${HANGFIRE_KEY}
+
+      - JwtSettings__DurationInMinutes=${JWT_EXPIRED_MINUTES}
+      - JwtSettings__Key=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__Provider=${JWT_PROVIDER}
+      - JwtSettings__Version=${JWT_VERSION}
       - RefreshTokenSettings__DurationInMinutes=${REFRESHTOKEN_EXPIRED_MINUTES}
 
-      - EngageLab__BaseUrl=${EngageLab_BaseUrl}
-      - EngageLab__ApiUser=${EngageLab_ApiUser}
-      - EngageLab__ApiKey=${EngageLab_ApiKey}
-      - EngageLab__From=${EngageLab_From}
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
-      - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
-      - RecurringJobSettings__StreamTimeoutCheckerJob=${RecurringJob_StreamTimeoutCheckerJob}
+      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
+
+      - UxmSettings__Host=${UXM_HOST}
+
+      - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
+      - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}
+      - GameProviderSettings__AesKey=${GAMEPROVIDER_AESKEY}
+      - GameProviderSettings__Iv=${GAMEPROVIDER_IV}
+      - GameProviderSettings__RevertProxyUrl=${GAMEPROVIDER_REVERTPROXYURL}
 
       - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
       - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
@@ -42,16 +45,62 @@ services:
       - SrsSettings__StreamServer=${Srs_StreamServer}
       - SrsSettings__ClientUrl=${Srs_ClientUrl}
 
-      - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
-      - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}
-      - GameProviderSettings__AesKey=${GAMEPROVIDER_AESKEY}
-      - GameProviderSettings__Iv=${GAMEPROVIDER_IV}
-      - GameProviderSettings__RevertProxyUrl=${GAMEPROVIDER_REVERTPROXYURL}
+      - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
+      - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
+      - RecurringJobSettings__StreamTimeoutCheckerJob=${RecurringJob_StreamTimeoutCheckerJob}
 
-      - UxmSettings__Host=${UXM_HOST}
+      - EngageLabSettings__BaseUrl=${EngageLab_BaseUrl}
+      - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
+      - EngageLabSettings__ApiKey=${EngageLab_ApiKey}
+      - EngageLabSettings__From=${EngageLab_From}
+
+      - SpamProtectionSettings_MaxVerifyAttempts=${SpamProtection_MaxVerifyAttempts}
+      - SpamProtectionSettings_VerifyLockMinutes=${SpamProtection_VerifyLockMinutes}
+      - SpamProtectionSettings_VerifySlidingMinutes=${SpamProtection_VerifySlidingMinutes}
+
       - GameXSettings__MerchantNumber=${GAME_X_MERCHANT_NUMBER}
-      - GameXSettings__PaymentGatewayPlatformId=${GAME_X_PAYMENT_GATEWAY_PLATFORM_ID}
+      - GameXSettings__PaymentGatewaySecretKey=${GAME_X_PAYMENT_GATEWAY_SECRET_KEY}
       - GameXSettings__PaymentGatewayApiKey=${GAME_X_PAYMENT_GATEWAY_API_KEY}
       - PaymentGatewaySettings__Host=${PAYMENT_GATEWAY_HOST}
 
+  seq:
+    image: datalust/seq:latest
+    container_name: game-x.seq
+    restart: always
+    ports:
+      - "8002:80"
+    networks:
+      - dls-gamex
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINUSERNAME=admin
+      - SEQ_FIRSTRUN_ADMINPASSWORD=admin1234
+    volumes:
+      - game-x-seq-data:/data
 
+  srs:
+    image: ossrs/srs:5
+    container_name: game-x.srs
+    ports:
+      - "1935:1935"   # RTMP port
+#      - "1985:1985"   # HTTP API port
+      - "8080:8080"   # HTTP server port
+    volumes:
+      - ./srs.conf:/usr/local/srs/conf/srs.conf
+      - ./ssl:/ssl:ro
+      - srs_data:/usr/local/srs/objs/nginx/html
+    command: ["./objs/srs", "-c", "conf/srs.conf"]
+    environment:
+      - TZ=Asia/Taipei
+    restart: always
+    networks:
+      - dls-gamex
+
+networks:
+  dls-network:
+    external: true
+
+volumes:
+  game-x-seq-data:
+  srs_data:
+  
