@@ -19,6 +19,6 @@ public sealed class AdminStatistics(GameXContext context) : IAdminStatistics, IS
                 baGroup.Count(ba => (ba.User.Status == UserStatus.Active) && (ba.Status == UserBankAccountStatus.UnderReview))
             ))
             .FirstOrDefaultAsync(ct);
-        return (statistic!.Item1, statistic.Item2, statistic.Item3);
+        return (statistic?.Item1 ?? 0, statistic?.Item2 ?? 0, statistic?.Item3 ?? 0);
     }
 }
