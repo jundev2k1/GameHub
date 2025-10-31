@@ -56,7 +56,7 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message);
+            logger.LogError("Failed to send deposit request to UXM: {Ex}", ex);
             throw;
         }
     }

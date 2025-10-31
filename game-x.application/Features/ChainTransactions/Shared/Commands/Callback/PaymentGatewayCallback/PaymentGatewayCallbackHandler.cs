@@ -16,8 +16,8 @@ public sealed class PaymentGatewayCallbackHandler(
         var (requestData, signature) = request;
 
         // Verify Payment Gateway signature
-        var apiKey = gameXSettings.Value.PaymentGatewayApiKey;
-        bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(apiKey, requestData, signature);
+        var secretKey = gameXSettings.Value.PaymentGatewaySecretKey;
+        bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(secretKey, requestData, signature);
         if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
         
         await eventDispatcher.Publish(new OnUxmTransactionCallbackEvent(

@@ -30,8 +30,8 @@ public sealed class CreateDepositChainTransactionHandler(
             var pgRequest = CreatePaymentGatewayRequest(tx, (int)request.Provider);
             var result = await pgService.ProxyDepositAsync(pgRequest);
 
-            var apiKey = gameXSettings.Value.PaymentGatewayApiKey;
-            bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(apiKey, result.Data, result.Signature);
+            var secretKey = gameXSettings.Value.PaymentGatewaySecretKey;
+            bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(secretKey, result.Data, result.Signature);
             if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
             
             tx.UpdateProviderResponse(amount: result.Data.Amount, to: result.Data.WalletAddress);
@@ -82,18 +82,9 @@ public sealed class CreateDepositChainTransactionHandler(
 
     private SecureRequest<DepositOrderRequest> CreatePaymentGatewayRequest(Transaction tx, int providerId)
     {
-        var merchantNumber = gameXSettings.Value.MerchantNumber;
-        var platformId = gameXSettings.Value.PaymentGatewayPlatformId;
-        var apiKey = gameXSettings.Value.PaymentGatewayApiKey;
-        var payload = tx.ToPaymentGatewayDepositOrderRequest(
-            merchantNumber: merchantNumber,
-            platformId: platformId,
-            providerId: providerId);
-        var signature = asymmetricCryptoService.PaymentGatewaySign(apiKey, payload);
-        return new SecureRequest<DepositOrderRequest>
-        {
-            Data = payload,
-            Signature = signature
-        };
+        var secretKey = gameXSettings.Value.PaymentGatewaySecretKey;
+        var payload = tx.ToPaymentGatewayDepositOrderRequest(providerId: providerId);
+        var signature = asymmetricCryptoService.PaymentGatewaySign(secretKey, payload);
+        return new SecureRequest<DepositOrderRequest> { Data = payload, Signature = signature };
     }
 }

@@ -4,20 +4,27 @@ using game_x.application.Exceptions;
 using game_x.application.Features.ChainTransactions.Mapping;
 using game_x.infrastructure.Security.Asymmetric;
 using game_x.share.ExternalApi.PaymentGateway.Dtos;
+using game_x.share.Settings;
+using Microsoft.Extensions.Options;
 
 namespace game_x.infrastructure.ExternalApi.PaymentGateway;
 
-public class PaymentGatewayService(IAppLogger<PaymentGatewayService> logger, IPaymentGatewayApi api): IPaymentGatewayService
+public class PaymentGatewayService(
+    IAppLogger<PaymentGatewayService> logger, 
+    IPaymentGatewayApi api,
+    IOptions<GameXSettings> gameXSettings): IPaymentGatewayService
 {
     public async Task<SecureResponse<OrderResponse>> ProxyDepositAsync(SecureRequest<DepositOrderRequest> data)
     {
         try
         {
+            var apiKey = gameXSettings.Value.PaymentGatewayApiKey;
+            
             logger.LogInformation(
-                $"Create order request: MerchantOrderId={data.Data.MerchantId}, ProviderId={data.Data.ProviderId}, Amount={data.Data.Amount}, OrderNumber={data.Data.OrderNumber}");
+                $"Create order request: ProviderId={data.Data.ProviderId}, Amount={data.Data.Amount}, OrderNumber={data.Data.OrderNumber}");
 
             var payload = data.Data.Adapt<DepositOrderPayload>() with{Signature = data.Signature};
-            var response = await api.ProxyDepositOrderAsync(payload);
+            var response = await api.ProxyDepositOrderAsync(apiKey, payload);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
                 logger.LogError($"Response failed: Status={response.StatusCode}");
@@ -29,7 +36,7 @@ public class PaymentGatewayService(IAppLogger<PaymentGatewayService> logger, IPa
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message);
+            logger.LogError("Failed to send deposit request to Payment Gateway: {Ex}", ex);
             throw;
         }
     }
@@ -38,11 +45,13 @@ public class PaymentGatewayService(IAppLogger<PaymentGatewayService> logger, IPa
     {
         try
         {
+            var apiKey = gameXSettings.Value.PaymentGatewayApiKey;
+            
             logger.LogInformation(
-                $"Create order request: MerchantOrderId={data.Data.MerchantId}, ProviderId={data.Data.ProviderId}, Amount={data.Data.Amount}, OrderNumber={data.Data.OrderNumber}");
+                $"Create order request: ProviderId={data.Data.ProviderId}, Amount={data.Data.Amount}, OrderNumber={data.Data.OrderNumber}");
 
             var payload = data.Data.Adapt<WithdrawalOrderPayload>() with{Signature = data.Signature};
-            var response = await api.ProxyWithdrawalOrderAsync(payload);
+            var response = await api.ProxyWithdrawalOrderAsync(apiKey, payload);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
                 logger.LogError($"Response failed: Status={response.StatusCode}");
@@ -54,7 +63,7 @@ public class PaymentGatewayService(IAppLogger<PaymentGatewayService> logger, IPa
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message);
+            logger.LogError("Failed to send withdrawal request to Payment Gateway: {Ex}", ex);
             throw;
         }
     }
