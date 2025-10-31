@@ -16,7 +16,7 @@ services:
   gamex.api:
     container_name: game-x.api
     ports:
-      - 8008:8080
+      - 8010:8080
     networks:
       - dls-gamex
     depends_on:
