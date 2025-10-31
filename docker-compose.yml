@@ -97,7 +97,7 @@ services:
       - dls-gamex
 
 networks:
-  dls-network:
+  dls-gamex:
     external: true
 
 volumes:
