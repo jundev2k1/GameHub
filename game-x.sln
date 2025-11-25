@@ -39,6 +39,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{24FBDE
 	ProjectSection(SolutionItems) = preProject
 		deploy\docker-compose.template.yml = deploy\docker-compose.template.yml
 		deploy\env.template = deploy\env.template
+		srs.conf = srs.conf
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D37ACD3F-D923-4611-A692-AD3C1DE10413}"

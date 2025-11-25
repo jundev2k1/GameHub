@@ -1,17 +1,17 @@
 services:
-  gamex.db:
+  db:
     image: postgres:16.4
 
-  gamex.api:
+  api:
     image: game-x.api
     build:
       context: .
       dockerfile: game-x.api/Dockerfile
 
-  gamex.seq:
+  seq:
     image: datalust/seq:latest
 
-  gamex.srs:
+  srs:
     image: ossrs/srs:5
 
 networks:
@@ -19,6 +19,6 @@ networks:
     external: true
 
 volumes:
-  game-x-seq-data:
-  srs_data:
-  postgres_gamex:
+  seq-data:
+  srs-data:
+  db-data:

@@ -87,7 +87,7 @@ services:
     volumes:
       - ./srs.conf:/usr/local/srs/conf/srs.conf
       - ./ssl:/ssl:ro
-      - srs_data:/usr/local/srs/objs/nginx/html
+      - srs-data:/usr/local/srs/objs/nginx/html
     command: ["./objs/srs", "-c", "conf/srs.conf"]
     environment:
       - TZ=Asia/Taipei
