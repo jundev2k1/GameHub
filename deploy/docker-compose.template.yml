@@ -3,13 +3,13 @@ services:
   # PostgreSQL Service
   # ========================
   game-x.db:
-    container_name: game-x.db
+    container_name: pg
     image: postgres:16.2-alpine
     restart: always
     ports:
       - ${POSTGRES_PORT}:5432
     networks:
-      - dls-gamex
+      - default
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
@@ -29,20 +29,16 @@ services:
   # ========================
   game-x.api:
     container_name: game-x.api
-    image: game-x.api
-    build:
-      context: ../
-      dockerfile: game-x.api/Dockerfile
+    image: ${DOCKER_IMAGE}
     restart: always
     ports:
       - ${API_PORT}:8080
     networks:
-      - dls-gamex
+      - default
     depends_on:
       - game-x.db
       - game-x.seq
       - game-x.minio
-      - game-x.srs
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
@@ -91,9 +87,9 @@ services:
   # ========================
   game-x.seq:
     image: datalust/seq:latest
-    container_name: game-x.seq
+    container_name: seq
     networks:
-      - dls-gamex
+      - default
     restart: always
     ports:
       - "${SEQ_PORT}:80"
@@ -109,9 +105,9 @@ services:
   # ========================
   game-x.minio:
     image: minio/minio:latest
-    container_name: game-x.minio
+    container_name: minio
     networks:
-      - dls-gamex
+      - default
     restart: always
     ports:
       - "9000:9000"
@@ -123,25 +119,6 @@ services:
       - minio-data:/data
     command: server --console-address ":9001" /data
 
-  # ========================
-  # Streaming Service
-  # ========================
-  game-x.srs:
-    container_name: game-x.srs
-    image: ossrs/srs:5
-    ports:
-      - "1935:1935"   # RTMP port
-      - "8080:8080"   # HTTP server port
-    volumes:
-      - ./srs.conf:/usr/local/srs/conf/srs.conf  # Change to the path of srs.conf
-      - ./ssl:/ssl:ro
-      - srs-data:/usr/local/srs/objs/nginx/html
-    command: ["/usr/local/srs/objs/srs", "-c", "/usr/local/srs/conf/srs.conf"]
-    environment:
-      - TZ=Asia/Taipei
-    restart: always
-    networks:
-      - dls-gamex
 
 # ========================
 # Volumes
@@ -150,11 +127,12 @@ volumes:
   db-data:
   seq-data:
   minio-data:
-  srs-data:
 
 # ========================
 # Networks
 # ========================
 networks:
-  dls-gamex:
-    external: true
+    default:
+        name: gamex
+
+

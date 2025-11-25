@@ -37,9 +37,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "game-x.share", "game-x.shar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{24FBDE9B-2DEA-43FA-9D60-F20C492D8E5F}"
 	ProjectSection(SolutionItems) = preProject
+		.gitlab-ci.yml = .gitlab-ci.yml
 		deploy\docker-compose.template.yml = deploy\docker-compose.template.yml
+		deploy_gamex.sh.template = deploy_gamex.sh.template
 		deploy\env.template = deploy\env.template
-		srs.conf = srs.conf
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D37ACD3F-D923-4611-A692-AD3C1DE10413}"

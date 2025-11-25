@@ -1,0 +1,35 @@
+﻿#!/bin/bash
+set -e
+
+# 接收參數
+NEW_IMAGE=$1
+REGISTRY_URL=$2    # Registry 網址
+REGISTRY_USER=$3   # 帳號
+REGISTRY_PASS=$4   # 密碼
+
+PROJECT_DIR="/home/dls/gamex"
+ENV_FILE="$PROJECT_DIR/.env"
+
+if [ -z "$NEW_IMAGE" ] || [ -z "$REGISTRY_USER" ]; then
+    echo "錯誤: 缺少必要的參數 (Image, User, Pass)"
+    exit 1
+fi
+
+echo "🚀 [Deploy Script] 切換至專案目錄..."
+cd "$PROJECT_DIR"
+
+echo "🔐 [Deploy Script] 登入 Harbor..."
+# 這裡使用傳進來的密碼登入，確保有權限拉取私有 Image
+echo "$REGISTRY_PASS" | docker login "$REGISTRY_URL" -u "$REGISTRY_USER" --password-stdin
+
+echo "🔧 [Deploy Script] 更新 .env 中的 Image..."
+sed -i "s|^DOCKER_IMAGE=.*|DOCKER_IMAGE=$NEW_IMAGE|" "$ENV_FILE"
+
+echo "🔄 [Deploy Script] Docker Compose 重啟..."
+docker-compose pull game-x.api
+docker-compose up -d
+
+echo "🧹 [Deploy Script] 清理 Image..."
+docker image prune -f
+
+echo "✅ 部署完成！"
