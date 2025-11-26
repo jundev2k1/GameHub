@@ -15,7 +15,7 @@ public sealed class GetScheduleDetailHandler(
         var targetStream = await liveStreamRepo.GetDetailByIdAsync(request.Id, ct);
         var result = targetStream.Adapt<GetScheduleDetailResult>();
         result.StreamUrl = options.Value.StreamServer;
-        result.StreamKey = $"{result.StreamKey}?token={targetStream.Token}";
+        result.StreamKey = $"{result.StreamKey}?vhost={options.Value.VHost}&token={targetStream.Token}";
 
         // Load avatar for assigned talent
         if (targetStream.AssignedTo != null && targetStream.AssignedTo.Avatar != null)

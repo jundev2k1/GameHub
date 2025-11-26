@@ -49,6 +49,7 @@ services:
       - SrsSettings__Host=${Srs_Host}
       - SrsSettings__StreamServer=${Srs_StreamServer}
       - SrsSettings__ClientUrl=${Srs_ClientUrl}
+      - SrsSettings__VHost=${Srs_VHost}
       - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
       - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
       - RecurringJobSettings__StreamTimeoutCheckerJob=${RecurringJob_StreamTimeoutCheckerJob}
