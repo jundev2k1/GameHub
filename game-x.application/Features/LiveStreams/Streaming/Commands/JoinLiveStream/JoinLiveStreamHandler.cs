@@ -5,6 +5,7 @@ using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.share.Extensions;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
+using System.Net;
 using System.Security.Cryptography;
 
 namespace game_x.application.Features.LiveStreams.Streaming.Commands.JoinLiveStream;
@@ -114,5 +115,5 @@ public sealed class JoinLiveStreamHandler(
                 .Replace('/', '_');
 
     private string GenerateUrl(string streamKey, string token) =>
-        $"{options.Value.ClientUrl}/{streamKey}.flv?vhost={options.Value.VHost}&token={token}";
+        $"{options.Value.ClientUrl}/{streamKey}.flv?vhost={WebUtility.UrlEncode(options.Value.VHost)}&token={token}";
 }

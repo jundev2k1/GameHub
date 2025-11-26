@@ -2,6 +2,7 @@
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
+using System.Net;
 
 namespace game_x.application.Features.LiveStreams.Schedules.Queries.GetScheduleDetail;
 
@@ -15,7 +16,7 @@ public sealed class GetScheduleDetailHandler(
         var targetStream = await liveStreamRepo.GetDetailByIdAsync(request.Id, ct);
         var result = targetStream.Adapt<GetScheduleDetailResult>();
         result.StreamUrl = options.Value.StreamServer;
-        result.StreamKey = $"{result.StreamKey}?vhost={options.Value.VHost}&token={targetStream.Token}";
+        result.StreamKey = $"{result.StreamKey}?vhost={WebUtility.UrlEncode(options.Value.VHost)}&token={targetStream.Token}";
 
         // Load avatar for assigned talent
         if (targetStream.AssignedTo != null && targetStream.AssignedTo.Avatar != null)
