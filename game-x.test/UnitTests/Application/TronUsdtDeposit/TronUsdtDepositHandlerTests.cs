@@ -4,7 +4,7 @@ using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using game_x.application.Features.ChainTransactions.Client.Commands.TronUsdtDeposit;
+using game_x.application.Features.ChainTransactions.Client.Commands.TraceV1.TronUsdtDeposit;
 using game_x.domain.Constants;
 using game_x.domain.Entities;
 using game_x.domain.Enum;
