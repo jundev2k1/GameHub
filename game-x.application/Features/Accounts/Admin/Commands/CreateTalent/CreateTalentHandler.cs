@@ -18,7 +18,7 @@ public sealed class CreateTalentHandler(
         var userId = Guid.CreateVersion7().ToString();
 
         // Create user info
-        var newUser = UserEntity.Create(request.Username, $"{request.Username}@gamex.local");
+        var newUser = UserEntity.Create(request.Username, $"{request.Username}@gamex.local", request.Nickname);
         newUser.Id = userId;
         newUser.ConfirmEmail();
 
