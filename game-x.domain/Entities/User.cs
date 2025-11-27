@@ -19,6 +19,7 @@ public class User : IdentityUser, IEntity, IAuditable
     public ICollection<UserBalance> UserBalances { get; set; } = [];
     public UserExtend? UserExtend { get; set; }
     public UserKyc? UserKyc { get; set; }
+    public TalentWallet? TalentWallet { get; set; }
     public ICollection<UserRole> UserRoles { get; set; } = [];
     public ICollection<UserBankAccount> UserBankAccounts { get; set; } = [];
     public ICollection<SocialLink> RequestedLinks { get; set; } = [];
