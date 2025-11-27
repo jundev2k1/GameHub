@@ -130,7 +130,7 @@ public sealed class UserRepo(
         bool? isKycConfirmed,
         bool? isBankAccountConfirmed,
         int size = 10,
-        bool isIncludeAdmin = false,
+        string[]? roles = null,
         CancellationToken ct = default)
     {
         var query = context.Users
@@ -142,21 +142,27 @@ public sealed class UserRepo(
             .Include(u => u.UserBankAccounts)
             .Where(u => u.Status == UserStatus.Active && !u.UserRoles.Any(ur => ur.Role.Name == AppRoles.Root))
             .AsQueryable();
-        if (!isIncludeAdmin)
-            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Name == AppRoles.User));
+        // Set condition to search with user roles
+        if (roles is not null && roles.Length > 0)
+            query = query.Where(u => u.UserRoles.Any(ur => roles.Contains(ur.Role.Name)));
+        else
+            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Name != AppRoles.Admin));
 
+        // Search with keyword
         if (keyword.IsNotNullOrEmpty())
             query = query.Where(u => u.Nickname.ToLower().Contains(keyword.ToLower()));
 
-        if (isKycConfirmed != null)
+        // Search with kyc or bank account confirmed status
+        var isUser = roles != null && roles.Contains(AppRoles.User);
+        if (isUser && isKycConfirmed != null)
             query = query.Where(u => isKycConfirmed == true
                 ? u.UserKyc != null && u.UserKyc.Status == KycStatus.Approved
                 : u.UserKyc == null || u.UserKyc.Status != KycStatus.Approved);
-
-        if (isBankAccountConfirmed != null)
+        if (isUser && isBankAccountConfirmed != null)
             query = query.Where(u => isBankAccountConfirmed == true
                 ? u.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved)
                 : !u.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved));
+
         var users = await query
             .Take(size)
             .ToArrayAsync(ct);

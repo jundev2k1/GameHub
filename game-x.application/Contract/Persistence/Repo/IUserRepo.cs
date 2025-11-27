@@ -29,7 +29,7 @@ public interface IUserRepo
         bool? isKycConfirmed,
         bool? isBankAccountConfirmed,
         int size = 10,
-        bool isIncludeAdmin = false,
+        string[]? roles = null,
         CancellationToken ct = default);
 
     Task<UserExtend> GetUserExtendAsync(string userId, CancellationToken ct = default);
