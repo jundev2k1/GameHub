@@ -7,7 +7,7 @@ services:
     networks:
       - dls-gamex
     volumes:
-      - postgres_gamex:/var/lib/postgresql/data/
+      - db-data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -77,7 +77,7 @@ services:
       - SEQ_FIRSTRUN_ADMINUSERNAME=admin
       - SEQ_FIRSTRUN_ADMINPASSWORD=admin1234
     volumes:
-      - game-x-seq-data:/data
+      - seq-data:/data
 
   game-x.srs:
     container_name: game-x.srs
