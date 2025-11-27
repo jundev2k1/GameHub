@@ -69,9 +69,9 @@ public sealed class ClientHub(
                 streamInfo.Thumbnail = await fileManagerCache.GetFileUrl(streamInfo.ThumbnailId);
                 return streamInfo.Adapt<LiveStreamShortcutInfo>();
             })
-            .Where(s => s is not null)
             .ToArray();
         var streamStatusList = await Task.WhenAll(streamStatusTaskList);
+        streamStatusList = [.. streamStatusList.Where(i => i is not null)];
         if (streamStatusList.Length == 0) return;
 
         await Clients.Caller.OnReceiveLiveStreamingShortcuts(streamStatusList!);
