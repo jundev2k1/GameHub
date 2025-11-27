@@ -51,7 +51,8 @@ public sealed class AssignTalentHandler(
         var streams = await liveStreamRepo.GetsByTalentIdAsync(talentId);
         foreach (var stream in streams)
         {
-            var isOverlaps = startTime <= stream.EndTime && endTime >= stream.StartTime;
+            var isOverlaps = stream.Status is not (LiveStreamStatus.Cancelled or LiveStreamStatus.Ended)
+                && startTime <= stream.EndTime && endTime >= stream.StartTime;
             if (isOverlaps)
             {
                 throw new BadRequestException(
