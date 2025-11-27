@@ -20,7 +20,7 @@ services:
     networks:
       - dls-gamex
     depends_on:
-      - gamex.db
+      - game-x.db
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
