@@ -22,6 +22,7 @@ public sealed class EntityName
         nameof(User),
         nameof(MediaFile),
         nameof(UserKyc),
+        nameof(TalentWallet),
         nameof(Transaction),
         nameof(TransactionInternal),
         nameof(TransactionExternal),
