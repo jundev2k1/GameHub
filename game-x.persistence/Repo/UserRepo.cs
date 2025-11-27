@@ -371,6 +371,9 @@ public sealed class UserRepo(
     public async Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.Email != null && u.Email.ToLower() == email.ToLower() && !u.IsDeleted, ct);
 
+    public async Task<bool> IsExistUsernameAsync(string username, CancellationToken ct = default)
+        => await userManager.Users.AnyAsync(u => u.UserName != null && u.UserName.ToLower() == username.ToLower() && !u.IsDeleted, ct);
+
     public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.PhoneNumber == phoneNumber && !u.IsDeleted, ct);
 

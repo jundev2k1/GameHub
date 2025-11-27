@@ -9,6 +9,12 @@ public sealed class CreateTalentHandler(
 {
     public async Task<Unit> Handle(CreateTalentCommand request, CancellationToken ct = default)
     {
+        var isExistUsername = await userRepo.IsExistUsernameAsync(request.Username, ct);
+        if (isExistUsername) throw new BadRequestException(MessageCode.User.UserAlreadyExists);
+
+        var isExistNickname = await userRepo.IsExistNicknameAsync(request.Nickname, ct);
+        if (isExistNickname) throw new BadRequestException(MessageCode.User.NicknameAlreadyExists);
+
         var userId = Guid.CreateVersion7().ToString();
 
         // Create user info

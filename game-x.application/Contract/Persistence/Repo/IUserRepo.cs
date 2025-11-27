@@ -61,6 +61,8 @@ public interface IUserRepo
     Task<bool> IsExistUserIdAsync(string userId, CancellationToken ct = default);
     Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default);
 
+    Task<bool> IsExistUsernameAsync(string username, CancellationToken ct = default);
+
     Task<bool> IsExistPhoneNumberAsync(string phoneNumber, CancellationToken ct = default);
 
     Task<bool> IsExistNicknameAsync(string nickname, CancellationToken ct = default);
