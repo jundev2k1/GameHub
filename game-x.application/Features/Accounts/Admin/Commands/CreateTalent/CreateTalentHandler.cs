@@ -9,7 +9,7 @@ public sealed class CreateTalentHandler(
 {
     public async Task<Unit> Handle(CreateTalentCommand request, CancellationToken ct = default)
     {
-        var newUser = UserEntity.Create(request.Email, request.Email);
+        var newUser = UserEntity.Create(request.Username, $"{request.Username}@gamex.local");
         newUser.ConfirmEmail();
 
         await userRepo.AddUserAsync(
