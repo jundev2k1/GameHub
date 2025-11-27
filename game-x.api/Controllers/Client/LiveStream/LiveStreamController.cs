@@ -4,10 +4,10 @@ using game_x.application.Features.LiveStreams.Streaming.Queries.GetChatMessageIn
 
 namespace game_x.api.Controllers.Client.LiveStream;
 
+[Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
 [Route("/api/user/livestreams")]
 public sealed class LiveStreamController : BaseApiController
 {
-    [Authorize(Roles = AppRoles.User)]
     [HttpPost("{id:guid}/join")]
     public async Task<IActionResult> JoinLiveStreamAsync(Guid id)
     {
@@ -16,7 +16,6 @@ public sealed class LiveStreamController : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
 
-    [Authorize(Roles = AppRoles.User)]
     [HttpGet("{streamKey}/chats")]
     public async Task<IActionResult> GetChatsInStreamAsync(string streamKey, [FromQuery] GetChatMessageInStreamRequest request)
     {
