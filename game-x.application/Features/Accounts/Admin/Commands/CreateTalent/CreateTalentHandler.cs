@@ -9,8 +9,16 @@ public sealed class CreateTalentHandler(
 {
     public async Task<Unit> Handle(CreateTalentCommand request, CancellationToken ct = default)
     {
+        var userId = Guid.CreateVersion7().ToString();
+
+        // Create user info
         var newUser = UserEntity.Create(request.Username, $"{request.Username}@gamex.local");
+        newUser.Id = userId;
         newUser.ConfirmEmail();
+
+        // Add wallet
+        var wallet = TalentWallet.Create(userId);
+        newUser.AddTalentWallet(wallet);
 
         await userRepo.AddUserAsync(
             user: newUser,

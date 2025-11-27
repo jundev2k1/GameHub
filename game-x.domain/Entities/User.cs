@@ -127,4 +127,9 @@ public class User : IdentityUser, IEntity, IAuditable
 
         UserBankAccounts.Add(bankAccount);
     }
+
+    public void AddTalentWallet(TalentWallet wallet)
+    {
+        TalentWallet = wallet;
+    }
 }
