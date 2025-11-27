@@ -20,7 +20,7 @@ public sealed class TalentWalletConfig : IEntityTypeConfiguration<TalentWallet>
 
         builder.HasOne(tw => tw.Talent)
             .WithOne(u => u.TalentWallet)
-            .HasForeignKey<User>(u => u.Id)
+            .HasForeignKey<TalentWallet>(tw => tw.Id)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
