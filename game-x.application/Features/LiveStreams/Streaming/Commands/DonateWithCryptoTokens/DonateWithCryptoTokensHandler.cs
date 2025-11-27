@@ -4,7 +4,7 @@ using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnLiveStreamDonated;
 using game_x.share.Extensions;
 
-namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithFiatCurrency;
+namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithCryptoTokens;
 
 public sealed class DonateWithCryptoTokensHandler(
     ICryptoTokenRepo cryptoTokenRepo,
