@@ -1,5 +1,5 @@
 services:
-  gamex.db:
+  game-x.db:
     container_name: game-x.db
     restart: always
     expose:
@@ -13,7 +13,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=gamex_db
 
-  gamex.api:
+  game-x.api:
     container_name: game-x.api
     ports:
       - 8010:8080
@@ -65,7 +65,7 @@ services:
       - GameXSettings__PaymentGatewayApiKey=${GAME_X_PAYMENT_GATEWAY_API_KEY}
       - PaymentGatewaySettings__Host=${PAYMENT_GATEWAY_HOST}
 
-  gamex.seq:
+  game-x.seq:
     container_name: game-x.seq
     restart: always
     ports:
@@ -79,7 +79,7 @@ services:
     volumes:
       - game-x-seq-data:/data
 
-  gamex.srs:
+  game-x.srs:
     container_name: game-x.srs
     ports:
       - "1935:1935"   # RTMP port

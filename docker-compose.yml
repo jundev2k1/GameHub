@@ -1,17 +1,17 @@
 services:
-  db:
+  game-x.db:
     image: postgres:16.4
 
-  api:
+  game-x.api:
     image: game-x.api
     build:
       context: .
       dockerfile: game-x.api/Dockerfile
 
-  seq:
+  game-x.seq:
     image: datalust/seq:latest
 
-  srs:
+  game-x.srs:
     image: ossrs/srs:5
 
 networks:
