@@ -1,4 +1,9 @@
-﻿
+﻿# =====================================
+# Dev：   game/api-dev    develop        
+# Demo：  game/api-demo   release/1.3.0
+# Prod：  game/api-prod   main:v1.2.3        # using tag
+# =====================================
+
 stages:
   - build and push
   - deploy
@@ -70,3 +75,32 @@ deploy_dev:
   only:
     - develop
 
+# Demo / Release
+release_docker_build:
+  stage: build and push
+  image: docker
+  <<: *default_tags
+  variables:
+    <<: *build_variables
+    TAG_NAME: $CI_COMMIT_REF_SLUG
+    PROJECT_NAME_API: gamex/api-demo
+  script:
+    - *build_script
+  only:
+    - /^release\//
+
+deploy_demo:
+  stage: deploy
+  <<: *default_tags
+  variables:
+    SERVER: $DEMO_SERVER
+    SSH_PORT: $DEMO_SSH_PORT
+    DEPLOY_HOST: deploy
+    ENVIRONMENT: demo
+    TAG_NAME: $CI_COMMIT_REF_SLUG
+    PROJECT_NAME_API: gamex/api-demo
+  before_script: *deploy_before_script
+  script:
+    - *deploy_script
+  only:
+    - /^release\//
