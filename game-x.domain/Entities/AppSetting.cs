@@ -14,8 +14,10 @@ public sealed class AppSetting : BaseEntity<int>, IAuditable
         ArgumentException.ThrowIfNullOrWhiteSpace(key, nameof(key));
         ArgumentException.ThrowIfNullOrWhiteSpace(key, nameof(value));
 
-        var isExist = typeof(AppSettingConstant).GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Any(f => f.Name.StartsWith("KEY_") && f.Name == key);
+        var isExist = typeof(AppSettingConstant)
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.Name.StartsWith("KEY_"))
+            .Any(f => (string?)f.GetValue(null) == key);
         if (!isExist) throw new ArgumentException(key, nameof(key));
 
         return new AppSetting
@@ -25,5 +27,11 @@ public sealed class AppSetting : BaseEntity<int>, IAuditable
             Description = desc,
             IsEditable = isEdit,
         };
+    }
+
+    public void Update(string value, string desc)
+    {
+        Value = value;
+        Description = desc;
     }
 }
