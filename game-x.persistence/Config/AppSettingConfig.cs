@@ -30,6 +30,6 @@ public sealed class AppSettingConfig : IEntityTypeConfiguration<AppSetting>
         builder.Property(s => s.IsEditable)
             .IsRequired();
 
-        builder.HasIndex(s => s.Key);
+        builder.HasIndex(s => s.Key).IsUnique();
     }
 }

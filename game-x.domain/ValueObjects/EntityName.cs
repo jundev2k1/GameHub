@@ -19,6 +19,7 @@ public sealed class EntityName
     }
 
     private static readonly string[] ValidValues = [
+        nameof(AppSetting),
         nameof(User),
         nameof(MediaFile),
         nameof(UserKyc),
