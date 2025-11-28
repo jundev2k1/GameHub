@@ -29,6 +29,9 @@ public static class Seed
         await SeedRoles(context);
         await SeedUsers(userManager);
 
+        // Seed system wallets
+        await SeedSystemWallet(context);
+
         // Seed asymmetric keys and crypto tokens
         await SeedAsymmetricKeys(cryptoService, context);
         await SeedCryptoTokens(context);
@@ -97,6 +100,22 @@ public static class Seed
                 await userManager.CreateAsync(user, "GTlAWoc2K5BcmZ8Z");
                 await userManager.AddToRoleAsync(user, AppRoles.Root);
             }
+        }
+    }
+
+    private static async Task SeedSystemWallet(GameXContext context)
+    {
+        var wallets = new SystemWallet[]
+        {
+            SystemWallet.Create(SystemWalletType.LiveStreamDonation),
+        };
+
+        foreach (var wallet in wallets)
+        {
+            var isExist = await context.SystemWallets.AsNoTracking().AnyAsync(sw => sw.Type == wallet.Type);
+            if (isExist) continue;
+
+            await context.SystemWallets.AddAsync(wallet);
         }
     }
 

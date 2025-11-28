@@ -23,7 +23,10 @@ public sealed class GameXContext(
     public DbSet<UserRole> AppUserRoles { get; set; }
     public DbSet<UserKyc> UserKycs { get; set; }
     public DbSet<UserBalance> UserBalances { get; set; }
+    public DbSet<SystemWallet> SystemWallets { get; set; }
+    public DbSet<SystemWalletTransaction> SystemWalletTransactions { get; set; }
     public DbSet<TalentWallet> TalentWallets { get; set; }
+    public DbSet<TalentWalletTransaction> TalentWalletTransactions { get; set; }
     public DbSet<AsymmetricKey> AsymmetricKeys { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<MediaFile> MediaFiles { get; set; }
