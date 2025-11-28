@@ -6,7 +6,7 @@ public sealed class SystemWalletTransactionConfig : IEntityTypeConfiguration<Sys
 {
     public void Configure(EntityTypeBuilder<SystemWalletTransaction> builder)
     {
-        builder.ToTable("talent_wallet_transactions");
+        builder.ToTable("system_wallet_transactions");
 
         builder.HasKey(twt => twt.Id);
 
