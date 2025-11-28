@@ -6,7 +6,6 @@ using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.application.Utils;
 using System.Text.Json;
-using static game_x.share.Helper.CursorHelper;
 
 namespace game_x.application.Events.OnLiveStreamDonated;
 
@@ -40,17 +39,10 @@ public sealed class OnLiveStreamDonatedHandler(
                 var newBalance = talentWallet.Balance + @event.Amount;
                 talentWallet.AdjustBalance(newBalance);
 
-                var transaction = Transaction.Create(
-                    sourceType: TransactionSourceType.GameX,
-                    type: type,
-                    userId: userId,
-                    amount: amount,
-                    fee: feeAmount,
-                    cryptoTokenId: tokenId,
-                    note: "Livestream donations.");
                 var tx = TalentWalletTransaction.Create(
                     @event.StreamInfo.AssignedTo!.Id,
-                    TalentTransactionType.Commission);
+                    TalentTransactionType.Commission,
+                    newBalance);
             }, ct);
 
             await CreateTransaction(TransactionType.TransferSent, @event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
