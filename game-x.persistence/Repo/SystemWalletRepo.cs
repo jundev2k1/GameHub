@@ -36,6 +36,13 @@ public sealed class SystemWalletRepo(GameXContext dbContext) : ISystemWalletRepo
             pageSize);
     }
 
+    public async Task<SystemWallet[]> GetAllAsync(CancellationToken ct = default)
+    {
+        return await dbContext.SystemWallets
+            .AsNoTracking()
+            .ToArrayAsync(ct);
+    }
+
     public async Task<SystemWallet> GetWalletAsync(SystemWalletType type, CancellationToken ct = default)
     {
         return await dbContext.SystemWallets.AsNoTracking().FirstOrDefaultAsync(sw => sw.Type == type, ct)

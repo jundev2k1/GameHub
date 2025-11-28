@@ -1,5 +1,6 @@
 ﻿using game_x.api.Dtos;
 using game_x.application.Common.Filters;
+using game_x.application.Features.SystemWallets.Queries.GetSystemWallets;
 using game_x.application.Features.TalentWallets.Queries.GetTalentWalletTransactions;
 
 namespace game_x.api.Controllers.BackOffice.SystemWallets;
@@ -23,6 +24,13 @@ public sealed class SystemWalletsController : BaseApiController
             parameters.PageNumber ?? 1,
             parameters.PageSize ?? 20);
         var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpGet("me")]
+    public async Task<IActionResult> GetSystemWalletsAsync()
+    {
+        var result = await Mediator.Send(new GetSystemWalletsQuery());
         return ApiResponseFactory.Ok(result);
     }
 }

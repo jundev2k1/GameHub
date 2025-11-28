@@ -10,6 +10,8 @@ public interface ISystemWalletRepo
         int pageSize = 20,
         CancellationToken ct = default);
 
+    Task<SystemWallet[]> GetAllAsync(CancellationToken ct = default);
+
     Task<SystemWallet> GetWalletAsync(SystemWalletType type, CancellationToken ct = default);
 
     Task UpdateAsync(SystemWalletType type, Action<SystemWallet> updateAction, CancellationToken ct = default);
