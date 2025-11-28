@@ -36,6 +36,12 @@ public sealed class TalentWalletRepo(GameXContext dbContext) : ITalentWalletRepo
             pageSize);
     }
 
+    public async Task<TalentWallet> GetWalletAsync(string userId, CancellationToken ct = default)
+    {
+        return await dbContext.TalentWallets.AsNoTracking().FirstOrDefaultAsync(tw => tw.Id == userId, ct)
+            ?? throw new NotFoundException(nameof(userId), userId);
+    }
+
     public async Task UpdateAsync(string userId, Action<TalentWallet> updateAction, CancellationToken ct = default)
     {
         var target = await dbContext.TalentWallets

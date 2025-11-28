@@ -10,5 +10,7 @@ public interface ITalentWalletRepo
         int pageSize = 20,
         CancellationToken ct = default);
 
+    Task<TalentWallet> GetWalletAsync(string userId, CancellationToken ct = default);
+
     Task UpdateAsync(string userId, Action<TalentWallet> updateAction, CancellationToken ct = default);
 }
