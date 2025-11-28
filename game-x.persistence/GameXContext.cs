@@ -18,11 +18,16 @@ public sealed class GameXContext(
         IdentityRoleClaim<string>,
         IdentityUserToken<string>>(options)
 {
+    public DbSet<AppSetting> AppSettings { get; set; }
     public DbSet<User> AppUsers { get; set; }
     public DbSet<UserExtend> UserExtends { get; set; }
     public DbSet<UserRole> AppUserRoles { get; set; }
     public DbSet<UserKyc> UserKycs { get; set; }
     public DbSet<UserBalance> UserBalances { get; set; }
+    public DbSet<SystemWallet> SystemWallets { get; set; }
+    public DbSet<SystemWalletTransaction> SystemWalletTransactions { get; set; }
+    public DbSet<TalentWallet> TalentWallets { get; set; }
+    public DbSet<TalentWalletTransaction> TalentWalletTransactions { get; set; }
     public DbSet<AsymmetricKey> AsymmetricKeys { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<MediaFile> MediaFiles { get; set; }

@@ -4,7 +4,6 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.Accounts.Admin.Queries.GetAllActiveTokensByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
 using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
-using game_x.application.Features.Accounts.Admin.Queries.GetUserWithSuggestions;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountByCriteria;
 using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountDetail;
@@ -35,13 +34,6 @@ public sealed class UserController : BaseApiController
             sorts,
             parameters.PageNumber,
             parameters.PageSize);
-        var result = await Mediator.Send(query);
-        return ApiResponseFactory.Ok(result);
-    }
-
-    [HttpGet("suggestions")]
-    public async Task<IActionResult> GetUserWithSuggestionsAsync([FromQuery] GetUserWithSuggestionsQuery query)
-    {
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }

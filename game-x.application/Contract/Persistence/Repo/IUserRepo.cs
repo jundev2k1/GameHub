@@ -29,7 +29,7 @@ public interface IUserRepo
         bool? isKycConfirmed,
         bool? isBankAccountConfirmed,
         int size = 10,
-        bool isIncludeAdmin = false,
+        string[]? roles = null,
         CancellationToken ct = default);
 
     Task<UserExtend> GetUserExtendAsync(string userId, CancellationToken ct = default);
@@ -60,6 +60,8 @@ public interface IUserRepo
 
     Task<bool> IsExistUserIdAsync(string userId, CancellationToken ct = default);
     Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default);
+
+    Task<bool> IsExistUsernameAsync(string username, CancellationToken ct = default);
 
     Task<bool> IsExistPhoneNumberAsync(string phoneNumber, CancellationToken ct = default);
 

@@ -51,7 +51,7 @@ public interface ILiveStreamHub
     Task OnDonationCompleted(LiveStreamDonationDto donation);
 }
 
-[Authorize(Roles = AppRoles.User)]
+[Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
 public sealed class LiveStreamHub(
     ISender sender,
     ILiveStreamManagerCacheService liveStreamManager,

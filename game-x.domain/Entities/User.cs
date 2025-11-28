@@ -19,6 +19,7 @@ public class User : IdentityUser, IEntity, IAuditable
     public ICollection<UserBalance> UserBalances { get; set; } = [];
     public UserExtend? UserExtend { get; set; }
     public UserKyc? UserKyc { get; set; }
+    public TalentWallet? TalentWallet { get; set; }
     public ICollection<UserRole> UserRoles { get; set; } = [];
     public ICollection<UserBankAccount> UserBankAccounts { get; set; } = [];
     public ICollection<SocialLink> RequestedLinks { get; set; } = [];
@@ -107,6 +108,7 @@ public class User : IdentityUser, IEntity, IAuditable
     public bool IsRoot => Has(AppRoles.Root);
     public bool IsAdmin => Has(AppRoles.Admin);
     public bool IsCs => Has(AppRoles.Cs);
+    public bool IsTalent => Has(AppRoles.Talent);
     public bool IsUser => Has(AppRoles.User);
 
     public void AddUserExtend(UserExtend userExtend)
@@ -125,5 +127,10 @@ public class User : IdentityUser, IEntity, IAuditable
             throw new ArgumentException("User already has a bank account for this currency.", nameof(bankAccount));
 
         UserBankAccounts.Add(bankAccount);
+    }
+
+    public void AddTalentWallet(TalentWallet wallet)
+    {
+        TalentWallet = wallet;
     }
 }

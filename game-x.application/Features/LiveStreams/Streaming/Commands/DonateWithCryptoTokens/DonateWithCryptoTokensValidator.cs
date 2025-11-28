@@ -1,6 +1,4 @@
-﻿using game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithFiatCurrency;
-
-namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithCryptoTokens;
+﻿namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithCryptoTokens;
 
 public sealed class DonateWithCryptoTokensValidator : AbstractValidator<DonateWithCryptoTokensCommand>
 {

@@ -14,6 +14,7 @@ public static class RoleIds
     public const string Root = "99b9cfef-1e02-cac0-abf6-b87a6e95bd48";
     public const string Admin = "64856429-39cc-2cb0-427e-c6a6549cf10a";
     public const string Cs = "3544228a-e12b-d7c9-da46-373340a7412f";
+    public const string Talent = "bdbaff6d-7c4b-4426-bdff-6db9d29b39ea";
     public const string User = "fe000fef-f758-c67e-2bcf-617d059487c3";
 }
 
@@ -24,9 +25,15 @@ public static class Seed
         UserManager<User> userManager,
         GameXContext context)
     {
+        // Seed appsetting
+        await SeedAppSettings(context);
+
         // Seed roles and users
         await SeedRoles(context);
         await SeedUsers(userManager);
+
+        // Seed system wallets
+        await SeedSystemWallet(context);
 
         // Seed asymmetric keys and crypto tokens
         await SeedAsymmetricKeys(cryptoService, context);
@@ -41,9 +48,25 @@ public static class Seed
 
         // Seed public conversation
         await SeedPublicConversation(context);
-        
+
         // Save changes to the database
         await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedAppSettings(GameXContext context)
+    {
+        var settings = new AppSetting[]
+        {
+            AppSetting.Create(AppSettingConstant.KEY_TALENT_COMMISSION_RATE, "70", string.Empty, true),
+        };
+
+        foreach (var setting in settings)
+        {
+            var isExist = await context.AppSettings.AsNoTracking().AnyAsync(sw => sw.Key == setting.Key);
+            if (isExist) continue;
+
+            await context.AppSettings.AddAsync(setting);
+        }
     }
 
     private static async Task SeedRoles(GameXContext context)
@@ -55,9 +78,15 @@ public static class Seed
             Role.Create(AppRoles.Root, RoleIds.Root),
             Role.Create(AppRoles.Admin, RoleIds.Admin),
             Role.Create(AppRoles.Cs, RoleIds.Cs),
+            Role.Create(AppRoles.Talent, RoleIds.Talent),
             Role.Create(AppRoles.User, RoleIds.User),
         };
-        await context.Roles.AddRangeAsync(roles);
+        foreach (var role in roles)
+        {
+            if (await context.Roles.AsNoTracking().AnyAsync(r => r.Id == role.Id)) continue;
+
+            await context.Roles.AddAsync(role);
+        }
     }
 
     private static async Task SeedUsers(UserManager<User> userManager)
@@ -90,6 +119,22 @@ public static class Seed
                 await userManager.CreateAsync(user, "GTlAWoc2K5BcmZ8Z");
                 await userManager.AddToRoleAsync(user, AppRoles.Root);
             }
+        }
+    }
+
+    private static async Task SeedSystemWallet(GameXContext context)
+    {
+        var wallets = new SystemWallet[]
+        {
+            SystemWallet.Create(SystemWalletType.LiveStreamDonation),
+        };
+
+        foreach (var wallet in wallets)
+        {
+            var isExist = await context.SystemWallets.AsNoTracking().AnyAsync(sw => sw.Type == wallet.Type);
+            if (isExist) continue;
+
+            await context.SystemWallets.AddAsync(wallet);
         }
     }
 
@@ -278,7 +323,7 @@ public static class Seed
         await CreateEntity("澳洲幸運10番攤", "AL10FT", GameConstants.PLATFORM_ID_G598);
         await CreateEntity("澳洲幸運5番攤", "AL5FT", GameConstants.PLATFORM_ID_G598);
     }
-    
+
     private static async Task SeedPublicConversation(GameXContext db, CancellationToken ct = default)
     {
         var exists = await db.Conversations.AnyAsync(c => c.Type == ConversationType.Public, ct);

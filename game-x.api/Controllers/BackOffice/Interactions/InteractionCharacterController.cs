@@ -105,9 +105,9 @@ public sealed class InteractionCharacterController : BaseApiController
         var command = new UpdatePoseCharacterCommand(
             id,
             poseId,
-            request.Name.Trim(),
-            request.Description.Trim(),
-            request.Notes.Trim(),
+            request.Name?.Trim() ?? string.Empty,
+            request.Description?.Trim() ?? string.Empty,
+            request.Notes?.Trim() ?? string.Empty,
             request.Pose is not null ? FileUpload.FromFormFile(request.Pose) : null);
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
