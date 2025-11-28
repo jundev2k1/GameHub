@@ -2,7 +2,7 @@
 
 namespace game_x.domain.Entities;
 
-public sealed class AppSetting : BaseEntity<int>
+public sealed class AppSetting : BaseEntity<int>, IAuditable
 {
     public string Key { get; private set; } = string.Empty;
     public string Value { get; private set; } = string.Empty;
