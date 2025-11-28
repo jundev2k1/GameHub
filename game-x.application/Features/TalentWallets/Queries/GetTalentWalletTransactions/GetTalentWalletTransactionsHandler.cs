@@ -4,13 +4,13 @@ using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.TalentWallets.DTOs;
 using game_x.application.Features.TalentWallets.Mapping;
 
-namespace game_x.application.Features.TalentWallets.Queries.GetTalentWallets;
+namespace game_x.application.Features.TalentWallets.Queries.GetTalentWalletTransactions;
 
-public sealed class GetTalentWalletsHandler(
+public sealed class GetTalentWalletTransactionsHandler(
     ICriteriaBuilder<TalentWalletTransaction> criteriaBuilder,
-    ITalentWalletRepo talentWalletRepo) : IQueryHandler<GetTalentWalletsQuery, PaginationResult<TalentWalletTransactionDto>>
+    ITalentWalletRepo talentWalletRepo) : IQueryHandler<GetTalentWalletTransactionsQuery, PaginationResult<TalentWalletTransactionDto>>
 {
-    public async Task<PaginationResult<TalentWalletTransactionDto>> Handle(GetTalentWalletsQuery request, CancellationToken ct = default)
+    public async Task<PaginationResult<TalentWalletTransactionDto>> Handle(GetTalentWalletTransactionsQuery request, CancellationToken ct = default)
     {
         var searchResult = await talentWalletRepo.GetsByCriteriaAsync(
             query => criteriaBuilder.Apply(

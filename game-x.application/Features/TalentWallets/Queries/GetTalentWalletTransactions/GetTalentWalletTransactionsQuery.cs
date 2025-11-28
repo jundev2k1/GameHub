@@ -2,9 +2,9 @@
 using game_x.application.Common.Filters;
 using game_x.application.Features.TalentWallets.DTOs;
 
-namespace game_x.application.Features.TalentWallets.Queries.GetTalentWallets;
+namespace game_x.application.Features.TalentWallets.Queries.GetTalentWalletTransactions;
 
-public record GetTalentWalletsQuery(
+public record GetTalentWalletTransactionsQuery(
     IEnumerable<QueryFilter> Filters,
     IEnumerable<QuerySort> Sorts,
     int PageIndex = 1,
