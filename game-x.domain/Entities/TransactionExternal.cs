@@ -1,6 +1,6 @@
 namespace game_x.domain.Entities;
 
-public class TransactionExternal: BaseEntity<int>, IAuditable
+public class TransactionExternal: BaseEntity<int>
 {
     public Transaction Transaction { get; set; } = null!;
     public string G598Sno { get; private set; } = string.Empty;

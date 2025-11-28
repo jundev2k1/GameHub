@@ -29,9 +29,6 @@ public sealed class TalentWalletTransactionConfig : IEntityTypeConfiguration<Tal
             .IsRequired()
             .HasConversion<short>();
 
-        builder.Property(twt => twt.BalanceBefore)
-            .IsRequired();
-
         builder.Property(twt => twt.BalanceAfter)
             .IsRequired();
 
@@ -44,12 +41,12 @@ public sealed class TalentWalletTransactionConfig : IEntityTypeConfiguration<Tal
         builder.HasIndex(twt => twt.PublicId).IsUnique();
 
         builder.HasIndex(twt => twt.Type);
-        builder.HasIndex(twt => new { twt.BalanceBefore, twt.BalanceAfter });
+        builder.HasIndex(twt => twt.BalanceAfter);
         builder.HasIndex(twt => twt.CreatedAt);
 
         builder.HasOne(twt => twt.TalentWallet)
             .WithMany(tw => tw.Transactions)
             .HasForeignKey(twt => twt.TalentId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

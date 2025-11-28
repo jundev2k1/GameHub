@@ -21,4 +21,7 @@ public sealed class TalentWallet : BaseEntity<string>, IAuditable
     public void AdjustBalance(decimal newBalance) => Balance = newBalance;
 
     public void ClearBalance() => Balance = 0;
+
+    public void AddTransaction(TalentWalletTransaction transaction)
+        => Transactions.Add(transaction);
 }
