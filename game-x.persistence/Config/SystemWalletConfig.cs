@@ -17,6 +17,7 @@ public sealed class SystemWalletConfig : IEntityTypeConfiguration<SystemWallet>
             .IsRequired()
             .HasConversion<short>();
 
+        builder.HasIndex(sw => sw.Type).IsUnique();
         builder.HasIndex(sw => sw.Balance);
     }
 }
