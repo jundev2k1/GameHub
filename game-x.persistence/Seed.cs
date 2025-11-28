@@ -25,6 +25,9 @@ public static class Seed
         UserManager<User> userManager,
         GameXContext context)
     {
+        // Seed appsetting
+        await SeedAppSettings(context);
+
         // Seed roles and users
         await SeedRoles(context);
         await SeedUsers(userManager);
@@ -45,9 +48,25 @@ public static class Seed
 
         // Seed public conversation
         await SeedPublicConversation(context);
-        
+
         // Save changes to the database
         await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedAppSettings(GameXContext context)
+    {
+        var settings = new AppSetting[]
+        {
+            AppSetting.Create(AppSettingConstant.KEY_TALENT_COMMISSION_RATE, "70", string.Empty, true),
+        };
+
+        foreach (var setting in settings)
+        {
+            var isExist = await context.AppSettings.AsNoTracking().AnyAsync(sw => sw.Key == setting.Key);
+            if (isExist) continue;
+
+            await context.AppSettings.AddAsync(setting);
+        }
     }
 
     private static async Task SeedRoles(GameXContext context)
@@ -304,7 +323,7 @@ public static class Seed
         await CreateEntity("澳洲幸運10番攤", "AL10FT", GameConstants.PLATFORM_ID_G598);
         await CreateEntity("澳洲幸運5番攤", "AL5FT", GameConstants.PLATFORM_ID_G598);
     }
-    
+
     private static async Task SeedPublicConversation(GameXContext db, CancellationToken ct = default)
     {
         var exists = await db.Conversations.AnyAsync(c => c.Type == ConversationType.Public, ct);
