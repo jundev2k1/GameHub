@@ -2,7 +2,7 @@ using game_x.api.Common;
 using game_x.application.Common.Filters;
 using game_x.application.Features.TalentWallets.Queries.GetTalentWallets;
 
-namespace game_x.api.Controllers.Client.Talent;
+namespace game_x.api.Controllers.Talent;
 
 [Authorize(Roles = AppRoles.Talent)]
 [Route("api/user/talents")]
