@@ -2,7 +2,7 @@
 
 public sealed class TalentWalletTransaction : BaseEntity<long>
 {
-    public Guid PublicId { get; private set; } = Guid.NewGuid();
+    public Guid PublicId { get; private set; } = Guid.CreateVersion7();
     public string TalentId { get; private set; } = string.Empty;
     public TalentWallet TalentWallet { get; private set; } = default!;
     public decimal Amount { get; private set; }
@@ -14,6 +14,7 @@ public sealed class TalentWalletTransaction : BaseEntity<long>
     public static TalentWalletTransaction Create(
         string talentId,
         TalentTransactionType type,
+        decimal amount,
         decimal balanceAfter,
         string? referenceId = null,
         string? adjustedBy = null)
@@ -25,6 +26,7 @@ public sealed class TalentWalletTransaction : BaseEntity<long>
         {
             TalentId = talentId,
             Type = type,
+            Amount = amount,
             BalanceAfter = balanceAfter,
             ReferenceId = referenceId,
             AdjustedBy = adjustedBy

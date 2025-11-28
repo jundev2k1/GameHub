@@ -18,4 +18,7 @@ public sealed class SystemWallet : BaseEntity<Guid>, IAuditable
     }
 
     public void AdjustBalance(decimal balance) => Balance = balance;
+
+    public void AddTransaction(SystemWalletTransaction transaction)
+        => Transactions.Add(transaction);
 }
