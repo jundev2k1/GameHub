@@ -19,6 +19,9 @@ public sealed class UpdateSettingsHandler(
             {
                 await appSettingRepo.UpdateAsync(setting.Key, appSetting =>
                 {
+                    if (appSetting.Value != setting.Value && !appSetting.IsEditable)
+                        throw new BadRequestException("This setting not allow to edit.");
+
                     appSetting.Update(setting.Value, setting.Description);
                 }, ct);
             }
