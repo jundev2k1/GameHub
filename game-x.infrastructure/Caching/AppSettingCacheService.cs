@@ -11,7 +11,7 @@ public sealed class AppSettingCacheService(
 {
     private AppSettingDto[] Datasource { get { return Get<AppSettingDto[]>("appSetting:list") ?? []; } }
 
-    public void RefreshCacheAsync(CancellationToken ct = default)
+    public void RefreshCache()
     {
         var data = appSettingRepo.GetAll()
             .Select(s => s.Adapt<AppSettingDto>())
@@ -19,11 +19,11 @@ public sealed class AppSettingCacheService(
         Set("appSetting:list", data);
     }
 
-    public AppSettingDto[] GetAllAsync() => Datasource;
+    public AppSettingDto[] GetAll() => Datasource;
 
-    public AppSettingDto? GetAsync(string key) => Datasource.FirstOrDefault(x => x.Key == key);
+    public AppSettingDto? Get(string key) => Datasource.FirstOrDefault(x => x.Key == key);
 
-    public bool IsExistSetting(string key) => Datasource.Any(x => x.Key == key);
+    public bool IsExist(string key) => Datasource.Any(x => x.Key == key);
 
     public decimal TalentCommissionRate => decimal.Parse(
         Datasource.FirstOrDefault(i => i.Key == AppSettingConstant.KEY_TALENT_COMMISSION_RATE)?.Value ?? "0");

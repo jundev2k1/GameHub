@@ -10,7 +10,7 @@ public sealed class UpdateSettingsHandler(
 {
     public async Task<Unit> Handle(UpdateSettingsCommand request, CancellationToken ct = default)
     {
-        var isExist = request.Settings.All(i => appSettingCache.IsExistSetting(i.Key));
+        var isExist = request.Settings.All(i => appSettingCache.IsExist(i.Key));
         if (!isExist) throw new BadRequestException("One or more settings do not exist in the DB.");
 
         await unitOfWork.WithTransactionAsync(async () =>
@@ -23,6 +23,8 @@ public sealed class UpdateSettingsHandler(
                 }, ct);
             }
         }, ct);
+
+        appSettingCache.RefreshCache();
 
         return Unit.Value;
     }

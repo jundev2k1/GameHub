@@ -4,13 +4,13 @@ namespace game_x.application.Contract.Infrastructure.Caching;
 
 public interface IAppSettingCacheService
 {
-    void RefreshCacheAsync(CancellationToken ct = default);
+    void RefreshCache();
 
-    AppSettingDto[] GetAllAsync();
+    AppSettingDto[] GetAll();
 
-    AppSettingDto? GetAsync(string key);
+    AppSettingDto? Get(string key);
 
-    bool IsExistSetting(string key);
+    bool IsExist(string key);
 
     decimal TalentCommissionRate { get; }
 }
