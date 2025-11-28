@@ -2,9 +2,9 @@
 
 public interface IAppSettingRepo
 {
-    Task<Dictionary<string, string>> GetAllSettingsAsync(CancellationToken ct = default);
-
     Task<AppSetting[]> GetAllAsync(CancellationToken ct = default);
+
+    AppSetting[] GetAll();
 
     Task CreateAsync(AppSetting setting, CancellationToken ct = default);
 

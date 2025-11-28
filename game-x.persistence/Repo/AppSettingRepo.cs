@@ -6,18 +6,16 @@ namespace game_x.persistence.Repo;
 
 public sealed class AppSettingRepo(GameXContext dbContext) : IAppSettingRepo, IRepository
 {
-    public async Task<Dictionary<string, string>> GetAllSettingsAsync(CancellationToken ct = default)
-    {
-        return await dbContext.AppSettings
-            .AsNoTracking()
-            .ToDictionaryAsync(s => s.Key, s => s.Value, ct);
-    }
-
     public async Task<AppSetting[]> GetAllAsync(CancellationToken ct = default)
     {
         return await dbContext.AppSettings
             .AsNoTracking()
             .ToArrayAsync(ct);
+    }
+
+    public AppSetting[] GetAll()
+    {
+        return [.. dbContext.AppSettings.AsNoTracking()];
     }
 
     public async Task CreateAsync(AppSetting setting, CancellationToken ct = default)

@@ -1,0 +1,30 @@
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.AppSettings.DTOs;
+using Microsoft.Extensions.Caching.Memory;
+
+namespace game_x.infrastructure.Caching;
+
+public sealed class AppSettingCacheService(
+    IMemoryCache cache,
+    IAppSettingRepo appSettingRepo) : CacheService(cache), IAppSettingCacheService
+{
+    private AppSettingDto[] Datasource { get { return Get<AppSettingDto[]>("appSetting:list") ?? []; } }
+
+    public void RefreshCacheAsync(CancellationToken ct = default)
+    {
+        var data = appSettingRepo.GetAll()
+            .Select(s => s.Adapt<AppSettingDto>())
+            .ToArray();
+        Set("appSetting:list", data);
+    }
+
+    public AppSettingDto[] GetAllAsync() => Datasource;
+
+    public AppSettingDto? GetAsync(string key) => Datasource.FirstOrDefault(x => x.Key == key);
+
+    public bool IsExistSetting(string key) => Datasource.Any(x => x.Key == key);
+
+    public decimal TalentCommissionRate => decimal.Parse(
+        Datasource.FirstOrDefault(i => i.Key == AppSettingConstant.KEY_TALENT_COMMISSION_RATE)?.Value ?? "0");
+}
