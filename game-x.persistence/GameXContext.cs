@@ -18,6 +18,7 @@ public sealed class GameXContext(
         IdentityRoleClaim<string>,
         IdentityUserToken<string>>(options)
 {
+    public DbSet<AppSetting> AppSettings { get; set; }
     public DbSet<User> AppUsers { get; set; }
     public DbSet<UserExtend> UserExtends { get; set; }
     public DbSet<UserRole> AppUserRoles { get; set; }
