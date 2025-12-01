@@ -9,6 +9,7 @@ using game_x.share.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace game_x.infrastructure.SignalR.Hubs;
 
@@ -30,7 +31,7 @@ public interface IClientHub
     Task OnReceiveLiveStreamingShortcuts(LiveStreamShortcutInfo[] streamInfo);
 }
 
-[Authorize(Roles = AppRoles.User)]
+[Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
 public sealed class ClientHub(
     ISender sender,
     IFileManagerCacheService fileManagerCache,
@@ -56,6 +57,14 @@ public sealed class ClientHub(
 
     private async Task HandleSendLiveStreamShortcut(string userId)
     {
+        if (Context.User?.Identity?.IsAuthenticated ?? false) return;
+
+        var roles = Context.User?
+            .FindAll(ClaimTypes.Role)
+            .Select(r => r.Value)
+            .ToList() ?? [];
+        if (!roles.Contains(AppRoles.Talent)) return;
+
         var streamList = liveStreamManager.GetAllStreamKeys();
         if (!streamList.TryGetValue(userId, out var activeStreamKeys))
             return;
