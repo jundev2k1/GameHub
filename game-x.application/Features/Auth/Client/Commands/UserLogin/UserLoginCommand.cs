@@ -8,4 +8,5 @@ public record UserLoginResult(
     string Nickname,
     string AccessToken,
     string RefreshToken,
+    string[] Roles,
     string? AvatarUrl = null);

@@ -40,6 +40,7 @@ public sealed class UserLoginHandler(
             Nickname: loggedUser.Nickname,
             AccessToken: tokenInfo.Token,
             RefreshToken: refreshToken.Token,
+            Roles: roles.Items,
             AvatarUrl: loggedUser.AvatarUrl);
     }
 
