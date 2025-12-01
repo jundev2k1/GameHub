@@ -15,4 +15,5 @@ public record JoinLiveStreamResult(
     string? TalentAvatar,
     int ViewCount,
     string Url,
+    string WebRtcUrl,
     LiveStreamBanInfoDto[] BanInfos);
