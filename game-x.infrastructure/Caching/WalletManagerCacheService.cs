@@ -75,10 +75,27 @@ public sealed class WalletManagerCacheService(
     {
         var userWallet = await GetWalletAsync(userId);
         var targetWallet = userWallet.ExternalWallets
-            .FirstOrDefault(w => w.PlatformId == platformId)
-            ?? throw new BadRequestException();
+            .FirstOrDefault(w => w.PlatformId == platformId);
+        if (targetWallet is null)
+        {
+            var g598Platform = gameProviderCache.G598Platform;
+            var g598Balance = await GetGame598Wallet(userId);
+            if (g598Balance.HasValue)
+            {
+                targetWallet = new UserWalletExternalItemDto
+                {
+                    PlatformId = g598Platform.Id,
+                    PlatformName = g598Platform.Name,
+                    Amount = balance,
+                };
+                userWallet.ExternalWallets.Add(targetWallet);
+            }
+        }
+        else
+        {
+            targetWallet.Amount = balance;
+        }
 
-        targetWallet.Amount = balance;
         var cacheKey = $"{CacheKeyPrefix}{userId}";
         Set(cacheKey, userWallet);
     }
