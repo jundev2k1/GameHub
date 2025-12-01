@@ -364,6 +364,48 @@ public sealed class UserRepo(
             page,
             pageSize);
     }
+    public async Task<PaginationResult<UserDto>> GetTalentByCriteriaAsync(
+        Func<IQueryable<UserDto>, IQueryable<UserDto>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var baseQuery = userManager.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .Where(u => !u.IsDeleted && u.UserRoles.Any(ur => ur.Role.NormalizedName == AppRoles.Talent.ToUpper()))
+            .AsQueryable();
+
+        var query = baseQuery
+            .Select(u => new UserDto
+            {
+                Id = u.Id,
+                Nickname = u.Nickname,
+                UserName = u.UserName!,
+                Email = u.Email!,
+                Status = u.Status,
+                CountryCode = u.CountryCode,
+                EmailConfirmed = u.EmailConfirmed,
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt
+            });
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<UserDto>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
 
     public async Task<bool> IsExistUserIdAsync(string userId, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted, ct);

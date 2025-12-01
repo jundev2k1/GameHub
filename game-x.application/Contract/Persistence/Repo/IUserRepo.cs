@@ -57,6 +57,11 @@ public interface IUserRepo
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default);
+    Task<PaginationResult<UserDto>> GetTalentByCriteriaAsync(
+        Func<IQueryable<UserDto>, IQueryable<UserDto>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
 
     Task<bool> IsExistUserIdAsync(string userId, CancellationToken ct = default);
     Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default);
