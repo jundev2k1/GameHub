@@ -1,5 +1,4 @@
 using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
@@ -24,7 +23,7 @@ public sealed class UserLoginHandler(
         if (!isValid) throw new ForbiddenException(errorCode!);
 
         var roles = await authService.GetRolesAsync(loginUser);
-        if (!roles.IsUser) throw new ForbiddenException();
+        if (!roles.IsUser && !roles.IsTalent) throw new ForbiddenException();
 
         if (!loginUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
