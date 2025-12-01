@@ -39,9 +39,11 @@ public sealed class LoginGameHandler(
             // Retry after account created
             targetUser = await userRepo.GetUserByIdAsync(userId, ct);
         }
-
-        // Loggout if user already login
-        await LogoutGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!);
+        else
+        {
+            // Loggout if user already login
+            await LogoutGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!);
+        }
 
         // Login from external API
         var url = await LoginGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!, request, ct)
