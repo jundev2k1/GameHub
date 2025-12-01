@@ -20,7 +20,7 @@ public sealed class TalentWalletTransaction : BaseEntity<long>
         string? adjustedBy = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(talentId);
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(0, balanceAfter);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(balanceAfter, 0);
 
         return new TalentWalletTransaction
         {
