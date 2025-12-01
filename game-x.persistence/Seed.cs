@@ -71,8 +71,6 @@ public static class Seed
 
     private static async Task SeedRoles(GameXContext context)
     {
-        if (await context.Roles.AnyAsync()) return;
-
         var roles = new List<Role>()
         {
             Role.Create(AppRoles.Root, RoleIds.Root),
@@ -83,7 +81,8 @@ public static class Seed
         };
         foreach (var role in roles)
         {
-            if (await context.Roles.AsNoTracking().AnyAsync(r => r.Id == role.Id)) continue;
+            if (await context.Roles.AsNoTracking().AnyAsync(r => r.Id == role.Id))
+                continue;
 
             await context.Roles.AddAsync(role);
         }
