@@ -8,18 +8,17 @@ public sealed class UserExtend : BaseEntity<string>, IEntity
     public string GameProviderNickname { get; private set; } = string.Empty;
     public decimal GameProviderRebateset { get; private set; }
 
-    public static UserExtend Create(
-        string gameProviderAccount = "",
-        string gameProviderPassword = "",
-        string gameProviderNickname = "",
+    public static UserExtend Create() => new ();
+
+    public void UpdateG598Account(
+        string gameProviderAccount,
+        string gameProviderPassword,
+        string gameProviderNickname,
         decimal? gameProviderRebateset = null)
     {
-        return new UserExtend()
-        {
-            GameProviderAccount = gameProviderAccount,
-            GameProviderPassword = gameProviderPassword,
-            GameProviderNickname = gameProviderNickname,
-            GameProviderRebateset = gameProviderRebateset ?? default,
-        };
+        GameProviderAccount = gameProviderAccount;
+        GameProviderPassword = gameProviderPassword;
+        GameProviderNickname = gameProviderNickname;
+        GameProviderRebateset = gameProviderRebateset ?? default;
     }
 }

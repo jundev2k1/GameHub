@@ -16,6 +16,9 @@ public sealed class LoginGameValidator : AbstractValidator<LoginGameCommand>
 
     public LoginGameValidator()
     {
+        RuleFor(x => x.GamePlatformId)
+            .NotEmpty().WithMessage($"{nameof(LoginGameCommand.GamePlatformId)} must be not empty.");
+
         RuleFor(x => x.GameCode)
             .NotEmpty().WithMessage($"{nameof(LoginGameCommand.GameCode)} must be not empty.")
             .Must(code => AllowedGameCodes.Contains(code)).WithMessage($"Invalid {nameof(LoginGameCommand.GameCode)}.");

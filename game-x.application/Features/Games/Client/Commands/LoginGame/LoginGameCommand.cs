@@ -3,6 +3,7 @@
 namespace game_x.application.Features.Games.Client.Commands.LoginGame;
 
 public record LoginGameCommand(
+    [property: JsonIgnore] Guid? GamePlatformId,
     string GameCode,
     string Locale,
     string Address,
