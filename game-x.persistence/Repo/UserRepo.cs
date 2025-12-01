@@ -392,6 +392,8 @@ public sealed class UserRepo(
         var roleResult = await userManager.AddToRolesAsync(user, role.Items);
         if (roleResult.Succeeded) return;
 
+        // Rollback and throw the error
+        await userManager.DeleteAsync(user);
         var roleError = roleResult.Errors.Select(e => e.Description).JoinToString(", ");
         throw new BadRequestException($"Failed to add user to role: {roleError}");
     }
