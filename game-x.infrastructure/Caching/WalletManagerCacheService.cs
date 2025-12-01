@@ -43,12 +43,15 @@ public sealed class WalletManagerCacheService(
 
         var g598Platform = gameProviderCache.G598Platform;
         var g598Balance = await GetGame598Wallet(userId);
-        userWallet.ExternalWallets.Add(new UserWalletExternalItemDto
+        if (g598Balance.HasValue)
         {
-            PlatformId = g598Platform.Id,
-            PlatformName = g598Platform.Name,
-            Amount = g598Balance,
-        });
+            userWallet.ExternalWallets.Add(new UserWalletExternalItemDto
+            {
+                PlatformId = g598Platform.Id,
+                PlatformName = g598Platform.Name,
+                Amount = g598Balance.Value,
+            });
+        }
 
         Set(cacheKey, userWallet);
     }
@@ -79,11 +82,11 @@ public sealed class WalletManagerCacheService(
         Set(cacheKey, userWallet);
     }
 
-    private async Task<decimal> GetGame598Wallet(string userId)
+    private async Task<decimal?> GetGame598Wallet(string userId)
     {
         var targetUser = await userRepo.GetUserByIdAsync(userId);
-        if (targetUser.UserExtend is null)
-            throw new NotFoundException("User extend is not exists.");
+        if (targetUser.UserExtend is null) return null;
+
         var isLogin = gameProviderCache.GetIsLoggedIn(targetUser.UserExtend.GameProviderAccount);
         if (!isLogin)
         {
