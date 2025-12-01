@@ -16,11 +16,9 @@ public sealed class OnGameRegisterHandler(
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await userRepo.UpdateAsync(@event.UserId, async user =>
+            await userRepo.UpdateUserExtendAsync(@event.UserId, async usrex =>
             {
-                var usrex = user.UserExtend ?? UserExtend.Create();
                 await UpdateUserExtendAsync(@event, usrex);
-                user.AddUserExtend(usrex);
             }, ct);
         }, ct);
     }

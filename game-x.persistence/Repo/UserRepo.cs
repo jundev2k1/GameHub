@@ -471,4 +471,14 @@ public sealed class UserRepo(
 
         updateAction.Invoke(targetKyc);
     }
+
+    public async Task UpdateUserExtendAsync(string userId, Func<UserExtend, Task> updateAction, CancellationToken ct = default)
+    {
+        var targetKyc = await context.UserExtends
+            .Include(usrex => usrex.User)
+            .FirstOrDefaultAsync(usrex => usrex.Id == userId && !usrex.User.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+
+        await updateAction.Invoke(targetKyc);
+    }
 }
