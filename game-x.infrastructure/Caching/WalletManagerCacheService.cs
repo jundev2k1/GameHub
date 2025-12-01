@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Dtos;
+using game_x.share.Extensions;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 using Microsoft.Extensions.Caching.Memory;
@@ -85,7 +86,9 @@ public sealed class WalletManagerCacheService(
     private async Task<decimal?> GetGame598Wallet(string userId)
     {
         var targetUser = await userRepo.GetUserByIdAsync(userId);
-        if (targetUser.UserExtend is null) return null;
+        if (targetUser.UserExtend is null
+            || targetUser.UserExtend.GameProviderAccount.IsNullOrWhiteSpace()
+            || targetUser.UserExtend.GameProviderPassword.IsNullOrWhiteSpace()) return null;
 
         var isLogin = gameProviderCache.GetIsLoggedIn(targetUser.UserExtend.GameProviderAccount);
         if (!isLogin)
