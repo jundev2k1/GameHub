@@ -13,8 +13,8 @@ public sealed class SystemWalletsController : BaseApiController
     public async Task<IActionResult> GetSystemTransactionsAsync(GetSystemTransactionsByCriteriaRequest parameters)
     {
         var paramExtends = new Dictionary<string, string>();
-        if (parameters.Type.IsNotNullOrEmpty())
-            paramExtends.Add("type", parameters.Type!);
+        if (parameters.TxType.IsNotNullOrEmpty())
+            paramExtends.Add("type", parameters.TxType!);
 
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);

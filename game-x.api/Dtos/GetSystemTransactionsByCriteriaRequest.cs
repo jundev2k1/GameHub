@@ -5,5 +5,5 @@ namespace game_x.api.Dtos;
 public sealed class GetSystemTransactionsByCriteriaRequest : SearchCriteriaRequest
 {
     [FromQuery(Name = "type")]
-    public string? Type { get; set; }
+    public string? TxType { get; set; }
 }
