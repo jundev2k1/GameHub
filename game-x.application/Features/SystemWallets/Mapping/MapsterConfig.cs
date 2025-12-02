@@ -10,7 +10,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Type, src => src.Type)
             .Map(dest => dest.Balance, src => src.Balance);
 
-        cfg.NewConfig<SystemWalletTransaction, SystemWalletDto>()
+        cfg.NewConfig<SystemWalletTransaction, SystemWalletTransactionDto>()
             .Map(dest => dest.Type, src => src.Wallet.Type);
 
     }
