@@ -1,7 +1,7 @@
 ﻿using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.SystemWallets.Queries.GetSystemWallets;
-using game_x.application.Features.TalentWallets.Queries.GetTalentWalletTransactions;
+using game_x.application.Features.SystemWallets.Queries.GetSystemWalletTransactions;
 
 namespace game_x.api.Controllers.BackOffice.SystemWallets;
 
@@ -18,7 +18,7 @@ public sealed class SystemWalletsController : BaseApiController
 
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
-        var query = new GetTalentWalletTransactionsQuery(
+        var query = new GetSystemWalletTransactionsQuery(
             filters,
             sorts,
             parameters.PageNumber ?? 1,
