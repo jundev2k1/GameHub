@@ -21,7 +21,7 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
             var response = await uxmApi.CreateProxyWithdrawalOrderAsync(data);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
-                logger.LogError($"Response failed: Status={response.StatusCode}, Message={response.Error?.Message}");
+                logger.LogError($"Response failed: Status={response.StatusCode}, Message={response.Error}");
                 throw new ExternalServiceException();
             }
             logger.LogInformation("Withdrawal request successful，OrderUid: {{OrderUid}}", response.Content.Data.OrderUid!);
@@ -48,7 +48,7 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
             var response = await uxmApi.CreateProxyDepositOrderAsync(data);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
-                logger.LogError($"Response failed: Status={response.StatusCode}, Message={response.Error?.Message}");
+                logger.LogError($"Response failed: Status={response.StatusCode}, Message={response.Error}");
                 throw new ExternalServiceException();
             }
             logger.LogInformation("Deposit request successful，OrderUid: {{OrderUid}}", response.Content.Data.OrderUid);
