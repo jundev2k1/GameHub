@@ -23,15 +23,33 @@ public sealed class UpdateGameHandler(
         {
             await gameRepo.UpdateGameAsync(request.Id, async game =>
             {
+                ICollection<GameCategoryMapping>? categories = request.Categories != null
+                    ? [.. GetCategoryMappings(request, game)]
+                    : null;
+                if (categories != null)
+                    await gameRepo.DeleteAllCategoryMappingsAsync(request.Id, ct);
+
+                ICollection<GameTypeMapping>? types = request.Types != null
+                    ? [.. GetTypeMappings(request, game)]
+                    : null;
+                if (types != null)
+                    await gameRepo.DeleteAllTypeMappingsAsync(request.Id, ct);
+
+                ICollection<GameTagMapping>? tags = request.Tags != null
+                    ? [.. GetTagMappings(request, game)]
+                    : null;
+                if (tags != null)
+                    await gameRepo.DeleteAllTagMappingsAsync(request.Id, ct);
+
                 game.UpdateGame(
                     name: request.Name.Trim(),
                     desc: request.Description.Trim(),
                     note: request.Note.Trim(),
                     priority: request.Priority,
                     isActive: request.IsActive,
-                    categories: request.Categories != null ? [.. GetCategoryMappings(request, game)] : null,
-                    types: request.Types != null ? [.. GetTypeMappings(request, game)] : null,
-                    tags: request.Tags != null ? [.. GetTagMappings(request, game)] : null);
+                    categories: categories,
+                    types: types,
+                    tags: tags);
 
                 // Handle upload if new thumbnail is provided
                 if (request.Thumbnail != null)
