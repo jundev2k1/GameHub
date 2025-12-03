@@ -1,4 +1,5 @@
-﻿using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
+﻿using System.Text.Json;
+using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Exceptions;
 using game_x.share.ExternalApi.Uxm.Dtos;
@@ -24,9 +25,9 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
                 logger.LogError(
                     "UXM withdrawal failed. Status={Status}, ErrorMessage={ErrorMessage}, Reason={Reason}, ErrorContent={Content}",
                     response.StatusCode,
-                    response.Error ?? new object(),
-                    response.ReasonPhrase ?? new object(),
-                    response.Content ?? new object()
+                    JsonSerializer.Serialize(response.Error),
+                    JsonSerializer.Serialize(response.ReasonPhrase),
+                    JsonSerializer.Serialize(response.Content)
                 );
                 throw new ExternalServiceException("UXM withdrawal failed");
             }
@@ -57,10 +58,11 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
                 logger.LogError(
                     "UXM deposit failed. Status={Status}, ErrorMessage={ErrorMessage}, Reason={Reason}, ErrorContent={Content}",
                     response.StatusCode,
-                    response.Error ?? new object(),
-                    response.ReasonPhrase ?? new object(),
-                    response.Content ?? new object()
+                    JsonSerializer.Serialize(response.Error),
+                    JsonSerializer.Serialize(response.ReasonPhrase),
+                    JsonSerializer.Serialize(response.Content)
                 );
+                
                 throw new ExternalServiceException("UXM deposit failed");
             }
             logger.LogInformation("Deposit request successful，OrderUid: {{OrderUid}}", response.Content.Data.OrderUid);
