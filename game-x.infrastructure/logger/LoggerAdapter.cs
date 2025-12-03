@@ -33,4 +33,9 @@ public class LoggerAdapter<T> : IAppLogger<T>
         //_logger.LogError($"[{TypeName}] {message}", args);
         _logger.LogError($"{ServicePrefix} [{TypeName}] {message}", args);
     }
+    
+    public void LogError(Exception exception, string message, params object[] args)
+    {
+        _logger.LogError(exception, $"{ServicePrefix} [{TypeName}] {message}", args);
+    }
 }
