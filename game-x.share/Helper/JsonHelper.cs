@@ -52,7 +52,7 @@ public static class JsonHelper
         }
         catch
         {
-            result = default;
+            result = null;
             return false;
         }
     }
