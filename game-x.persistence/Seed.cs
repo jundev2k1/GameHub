@@ -219,6 +219,7 @@ public static class Seed
         var gamePlatforms = new GamePlatform[]
         {
             GamePlatform.Create("598彩票", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_G598),
+            GamePlatform.Create("百家樂", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_GAMEBACCARAT),
         };
         foreach (var gamePlatform in gamePlatforms)
         {
@@ -321,6 +322,8 @@ public static class Seed
         await CreateEntity("PC蛋蛋", "ALEGG", GameConstants.PLATFORM_ID_G598);
         await CreateEntity("澳洲幸運10番攤", "AL10FT", GameConstants.PLATFORM_ID_G598);
         await CreateEntity("澳洲幸運5番攤", "AL5FT", GameConstants.PLATFORM_ID_G598);
+
+        await CreateEntity("百家樂", "BAC001", GameConstants.PLATFORM_ID_GAMEBACCARAT);
     }
 
     private static async Task SeedPublicConversation(GameXContext db, CancellationToken ct = default)
