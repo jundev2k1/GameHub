@@ -21,21 +21,21 @@ public sealed class UpdateGameValidator : AbstractValidator<UpdateGameCommand>
             .GreaterThanOrEqualTo(0).WithMessage($"{nameof(UpdateGameCommand.Priority)} must be greater than or equal to 0.");
 
         RuleFor(x => x.Categories)
-            .Must(items => items!.Length > 0 && items.Count(item => item.IsPrimary) == 1)
+            .Must(items => items!.Length == 0 || (items!.Length > 0 && items.Count(item => item.IsPrimary) == 1))
                 .WithMessage("There must be exactly one primary category.")
             .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
                 .WithMessage($"{nameof(UpdateGameCommand.Categories)} contains duplicate category IDs.")
             .When(x => x.Categories is not null);
 
         RuleFor(x => x.Types)
-            .Must(items => items!.Length > 0 && items.Count(item => item.IsPrimary) == 1)
+            .Must(items => items!.Length == 0 || (items!.Length > 0 && items.Count(item => item.IsPrimary) == 1))
                 .WithMessage("There must be exactly one primary type.")
             .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
                 .WithMessage($"{nameof(UpdateGameCommand.Categories)} contains duplicate type IDs.")
             .When(x => x.Types is not null);
 
         RuleFor(x => x.Tags)
-            .Must(items => items!.Length > 0 && items.Count(item => item.IsPrimary) == 1)
+            .Must(items => items!.Length == 0 || (items!.Length > 0 && items.Count(item => item.IsPrimary) == 1))
                 .WithMessage("There must be exactly one primary tag.")
             .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
                 .WithMessage($"{nameof(UpdateGameCommand.Categories)} contains duplicate tag IDs.")
