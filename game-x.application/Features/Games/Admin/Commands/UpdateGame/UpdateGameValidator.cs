@@ -24,29 +24,21 @@ public sealed class UpdateGameValidator : AbstractValidator<UpdateGameCommand>
             .Must(items => items!.Length == 0 || items.Count(i => i.IsPrimary) == 1)
                 .WithMessage($"There must be exactly one primary Categories.")
             .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
-                .WithMessage($"Categories contains duplicate IDs.");
+                .WithMessage($"Categories contains duplicate IDs.")
+            .When(x => x.Categories is not null);
 
         RuleFor(x => x.Types)
             .Must(items => items!.Length == 0 || items.Count(i => i.IsPrimary) == 1)
                 .WithMessage($"There must be exactly one primary Types.")
             .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
-                .WithMessage("Types contains duplicate IDs.");
+                .WithMessage("Types contains duplicate IDs.")
+            .When(x => x.Types is not null);
 
         RuleFor(x => x.Tags)
             .Must(items => items!.Length == 0 || items.Count(i => i.IsPrimary) == 1)
                 .WithMessage($"There must be exactly one primary Tags.")
             .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
-                .WithMessage($"Tags contains duplicate IDs."); ;
-    }
-
-    private static IRuleBuilderOptions<T, TItem[]> ValidateCollection<T, TItem>(
-        IRuleBuilder<T, TItem[]> rule,
-        string fieldName)
-    {
-        return rule
-            .Must(items => items!.Length == 0 || items.Count(i => i.IsPrimary) == 1)
-                .WithMessage($"There must be exactly one primary {fieldName}.")
-            .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
-                .WithMessage($"{fieldName} contains duplicate IDs.");
+                .WithMessage($"Tags contains duplicate IDs.")
+            .When(x => x.Tags is not null);
     }
 }
