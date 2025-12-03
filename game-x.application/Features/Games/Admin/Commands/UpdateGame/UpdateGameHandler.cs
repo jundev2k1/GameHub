@@ -41,6 +41,8 @@ public sealed class UpdateGameHandler(
                 if (tags != null)
                     await gameRepo.DeleteAllTagMappingsAsync(request.Id, ct);
 
+                await unitOfWork.SaveChangesAsync();
+
                 game.UpdateGame(
                     name: request.Name.Trim(),
                     desc: request.Description.Trim(),
