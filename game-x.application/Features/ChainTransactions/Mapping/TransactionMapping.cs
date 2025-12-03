@@ -9,8 +9,7 @@ public static class TransactionMapping
 {
     public static DepositOrderRequest ToPaymentGatewayDepositOrderRequest(this Transaction tx, int providerId)
     {
-        var result = tx.Adapt<DepositOrderRequest>();
-        return result with
+        return new DepositOrderRequest
         {
             UserId = tx.UserId,
             OrderNumber = tx.TransactionInternal?.OrderNumber ?? string.Empty,
@@ -22,8 +21,7 @@ public static class TransactionMapping
     
     public static WithdrawalOrderRequest ToPaymentGatewayWithdrawalOrderRequest(this Transaction tx, int providerId)
     {
-        var result = tx.Adapt<WithdrawalOrderRequest>();
-        return result with
+        return new WithdrawalOrderRequest
         {
             WalletAddress = tx.TransactionInternal?.ToAddress,
             OrderNumber = tx.TransactionInternal?.OrderNumber ?? string.Empty,
@@ -37,28 +35,28 @@ public static class TransactionMapping
         this Transaction tx,
         string merchantNumber)
     {
-        var result = tx.Adapt<UxmDepositOrderRequest>();
-        return result with {
-            UserId = tx.UserId!,
-            MerchantNumber = merchantNumber,
-            OrderNumber = tx.TransactionInternal?.OrderNumber ?? string.Empty,
-            Amount = tx.Amount,
-            Remark = tx.Note ?? string.Empty
-        };
+        return new UxmDepositOrderRequest
+        (
+            UserId: tx.UserId,
+            MerchantNumber: merchantNumber,
+            OrderNumber: tx.TransactionInternal?.OrderNumber ?? string.Empty,
+            Amount: tx.Amount,
+            Remark: tx.Note ?? string.Empty
+        );
     }
     
     public static UxmWithdrawalOrderRequest ToUxmWithdrawalOrderRequest(
         this Transaction transaction,
         string merchantNumber)
     {
-        var result = transaction.Adapt<UxmWithdrawalOrderRequest>();
-        return result with {
-            MerchantNumber = merchantNumber,
-            OrderNumber = transaction.TransactionInternal?.OrderNumber ?? String.Empty,
-            Amount =  transaction.Amount,
-            To = transaction.TransactionInternal?.ToAddress ?? string.Empty,
-            Remark = transaction.Note ?? string.Empty
-        };
+        return new UxmWithdrawalOrderRequest
+        (
+            MerchantNumber: merchantNumber,
+            OrderNumber: transaction.TransactionInternal?.OrderNumber ?? String.Empty,
+            Amount: transaction.Amount,
+            To: transaction.TransactionInternal?.ToAddress ?? string.Empty,
+            Remark: transaction.Note ?? string.Empty
+        );
     }
     
     public static PaginationResult<ListTransactionInternalDto> ToSearchResult(this PaginationResult<Transaction> data)
