@@ -21,8 +21,16 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
             var response = await uxmApi.CreateProxyWithdrawalOrderAsync(data);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
-                logger.LogError($"Response failed: Status={response.StatusCode}");
-                throw new ExternalServiceException();
+                var apiEx = response.Error;
+                var errorContent = apiEx?.Content;
+                logger.LogError(
+                    apiEx ?? new Exception(),
+                    "UXM withdrawal failed. Status={Status}, Reason={Reason}, ErrorMessage={ErrorMessage}, ErrorContent={ErrorContent}",
+                    response.StatusCode,
+                    apiEx?.ReasonPhrase ?? response.ReasonPhrase ?? string.Empty,
+                    apiEx?.Message ?? string.Empty,
+                    errorContent ?? string.Empty);
+                throw new ExternalServiceException("UXM withdrawal failed");
             }
             logger.LogInformation("Withdrawal request successful，OrderUid: {{OrderUid}}", response.Content.Data.OrderUid!);
             return response.Content;
@@ -48,8 +56,17 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
             var response = await uxmApi.CreateProxyDepositOrderAsync(data);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
-                logger.LogError($"Response failed: Status={response.StatusCode}");
-                throw new ExternalServiceException();
+                var apiEx = response.Error;
+                var errorContent = apiEx?.Content;
+                logger.LogError(
+                    apiEx ?? new Exception(),
+                    "UXM deposit failed. Status={Status}, Reason={Reason}, ErrorMessage={ErrorMessage}, ErrorContent={ErrorContent}",
+                    response.StatusCode,
+                    apiEx?.ReasonPhrase ?? response.ReasonPhrase ?? string.Empty,
+                    apiEx?.Message ?? string.Empty,
+                    errorContent ?? string.Empty);
+                
+                throw new ExternalServiceException("UXM deposit failed");
             }
             logger.LogInformation("Deposit request successful，OrderUid: {{OrderUid}}", response.Content.Data.OrderUid);
             return response.Content;
@@ -60,5 +77,4 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
             throw;
         }
     }
-
 }

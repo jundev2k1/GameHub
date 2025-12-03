@@ -3,7 +3,7 @@ using game_x.application.Features.GetUnderReviewStatistics.Admin.Queries.GetTran
 
 namespace game_x.application.Features.Statistics.Admin.Queries.GetUnderReviewStatistics;
 
-public sealed class GetUnderReviewStatisticsHandler(
+public sealed class  GetUnderReviewStatisticsHandler(
     IAdminStatistics adminStatistics) : IQueryHandler<GetUnderReviewStatisticsQuery, GetUnderReviewStatisticsResult>
 {
     public async Task<GetUnderReviewStatisticsResult> Handle(GetUnderReviewStatisticsQuery request, CancellationToken ct = default)
@@ -12,3 +12,4 @@ public sealed class GetUnderReviewStatisticsHandler(
         return new GetUnderReviewStatisticsResult(withdrawalCount, kycCount, bankAccountCount);
     }
 }
+  
