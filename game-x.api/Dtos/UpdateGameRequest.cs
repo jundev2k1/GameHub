@@ -8,14 +8,7 @@ public sealed class UpdateGameRequest
     public int Priority { get; set; }
     public bool IsActive { get; set; }
     public IFormFile? Thumbnail { get; set; }
-    public GameItemSettings[]? Categories { get; set; }
-    public GameItemSettings[]? Types { get; set; }
-    public GameItemSettings[]? Tags { get; set; }
-}
-
-public sealed class GameItemSettings
-{
-    public Guid Id { get; set; }
-    public bool IsPrimary { get; set; }
-    public int Priority { get; set; }
+    public string? Categories { get; set; }
+    public string? Types { get; set; }
+    public string? Tags { get; set; }
 }
