@@ -67,7 +67,7 @@ public class JwtTokenGenerator(
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Value.Key))
         };
 
-        var principal = handler.ValidateToken(token, parameters, out var validatedToken);
+        _ = handler.ValidateToken(token, parameters, out var validatedToken);
         if (validatedToken is not JwtSecurityToken jwtToken)
             throw new BadRequestException(MessageCode.System.InvalidOrMissingToken, "Invalid token");
 
