@@ -21,8 +21,14 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
             var response = await uxmApi.CreateProxyWithdrawalOrderAsync(data);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
-                logger.LogError($"Response failed: Status={response.StatusCode}, Message={response.Error}");
-                throw new ExternalServiceException();
+                logger.LogError(
+                    "UXM withdrawal failed. Status={Status}, ErrorMessage={ErrorMessage}, Reason={Reason}, ErrorContent={Content}",
+                    response.StatusCode,
+                    response.Error ?? new object(),
+                    response.ReasonPhrase ?? new object(),
+                    response.Content ?? new object()
+                );
+                throw new ExternalServiceException("UXM withdrawal failed");
             }
             logger.LogInformation("Withdrawal request successful，OrderUid: {{OrderUid}}", response.Content.Data.OrderUid!);
             return response.Content;
@@ -48,8 +54,14 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
             var response = await uxmApi.CreateProxyDepositOrderAsync(data);
             if (!response.IsSuccessStatusCode || response.Content == null)
             {
-                logger.LogError($"Response failed: Status={response.StatusCode}, Message={response.Error}");
-                throw new ExternalServiceException();
+                logger.LogError(
+                    "UXM deposit failed. Status={Status}, ErrorMessage={ErrorMessage}, Reason={Reason}, ErrorContent={Content}",
+                    response.StatusCode,
+                    response.Error ?? new object(),
+                    response.ReasonPhrase ?? new object(),
+                    response.Content ?? new object()
+                );
+                throw new ExternalServiceException("UXM deposit failed");
             }
             logger.LogInformation("Deposit request successful，OrderUid: {{OrderUid}}", response.Content.Data.OrderUid);
             return response.Content;
