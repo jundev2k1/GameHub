@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.domain.Entities;
 using game_x.share.Extensions;
 
 namespace game_x.application.Features.Games.Admin.Commands.UpdateGame;
@@ -21,28 +22,28 @@ public sealed class UpdateGameHandler(
         // Update game
         await unitOfWork.WithTransactionAsync(async () =>
         {
+            var targetGame = await gameRepo.GetAsync(request.Id, ct);
+
+            ICollection<GameCategoryMapping>? categories = request.Categories != null
+                ? [.. GetCategoryMappings(request, targetGame)]
+                : null;
+            if (categories != null)
+                await gameRepo.DeleteAllCategoryMappingsAsync(request.Id, ct);
+
+            ICollection<GameTypeMapping>? types = request.Types != null
+                ? [.. GetTypeMappings(request, targetGame)]
+                : null;
+            if (types != null)
+                await gameRepo.DeleteAllTypeMappingsAsync(request.Id, ct);
+
+            ICollection<GameTagMapping>? tags = request.Tags != null
+                ? [.. GetTagMappings(request, targetGame)]
+                : null;
+            if (tags != null)
+                await gameRepo.DeleteAllTagMappingsAsync(request.Id, ct);
+
             await gameRepo.UpdateGameAsync(request.Id, async game =>
             {
-                ICollection<GameCategoryMapping>? categories = request.Categories != null
-                    ? [.. GetCategoryMappings(request, game)]
-                    : null;
-                if (categories != null)
-                    await gameRepo.DeleteAllCategoryMappingsAsync(request.Id, ct);
-
-                ICollection<GameTypeMapping>? types = request.Types != null
-                    ? [.. GetTypeMappings(request, game)]
-                    : null;
-                if (types != null)
-                    await gameRepo.DeleteAllTypeMappingsAsync(request.Id, ct);
-
-                ICollection<GameTagMapping>? tags = request.Tags != null
-                    ? [.. GetTagMappings(request, game)]
-                    : null;
-                if (tags != null)
-                    await gameRepo.DeleteAllTagMappingsAsync(request.Id, ct);
-
-                await unitOfWork.SaveChangesAsync();
-
                 game.UpdateGame(
                     name: request.Name.Trim(),
                     desc: request.Description.Trim(),

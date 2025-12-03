@@ -6,6 +6,8 @@ public interface IGameRepo
 {
     Task<Game[]> GetAllAsync(CancellationToken ct = default);
 
+    Task<Game> GetAsync(Guid gameId, CancellationToken ct = default);
+
     Task<PaginationResult<Game>> GetsByCriteriaAsync(
         Func<IQueryable<Game>, IQueryable<Game>>? queryBuilder = null,
         int page = 1,

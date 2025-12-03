@@ -22,6 +22,20 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ToArrayAsync(ct);
     }
 
+    public async Task<Game> GetAsync(Guid gameId, CancellationToken ct = default)
+    {
+        return await context.Games
+            .Include(g => g.GameCategoryMappings)
+            .ThenInclude(gcm => gcm.Category)
+            .Include(g => g.GameTypeMappings)
+            .ThenInclude(gtm => gtm.Type)
+            .Include(g => g.GameTagMappings)
+            .ThenInclude(gtm => gtm.Tag)
+            .Include(g => g.Thumbnail)
+            .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
+            ?? throw new NotFoundException(nameof(gameId), gameId);
+    }
+
     public async Task<PaginationResult<Game>> GetsByCriteriaAsync(
         Func<IQueryable<Game>, IQueryable<Game>>? queryBuilder = null,
         int page = 1,
