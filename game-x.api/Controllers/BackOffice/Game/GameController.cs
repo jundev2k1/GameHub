@@ -52,14 +52,17 @@ public sealed class GameController : BaseApiController
     {
         GameCategoryItem[]? categories = null;
         if (request.Categories != null
+            && request.Categories.IsNotNullOrEmpty()
             && !JsonHelper.TryParseJson(request.Categories, out categories))
             throw new BadRequestException("Categories is in the wrong format.");
         GameTypeItem[]? types = null;
         if (request.Types != null
+            && request.Types.IsNotNullOrEmpty()
             && !JsonHelper.TryParseJson(request.Types, out types))
             throw new BadRequestException("Types is in the wrong format.");
         GameTagItem[]? tags = null;
         if (request.Tags != null
+            && request.Tags.IsNotNullOrEmpty()
             && !JsonHelper.TryParseJson(request.Tags, out tags))
             throw new BadRequestException("Tags is in the wrong format.");
 

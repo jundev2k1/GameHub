@@ -21,24 +21,32 @@ public sealed class UpdateGameValidator : AbstractValidator<UpdateGameCommand>
             .GreaterThanOrEqualTo(0).WithMessage($"{nameof(UpdateGameCommand.Priority)} must be greater than or equal to 0.");
 
         RuleFor(x => x.Categories)
-            .Must(items => items!.Length == 0 || (items!.Length > 0 && items.Count(item => item.IsPrimary) == 1))
-                .WithMessage("There must be exactly one primary category.")
+            .Must(items => items!.Length == 0 || items.Count(i => i.IsPrimary) == 1)
+                .WithMessage($"There must be exactly one primary Categories.")
             .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
-                .WithMessage($"{nameof(UpdateGameCommand.Categories)} contains duplicate category IDs.")
-            .When(x => x.Categories is not null);
+                .WithMessage($"Categories contains duplicate IDs.");
 
         RuleFor(x => x.Types)
-            .Must(items => items!.Length == 0 || (items!.Length > 0 && items.Count(item => item.IsPrimary) == 1))
-                .WithMessage("There must be exactly one primary type.")
+            .Must(items => items!.Length == 0 || items.Count(i => i.IsPrimary) == 1)
+                .WithMessage($"There must be exactly one primary Types.")
             .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
-                .WithMessage($"{nameof(UpdateGameCommand.Categories)} contains duplicate type IDs.")
-            .When(x => x.Types is not null);
+                .WithMessage("Types contains duplicate IDs.");
 
         RuleFor(x => x.Tags)
-            .Must(items => items!.Length == 0 || (items!.Length > 0 && items.Count(item => item.IsPrimary) == 1))
-                .WithMessage("There must be exactly one primary tag.")
+            .Must(items => items!.Length == 0 || items.Count(i => i.IsPrimary) == 1)
+                .WithMessage($"There must be exactly one primary Tags.")
             .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
-                .WithMessage($"{nameof(UpdateGameCommand.Categories)} contains duplicate tag IDs.")
-            .When(x => x.Tags is not null);
+                .WithMessage($"Tags contains duplicate IDs."); ;
+    }
+
+    private static IRuleBuilderOptions<T, TItem[]> ValidateCollection<T, TItem>(
+        IRuleBuilder<T, TItem[]> rule,
+        string fieldName)
+    {
+        return rule
+            .Must(items => items!.Length == 0 || items.Count(i => i.IsPrimary) == 1)
+                .WithMessage($"There must be exactly one primary {fieldName}.")
+            .Must(items => items!.Select(i => i.Id).Distinct().Count() == items!.Length)
+                .WithMessage($"{fieldName} contains duplicate IDs.");
     }
 }
