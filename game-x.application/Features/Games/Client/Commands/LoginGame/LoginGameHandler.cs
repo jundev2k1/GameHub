@@ -1,10 +1,12 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnGameRegister;
 using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.share.Extensions;
+using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Logout;
 using game_x.share.Settings;
@@ -16,6 +18,7 @@ public sealed class LoginGameHandler(
     IUserAccessor userAccessor,
     IUserRepo userRepo,
     IGameProviderService gameProvider,
+    IGameBaccaratService gameBaccarat,
     IGameAesEncryptor aesEncryptor,
     IGameProviderCacheService gameProviderCache,
     IOptions<GameProviderSettings> gameSettings,
@@ -94,6 +97,19 @@ public sealed class LoginGameHandler(
 
             // Update user balance
             await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(usrex.Id, gamePlatformId), ct);
+            return result.Url;
+        }
+
+        if (gamePlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+        {
+            var externalRequest = new GameBaccaratLoginRequest
+            {
+                Account = usrex.GameBaccaratAccount,
+                Password = aesEncryptor.Decrypt(usrex.GameBaccaratPassword),
+                Gamecode = request.GameCode
+            };
+            var result = await gameBaccarat.LoginAsync(externalRequest);
+
             return result.Url;
         }
 

@@ -2,6 +2,7 @@ using game_x.application.Common.Abstractions;
 using game_x.application.Common.Abstractions.Events;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Email;
+using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.PaymentGateway;
 using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
@@ -85,6 +86,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IUxmService, UxmService>();
         services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
         services.AddScoped<IGameProviderService, GameProviderService>();
+        services.AddScoped<IGameBaccaratService, GameBaccaratService>();
         services.AddScoped<ISrsService, SrsService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
 

@@ -1,4 +1,5 @@
-﻿using game_x.application.Contract.Infrastructure.Logger;
+﻿using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Exceptions;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 
@@ -6,7 +7,7 @@ namespace game_x.infrastructure.ExternalApi.GameBaccarat;
 
 public sealed class GameBaccaratService(
     IGameBaccaratApi gameApi,
-    IAppLogger<GameBaccaratService> logger)
+    IAppLogger<GameBaccaratService> logger) : IGameBaccaratService
 {
     public async Task<GameBaccaratLoginResponse> LoginAsync(GameBaccaratLoginRequest request)
     {
