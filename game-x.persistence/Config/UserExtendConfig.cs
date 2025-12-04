@@ -14,27 +14,45 @@ public class UserExtendConfig : IEntityTypeConfiguration<UserExtend>
             .IsRequired();
 
         builder.Property(urex => urex.GameProviderAccount)
-            .HasColumnName("urex_gp_account")
+            .HasColumnName("usrex_gp_account")
             .IsRequired()
             .HasMaxLength(50)
             .HasDefaultValue(string.Empty);
 
         builder.Property(urex => urex.GameProviderPassword)
-            .HasColumnName("urex_gp_password")
+            .HasColumnName("usrex_gp_password")
             .IsRequired()
             .HasMaxLength(4000)
             .HasDefaultValue(string.Empty);
 
         builder.Property(urex => urex.GameProviderNickname)
-            .HasColumnName("urex_gp_nickname")
+            .HasColumnName("usrex_gp_nickname")
             .IsRequired()
             .HasMaxLength(50)
             .HasDefaultValue(string.Empty);
 
         builder.Property(urex => urex.GameProviderRebateset)
-            .HasColumnName("urex_gp_rebateset")
+            .HasColumnName("usrex_gp_rebateset")
             .IsRequired()
             .HasDefaultValue(0);
+
+        builder.Property(urex => urex.GameBaccaratAccount)
+            .HasColumnName("usrex_gb_account")
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(urex => urex.GameBaccaratPassword)
+            .HasColumnName("usrex_gb_password")
+            .IsRequired()
+            .HasMaxLength(4000)
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(urex => urex.GameBaccaratNickname)
+            .HasColumnName("usrex_gb_nickname")
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue(string.Empty);
 
         builder.HasOne(urex => urex.User)
             .WithOne(u => u.UserExtend)

@@ -7,6 +7,9 @@ public sealed class UserExtend : BaseEntity<string>, IEntity
     public string GameProviderPassword { get; private set; } = string.Empty;
     public string GameProviderNickname { get; private set; } = string.Empty;
     public decimal GameProviderRebateset { get; private set; }
+    public string GameBaccaratAccount { get; private set; } = string.Empty;
+    public string GameBaccaratPassword { get; private set; } = string.Empty;
+    public string GameBaccaratNickname { get; private set; } = string.Empty;
 
     public static UserExtend Create() => new ();
 
