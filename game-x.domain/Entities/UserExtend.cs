@@ -24,4 +24,14 @@ public sealed class UserExtend : BaseEntity<string>, IEntity
         GameProviderNickname = gameProviderNickname;
         GameProviderRebateset = gameProviderRebateset ?? default;
     }
+
+    public void UpdateBaccaratAccount(
+        string gameBaccaratAccount,
+        string gameBaccaratPassword,
+        string gameBaccaratNickname)
+    {
+        GameBaccaratAccount = gameBaccaratAccount;
+        GameBaccaratPassword = gameBaccaratPassword;
+        GameBaccaratNickname = gameBaccaratNickname;
+    }
 }

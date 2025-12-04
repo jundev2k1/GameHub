@@ -3,6 +3,8 @@ using game_x.application.Common.Abstractions.Events;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Email;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.ExternalApi.PaymentGateway;
+using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Logger;
@@ -13,16 +15,22 @@ using game_x.infrastructure.Caching;
 using game_x.infrastructure.Email;
 using game_x.infrastructure.Eventing;
 using game_x.infrastructure.Extensions;
+using game_x.infrastructure.ExternalApi.GameBaccarat;
+using game_x.infrastructure.ExternalApi.GameBaccarat.Intercepters;
 using game_x.infrastructure.ExternalApi.GameProvider;
 using game_x.infrastructure.ExternalApi.GameProvider.Intercepters;
+using game_x.infrastructure.ExternalApi.PaymentGateway;
+using game_x.infrastructure.ExternalApi.Srs;
 using game_x.infrastructure.ExternalApi.Uxm;
 using game_x.infrastructure.logger;
 using game_x.infrastructure.MediaStorage;
+using game_x.infrastructure.Security;
 using game_x.infrastructure.Security.Asymmetric;
 using game_x.infrastructure.Security.Encryption;
 using game_x.share.Settings;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Minio;
@@ -33,12 +41,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using game_x.application.Contract.Infrastructure.ExternalApi.PaymentGateway;
-using game_x.infrastructure.Security;
-using Microsoft.AspNetCore.SignalR;
-using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
-using game_x.infrastructure.ExternalApi.PaymentGateway;
-using game_x.infrastructure.ExternalApi.Srs;
 
 namespace game_x.infrastructure;
 
@@ -197,6 +199,20 @@ public static class InfrastructureServicesRegistration
                 c.DefaultRequestHeaders.Add("Authorization", apiToken);
             })
             .AddHttpMessageHandler<CustomApiResponseHandler>()
+            .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
+
+        // Game Baccarat API
+        services.AddTransient<HmacMessageHandler>();
+        services.AddRefitClient<IGameBaccaratApi>()
+            .ConfigureHttpClient(c =>
+            {
+                var baseUrl = configuration["BaccaratHmacSettings:Host"]
+                    ?? throw new InvalidOperationException("BaccaratHmacSettings:Host not configured");
+                c.BaseAddress = new Uri(baseUrl);
+                c.Timeout = TimeSpan.FromSeconds(5);
+                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            })
+            .AddHttpMessageHandler<HmacMessageHandler>()
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
         // SRS API

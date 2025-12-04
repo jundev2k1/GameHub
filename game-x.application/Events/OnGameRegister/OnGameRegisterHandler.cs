@@ -28,7 +28,14 @@ public sealed class OnGameRegisterHandler(
         // Platform: Game598
         if (@event.GamePlatformId == GameConstants.PLATFORM_ID_G598)
         {
-            await RegisterGame598User(usrex, @event.Nickname);
+            await RegisterGame598User(usrex, usrex.User.Nickname);
+            return;
+        }
+
+        // Platform: Game Baccarat
+        if (@event.GamePlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+        {
+            await RegisterGameBaccaratUser(usrex, usrex.User.Nickname);
             return;
         }
     }
@@ -48,5 +55,22 @@ public sealed class OnGameRegisterHandler(
         await gameProvider.RegisterAsync(request);
 
         usrex.UpdateG598Account(account, aesEncryptor.Encrypt(password), nickName, 0M);
+    }
+
+    private async Task RegisterGameBaccaratUser(UserExtend usrex, string nickName)
+    {
+        var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
+        var account = $"Gx{suffix}";
+        var password = GameProviderPasswordGenerator.Generate();
+        var request = new GameRegisterRequest
+        {
+            Account = account,
+            Passwd = password,
+            Alias = nickName,
+            Rebateset = 0M,
+        };
+        await gameProvider.RegisterAsync(request);
+
+        usrex.UpdateBaccaratAccount(account, aesEncryptor.Encrypt(password), nickName);
     }
 }

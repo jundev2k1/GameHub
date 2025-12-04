@@ -33,7 +33,7 @@ public sealed class LoginGameHandler(
         // Create new external account if none exists
         if (!CheckExistAccount(targetUser.UserExtend, request.GamePlatformId!.Value))
         {
-            var @event = new OnGameRegisterEvent(request.GamePlatformId.Value, userId, targetUser.Nickname);
+            var @event = new OnGameRegisterEvent(request.GamePlatformId.Value, userId);
             await eventDispatcher.Publish(@event, ct);
 
             // Retry after account created
@@ -59,6 +59,10 @@ public sealed class LoginGameHandler(
 
         if ((gamePlatformId == GameConstants.PLATFORM_ID_G598)
             && (usrex.GameProviderAccount.IsNullOrWhiteSpace() || usrex.GameProviderPassword.IsNullOrWhiteSpace()))
+            return false;
+
+        if ((gamePlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+            && (usrex.GameBaccaratAccount.IsNullOrWhiteSpace() || usrex.GameBaccaratPassword.IsNullOrWhiteSpace()))
             return false;
 
         return true;
