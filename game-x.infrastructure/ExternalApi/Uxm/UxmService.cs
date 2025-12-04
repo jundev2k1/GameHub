@@ -12,7 +12,7 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
     {
         try
         {
-            logger.LogInformation($"Send withdrawal request to UXM: MerchantNumber={{MerchantNumber}}, To = {{To}}, Amount = {{Amount}}, OrderNumber = {{OtcOrderNumber}}", 
+            logger.LogInformation("Send withdrawal request to UXM: MerchantNumber={MerchantNumber}, To = {To}, Amount = {Amount}, OrderNumber = {OtcOrderNumber}", 
                 data.Data.MerchantNumber, 
                 data.Data.To,
                 data.Data.Amount, 
@@ -32,7 +32,7 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
                     errorContent ?? string.Empty);
                 throw new ExternalServiceException("UXM withdrawal failed");
             }
-            logger.LogInformation("Withdrawal request successful，OrderUid: {{OrderUid}}", response.Content.Data.OrderUid!);
+            logger.LogInformation("Withdrawal request successful，OrderUid: {OrderUid}", response.Content.Data.OrderUid!);
             return response.Content;
         }
         catch (Exception ex)
@@ -47,7 +47,7 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
     {
         try
         {
-            logger.LogInformation($"Send deposit request to UXM: MerchantNumber={{MerchantNumber}}, UserId={{UserId}}, Amount = {{Amount}}, OrderNumber = {{OtcOrderNumber}}", 
+            logger.LogInformation("Send deposit request to UXM: MerchantNumber={MerchantNumber}, UserId={UserId}, Amount = {Amount}, OrderNumber = {OtcOrderNumber}", 
                 data.Data.MerchantNumber, 
                 data.Data.UserId, 
                 data.Data.Amount, 
@@ -68,7 +68,7 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
                 
                 throw new ExternalServiceException("UXM deposit failed");
             }
-            logger.LogInformation("Deposit request successful，OrderUid: {{OrderUid}}", response.Content.Data.OrderUid);
+            logger.LogInformation("Deposit request successful，OrderUid: {OrderUid}", response.Content.Data.OrderUid);
             return response.Content;
         }
         catch (Exception ex)
