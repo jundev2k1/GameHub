@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Exceptions;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
+using System.Text.Json;
 
 namespace game_x.infrastructure.ExternalApi.GameBaccarat;
 
@@ -16,6 +17,7 @@ public sealed class GameBaccaratService(
             logger.LogInformation("Send login request to GameProvider: account = {Accound}, gamecode = {Gamecode}", request.Account, request.Gamecode);
 
             var result = await gameApi.LoginAsync(request);
+            logger.LogInformation(JsonSerializer.Serialize(result));
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
                 logger.LogError($"Response failed: Status={result.StatusCode}");
@@ -23,6 +25,7 @@ public sealed class GameBaccaratService(
             }
 
             var response = result.Content;
+            logger.LogInformation(JsonSerializer.Serialize(result.Content));
             if (!response!.Success)
             {
                 logger.LogError($"Response failed: Code={response.MessageCode} - Message={response.Message}");
