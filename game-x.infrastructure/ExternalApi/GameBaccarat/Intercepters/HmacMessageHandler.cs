@@ -32,7 +32,11 @@ public sealed class HmacMessageHandler : DelegatingHandler
         // Timestamp (unix seconds)
         var ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
+        // Nonce: 16 bytes (base64)
+        var nonce = GenerateNonceBase64(16);
         // Build path + query (relative path)
+
+        // Path + query
         var pathAndQuery = request.RequestUri?.PathAndQuery ?? "/";
 
         // Method
@@ -61,7 +65,7 @@ public sealed class HmacMessageHandler : DelegatingHandler
         }
 
         // Canonical string: timestamp + newline + method + newline + path + newline + bodyHash
-        var canonical = $"{ts}\n{method}\n{pathAndQuery}\n{bodyHash}";
+        var canonical = $"{ts}\n{nonce}\n{method}\n{pathAndQuery}\n{bodyHash}";
 
         // Compute signature: HMACSHA256(secret, canonical) -> base64
         var signature = ComputeHmacSha256Base64(_secretKey, canonical);
@@ -77,6 +81,12 @@ public sealed class HmacMessageHandler : DelegatingHandler
             request.Headers.Add(_settings.TimestampHeader, ts);
         }
 
+        if (!string.IsNullOrEmpty(_settings.NonceHeader))
+        {
+            request.Headers.Remove(_settings.NonceHeader);
+            request.Headers.Add(_settings.NonceHeader, nonce);
+        }
+
         if (!string.IsNullOrEmpty(_settings.SignatureHeader))
         {
             request.Headers.Remove(_settings.SignatureHeader);
@@ -84,6 +94,13 @@ public sealed class HmacMessageHandler : DelegatingHandler
         }
 
         return await base.SendAsync(request, ct).ConfigureAwait(false);
+    }
+
+    private static string GenerateNonceBase64(int length)
+    {
+        var bytes = new byte[length];
+        RandomNumberGenerator.Fill(bytes);
+        return Convert.ToBase64String(bytes);
     }
 
     private static string ComputeSha256HashBase64(string text)
