@@ -105,7 +105,7 @@ public sealed class LoginGameHandler(
             var externalRequest = new GameBaccaratLoginRequest
             {
                 Account = usrex.GameBaccaratAccount,
-                Password = aesEncryptor.Decrypt(usrex.GameBaccaratPassword),
+                Password = usrex.GameBaccaratPassword,
                 Gamecode = request.GameCode
             };
             var result = await gameBaccarat.LoginAsync(externalRequest);
