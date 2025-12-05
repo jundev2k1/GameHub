@@ -17,7 +17,6 @@ public sealed class GameBaccaratService(
             logger.LogInformation("Send login request to GameProvider: account = {Accound}, gamecode = {Gamecode}", request.Account, request.Gamecode);
 
             var result = await gameApi.LoginAsync(request);
-            logger.LogInformation(JsonSerializer.Serialize(result));
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
                 logger.LogError($"Response failed: Status={result.StatusCode}");
