@@ -1,7 +1,9 @@
-﻿using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+﻿using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
+using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Utils;
+using game_x.share.ExternalApi.GameBaccarat.Dtos.Register;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
 
 namespace game_x.application.Events.OnGameRegister;
@@ -10,6 +12,7 @@ public sealed class OnGameRegisterHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IGameProviderService gameProvider,
+    IGameBaccaratService gameBaccarat,
     IGameAesEncryptor aesEncryptor) : IApplicationEventHandler<OnGameRegisterEvent>
 {
     public async Task Handle(OnGameRegisterEvent @event, CancellationToken ct = default)
@@ -62,15 +65,13 @@ public sealed class OnGameRegisterHandler(
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}";
         var password = GameProviderPasswordGenerator.Generate();
-        var request = new GameRegisterRequest
+        var request = new GameBaccaratRegisterRequest
         {
             Account = account,
-            Passwd = password,
-            Alias = nickName,
-            Rebateset = 0M,
+            Password = password,
+            Nickname = nickName
         };
-        await gameProvider.RegisterAsync(request);
-
-        usrex.UpdateBaccaratAccount(account, aesEncryptor.Encrypt(password), nickName);
+        var response = await gameBaccarat.RegisterAsync(request);
+        usrex.UpdateBaccaratAccount(response.UserId, account, password, nickName);
     }
 }
