@@ -36,6 +36,12 @@ public class UserExtendConfig : IEntityTypeConfiguration<UserExtend>
             .IsRequired()
             .HasDefaultValue(0);
 
+        builder.Property(urex => urex.GameBaccaratUserId)
+            .HasColumnName("usrex_gb_userid")
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue(string.Empty);
+
         builder.Property(urex => urex.GameBaccaratAccount)
             .HasColumnName("usrex_gb_account")
             .IsRequired()
