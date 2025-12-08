@@ -2,6 +2,7 @@
 using game_x.share.ExternalApi.GameBaccarat.Dtos.GetWallet;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Register;
+using game_x.share.ExternalApi.GameBaccarat.Dtos.Withdrawal;
 
 namespace game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 
@@ -14,4 +15,6 @@ public interface IGameBaccaratService
     Task<GameBaccaratGetWalletResponse> GetWalletAsync(GameBaccaratGetWalletRequest request);
 
     Task DepositAsync(GameBaccaratDepositRequest request);
+
+    Task WithdrawalAsync(GameBaccaratWithdrawalRequest request);
 }

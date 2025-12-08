@@ -3,6 +3,7 @@ using game_x.share.ExternalApi.GameBaccarat.Dtos.Deposit;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.GetWallet;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Register;
+using game_x.share.ExternalApi.GameBaccarat.Dtos.Withdrawal;
 using Refit;
 
 namespace game_x.infrastructure.ExternalApi.GameBaccarat;
@@ -24,4 +25,8 @@ public interface IGameBaccaratApi
     /// <summary>Deposit API</summary>
     [Post("/partners/v1/wallet/deposit")]
     Task<ApiResponse<ResponseBase<object>>> DepositAsync([Body] GameBaccaratDepositRequest request);
+
+    /// <summary>Withdrawal API</summary>
+    [Post("/partners/v1/wallet/withdrawal")]
+    Task<ApiResponse<ResponseBase<object>>> WithdrawalAsync([Body] GameBaccaratWithdrawalRequest request);
 }
