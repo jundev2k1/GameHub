@@ -5,9 +5,11 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnGameRegister;
 using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Features.Games.Dtos;
 using game_x.application.Utils;
+using game_x.share.Extensions;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Deposit;
 using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
 
@@ -33,6 +35,15 @@ public sealed class WalletDepositHandler(
             ?? throw new NotFoundException(MessageCode.Accounting.PlatformNotExist);
 
         var currentUser = await GetCurrentUserAsync(ct);
+        if (!CheckExistAccount(currentUser.UserExtend, request.PlatformId))
+        {
+            var gameRegisterEvent = new OnGameRegisterEvent(request.PlatformId, currentUser.Id);
+            await eventDispatcher.Publish(gameRegisterEvent, ct);
+
+            // Retry after account created
+            currentUser = await userRepo.GetUserByIdAsync(currentUser.Id, ct);
+        }
+
         var balance = await GetUserBalanceAsync(currentUser.Id, request, ct);
         var transaction = await CreateTransactionAsync(
             currentUser.Id,
@@ -96,6 +107,21 @@ public sealed class WalletDepositHandler(
 
         var result = await transactionRepo.GetExternalByIdAsync(transaction.PublicId, ct);
         return result.Adapt<ListTransactionExternalDto>();
+    }
+
+    private static bool CheckExistAccount(UserExtend? usrex, Guid gamePlatformId)
+    {
+        if (usrex is null) return false;
+
+        if ((gamePlatformId == GameConstants.PLATFORM_ID_G598)
+            && (usrex.GameProviderAccount.IsNullOrWhiteSpace() || usrex.GameProviderPassword.IsNullOrWhiteSpace()))
+            return false;
+
+        if ((gamePlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+            && (usrex.GameBaccaratAccount.IsNullOrWhiteSpace() || usrex.GameBaccaratPassword.IsNullOrWhiteSpace()))
+            return false;
+
+        return true;
     }
 
     private async Task<User> GetCurrentUserAsync(CancellationToken ct)
