@@ -129,6 +129,10 @@ public sealed class GameProviderCacheService(
         => Get<GameInfoDto[]>($"{_prefixCache}:game:list") ?? [];
 
     public GamePlatformDto G598Platform
-        => PlatformList.FirstOrDefault(p => p.Id == Guid.Parse("b2e3c5bb-6b74-4bb0-9dc3-9e8a1e70d94a"))
+        => PlatformList.FirstOrDefault(p => p.Id == GameConstants.PLATFORM_ID_G598)
         ?? throw new NotFoundException();
+
+    public GamePlatformDto BaccaratPlatform
+        => PlatformList.FirstOrDefault(p => p.Id == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+            ?? throw new NotFoundException();
 }

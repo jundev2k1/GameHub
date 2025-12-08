@@ -1,10 +1,13 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.share.Extensions;
+using game_x.share.ExternalApi.GameBaccarat.Dtos.GetWallet;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 using Microsoft.Extensions.Caching.Memory;
@@ -17,8 +20,10 @@ public sealed class WalletManagerCacheService(
     IUserBalanceRepo userBalanceRepo,
     IUserRepo userRepo,
     IGameProviderCacheService gameProviderCache,
+    IGameBaccaratService gameBaccaratService,
     IGameProviderService gameProvider,
-    IGameAesEncryptor aesEncryptor) : CacheService(cache), IWalletManagerCacheService
+    IGameAesEncryptor aesEncryptor,
+    IAppLogger<WalletManagerCacheService> logger) : CacheService(cache), IWalletManagerCacheService
 {
     private const string CacheKeyPrefix = "wallet-manager:";
 
@@ -43,7 +48,7 @@ public sealed class WalletManagerCacheService(
         };
 
         var g598Platform = gameProviderCache.G598Platform;
-        var g598Balance = await GetGame598Wallet(userId);
+        var g598Balance = await GetGame598WalletAsync(userId);
         if (g598Balance.HasValue)
         {
             userWallet.ExternalWallets.Add(new UserWalletExternalItemDto
@@ -78,17 +83,34 @@ public sealed class WalletManagerCacheService(
             .FirstOrDefault(w => w.PlatformId == platformId);
         if (targetWallet is null)
         {
-            var g598Platform = gameProviderCache.G598Platform;
-            var g598Balance = await GetGame598Wallet(userId);
-            if (g598Balance.HasValue)
+            if (platformId == GameConstants.PLATFORM_ID_G598)
             {
-                targetWallet = new UserWalletExternalItemDto
+                var g598Balance = await GetGame598WalletAsync(userId);
+                if (g598Balance.HasValue)
                 {
-                    PlatformId = g598Platform.Id,
-                    PlatformName = g598Platform.Name,
-                    Amount = balance,
-                };
-                userWallet.ExternalWallets.Add(targetWallet);
+                    targetWallet = new UserWalletExternalItemDto
+                    {
+                        PlatformId = GameConstants.PLATFORM_ID_G598,
+                        PlatformName = gameProviderCache.G598Platform.Name,
+                        Amount = g598Balance.Value,
+                    };
+                    userWallet.ExternalWallets.Add(targetWallet);
+                }
+            }
+
+            if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+            {
+                var baccaratBalance = await GetBaccaratWalletAsync(userId);
+                if (baccaratBalance.HasValue)
+                {
+                    targetWallet = new UserWalletExternalItemDto
+                    {
+                        PlatformId = GameConstants.PLATFORM_ID_GAMEBACCARAT,
+                        PlatformName = gameProviderCache.BaccaratPlatform.Name,
+                        Amount = baccaratBalance.Value,
+                    };
+                    userWallet.ExternalWallets.Add(targetWallet);
+                }
             }
         }
         else
@@ -100,7 +122,7 @@ public sealed class WalletManagerCacheService(
         Set(cacheKey, userWallet);
     }
 
-    private async Task<decimal?> GetGame598Wallet(string userId)
+    private async Task<decimal?> GetGame598WalletAsync(string userId)
     {
         var targetUser = await userRepo.GetUserByIdAsync(userId);
         if (targetUser.UserExtend is null
@@ -132,5 +154,27 @@ public sealed class WalletManagerCacheService(
             throw new ExternalServiceException();
 
         return gameWallet.Data.Quota;
+    }
+
+    private async Task<decimal?> GetBaccaratWalletAsync(string userId)
+    {
+        var targetUser = await userRepo.GetUserByIdAsync(userId);
+        if (targetUser.UserExtend is null
+            || targetUser.UserExtend.GameBaccaratUserId.IsNullOrWhiteSpace()) return null;
+
+        try
+        {
+            if (userId is null) return null;
+
+            var externalRequest = new GameBaccaratGetWalletRequest { UserId = userId };
+            var externalWallet = await gameBaccaratService.GetWalletAsync(externalRequest);
+
+            return externalWallet.Amount;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to get external wallet", ex.Message);
+            return null;
+        }
     }
 }
