@@ -37,7 +37,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             page,
             pageSize);
     }
-    
+
     public async Task<PaginationResult<Transaction>> GetExternalTransactionsAsync(
         Func<IQueryable<Transaction>, IQueryable<Transaction>>? queryBuilder = null,
         int page = 1,
@@ -131,14 +131,14 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             page,
             pageSize);
     }
-    
+
     public async Task<bool> ExistsByOrderNoAsync(string otcOrderNo, CancellationToken ct)
     {
-        return await context.Transactions 
+        return await context.Transactions
             .Include(x => x.TransactionInternal)
             .AnyAsync(x => x.TransactionInternal!.OrderNumber == otcOrderNo, ct);
     }
-     
+
     public async Task<Transaction?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct)
     {
         return await context.Transactions
@@ -148,7 +148,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .Include(t => t.TransactionInternal)
             .FirstOrDefaultAsync(x => x.TransactionInternal != null && x.TransactionInternal.OrderNumber == orderNumber, ct);
     }
-    
+
     public async Task<Transaction> GetInternalByIdAsync(Guid publicId, CancellationToken ct = default)
     {
         return await context.Transactions
@@ -160,7 +160,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
             ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
-    
+
     public async Task<Transaction> GetExternalByIdAsync(Guid publicId, CancellationToken ct = default)
     {
         return await context.Transactions
@@ -173,7 +173,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
                    .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
                ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
-    
+
     public async Task<Transaction> GetByIdAndUserIdAsync(string userId, Guid publicId, CancellationToken ct = default)
     {
         return await context.Transactions
@@ -187,7 +187,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
                    .FirstOrDefaultAsync(x => x.PublicId == publicId && x.UserId == userId, ct)
                ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
-    
+
     public async Task<decimal> GetLatestBalanceAfterAsync(string userId, CancellationToken ct = default)
     {
         var tx = await context.Transactions
@@ -195,6 +195,20 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
                    .Where(x => x.UserId == userId && x.Status == TransactionStatus.Completed)
                    .OrderByDescending(x => x.CreatedAt)
                    .FirstOrDefaultAsync(ct);
+
+        return tx?.BalanceAfter ?? 0;
+    }
+
+    public async Task<decimal> GetLatestExternalBalanceAfterAsync(string userId, int localPlatformId, CancellationToken ct = default)
+    {
+        var tx = await context.Transactions
+            .AsNoTracking()
+            .Where(x => x.UserId == userId
+                && (x.Status == TransactionStatus.Completed)
+                && (x.TransactionExternal != null)
+                && (x.TransactionExternal.GamePlatformId == localPlatformId))
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync(ct);
 
         return tx?.BalanceAfter ?? 0;
     }

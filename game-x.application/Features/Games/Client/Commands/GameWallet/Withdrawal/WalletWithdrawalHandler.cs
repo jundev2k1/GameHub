@@ -50,14 +50,14 @@ public sealed class WalletWithdrawalHandler(
             // Rollback all processing if the transaction fails at the third party
             await WithdrawalToProviderWalletAsync(
                 gameProviderAccount: currentUser.UserExtend!.GameProviderAccount,
-                sno: transaction.TransactionExternal!.G598Sno,
+                sno: transaction.TransactionExternal!.SerialNumber,
                 amount: transaction.Amount);
             await unitOfWork.CommitAsync(ct);
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync(ct);
-            logger.LogError($"Failed to create withdrawal game transaction. SNO: {transaction.TransactionExternal!.G598Sno}", ex.Message);
+            logger.LogError($"Failed to create withdrawal game transaction. SNO: {transaction.TransactionExternal!.SerialNumber}", ex.Message);
             await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
             {
                 order.UpdateStatus(TransactionStatus.Failed);
@@ -103,7 +103,7 @@ public sealed class WalletWithdrawalHandler(
     private async Task<Transaction> CreateTransactionAsync(string userId, int cryptoTokenId, WalletWithdrawalCommand command, CancellationToken ct)
     {
         var txExternal = TransactionExternal.Create(
-            g598sno: GameProviderUtils.SnoGenerate(),
+            sno: GameProviderUtils.SnoGenerate(),
             gamePlatformId: gameProviderCache.G598Platform.LocalId);
         
         var tx = Transaction.Create(

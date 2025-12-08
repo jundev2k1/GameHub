@@ -10,7 +10,7 @@ public sealed class TransactionExternalConfig : IEntityTypeConfiguration<Transac
         
         builder.HasKey(x => x.Id);
         
-        builder.Property(x => x.G598Sno)
+        builder.Property(x => x.SerialNumber)
             .HasColumnName("g598_sno")
             .IsRequired(false);
         
