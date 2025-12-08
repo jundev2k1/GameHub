@@ -66,15 +66,12 @@ public sealed class OnUserBalanceUpdatedHandler(
             _ => null
         };
         if (amount is null)
-        {
             logger.LogWarning($"Failed to get external wallet for platform ({platformId}) and user ({userDetail.UserId})");
-            return;
-        }
 
         await walletManagerCache.RefreshExternalWalletAsync(
             userDetail.UserId,
             platformId.Value,
-            amount.Value);
+            amount ?? 0);
     }
 
     private async Task<decimal?> GetG598ExternalWallet(string? account)
