@@ -37,8 +37,7 @@ public sealed class LoginGameHandler(
 
         targetUser = await gamePlatformService.EnsureExternalAccountCreatedAsync(
             targetUser, request.GamePlatformId!.Value,
-            async () => await LogoutGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!),
-            ct);
+            ct: ct);
 
         // Login from external API
         var url = await LoginGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!, request, ct)
@@ -67,8 +66,6 @@ public sealed class LoginGameHandler(
             };
             var result = await gameProvider.LoginAsync(externalRequest, request.IpAddress!);
 
-            // Set Login state
-            gameProviderCache.SetIsLoggedIn(externalRequest.Account, true);
             // Reset language
             gameProviderCache.SetLanguage(externalRequest.Account, request.Locale);
 
@@ -91,22 +88,6 @@ public sealed class LoginGameHandler(
         }
 
         return null;
-    }
-
-    private async Task LogoutGameAsync(Guid gamePlatformId, UserExtend usrex)
-    {
-        if (gamePlatformId == GameConstants.PLATFORM_ID_G598)
-        {
-            if (!gameProviderCache.GetIsLoggedIn(usrex.GameProviderAccount))
-                return;
-
-            var logoutRequest = new GameLogoutRequest
-            {
-                Account = usrex.GameProviderAccount,
-            };
-            await gameProvider.LogoutAsync(logoutRequest);
-            gameProviderCache.SetIsLoggedIn(usrex.GameProviderAccount, false);
-        }
     }
 
     private string ConvertEmbededLink(Guid gamePlatformId, string url)

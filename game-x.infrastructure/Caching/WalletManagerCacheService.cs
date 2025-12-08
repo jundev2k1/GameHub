@@ -2,13 +2,11 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Logger;
-using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.share.Extensions;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.GetWallet;
-using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -16,13 +14,11 @@ namespace game_x.infrastructure.Caching;
 
 public sealed class WalletManagerCacheService(
     IMemoryCache cache,
-    IUserAccessor userAccessor,
     IUserBalanceRepo userBalanceRepo,
     IUserRepo userRepo,
     IGameProviderCacheService gameProviderCache,
     IGameBaccaratService gameBaccaratService,
     IGameProviderService gameProvider,
-    IGameAesEncryptor aesEncryptor,
     IAppLogger<WalletManagerCacheService> logger) : CacheService(cache), IWalletManagerCacheService
 {
     private const string CacheKeyPrefix = "wallet-manager:";
@@ -128,23 +124,6 @@ public sealed class WalletManagerCacheService(
         if (targetUser.UserExtend is null
             || targetUser.UserExtend.GameProviderAccount.IsNullOrWhiteSpace()
             || targetUser.UserExtend.GameProviderPassword.IsNullOrWhiteSpace()) return null;
-
-        var isLogin = gameProviderCache.GetIsLoggedIn(targetUser.UserExtend.GameProviderAccount);
-        if (!isLogin)
-        {
-            var loginState = await gameProvider.LoginAsync(
-                new GameLoginRequest
-                {
-                    Account = targetUser.UserExtend.GameProviderAccount,
-                    Passwd = aesEncryptor.Decrypt(targetUser.UserExtend.GameProviderPassword),
-                    Locale = gameProviderCache.GetLanguage(targetUser.UserExtend.GameProviderAccount),
-                    Address = "lobby",
-                    Gamecode = gameProviderCache.GameList[0].GameCode,
-                },
-                userAccessor.GetIpAddress());
-            if (loginState.IsSuccess == false)
-                throw new ExternalServiceException();
-        }
 
         var gameWallet = await gameProvider.GetWalletAsync(new GameWalletRequest
         {
