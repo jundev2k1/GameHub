@@ -47,7 +47,7 @@ public sealed class OnGameRegisterHandler(
     {
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}";
-        var password = GameProviderPasswordGenerator.Generate();
+        var password = GameProviderPasswordGenerator.Generate(5, 13);
         var request = new GameRegisterRequest
         {
             Account = account,
@@ -64,7 +64,7 @@ public sealed class OnGameRegisterHandler(
     {
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}";
-        var password = GameProviderPasswordGenerator.Generate();
+        var password = GameProviderPasswordGenerator.Generate(8, 20);
         var request = new GameBaccaratRegisterRequest
         {
             Account = account,
