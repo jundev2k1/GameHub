@@ -5,6 +5,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnGameRegister;
 using game_x.application.Events.OnUserBalanceUpdated;
+using game_x.application.Features.Games.Services;
 using game_x.share.Extensions;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
@@ -21,6 +22,7 @@ public sealed class LoginGameHandler(
     IGameBaccaratService gameBaccarat,
     IGameAesEncryptor aesEncryptor,
     IGameProviderCacheService gameProviderCache,
+    IGamePlatformService gamePlatformService,
     IOptions<GameProviderSettings> gameSettings,
     IApplicationEventDispatcher eventDispatcher) : ICommandHandler<LoginGameCommand, LoginGameResult>
 {
@@ -33,20 +35,10 @@ public sealed class LoginGameHandler(
         if (!targetUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
-        // Create new external account if none exists
-        if (!CheckExistAccount(targetUser.UserExtend, request.GamePlatformId!.Value))
-        {
-            var @event = new OnGameRegisterEvent(request.GamePlatformId.Value, userId);
-            await eventDispatcher.Publish(@event, ct);
-
-            // Retry after account created
-            targetUser = await userRepo.GetUserByIdAsync(userId, ct);
-        }
-        else
-        {
-            // Loggout if user already login
-            await LogoutGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!);
-        }
+        targetUser = await gamePlatformService.EnsureExternalAccountCreatedAsync(
+            targetUser, request.GamePlatformId!.Value,
+            async () => await LogoutGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!),
+            ct);
 
         // Login from external API
         var url = await LoginGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!, request, ct)
@@ -54,21 +46,6 @@ public sealed class LoginGameHandler(
 
         var gameEmbededLink = ConvertEmbededLink(request.GamePlatformId.Value, url);
         return new LoginGameResult(gameEmbededLink);
-    }
-
-    private static bool CheckExistAccount(UserExtend? usrex, Guid gamePlatformId)
-    {
-        if (usrex is null) return false;
-
-        if ((gamePlatformId == GameConstants.PLATFORM_ID_G598)
-            && (usrex.GameProviderAccount.IsNullOrWhiteSpace() || usrex.GameProviderPassword.IsNullOrWhiteSpace()))
-            return false;
-
-        if ((gamePlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
-            && (usrex.GameBaccaratAccount.IsNullOrWhiteSpace() || usrex.GameBaccaratPassword.IsNullOrWhiteSpace()))
-            return false;
-
-        return true;
     }
 
     private async Task<string?> LoginGameAsync(
