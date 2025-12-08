@@ -45,15 +45,21 @@ public sealed class WalletManagerCacheService(
 
         var g598Platform = gameProviderCache.G598Platform;
         var g598Balance = await GetGame598WalletAsync(userId);
-        if (g598Balance.HasValue)
+        userWallet.ExternalWallets.Add(new UserWalletExternalItemDto
         {
-            userWallet.ExternalWallets.Add(new UserWalletExternalItemDto
-            {
-                PlatformId = g598Platform.Id,
-                PlatformName = g598Platform.Name,
-                Amount = g598Balance.Value,
-            });
-        }
+            PlatformId = g598Platform.Id,
+            PlatformName = g598Platform.Name,
+            Amount = g598Balance ?? 0,
+        });
+
+        var baccaratPlatform = gameProviderCache.BaccaratPlatform;
+        var baccaratBalace = await GetBaccaratWalletAsync(userId);
+        userWallet.ExternalWallets.Add(new UserWalletExternalItemDto
+        {
+            PlatformId = baccaratPlatform.Id,
+            PlatformName = baccaratPlatform.Name,
+            Amount = baccaratBalace ?? 0,
+        });
 
         Set(cacheKey, userWallet);
     }
