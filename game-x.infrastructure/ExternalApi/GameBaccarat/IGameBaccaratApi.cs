@@ -1,4 +1,5 @@
 ﻿using game_x.share.ExternalApi.GameBaccarat.Dtos;
+using game_x.share.ExternalApi.GameBaccarat.Dtos.GetWallet;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Register;
 using Refit;
@@ -14,4 +15,8 @@ public interface IGameBaccaratApi
     /// <summary>Register API</summary>
     [Post("/partners/v1/auth/register")]
     Task<ApiResponse<ResponseBase<GameBaccaratRegisterResponse>>> RegisterAsync([Body] GameBaccaratRegisterRequest request);
+
+    /// <summary>Register API</summary>
+    [Post("/partners/v1/wallet")]
+    Task<ApiResponse<ResponseBase<GameBaccaratGetWalletResponse>>> GetWalletAsync([Body] GameBaccaratGetWalletRequest request);
 }
