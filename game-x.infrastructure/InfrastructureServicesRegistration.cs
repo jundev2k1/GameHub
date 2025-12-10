@@ -93,6 +93,7 @@ public static class InfrastructureServicesRegistration
         // Add security services
         services.AddSingleton<IAsymmetricCryptoService, AsymmetricCryptoService>();
         services.AddSingleton<IGameAesEncryptor, GameAesEncryptor>();
+        services.AddSingleton<IAesEncryptor, SystemAesEncryptor>();
         services.AddSingleton<IUserIdProvider, GidQueryUserIdProvider>();
         
         // Add service DI

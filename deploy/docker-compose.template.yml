@@ -85,6 +85,7 @@ services:
       - GameXSettings__MerchantNumber=${GAME_X_MERCHANT_NUMBER}
       - GameXSettings__PaymentGatewayPlatformId=${GAME_X_PAYMENT_GATEWAY_PLATFORM_ID}
       - GameXSettings__PaymentGatewayApiKey=${GAME_X_PAYMENT_GATEWAY_API_KEY}
+      - GameXSettings__AesKey=${GAME_X_AESKEY}
       - PaymentGatewaySettings__Host=${PAYMENT_GATEWAY_HOST}
 
   # ========================
