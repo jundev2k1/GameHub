@@ -13,7 +13,8 @@ public sealed class OnGameRegisterHandler(
     IUserRepo userRepo,
     IGameProviderService gameProvider,
     IGameBaccaratService gameBaccarat,
-    IGameAesEncryptor aesEncryptor) : IApplicationEventHandler<OnGameRegisterEvent>
+    IGameAesEncryptor gameAesEncryptor,
+    IAesEncryptor aesEncryptor) : IApplicationEventHandler<OnGameRegisterEvent>
 {
     public async Task Handle(OnGameRegisterEvent @event, CancellationToken ct = default)
     {
@@ -57,7 +58,7 @@ public sealed class OnGameRegisterHandler(
         };
         await gameProvider.RegisterAsync(request);
 
-        usrex.UpdateG598Account(account, aesEncryptor.Encrypt(password), nickName, 0M);
+        usrex.UpdateG598Account(account, gameAesEncryptor.Encrypt(password), nickName, 0M);
     }
 
     private async Task RegisterGameBaccaratUser(UserExtend usrex, string nickName)
@@ -72,6 +73,6 @@ public sealed class OnGameRegisterHandler(
             Nickname = nickName
         };
         var response = await gameBaccarat.RegisterAsync(request);
-        usrex.UpdateBaccaratAccount(response.UserId, account, password, nickName);
+        usrex.UpdateBaccaratAccount(response.UserId, account, aesEncryptor.Encrypt(password), nickName);
     }
 }

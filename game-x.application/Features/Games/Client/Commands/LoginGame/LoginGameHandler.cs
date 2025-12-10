@@ -3,13 +3,11 @@ using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnGameRegister;
 using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Features.Games.Services;
 using game_x.share.Extensions;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
-using game_x.share.ExternalApi.GameProvider.Dtos.Logout;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 
@@ -20,7 +18,8 @@ public sealed class LoginGameHandler(
     IUserRepo userRepo,
     IGameProviderService gameProvider,
     IGameBaccaratService gameBaccarat,
-    IGameAesEncryptor aesEncryptor,
+    IGameAesEncryptor gameAesEncryptor,
+    IAesEncryptor aesEncryptor,
     IGameProviderCacheService gameProviderCache,
     IGamePlatformService gamePlatformService,
     IOptions<GameProviderSettings> gameSettings,
@@ -58,7 +57,7 @@ public sealed class LoginGameHandler(
             var externalRequest = new GameLoginRequest
             {
                 Account = usrex.GameProviderAccount,
-                Passwd = aesEncryptor.Decrypt(usrex.GameProviderPassword),
+                Passwd = gameAesEncryptor.Decrypt(usrex.GameProviderPassword),
                 Gamecode = request.GameCode,
                 Address = request.Address,
                 Locale = request.Locale,
@@ -79,7 +78,7 @@ public sealed class LoginGameHandler(
             var externalRequest = new GameBaccaratLoginRequest
             {
                 Account = usrex.GameBaccaratAccount,
-                Password = usrex.GameBaccaratPassword,
+                Password = aesEncryptor.Decrypt(usrex.GameBaccaratPassword),
                 Gamecode = request.GameCode
             };
             var result = await gameBaccarat.LoginAsync(externalRequest);
