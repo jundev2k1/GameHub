@@ -28,6 +28,6 @@ public sealed class GameHookController(
         var partnerName = partnerValues.First();
 
         await Mediator.Send(command with { PartnerName = partnerName });
-        return NoContent();
+        return ApiResponseFactory.NoContent();
     }
 }
