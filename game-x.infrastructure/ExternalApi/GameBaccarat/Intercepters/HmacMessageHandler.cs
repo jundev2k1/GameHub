@@ -72,8 +72,16 @@ public sealed class HmacMessageHandler : DelegatingHandler
 
         // Add headers
         if (!string.IsNullOrEmpty(_settings.ClientIdHeader))
+        {
             request.Headers.Remove(_settings.ClientIdHeader);
-        request.Headers.Add(_settings.ClientIdHeader, _settings.ClientId);
+            request.Headers.Add(_settings.ClientIdHeader, _settings.ClientId);
+        }
+
+        if (!string.IsNullOrEmpty(_settings.AppIdHeader))
+        {
+            request.Headers.Remove(_settings.AppIdHeader);
+            request.Headers.Add(_settings.AppIdHeader, _settings.AppId);
+        }
 
         if (!string.IsNullOrEmpty(_settings.TimestampHeader))
         {
