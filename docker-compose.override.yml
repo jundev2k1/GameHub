@@ -42,6 +42,7 @@ services:
       - GameProviderSettings__RevertProxyUrl=${GAMEPROVIDER_REVERTPROXYURL}
       - BaccaratHmacSettings__Host=${GAMEBACCARAT_HOST}
       - BaccaratHmacSettings__ClientId=${GAMEBACCARAT_CLIENT_ID}
+      - BaccaratHmacSettings__AppId=${GAMEBACCARAT_APP_ID}
       - BaccaratHmacSettings__Secret=${GAMEBACCARAT_SECRET}
       - BaccaratHmacSettings__AllowedTimestampSkewSeconds=${GAMEBACCARAT_ALLOWEDTIMESTAMPSKEWSECONDS}
       - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
