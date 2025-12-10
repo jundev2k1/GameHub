@@ -28,6 +28,7 @@ using game_x.infrastructure.MediaStorage;
 using game_x.infrastructure.Security;
 using game_x.infrastructure.Security.Asymmetric;
 using game_x.infrastructure.Security.Encryption;
+using game_x.infrastructure.Security.HMac;
 using game_x.share.Settings;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -95,7 +96,11 @@ public static class InfrastructureServicesRegistration
         services.AddSingleton<IGameAesEncryptor, GameAesEncryptor>();
         services.AddSingleton<IAesEncryptor, SystemAesEncryptor>();
         services.AddSingleton<IUserIdProvider, GidQueryUserIdProvider>();
-        
+
+        // Add Hmac service
+        services.AddScoped<IHmacNonceStore, HmacNonceStore>();
+        services.AddScoped<IHmacValidator, HmacValidator>();
+
         // Add service DI
         services.Scan(scan => scan.FromApplicationDependencies()
             .AddClasses(c => c.AssignableTo<IServices>().Where(t => !t.IsAbstract))

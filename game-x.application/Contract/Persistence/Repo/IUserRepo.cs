@@ -63,6 +63,8 @@ public interface IUserRepo
         int pageSize = 20,
         CancellationToken ct = default);
 
+    Task<UserExtend?> GetUserExtendByAccountAsync(Guid platformId, string account, CancellationToken ct = default);
+
     Task<bool> IsExistUserIdAsync(string userId, CancellationToken ct = default);
     Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default);
 

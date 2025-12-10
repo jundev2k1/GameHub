@@ -9,6 +9,7 @@ using game_x.domain.Constants;
 using game_x.share.Extensions;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
+using System.Linq.Expressions;
 
 namespace game_x.persistence.Repo;
 
@@ -112,7 +113,7 @@ public sealed class UserRepo(
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException();
-        
+
         string? avatarUrl = null;
         if (targetUser.Avatar is not null)
         {
@@ -405,6 +406,17 @@ public sealed class UserRepo(
             (int)Math.Ceiling((decimal)totalCount / pageSize),
             page,
             pageSize);
+    }
+
+    public async Task<UserExtend?> GetUserExtendByAccountAsync(Guid platformId, string account, CancellationToken ct = default)
+    {
+        if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+            return await context.UserExtends.AsNoTracking().FirstOrDefaultAsync(usrex => usrex.GameBaccaratAccount == account, ct);
+
+        if (platformId == GameConstants.PLATFORM_ID_G598)
+            return await context.UserExtends.AsNoTracking().FirstOrDefaultAsync(usrex => usrex.GameProviderAccount == account, ct);
+
+        return null;
     }
 
     public async Task<bool> IsExistUserIdAsync(string userId, CancellationToken ct = default)
