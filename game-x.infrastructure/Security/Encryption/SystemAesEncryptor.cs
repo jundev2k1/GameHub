@@ -9,7 +9,7 @@ namespace game_x.infrastructure.Security.Encryption;
 public sealed class SystemAesEncryptor(IOptions<GameXSettings> options)
     : AesEncryptor(options.Value.AesKey, string.Empty), IAesEncryptor
 {
-    private readonly byte[] _key = Encoding.UTF8.GetBytes(options.Value.AesKey);
+    private readonly byte[] _key = Convert.FromBase64String(options.Value.AesKey);
 
     public override string Encrypt(string plainText)
     {
