@@ -1,4 +1,5 @@
-﻿using game_x.application.Contract.Infrastructure.Security;
+﻿using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.share.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -10,10 +11,12 @@ namespace game_x.infrastructure.Security.HMac;
 public sealed class HmacValidator(
     IOptions<HmacSettings> options,
     IOptions<BaccaratHmacSettings> baccaratOptions,
-    IHmacNonceStore nonceStore) : IHmacValidator
+    IHmacNonceStore nonceStore,
+    IAppLogger<HmacValidator> logger) : IHmacValidator
 {
     public async Task<bool> ValidateAsync(HttpRequest request, CancellationToken ct = default)
     {
+        logger.LogInformation("|===========> 1");
         if (!request.Headers.TryGetValue(options.Value.PartnerHeader, out var partnerValues))
             return false;
         if (!request.Headers.TryGetValue(options.Value.SignatureHeader, out var signatureValues))
@@ -23,6 +26,7 @@ public sealed class HmacValidator(
         if (!request.Headers.TryGetValue(options.Value.NonceHeader, out var nonceValues))
             return false;
 
+        logger.LogInformation("|===========> 2");
         var signature = signatureValues.First();
         var tsRaw = tsValues.First();
         var nonce = nonceValues.First();
@@ -35,18 +39,22 @@ public sealed class HmacValidator(
         };
         if (secretKey is null) return false;
 
+        logger.LogInformation("|===========> 3");
         if (!long.TryParse(tsRaw, out var tsSeconds))
             return false;
 
+        logger.LogInformation("|===========> 4");
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         if (Math.Abs(now - tsSeconds) > options.Value.AllowedTimestampSkewSeconds)
             return false; // timestamp out of allowed window
 
+        logger.LogInformation("|===========> 5");
         // Nonce check (replay protection)
         var ttl = TimeSpan.FromSeconds(options.Value.NonceTtlSeconds);
         var isNew = await nonceStore.TryUseNonceAsync(nonce!, ttl);
         if (!isNew) return false;
 
+        logger.LogInformation("|===========> 6");
         // Read body (we need to allow stream to be read by proxy after validation)
         request.EnableBuffering();
         request.Body.Position = 0;
