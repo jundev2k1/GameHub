@@ -58,13 +58,17 @@ public sealed class HmacValidator(
         // Read body (we need to allow stream to be read by proxy after validation)
         request.EnableBuffering();
         request.Body.Position = 0;
-        using var reader = new StreamReader(request.Body, leaveOpen: true);
-        var body = await reader.ReadToEndAsync(ct);
-        request.Body.Position = 0;
 
         // Compute body SHA256 hash → base64 (same as client)
-        var bodyBytes = Encoding.UTF8.GetBytes(body);
+        using var ms = new MemoryStream();
+        await request.Body.CopyToAsync(ms, ct);
+        var bodyBytes = ms.ToArray();
+
+        request.Body.Position = 0;
+
+        // Compute body hash
         var bodyHash = Convert.ToBase64String(SHA256.HashData(bodyBytes));
+
         var method = request.Method;
         var pathAndQuery = request.Path + request.QueryString;
 
