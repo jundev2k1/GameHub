@@ -12,6 +12,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Jobs;
 using game_x.application.Contract.Polly;
+using game_x.infrastructure.Auth.Handlers;
 using game_x.infrastructure.Caching;
 using game_x.infrastructure.Email;
 using game_x.infrastructure.Eventing;
@@ -29,12 +30,16 @@ using game_x.infrastructure.Security;
 using game_x.infrastructure.Security.Asymmetric;
 using game_x.infrastructure.Security.Encryption;
 using game_x.infrastructure.Security.HMac;
+using game_x.persistence.Requirements;
 using game_x.share.Settings;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Minio;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -59,6 +64,8 @@ public static class InfrastructureServicesRegistration
                     new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
             });
         services.AutoBindSettings(configuration, typeof(BaseSettings).Assembly)
+            .AddJwtAuth(configuration)
+            .AddHmacAuth()
             .AddHangfireServices(configuration)
             .AddExternalApiServices(configuration)
             .AddMinioServices(configuration)
@@ -106,6 +113,65 @@ public static class InfrastructureServicesRegistration
             .AddClasses(c => c.AssignableTo<IServices>().Where(t => !t.IsAbstract))
             .AsImplementedInterfaces()
             .WithScopedLifetime());
+
+        return services;
+    }
+
+    /// <summary>
+    /// Add JWT authentication to the DI container.
+    /// </summary>
+    private static IServiceCollection AddJwtAuth(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(option =>
+            {
+                var jwtKey = configuration["JwtSettings:Key"]
+                    ?? throw new InvalidOperationException("JwtSettings:Key Not configured");
+
+                option.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                    ValidIssuer = configuration["JwtSettings:Issuer"],
+                    ValidAudience = configuration["JwtSettings:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                };
+                option.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        // SignalR will put the token in the URL query parameter with the parameter name access_token
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        // The connection URL is only checked if it is a Hubs-related path
+                        bool hasToken = !string.IsNullOrEmpty(accessToken);
+                        bool shouldValidPath = path.StartsWithSegments("/hubs");
+                        if (hasToken && shouldValidPath)
+                            context.Token = accessToken;
+
+                        return Task.CompletedTask;
+                    },
+                };
+            });
+
+        return services;
+    }
+
+    private static IServiceCollection AddHmacAuth(this IServiceCollection services)
+    {
+        services.AddAuthorizationBuilder()
+            .AddPolicy(AppPolicies.RequireHmac, p => p.Requirements.Add(new HmacRequirement()));
+
+        services.AddSingleton<IAuthorizationHandler, HmacAuthorizationHandler>();
 
         return services;
     }
