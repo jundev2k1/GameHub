@@ -171,7 +171,7 @@ public static class InfrastructureServicesRegistration
         services.AddAuthorizationBuilder()
             .AddPolicy(AppPolicies.RequireHmac, p => p.Requirements.Add(new HmacRequirement()));
 
-        services.AddSingleton<IAuthorizationHandler, HmacAuthorizationHandler>();
+        services.AddScoped<IAuthorizationHandler, HmacAuthorizationHandler>();
 
         return services;
     }
