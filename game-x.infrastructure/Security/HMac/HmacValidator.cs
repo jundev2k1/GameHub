@@ -75,9 +75,13 @@ public sealed class HmacValidator(
         // Build canonical string to sign. Adjust order and canonicalization as needed.
         // Here: method + path + query + timestamp + nonce + body
         var canonical = $"{tsRaw}\n{nonce}\n{method}\n{pathAndQuery}\n{bodyHash}";
+        logger.LogInformation("Canonical: " + canonical);
+        logger.LogInformation("SecretKey: " + secretKey);
+        logger.LogInformation("Signature: " + signature);
 
         // Compute HMAC
         var computed = ComputeHmac(secretKey, canonical);
+        logger.LogInformation("Computed: " + computed);
 
         // Compare in constant time
         return SecureEquals(computed, signature!);
