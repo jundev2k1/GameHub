@@ -12,7 +12,7 @@ public sealed class BaccaratHmacSettings : BaseSettings
     public int AllowedTimestampSkewSeconds { get; set; } = 300; // 5 minutes
 
     // Header names
-    public string ClientIdHeader { get; set; } = "X-Client-Id";
+    public string ClientIdHeader { get; set; } = "X-ClientId";
     public string AppIdHeader { get; set; } = "X-AppId";
     public string SignatureHeader { get; set; } = "X-Signature";
     public string TimestampHeader { get; set; } = "X-Timestamp";
