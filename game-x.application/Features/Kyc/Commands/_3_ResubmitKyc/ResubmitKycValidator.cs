@@ -26,7 +26,6 @@ public sealed class ResubmitKycValidator : AbstractValidator<ResubmitKycCommand>
         RuleFor(x => x.IdNumber)
             .NotEmpty().WithMessage($"{nameof(SubmitKycCommand.IdNumber)} must be not empty.")
             .MaximumLength(20).WithMessage($"{nameof(SubmitKycCommand.IdNumber)} must be not greater than 20 characters.")
-            .IsNumber(nameof(SubmitKycCommand.IdNumber))
             .When(x => x.IdNumber is not null);
 
         RuleFor(x => x.FrontImage)
