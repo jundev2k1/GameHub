@@ -1,5 +1,5 @@
 ﻿using game_x.application.Common.Abstractions;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Notifications.Dtos;

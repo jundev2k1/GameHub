@@ -1,17 +1,23 @@
-using System.Text.Json;
 using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Services.Statistics.Admin;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Features.ChainTransactions.Dtos;
+using game_x.share.Extensions;
+using System.Text.Json;
 
 namespace game_x.application.Events.OnWithdrawalOrderReviewed;
 
 public sealed class OnWithdrawalOrderReviewedHandler(
     IUnitOfWork unitOfWork,
     INotificationRepo notificationRepo,
+    IAdminStatistics adminStatistics,
     IClientHubService clientHubService,
+    IAdminHubService adminHubService,
     IApplicationEventDispatcher eventDispatcher,
     IAppLogger<User> logger) : IApplicationEventHandler<OnWithdrawalOrderReviewedEvent>
 {
@@ -40,7 +46,16 @@ public sealed class OnWithdrawalOrderReviewedHandler(
             await clientHubService.SendTransactionToMemberAsync(
                 transaction.UserId,
                 transaction.Adapt<ClientTransactionDto>());
-            
+
+            var (withdrawalCount, kycCount, bankAccountCount) = await adminStatistics.GetUnderReviewStatisticsAsync(ct);
+            var orderReviewedDto = new AdminOrderReviewedDto
+            {
+                Id = transaction.Id,
+                Status = transaction.Status.ToCamelCase(),
+                UnderReviewCount = withdrawalCount,
+            };
+            await adminHubService.NotifyOrderTxReviewedToAdminAsync(orderReviewedDto);
+
             await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
         }
         catch (Exception ex)

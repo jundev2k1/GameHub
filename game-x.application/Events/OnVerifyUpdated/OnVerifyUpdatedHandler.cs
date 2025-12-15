@@ -1,27 +1,30 @@
-using System.Text.Json;
-using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Services.Statistics.Admin;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.share.Extensions;
+using System.Text.Json;
 
 namespace game_x.application.Events.OnVerifyUpdated;
 
 public sealed class OnVerifyUpdatedHandler(
     IUnitOfWork unitOfWork,
     INotificationRepo notificationRepo,
-    IClientHubService clientHubService) : IApplicationEventHandler<OnVerifyUpdatedEvent>
+    IAdminStatistics adminStatistics,
+    IClientHubService clientHubService,
+    IAdminHubService adminHubService) : IApplicationEventHandler<OnVerifyUpdatedEvent>
 {
     public async Task Handle(OnVerifyUpdatedEvent @event, CancellationToken ct = default)
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await SendToMember(@event.UserId, @event.VerificationStatus, ct);
+            await SendToMember(@event.UserId, @event.PublicId, @event.VerificationStatus, ct);
         }, ct);
     }
 
-    private async Task SendToMember(string userId, VerificationStatusDto verificationDto, CancellationToken ct)
+    private async Task SendToMember(string userId, Guid publicId, VerificationStatusDto verificationDto, CancellationToken ct)
     {
         var notificationDto = new VerificationNotificationDto
         {
@@ -46,5 +49,29 @@ public sealed class OnVerifyUpdatedHandler(
         await clientHubService.SendVerifyUpdateAsync(
             userId,
             verificationDto);
+
+        await SendOrderReviewedForAdminAsync(publicId, verificationDto.Type, verificationDto.Status, ct);
+    }
+
+    private async Task SendOrderReviewedForAdminAsync(Guid publicId, VerificationStatusType type, VerificationStatus status, CancellationToken ct)
+    {
+        var (withdrawalCount, kycCount, bankAccountCount) = await adminStatistics.GetUnderReviewStatisticsAsync(ct);
+        var dto = new AdminOrderReviewedDto
+        {
+            Id = publicId,
+            Status = status.ToCamelCase()
+        };
+        switch (type)
+        {
+            case VerificationStatusType.Kyc:
+                dto.UnderReviewCount = kycCount;
+                await adminHubService.NotifyOrderKycReviewedToAdminAsync(dto);
+                break;
+
+            case VerificationStatusType.BankAccount:
+                dto.UnderReviewCount += bankAccountCount;
+                await adminHubService.NotifyOrderBankAccountReviewedToAdminAsync(dto);
+                break;
+        }
     }
 }

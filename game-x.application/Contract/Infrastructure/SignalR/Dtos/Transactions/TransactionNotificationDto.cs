@@ -1,4 +1,4 @@
-namespace game_x.application.Contract.Infrastructure.SignalR.Dtos;
+namespace game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 
 public class TransactionNotificationDto
 {

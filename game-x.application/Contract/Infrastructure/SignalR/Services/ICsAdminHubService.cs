@@ -1,4 +1,4 @@
-﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 
 namespace game_x.application.Contract.Infrastructure.SignalR.Services;
 

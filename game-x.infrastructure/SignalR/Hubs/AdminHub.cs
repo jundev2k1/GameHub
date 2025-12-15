@@ -1,8 +1,10 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
-using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Features.BankAccountVerifications.Dtos;
 using game_x.application.Features.Kyc.Dtos;
+using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
 using game_x.share.Extensions;
 using MediatR;
@@ -23,8 +25,9 @@ public interface IAdminHub
     Task TransactionUpdated(AdminTransactionDto transaction);
     Task KycCreated(UserKycListItemDto verify);
     Task BankAccountCreated(BankAccountListItemDto verify);
-
-
+    Task TransactionReviewed(AdminOrderReviewedDto order);
+    Task KycReviewed(AdminOrderReviewedDto order);
+    Task BankAccountReviewed(AdminOrderReviewedDto order);
 }
 
 [Authorize(Roles = AppRoles.Admin)]
@@ -42,6 +45,7 @@ public sealed class AdminHub(
             logger.LogInformation($"Admin User connected ({nameof(AdminHub)}): {userId}");
 
         await Groups.AddToGroupAsync(Context.ConnectionId, $"admin-{userId}");
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"admin-group");
         await base.OnConnectedAsync();
     }
 

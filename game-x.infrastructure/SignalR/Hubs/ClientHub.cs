@@ -2,6 +2,8 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.LiveStream;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
