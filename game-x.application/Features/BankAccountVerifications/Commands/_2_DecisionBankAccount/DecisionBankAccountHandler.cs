@@ -18,9 +18,10 @@ public sealed class DecisionBankAccountHandler(
         var userId = string.Empty;
         var currencyId = 0;
 
+        Guid? bankAccountId = null;
+        VerificationStatusDto? verificationDto = null;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            Guid? bankAccountId = null;
             await bankAccountRepo.UpdateAsync(request.Id, targetItem =>
             {
                 if (targetItem.Status != UserBankAccountStatus.UnderReview)
@@ -39,19 +40,16 @@ public sealed class DecisionBankAccountHandler(
 
             var targetCurrency = await currencyRepo.GetByIdAsync(currencyId, ct);
 
-            var verificationDto = new VerificationStatusDto
+            verificationDto = new VerificationStatusDto
             {
                 CurrencyCode = targetCurrency?.Code?.Value ?? string.Empty,
                 Type = VerificationStatusType.BankAccount,
                 Status = (VerificationStatus)(int)request.Status,
                 IsVerified = request.Status == UserBankAccountStatus.Approved,
             };
-
-            await eventDispatcher.Publish(new OnVerifyUpdatedEvent(userId, bankAccountId!.Value, verificationDto), ct);
         }, ct);
+        await eventDispatcher.Publish(new OnVerifyUpdatedEvent(userId, bankAccountId!.Value, verificationDto!), ct);
 
         return Unit.Value;
     }
-
-
 }
