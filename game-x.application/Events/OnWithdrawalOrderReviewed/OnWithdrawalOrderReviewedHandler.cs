@@ -18,6 +18,7 @@ public sealed class OnWithdrawalOrderReviewedHandler(
     IAdminStatistics adminStatistics,
     IClientHubService clientHubService,
     IAdminHubService adminHubService,
+    ICsAdminHubService csAdminHubService,
     IApplicationEventDispatcher eventDispatcher,
     IAppLogger<User> logger) : IApplicationEventHandler<OnWithdrawalOrderReviewedEvent>
 {
@@ -55,6 +56,7 @@ public sealed class OnWithdrawalOrderReviewedHandler(
                 UnderReviewCount = withdrawalCount,
             };
             await adminHubService.NotifyOrderTxReviewedToAdminAsync(orderReviewedDto);
+            await csAdminHubService.NotifyOrderTxReviewedToAdminAsync(orderReviewedDto);
 
             await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
         }

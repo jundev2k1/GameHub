@@ -14,7 +14,8 @@ public sealed class OnVerifyUpdatedHandler(
     INotificationRepo notificationRepo,
     IAdminStatistics adminStatistics,
     IClientHubService clientHubService,
-    IAdminHubService adminHubService) : IApplicationEventHandler<OnVerifyUpdatedEvent>
+    IAdminHubService adminHubService,
+    ICsAdminHubService csAdminHubService) : IApplicationEventHandler<OnVerifyUpdatedEvent>
 {
     public async Task Handle(OnVerifyUpdatedEvent @event, CancellationToken ct = default)
     {
@@ -66,11 +67,13 @@ public sealed class OnVerifyUpdatedHandler(
             case VerificationStatusType.Kyc:
                 dto.UnderReviewCount = kycCount;
                 await adminHubService.NotifyOrderKycReviewedToAdminAsync(dto);
+                await csAdminHubService.NotifyOrderKycReviewedToAdminAsync(dto);
                 break;
 
             case VerificationStatusType.BankAccount:
                 dto.UnderReviewCount += bankAccountCount;
                 await adminHubService.NotifyOrderBankAccountReviewedToAdminAsync(dto);
+                await csAdminHubService.NotifyOrderBankAccountReviewedToAdminAsync(dto);
                 break;
         }
     }
