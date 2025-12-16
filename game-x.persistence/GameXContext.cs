@@ -59,6 +59,7 @@ public sealed class GameXContext(
     public DbSet<LiveStreamChatMessage> LiveStreamChatMessages { get; set; }
     public DbSet<InteractionCharacter> InteractionCharacters { get; set; }
     public DbSet<InteractionCharacterPose> InteractionCharacterPoses { get; set; }
+    public DbSet<UserGameSession> UserGameSessions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
