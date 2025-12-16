@@ -37,7 +37,6 @@ public sealed class TronUsdtWithdrawalHandler(
         await unitOfWork.WithTransactionAsync( async () =>
         {
             userBalanceService.Freeze(balance, totalAmount);
-            tx.BalanceAfter = balance.TotalAmount;
             await transactionRepo.AddAsync(tx, ct);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
             await eventDispatcher.Publish(new OnTransactionInternalCreatedEvent(tx.Adapt<TransactionInternalDto>()), ct);
