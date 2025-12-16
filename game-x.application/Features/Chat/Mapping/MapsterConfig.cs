@@ -14,20 +14,20 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.CustomerId, src => src.CustomerId ?? String.Empty)
             .Map(dest => dest.CustomerDisplayName, src => src.Customer!.Nickname)
             .Map(dest => dest.CustomerAvatarUrl, src => string.Empty)
-            .Map(dest => dest.LastSenderRole, src => src.Messages.FirstOrDefault()!.SenderRole)
-            .Map(dest => dest.LastUserId, src => src.Messages.FirstOrDefault()!.SenderActorId)
+            .Map(dest => dest.LastSenderRole, src => src.Messages.LastOrDefault()!.SenderRole)
+            .Map(dest => dest.LastUserId, src => src.Messages.LastOrDefault()!.SenderActorId)
             .Map(dest => dest.LastUserName, src => 
-                src.Messages.FirstOrDefault()!.SenderUser != null 
-                    ? src.Messages.FirstOrDefault()!.SenderUser!.Nickname.IsNotNullOrEmpty() 
-                        ? src.Messages.FirstOrDefault()!.SenderUser!.Nickname
-                        : src.Messages.FirstOrDefault()!.SenderUser!.UserName ?? String.Empty
+                src.Messages.LastOrDefault()!.SenderUser != null 
+                    ? src.Messages.LastOrDefault()!.SenderUser!.Nickname.IsNotNullOrEmpty() 
+                        ? src.Messages.LastOrDefault()!.SenderUser!.Nickname
+                        : src.Messages.LastOrDefault()!.SenderUser!.UserName ?? String.Empty
                     : string.Empty)
-            .Map(dest => dest.LastUserName, src =>  src.Messages.FirstOrDefault()!.SenderUser)
+            .Map(dest => dest.LastUserName, src =>  src.Messages.LastOrDefault()!.SenderUser)
             .Map(dest => dest.LastUserAvatarUrl, src => string.Empty)
             .Map(dest => dest.LastMessageAt, src => src.LastMessageAt)
-            .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault()!.PublicId)
-            .Map(dest => dest.LastMessageText, src => src.Messages.FirstOrDefault()!.Text)
-            .Map(dest => dest.LastMessageKind, src => src.Messages.FirstOrDefault()!.Kind);
+            .Map(dest => dest.LastMessageId, src => src.Messages.LastOrDefault()!.PublicId)
+            .Map(dest => dest.LastMessageText, src => src.Messages.LastOrDefault()!.Text)
+            .Map(dest => dest.LastMessageKind, src => src.Messages.LastOrDefault()!.Kind);
         
         cfg.NewConfig<Message, MessageDto>()
             .Map(dest => dest.ConversationId, src => src.Conversation.PublicId)
