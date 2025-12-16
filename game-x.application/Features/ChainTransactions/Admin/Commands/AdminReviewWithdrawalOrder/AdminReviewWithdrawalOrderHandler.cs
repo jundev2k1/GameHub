@@ -67,8 +67,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         await unitOfWork.WithTransactionAsync(
             async () =>
             {
-                decimal balanceAfter = await TryRefundFrozenBalanceAsync(transaction, ct);
-                transaction.BalanceAfter = balanceAfter;
+                await TryRefundFrozenBalanceAsync(transaction, ct);
                 await transactionRepo.PutUpdateAsync(transaction, ct);
             }, ct);
     }
@@ -97,20 +96,17 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         }
         catch (Exception ex)
         {
-            decimal balanceAfter = await TryRefundFrozenBalanceAsync(tx, ct);
             await TryRefundFrozenBalanceAsync(tx, ct);
-            
             await transactionRepo.PatchUpdateAsync(tx.PublicId, x =>
             {
                 x.Status = TransactionStatus.Failed;
-                x.BalanceAfter = balanceAfter;
                 x.UpdateMeta(m => m.ErrorMessage = ex.Message);
             }, ct);
             throw;
         }
     }
     
-    private async Task<decimal> TryRefundFrozenBalanceAsync(Transaction tx, CancellationToken ct)
+    private async Task TryRefundFrozenBalanceAsync(Transaction tx, CancellationToken ct)
     {
         UserBalance? balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId);
         if (balance == null)
@@ -122,7 +118,6 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         {
             userBalanceService.Unfreeze(balance, refundAmount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
-            return balance.TotalAmount;
         }
         catch (Exception ex)
         {
