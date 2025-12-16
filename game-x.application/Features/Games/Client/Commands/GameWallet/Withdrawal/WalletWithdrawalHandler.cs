@@ -49,7 +49,7 @@ public sealed class WalletWithdrawalHandler(
             await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
             {
                 order.UpdateStatus(TransactionStatus.Completed);
-                order.BalanceAfter = balance.Amount;
+                order.BalanceAfter = balance.TotalAmount;
                 order.CompletedAt = DateTime.UtcNow;
             }, ct);
 

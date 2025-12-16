@@ -69,7 +69,7 @@ public sealed class OnUxmTransactionCallbackHandler(
                         completedAt: DateTime.UtcNow
                     );
                     
-                    order.BalanceAfter = balance.Amount;
+                    order.BalanceAfter = balance.TotalAmount;
                 }, ct);
                 
                 var transactionInternal = transaction.Adapt<TransactionInternalDto>();
