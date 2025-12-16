@@ -49,7 +49,7 @@ public sealed class AuthController : BaseApiController
         return ApiResponseFactory.Ok(result, MessageCode.User.UserResetPasswordSuccess);
     }
 
-    [Authorize(Roles = AppRoles.User)]
+    [Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
     [HttpPost("logout")]
     public async Task<IActionResult> LogoutAsync()
     {

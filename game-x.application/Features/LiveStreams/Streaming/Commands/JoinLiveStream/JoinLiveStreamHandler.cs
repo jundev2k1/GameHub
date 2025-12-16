@@ -5,6 +5,7 @@ using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.share.Extensions;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
+using System.Net;
 using System.Security.Cryptography;
 
 namespace game_x.application.Features.LiveStreams.Streaming.Commands.JoinLiveStream;
@@ -83,6 +84,7 @@ public sealed class JoinLiveStreamHandler(
             TalentAvatar: await fileManagerCache.GetFileUrl(streamInfo.AssignedTo?.AvatarId, ct),
             ViewCount: liveStreamManager.GetViewerCount(streamInfo.StreamKey),
             Url: viewer.Url,
+            WebRtcUrl: viewer.WebRtcUrl,
             BanInfos: banInfos);
     }
 
@@ -96,6 +98,7 @@ public sealed class JoinLiveStreamHandler(
             StreamKey = schedule.StreamKey,
             Token = token,
             Url = GenerateUrl(schedule.StreamKey, token),
+            WebRtcUrl = GenerateWebRtcUrl(schedule.StreamKey, token),
             ViewerId = targetUser.Id,
             ViewerName = targetUser.Nickname,
             ViewerAvatar = avatarUrl,
@@ -114,5 +117,13 @@ public sealed class JoinLiveStreamHandler(
                 .Replace('/', '_');
 
     private string GenerateUrl(string streamKey, string token) =>
-        $"{options.Value.ClientUrl}/{streamKey}.flv?token={token}";
+        $"{options.Value.ClientUrl}/{streamKey}.flv?vhost={WebUtility.UrlEncode(options.Value.VHost)}&token={token}";
+
+    private string GenerateWebRtcUrl(string streamKey, string token)
+    {
+        var domain = options.Value.ClientUrl
+            .Replace("http://", string.Empty)
+            .Replace("https://", string.Empty);
+        return $"webrtc://{domain}/{streamKey}?vhost={WebUtility.UrlEncode(options.Value.VHost)}&token={token}";
+    }
 }

@@ -9,13 +9,16 @@ public sealed class LoginGameValidator : AbstractValidator<LoginGameCommand>
     [
         "KRF3", "ESF3", "ALPK10", "ESPK10", "LBPK10", "EBPK10", "ANPK6", "M3ANPK6",
         "ESSSC", "ALSSC", "LBSSC", "HKM6", "MCM6", "NMCM6", "TWM6", "HKDM6",
-        "FCD3", "PLD3", "ALEGG", "AL10FT", "AL5FT"
+        "FCD3", "PLD3", "ALEGG", "AL10FT", "AL5FT", "BAC001"
     ];
     private static readonly HashSet<string> AllowedLocales = ["zh-Hant", "zh-Hants"];
     private static readonly HashSet<string> AllowedAddress = ["lobby", "lotterygame"];
 
     public LoginGameValidator()
     {
+        RuleFor(x => x.GamePlatformId)
+            .NotEmpty().WithMessage($"{nameof(LoginGameCommand.GamePlatformId)} must be not empty.");
+
         RuleFor(x => x.GameCode)
             .NotEmpty().WithMessage($"{nameof(LoginGameCommand.GameCode)} must be not empty.")
             .Must(code => AllowedGameCodes.Contains(code)).WithMessage($"Invalid {nameof(LoginGameCommand.GameCode)}.");

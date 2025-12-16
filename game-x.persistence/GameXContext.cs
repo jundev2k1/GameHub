@@ -18,11 +18,16 @@ public sealed class GameXContext(
         IdentityRoleClaim<string>,
         IdentityUserToken<string>>(options)
 {
+    public DbSet<AppSetting> AppSettings { get; set; }
     public DbSet<User> AppUsers { get; set; }
     public DbSet<UserExtend> UserExtends { get; set; }
     public DbSet<UserRole> AppUserRoles { get; set; }
     public DbSet<UserKyc> UserKycs { get; set; }
     public DbSet<UserBalance> UserBalances { get; set; }
+    public DbSet<SystemWallet> SystemWallets { get; set; }
+    public DbSet<SystemWalletTransaction> SystemWalletTransactions { get; set; }
+    public DbSet<TalentWallet> TalentWallets { get; set; }
+    public DbSet<TalentWalletTransaction> TalentWalletTransactions { get; set; }
     public DbSet<AsymmetricKey> AsymmetricKeys { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<MediaFile> MediaFiles { get; set; }
@@ -31,8 +36,11 @@ public sealed class GameXContext(
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<GamePlatform> GamePlatforms { get; set; }
     public DbSet<GameCategory> GameCategories { get; set; }
+    public DbSet<GameCategoryMapping> GameCategoryMappings { get; set; }
     public DbSet<GameType> GameTypes { get; set; }
+    public DbSet<GameTypeMapping> GameTypeMappings { get; set; }
     public DbSet<GameTag> GameTags { get; set; }
+    public DbSet<GameTagMapping> GameTagMappings { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<GameRecommend> GameRecommends { get; set; }
     public DbSet<FiatCurrency> FiatCurrencies { get; set; }

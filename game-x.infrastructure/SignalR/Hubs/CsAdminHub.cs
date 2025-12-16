@@ -1,5 +1,9 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
+using game_x.application.Features.BankAccountVerifications.Dtos;
+using game_x.application.Features.Kyc.Dtos;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
 using game_x.share.Extensions;
@@ -13,12 +17,12 @@ namespace game_x.infrastructure.SignalR.Hubs;
 public interface ICsAdminHub
 {
     Task ReceiveNotification(NotificationDto message);
-
-    /// <summary>
-    ///     Notify that an order has been updated.
-    /// </summary>
-    /// <param name="transaction">The transaction information that was updated.</param>
     Task TransactionUpdated(AdminTransactionDto transaction);
+    Task KycCreated(UserKycListItemDto verify);
+    Task BankAccountCreated(BankAccountListItemDto verify);
+    Task TransactionReviewed(AdminOrderReviewedDto order);
+    Task KycReviewed(AdminOrderReviewedDto order);
+    Task BankAccountReviewed(AdminOrderReviewedDto order);
 }
 
 [Authorize(Roles = AppRoles.Cs)]
@@ -36,6 +40,7 @@ public sealed class CsAdminHub(
             logger.LogInformation("Admin User connected ({hubName}): {userId}", nameof(CsAdminHub), userId);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, $"cs-admin-{userId}");
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"cs-admin-group");
         await base.OnConnectedAsync();
     }
 

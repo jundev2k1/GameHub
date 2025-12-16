@@ -9,6 +9,7 @@ using game_x.domain.Constants;
 using game_x.share.Extensions;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
+using System.Linq.Expressions;
 
 namespace game_x.persistence.Repo;
 
@@ -112,7 +113,7 @@ public sealed class UserRepo(
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException();
-        
+
         string? avatarUrl = null;
         if (targetUser.Avatar is not null)
         {
@@ -130,7 +131,7 @@ public sealed class UserRepo(
         bool? isKycConfirmed,
         bool? isBankAccountConfirmed,
         int size = 10,
-        bool isIncludeAdmin = false,
+        string[]? roles = null,
         CancellationToken ct = default)
     {
         var query = context.Users
@@ -142,21 +143,27 @@ public sealed class UserRepo(
             .Include(u => u.UserBankAccounts)
             .Where(u => u.Status == UserStatus.Active && !u.UserRoles.Any(ur => ur.Role.Name == AppRoles.Root))
             .AsQueryable();
-        if (!isIncludeAdmin)
-            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Name == AppRoles.User));
+        // Set condition to search with user roles
+        if (roles is not null && roles.Length > 0)
+            query = query.Where(u => u.UserRoles.Any(ur => roles.Contains(ur.Role.Name)));
+        else
+            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Name != AppRoles.Admin));
 
+        // Search with keyword
         if (keyword.IsNotNullOrEmpty())
             query = query.Where(u => u.Nickname.ToLower().Contains(keyword.ToLower()));
 
-        if (isKycConfirmed != null)
+        // Search with kyc or bank account confirmed status
+        var isUser = roles != null && roles.Contains(AppRoles.User);
+        if (isUser && isKycConfirmed != null)
             query = query.Where(u => isKycConfirmed == true
                 ? u.UserKyc != null && u.UserKyc.Status == KycStatus.Approved
                 : u.UserKyc == null || u.UserKyc.Status != KycStatus.Approved);
-
-        if (isBankAccountConfirmed != null)
+        if (isUser && isBankAccountConfirmed != null)
             query = query.Where(u => isBankAccountConfirmed == true
                 ? u.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved)
                 : !u.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved));
+
         var users = await query
             .Take(size)
             .ToArrayAsync(ct);
@@ -358,12 +365,68 @@ public sealed class UserRepo(
             page,
             pageSize);
     }
+    public async Task<PaginationResult<UserDto>> GetTalentByCriteriaAsync(
+        Func<IQueryable<UserDto>, IQueryable<UserDto>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var baseQuery = userManager.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .Where(u => !u.IsDeleted && u.UserRoles.Any(ur => ur.Role.NormalizedName == AppRoles.Talent.ToUpper()))
+            .AsQueryable();
+
+        var query = baseQuery
+            .Select(u => new UserDto
+            {
+                Id = u.Id,
+                Nickname = u.Nickname,
+                UserName = u.UserName!,
+                Email = u.Email!,
+                Status = u.Status,
+                CountryCode = u.CountryCode,
+                EmailConfirmed = u.EmailConfirmed,
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt
+            });
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<UserDto>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
+
+    public async Task<UserExtend?> GetUserExtendByAccountAsync(Guid platformId, string account, CancellationToken ct = default)
+    {
+        if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+            return await context.UserExtends.AsNoTracking().FirstOrDefaultAsync(usrex => usrex.GameBaccaratAccount == account, ct);
+
+        if (platformId == GameConstants.PLATFORM_ID_G598)
+            return await context.UserExtends.AsNoTracking().FirstOrDefaultAsync(usrex => usrex.GameProviderAccount == account, ct);
+
+        return null;
+    }
 
     public async Task<bool> IsExistUserIdAsync(string userId, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted, ct);
 
     public async Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.Email != null && u.Email.ToLower() == email.ToLower() && !u.IsDeleted, ct);
+
+    public async Task<bool> IsExistUsernameAsync(string username, CancellationToken ct = default)
+        => await userManager.Users.AnyAsync(u => u.UserName != null && u.UserName.ToLower() == username.ToLower() && !u.IsDeleted, ct);
 
     public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.PhoneNumber == phoneNumber && !u.IsDeleted, ct);
@@ -383,6 +446,8 @@ public sealed class UserRepo(
         var roleResult = await userManager.AddToRolesAsync(user, role.Items);
         if (roleResult.Succeeded) return;
 
+        // Rollback and throw the error
+        await userManager.DeleteAsync(user);
         var roleError = roleResult.Errors.Select(e => e.Description).JoinToString(", ");
         throw new BadRequestException($"Failed to add user to role: {roleError}");
     }
@@ -391,6 +456,7 @@ public sealed class UserRepo(
     {
         var targetUser = await context.AppUsers
             .Include(u => u.UserKyc)
+            .Include(u => u.UserExtend)
             .Include(u => u.UserBankAccounts)
             .ThenInclude(uba => uba.FiatCurrency)
             .FirstOrDefaultAsync(user => user.Id == userId, ct)
@@ -416,5 +482,15 @@ public sealed class UserRepo(
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
         updateAction.Invoke(targetKyc);
+    }
+
+    public async Task UpdateUserExtendAsync(string userId, Func<UserExtend, Task> updateAction, CancellationToken ct = default)
+    {
+        var targetKyc = await context.UserExtends
+            .Include(usrex => usrex.User)
+            .FirstOrDefaultAsync(usrex => usrex.Id == userId && !usrex.User.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+
+        await updateAction.Invoke(targetKyc);
     }
 }

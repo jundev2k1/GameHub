@@ -23,12 +23,7 @@ public sealed class AssignTalentHandler(
                 throw new BadRequestException("Only scheduled livestream can be assigned talent.");
 
             talent = await userRepo.GetUserByIdAsync(request.TalentId, ct);
-            if (talent.UserKyc == null || talent.UserKyc.Status != KycStatus.Approved)
-                throw new BadRequestException("User must be kyc verified.");
-
-            if (talent.UserBankAccounts.Count == 0
-                || !talent.UserBankAccounts.Any(ba => ba.Status == UserBankAccountStatus.Approved))
-                throw new BadRequestException("Must have at least 1 verified bank account");
+            if (!talent.IsTalent) throw new BadRequestException($"This user is not a Talent.");
 
             livestream.AssignStream(talent.Id);
 
@@ -51,7 +46,8 @@ public sealed class AssignTalentHandler(
         var streams = await liveStreamRepo.GetsByTalentIdAsync(talentId);
         foreach (var stream in streams)
         {
-            var isOverlaps = startTime <= stream.EndTime && endTime >= stream.StartTime;
+            var isOverlaps = stream.Status is not (LiveStreamStatus.Cancelled or LiveStreamStatus.Ended)
+                && startTime <= stream.EndTime && endTime >= stream.StartTime;
             if (isOverlaps)
             {
                 throw new BadRequestException(

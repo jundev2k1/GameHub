@@ -6,7 +6,6 @@ public record OnLiveStreamDonatedEvent(
     LiveStreamStatusDto StreamInfo,
     string UserId,
     Guid UserBalanceId,
-    Guid TalentBalanceId,
     decimal Amount,
     int CryptoId,
     string Message = "",

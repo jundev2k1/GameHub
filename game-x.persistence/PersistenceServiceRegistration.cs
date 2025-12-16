@@ -1,12 +1,9 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.persistence.Interceptors;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace game_x.persistence;
 
@@ -21,7 +18,6 @@ public static class PersistenceServiceRegistration
             .AddDbContext<GameXContext>(options => options
                 .UseNpgsql(connectionString)
                 .UseSnakeCaseNamingConvention())
-            .AddJwtAuth(configuration)
             .AddIdentity()
             .AddRepos()
             .AddInterceptors();
@@ -68,55 +64,6 @@ public static class PersistenceServiceRegistration
             .AddEntityFrameworkStores<GameXContext>()
             .AddSignInManager<SignInManager<User>>()
             .AddDefaultTokenProviders();
-
-        return services;
-    }
-
-    /// <summary>
-    /// Add JWT authentication to the DI container.
-    /// </summary>
-    private static IServiceCollection AddJwtAuth(this IServiceCollection services, IConfiguration configuration)
-    {
-        services
-            .AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(option =>
-            {
-                var jwtKey = configuration["JwtSettings:Key"]
-                    ?? throw new InvalidOperationException("JwtSettings:Key Not configured");
-
-                option.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero,
-                    ValidIssuer = configuration["JwtSettings:Issuer"],
-                    ValidAudience = configuration["JwtSettings:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-                };
-                option.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        // SignalR will put the token in the URL query parameter with the parameter name access_token
-                        var accessToken = context.Request.Query["access_token"];
-                        var path = context.HttpContext.Request.Path;
-
-                        // The connection URL is only checked if it is a Hubs-related path
-                        bool hasToken = !string.IsNullOrEmpty(accessToken);
-                        bool shouldValidPath = path.StartsWithSegments("/hubs");
-                        if (hasToken && shouldValidPath)
-                            context.Token = accessToken;
-
-                        return Task.CompletedTask;
-                    },
-                };
-            });
 
         return services;
     }

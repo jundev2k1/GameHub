@@ -71,8 +71,7 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<GameCategoryMapping, GameCategoryInfo>()
             .Map(dest => dest.LocalId, src => src.Category.Id)
             .Map(dest => dest.Id, src => src.Category.PublicId)
-            .Map(dest => dest.Name, src => src.Category.Name)
-            .Map(dest => dest.Priority, src => src.Category.Priority);
+            .Map(dest => dest.Name, src => src.Category.Name);
     }
 
     private static void RegisterGameTypeMappings(TypeAdapterConfig cfg)
@@ -84,8 +83,7 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<GameTypeMapping, GameTypeInfo>()
             .Map(dest => dest.LocalId, src => src.Type.Id)
             .Map(dest => dest.Id, src => src.Type.PublicId)
-            .Map(dest => dest.Name, src => src.Type.Name)
-            .Map(dest => dest.Priority, src => src.Type.Priority);
+            .Map(dest => dest.Name, src => src.Type.Name);
     }
 
     private static void RegisterGameTagMappings(TypeAdapterConfig cfg)

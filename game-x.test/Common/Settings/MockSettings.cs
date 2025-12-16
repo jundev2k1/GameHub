@@ -6,5 +6,5 @@ namespace Test.Common.Settings;
 public static class MockSettings
 {
     public static readonly IOptions<GameXSettings> GameX =
-        Options.Create(new GameXSettings { MerchantNumber = "M-12345" });
+        Options.Create(new GameXSettings { MerchantNumber = "M-12345", AesKey = "SecretKey-12345" });
 }

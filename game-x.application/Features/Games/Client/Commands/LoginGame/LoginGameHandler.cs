@@ -1,12 +1,13 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
+using game_x.application.Features.Games.Services;
 using game_x.share.Extensions;
+using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
-using game_x.share.ExternalApi.GameProvider.Dtos.Logout;
-using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 
@@ -16,8 +17,11 @@ public sealed class LoginGameHandler(
     IUserAccessor userAccessor,
     IUserRepo userRepo,
     IGameProviderService gameProvider,
-    IGameAesEncryptor aesEncryptor,
+    IGameBaccaratService gameBaccarat,
+    IGameAesEncryptor gameAesEncryptor,
+    IAesEncryptor aesEncryptor,
     IGameProviderCacheService gameProviderCache,
+    IGamePlatformService gamePlatformService,
     IOptions<GameProviderSettings> gameSettings,
     IApplicationEventDispatcher eventDispatcher) : ICommandHandler<LoginGameCommand, LoginGameResult>
 {
@@ -25,56 +29,78 @@ public sealed class LoginGameHandler(
     {
         var userId = userAccessor.GetUserId();
         var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
-        if (targetUser.UserExtend is null)
-            throw new NotFoundException("User extend is not exists.");
-
-        var gameProviderAccount = targetUser.UserExtend.GameProviderAccount;
 
         // Check: email must be confirmed before requesting password reset
         if (!targetUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
-        // Loggout if user already login
-        var isLoggedIn = gameProviderCache.GetIsLoggedIn(gameProviderAccount);
-        if (isLoggedIn)
-        {
-            await LogoutGameAsync(gameProviderAccount);
-            gameProviderCache.SetIsLoggedIn(gameProviderAccount, false);
-        }
+        targetUser = await gamePlatformService.EnsureExternalAccountCreatedAsync(
+            targetUser, request.GamePlatformId!.Value,
+            ct: ct);
 
         // Login from external API
-        gameProviderCache.SetLanguage(gameProviderAccount, request.Locale);
-        var externalRequest = new GameLoginRequest
-        {
-            Account = gameProviderAccount,
-            Passwd = aesEncryptor.Decrypt(targetUser.UserExtend.GameProviderPassword),
-            Gamecode = request.GameCode,
-            Address = request.Address,
-            Locale = request.Locale,
-            ReturnUrl = request.ReturnUrl,
-        };
-        var result = await gameProvider.LoginAsync(externalRequest, request.IpAddress!);
-        gameProviderCache.SetIsLoggedIn(gameProviderAccount, true);
-        await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(userId, gameProviderCache.G598Platform.Id), ct);
-        var gameEmbededLink = ConvertEmbededLink(result.Url);
+        var url = await LoginGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!, request, ct)
+            ?? throw new BadRequestException($"GamePlatformId({request.GamePlatformId.Value}) is not supported.");
+
+        var gameEmbededLink = ConvertEmbededLink(request.GamePlatformId.Value, url);
         return new LoginGameResult(gameEmbededLink);
     }
 
-    public async Task LogoutGameAsync(string account)
+    private async Task<string?> LoginGameAsync(
+        Guid gamePlatformId,
+        UserExtend usrex,
+        LoginGameCommand request,
+        CancellationToken ct)
     {
-        var logoutRequest = new GameLogoutRequest
+        if (gamePlatformId == GameConstants.PLATFORM_ID_G598)
         {
-            Account = account,
-        };
-        await gameProvider.LogoutAsync(logoutRequest);
+            var externalRequest = new GameLoginRequest
+            {
+                Account = usrex.GameProviderAccount,
+                Passwd = gameAesEncryptor.Decrypt(usrex.GameProviderPassword),
+                Gamecode = request.GameCode,
+                Address = request.Address,
+                Locale = request.Locale,
+                ReturnUrl = request.ReturnUrl,
+            };
+            var result = await gameProvider.LoginAsync(externalRequest, request.IpAddress!);
+
+            // Reset language
+            gameProviderCache.SetLanguage(externalRequest.Account, request.Locale);
+
+            // Update user balance
+            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(usrex.Id, gamePlatformId), ct);
+            return result.Url;
+        }
+
+        if (gamePlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+        {
+            var externalRequest = new GameBaccaratLoginRequest
+            {
+                Account = usrex.GameBaccaratAccount,
+                Password = aesEncryptor.Decrypt(usrex.GameBaccaratPassword),
+                Gamecode = request.GameCode
+            };
+            var result = await gameBaccarat.LoginAsync(externalRequest);
+
+            return result.Url;
+        }
+
+        return null;
     }
 
-    private string ConvertEmbededLink(string url)
+    private string ConvertEmbededLink(Guid gamePlatformId, string url)
     {
-        var domain = gameSettings.Value.RevertProxyUrl;
-        if (domain.IsNullOrWhiteSpace()) return url;
+        if (gamePlatformId == GameConstants.PLATFORM_ID_G598)
+        {
+            var domain = gameSettings.Value.RevertProxyUrl;
+            if (domain.IsNullOrWhiteSpace()) return url;
 
-        var uri = new Uri(url);
-        return $"{domain}{uri.PathAndQuery}";
+            var uri = new Uri(url);
+            return $"{domain}{uri.PathAndQuery}";
+        }
+
+        // Fallback
+        return url;
     }
 }

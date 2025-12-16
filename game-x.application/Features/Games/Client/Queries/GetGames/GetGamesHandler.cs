@@ -10,6 +10,7 @@ public sealed class GetGamesHandler(
     public async Task<PaginationResult<GetGamesItemDto>> Handle(GetGamesQuery request, CancellationToken ct = default)
     {
         var searchResult = gameProviderCache.GameList
+            .OrderBy(g => g.Priority)
             .Where(GetFilterCondition(request))
             .ToArray();
         var totalItems = searchResult.Length;

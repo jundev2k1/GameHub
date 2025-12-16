@@ -137,6 +137,59 @@ namespace game_x.persistence.Migrations
                     b.ToTable("user_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.AppSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsEditable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_editable");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("key");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("pk_app_settings");
+
+                    b.HasIndex("Key")
+                        .IsUnique()
+                        .HasDatabaseName("ix_app_settings_key");
+
+                    b.ToTable("app_settings", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.AsymmetricKey", b =>
                 {
                     b.Property<int>("Id")
@@ -2546,6 +2599,187 @@ namespace game_x.persistence.Migrations
                     b.ToTable("social_links", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.SystemWallet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_system_wallets");
+
+                    b.HasIndex("Balance")
+                        .HasDatabaseName("ix_system_wallets_balance");
+
+                    b.HasIndex("Type")
+                        .IsUnique()
+                        .HasDatabaseName("ix_system_wallets_type");
+
+                    b.ToTable("system_wallets", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.SystemWalletTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<decimal?>("BalanceAfter")
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance_after");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("ReferenceId")
+                        .HasColumnType("text")
+                        .HasColumnName("reference_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("WalletId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("wallet_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_system_wallet_transactions");
+
+                    b.HasIndex("BalanceAfter")
+                        .HasDatabaseName("ix_system_wallet_transactions_balance_after");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_system_wallet_transactions_created_at");
+
+                    b.HasIndex("WalletId")
+                        .HasDatabaseName("ix_system_wallet_transactions_wallet_id");
+
+                    b.ToTable("system_wallet_transactions", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.TalentWallet", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_talent_wallets");
+
+                    b.HasIndex("Balance")
+                        .HasDatabaseName("ix_talent_wallets_balance");
+
+                    b.ToTable("talent_wallets", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.TalentWalletTransaction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AdjustedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("adjusted_by");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<decimal>("BalanceAfter")
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance_after");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("code")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("ReferenceId")
+                        .HasColumnType("text")
+                        .HasColumnName("reference_id");
+
+                    b.Property<string>("TalentId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("talent_id");
+
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_talent_wallet_transactions");
+
+                    b.HasIndex("BalanceAfter")
+                        .HasDatabaseName("ix_talent_wallet_transactions_balance_after");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_talent_wallet_transactions_created_at");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_talent_wallet_transactions_code");
+
+                    b.HasIndex("TalentId")
+                        .HasDatabaseName("ix_talent_wallet_transactions_talent_id");
+
+                    b.HasIndex("Type")
+                        .HasDatabaseName("ix_talent_wallet_transactions_type");
+
+                    b.ToTable("talent_wallet_transactions", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -2651,13 +2885,13 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("G598Sno")
-                        .HasColumnType("text")
-                        .HasColumnName("g598_sno");
-
                     b.Property<int>("GamePlatformId")
                         .HasColumnType("integer")
                         .HasColumnName("game_platform_id");
+
+                    b.Property<string>("SerialNumber")
+                        .HasColumnType("text")
+                        .HasColumnName("g598_sno");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -3038,13 +3272,45 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("GameBaccaratAccount")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("")
+                        .HasColumnName("usrex_gb_account");
+
+                    b.Property<string>("GameBaccaratNickname")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("")
+                        .HasColumnName("usrex_gb_nickname");
+
+                    b.Property<string>("GameBaccaratPassword")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("usrex_gb_password");
+
+                    b.Property<string>("GameBaccaratUserId")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("")
+                        .HasColumnName("usrex_gb_userid");
+
                     b.Property<string>("GameProviderAccount")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasDefaultValue("")
-                        .HasColumnName("urex_gp_account");
+                        .HasColumnName("usrex_gp_account");
 
                     b.Property<string>("GameProviderNickname")
                         .IsRequired()
@@ -3052,7 +3318,7 @@ namespace game_x.persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasDefaultValue("")
-                        .HasColumnName("urex_gp_nickname");
+                        .HasColumnName("usrex_gp_nickname");
 
                     b.Property<string>("GameProviderPassword")
                         .IsRequired()
@@ -3060,13 +3326,13 @@ namespace game_x.persistence.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("character varying(4000)")
                         .HasDefaultValue("")
-                        .HasColumnName("urex_gp_password");
+                        .HasColumnName("usrex_gp_password");
 
                     b.Property<decimal>("GameProviderRebateset")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("numeric")
                         .HasDefaultValue(0m)
-                        .HasColumnName("urex_gp_rebateset");
+                        .HasColumnName("usrex_gp_rebateset");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -3775,6 +4041,42 @@ namespace game_x.persistence.Migrations
                     b.Navigation("RequesterUser");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.SystemWalletTransaction", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.SystemWallet", "Wallet")
+                        .WithMany("Transactions")
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_system_wallet_transactions_system_wallets_wallet_id");
+
+                    b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.TalentWallet", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.User", "Talent")
+                        .WithOne("TalentWallet")
+                        .HasForeignKey("game_x.domain.Entities.TalentWallet", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_talent_wallets_asp_net_users_id");
+
+                    b.Navigation("Talent");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.TalentWalletTransaction", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.TalentWallet", "TalentWallet")
+                        .WithMany("Transactions")
+                        .HasForeignKey("TalentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_talent_wallet_transactions_talent_wallets_talent_id");
+
+                    b.Navigation("TalentWallet");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.Transaction", b =>
                 {
                     b.HasOne("game_x.domain.Entities.CryptoToken", "CryptoToken")
@@ -4048,6 +4350,16 @@ namespace game_x.persistence.Migrations
                     b.Navigation("UserRoles");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.SystemWallet", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.TalentWallet", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.Transaction", b =>
                 {
                     b.Navigation("TransactionExternal");
@@ -4064,6 +4376,8 @@ namespace game_x.persistence.Migrations
                     b.Navigation("ReceivedRequests");
 
                     b.Navigation("RequestedLinks");
+
+                    b.Navigation("TalentWallet");
 
                     b.Navigation("Transactions");
 

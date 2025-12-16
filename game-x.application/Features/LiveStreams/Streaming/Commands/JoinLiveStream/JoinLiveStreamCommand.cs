@@ -1,5 +1,4 @@
 ﻿using game_x.application.Features.LiveStreams.Streaming.Dtos;
-using game_x.application.Features.LiveStreams.Streaming.Enum;
 
 namespace game_x.application.Features.LiveStreams.Streaming.Commands.JoinLiveStream;
 
@@ -16,4 +15,5 @@ public record JoinLiveStreamResult(
     string? TalentAvatar,
     int ViewCount,
     string Url,
+    string WebRtcUrl,
     LiveStreamBanInfoDto[] BanInfos);

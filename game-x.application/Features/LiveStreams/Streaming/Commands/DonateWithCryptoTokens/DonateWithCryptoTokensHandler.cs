@@ -4,7 +4,7 @@ using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnLiveStreamDonated;
 using game_x.share.Extensions;
 
-namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithFiatCurrency;
+namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithCryptoTokens;
 
 public sealed class DonateWithCryptoTokensHandler(
     ICryptoTokenRepo cryptoTokenRepo,
@@ -35,8 +35,6 @@ public sealed class DonateWithCryptoTokensHandler(
         var targetCrypto = await cryptoTokenRepo.GetByIdAsync(request.CryptoTokenId, ct);
         var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, targetCrypto.Id, ct)
             ?? throw new NotFoundException("User banlance not found.");
-        var talentBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(streamInfo.AssignedTo!.Id, targetCrypto.Id, ct)
-            ?? throw new NotFoundException("Talent balance not found.");
 
         // Check if user has enough balance
         if (userBalance.Amount < request.Amount)
@@ -49,7 +47,6 @@ public sealed class DonateWithCryptoTokensHandler(
             streamInfo,
             userId,
             userBalance.PublicId,
-            talentBalance.PublicId,
             request.Amount,
             targetCrypto.Id,
             request.Message.Trim());

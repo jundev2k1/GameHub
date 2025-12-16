@@ -14,12 +14,12 @@ using game_x.application.Features.Auth.Client.Commands.ChangePasswordUser;
 
 namespace game_x.api.Controllers.Client.Me;
 
-[Authorize(Roles = AppRoles.User)]
 [Route("api/user/me")]
 public sealed class UserController(
     IUserAccessor userAccessor,
     IRefreshTokenManagerCacheService refreshTokenManager) : BaseApiController
 {
+    [Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
     [HttpGet]
     public async Task<IActionResult> GetUserDetailAsync()
     {
@@ -27,6 +27,7 @@ public sealed class UserController(
         return ApiResponseFactory.Ok(result);
     }
 
+    [Authorize(Roles = AppRoles.User)]
     [HttpGet("verification-statuses")]
     public async Task<IActionResult> GetUserVerificationListAsync()
     {
@@ -34,6 +35,7 @@ public sealed class UserController(
         return ApiResponseFactory.Ok(result);
     }
 
+    [Authorize(Roles = AppRoles.User)]
     [HttpPatch("password")]
     public async Task<IActionResult> ChangePasswordAsync(ChangePasswordUserCommand command)
     {
@@ -44,6 +46,7 @@ public sealed class UserController(
         return ApiResponseFactory.NoContent(MessageCode.User.UserChangePasswordSuccess);
     }
 
+    [Authorize(Roles = AppRoles.User)]
     [HttpPut]
     public async Task<IActionResult> UpdateUserAsync(UserSelfUpdateCommand command)
     {
@@ -51,6 +54,7 @@ public sealed class UserController(
         return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
 
+    [Authorize(Roles = AppRoles.User)]
     [HttpGet("balances")]
     public async Task<IActionResult> GetUserBalanceAsync()
     {
@@ -58,6 +62,7 @@ public sealed class UserController(
         return ApiResponseFactory.Ok(result);
     }
 
+    [Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
     [HttpGet("tokens")]
     public async Task<IActionResult> GetActiveTokensAsync()
     {
@@ -66,6 +71,7 @@ public sealed class UserController(
         return ApiResponseFactory.Ok(result);
     }
 
+    [Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
     [HttpDelete("tokens/{tokenId}")]
     public async Task<IActionResult> RevokeTokenAsync(Guid tokenId)
     {
@@ -82,13 +88,15 @@ public sealed class UserController(
         return ApiResponseFactory.NoContent();
     }
 
+    [Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
     [HttpDelete("tokens/others")]
     public async Task<IActionResult> RevokeOtherTokensAsync()
     {
         await Mediator.Send(new RevokeAllOtherTokenCommand());
         return ApiResponseFactory.NoContent();
     }
-    
+
+    [Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
     [HttpPost("avatar")]
     public async Task<IActionResult> UploadAvatarAsync(IFormFile file)
     {

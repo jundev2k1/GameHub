@@ -1,5 +1,7 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Features.BankAccountVerifications.Dtos;
 using game_x.application.Features.Kyc.Dtos;
@@ -34,5 +36,20 @@ public sealed class AdminHubService(IHubContext<AdminHub, IAdminHub> hubContext)
     public async Task SendVerificationToAdminAsync(string adminId, BankAccountListItemDto verification)
     {
         await hubContext.Clients.Group($"admin-{adminId}").BankAccountCreated(verification);
+    }
+
+    public async Task NotifyOrderTxReviewedToAdminAsync(AdminOrderReviewedDto order)
+    {
+        await hubContext.Clients.Group("admin-group").TransactionReviewed(order);
+    }
+
+    public async Task NotifyOrderKycReviewedToAdminAsync(AdminOrderReviewedDto order)
+    {
+        await hubContext.Clients.Group("admin-group").KycReviewed(order);
+    }
+
+    public async Task NotifyOrderBankAccountReviewedToAdminAsync(AdminOrderReviewedDto order)
+    {
+        await hubContext.Clients.Group("admin-group").BankAccountReviewed(order);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithFiatCurrency;
+namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithCryptoTokens;
 
 public record DonateWithCryptoTokensCommand(
     [property: JsonIgnore] string? StreamKey,

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Logger;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Jobs;
 using game_x.application.Contract.Persistence.Repo;

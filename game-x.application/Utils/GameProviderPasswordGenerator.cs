@@ -4,13 +4,13 @@ namespace game_x.application.Utils;
 
 internal sealed class GameProviderPasswordGenerator
 {
-    public static string Generate()
+    public static string Generate(int minLength, int maxLength)
     {
         const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const string lettersAndDigits = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
         // Password length must be between 5 and 12 characters
-        int length = RandomNumber(5, 13); // 13 because Random.Next is exclusive at the upper bound
+        int length = RandomNumber(minLength, maxLength); // 13 because Random.Next is exclusive at the upper bound
         char[] password = new char[length];
 
         using (var rng = RandomNumberGenerator.Create())
