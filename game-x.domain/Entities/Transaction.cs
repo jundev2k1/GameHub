@@ -46,7 +46,7 @@ public class Transaction: BaseEntity<int>, IAuditable
         if (fee is < 0)
             throw new ArgumentException("Fee must be equal or greater than zero.", nameof(fee));
 
-        var chainTransaction = new Transaction
+        return new()
         {
             UserId = userId,
             SourceType = sourceType,
@@ -57,7 +57,6 @@ public class Transaction: BaseEntity<int>, IAuditable
             Status = status ?? TransactionStatus.Pending,
             Note = note,
         };
-        return chainTransaction;
     }
     
     [NotMapped]

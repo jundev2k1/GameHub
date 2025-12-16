@@ -42,14 +42,14 @@ public sealed class OnLiveStreamDonatedHandler(
             // Increase talent balance
             await talentWalletRepo.UpdateAsync(@event.StreamInfo.AssignedTo!.Id, talentWallet =>
             {
-                var newBalance = talentWallet.Balance + talentAmount;
-                talentWallet.AdjustBalance(newBalance);
+                var balanceAfter = talentWallet.Balance + talentAmount;
+                talentWallet.AdjustBalance(balanceAfter);
 
                 var tx = TalentWalletTransaction.Create(
                     @event.StreamInfo.AssignedTo!.Id,
                     TalentTransactionType.Commission,
                     talentAmount,
-                    newBalance);
+                    balanceAfter);
                 talentWallet.AddTransaction(tx);
             }, ct);
             // Increase system balance

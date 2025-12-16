@@ -81,7 +81,6 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionInternal)
             .Where(x => x.UserId == userId && x.SourceType == TransactionSourceType.Uxm)
-            .OrderByDescending(x => x.CompletedAt)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -114,7 +113,6 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .Include(x => x.TransactionExternal)
                 .ThenInclude(x => x!.GamePlatform)
             .Where(x => x.UserId == userId && x.SourceType != TransactionSourceType.Uxm)
-            .OrderByDescending(x => x.CompletedAt)
             .AsQueryable();
 
         if (queryBuilder != null)
