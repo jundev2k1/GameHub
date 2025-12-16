@@ -7,6 +7,7 @@ using game_x.api.Dtos;
 
 namespace game_x.api.Controllers.Client.Chain;
 
+/// <summary>Uxm Integration</summary>
 [Authorize(Roles = AppRoles.User)]
 [Route("/api/user/chain-transactions")]
 public sealed class ChainController : BaseApiController

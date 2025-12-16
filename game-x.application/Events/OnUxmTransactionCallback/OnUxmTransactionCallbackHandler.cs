@@ -42,27 +42,6 @@ public sealed class OnUxmTransactionCallbackHandler(
 
             await unitOfWork.WithTransactionAsync(async () =>
             {
-                decimal lastedBalanceAfter = await transactionRepo.GetLatestBalanceAfterAsync(transaction.UserId, ct);
-                decimal changeAmount = transaction.Type switch
-                {
-                    TransactionType.Deposit => @event.ActualAmount,
-                    TransactionType.Withdrawal => - @event.ActualAmount,
-                    _ => 0
-                };
-                
-                await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
-                {
-                    order.UpdateStatus(TransactionStatus.Completed);
-                    order.UpdateProviderResponse(
-                        actualAmount: @event.ActualAmount,
-                        providerOrderId: @event.ProviderOrderId,
-                        hash: @event.Hash,
-                        confirmedAt: @event.ConfirmedAt
-                    );
-                    
-                    order.BalanceAfter = lastedBalanceAfter + changeAmount;
-                }, ct);
-
                 switch (transaction.Type)
                 {
                     case TransactionType.Deposit:
@@ -78,6 +57,20 @@ public sealed class OnUxmTransactionCallbackHandler(
                 }
                 await userBalanceRepo.PutUpdateAsync(balance, ct);
                 
+                await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
+                {
+                    order.UpdateStatus(TransactionStatus.Completed);
+                    order.UpdateProviderResponse(
+                        actualAmount: @event.ActualAmount,
+                        providerOrderId: @event.ProviderOrderId,
+                        hash: @event.Hash,
+                        confirmedAt: @event.ConfirmedAt,
+                        completedAt: DateTime.UtcNow
+                    );
+                    
+                    order.BalanceAfter = balance.Amount;
+                }, ct);
+                
                 var transactionInternal = transaction.Adapt<TransactionInternalDto>();
                 await SendToMember(transactionInternal, ct);
                 await SendToAdmin(transactionInternal, ct);
@@ -89,17 +82,15 @@ public sealed class OnUxmTransactionCallbackHandler(
                 await unitOfWork.SaveChangesAsync(ct);
             }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            logger.LogError(e.Message);
+            logger.LogError(ex, ex.Message);
         }
     }
 
     private async Task SendToMember(TransactionInternalDto transaction, CancellationToken ct)
     {
         var userId = transaction.UserId;
-
-        // Create new notification for member
         var notification = Notification.Create(
             NotificationMessageKey.Transaction_Completed,
             userId,
@@ -107,18 +98,8 @@ public sealed class OnUxmTransactionCallbackHandler(
             NotificationSeverity.Success,
             JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
         await notificationRepo.AddNotificationAsync(notification, ct);
-
-        // Send new notification to member
-        await clientHubService.SendNotificationToMemberAsync(
-            userId,
-            notification.Adapt<NotificationDto>());
-
-        // Send new transaction to member
-        await clientHubService.SendTransactionToMemberAsync(
-            userId,
-            transaction.Adapt<ClientTransactionDto>());
-
-        // Send updated wallet to member
+        await clientHubService.SendNotificationToMemberAsync(userId, notification.Adapt<NotificationDto>());
+        await clientHubService.SendTransactionToMemberAsync(userId, transaction.Adapt<ClientTransactionDto>());
         await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(userId), ct);
     }
 
@@ -127,9 +108,7 @@ public sealed class OnUxmTransactionCallbackHandler(
         var adminUsers = await userRepo.GetAdminUsers(ct);
         foreach (var adminUser in adminUsers)
         {
-            await adminHubService.SendTransactionToAdminAsync(
-                adminUser.Id,
-                transaction.Adapt<AdminTransactionDto>());
+            await adminHubService.SendTransactionToAdminAsync(adminUser.Id, transaction.Adapt<AdminTransactionDto>());
         }
     }
 }

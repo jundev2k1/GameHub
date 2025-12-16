@@ -17,7 +17,7 @@ public class TransactionInternal: BaseEntity<int>, IAuditable
     public string? FromAddress { get; set; }
     /// <summary>The recipient's wallet address.</summary>
     public string? ToAddress { get; set; }
-    /// <summary>The funds used for the transaction.</summary>
+    /// <summary>The time when the transaction is completed.</summary>
     public DateTime? ConfirmedAt { get; set; }
     
     public static TransactionInternal Create(

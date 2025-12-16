@@ -4,6 +4,7 @@ using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransact
 
 namespace game_x.api.Controllers.Client.Chain;
 
+/// <summary>Payment Gateway Integration</summary>
 [Authorize(Roles = AppRoles.User)]
 [Route("/api/user/v2/chain-transactions")]
 public sealed class ChainV2Controller : BaseApiController

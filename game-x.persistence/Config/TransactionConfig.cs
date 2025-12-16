@@ -61,6 +61,10 @@ public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
             .HasColumnName("note")
             .IsRequired(false);
         
+        builder.Property(rt => rt.CompletedAt)
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
+        
         builder.HasOne(x => x.CryptoToken)
             .WithMany()
             .HasForeignKey(x => x.CryptoTokenId)
