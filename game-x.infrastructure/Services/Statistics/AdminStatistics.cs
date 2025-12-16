@@ -8,17 +8,18 @@ public sealed class AdminStatistics(GameXContext context) : IAdminStatistics, IS
 {
     public async Task<(int WithdrawalCount, int KycCount, int BankAccountCount)> GetUnderReviewStatisticsAsync(CancellationToken ct = default)
     {
-        var statistic = await context.UserBankAccounts
-            .OrderByDescending(ba => ba.CreatedAt)
-            .GroupBy(_ => 1)
-            .Select(baGroup => Tuple.Create(
-                context.Transactions
-                    .Count(tx => (tx.Type == TransactionType.Withdrawal) && (tx.Status == TransactionStatus.Pending)),
-                context.UserKycs
-                    .Count(kyc => (kyc.User.Status == UserStatus.Active) && (kyc.Status == KycStatus.UnderReview)),
-                baGroup.Count(ba => (ba.User.Status == UserStatus.Active) && (ba.Status == UserBankAccountStatus.UnderReview))
-            ))
-            .FirstOrDefaultAsync(ct);
-        return (statistic!.Item1, statistic.Item2, statistic.Item3);
+        var pendingWithdrawals = await context.Transactions
+            .AsNoTracking()
+            .CountAsync(tx => tx.Type == TransactionType.Withdrawal && tx.Status == TransactionStatus.Pending, ct);
+
+        var pendingKycs = await context.UserKycs
+            .AsNoTracking()
+            .CountAsync(kyc => kyc.User.Status == UserStatus.Active && kyc.Status == KycStatus.UnderReview, ct);
+
+        var pendingBankAccounts = await context.UserBankAccounts
+            .AsNoTracking()
+            .CountAsync(ba => ba.User.Status == UserStatus.Active && ba.Status == UserBankAccountStatus.UnderReview, ct);
+
+        return (pendingWithdrawals, pendingKycs, pendingBankAccounts);
     }
 }

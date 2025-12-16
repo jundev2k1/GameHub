@@ -1,4 +1,4 @@
-﻿using game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithFiatCurrency;
+﻿using game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithCryptoTokens;
 using game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithGift;
 
 namespace game_x.api.Controllers.Client.LiveStream;

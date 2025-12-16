@@ -19,12 +19,13 @@ public sealed class EntityName
     }
 
     private static readonly string[] ValidValues = [
+        nameof(AppSetting),
         nameof(User),
         nameof(MediaFile),
         nameof(UserKyc),
+        nameof(SystemWallet),
+        nameof(TalentWallet),
         nameof(Transaction),
-        nameof(TransactionInternal),
-        nameof(TransactionExternal),
         nameof(Game),
         nameof(GameType),
         nameof(GameCategory),

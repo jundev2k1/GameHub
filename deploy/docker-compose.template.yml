@@ -1,78 +1,17 @@
 services:
-  game-x.api:
-    container_name: game-x.api
-    image: ${DOCKER_IMAGE}
-    restart: always
-    ports:
-      - ${API_PORT}:8080
-    networks:
-      - default
-    environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
-      - ConnectionStrings__HangfireConnection=${HANGFIREDB_CONNECTION_STRING}
-
-      - HangfireSettings__Key=${HANGFIRE_KEY}
-
-      - JwtSettings__DurationInMinutes=${JWT_EXPIRED_MINUTES}
-      - JwtSettings__Key=${JWT_SECRET}
-      - JwtSettings__Issuer=${JWT_ISSUER}
-      - JwtSettings__Audience=${JWT_AUDIENCE}
-      - JwtSettings__Provider=${JWT_PROVIDER}
-      - JwtSettings__Version=${JWT_VERSION}
-
-      - RefreshTokenSettings__DurationInMinutes=${REFRESHTOKEN_EXPIRED_MINUTES}
-
-      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
-
-      - UxmSettings__Host=${UXM_HOST}
-
-      - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
-      - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}
-      - GameProviderSettings__AesKey=${GAMEPROVIDER_AESKEY}
-      - GameProviderSettings__Iv=${GAMEPROVIDER_IV}
-      - GameProviderSettings__RevertProxyUrl=${GAMEPROVIDER_REVERTPROXYURL}
-
-      - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
-      - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
-      - MinioSettings__AccessKey=${Minio_AccessKey}
-      - MinioSettings__SecretKey=${Minio_SecretKey}
-      - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
-      - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
-      
-      - SrsSettings__Host=${Srs_Host}
-      - SrsSettings__StreamServer=${Srs_StreamServer}
-      - SrsSettings__ClientUrl=${Srs_ClientUrl}
-
-      - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
-      - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
-      - RecurringJobSettings__StreamTimeoutCheckerJob=${RecurringJob_StreamTimeoutCheckerJob}
-
-      - EngageLabSettings__BaseUrl=${EngageLab_BaseUrl}
-      - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
-      - EngageLabSettings__ApiKey=${EngageLab_ApiKey}
-      - EngageLabSettings__From=${EngageLab_From}
-
-      - SpamProtectionSettings_MaxVerifyAttempts=${SpamProtection_MaxVerifyAttempts}
-      - SpamProtectionSettings_VerifyLockMinutes=${SpamProtection_VerifyLockMinutes}
-      - SpamProtectionSettings_VerifySlidingMinutes=${SpamProtection_VerifySlidingMinutes}
-
-      - GameXSettings__MerchantNumber=${GAME_X_MERCHANT_NUMBER}
-      - GameXSettings__PaymentGatewayPlatformId=${GAME_X_PAYMENT_GATEWAY_PLATFORM_ID}
-      - GameXSettings__PaymentGatewayApiKey=${GAME_X_PAYMENT_GATEWAY_API_KEY}
-      - PaymentGatewaySettings__Host=${PAYMENT_GATEWAY_HOST}
-
   # ========================
   # PostgreSQL Service
   # ========================
-  postgres:
-    container_name: game-x.pg
+  game-x.db:
+    container_name: pg
     image: postgres:16.2-alpine
     restart: always
     ports:
-      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+      - ${POSTGRES_PORT}:5432
+    networks:
+      - default
     volumes:
-      - game-x.pg-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: "${POSTGRES_DB}"
       POSTGRES_USER: "${POSTGRES_USER}"
@@ -84,31 +23,98 @@ services:
         while ! pg_isready -U $$POSTGRES_USER; do sleep 1; done
         createdb -U $$POSTGRES_USER HangfireDb --echo || true
         wait"
+
   # ========================
-  # seq server
+  # API Service
   # ========================
-  seq:
+  game-x.api:
+    container_name: game-x.api
+    image: ${DOCKER_IMAGE}
+    restart: always
+    ports:
+      - ${API_PORT}:8080
+    networks:
+      - default
+    depends_on:
+      - game-x.db
+      - game-x.seq
+      - game-x.minio
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+      - ConnectionStrings__HangfireConnection=${HANGFIREDB_CONNECTION_STRING}
+      - HangfireSettings__Key=${HANGFIRE_KEY}
+      - JwtSettings__DurationInMinutes=${JWT_EXPIRED_MINUTES}
+      - JwtSettings__Key=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__Provider=${JWT_PROVIDER}
+      - JwtSettings__Version=${JWT_VERSION}
+      - RefreshTokenSettings__DurationInMinutes=${REFRESHTOKEN_EXPIRED_MINUTES}
+      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
+      - UxmSettings__Host=${UXM_HOST}
+      - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
+      - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}
+      - GameProviderSettings__AesKey=${GAMEPROVIDER_AESKEY}
+      - GameProviderSettings__Iv=${GAMEPROVIDER_IV}
+      - GameProviderSettings__RevertProxyUrl=${GAMEPROVIDER_REVERTPROXYURL}
+      - BaccaratHmacSettings__Host=${GAMEBACCARAT_HOST}
+      - BaccaratHmacSettings__ClientId=${GAMEBACCARAT_CLIENT_ID}
+      - BaccaratHmacSettings__AppId=${GAMEBACCARAT_APP_ID}
+      - BaccaratHmacSettings__Secret=${GAMEBACCARAT_SECRET}
+      - BaccaratHmacSettings__AllowedTimestampSkewSeconds=${GAMEBACCARAT_ALLOWEDTIMESTAMPSKEWSECONDS}
+      - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
+      - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
+      - MinioSettings__AccessKey=${Minio_AccessKey}
+      - MinioSettings__SecretKey=${Minio_SecretKey}
+      - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
+      - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
+      - SrsSettings__Host=${Srs_Host}
+      - SrsSettings__StreamServer=${Srs_StreamServer}
+      - SrsSettings__ClientUrl=${Srs_ClientUrl}
+      - SrsSettings__VHost=${Srs_VHost}
+      - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
+      - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
+      - RecurringJobSettings__StreamTimeoutCheckerJob=${RecurringJob_StreamTimeoutCheckerJob}
+      - EngageLabSettings__BaseUrl=${EngageLab_BaseUrl}
+      - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
+      - EngageLabSettings__ApiKey=${EngageLab_ApiKey}
+      - EngageLabSettings__From=${EngageLab_From}
+      - SpamProtectionSettings_MaxVerifyAttempts=${SpamProtection_MaxVerifyAttempts}
+      - SpamProtectionSettings_VerifyLockMinutes=${SpamProtection_VerifyLockMinutes}
+      - SpamProtectionSettings_VerifySlidingMinutes=${SpamProtection_VerifySlidingMinutes}
+      - GameXSettings__MerchantNumber=${GAME_X_MERCHANT_NUMBER}
+      - GameXSettings__PaymentGatewayPlatformId=${GAME_X_PAYMENT_GATEWAY_PLATFORM_ID}
+      - GameXSettings__PaymentGatewayApiKey=${GAME_X_PAYMENT_GATEWAY_API_KEY}
+      - GameXSettings__AesKey=${GAME_X_AESKEY}
+      - PaymentGatewaySettings__Host=${PAYMENT_GATEWAY_HOST}
+
+  # ========================
+  # SEQ Service
+  # ========================
+  game-x.seq:
     image: datalust/seq:latest
-    container_name: game-x.seq
+    container_name: seq
     networks:
       - default
     restart: always
     ports:
-      - "5341:80"
+      - "${SEQ_PORT}:80"
     environment:
       - ACCEPT_EULA=Y
-      - SEQ_FIRSTRUN_ADMINUSERNAME=admin
-      - SEQ_FIRSTRUN_ADMINPASSWORD=admin1234
+      - SEQ_FIRSTRUN_ADMINUSERNAME=${SEQ_USERNAME}
+      - SEQ_FIRSTRUN_ADMINPASSWORD=${SEQ_PASSWORD}
     volumes:
-      - game-x.seq-data:/data
+      - seq-data:/data
+
   # ========================
-  # minio server
+  # Minio Service
   # ========================
-  minio:
+  game-x.minio:
     image: minio/minio:latest
-    container_name: game-x.minio
+    container_name: minio
     networks:
-      - default  
+      - default
     restart: always
     ports:
       - "9000:9000"
@@ -117,19 +123,23 @@ services:
       MINIO_ROOT_USER: ${Minio_AccessKey}
       MINIO_ROOT_PASSWORD: ${Minio_SecretKey}
     volumes:
-      - game-x.minio-data:/data
+      - minio-data:/data
     command: server --console-address ":9001" /data
+
+
 # ========================
 # Volumes
 # ========================
 volumes:
-  game-x.pg-data:
-  game-x.seq-data:
-  game-x.minio-data:
+  db-data:
+  seq-data:
+  minio-data:
+
 # ========================
 # Networks
 # ========================
 networks:
-  default:
-    external: true
-    name: game-x-network
+    default:
+        name: gamex
+
+

@@ -1,5 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
@@ -13,6 +13,8 @@ public sealed class OnLiveStreamDonatedHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IUserBalanceRepo userBalanceRepo,
+    ITalentWalletRepo talentWalletRepo,
+    ISystemWalletRepo systemWalletRepo,
     ITransactionRepo transactionRepo,
     INotificationRepo notificationRepo,
     ILiveStreamChatRepo liveStreamChatRepo,
@@ -20,6 +22,7 @@ public sealed class OnLiveStreamDonatedHandler(
     ILiveStreamManagerCacheService liveStreamManager,
     IClientHubService clientHub,
     ILiveStreamHubService liveStreamHub,
+    IAppSettingCacheService appSettingCache,
     IApplicationEventDispatcher eventDispatcher) : IApplicationEventHandler<OnLiveStreamDonatedEvent>
 {
     public async Task Handle(OnLiveStreamDonatedEvent @event, CancellationToken ct = default)
@@ -32,14 +35,34 @@ public sealed class OnLiveStreamDonatedHandler(
             {
                 ub.AdjustAmount(@event.Amount, false);
             }, ct);
+
+            decimal commissionRate = appSettingCache.TalentCommissionRate;
+            decimal talentAmount = (@event.Amount / 100) * commissionRate;
+            decimal systemAmount = (@event.Amount / 100) * (100 - commissionRate);
             // Increase talent balance
-            await userBalanceRepo.UpdateAsync(@event.TalentBalanceId, ub =>
+            await talentWalletRepo.UpdateAsync(@event.StreamInfo.AssignedTo!.Id, talentWallet =>
             {
-                ub.AdjustAmount(@event.Amount, true);
+                var newBalance = talentWallet.Balance + talentAmount;
+                talentWallet.AdjustBalance(newBalance);
+
+                var tx = TalentWalletTransaction.Create(
+                    @event.StreamInfo.AssignedTo!.Id,
+                    TalentTransactionType.Commission,
+                    talentAmount,
+                    newBalance);
+                talentWallet.AddTransaction(tx);
+            }, ct);
+            // Increase system balance
+            await systemWalletRepo.UpdateAsync(SystemWalletType.LiveStreamDonation, wallet =>
+            {
+                var newBalance = wallet.Balance + systemAmount;
+                wallet.AdjustBalance(newBalance);
+
+                var tx = SystemWalletTransaction.Create(wallet.Id, systemAmount, newBalance);
+                wallet.AddTransaction(tx);
             }, ct);
 
-            await CreateTransaction(TransactionType.TransferSent, @event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
-            await CreateTransaction(TransactionType.TransferReceived, @event.Amount, @event.StreamInfo.AssignedTo!.Id, feeAmount: 0, @event.CryptoId, ct);
+            await CreateTransaction(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
             await CreateDonation(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
             await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift);
             await CreateNotificationForDonor(@event.UserId, this.StreamDonation!, ct);
@@ -79,7 +102,6 @@ public sealed class OnLiveStreamDonatedHandler(
     }
 
     private async Task CreateTransaction(
-        TransactionType type,
         decimal amount,
         string userId,
         decimal feeAmount,
@@ -88,7 +110,7 @@ public sealed class OnLiveStreamDonatedHandler(
     {
         var transaction = Transaction.Create(
             sourceType: TransactionSourceType.GameX,
-            type: type,
+            type: TransactionType.TransferSent,
             userId: userId,
             amount: amount,
             fee: feeAmount,
@@ -101,7 +123,9 @@ public sealed class OnLiveStreamDonatedHandler(
             fromAddress: string.Empty,
             toAddress: string.Empty);
         transaction.AddTxInternal(transactionInternal);
-        transaction.ConfirmTx(amount, lastedBalanceAfter, DateTime.UtcNow);
+
+        var balanceAfter = lastedBalanceAfter - amount;
+        transaction.ConfirmTx(amount, balanceAfter, DateTime.UtcNow);
 
         await transactionRepo.AddAsync(transaction, ct);
     }

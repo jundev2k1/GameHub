@@ -22,8 +22,7 @@ public sealed class SubmitKycValidator : AbstractValidator<SubmitKycCommand>
 
         RuleFor(x => x.IdNumber)
             .NotEmpty().WithMessage($"{nameof(SubmitKycCommand.IdNumber)} must be not empty.")
-            .MaximumLength(20).WithMessage($"{nameof(SubmitKycCommand.IdNumber)} must be not greater than 20 characters.")
-            .IsNumber(nameof(SubmitKycCommand.IdNumber));
+            .MaximumLength(20).WithMessage($"{nameof(SubmitKycCommand.IdNumber)} must be not greater than 20 characters.");
 
         RuleFor(x => x.FrontImage)
             .Must(BeAValidFileType).WithMessage("Invalid file type.")

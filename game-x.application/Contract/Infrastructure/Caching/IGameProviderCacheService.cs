@@ -34,4 +34,5 @@ public interface IGameProviderCacheService
     GameInfoDto[] GameList { get; }
 
     GamePlatformDto G598Platform { get; }
+    GamePlatformDto BaccaratPlatform { get; }
 }

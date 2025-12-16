@@ -15,6 +15,8 @@ public sealed class DecisionKycHandler(
     {
         var adminId = userAccessor.GetUserId();
 
+        Guid? kycId = null;
+        VerificationStatusDto? verificationDto = null;
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await userRepo.UpdateKycAsync(request.UserId, targetKyc =>
@@ -28,18 +30,19 @@ public sealed class DecisionKycHandler(
                     targetKyc.Reject(adminId, request.Reason, request.Details);
                 else
                     throw new BadRequestException(MessageCode.User.KycInvalidStatus);
+
+                kycId = targetKyc.PublicId;
             }, ct);
 
-            var verificationDto = new VerificationStatusDto
+            verificationDto = new VerificationStatusDto
             {
                 CurrencyCode = string.Empty,
                 Type = VerificationStatusType.Kyc,
                 Status = (VerificationStatus)(int)request.Status,
                 IsVerified = request.Status == KycStatus.Approved
             };
-
-            await eventDispatcher.Publish(new OnVerifyUpdatedEvent(request.UserId, verificationDto), ct);
         }, ct);
+        await eventDispatcher.Publish(new OnVerifyUpdatedEvent(request.UserId, kycId!.Value, verificationDto!), ct);
 
         return Unit.Value;
     }

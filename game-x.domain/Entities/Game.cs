@@ -47,11 +47,11 @@ public sealed class Game : BaseEntity<int>, IAuditable
     {
         if (priority < 0)
             throw new ArgumentException("Priority must be greater than or equal to 0.", nameof(priority));
-        if (categories != null && (categories.Count == 0 || categories.Count(c => c.IsPrimary) != 1))
+        if (categories != null && categories.Count > 0 && categories.Count(c => c.IsPrimary) != 1)
             throw new ArgumentException("There must be exactly one primary category.", nameof(categories));
-        if (types != null &&  (types.Count == 0 || types.Count(t => t.IsPrimary) != 1))
+        if (types != null && types.Count > 0 && types.Count(t => t.IsPrimary) != 1)
             throw new ArgumentException("There must be exactly one primary type.", nameof(types));
-        if (tags != null && (tags.Count == 0 || tags.Count(t => t.IsPrimary) != 1))
+        if (tags != null && tags.Count > 0 && tags.Count(t => t.IsPrimary) != 1)
             throw new ArgumentException("There must be exactly one primary tag.", nameof(tags));
         if (categories != null && (categories.Select(c => c.CategoryId).Distinct().Count() != categories.Count))
             throw new ArgumentException("Categories contains duplicate category IDs.", nameof(categories));

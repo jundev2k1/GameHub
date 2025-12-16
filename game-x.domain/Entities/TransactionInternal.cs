@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace game_x.domain.Entities;
 
-public class TransactionInternal: BaseEntity<int>, IAuditable
+public class TransactionInternal: BaseEntity<int>
 {
     public Transaction Transaction { get; set; } = null!;
     /// <summary>Payment Gateway ProviderId.</summary>

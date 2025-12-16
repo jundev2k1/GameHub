@@ -3,7 +3,7 @@ using game_x.application.Features.Notifications.Shared.Queries.GetNotificationDe
 
 namespace game_x.api.Controllers.Client.Notification;
 
-[Authorize(Roles = AppRoles.User)]
+[Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
 [Route("/api/user/notifications")]
 public sealed class NotificationController : BaseApiController
 {

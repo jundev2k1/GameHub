@@ -10,4 +10,5 @@ public sealed class GameXSettings : BaseSettings
     public string PaymentGatewayApiKey { get; set; } = string.Empty;
     [Required]
     public string PaymentGatewaySecretKey { get; set; } = string.Empty;
+    public required string AesKey { get; set; } = string.Empty;
 }

@@ -22,6 +22,20 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ToArrayAsync(ct);
     }
 
+    public async Task<Game> GetAsync(Guid gameId, CancellationToken ct = default)
+    {
+        return await context.Games
+            .Include(g => g.GameCategoryMappings)
+            .ThenInclude(gcm => gcm.Category)
+            .Include(g => g.GameTypeMappings)
+            .ThenInclude(gtm => gtm.Type)
+            .Include(g => g.GameTagMappings)
+            .ThenInclude(gtm => gtm.Tag)
+            .Include(g => g.Thumbnail)
+            .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
+            ?? throw new NotFoundException(nameof(gameId), gameId);
+    }
+
     public async Task<PaginationResult<Game>> GetsByCriteriaAsync(
         Func<IQueryable<Game>, IQueryable<Game>>? queryBuilder = null,
         int page = 1,
@@ -74,5 +88,26 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             ?? throw new NotFoundException(nameof(gameId), gameId);
 
         await updateAction.Invoke(targetGame);
+    }
+
+    public async Task DeleteAllCategoryMappingsAsync(Guid gameId, CancellationToken ct = default)
+    {
+        await context.GameCategoryMappings
+            .Where(gcm => gcm.Game.PublicId == gameId)
+            .ExecuteDeleteAsync(ct);
+    }
+
+    public async Task DeleteAllTypeMappingsAsync(Guid gameId, CancellationToken ct = default)
+    {
+        await context.GameTypeMappings
+            .Where(gtm => gtm.Game.PublicId == gameId)
+            .ExecuteDeleteAsync(ct);
+    }
+
+    public async Task DeleteAllTagMappingsAsync(Guid gameId, CancellationToken ct = default)
+    {
+        await context.GameTagMappings
+            .Where(gtm => gtm.Game.PublicId == gameId)
+            .ExecuteDeleteAsync(ct);
     }
 }

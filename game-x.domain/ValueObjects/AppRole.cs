@@ -36,5 +36,6 @@ public sealed class AppRole : IReadOnlyCollection<string>
     public bool IsRoot => Has(AppRoles.Root);
     public bool IsAdmin => Has(AppRoles.Admin);
     public bool IsCs => Has(AppRoles.Cs);
+    public bool IsTalent => Has(AppRoles.Talent);
     public bool IsUser => Has(AppRoles.User);
 }

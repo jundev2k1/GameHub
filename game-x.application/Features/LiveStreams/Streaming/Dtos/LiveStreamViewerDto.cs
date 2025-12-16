@@ -5,6 +5,7 @@ public sealed class LiveStreamViewerDto
     public string StreamKey { get; set; } = string.Empty;
     public string Token { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
+    public string WebRtcUrl { get; set; } = string.Empty;
     public string ClientId { get; set; } = string.Empty;
     public string ViewerId { get; set; } = string.Empty;
     public string ViewerName { get; set; } = string.Empty;
