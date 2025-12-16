@@ -242,10 +242,7 @@ public sealed class ConversationService(
     private async Task<string?> GetAvatarUrl(MediaFile? file, CancellationToken ct)
     {
         string? avatarUrl = null;
-        if (file != null)
-        {
-            avatarUrl = await fileCache.GetFileUrl(file, ct);
-        }
+        if (file != null) avatarUrl = await fileCache.GetFileUrl(file, ct);
         return avatarUrl;
     }
     
