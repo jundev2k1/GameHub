@@ -36,15 +36,14 @@ public sealed class WalletWithdrawalHandler(
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
-            decimal lastedBalanceAfter = await transactionRepo.GetLatestBalanceAfterAsync(transaction.UserId, ct);
-            
             // Handle actions related to post-transaction success
             userBalanceService.IncreaseAmount(balance, transaction.Amount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
             await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
             {
                 order.UpdateStatus(TransactionStatus.Completed);
-                order.BalanceAfter = lastedBalanceAfter + transaction.Amount;
+                order.BalanceAfter = balance.Amount;
+                order.CompletedAt = DateTime.UtcNow;
             }, ct);
             
             // Rollback all processing if the transaction fails at the third party
