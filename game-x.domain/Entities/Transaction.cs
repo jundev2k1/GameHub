@@ -24,6 +24,7 @@ public class Transaction: BaseEntity<int>, IAuditable
     public string? Note { get; set; }
     public TransactionInternal? TransactionInternal { get; set; }
     public TransactionExternal? TransactionExternal { get; set; }
+    public DateTime? CompletedAt { get; set; }
     
     public decimal TotalAmount => Amount + (Fee ?? 0);
 
@@ -94,10 +95,12 @@ public class Transaction: BaseEntity<int>, IAuditable
         string? providerOrderId = null, 
         string? hash = null,
         string? to = null,
-        DateTime? confirmedAt = null)
+        DateTime? confirmedAt = null,
+        DateTime? completedAt = null)
     {
         Amount = amount ?? Amount;
         ActualAmount = actualAmount ?? ActualAmount;
+        CompletedAt = completedAt ?? CompletedAt;
         if (TransactionInternal != null)
         {
             TransactionInternal.OrderUid = providerOrderId ?? TransactionInternal.OrderUid;
