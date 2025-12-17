@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 namespace game_x.infrastructure.BackgroundJobs.Jobs;
 
 public sealed class GameSessionTimeoutCheckerJob(
-    IUnitOfWork unitOfWork,
     IUserGameSessionRepo userGameSessionRepo,
     IOptions<RecurringJobSettings> jobOptions,
     IAppLogger<GameSessionTimeoutCheckerJob> logger) : IRecurringJob
@@ -22,10 +21,7 @@ public sealed class GameSessionTimeoutCheckerJob(
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
         logger.LogInformation("Job is running...");
-        await unitOfWork.WithTransactionAsync(async () =>
-        {
-            await userGameSessionRepo.BulkUpdateExpiredGameSessionsAsync(LimitRangeCount, ct);
-        }, ct);
+        await userGameSessionRepo.BulkUpdateExpiredGameSessionsAsync(LimitRangeCount, ct);
         logger.LogInformation("Job has stopped...");
     }
 }
