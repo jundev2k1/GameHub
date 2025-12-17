@@ -46,7 +46,7 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
             pageSize);
     }
 
-    public async Task<UserGameSession?> GetCurrentSessionByUserIdAsync(string userId, int platformId, int? gameId, CancellationToken ct = default)
+    public async Task<UserGameSession?> GetCurrentSessionByUserIdAsync(string userId, int platformId, CancellationToken ct = default)
     {
         var currentTime = DateTime.UtcNow;
         return await context.UserGameSessions
@@ -55,7 +55,6 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
             .FirstOrDefaultAsync(ugs =>
                 ugs.UserId == userId
                 && ugs.PlatformId == platformId
-                && ugs.GameId == gameId
                 && !ugs.IsEnd
                 && ugs.Connections.Any(c => c.ConnectedAt < currentTime), ct);
     }

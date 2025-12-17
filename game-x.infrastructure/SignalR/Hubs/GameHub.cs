@@ -56,7 +56,7 @@ public sealed class GameHub(
         var connectionId = Context.ConnectionId;
         var (platformInfo, gameInfo) = GetGameInfo(gameHubToken);
 
-        var currentSession = await userGameSessionRepo.GetCurrentSessionByUserIdAsync(userId, platformInfo.LocalId, gameInfo.LocalId);
+        var currentSession = await userGameSessionRepo.GetCurrentSessionByUserIdAsync(userId, platformInfo.LocalId);
         if (currentSession is null)
         {
             // Handle for new session
@@ -105,7 +105,7 @@ public sealed class GameHub(
         var (platformInfo, gameInfo) = GetGameInfo(gameHubToken);
 
         // Handle for new session
-        var currentSession = await userGameSessionRepo.GetCurrentSessionByUserIdAsync(userId);
+        var currentSession = await userGameSessionRepo.GetCurrentSessionByUserIdAsync(userId, platformInfo.LocalId);
         if (currentSession is null)
             return;
 
