@@ -96,10 +96,10 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
         while (isContinues)
         {
             var data = context.UserGameSessions
-                .Where(ugs => !ugs.IsEnd && !ugs.Connections.Any(c => c.DisconnectedAt != null && c.DisconnectedAt < currentTime))
+                .Where(ugs => !ugs.IsEnd && !ugs.Connections.All(c => c.DisconnectedAt != null && c.DisconnectedAt < currentTime))
                 .Skip(pageSize * index)
                 .Take(pageSize);
-            if (await data.AnyAsync(ct))
+            if (!await data.AnyAsync(ct))
             {
                 isContinues = false;
                 break;
