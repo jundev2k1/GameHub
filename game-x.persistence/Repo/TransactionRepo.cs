@@ -199,20 +199,6 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
         return tx?.BalanceAfter ?? 0;
     }
 
-    public async Task<decimal> GetLatestExternalBalanceAfterAsync(string userId, int localPlatformId, CancellationToken ct = default)
-    {
-        var tx = await context.Transactions
-            .AsNoTracking()
-            .Where(x => x.UserId == userId
-                && (x.Status == TransactionStatus.Completed)
-                && (x.TransactionExternal != null)
-                && (x.TransactionExternal.GamePlatformId == localPlatformId))
-            .OrderByDescending(x => x.CreatedAt)
-            .FirstOrDefaultAsync(ct);
-
-        return tx?.BalanceAfter ?? 0;
-    }
-
     public async Task AddAsync(Transaction transaction, CancellationToken ct = default)
     {
         await context.Transactions.AddAsync(transaction, ct);
