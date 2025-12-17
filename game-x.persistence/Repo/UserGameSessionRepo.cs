@@ -85,4 +85,25 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
 
         updateAction?.Invoke(targetSession);
     }
+
+    public async Task BulkUpdateExpiredGameSessionsAsync(int pageSize, CancellationToken ct = default)
+    {
+        var currentTime = DateTime.UtcNow.AddMinutes(5);
+        var index = 0;
+
+        var isContinues = true;
+        while (isContinues)
+        {
+            var data = context.UserGameSessions
+                .Where(ugs => !ugs.IsEnd && !ugs.Connections.Any(c => c.DisconnectedAt != null && c.DisconnectedAt < currentTime))
+                .Take(pageSize * index);
+            if (await data.AnyAsync(ct))
+            {
+                isContinues = false;
+                break;
+            }
+            await data.ExecuteUpdateAsync(setters => setters.SetProperty(ugs => ugs.IsEnd, true), ct);
+            index++;
+        }
+    }
 }
