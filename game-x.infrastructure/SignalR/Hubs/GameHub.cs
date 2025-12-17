@@ -115,7 +115,7 @@ public sealed class GameHub(
         if (targetConnection is null)
             return;
 
-        await userGameSessionRepo.UpdateConnectionAsync(targetConnection.UserGameSessionId, connection =>
+        await userGameSessionRepo.UpdateConnectionAsync(targetConnection.Id, connection =>
         {
             connection.Disconnect();
         });

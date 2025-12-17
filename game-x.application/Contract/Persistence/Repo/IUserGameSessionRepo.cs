@@ -19,7 +19,7 @@ public interface IUserGameSessionRepo
 
     Task AddConnectionAsync(UserGameSessionConnection connection, CancellationToken ct = default);
 
-    Task UpdateConnectionAsync(int id, Action<UserGameSessionConnection> updateAction, CancellationToken ct = default);
+    Task UpdateConnectionAsync(long id, Action<UserGameSessionConnection> updateAction, CancellationToken ct = default);
 
     Task BulkUpdateExpiredGameSessionsAsync(int pageSize, CancellationToken ct = default);
 }

@@ -77,7 +77,7 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
         await context.UserGameSessionConnections.AddAsync(connection, ct);
     }
 
-    public async Task UpdateConnectionAsync(int id, Action<UserGameSessionConnection> updateAction, CancellationToken ct = default)
+    public async Task UpdateConnectionAsync(long id, Action<UserGameSessionConnection> updateAction, CancellationToken ct = default)
     {
         var targetSession = await context.UserGameSessionConnections
             .FirstOrDefaultAsync(s => s.Id == id, ct)
