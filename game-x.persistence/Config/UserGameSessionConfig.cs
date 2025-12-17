@@ -6,7 +6,7 @@ public sealed class UserGameSessionConfig : IEntityTypeConfiguration<UserGameSes
 {
     public void Configure(EntityTypeBuilder<UserGameSession> builder)
     {
-        builder.ToTable("User_game_sessions");
+        builder.ToTable("user_game_sessions");
 
         builder.HasKey(ugs => ugs.Id);
 
@@ -22,7 +22,7 @@ public sealed class UserGameSessionConfig : IEntityTypeConfiguration<UserGameSes
         builder.Property(ugs => ugs.GameId)
             .IsRequired(false);
 
-        builder.Property(ugs => ugs.LoginAt)
+        builder.Property(ugs => ugs.IsEnd)
             .IsRequired();
 
         builder.Property(ugs => ugs.BalanceSnapshot)
@@ -44,6 +44,5 @@ public sealed class UserGameSessionConfig : IEntityTypeConfiguration<UserGameSes
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(ugs => new { ugs.PlatformId, ugs.GameId });
-        builder.HasIndex(ugs => ugs.LoginAt);
     }
 }
