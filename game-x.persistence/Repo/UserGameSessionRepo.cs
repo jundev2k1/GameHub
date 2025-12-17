@@ -97,7 +97,8 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
         {
             var data = context.UserGameSessions
                 .Where(ugs => !ugs.IsEnd && !ugs.Connections.Any(c => c.DisconnectedAt != null && c.DisconnectedAt < currentTime))
-                .Take(pageSize * index);
+                .Skip(pageSize * index)
+                .Take(pageSize);
             if (await data.AnyAsync(ct))
             {
                 isContinues = false;
