@@ -5,9 +5,11 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Features.Games.Services;
+using game_x.application.Features.UserGameSessions.Dtos;
 using game_x.share.Extensions;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
+using game_x.share.Helper;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 
@@ -34,8 +36,12 @@ public sealed class LoginGameHandler(
         if (!targetUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
+        var gameInfo = gameProviderCache.GameList.FirstOrDefault(gl => gl.GameCode == request.GameCode)
+            ?? throw new BadRequestException($"Game ({request.GameCode}) is not found or disabled.");
+
         targetUser = await gamePlatformService.EnsureExternalAccountCreatedAsync(
-            targetUser, request.GamePlatformId!.Value,
+            targetUser,
+            request.GamePlatformId!.Value,
             ct: ct);
 
         // Login from external API
@@ -43,7 +49,8 @@ public sealed class LoginGameHandler(
             ?? throw new BadRequestException($"GamePlatformId({request.GamePlatformId.Value}) is not supported.");
 
         var gameEmbededLink = ConvertEmbededLink(request.GamePlatformId.Value, url);
-        return new LoginGameResult(gameEmbededLink);
+        var loginToken = GenerateToken(gameInfo.PlatformId, gameInfo.Id);
+        return new LoginGameResult(gameEmbededLink, loginToken);
     }
 
     private async Task<string?> LoginGameAsync(
@@ -102,5 +109,15 @@ public sealed class LoginGameHandler(
 
         // Fallback
         return url;
+    }
+
+    private static string GenerateToken(Guid platformId, Guid gameId)
+    {
+        var data = new GameHubTokenDto
+        {
+            GamePlatformId = platformId,
+            GameId = gameId,
+        };
+        return Base64Helper.Encode(data);
     }
 }
