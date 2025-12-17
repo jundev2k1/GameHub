@@ -2,19 +2,31 @@
 using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.application.Features.UserGameSessions.Dtos;
 
 namespace game_x.persistence.Repo;
 
 public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSessionRepo, IRepository
 {
-    public async Task<PaginationResult<UserGameSession>> GetsByCriteriaAsync(
-        Func<IQueryable<UserGameSession>, IQueryable<UserGameSession>>? builder = null,
+    public async Task<PaginationResult<UserGameSessionSearchItemDto>> GetsByCriteriaAsync(
+        Func<IQueryable<UserGameSessionSearchItemDto>, IQueryable<UserGameSessionSearchItemDto>>? builder = null,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default)
     {
         var query = context.UserGameSessions
             .AsNoTracking()
+            .Where(ugs => ugs.IsEnd)
+            .Select(ugs => new UserGameSessionSearchItemDto
+            {
+                UserId = ugs.UserId,
+                Nickname = ugs.User.Nickname,
+                PlatformId = ugs.Platform.PublicId,
+                GameCode = ugs.Game != null ? ugs.Game.GameCode : null,
+                BalanceSnapshot = ugs.BalanceSnapshot,
+                ConnectedAt = ugs.Connections.Min(c => c.ConnectedAt),
+                DisconnectedAt = ugs.Connections.Max(c => c.DisconnectedAt),
+            })
             .AsQueryable();
 
         if (builder is not null)
@@ -26,7 +38,7 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToArrayAsync(ct);
-        return new PaginationResult<UserGameSession>(
+        return new PaginationResult<UserGameSessionSearchItemDto>(
             items,
             totalItems,
             totalPages,

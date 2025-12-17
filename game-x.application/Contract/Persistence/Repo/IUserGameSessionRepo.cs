@@ -1,11 +1,12 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Features.UserGameSessions.Dtos;
 
 namespace game_x.application.Contract.Persistence.Repo;
 
 public interface IUserGameSessionRepo
 {
-    Task<PaginationResult<UserGameSession>> GetsByCriteriaAsync(
-        Func<IQueryable<UserGameSession>, IQueryable<UserGameSession>>? builder = null,
+    Task<PaginationResult<UserGameSessionSearchItemDto>> GetsByCriteriaAsync(
+        Func<IQueryable<UserGameSessionSearchItemDto>, IQueryable<UserGameSessionSearchItemDto>>? builder = null,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default);

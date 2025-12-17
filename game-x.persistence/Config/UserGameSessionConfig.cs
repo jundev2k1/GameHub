@@ -44,5 +44,7 @@ public sealed class UserGameSessionConfig : IEntityTypeConfiguration<UserGameSes
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(ugs => new { ugs.PlatformId, ugs.GameId });
+        builder.HasIndex(ugs => ugs.BalanceSnapshot);
+        builder.HasIndex(ugs => ugs.IsEnd);
     }
 }
