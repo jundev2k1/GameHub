@@ -32,4 +32,7 @@ public sealed class UserGameSession : BaseEntity<int>
     {
         IsEnd = true;
     }
+
+    public void AddConnection(UserGameSessionConnection connection)
+        => Connections.Add(connection);
 }

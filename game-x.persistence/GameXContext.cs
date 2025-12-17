@@ -60,6 +60,7 @@ public sealed class GameXContext(
     public DbSet<InteractionCharacter> InteractionCharacters { get; set; }
     public DbSet<InteractionCharacterPose> InteractionCharacterPoses { get; set; }
     public DbSet<UserGameSession> UserGameSessions { get; set; }
+    public DbSet<UserGameSessionConnection> UserGameSessionConnections { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

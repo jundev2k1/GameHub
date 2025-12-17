@@ -26,16 +26,12 @@ public sealed class UserGameSessionConnectionConfig : IEntityTypeConfiguration<U
         builder.Property(ugsc => ugsc.DisconnectedAt)
             .IsRequired(false);
 
-        builder.Property(ugsc => ugsc.LeftAt)
-            .IsRequired(false);
-
         builder.HasOne(ugsc => ugsc.Session)
             .WithMany(ugs => ugs.Connections)
             .HasForeignKey(ugsc => ugsc.UserGameSessionId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(ugsc => ugsc.ConnectionId);
-        builder.HasIndex(ugsc => ugsc.LeftAt);
         builder.HasIndex(ugs => new { ugs.ConnectedAt, ugs.DisconnectedAt });
     }
 }
