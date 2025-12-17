@@ -9,9 +9,9 @@ namespace game_x.application.Features.Games.Client.Queries.GetGameReport;
 public sealed class GetGameReportHandler(
     IUserAccessor userAccessor,
     IUserRepo userRepo,
-    IGameProviderService gameProvider) : IQueryHandler<GetGameReportQuery, Unit>
+    IGameProviderService gameProvider) : IQueryHandler<GetGameReportQuery, GameReportResponse>
 {
-    public async Task<Unit> Handle(GetGameReportQuery request, CancellationToken ct = default)
+    public async Task<GameReportResponse> Handle(GetGameReportQuery request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
         var userExtend = await userRepo.GetUserExtendAsync(userId, ct);
@@ -21,6 +21,6 @@ public sealed class GetGameReportHandler(
             EndDate = request.EndDate?.ToString("yyyy-MM-dd hh:MM:ss") ?? string.Empty
         };
         var report = await gameProvider.GetReportAsync(reportRequest, userExtend.GameProviderAccount);
-        return Unit.Value;
+        return report;
     }
 }

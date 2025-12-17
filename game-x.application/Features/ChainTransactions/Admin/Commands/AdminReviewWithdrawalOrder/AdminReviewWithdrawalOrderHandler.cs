@@ -57,7 +57,6 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     {
         transaction.UpdateStatus(TransactionStatus.Approved);
         await transactionRepo.PutUpdateAsync(transaction, ct);
-        
         await SendUxmWithdrawalOrderAsync(transaction, ct);
     }
     
@@ -68,8 +67,8 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         await unitOfWork.WithTransactionAsync(
             async () =>
             {
-                await transactionRepo.PutUpdateAsync(transaction, ct);
                 await TryRefundFrozenBalanceAsync(transaction, ct);
+                await transactionRepo.PutUpdateAsync(transaction, ct);
             }, ct);
     }
     
@@ -97,14 +96,12 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         }
         catch (Exception ex)
         {
+            await TryRefundFrozenBalanceAsync(tx, ct);
             await transactionRepo.PatchUpdateAsync(tx.PublicId, x =>
             {
                 x.Status = TransactionStatus.Failed;
                 x.UpdateMeta(m => m.ErrorMessage = ex.Message);
             }, ct);
-
-            await TryRefundFrozenBalanceAsync(tx, ct);
-
             throw;
         }
     }

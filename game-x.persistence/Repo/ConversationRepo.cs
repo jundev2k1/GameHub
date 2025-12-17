@@ -2,7 +2,6 @@ using System.Linq.Expressions;
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using game_x.application.Features.Chat.Dtos;
 using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
@@ -13,7 +12,6 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
     {
         return query
             .AsNoTracking()
-            .Include(c => c.Members)
             .Include(c => c.Customer)
                 .ThenInclude(c => c!.Avatar)
             .Include(c => c.Messages
@@ -146,13 +144,13 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                        .Select(x => new
                        {
                            conv = x,
-                           member = x.Members.FirstOrDefault(x => x.UserId == userId)
+                           member = x.Members.FirstOrDefault(m => m.UserId == userId)
                        })
                        .FirstOrDefaultAsync(ct)
                    ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
 
-        result.conv.IsHidden = result?.member?.IsHidden;
-        return result?.conv;
+        result.conv.IsHidden = result.member?.IsHidden;
+        return result.conv;
     }
     
     public async Task<Conversation?> FindForPairAsync(string userA, string userB, CancellationToken ct = default)

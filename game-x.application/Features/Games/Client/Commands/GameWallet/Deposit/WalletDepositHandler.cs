@@ -55,16 +55,11 @@ public sealed class WalletDepositHandler(
             // Handle actions related to post-transaction success
             userBalanceService.DecreaseAmount(balance, transaction.Amount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
-
-            decimal lastedBalanceAfter = await transactionRepo.GetLatestExternalBalanceAfterAsync(
-                transaction.UserId,
-                targetPlatform.LocalId,
-                ct);
-
             await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
             {
                 order.UpdateStatus(TransactionStatus.Completed);
-                order.BalanceAfter = lastedBalanceAfter - transaction.Amount;
+                order.BalanceAfter = balance.TotalAmount;
+                order.CompletedAt = DateTime.UtcNow;
             }, ct);
 
             // Rollback all processing if the transaction fails at the third party
