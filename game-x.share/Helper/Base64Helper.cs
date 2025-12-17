@@ -18,4 +18,18 @@ public static class Base64Helper
         var json = Encoding.UTF8.GetString(bytes);
         return JsonSerializer.Deserialize<T>(json)!;
     }
+
+    public static bool TryDecode<T>(string token, out T? obj)
+    {
+        try
+        {
+            obj = Decode<T>(token);
+            return true;
+        }
+        catch
+        {
+            obj = default;
+            return false;
+        }
+    }
 }

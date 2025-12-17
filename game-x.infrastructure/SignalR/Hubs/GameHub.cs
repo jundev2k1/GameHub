@@ -30,12 +30,12 @@ public sealed class GameHub(
         if (token.IsNullOrWhiteSpace())
             throw new ForbiddenException("Token is required.");
 
-        var @params = Base64Helper.Decode<GameHubTokenDto>(token!)
-            ?? throw new BadRequestException();
+        if (!Base64Helper.TryDecode<GameHubTokenDto>(token!, out var loginToken))
+            throw new BadRequestException();
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"games-{@params.GamePlatformId}-{userId}");
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"games-{loginToken!.GamePlatformId}-{userId}");
 
-        logger.LogInformation("GameHub ({PlatformId}) connected: {UserId}", @params.GamePlatformId, userId);
+        logger.LogInformation("GameHub ({PlatformId}) connected: {UserId}", loginToken.GamePlatformId, userId);
         await base.OnConnectedAsync();
     }
 
