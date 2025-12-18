@@ -2,8 +2,6 @@
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.UserGameSessions.Dtos;
-using game_x.share.Extensions;
-using System.Linq.Expressions;
 
 namespace game_x.application.Features.UserGameSessions.Queries.GetGameSessions;
 
