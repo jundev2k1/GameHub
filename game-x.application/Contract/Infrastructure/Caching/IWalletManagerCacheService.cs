@@ -6,6 +6,8 @@ public interface IWalletManagerCacheService
 {
     Task<UserWalletDto> GetWalletAsync(string userId);
 
+    Task<UserWalletExternalItemDto> GetExternalWalletAsync(string userId, Guid platformId);
+
     Task RefreshWalletAsync(string userId);
 
     Task RefreshInternalWalletAsync(string userId, Guid walletId, decimal amount, decimal frozenAmount);

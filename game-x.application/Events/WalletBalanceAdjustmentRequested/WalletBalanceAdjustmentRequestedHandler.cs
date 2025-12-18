@@ -42,7 +42,7 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
                 latestTransaction.CryptoTokenId,
                 TransactionSourceType.G598SnoGameProvider,
                 TransactionType.BalanceAdjustment);
-            transaction.ConfirmTx(platformWallet.Amount, platformWallet.Amount, DateTime.UtcNow);
+            transaction.Confirm(platformWallet.Amount, platformWallet.Amount);
             await transactionRepo.AddAsync(transaction, ct);
         }, ct);
     }

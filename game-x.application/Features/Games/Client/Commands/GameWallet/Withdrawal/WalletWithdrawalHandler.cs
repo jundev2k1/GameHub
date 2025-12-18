@@ -24,7 +24,8 @@ public sealed class WalletWithdrawalHandler(
     IGameProviderService gameProvider,
     IGameBaccaratService gameBaccarat,
     IGameProviderCacheService gameProviderCache,
-    IGamePlatformService gamePlatformService) : ICommandHandler<WalletWithdrawalCommand, ListTransactionExternalDto>
+    IGamePlatformService gamePlatformService,
+    IWalletManagerCacheService walletManagerCache) : ICommandHandler<WalletWithdrawalCommand, ListTransactionExternalDto>
 {
     public async Task<ListTransactionExternalDto> Handle(WalletWithdrawalCommand request, CancellationToken ct = default)
     {
@@ -41,27 +42,25 @@ public sealed class WalletWithdrawalHandler(
         var balanceAjustmentEvent = new WalletBalanceAdjustmentRequestedEvent(currentUser.Id, targetPlatform.Id);
         await eventDispatcher.Publish(balanceAjustmentEvent, ct);
 
+        // Create transaction
         var currentBalance = await GetUserBalanceAsync(currentUser.Id, request, ct);
-
-        // Create transaction and ajust balance
-        Transaction? transaction = null;
+        var serialNumber = GameProviderUtils.SnoGenerate();
         var txSourceType = GetTxSourceType(targetPlatform.Id);
+        var transaction = CreateTransaction(
+            currentUser.Id,
+            serialNumber,
+            currentBalance.CryptoToken.Id,
+            request.Amount,
+            targetPlatform.LocalId,
+            txSourceType,
+            request.Note);
+
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await userBalanceRepo.UpdateAsync(currentBalance.PublicId, balance =>
             {
-                balance.AdjustAmount(request.Amount, false);
+                balance.AdjustAmount(request.Amount, true);
             }, ct);
-
-            transaction = await CreateTransactionAsync(
-                currentUser.Id,
-                currentBalance.CryptoToken.Id,
-                request.Amount,
-                currentBalance.TotalAmount,
-                targetPlatform.LocalId,
-                txSourceType,
-                request.Note,
-                ct);
 
             // Rollback all processing if the transaction fails at the third party
             if (request.PlatformId == GameConstants.PLATFORM_ID_G598)
@@ -78,10 +77,17 @@ public sealed class WalletWithdrawalHandler(
                     sno: transaction.TransactionExternal!.SerialNumber,
                     amount: transaction.Amount);
             }
-        }, ct);
 
-        // Refresh wallet cache and notify user
-        await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction!.UserId, request.PlatformId), ct);
+            var @event = new OnUserBalanceUpdatedEvent(transaction!.UserId, targetPlatform.Id);
+            await eventDispatcher.Publish(@event, ct);
+
+            // Set balance after for transaction
+            var walletRefreshed = await walletManagerCache.GetExternalWalletAsync(
+                currentUser.Id,
+                request.PlatformId);
+            transaction.Confirm(walletRefreshed.Amount, walletRefreshed.Amount);
+            await transactionRepo.AddAsync(transaction, ct);
+        }, ct);
 
         var result = await transactionRepo.GetExternalByIdAsync(transaction.PublicId, ct);
         return result.Adapt<ListTransactionExternalDto>();
@@ -112,15 +118,14 @@ public sealed class WalletWithdrawalHandler(
         return userBalance;
     }
 
-    private async Task<Transaction> CreateTransactionAsync(
+    private static Transaction CreateTransaction(
         string userId,
+        string serialNumber,
         int cryptoTokenId,
         decimal amount,
-        decimal balanceAfter,
         int localPlatformId,
         TransactionSourceType sourceType,
-        string? note,
-        CancellationToken ct)
+        string? note)
     {
         var tx = Transaction.Create(
             sourceType: sourceType,
@@ -129,13 +134,11 @@ public sealed class WalletWithdrawalHandler(
             amount: amount,
             cryptoTokenId: cryptoTokenId,
             note: note);
-        tx.ConfirmTx(balanceAfter, balanceAfter, DateTime.UtcNow);
 
         var txExternal = TransactionExternal.Create(
-            sno: GameProviderUtils.SnoGenerate(),
+            sno: serialNumber,
             gamePlatformId: localPlatformId);
         tx.AddTxExternal(txExternal);
-        await transactionRepo.AddAsync(tx, ct);
 
         return tx;
     }

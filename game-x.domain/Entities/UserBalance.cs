@@ -40,7 +40,7 @@ public sealed class UserBalance : BaseEntity<int>
         var amountAfter = isIncrease
             ? Amount + amount
             : Amount - amount;
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amountAfter, nameof(amountAfter));
+        ArgumentOutOfRangeException.ThrowIfLessThan(amountAfter, 0);
 
         Amount = amountAfter;
     }

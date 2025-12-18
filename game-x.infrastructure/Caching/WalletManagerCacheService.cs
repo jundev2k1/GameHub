@@ -9,6 +9,7 @@ using game_x.share.Extensions;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.GetWallet;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 using Microsoft.Extensions.Caching.Memory;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace game_x.infrastructure.Caching;
 
@@ -31,6 +32,14 @@ public sealed class WalletManagerCacheService(
 
         await RefreshWalletAsync(userId);
         return Get<UserWalletDto>(cacheKey)!;
+    }
+
+    public async Task<UserWalletExternalItemDto> GetExternalWalletAsync(string userId, Guid platformId)
+    {
+        var currentWallet = await GetWalletAsync(userId);
+        return currentWallet.ExternalWallets
+            .FirstOrDefault(ew => ew.PlatformId == platformId)
+            ?? throw new NotFoundException(nameof(platformId), platformId);
     }
 
     public async Task RefreshWalletAsync(string userId)

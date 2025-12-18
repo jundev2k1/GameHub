@@ -125,7 +125,7 @@ public sealed class OnLiveStreamDonatedHandler(
         transaction.AddTxInternal(transactionInternal);
 
         var balanceAfter = lastedBalanceAfter - amount;
-        transaction.ConfirmTx(amount, balanceAfter, DateTime.UtcNow);
+        transaction.Confirm(amount, balanceAfter);
 
         await transactionRepo.AddAsync(transaction, ct);
     }
