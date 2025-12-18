@@ -9,7 +9,6 @@ using game_x.share.Extensions;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.GetWallet;
 using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 using Microsoft.Extensions.Caching.Memory;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace game_x.infrastructure.Caching;
 
@@ -207,7 +206,7 @@ public sealed class WalletManagerCacheService(
         {
             if (userId is null) return null;
 
-            var externalRequest = new GameBaccaratGetWalletRequest { UserId = userId };
+            var externalRequest = new GameBaccaratGetWalletRequest { UserId = targetUser.UserExtend.GameBaccaratUserId };
             var externalWallet = await gameBaccaratService.GetWalletAsync(externalRequest);
 
             return externalWallet.Amount;
