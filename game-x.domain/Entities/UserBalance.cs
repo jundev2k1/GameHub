@@ -37,9 +37,11 @@ public sealed class UserBalance : BaseEntity<int>
 
     public void AdjustAmount(decimal amount, bool isIncrease)
     {
-        if (isIncrease)
-            Amount += amount;
-        else
-            Amount -= amount;
+        var amountAfter = isIncrease
+            ? Amount + amount
+            : Amount - amount;
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amountAfter, nameof(amountAfter));
+
+        Amount = amountAfter;
     }
 }

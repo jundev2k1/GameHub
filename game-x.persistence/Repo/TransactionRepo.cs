@@ -199,7 +199,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
         return tx?.BalanceAfter ?? 0;
     }
 
-    public async Task<decimal> GetLatestExternalBalanceAfterAsync(string userId, int localPlatformId, CancellationToken ct = default)
+    public async Task<Transaction?> GetLatestExternalTransactionAsync(string userId, int localPlatformId, CancellationToken ct = default)
     {
         var tx = await context.Transactions
             .AsNoTracking()
@@ -210,7 +210,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(ct);
 
-        return tx?.BalanceAfter ?? 0;
+        return tx;
     }
 
     public async Task AddAsync(Transaction transaction, CancellationToken ct = default)

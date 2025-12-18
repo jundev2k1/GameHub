@@ -40,7 +40,7 @@ public interface ITransactionRepo
     /// <summary>Get the balance after from the lasted successful transaction of the user</summary>
     Task<decimal> GetLatestBalanceAfterAsync(string userId, CancellationToken ct = default);
 
-    Task<decimal> GetLatestExternalBalanceAfterAsync(string userId, int localPlatformId, CancellationToken ct = default);
+    Task<Transaction?> GetLatestExternalTransactionAsync(string userId, int localPlatformId, CancellationToken ct = default);
 
     Task AddAsync(Transaction transaction, CancellationToken ct = default);
 
