@@ -164,53 +164,51 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     public async Task<Transaction> GetExternalByIdAsync(Guid publicId, CancellationToken ct = default)
     {
         return await context.Transactions
-                   .AsNoTracking()
-                   .Include(t => t.User)
-                   .ThenInclude(u => u.UserBalances)
-                   .Include(t => t.CryptoToken)
-                   .Include(x => x.TransactionExternal)
-                        .ThenInclude(x => x!.GamePlatform)
-                   .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
-               ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
+            .AsNoTracking()
+            .Include(t => t.User)
+            .ThenInclude(u => u.UserBalances)
+            .Include(t => t.CryptoToken)
+            .Include(x => x.TransactionExternal)
+                .ThenInclude(x => x!.GamePlatform)
+            .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
+            ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
 
     public async Task<Transaction> GetByIdAndUserIdAsync(string userId, Guid publicId, CancellationToken ct = default)
     {
         return await context.Transactions
-                   .AsNoTracking()
-                   .Include(t => t.User)
-                   .ThenInclude(u => u.UserBalances)
-                   .Include(t => t.CryptoToken)
-                   .Include(x => x.TransactionInternal)
-                   .Include(x => x.TransactionExternal)
-                        .ThenInclude(x => x!.GamePlatform)
-                   .FirstOrDefaultAsync(x => x.PublicId == publicId && x.UserId == userId, ct)
-               ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
+            .AsNoTracking()
+            .Include(t => t.User)
+            .ThenInclude(u => u.UserBalances)
+            .Include(t => t.CryptoToken)
+            .Include(x => x.TransactionInternal)
+            .Include(x => x.TransactionExternal)
+                 .ThenInclude(x => x!.GamePlatform)
+            .FirstOrDefaultAsync(x => x.PublicId == publicId && x.UserId == userId, ct)
+            ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
 
     public async Task<decimal> GetLatestBalanceAfterAsync(string userId, CancellationToken ct = default)
     {
         var tx = await context.Transactions
-                   .AsNoTracking()
-                   .Where(x => x.UserId == userId && x.Status == TransactionStatus.Completed)
-                   .OrderByDescending(x => x.CreatedAt)
-                   .FirstOrDefaultAsync(ct);
+            .AsNoTracking()
+            .Where(x => x.UserId == userId && x.Status == TransactionStatus.Completed)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync(ct);
 
         return tx?.BalanceAfter ?? 0;
     }
 
     public async Task<Transaction?> GetLatestExternalTransactionAsync(string userId, int localPlatformId, CancellationToken ct = default)
     {
-        var tx = await context.Transactions
+        return await context.Transactions
             .AsNoTracking()
-            .Where(x => x.UserId == userId
+            .Include(tx => tx.TransactionExternal)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync(x => x.UserId == userId
                 && (x.Status == TransactionStatus.Completed)
                 && (x.TransactionExternal != null)
-                && (x.TransactionExternal.GamePlatformId == localPlatformId))
-            .OrderByDescending(x => x.CreatedAt)
-            .FirstOrDefaultAsync(ct);
-
-        return tx;
+                && (x.TransactionExternal.GamePlatformId == localPlatformId), ct);
     }
 
     public async Task AddAsync(Transaction transaction, CancellationToken ct = default)
