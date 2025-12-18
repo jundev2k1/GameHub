@@ -50,7 +50,7 @@ public sealed class WalletDepositHandler(
         {
             await userBalanceRepo.UpdateAsync(currentBalance.PublicId, balance =>
             {
-                balance.AdjustAmount(request.Amount, false);
+                balance.AdjustAmount(request.Amount, true);
             }, ct);
 
             transaction = await CreateTransactionAsync(
