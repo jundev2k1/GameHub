@@ -132,11 +132,11 @@ public sealed class WalletDepositHandler(
         string? note)
     {
         var tx = Transaction.Create(
-            sourceType: sourceType,
-            type: TransactionType.Deposit,
             userId: userId,
             amount: amount,
             cryptoTokenId: cryptoTokenId,
+            sourceType: sourceType,
+            type: TransactionType.Deposit,
             note: note);
 
         var txExternal = TransactionExternal.Create(

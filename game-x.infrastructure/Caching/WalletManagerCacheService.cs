@@ -133,6 +133,53 @@ public sealed class WalletManagerCacheService(
         Set(cacheKey, userWallet);
     }
 
+    public async Task RefreshExternalWalletAsync(string userId, Guid platformId)
+    {
+        var userWallet = await GetWalletAsync(userId);
+        var targetWallet = userWallet.ExternalWallets
+            .FirstOrDefault(w => w.PlatformId == platformId);
+        if (platformId == GameConstants.PLATFORM_ID_G598)
+        {
+            var g598Balance = await GetGame598WalletAsync(userId);
+            if (targetWallet is null)
+            {
+                targetWallet = new UserWalletExternalItemDto
+                {
+                    PlatformId = GameConstants.PLATFORM_ID_G598,
+                    PlatformName = gameProviderCache.G598Platform.Name,
+                    Amount = g598Balance ?? 0,
+                };
+                userWallet.ExternalWallets.Add(targetWallet);
+            }
+            else
+            {
+                targetWallet.Amount = g598Balance ?? 0;
+            }
+        }
+
+        if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+        {
+            var baccaratBalance = await GetBaccaratWalletAsync(userId);
+            if (targetWallet is null)
+            {
+                targetWallet = new UserWalletExternalItemDto
+                {
+                    PlatformId = GameConstants.PLATFORM_ID_GAMEBACCARAT,
+                    PlatformName = gameProviderCache.BaccaratPlatform.Name,
+                    Amount = baccaratBalance ?? 0,
+                };
+                userWallet.ExternalWallets.Add(targetWallet);
+            }
+            else
+            {
+                targetWallet.Amount = baccaratBalance ?? 0;
+            }
+        }
+
+        var cacheKey = $"{CacheKeyPrefix}{userId}";
+        Set(cacheKey, userWallet);
+    }
+
     private async Task<decimal?> GetGame598WalletAsync(string userId)
     {
         var targetUser = await userRepo.GetUserByIdAsync(userId);

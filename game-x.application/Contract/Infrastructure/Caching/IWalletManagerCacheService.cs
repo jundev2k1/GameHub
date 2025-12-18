@@ -13,4 +13,5 @@ public interface IWalletManagerCacheService
     Task RefreshInternalWalletAsync(string userId, Guid walletId, decimal amount, decimal frozenAmount);
 
     Task RefreshExternalWalletAsync(string userId, Guid platformId, decimal balance);
+    Task RefreshExternalWalletAsync(string userId, Guid platformId);
 }
