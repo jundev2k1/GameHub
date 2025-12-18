@@ -11,7 +11,7 @@ public interface IUserGameSessionRepo
         int pageSize = 20,
         CancellationToken ct = default);
 
-    Task<UserGameSession?> GetCurrentSessionByUserIdAsync(string userId, int platformId, CancellationToken ct = default);
+    Task<UserGameSession?> GetCurrentSessionByUserIdAsync(string userId, int platformId, int gameId, CancellationToken ct = default);
 
     Task CreateAsync(UserGameSession gameSession, CancellationToken ct = default);
 
