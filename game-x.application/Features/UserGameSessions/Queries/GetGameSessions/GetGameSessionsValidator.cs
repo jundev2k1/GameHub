@@ -7,6 +7,7 @@ public sealed class GetGameSessionsValidator : AbstractValidator<GetGameSessions
 {
     private readonly string[] _allowFields =
     {
+        "search",
         nameof(UserGameSessionSearchItemDto.PlatformId),
         nameof(UserGameSessionSearchItemDto.PlatformName),
         nameof(UserGameSessionSearchItemDto.GameName),
