@@ -74,9 +74,6 @@ public sealed class UserKyc : BaseEntity<int>, IAuditable
         if (Status != KycStatus.UnderReview)
             throw new ArgumentException("Can only reject KYC in UnderReview status.");
 
-        if (string.IsNullOrWhiteSpace(reason))
-            throw new ArgumentException("Rejection reason is required.");
-
         if (details.IsNotNullOrEmpty() && !JsonHelper.IsJsonArray(details!))
             throw new ArgumentException("Reject details must be an array object json.");
 
