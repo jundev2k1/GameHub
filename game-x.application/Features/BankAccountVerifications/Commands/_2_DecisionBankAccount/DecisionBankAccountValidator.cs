@@ -10,10 +10,6 @@ public sealed class DecisionBankAccountValidator : AbstractValidator<DecisionBan
             .IsInEnum().WithMessage($"{nameof(DecisionBankAccountCommand.Status)} must be in enum.")
             .Must(BeValidStatus).WithMessage($"{nameof(DecisionBankAccountCommand.Status)} is invalid status.");
 
-        RuleFor(x => x.Reason)
-            .Must((model, value) => BeRequiredField(model.Status, value))
-            .WithMessage($"{nameof(DecisionBankAccountCommand.Reason)} must be not empty.");
-
         RuleFor(x => x.Details)
             .Must((model, value) => BeRequiredField(model.Status, value))
             .WithMessage($"{nameof(DecisionBankAccountCommand.Details)} must be not empty.");
