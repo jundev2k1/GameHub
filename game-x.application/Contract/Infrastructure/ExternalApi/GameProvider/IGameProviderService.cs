@@ -16,7 +16,7 @@ public interface IGameProviderService
 
     Task<GameRegisterResponse> RegisterAsync(GameRegisterRequest data);
 
-    Task<GameWalletResponse> GetWalletAsync(GameWalletRequest data);
+    Task<GameWalletResponse> GetWalletAsync(string account);
 
     Task<GameDepositResponse> DepositWalletAsync(GameDepositRequest data);
 
