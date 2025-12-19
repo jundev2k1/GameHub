@@ -1,6 +1,6 @@
-using game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtWithdrawalV2;
-using game_x.application.Features.ChainTransactions.Client.Commands.TraceV2.TronUsdtDepositV2;
-using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactionDetail;
+using game_x.application.Features.Transactions.Client.Commands.TraceV2.TronUsdtWithdrawalV2;
+using game_x.application.Features.Transactions.Client.Commands.TraceV2.TronUsdtDepositV2;
+using game_x.application.Features.Transactions.Client.Queries.GetMyTransactionDetail;
 
 namespace game_x.api.Controllers.Client.Chain;
 

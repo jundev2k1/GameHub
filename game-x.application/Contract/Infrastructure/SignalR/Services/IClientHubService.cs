@@ -2,7 +2,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Features.Accounts.User.Dtos;
-using game_x.application.Features.ChainTransactions.Dtos;
+using game_x.application.Features.Transactions.Dtos;
 using game_x.application.Features.UserWallet.Dtos;
 
 namespace game_x.application.Contract.Infrastructure.SignalR.Services;

@@ -1,4 +1,4 @@
-using game_x.application.Features.ChainTransactions.Shared.Queries.GetCryptoTokenList;
+using game_x.application.Features.Transactions.Shared.Queries.GetCryptoTokenList;
 
 namespace game_x.api.Controllers.Common;
 

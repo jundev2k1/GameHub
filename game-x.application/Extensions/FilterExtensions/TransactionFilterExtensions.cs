@@ -1,3 +1,4 @@
+using game_x.application.Features.Transactions.Dtos;
 using game_x.share.Extensions;
 using System.Linq.Expressions;
 
@@ -16,6 +17,12 @@ public static class TransactionFilterExtensions
         {
             ["statuses"] = CreateStatusFilter,
             ["platforms"] = CreatePlatformFilter
+        };
+
+    public static readonly Dictionary<string, Func<object, Expression<Func<WalletTransactionDto, bool>>>> WalletTransactionOptions =
+        new()
+        {
+            ["statuses"] = CreateStatusesFilter
         };
 
     /// <summary>Builds a filter by multiple statuses.</summary>
@@ -60,5 +67,22 @@ public static class TransactionFilterExtensions
 
         return transaction => (transaction.TransactionExternal != null)
             && statusList.Contains(transaction.TransactionExternal.GamePlatform.PublicId);
+    }
+
+    private static Expression<Func<WalletTransactionDto, bool>> CreateStatusesFilter(object value)
+    {
+        var raw = value.ToStringOrEmpty();
+        if (raw.IsNullOrEmpty())
+            return _ => true;
+
+        var statusList = raw
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s => Enum.TryParse<TransactionStatus>(s, out _))
+            .Select(Enum.Parse<TransactionStatus>)
+            .ToArray();
+        if (statusList.Length == 0)
+            return _ => false;
+
+        return transaction => statusList.Contains(transaction.Status);
     }
 }

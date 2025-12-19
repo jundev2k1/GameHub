@@ -1,4 +1,5 @@
 using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Features.Transactions.Dtos;
 
 namespace game_x.application.Contract.Persistence.Repo;
 
@@ -23,6 +24,13 @@ public interface ITransactionRepo
     Task<PaginationResult<Transaction>> GetMyExternalTransactionsAsync(
         string userId,
         Func<IQueryable<Transaction>, IQueryable<Transaction>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
+
+    Task<PaginationResult<WalletTransactionDto>> GetMyWalletTransactionsAsync(
+        string userId,
+        Func<IQueryable<WalletTransactionDto>, IQueryable<WalletTransactionDto>>? queryBuilder = null,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default);
