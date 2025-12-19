@@ -112,7 +112,7 @@ public sealed class UserController(
     {
         var paramExtends = new Dictionary<string, string>();
         if (parameters.TransactionStatuses.IsNotNullOrEmpty())
-            paramExtends.Add("statuses", parameters.TransactionStatuses);
+            paramExtends.Add("type", parameters.TabType);
 
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);

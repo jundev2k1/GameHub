@@ -1,5 +1,4 @@
 ﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
-using game_x.application.Features.Games.Dtos;
 using game_x.application.Features.Transactions.Dtos;
 using game_x.application.Features.Transactions.Shared.Queries.GetCryptoTokenList;
 
@@ -65,9 +64,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
             .Map(dest => dest.BalanceAfter, src => src.BalanceAfter)
-            .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : Guid.Empty)
-            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : null)
-            .Map(dest => dest.From, src => src.Type == TransactionType.Deposit ? "cash" : src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : "-")
-            .Map(dest => dest.To, src => src.Type == TransactionType.Withdrawal ? "cash" : src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : "-");
+            .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : (Guid?)null)
+            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : null);
     }
 }

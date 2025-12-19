@@ -15,10 +15,10 @@ public sealed class GetMyWalletTransactionsHandler(
     public async Task<PaginationResult<WalletTransactionDto>> Handle(GetMyWalletTransactionsQuery request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
-        var items = await transactionRepo.GetMyWalletTransactionsAsync(
+        var result = await transactionRepo.GetMyWalletTransactionsAsync(
             userId,
             query => builder.Apply(
-                query,
+                query.Where(q => q.Status == TransactionStatus.Completed),
                 request.Filters,
                 request.Sorts,
                 options: TransactionFilterExtensions.WalletTransactionOptions),
@@ -26,7 +26,44 @@ public sealed class GetMyWalletTransactionsHandler(
             request.PageSize ?? 20,
             ct);
 
-        var result = items;
-        return items;
+        MapAddressWalletForItems(result);
+        return result;
+    }
+
+    private static void MapAddressWalletForItems(PaginationResult<WalletTransactionDto> result)
+    {
+        var gameProviders = new TransactionSourceType[]
+        {
+            TransactionSourceType.G598SnoGameProvider,
+            TransactionSourceType.BaccaratGameProvider
+        };
+        var cashKey = "cash";
+
+        foreach (var item in result.Items)
+        {
+            var isGameTransaction = gameProviders.Contains(item.SourceType);
+            var isUxmTransaction = item.SourceType == TransactionSourceType.Uxm;
+
+            var isDeposit = item.Type == TransactionType.Deposit;
+            var isWithdrawal = item.Type == TransactionType.Withdrawal;
+
+            var isFromCash = (isWithdrawal && isUxmTransaction)
+                || (isDeposit && isGameTransaction);
+            if (isFromCash)
+                item.From = cashKey;
+
+            var isFromPlatform = isWithdrawal && isGameTransaction;
+            if (isFromPlatform)
+                item.From = item.GamePlatformName;
+
+            var isToCash = (isWithdrawal && isGameTransaction)
+                || (isDeposit && isUxmTransaction);
+            if (isToCash)
+                item.To = cashKey;
+
+            var isToPlatform = isDeposit && isGameTransaction;
+            if (isToPlatform)
+                item.To = item.GamePlatformName;
+        }
     }
 }

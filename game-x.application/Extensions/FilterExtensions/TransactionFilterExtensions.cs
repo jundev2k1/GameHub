@@ -1,4 +1,5 @@
 using game_x.application.Features.Transactions.Dtos;
+using game_x.application.Features.Transactions.Enums;
 using game_x.share.Extensions;
 using System.Linq.Expressions;
 
@@ -22,7 +23,7 @@ public static class TransactionFilterExtensions
     public static readonly Dictionary<string, Func<object, Expression<Func<WalletTransactionDto, bool>>>> WalletTransactionOptions =
         new()
         {
-            ["statuses"] = CreateStatusesFilter
+            ["type"] = CreateTabTypeFilter,
         };
 
     /// <summary>Builds a filter by multiple statuses.</summary>
@@ -69,20 +70,23 @@ public static class TransactionFilterExtensions
             && statusList.Contains(transaction.TransactionExternal.GamePlatform.PublicId);
     }
 
-    private static Expression<Func<WalletTransactionDto, bool>> CreateStatusesFilter(object value)
+    private static Expression<Func<WalletTransactionDto, bool>> CreateTabTypeFilter(object value)
     {
         var raw = value.ToStringOrEmpty();
-        if (raw.IsNullOrEmpty())
+        if (raw.IsNullOrEmpty() || !Enum.TryParse<TransactionTabType>(raw, out var type))
             return _ => true;
 
-        var statusList = raw
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(s => Enum.TryParse<TransactionStatus>(s, out _))
-            .Select(Enum.Parse<TransactionStatus>)
-            .ToArray();
-        if (statusList.Length == 0)
-            return _ => false;
+        if (type == TransactionTabType.Cash)
+        {
+            return tx => tx.Type != TransactionType.BalanceAdjustment
+                && tx.Type != TransactionType.Init;
+        }
+        if (type == TransactionTabType.Credit)
+        {
+            return tx => tx.SourceType == TransactionSourceType.G598SnoGameProvider
+                && tx.SourceType == TransactionSourceType.BaccaratGameProvider;
+        }
 
-        return transaction => statusList.Contains(transaction.Status);
+        return _ => true;
     }
 }

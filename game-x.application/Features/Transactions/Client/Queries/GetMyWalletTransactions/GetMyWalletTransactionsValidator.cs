@@ -8,15 +8,11 @@ public sealed class GetMyWalletTransactionsValidator : AbstractValidator<GetMyWa
 {
     private readonly string[] _allowFilterFields =
     [
-        "search",
-        "statuses",
+        "type",
         nameof(WalletTransactionDto.Id),
         nameof(WalletTransactionDto.UserId),
-        nameof(WalletTransactionDto.Status),
         nameof(WalletTransactionDto.GamePlatformId),
         nameof(WalletTransactionDto.Amount),
-        nameof(WalletTransactionDto.Type),
-        nameof(WalletTransactionDto.SourceType),
         nameof(WalletTransactionDto.UpdatedAt),
         nameof(WalletTransactionDto.CreatedAt)
     ];
