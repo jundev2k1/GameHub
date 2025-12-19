@@ -143,10 +143,8 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         var query = context.Transactions
             .AsNoTracking()
-            .Include(x => x.TransactionExternal)
-                .ThenInclude(x => x!.GamePlatform)
             .Where(x => x.UserId == userId)
-            .Select(tx => tx.Adapt<WalletTransactionDto>())
+            .ProjectToType<WalletTransactionDto>()
             .AsQueryable();
 
         if (queryBuilder != null)

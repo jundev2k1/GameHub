@@ -1,6 +1,5 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Dtos;
 using game_x.application.Features.Transactions.Dtos;
 
 namespace game_x.application.Features.Transactions.Client.Queries.GetMyWalletTransactions;

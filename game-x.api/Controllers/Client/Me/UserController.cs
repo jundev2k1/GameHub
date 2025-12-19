@@ -13,7 +13,6 @@ using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 using game_x.application.Features.Accounts.User.Queries.GetSelfVerificationStatusList;
 using game_x.application.Features.Auth.Client.Commands.ChangePasswordUser;
-using game_x.application.Features.Transactions.Client.Queries.GetMyTransactions;
 using game_x.application.Features.Transactions.Client.Queries.GetMyWalletTransactions;
 
 namespace game_x.api.Controllers.Client.Me;
