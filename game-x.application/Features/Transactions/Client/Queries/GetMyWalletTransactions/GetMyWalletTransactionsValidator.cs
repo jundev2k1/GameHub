@@ -16,6 +16,7 @@ public sealed class GetMyWalletTransactionsValidator : AbstractValidator<GetMyWa
         nameof(WalletTransactionDto.GamePlatformId),
         nameof(WalletTransactionDto.Amount),
         nameof(WalletTransactionDto.Type),
+        nameof(WalletTransactionDto.SourceType),
         nameof(WalletTransactionDto.UpdatedAt),
         nameof(WalletTransactionDto.CreatedAt)
     ];
