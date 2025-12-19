@@ -1,4 +1,6 @@
-﻿namespace game_x.application.Features.Transactions.Dtos;
+﻿using System.Text.Json.Serialization;
+
+namespace game_x.application.Features.Transactions.Dtos;
 
 public sealed class WalletTransactionDto
 {

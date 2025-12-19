@@ -1,5 +1,6 @@
 ﻿using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Dtos;
+using game_x.application.Features.Transactions.Dtos;
 
 namespace game_x.application.Features.Transactions.Client.Queries.GetMyWalletTransactions;
 
@@ -9,22 +10,23 @@ public sealed class GetMyWalletTransactionsValidator : AbstractValidator<GetMyWa
     [
         "search",
         "statuses",
-        nameof(ListTransactionExternalDto.Id),
-        nameof(ListTransactionExternalDto.UserId),
-        nameof(ListTransactionExternalDto.Status),
-        nameof(ListTransactionExternalDto.Amount),
-        nameof(ListTransactionExternalDto.Type),
-        nameof(ListTransactionExternalDto.UpdatedAt),
-        nameof(ListTransactionExternalDto.CreatedAt)
+        nameof(WalletTransactionDto.Id),
+        nameof(WalletTransactionDto.UserId),
+        nameof(WalletTransactionDto.Status),
+        nameof(WalletTransactionDto.GamePlatformId),
+        nameof(WalletTransactionDto.Amount),
+        nameof(WalletTransactionDto.Type),
+        nameof(WalletTransactionDto.UpdatedAt),
+        nameof(WalletTransactionDto.CreatedAt)
     ];
 
     private readonly string[] _allowSortFields =
     [
-        nameof(ListTransactionExternalDto.Status),
-        nameof(ListTransactionExternalDto.Amount),
-        nameof(ListTransactionExternalDto.Type),
-        nameof(ListTransactionExternalDto.UpdatedAt),
-        nameof(ListTransactionExternalDto.CreatedAt)
+        nameof(WalletTransactionDto.Status),
+        nameof(WalletTransactionDto.Amount),
+        nameof(WalletTransactionDto.Type),
+        nameof(WalletTransactionDto.UpdatedAt),
+        nameof(WalletTransactionDto.CreatedAt)
     ];
 
     public GetMyWalletTransactionsValidator()
@@ -48,12 +50,12 @@ public sealed class GetMyWalletTransactionsValidator : AbstractValidator<GetMyWa
         if (_allowFilterFields.All(f => !f.Equals(filter.Field, StringComparison.CurrentCultureIgnoreCase)))
             context.AddFailure($"Filter field {filter.Field} is not allowed.");
 
-        if (filter.Field.Equals(nameof(ListTransactionExternalDto.Status), StringComparison.OrdinalIgnoreCase))
+        if (filter.Field.Equals(nameof(WalletTransactionDto.Status), StringComparison.OrdinalIgnoreCase))
         {
             ValidateStatusField(filter.Value, context);
         }
 
-        if (filter.Field.Equals(nameof(ListTransactionExternalDto.Type), StringComparison.OrdinalIgnoreCase))
+        if (filter.Field.Equals(nameof(WalletTransactionDto.Type), StringComparison.OrdinalIgnoreCase))
         {
             ValidateTypeField(filter.Value, context);
         }

@@ -1,5 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Utils;
 
 namespace game_x.application.Events.WalletBalanceAdjustmentRequested;
 
@@ -38,7 +39,13 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
                 latestTransaction.CryptoTokenId,
                 GetTxSourceType(platform.Id),
                 TransactionType.BalanceAdjustment);
+
+            var sno = GameProviderUtils.SnoGenerate();
+            var externalTx = TransactionExternal.Create(sno, platform.LocalId);
+            transaction.AddTxExternal(externalTx);
+
             transaction.Confirm(platformWallet.Amount, platformWallet.Amount);
+
             await transactionRepo.AddAsync(transaction, ct);
         }, ct);
     }
