@@ -104,7 +104,7 @@ public sealed class UserRepo(
         var result = await context.Users
             .AsNoTracking()
             .Where(u => u.Id == userId && !u.IsDeleted)
-            .Select(u => u.Adapt<UserDetailDto>())
+            .ProjectToType<UserDetailDto>()
             .FirstOrDefaultAsync(ct)
             ?? throw new NotFoundException();
 
