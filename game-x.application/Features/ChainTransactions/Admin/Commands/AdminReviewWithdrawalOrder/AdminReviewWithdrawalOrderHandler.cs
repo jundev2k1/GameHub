@@ -20,7 +20,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     ITransactionRepo transactionRepo,
     IApplicationEventDispatcher eventDispatcher,
     IUserBalanceRepo userBalanceRepo,
-    IAppLogger<Transaction> logger,
+    IAppLogger<AdminReviewWithdrawalOrderHandler> logger,
     IOptions<GameXSettings> gameXSettings,
     IAsymmetricKeyCacheService asymmetricKeyCacheService,
     IAsymmetricCryptoService asymmetricCryptoService)
@@ -88,7 +88,6 @@ public sealed class AdminReviewWithdrawalOrderHandler(
             };
             
             var result = await uxmService.CreateWithdrawalOrderAsync(uxmRequest);
-            
             // Verify UXM signature
             var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
             var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
@@ -96,12 +95,17 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         }
         catch (Exception ex)
         {
-            await TryRefundFrozenBalanceAsync(tx, ct);
-            await transactionRepo.PatchUpdateAsync(tx.PublicId, x =>
-            {
-                x.Status = TransactionStatus.Failed;
-                x.UpdateMeta(m => m.ErrorMessage = ex.Message);
-            }, ct);
+            logger.LogError(ex, ex.Message);
+            await unitOfWork.WithTransactionAsync(
+                async () =>
+                {
+                    await TryRefundFrozenBalanceAsync(tx, ct);
+                    await transactionRepo.PatchUpdateAsync(tx.PublicId, x =>
+                    {
+                        x.Status = TransactionStatus.Failed;
+                        x.UpdateMeta(m => m.ErrorMessage = ex.Message);
+                    }, ct);
+                }, ct);
             throw;
         }
     }
