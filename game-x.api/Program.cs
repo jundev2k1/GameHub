@@ -1,8 +1,10 @@
 using game_x.api;
 using game_x.application;
+using game_x.application.Common.Abstractions.Events;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.domain.Entities;
 using game_x.infrastructure;
 using game_x.infrastructure.BackgroundJobs.Scheduling;
@@ -38,6 +40,18 @@ app.UseApplicationPipeline();
 
 using var scope = app.Services.CreateScope();
 var serviceProvider = scope.ServiceProvider;
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/dev/{userId}/balance-changed", async (
+        [FromRoute] string userId,
+        [AsParameters] BalanceChangedDevInput input,
+        [FromServices] IApplicationEventDispatcher eventDispatcher) =>
+    {
+        var @event = new OnUserBalanceUpdatedEvent(userId, input.PlatformId);
+        await eventDispatcher.Publish(@event);
+    });
+}
 
 // Seed data
 try
@@ -77,3 +91,5 @@ catch (Exception ex)
 HangfireRecurringJobRegistration.RegisterRecurringJobs(serviceProvider);
 
 app.Run();
+
+public record BalanceChangedDevInput(Guid? PlatformId);
