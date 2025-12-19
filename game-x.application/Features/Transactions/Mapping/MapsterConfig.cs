@@ -65,6 +65,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
             .Map(dest => dest.BalanceAfter, src => src.BalanceAfter)
             .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : (Guid?)null)
-            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : null);
+            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : null)
+            .Map(dest => dest.From, src => src.TransactionInternal != null ? src.TransactionInternal.FromAddress : null)
+            .Map(dest => dest.To, src => src.TransactionInternal != null ? src.TransactionInternal.ToAddress : null);
     }
 }

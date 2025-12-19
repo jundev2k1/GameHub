@@ -1,5 +1,4 @@
 ﻿using game_x.application.Common.Filters;
-using game_x.application.Features.Games.Dtos;
 using game_x.application.Features.Transactions.Dtos;
 
 namespace game_x.application.Features.Transactions.Client.Queries.GetMyWalletTransactions;
@@ -8,7 +7,7 @@ public sealed class GetMyWalletTransactionsValidator : AbstractValidator<GetMyWa
 {
     private readonly string[] _allowFilterFields =
     [
-        "type",
+        "tabType",
         nameof(WalletTransactionDto.Id),
         nameof(WalletTransactionDto.UserId),
         nameof(WalletTransactionDto.GamePlatformId),

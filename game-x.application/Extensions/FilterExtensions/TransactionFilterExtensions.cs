@@ -23,7 +23,7 @@ public static class TransactionFilterExtensions
     public static readonly Dictionary<string, Func<object, Expression<Func<WalletTransactionDto, bool>>>> WalletTransactionOptions =
         new()
         {
-            ["type"] = CreateTabTypeFilter,
+            ["tabType"] = CreateTabTypeFilter,
         };
 
     /// <summary>Builds a filter by multiple statuses.</summary>
@@ -73,7 +73,7 @@ public static class TransactionFilterExtensions
     private static Expression<Func<WalletTransactionDto, bool>> CreateTabTypeFilter(object value)
     {
         var raw = value.ToStringOrEmpty();
-        if (raw.IsNullOrEmpty() || !Enum.TryParse<TransactionTabType>(raw, out var type))
+        if (raw.IsNullOrEmpty() || !Enum.TryParse<TransactionTabType>(raw, true, out var type))
             return _ => true;
 
         if (type == TransactionTabType.Cash)
