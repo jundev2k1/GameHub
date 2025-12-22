@@ -111,7 +111,7 @@ public sealed class UserController(
     public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] GetTransactionsRequest parameters)
     {
         var paramExtends = new Dictionary<string, string>();
-        if (parameters.TransactionStatuses.IsNotNullOrEmpty())
+        if (parameters.TabType.IsNotNullOrEmpty())
             paramExtends.Add("tabType", parameters.TabType);
 
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
