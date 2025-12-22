@@ -84,7 +84,7 @@ public static class TransactionFilterExtensions
         if (type == TransactionTabType.Credit)
         {
             return tx => tx.SourceType == TransactionSourceType.G598SnoGameProvider
-                && tx.SourceType == TransactionSourceType.BaccaratGameProvider;
+                || tx.SourceType == TransactionSourceType.BaccaratGameProvider;
         }
 
         return _ => true;
