@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace game_x.application.Features.Transactions.Dtos;
+﻿namespace game_x.application.Features.Transactions.Dtos;
 
 public sealed class WalletTransactionDto
 {
@@ -17,8 +15,8 @@ public sealed class WalletTransactionDto
     public TransactionType Type { get; set; }
     public TransactionSourceType SourceType { get; set; }
     public TransactionStatus Status { get; set; }
-    public string? From { get; set; } = string.Empty;
-    public string? To { get; set; } = string.Empty;
+    public string? From { get; set; }
+    public string? To { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
