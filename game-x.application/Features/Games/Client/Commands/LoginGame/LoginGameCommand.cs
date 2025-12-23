@@ -10,4 +10,4 @@ public record LoginGameCommand(
     string ReturnUrl,
     [property: JsonIgnore] string? IpAddress) : ICommand<LoginGameResult>;
 
-public record LoginGameResult(string EmbededLink);
+public record LoginGameResult(string EmbededLink, string Token);

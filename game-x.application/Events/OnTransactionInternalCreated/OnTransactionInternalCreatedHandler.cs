@@ -4,7 +4,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
-using game_x.application.Features.ChainTransactions.Dtos;
+using game_x.application.Features.Transactions.Dtos;
 
 namespace game_x.application.Events.OnTransactionInternalCreated;
 

@@ -13,10 +13,6 @@ public sealed class DecisionKycValidator : AbstractValidator<DecisionKycCommand>
             .IsInEnum().WithMessage($"{nameof(DecisionKycCommand.Status)} must be in enum.")
             .Must(BeValidStatus).WithMessage($"{nameof(DecisionKycCommand.Status)} is invalid status.");
 
-        RuleFor(x => x.Reason)
-            .Must((model, value) => BeRequiredField(model.Status, value))
-            .WithMessage($"{nameof(DecisionKycCommand.Reason)} must be not empty.");
-
         RuleFor(x => x.Details)
             .Must((model, value) => BeRequiredField(model.Status, value))
             .WithMessage($"{nameof(DecisionKycCommand.Details)} must be not empty.");

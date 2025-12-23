@@ -1,4 +1,4 @@
-using game_x.application.Features.ChainTransactions.Dtos;
+using game_x.application.Features.Transactions.Dtos;
 
 namespace game_x.application.Events.OnWithdrawalOrderReviewed;
 

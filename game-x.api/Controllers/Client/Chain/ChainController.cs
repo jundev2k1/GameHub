@@ -1,8 +1,8 @@
 using game_x.application.Common.Filters;
-using game_x.application.Features.ChainTransactions.Client.Commands.TraceV1.TronUsdtWithdrawal;
-using game_x.application.Features.ChainTransactions.Client.Commands.TraceV1.TronUsdtDeposit;
-using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactionDetail;
-using game_x.application.Features.ChainTransactions.Client.Queries.GetMyTransactions;
+using game_x.application.Features.Transactions.Client.Commands.TraceV1.TronUsdtWithdrawal;
+using game_x.application.Features.Transactions.Client.Commands.TraceV1.TronUsdtDeposit;
+using game_x.application.Features.Transactions.Client.Queries.GetMyTransactionDetail;
+using game_x.application.Features.Transactions.Client.Queries.GetMyTransactions;
 using game_x.api.Dtos;
 
 namespace game_x.api.Controllers.Client.Chain;
@@ -25,7 +25,7 @@ public sealed class ChainController : BaseApiController
         var result = await Mediator.Send(command, ct);
         return ApiResponseFactory.Ok(result);
     }
-    
+
     [HttpGet("me")]
     public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] GetTransactionsRequest parameters)
     {
@@ -43,7 +43,7 @@ public sealed class ChainController : BaseApiController
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
-    
+
     [HttpGet("{transactionId:guid}")]
     public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
     {

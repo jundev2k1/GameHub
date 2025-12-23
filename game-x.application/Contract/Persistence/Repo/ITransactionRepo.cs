@@ -27,6 +27,13 @@ public interface ITransactionRepo
         int pageSize = 20,
         CancellationToken ct = default);
 
+    Task<PaginationResult<WalletTransactionDto>> GetMyWalletTransactionsAsync(
+        string userId,
+        Func<IQueryable<WalletTransactionDto>, IQueryable<WalletTransactionDto>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default);
+
     Task<bool> ExistsByOrderNoAsync(string otcOrderNo, CancellationToken ct);
 
     Task<Transaction?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct);
@@ -39,6 +46,8 @@ public interface ITransactionRepo
 
     /// <summary>Get the balance after from the lasted successful transaction of the user</summary>
     Task<decimal> GetLatestBalanceAfterAsync(string userId, CancellationToken ct = default);
+
+    Task<Transaction?> GetLatestExternalTransactionAsync(string userId, int localPlatformId, CancellationToken ct = default);
     
     Task AddAsync(Transaction transaction, CancellationToken ct = default);
 

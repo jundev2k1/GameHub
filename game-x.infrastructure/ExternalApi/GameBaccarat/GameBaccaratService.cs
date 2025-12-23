@@ -77,10 +77,14 @@ public sealed class GameBaccaratService(
         }
     }
 
-    public async Task<GameBaccaratGetWalletResponse> GetWalletAsync(GameBaccaratGetWalletRequest request)
+    public async Task<GameBaccaratGetWalletResponse> GetWalletAsync(string accountId)
     {
         try
         {
+            var request = new GameBaccaratGetWalletRequest
+            {
+                UserId = accountId,
+            };
             logger.LogInformation("Send get wallet request to Baccarat Platform: userId = {UserId}", request.UserId);
 
             var result = await gameApi.GetWalletAsync(request);

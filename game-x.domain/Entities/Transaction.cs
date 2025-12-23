@@ -40,9 +40,6 @@ public class Transaction: BaseEntity<int>, IAuditable
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
 
-        if (amount <= 0)
-            throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
-
         if (fee is < 0)
             throw new ArgumentException("Fee must be equal or greater than zero.", nameof(fee));
 
@@ -109,15 +106,14 @@ public class Transaction: BaseEntity<int>, IAuditable
         }
     }
 
-    public void ConfirmTx(decimal actualAmount, decimal balanceAfter, DateTime confirmedAt)
+    public void Confirm(decimal actualAmount, decimal balanceAfter)
     {
         ActualAmount = actualAmount;
         BalanceAfter = balanceAfter;
         Status = TransactionStatus.Completed;
+
         if (TransactionInternal != null)
-        {
-            TransactionInternal.ConfirmedAt = confirmedAt;
-        }
+            TransactionInternal.ConfirmedAt = DateTime.UtcNow;
     }
 }
 

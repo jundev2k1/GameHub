@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.PaymentGateway;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Exceptions;
-using game_x.application.Features.ChainTransactions.Mapping;
+using game_x.application.Features.Transactions.Mapping;
 using game_x.infrastructure.Security.Asymmetric;
 using game_x.share.ExternalApi.PaymentGateway.Dtos;
 using game_x.share.Settings;

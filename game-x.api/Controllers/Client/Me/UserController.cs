@@ -1,4 +1,6 @@
+using game_x.api.Dtos;
 using game_x.application.Common.Files;
+using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
@@ -11,6 +13,7 @@ using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 using game_x.application.Features.Accounts.User.Queries.GetSelfVerificationStatusList;
 using game_x.application.Features.Auth.Client.Commands.ChangePasswordUser;
+using game_x.application.Features.Transactions.Client.Queries.GetMyWalletTransactions;
 
 namespace game_x.api.Controllers.Client.Me;
 
@@ -101,6 +104,24 @@ public sealed class UserController(
     public async Task<IActionResult> UploadAvatarAsync(IFormFile file)
     {
         var result = await Mediator.Send(new UploadAvatarCommand(FileUpload.FromFormFile(file)));
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpGet("transactions")]
+    public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] GetTransactionsRequest parameters)
+    {
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.TabType.IsNotNullOrEmpty())
+            paramExtends.Add("tabType", parameters.TabType);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
+        var sorts = QueryConverter.ToSorts(parameters.Sorts);
+        var query = new GetMyWalletTransactionsQuery(
+            filters,
+            sorts,
+            parameters.PageNumber,
+            parameters.PageSize);
+        var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
 }

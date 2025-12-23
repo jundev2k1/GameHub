@@ -5,9 +5,8 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Dtos;
+using game_x.application.Features.Games.Dtos;
 using game_x.share.Extensions;
-using game_x.share.ExternalApi.GameBaccarat.Dtos.GetWallet;
-using game_x.share.ExternalApi.GameProvider.Dtos.Wallet;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace game_x.infrastructure.Caching;
@@ -33,9 +32,18 @@ public sealed class WalletManagerCacheService(
         return Get<UserWalletDto>(cacheKey)!;
     }
 
+    public async Task<UserWalletExternalItemDto> GetExternalWalletAsync(string userId, Guid platformId)
+    {
+        var currentWallet = await GetWalletAsync(userId);
+        return currentWallet.ExternalWallets
+            .FirstOrDefault(ew => ew.PlatformId == platformId)
+            ?? throw new NotFoundException(nameof(platformId), platformId);
+    }
+
     public async Task RefreshWalletAsync(string userId)
     {
         var cacheKey = $"{CacheKeyPrefix}{userId}";
+        var targetUser = await userRepo.GetUserByIdAsync(userId);
         var userBalances = await userBalanceRepo.GetBalancesByUserIdAsync(userId);
         var userWallet = new UserWalletDto
         {
@@ -43,23 +51,19 @@ public sealed class WalletManagerCacheService(
             ExternalWallets = [],
         };
 
-        var g598Platform = gameProviderCache.G598Platform;
-        var g598Balance = await GetGame598WalletAsync(userId);
-        userWallet.ExternalWallets.Add(new UserWalletExternalItemDto
-        {
-            PlatformId = g598Platform.Id,
-            PlatformName = g598Platform.Name,
-            Amount = g598Balance ?? 0,
-        });
+        var g598Balance = await GetGame598WalletAsync(targetUser);
+        CreateOrUpdateExternalWallet(
+            wallet: userWallet,
+            targetWallet: null,
+            platform: gameProviderCache.G598Platform,
+            balance: g598Balance);
 
-        var baccaratPlatform = gameProviderCache.BaccaratPlatform;
-        var baccaratBalace = await GetBaccaratWalletAsync(userId);
-        userWallet.ExternalWallets.Add(new UserWalletExternalItemDto
-        {
-            PlatformId = baccaratPlatform.Id,
-            PlatformName = baccaratPlatform.Name,
-            Amount = baccaratBalace ?? 0,
-        });
+        var baccaratBalace = await GetBaccaratWalletAsync(targetUser);
+        CreateOrUpdateExternalWallet(
+            wallet: userWallet,
+            targetWallet: null,
+            platform: gameProviderCache.BaccaratPlatform,
+            balance: baccaratBalace);
 
         Set(cacheKey, userWallet);
     }
@@ -78,82 +82,67 @@ public sealed class WalletManagerCacheService(
         Set(cacheKey, userWallet);
     }
 
-    public async Task RefreshExternalWalletAsync(string userId, Guid platformId, decimal balance)
+    public async Task RefreshExternalWalletAsync(string userId, Guid platformId)
     {
+        var targetUser = await userRepo.GetUserByIdAsync(userId);
         var userWallet = await GetWalletAsync(userId);
         var targetWallet = userWallet.ExternalWallets
             .FirstOrDefault(w => w.PlatformId == platformId);
-        if (targetWallet is null)
-        {
-            if (platformId == GameConstants.PLATFORM_ID_G598)
-            {
-                var g598Balance = await GetGame598WalletAsync(userId);
-                if (g598Balance.HasValue)
-                {
-                    targetWallet = new UserWalletExternalItemDto
-                    {
-                        PlatformId = GameConstants.PLATFORM_ID_G598,
-                        PlatformName = gameProviderCache.G598Platform.Name,
-                        Amount = g598Balance.Value,
-                    };
-                    userWallet.ExternalWallets.Add(targetWallet);
-                }
-            }
 
-            if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
-            {
-                var baccaratBalance = await GetBaccaratWalletAsync(userId);
-                if (baccaratBalance.HasValue)
-                {
-                    targetWallet = new UserWalletExternalItemDto
-                    {
-                        PlatformId = GameConstants.PLATFORM_ID_GAMEBACCARAT,
-                        PlatformName = gameProviderCache.BaccaratPlatform.Name,
-                        Amount = baccaratBalance.Value,
-                    };
-                    userWallet.ExternalWallets.Add(targetWallet);
-                }
-            }
-        }
-        else
+        if (platformId == GameConstants.PLATFORM_ID_G598)
         {
-            targetWallet.Amount = balance;
+            var balance = await GetGame598WalletAsync(targetUser);
+            CreateOrUpdateExternalWallet(
+                wallet: userWallet,
+                targetWallet: targetWallet,
+                platform: gameProviderCache.G598Platform,
+                balance: balance);
+        }
+
+        if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+        {
+            var balance = await GetBaccaratWalletAsync(targetUser);
+            CreateOrUpdateExternalWallet(
+                wallet: userWallet,
+                targetWallet: targetWallet,
+                platform: gameProviderCache.BaccaratPlatform,
+                balance: balance);
         }
 
         var cacheKey = $"{CacheKeyPrefix}{userId}";
         Set(cacheKey, userWallet);
     }
 
-    private async Task<decimal?> GetGame598WalletAsync(string userId)
+    private async Task<decimal?> GetGame598WalletAsync(User targetUser)
     {
-        var targetUser = await userRepo.GetUserByIdAsync(userId);
         if (targetUser.UserExtend is null
             || targetUser.UserExtend.GameProviderAccount.IsNullOrWhiteSpace()
             || targetUser.UserExtend.GameProviderPassword.IsNullOrWhiteSpace()) return null;
-
-        var gameWallet = await gameProvider.GetWalletAsync(new GameWalletRequest
+        try
         {
-            Account = targetUser.UserExtend.GameProviderAccount
-        });
-        if (gameWallet.IsSuccess == false)
-            throw new ExternalServiceException();
+            var gameWallet = await gameProvider
+                .GetWalletAsync(targetUser.UserExtend.GameProviderAccount);
+            if (gameWallet.IsSuccess == false)
+                throw new ExternalServiceException();
 
-        return gameWallet.Data.Quota;
+            return gameWallet.Data.Quota;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Fail to refresh G598 wallet, ex: {ex}", ex);
+            return null;
+        }
     }
 
-    private async Task<decimal?> GetBaccaratWalletAsync(string userId)
+    private async Task<decimal?> GetBaccaratWalletAsync(User targetUser)
     {
-        var targetUser = await userRepo.GetUserByIdAsync(userId);
         if (targetUser.UserExtend is null
             || targetUser.UserExtend.GameBaccaratUserId.IsNullOrWhiteSpace()) return null;
 
         try
         {
-            if (userId is null) return null;
-
-            var externalRequest = new GameBaccaratGetWalletRequest { UserId = userId };
-            var externalWallet = await gameBaccaratService.GetWalletAsync(externalRequest);
-
+            var externalWallet = await gameBaccaratService
+                .GetWalletAsync(targetUser.UserExtend.GameBaccaratUserId);
             return externalWallet.Amount;
         }
         catch (Exception ex)
@@ -161,5 +150,40 @@ public sealed class WalletManagerCacheService(
             logger.LogError($"Failed to get external wallet", ex.Message);
             return null;
         }
+    }
+
+    private static void CreateOrUpdateExternalWallet(
+        UserWalletDto wallet,
+        UserWalletExternalItemDto? targetWallet,
+        GamePlatformDto platform,
+        decimal? balance)
+    {
+        // Not create if null
+        if (!balance.HasValue)
+        {
+            RemoveExternalWallet(wallet, platform.Id);
+            return;
+        }
+
+        // Update target external wallet if exists
+        if (targetWallet != null)
+        {
+            targetWallet.Amount = balance.Value;
+            return;
+        }
+
+        // create new external wallet if platform wallet is not exist
+        targetWallet = new UserWalletExternalItemDto
+        {
+            PlatformId = platform.Id,
+            PlatformName = platform.Name,
+            Amount = balance.Value,
+        };
+        wallet.ExternalWallets.Add(targetWallet);
+    }
+
+    private static void RemoveExternalWallet(UserWalletDto wallet, Guid platformId)
+    {
+        wallet.ExternalWallets = [.. wallet.ExternalWallets.Where(w => w.PlatformId != platformId)];
     }
 }

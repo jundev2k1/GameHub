@@ -1,9 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace game_x.application.Features.Games.Dtos;
 
 public class ListTransactionExternalDto
 {
     public Guid Id { get; set; }
-    public string UserId { get; set; } =  string.Empty;
+    public string UserId { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public decimal? BalanceAfter { get; set; }
     public Guid CryptoTokenId { get; set; }
@@ -13,6 +15,8 @@ public class ListTransactionExternalDto
     public string GamePlatformName { get; set; } = string.Empty;
     public NetworkType Network { get; set; }
     public TransactionType Type { get; set; }
+    [JsonIgnore]
+    public TransactionSourceType SourceType { get; set; }
     public TransactionStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

@@ -146,8 +146,13 @@ public sealed class GameProviderService(
         }
     }
 
-    public async Task<GameWalletResponse> GetWalletAsync(GameWalletRequest data)
+    public async Task<GameWalletResponse> GetWalletAsync(string account)
     {
+        var data = new GameWalletRequest
+        {
+            Account = account,
+        };
+
         try
         {
             logger.LogInformation("Send get wallet request to GameProvider: account = {Accound}", data.Account);

@@ -3344,6 +3344,114 @@ namespace game_x.persistence.Migrations
                     b.ToTable("user_extends", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.UserGameSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("BalanceSnapshot")
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance_snapshot");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int?>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
+
+                    b.Property<bool>("IsEnd")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_end");
+
+                    b.Property<int>("PlatformId")
+                        .HasColumnType("integer")
+                        .HasColumnName("platform_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_game_sessions");
+
+                    b.HasIndex("BalanceSnapshot")
+                        .HasDatabaseName("ix_user_game_sessions_balance_snapshot");
+
+                    b.HasIndex("GameId")
+                        .HasDatabaseName("ix_user_game_sessions_game_id");
+
+                    b.HasIndex("IsEnd")
+                        .HasDatabaseName("ix_user_game_sessions_is_end");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_game_sessions_user_id");
+
+                    b.HasIndex("PlatformId", "GameId")
+                        .HasDatabaseName("ix_user_game_sessions_platform_id_game_id");
+
+                    b.ToTable("user_game_sessions", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.UserGameSessionConnection", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("ConnectedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("connected_at");
+
+                    b.Property<string>("ConnectionId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("connection_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DisconnectedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("disconnected_at");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("UserGameSessionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_game_session_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_game_session_connections");
+
+                    b.HasIndex("ConnectionId")
+                        .HasDatabaseName("ix_user_game_session_connections_connection_id");
+
+                    b.HasIndex("UserGameSessionId")
+                        .HasDatabaseName("ix_user_game_session_connections_user_game_session_id");
+
+                    b.HasIndex("ConnectedAt", "DisconnectedAt")
+                        .HasDatabaseName("ix_user_game_session_connections_connected_at_disconnected_at");
+
+                    b.ToTable("user_game_session_connections", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.UserKyc", b =>
                 {
                     b.Property<int>("Id")
@@ -4211,6 +4319,47 @@ namespace game_x.persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.UserGameSession", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_user_game_sessions_games_game_id");
+
+                    b.HasOne("game_x.domain.Entities.GamePlatform", "Platform")
+                        .WithMany()
+                        .HasForeignKey("PlatformId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_game_sessions_game_platforms_platform_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_game_sessions_user_user_id");
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Platform");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.UserGameSessionConnection", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.UserGameSession", "Session")
+                        .WithMany("Connections")
+                        .HasForeignKey("UserGameSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_game_session_connections_user_game_sessions_user_game_");
+
+                    b.Navigation("Session");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.UserKyc", b =>
                 {
                     b.HasOne("game_x.domain.Entities.MediaFile", "BackImage")
@@ -4390,6 +4539,11 @@ namespace game_x.persistence.Migrations
                     b.Navigation("UserKyc");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.UserGameSession", b =>
+                {
+                    b.Navigation("Connections");
                 });
 #pragma warning restore 612, 618
         }

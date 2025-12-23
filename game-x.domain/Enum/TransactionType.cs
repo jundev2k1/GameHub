@@ -7,4 +7,5 @@ public enum TransactionType
     Withdrawal = 2,
     TransferSent = 3,
     TransferReceived = 4,
+    BalanceAdjustment = 5,
 }

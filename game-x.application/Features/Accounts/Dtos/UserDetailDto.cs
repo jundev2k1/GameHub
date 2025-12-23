@@ -1,4 +1,6 @@
-﻿namespace game_x.application.Features.Accounts.Dtos;
+﻿using System.Text.Json.Serialization;
+
+namespace game_x.application.Features.Accounts.Dtos;
 
 public class UserDetailDto
 {
@@ -7,6 +9,8 @@ public class UserDetailDto
     public string Email { get; set; } = string.Empty;
     public string Nickname { get; set; } = string.Empty;
     public string? FullName { get; set; } = string.Empty;
+    [JsonIgnore]
+    public int? AvatarId { get; set; }
     public string? AvatarUrl { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string? ResidentialAddress { get; set; } = string.Empty;

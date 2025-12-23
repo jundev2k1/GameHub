@@ -1,4 +1,4 @@
-using game_x.application.Features.ChainTransactions.Admin.Commands.TraceV2.AdminReviewWithdrawalOrderV2;
+using game_x.application.Features.Transactions.Admin.Commands.TraceV2.AdminReviewWithdrawalOrderV2;
 
 namespace game_x.api.Controllers.BackOffice.Chain;
 

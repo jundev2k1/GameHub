@@ -101,28 +101,19 @@ public sealed class UserRepo(
 
     public async Task<UserDetailDto> GetUserDetailAsync(string userId, CancellationToken ct = default)
     {
-        var targetUser = await context.Users
+        var result = await context.Users
             .AsNoTracking()
-            .Include(u => u.Avatar)
-            .Include(u => u.UserKyc)
-            .Include(u => u.UserExtend)
-            .Include(u => u.UserBankAccounts)
-            .Include(u => u.UserBalances)
-                .ThenInclude(ub => ub.CryptoToken)
-            .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
+            .Where(u => u.Id == userId && !u.IsDeleted)
+            .ProjectToType<UserDetailDto>()
+            .FirstOrDefaultAsync(ct)
             ?? throw new NotFoundException();
 
-        string? avatarUrl = null;
-        if (targetUser.Avatar is not null)
+        if (result.AvatarId.HasValue)
         {
-            var avatar = await fileManagerCache.GetFileInfo(targetUser.Avatar, ct);
-            avatarUrl = avatar?.Url;
+            var avatar = await fileManagerCache.GetFileInfo(result.AvatarId.Value, ct);
+            result.AvatarUrl = avatar?.Url;
         }
 
-        var result = targetUser.Adapt<UserDetailDto>();
-        result.AvatarUrl = avatarUrl;
         return result;
     }
 

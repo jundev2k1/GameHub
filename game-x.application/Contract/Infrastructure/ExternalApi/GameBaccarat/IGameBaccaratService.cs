@@ -12,7 +12,7 @@ public interface IGameBaccaratService
 
     Task<GameBaccaratRegisterResponse> RegisterAsync(GameBaccaratRegisterRequest request);
 
-    Task<GameBaccaratGetWalletResponse> GetWalletAsync(GameBaccaratGetWalletRequest request);
+    Task<GameBaccaratGetWalletResponse> GetWalletAsync(string accountId);
 
     Task DepositAsync(GameBaccaratDepositRequest request);
 
