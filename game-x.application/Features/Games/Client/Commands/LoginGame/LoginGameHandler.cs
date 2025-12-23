@@ -48,7 +48,7 @@ public sealed class LoginGameHandler(
         var url = await LoginGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!, request, ct)
             ?? throw new BadRequestException($"GamePlatformId({request.GamePlatformId.Value}) is not supported.");
 
-        var gameEmbeddedLink = ConvertEmbededLink(request.GamePlatformId.Value, url);
+        var gameEmbeddedLink = ConvertEmbeddedLink(request.GamePlatformId.Value, url);
         var loginToken = GenerateToken(gameInfo.PlatformId, gameInfo.Id);
         return new LoginGameResult(gameEmbeddedLink, loginToken);
     }
@@ -96,7 +96,7 @@ public sealed class LoginGameHandler(
         return null;
     }
 
-    private string ConvertEmbededLink(Guid gamePlatformId, string url)
+    private string ConvertEmbeddedLink(Guid gamePlatformId, string url)
     {
         if (gamePlatformId == GameConstants.PLATFORM_ID_G598)
         {
