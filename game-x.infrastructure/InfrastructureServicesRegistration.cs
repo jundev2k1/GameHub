@@ -48,6 +48,9 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
+using game_x.infrastructure.ExternalApi.Etl998;
+using game_x.infrastructure.ExternalApi.Etl998.Interceptors;
 
 namespace game_x.infrastructure;
 
@@ -96,6 +99,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IGameProviderService, GameProviderService>();
         services.AddScoped<IGameBaccaratService, GameBaccaratService>();
         services.AddScoped<ISrsService, SrsService>();
+        services.AddScoped<IEtl998Service, Etl998Service>();
         services.AddScoped<IFileStorageService, FileStorageService>();
 
         // Add security services
@@ -212,7 +216,7 @@ public static class InfrastructureServicesRegistration
             .ConfigureHttpClient(c =>
             {
                 var baseUrl = configuration["UxmSettings:Host"]
-                    ?? throw new InvalidOperationException("UxmSettings:Host 未設定");
+                    ?? throw new InvalidOperationException("UxmSettings:Host is not configured");
                 c.BaseAddress = new Uri(baseUrl);
                 c.Timeout = TimeSpan.FromSeconds(5);
             })
@@ -301,6 +305,19 @@ public static class InfrastructureServicesRegistration
             .AddHttpMessageHandler<CustomApiResponseHandler>()
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
+        // Etl998 API
+        services.AddTransient<Etl998Md5MessageHandler>();
+        services.AddRefitClient<IEtl998Api>()
+            .ConfigureHttpClient(c =>
+            {
+                var baseUrl = configuration["Etl998Settings:Host"]
+                              ?? throw new InvalidOperationException("Etl998Settings:Host is not configured");
+                c.BaseAddress = new Uri(baseUrl);
+                c.Timeout = TimeSpan.FromSeconds(5);
+            })
+            .AddHttpMessageHandler<Etl998Md5MessageHandler>()
+            .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
+        
         return services;
     }
 
@@ -309,7 +326,7 @@ public static class InfrastructureServicesRegistration
         services.AddHangfire(config =>
         {
             var hangfireConnectionString = configuration.GetConnectionString("HangfireConnection")
-                ?? throw new InvalidOperationException("HangfireConnection 未設定");
+                ?? throw new InvalidOperationException("HangfireConnection is not configured");
             var options = new PostgreSqlStorageOptions
             {
                 SchemaName = "GameXHangfire",

@@ -42,8 +42,8 @@ public sealed class LoginGameHandler(
         var url = await LoginGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!, request, ct)
             ?? throw new BadRequestException($"GamePlatformId({request.GamePlatformId.Value}) is not supported.");
 
-        var gameEmbededLink = ConvertEmbededLink(request.GamePlatformId.Value, url);
-        return new LoginGameResult(gameEmbededLink);
+        var gameEmbeddedLink = ConvertEmbededLink(request.GamePlatformId.Value, url);
+        return new LoginGameResult(gameEmbeddedLink);
     }
 
     private async Task<string?> LoginGameAsync(
