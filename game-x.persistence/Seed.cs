@@ -220,7 +220,7 @@ public static class Seed
         {
             GamePlatform.Create("598彩票", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_G598),
             GamePlatform.Create("百家樂", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_GAMEBACCARAT),
-            GamePlatform.Create("etl998 百家樂", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT),
+            GamePlatform.Create("etl998", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT),
         };
         foreach (var gamePlatform in gamePlatforms)
         {
