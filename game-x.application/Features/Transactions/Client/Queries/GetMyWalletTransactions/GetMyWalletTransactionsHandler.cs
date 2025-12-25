@@ -32,10 +32,11 @@ public sealed class GetMyWalletTransactionsHandler(
 
     private static void MapAddressWalletForItems(PaginationResult<WalletTransactionDto> result)
     {
-        var gameProviders = new TransactionSourceType[]
+        var gameProviders = new[]
         {
             TransactionSourceType.G598SnoGameProvider,
-            TransactionSourceType.BaccaratGameProvider
+            TransactionSourceType.BaccaratGameProvider,
+            TransactionSourceType.Elt998GameProvider
         };
         var cashKey = "cash";
 

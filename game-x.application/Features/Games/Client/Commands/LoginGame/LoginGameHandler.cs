@@ -28,7 +28,8 @@ public sealed class LoginGameHandler(
     IGamePlatformService gamePlatformService,
     IEtl998Service etl998Service,
     IOptions<GameProviderSettings> gameSettings,
-    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<LoginGameCommand, LoginGameResult>
+    IApplicationEventDispatcher eventDispatcher,
+    IOptions<Etl998Settings> settings) : ICommandHandler<LoginGameCommand, LoginGameResult>
 {
     public async Task<LoginGameResult> Handle(LoginGameCommand request, CancellationToken ct = default)
     {
@@ -102,7 +103,7 @@ public sealed class LoginGameHandler(
             {
                 Account = usrex.Etl998ProviderAccount,
                 Password = aesEncryptor.Decrypt(usrex.Etl998ProviderPassword),
-                Dm = request.ReturnUrl
+                Dm = settings.Value.Host
             };
             var result = await etl998Service.ForwardGameAsync(externalRequest);
             var data = result.FirstOrDefault();
