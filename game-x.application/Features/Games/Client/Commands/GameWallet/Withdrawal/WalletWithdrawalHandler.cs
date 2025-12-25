@@ -1,6 +1,7 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
@@ -8,6 +9,8 @@ using game_x.application.Events.WalletBalanceAdjustmentRequested;
 using game_x.application.Features.Games.Dtos;
 using game_x.application.Features.Games.Services;
 using game_x.application.Utils;
+using game_x.share.ExternalApi.Etl998.Constants;
+using game_x.share.ExternalApi.Etl998.Dtos.PrepareTransfer;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Withdrawal;
 using game_x.share.ExternalApi.GameProvider.Dtos.Withdrawal;
 
@@ -23,6 +26,7 @@ public sealed class WalletWithdrawalHandler(
     IApplicationEventDispatcher eventDispatcher,
     IGameProviderService gameProvider,
     IGameBaccaratService gameBaccarat,
+    IEtl998Service etl998Service,
     IGameProviderCacheService gameProviderCache,
     IGamePlatformService gamePlatformService,
     IWalletManagerCacheService walletManagerCache) : ICommandHandler<WalletWithdrawalCommand, ListTransactionExternalDto>
@@ -38,9 +42,9 @@ public sealed class WalletWithdrawalHandler(
             request.PlatformId,
             ct: ct);
 
-        // Write a balance ajustment transaction if target platform balance changed
-        var balanceAjustmentEvent = new WalletBalanceAdjustmentRequestedEvent(currentUser.Id, targetPlatform.Id);
-        await eventDispatcher.Publish(balanceAjustmentEvent, ct);
+        // Write a balance adjustment transaction if target-platform balance changed
+        var balanceAdjustmentEvent = new WalletBalanceAdjustmentRequestedEvent(currentUser.Id, targetPlatform.Id);
+        await eventDispatcher.Publish(balanceAdjustmentEvent, ct);
 
         // Create transaction
         var currentBalance = await GetUserBalanceAsync(currentUser.Id, request, ct);
@@ -54,7 +58,11 @@ public sealed class WalletWithdrawalHandler(
             targetPlatform.LocalId,
             txSourceType,
             request.Note);
-
+        
+        var wallet = await walletManagerCache.GetExternalWalletAsync(
+            currentUser.Id,
+            request.PlatformId);
+        
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await userBalanceRepo.UpdateAsync(currentBalance.PublicId, balance =>
@@ -64,21 +72,30 @@ public sealed class WalletWithdrawalHandler(
 
             // Rollback all processing if the transaction fails at the third party
             if (request.PlatformId == GameConstants.PLATFORM_ID_G598)
-            {
                 await WithdrawalToProviderWalletAsync(
                     gameProviderAccount: currentUser.UserExtend!.GameProviderAccount,
                     sno: transaction.TransactionExternal!.SerialNumber,
                     amount: transaction.Amount);
-            }
+            
             if (request.PlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
-            {
                 await WithdrawalToBaccaratWalletAsync(
                     gameUserId: currentUser.UserExtend!.GameBaccaratUserId,
                     sno: transaction.TransactionExternal!.SerialNumber,
                     amount: transaction.Amount);
+
+            if (request.PlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
+            {
+                if(wallet.Amount < transaction.Amount)
+                    throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
+                
+                await WithdrawalToEtl998WalletAsync(
+                    accountName: currentUser.UserExtend!.Etl998ProviderAccount, 
+                    password: currentUser.UserExtend!.Etl998ProviderPassword,
+                    sno: serialNumber,
+                    amount: transaction.Amount);
             }
 
-            var @event = new OnUserBalanceUpdatedEvent(transaction!.UserId, targetPlatform.Id);
+            var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
             await eventDispatcher.Publish(@event, ct);
 
             // Set balance after for transaction
@@ -149,6 +166,8 @@ public sealed class WalletWithdrawalHandler(
             return TransactionSourceType.G598SnoGameProvider;
         if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
             return TransactionSourceType.BaccaratGameProvider;
+        if (platformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
+            return TransactionSourceType.Elt998GameProvider;
 
         throw new NotSupportedException($"This platform ({platformId}) is not support.");
     }
@@ -182,5 +201,23 @@ public sealed class WalletWithdrawalHandler(
         };
 
         await gameBaccarat.WithdrawalAsync(withdrawalRequest);
+    }
+    
+    private async Task WithdrawalToEtl998WalletAsync(
+        string accountName, 
+        string password, 
+        decimal amount,
+        string sno)
+    {
+        var prepareRequest = new Etl998TransferRequest
+        {
+            Account = accountName, 
+            Password = password,
+            CustomerOrderId = sno,
+            Credit = amount,
+            Type = Etl998CreditType.Withdrawal
+        };
+        await etl998Service.PrepareTransferAsync(prepareRequest);
+        await etl998Service.ConfirmTransferAsync(prepareRequest);
     }
 }

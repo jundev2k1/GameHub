@@ -3272,6 +3272,30 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("Etl998ProviderAccount")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("")
+                        .HasColumnName("usrex_etl998_account");
+
+                    b.Property<string>("Etl998ProviderNickname")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("")
+                        .HasColumnName("usrex_etl998_nickname");
+
+                    b.Property<string>("Etl998ProviderPassword")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("usrex_etl998_password");
+
                     b.Property<string>("GameBaccaratAccount")
                         .IsRequired()
                         .ValueGeneratedOnAdd()

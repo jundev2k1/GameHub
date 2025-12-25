@@ -59,6 +59,24 @@ public class UserExtendConfig : IEntityTypeConfiguration<UserExtend>
             .IsRequired()
             .HasMaxLength(50)
             .HasDefaultValue(string.Empty);
+        
+        builder.Property(urex => urex.Etl998ProviderAccount)
+            .HasColumnName("usrex_etl998_account")
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(urex => urex.Etl998ProviderNickname)
+            .HasColumnName("usrex_etl998_nickname")
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(urex => urex.Etl998ProviderPassword)
+            .HasColumnName("usrex_etl998_password")
+            .IsRequired()
+            .HasMaxLength(4000)
+            .HasDefaultValue(string.Empty);
 
         builder.HasOne(urex => urex.User)
             .WithOne(u => u.UserExtend)

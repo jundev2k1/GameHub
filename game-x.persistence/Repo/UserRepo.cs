@@ -9,7 +9,6 @@ using game_x.domain.Constants;
 using game_x.share.Extensions;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
-using System.Linq.Expressions;
 
 namespace game_x.persistence.Repo;
 
@@ -78,7 +77,7 @@ public sealed class UserRepo(
     {
         var query = context.AppUsers
             .AsNoTracking()
-            .Where(u => u.UserRoles.Any(u => u.Role.Name == AppRoles.Cs))
+            .Where(u => u.UserRoles.Any(x => x.Role.Name == AppRoles.Cs))
             .AsQueryable();
 
         if (queryBuilder != null)

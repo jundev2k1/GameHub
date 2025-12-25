@@ -25,7 +25,7 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
         var platformWallet = await walletManagerCache.GetExternalWalletAsync(
             @event.UserId,
             platform.Id);
-        // In case of the current balance remains unchanged, exit this function
+        // In the case of the current balance remains unchanged, exit this function
         if (latestTransaction.BalanceAfter == platformWallet.Amount)
             return;
 
@@ -56,6 +56,8 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
             return TransactionSourceType.G598SnoGameProvider;
         if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
             return TransactionSourceType.BaccaratGameProvider;
+        if (platformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
+            return TransactionSourceType.Elt998GameProvider;
 
         throw new NotSupportedException($"This platform ({platformId}) is not support.");
     }

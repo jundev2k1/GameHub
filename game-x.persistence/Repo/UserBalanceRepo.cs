@@ -22,6 +22,7 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
             .Include(x => x.CryptoToken)
             .FirstOrDefaultAsync(x => x.UserId == userId && x.CryptoTokenId == cryptoTokenId, ct);
     }
+    
     public async Task<UserBalance> GetByUserIdAndTokenIdAsync(string userId, Guid cryptoTokenId, CancellationToken ct = default)
     {
         return await context.UserBalances
@@ -54,6 +55,7 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
 
         updateAction.Invoke(targetBalance);
     }
+    
     public async Task UpdateAsync(Guid id, Func<UserBalance, Task> updateAction, CancellationToken ct = default)
     {
         var targetBalance = await context.UserBalances

@@ -23,7 +23,7 @@ public sealed class UserLoginHandler(
         if (!isValid) throw new ForbiddenException(errorCode!);
 
         var roles = await authService.GetRolesAsync(loginUser);
-        if (!roles.IsUser && !roles.IsTalent) throw new ForbiddenException();
+        if (roles is {IsUser: false, IsTalent: false}) throw new ForbiddenException();
 
         if (!loginUser.EmailConfirmed)
             throw new BadRequestException(MessageCode.User.UserNotConfirmed);
@@ -35,7 +35,7 @@ public sealed class UserLoginHandler(
         var loggedUser = await userRepo.GetUserDetailAsync(loginUser.Id, ct);
      
         return new UserLoginResult(
-            Email: loggedUser.Email!,
+            Email: loggedUser.Email,
             UserId: loggedUser.UserId,
             Nickname: loggedUser.Nickname,
             AccessToken: tokenInfo.Token,

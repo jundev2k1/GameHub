@@ -49,7 +49,7 @@ public interface ITransactionRepo
     Task<decimal> GetLatestBalanceAfterAsync(string userId, CancellationToken ct = default);
 
     Task<Transaction?> GetLatestExternalTransactionAsync(string userId, int localPlatformId, CancellationToken ct = default);
-
+    
     Task AddAsync(Transaction transaction, CancellationToken ct = default);
 
     /// <summary>Only update the fields that are passed in.</summary>
