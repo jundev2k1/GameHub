@@ -78,6 +78,10 @@ public class UserExtendConfig : IEntityTypeConfiguration<UserExtend>
             .HasMaxLength(4000)
             .HasDefaultValue(string.Empty);
 
+        builder.Property(urex => urex.Etl998ProviderTableLimit)
+            .HasColumnName("usrex_etl998_table_limit")
+            .IsRequired();
+
         builder.HasOne(urex => urex.User)
             .WithOne(u => u.UserExtend)
             .HasForeignKey<UserExtend>(urex => urex.Id)

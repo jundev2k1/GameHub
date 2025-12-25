@@ -90,6 +90,7 @@ public sealed class OnGameRegisterHandler(
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}".ToLower();
         var password = GameProviderPasswordGenerator.Generate(8, 20);
+        var limitId = BettingLimitGroups.All[4].LimitId;
         var request = new Etl998RegisterRequest
         {
             Account = account,
@@ -98,7 +99,7 @@ public sealed class OnGameRegisterHandler(
             Ximalv = 10,
             Ximatype = 1,
             FatherId = 0,
-            Tables = BettingLimitGroups.All[4].LimitId.ToString()
+            Tables = limitId.ToString()
         };
         var isExisted = await etl998Service.IsAccountExistAsync(new IsAccountExistRequest { Account = account });
         if (!isExisted)
@@ -106,7 +107,11 @@ public sealed class OnGameRegisterHandler(
             var response = await etl998Service.RegisterAsync(request);
             var data = response.FirstOrDefault();
             if(data != null)
-                usrex.UpdateEtl998Account(account: account, nickname: nickName, password: aesEncryptor.Encrypt(password));
+                usrex.UpdateEtl998Account(
+                    account: account, 
+                    nickname: nickName, 
+                    password: aesEncryptor.Encrypt(password),
+                    limitId: limitId);
         }
     }
 }
