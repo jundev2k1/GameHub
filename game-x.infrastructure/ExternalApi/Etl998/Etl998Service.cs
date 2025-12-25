@@ -253,7 +253,7 @@ public class Etl998Service(
             }
             
             logger.LogInformation("Betting limit modification successful，account: {Account}", req.Account);
-            return response.Content?.ErrorCode != 0;
+            return response.Content?.ErrorCode == 0;
         }
         catch (Exception ex)
         {

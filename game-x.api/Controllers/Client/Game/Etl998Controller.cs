@@ -86,6 +86,13 @@ public sealed class Etl998Controller : BaseApiController
         return ApiResponseFactory.Ok(result);
     }
     
+    [HttpGet("games/modify-betting-limit")]
+    public Task<IActionResult> GetBettingLimitAsync()
+    {
+        var result = BettingLimitGroups.All.Select(x => x.Value);
+        return Task.FromResult(ApiResponseFactory.Ok(result));
+    }
+    
     [HttpPost("games/modify-betting-limit")]
     public async Task<IActionResult> ModifyBettingLimitAsync(ModifyBettingLimitCommand command)
     {
