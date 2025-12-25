@@ -98,7 +98,7 @@ public sealed class OnGameRegisterHandler(
             Ximalv = 10,
             Ximatype = 1,
             FatherId = 0,
-            Tables = BettingLimitGroups.DefaultTables
+            Tables = BettingLimitGroups.All[4].LimitId.ToString()
         };
         var isExisted = await etl998Service.IsAccountExistAsync(new IsAccountExistRequest { Account = account });
         if (!isExisted)

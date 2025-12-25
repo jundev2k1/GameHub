@@ -4,7 +4,13 @@ public sealed class ModifyBettingLimitValidator : AbstractValidator<ModifyBettin
 {
     public ModifyBettingLimitValidator()
     {
-        RuleFor(x => x.Tables)
-            .NotEmpty().WithMessage($"{nameof(ModifyBettingLimitCommand.Tables)} must be not empty.");
+        RuleFor(x => x.LimitId)
+            .NotEmpty()
+            .WithMessage($"{nameof(ModifyBettingLimitCommand.LimitId)} must not be empty.")
+            .Must(BeAValidLimitId)
+            .WithMessage("Invalid betting limit group.");
     }
+
+    private static bool BeAValidLimitId(int limitId)
+        => BettingLimitGroups.All.ContainsKey(limitId);
 }

@@ -36,7 +36,7 @@ public sealed class ModifyBettingLimitHandler(
             var request = new ModifyBettingLimitRequest
             {
                 Account = accountName,
-                Tables = cmd.Tables
+                Tables = cmd.LimitId.ToString()
             };
             return await service.ModifyBettingLimitAsync(request);
         }

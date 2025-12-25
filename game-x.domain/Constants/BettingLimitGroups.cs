@@ -8,8 +8,7 @@ public sealed record BettingLimitGroup(int LimitId, int MinBet, int MaxBet )
 
 public static class BettingLimitGroups
 {
-    public static readonly IReadOnlyDictionary<int, BettingLimitGroup> All =
-        new Dictionary<int, BettingLimitGroup>
+    public static readonly IReadOnlyDictionary<int, BettingLimitGroup> All = new Dictionary<int, BettingLimitGroup>
         {
             [1] = new(1, 10, 3000),
             [2] = new(2, 10, 5000),
@@ -33,6 +32,4 @@ public static class BettingLimitGroups
             [20] = new(20, 100, 50000),
             [21] = new(21, 50, 10000),
         };
-    
-    public static string DefaultTables => "1,2,3";
 }
