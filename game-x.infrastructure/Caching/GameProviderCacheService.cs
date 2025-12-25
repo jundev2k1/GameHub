@@ -82,11 +82,11 @@ public sealed class GameProviderCacheService(
     {
         var gameList = await gameRepo.GetAllAsync();
 
-        // Clear all game thumbnail cache
+        // Clear all game thumbnail caches
         foreach (var game in gameList)
         {
-            var cacheThumnailKey = $"{_prefixCache}:game:{game.PublicId}:thumbnail";
-            Remove(cacheThumnailKey);
+            var cacheThumbnailKey = $"{_prefixCache}:game:{game.PublicId}:thumbnail";
+            Remove(cacheThumbnailKey);
         }
 
         var cacheKey = $"{_prefixCache}:game:list";
@@ -135,4 +135,8 @@ public sealed class GameProviderCacheService(
     public GamePlatformDto BaccaratPlatform
         => PlatformList.FirstOrDefault(p => p.Id == GameConstants.PLATFORM_ID_GAMEBACCARAT)
             ?? throw new NotFoundException();
+    
+    public GamePlatformDto Etl998Platform
+        => PlatformList.FirstOrDefault(p => p.Id == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
+           ?? throw new NotFoundException();
 }

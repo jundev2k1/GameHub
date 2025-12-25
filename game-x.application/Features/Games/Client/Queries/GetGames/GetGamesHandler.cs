@@ -20,7 +20,7 @@ public sealed class GetGamesHandler(
             .Select(MapToListItem)
             .ToArray();
         var result = new PaginationResult<GetGamesItemDto>(
-            items: await Task.WhenAll(items) ?? [],
+            items: await Task.WhenAll(items),
             totalItems: totalItems,
             totalPages: (int)Math.Ceiling((decimal)totalItems / request.PageSize),
             pageIndex: request.PageIndex,

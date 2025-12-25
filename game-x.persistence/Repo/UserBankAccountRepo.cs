@@ -64,6 +64,7 @@ public sealed class UserBankAccountRepo(GameXContext context) : IUserBankAccount
 
         updateAction(targetItem);
     }
+    
     public async Task UpdateAsync(string userId, CurrencyUnit currencyCode, Action<UserBankAccount> updateAction, CancellationToken ct = default)
     {
         var targetItem = await context.UserBankAccounts

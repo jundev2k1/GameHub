@@ -17,7 +17,7 @@ public sealed class GameBaccaratService(
     {
         try
         {
-            logger.LogInformation("Send login request to Baccarat Platform: account = {Accound}, gamecode = {Gamecode}", request.Account, request.Gamecode);
+            logger.LogInformation("Send login request to Baccarat Platform: account = {Account}, gamecode = {Gamecode}", request.Account, request.Gamecode);
 
             var result = await gameApi.LoginAsync(request);
             if (!result.IsSuccessStatusCode || result.Content == null)
@@ -33,8 +33,8 @@ public sealed class GameBaccaratService(
                 throw new ExternalServiceException();
             }
 
-            logger.LogInformation("Login request successful，url: {url}", response!.Data!.Url);
-            return response!.Data!;
+            logger.LogInformation("Login request successful，url: {url}", response.Data!.Url);
+            return response.Data!;
         }
         catch (Exception ex)
         {
@@ -48,7 +48,7 @@ public sealed class GameBaccaratService(
         try
         {
             logger.LogInformation(
-                "Send register request to Baccarat Platform: account = {Accound}, gamecode = {Password}, nickname={Nickname}",
+                "Send register request to Baccarat Platform: account = {Account}, password = {Password}, nickname={Nickname}",
                 request.Account,
                 request.Password,
                 request.Nickname);
@@ -67,8 +67,8 @@ public sealed class GameBaccaratService(
                 throw new ExternalServiceException();
             }
 
-            logger.LogInformation("Register request successful，UserId: {UserId}", response!.Data!.UserId);
-            return response!.Data!;
+            logger.LogInformation("Register request successful，UserId: {UserId}", response.Data!.UserId);
+            return response.Data!;
         }
         catch (Exception ex)
         {
@@ -101,8 +101,8 @@ public sealed class GameBaccaratService(
                 throw new ExternalServiceException();
             }
 
-            logger.LogInformation("Get wallet request successful，Amount: {Amount}", response!.Data!.Amount);
-            return response!.Data!;
+            logger.LogInformation("Get wallet request successful，Amount: {Amount}", response.Data!.Amount);
+            return response.Data!;
         }
         catch (Exception ex)
         {

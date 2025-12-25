@@ -1,8 +1,11 @@
 ﻿using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Utils;
+using game_x.share.ExternalApi.Etl998.Dtos.IsAccountExist;
+using game_x.share.ExternalApi.Etl998.Dtos.Register;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Register;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
 
@@ -13,6 +16,7 @@ public sealed class OnGameRegisterHandler(
     IUserRepo userRepo,
     IGameProviderService gameProvider,
     IGameBaccaratService gameBaccarat,
+    IEtl998Service etl998Service,
     IGameAesEncryptor gameAesEncryptor,
     IAesEncryptor aesEncryptor) : IApplicationEventHandler<OnGameRegisterEvent>
 {
@@ -41,6 +45,11 @@ public sealed class OnGameRegisterHandler(
         {
             await RegisterGameBaccaratUser(usrex, usrex.User.Nickname);
             return;
+        }
+        
+        if (@event.GamePlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
+        {
+            await RegisterEtl998User(usrex, usrex.User.Nickname);
         }
     }
 
@@ -74,5 +83,30 @@ public sealed class OnGameRegisterHandler(
         };
         var response = await gameBaccarat.RegisterAsync(request);
         usrex.UpdateBaccaratAccount(response.UserId, account, aesEncryptor.Encrypt(password), nickName);
+    }
+
+    private async Task RegisterEtl998User(UserExtend usrex, string nickName)
+    {
+        var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
+        var account = $"Gx{suffix}".ToLower();
+        var password = GameProviderPasswordGenerator.Generate(8, 20);
+        var request = new Etl998RegisterRequest
+        {
+            Account = account,
+            Password = password,
+            Nickname = nickName,
+            Ximalv = 10,
+            Ximatype = 1,
+            FatherId = 0,
+            Tables = "1,2,3"
+        };
+        var isExisted = await etl998Service.IsAccountExistAsync(new IsAccountExistRequest { Account = account });
+        if (!isExisted)
+        {
+            var response = await etl998Service.RegisterAsync(request);
+            var data = response.FirstOrDefault();
+            if(data != null)
+                usrex.UpdateEtl998Account(account: account, nickname: nickName, password: aesEncryptor.Encrypt(password));
+        }
     }
 }

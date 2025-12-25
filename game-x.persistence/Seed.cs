@@ -25,7 +25,7 @@ public static class Seed
         UserManager<User> userManager,
         GameXContext context)
     {
-        // Seed appsetting
+        // Seed app setting
         await SeedAppSettings(context);
 
         // Seed roles and users
@@ -220,6 +220,7 @@ public static class Seed
         {
             GamePlatform.Create("598彩票", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_G598),
             GamePlatform.Create("百家樂", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_GAMEBACCARAT),
+            GamePlatform.Create("etl998", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT),
         };
         foreach (var gamePlatform in gamePlatforms)
         {
@@ -324,6 +325,7 @@ public static class Seed
         await CreateEntity("澳洲幸運5番攤", "AL5FT", GameConstants.PLATFORM_ID_G598);
 
         await CreateEntity("百家樂", "BAC001", GameConstants.PLATFORM_ID_GAMEBACCARAT);
+        await CreateEntity("998百家樂", "BAC002", GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT);
     }
 
     private static async Task SeedPublicConversation(GameXContext db, CancellationToken ct = default)

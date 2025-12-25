@@ -1,12 +1,14 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Features.Games.Services;
 using game_x.application.Features.UserGameSessions.Dtos;
 using game_x.share.Extensions;
+using game_x.share.ExternalApi.Etl998.Dtos.ForwardGame;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.Helper;
@@ -24,8 +26,10 @@ public sealed class LoginGameHandler(
     IAesEncryptor aesEncryptor,
     IGameProviderCacheService gameProviderCache,
     IGamePlatformService gamePlatformService,
+    IEtl998Service etl998Service,
     IOptions<GameProviderSettings> gameSettings,
-    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<LoginGameCommand, LoginGameResult>
+    IApplicationEventDispatcher eventDispatcher,
+    IOptions<Etl998Settings> settings) : ICommandHandler<LoginGameCommand, LoginGameResult>
 {
     public async Task<LoginGameResult> Handle(LoginGameCommand request, CancellationToken ct = default)
     {
@@ -48,9 +52,9 @@ public sealed class LoginGameHandler(
         var url = await LoginGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!, request, ct)
             ?? throw new BadRequestException($"GamePlatformId({request.GamePlatformId.Value}) is not supported.");
 
-        var gameEmbededLink = ConvertEmbededLink(request.GamePlatformId.Value, url);
+        var gameEmbeddedLink = ConvertEmbeddedLink(request.GamePlatformId.Value, url);
         var loginToken = GenerateToken(gameInfo.PlatformId, gameInfo.Id);
-        return new LoginGameResult(gameEmbededLink, loginToken);
+        return new LoginGameResult(gameEmbeddedLink, loginToken);
     }
 
     private async Task<string?> LoginGameAsync(
@@ -68,7 +72,7 @@ public sealed class LoginGameHandler(
                 Gamecode = request.GameCode,
                 Address = request.Address,
                 Locale = request.Locale,
-                ReturnUrl = request.ReturnUrl,
+                ReturnUrl = request.ReturnUrl
             };
             var result = await gameProvider.LoginAsync(externalRequest, request.IpAddress!);
 
@@ -92,11 +96,24 @@ public sealed class LoginGameHandler(
 
             return result.Url;
         }
+        
+        if (gamePlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
+        {
+            var externalRequest = new ForwardGameRequest
+            {
+                Account = usrex.Etl998ProviderAccount,
+                Password = aesEncryptor.Decrypt(usrex.Etl998ProviderPassword),
+                Dm = settings.Value.Host
+            };
+            var result = await etl998Service.ForwardGameAsync(externalRequest);
+            var data = result.FirstOrDefault();
+            return data?.GameUrl;
+        }
 
         return null;
     }
 
-    private string ConvertEmbededLink(Guid gamePlatformId, string url)
+    private string ConvertEmbeddedLink(Guid gamePlatformId, string url)
     {
         if (gamePlatformId == GameConstants.PLATFORM_ID_G598)
         {
