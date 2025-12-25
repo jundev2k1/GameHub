@@ -312,7 +312,7 @@ public static class InfrastructureServicesRegistration
             {
                 var baseUrl = configuration["Etl998Settings:Host"]
                               ?? throw new InvalidOperationException("Etl998Settings:Host is not configured");
-                c.BaseAddress = new Uri(baseUrl);
+                c.BaseAddress = new Uri($"{baseUrl}/GameAPIV4");
                 c.Timeout = TimeSpan.FromSeconds(5);
             })
             .AddHttpMessageHandler<Etl998Md5MessageHandler>()
