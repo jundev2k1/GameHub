@@ -4,15 +4,14 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Exceptions;
 using game_x.share.ExternalApi.Etl998.Converters;
 using game_x.share.ExternalApi.Etl998.Dtos;
-using game_x.share.ExternalApi.Etl998.Dtos.AccountBalance;
+using game_x.share.ExternalApi.Etl998.Dtos.Wallet;
 using game_x.share.ExternalApi.Etl998.Dtos.CancelTransfer;
 using game_x.share.ExternalApi.Etl998.Dtos.ChangePassword;
-using game_x.share.ExternalApi.Etl998.Dtos.ConfirmTransfer;
-using game_x.share.ExternalApi.Etl998.Dtos.CreateAccount;
 using game_x.share.ExternalApi.Etl998.Dtos.ForwardGame;
 using game_x.share.ExternalApi.Etl998.Dtos.IsAccountExist;
 using game_x.share.ExternalApi.Etl998.Dtos.ModifyBettingLimit;
 using game_x.share.ExternalApi.Etl998.Dtos.PrepareTransfer;
+using game_x.share.ExternalApi.Etl998.Dtos.Register;
 using game_x.share.ExternalApi.Etl998.Dtos.SearchRecord;
 using game_x.share.ExternalApi.Etl998.Dtos.SearchTransfer;
 using Refit;
@@ -23,13 +22,13 @@ public class Etl998Service(
     IEtl998Api gameApi,
     IAppLogger<Etl998Service> logger) : IEtl998Service
 {
-    public async Task<IReadOnlyCollection<CreateAccountResponse>> CreateAccountAsync(CreateAccountRequest req)
+    public async Task<IReadOnlyCollection<Etl998RegisterResponse>> RegisterAsync(Etl998RegisterRequest req)
     {
         try
         {
             logger.LogInformation("Send creating a new account request to Etl998 Platform: account = {Account}", req.Account);
 
-            var result = await gameApi.CreateAccountAsync(req);
+            var result = await gameApi.RegisterAsync(req);
             var content = result.Content;
             
             if (content?.ErrorCode != 0 || !result.IsSuccessful || result.Content == null)
@@ -38,7 +37,7 @@ public class Etl998Service(
                 throw new ExternalServiceException();
             }
             
-            return DeserializeResult<CreateAccountResponse>(content.Result);
+            return DeserializeResult<Etl998RegisterResponse>(content.Result);
         }
         catch (Exception ex)
         {
@@ -71,15 +70,15 @@ public class Etl998Service(
         }
     }
 
-    public async Task<IReadOnlyCollection<AccountBalanceResponse>> GetAccountBalanceAsync(AccountBalanceRequest req)
+    public async Task<IReadOnlyCollection<Etl998WalletResponse>> GetWalletAsync(Etl998WalletRequest req)
     {
         try
         {
             logger.LogInformation("Send retrieving account balance request to Etl998 Platform: account = {Account}", req.Account);
 
-            var response = await gameApi.GetAccountBalanceAsync(req);
+            var response = await gameApi.GetWalletAsync(req);
             var result = ValidateApiResponse(response);
-            return DeserializeResult<AccountBalanceResponse>(result);
+            return DeserializeResult<Etl998WalletResponse>(result);
         }
         catch (Exception ex)
         {
@@ -88,7 +87,7 @@ public class Etl998Service(
         }
     }
     
-    public async Task<IReadOnlyCollection<PrepareTransferResponse>> PrepareTransferAsync(PrepareTransferRequest req)
+    public async Task<IReadOnlyCollection<Etl998TransferResponse>> PrepareTransferAsync(Etl998TransferRequest req)
     {
         try
         {
@@ -100,7 +99,7 @@ public class Etl998Service(
 
             var response = await gameApi.PrepareTransferAsync(req);
             var result = ValidateApiResponse(response);
-            return DeserializeResult<PrepareTransferResponse>(result);
+            return DeserializeResult<Etl998TransferResponse>(result);
         }
         catch (Exception ex)
         {
@@ -109,7 +108,7 @@ public class Etl998Service(
         }
     }
     
-    public async Task<IReadOnlyCollection<ConfirmTransferResponse>> ConfirmTransferAsync(ConfirmTransferRequest req)
+    public async Task<IReadOnlyCollection<Etl998TransferResponse>> ConfirmTransferAsync(Etl998TransferRequest req)
     {
         try
         {
@@ -121,7 +120,7 @@ public class Etl998Service(
 
             var response = await gameApi.ConfirmTransferAsync(req);
             var result = ValidateApiResponse(response);
-            return DeserializeResult<ConfirmTransferResponse>(result);
+            return DeserializeResult<Etl998TransferResponse>(result);
         }
         catch (Exception ex)
         {

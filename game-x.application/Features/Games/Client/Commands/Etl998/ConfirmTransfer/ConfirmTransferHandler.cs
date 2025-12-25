@@ -1,20 +1,20 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
-using game_x.share.ExternalApi.Etl998.Dtos.ConfirmTransfer;
+using game_x.share.ExternalApi.Etl998.Dtos.PrepareTransfer;
 using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Games.Client.Commands.Etl998.ConfirmTransfer;
 
 public sealed class ConfirmTransferHandler(
     IEtl998Service service,
-    ILogger<ConfirmTransferHandler> logger): ICommandHandler<ConfirmTransferCommand, IReadOnlyCollection<ConfirmTransferResponse>>
+    ILogger<ConfirmTransferHandler> logger): ICommandHandler<ConfirmTransferCommand, IReadOnlyCollection<Etl998TransferResponse>>
 {
-    public async Task<IReadOnlyCollection<ConfirmTransferResponse>> Handle(ConfirmTransferCommand cmd, CancellationToken ct = default)
+    public async Task<IReadOnlyCollection<Etl998TransferResponse>> Handle(ConfirmTransferCommand cmd, CancellationToken ct = default)
     {
         try
         {
-            var request = new ConfirmTransferRequest
+            var request = new Etl998TransferRequest
             {
-                Account = cmd.AccountName, 
+                Account = cmd.AccountName,
                 Password = cmd.Password,
                 CustomerOrderId = cmd.CustomerOrderId,
                 Credit = cmd.Credit,

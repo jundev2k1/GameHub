@@ -7,4 +7,4 @@ public record PrepareTransferCommand(
     string Password,
     decimal Credit,
     string CreditType,
-    string CustomerOrderId) : ICommand<IReadOnlyCollection<PrepareTransferResponse>>;
+    string CustomerOrderId) : ICommand<IReadOnlyCollection<Etl998TransferResponse>>;

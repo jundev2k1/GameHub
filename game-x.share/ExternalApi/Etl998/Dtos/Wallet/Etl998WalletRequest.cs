@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace game_x.share.ExternalApi.Etl998.Dtos.AccountBalance;
+namespace game_x.share.ExternalApi.Etl998.Dtos.Wallet;
 
-public sealed class AccountBalanceRequest
+public sealed class Etl998WalletRequest
 {
     [JsonPropertyName("account")]
     public required string Account { get; set; }

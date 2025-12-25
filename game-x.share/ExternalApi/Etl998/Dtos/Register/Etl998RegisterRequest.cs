@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace game_x.share.ExternalApi.Etl998.Dtos.CreateAccount;
+namespace game_x.share.ExternalApi.Etl998.Dtos.Register;
 
-public sealed class CreateAccountRequest
+public sealed class Etl998RegisterRequest
 {
     [JsonPropertyName("account")]
     public required string Account { get; set; }

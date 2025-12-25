@@ -35,7 +35,7 @@ public sealed class GamePlatformService(
         var gameRegisterEvent = new OnGameRegisterEvent(gamePlatformId, user.Id);
         await eventDispatcher.Publish(gameRegisterEvent, ct);
 
-        // Retry after account created
+        // Retry after an account created
         return await userRepo.GetUserByIdAsync(user.Id, ct);
     }
 
@@ -51,6 +51,10 @@ public sealed class GamePlatformService(
             && (usrex.GameBaccaratAccount.IsNullOrWhiteSpace() || usrex.GameBaccaratPassword.IsNullOrWhiteSpace()))
             return false;
 
+        if ((gamePlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
+            && (usrex.Etl998ProviderAccount.IsNullOrWhiteSpace() || usrex.Etl998ProviderPassword.IsNullOrWhiteSpace()))
+            return false;
+        
         return true;
     }
 }

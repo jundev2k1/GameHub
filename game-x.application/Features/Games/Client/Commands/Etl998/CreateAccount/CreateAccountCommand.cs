@@ -1,4 +1,4 @@
-using game_x.share.ExternalApi.Etl998.Dtos.CreateAccount;
+using game_x.share.ExternalApi.Etl998.Dtos.Register;
 
 namespace game_x.application.Features.Games.Client.Commands.Etl998.CreateAccount;
 
@@ -9,4 +9,4 @@ public record CreateAccountCommand(
     decimal Ximalv,
     int Ximatype,
     int FatherId,
-    string Tables) : ICommand<IReadOnlyCollection<CreateAccountResponse>>;
+    string Tables) : ICommand<IReadOnlyCollection<Etl998RegisterResponse>>;

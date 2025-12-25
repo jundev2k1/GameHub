@@ -1,18 +1,18 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
-using game_x.share.ExternalApi.Etl998.Dtos.CreateAccount;
+using game_x.share.ExternalApi.Etl998.Dtos.Register;
 using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Games.Client.Commands.Etl998.CreateAccount;
 
 public sealed class CreateAccountHandler(
     IEtl998Service service,
-    ILogger<CreateAccountHandler> logger): ICommandHandler<CreateAccountCommand, IReadOnlyCollection<CreateAccountResponse>>
+    ILogger<CreateAccountHandler> logger): ICommandHandler<CreateAccountCommand, IReadOnlyCollection<Etl998RegisterResponse>>
 {
-    public async Task<IReadOnlyCollection<CreateAccountResponse>> Handle(CreateAccountCommand cmd, CancellationToken ct = default)
+    public async Task<IReadOnlyCollection<Etl998RegisterResponse>> Handle(CreateAccountCommand cmd, CancellationToken ct = default)
     {
         try
         {
-            var request = new CreateAccountRequest
+            var request = new Etl998RegisterRequest
             {
                 Account = cmd.AccountName,
                 Password = cmd.Password,
@@ -22,7 +22,7 @@ public sealed class CreateAccountHandler(
                 FatherId = cmd.FatherId,
                 Tables = cmd.Tables
             };
-            return await service.CreateAccountAsync(request);
+            return await service.RegisterAsync(request);
         }
         catch (Exception ex)
         {

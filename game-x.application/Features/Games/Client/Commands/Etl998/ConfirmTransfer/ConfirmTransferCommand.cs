@@ -1,4 +1,4 @@
-using game_x.share.ExternalApi.Etl998.Dtos.ConfirmTransfer;
+using game_x.share.ExternalApi.Etl998.Dtos.PrepareTransfer;
 
 namespace game_x.application.Features.Games.Client.Commands.Etl998.ConfirmTransfer;
 
@@ -7,4 +7,4 @@ public record ConfirmTransferCommand(
     string Password,
     decimal Credit,
     string CreditType,
-    string CustomerOrderId) : ICommand<IReadOnlyCollection<ConfirmTransferResponse>>;
+    string CustomerOrderId) : ICommand<IReadOnlyCollection<Etl998TransferResponse>>;

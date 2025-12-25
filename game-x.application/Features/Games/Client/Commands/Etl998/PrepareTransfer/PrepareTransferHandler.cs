@@ -6,15 +6,15 @@ namespace game_x.application.Features.Games.Client.Commands.Etl998.PrepareTransf
 
 public sealed class PrepareTransferHandler(
     IEtl998Service service,
-    ILogger<PrepareTransferHandler> logger): ICommandHandler<PrepareTransferCommand, IReadOnlyCollection<PrepareTransferResponse>>
+    ILogger<PrepareTransferHandler> logger): ICommandHandler<PrepareTransferCommand, IReadOnlyCollection<Etl998TransferResponse>>
 {
-    public async Task<IReadOnlyCollection<PrepareTransferResponse>> Handle(PrepareTransferCommand cmd, CancellationToken ct = default)
+    public async Task<IReadOnlyCollection<Etl998TransferResponse>> Handle(PrepareTransferCommand cmd, CancellationToken ct = default)
     {
         try
         {
-            var request = new PrepareTransferRequest
+            var request = new Etl998TransferRequest
             {
-                Account = cmd.AccountName, 
+                Account = cmd.AccountName,
                 Password = cmd.Password,
                 CustomerOrderId = cmd.CustomerOrderId,
                 Credit = cmd.Credit,

@@ -1,12 +1,14 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Features.Games.Services;
 using game_x.application.Features.UserGameSessions.Dtos;
 using game_x.share.Extensions;
+using game_x.share.ExternalApi.Etl998.Dtos.ForwardGame;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.Helper;
@@ -24,6 +26,7 @@ public sealed class LoginGameHandler(
     IAesEncryptor aesEncryptor,
     IGameProviderCacheService gameProviderCache,
     IGamePlatformService gamePlatformService,
+    IEtl998Service etl998Service,
     IOptions<GameProviderSettings> gameSettings,
     IApplicationEventDispatcher eventDispatcher) : ICommandHandler<LoginGameCommand, LoginGameResult>
 {
@@ -68,7 +71,7 @@ public sealed class LoginGameHandler(
                 Gamecode = request.GameCode,
                 Address = request.Address,
                 Locale = request.Locale,
-                ReturnUrl = request.ReturnUrl,
+                ReturnUrl = request.ReturnUrl
             };
             var result = await gameProvider.LoginAsync(externalRequest, request.IpAddress!);
 
@@ -91,6 +94,19 @@ public sealed class LoginGameHandler(
             var result = await gameBaccarat.LoginAsync(externalRequest);
 
             return result.Url;
+        }
+        
+        if (gamePlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
+        {
+            var externalRequest = new ForwardGameRequest
+            {
+                Account = usrex.Etl998ProviderAccount,
+                Password = aesEncryptor.Decrypt(usrex.Etl998ProviderPassword),
+                Dm = request.ReturnUrl
+            };
+            var result = await etl998Service.ForwardGameAsync(externalRequest);
+            var data = result.FirstOrDefault();
+            return data?.GameUrl;
         }
 
         return null;

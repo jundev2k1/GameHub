@@ -1,12 +1,14 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.Games.Dtos;
 using game_x.share.Extensions;
+using game_x.share.ExternalApi.Etl998.Dtos.Wallet;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace game_x.infrastructure.Caching;
@@ -17,6 +19,7 @@ public sealed class WalletManagerCacheService(
     IUserRepo userRepo,
     IGameProviderCacheService gameProviderCache,
     IGameBaccaratService gameBaccaratService,
+    IEtl998Service etl998Service,
     IGameProviderService gameProvider,
     IAppLogger<WalletManagerCacheService> logger) : CacheService(cache), IWalletManagerCacheService
 {
@@ -58,13 +61,20 @@ public sealed class WalletManagerCacheService(
             platform: gameProviderCache.G598Platform,
             balance: g598Balance);
 
-        var baccaratBalace = await GetBaccaratWalletAsync(targetUser);
+        var baccaratBalance = await GetBaccaratWalletAsync(targetUser);
         CreateOrUpdateExternalWallet(
             wallet: userWallet,
             targetWallet: null,
             platform: gameProviderCache.BaccaratPlatform,
-            balance: baccaratBalace);
+            balance: baccaratBalance);
 
+        var elt998Balance = await GetElt998WalletAsync(targetUser);
+        CreateOrUpdateExternalWallet(
+            wallet: userWallet,
+            targetWallet: null,
+            platform: gameProviderCache.Etl998Platform,
+            balance: elt998Balance);
+        
         Set(cacheKey, userWallet);
     }
 
@@ -106,6 +116,16 @@ public sealed class WalletManagerCacheService(
                 wallet: userWallet,
                 targetWallet: targetWallet,
                 platform: gameProviderCache.BaccaratPlatform,
+                balance: balance);
+        }
+        
+        if (platformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
+        {
+            var balance = await GetElt998WalletAsync(targetUser);
+            CreateOrUpdateExternalWallet(
+                wallet: userWallet,
+                targetWallet: targetWallet,
+                platform: gameProviderCache.Etl998Platform,
                 balance: balance);
         }
 
@@ -152,6 +172,31 @@ public sealed class WalletManagerCacheService(
         }
     }
 
+    private async Task<decimal?> GetElt998WalletAsync(User targetUser)
+    {
+        if (targetUser.UserExtend is null
+            || targetUser.UserExtend.Etl998ProviderAccount.IsNullOrWhiteSpace()
+            || targetUser.UserExtend.Etl998ProviderPassword.IsNullOrWhiteSpace()) return null;
+
+        try
+        {
+            var request = new Etl998WalletRequest
+            {
+                Account = targetUser.UserExtend.Etl998ProviderAccount,
+                Password = targetUser.UserExtend.Etl998ProviderPassword
+            };
+            
+            var response = await etl998Service.GetWalletAsync(request);
+            var externalWallet = response.FirstOrDefault();
+            return externalWallet?.Money;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to get external wallet", ex.Message);
+            return null;
+        }
+    }
+    
     private static void CreateOrUpdateExternalWallet(
         UserWalletDto wallet,
         UserWalletExternalItemDto? targetWallet,
@@ -172,7 +217,7 @@ public sealed class WalletManagerCacheService(
             return;
         }
 
-        // create new external wallet if platform wallet is not exist
+        // create new external wallet if platform wallet does not exist
         targetWallet = new UserWalletExternalItemDto
         {
             PlatformId = platform.Id,

@@ -1,15 +1,14 @@
 ﻿using game_x.share.ExternalApi.Etl998.Dtos;
-using game_x.share.ExternalApi.Etl998.Dtos.AccountBalance;
 using game_x.share.ExternalApi.Etl998.Dtos.CancelTransfer;
 using game_x.share.ExternalApi.Etl998.Dtos.ChangePassword;
-using game_x.share.ExternalApi.Etl998.Dtos.ConfirmTransfer;
-using game_x.share.ExternalApi.Etl998.Dtos.CreateAccount;
 using game_x.share.ExternalApi.Etl998.Dtos.ForwardGame;
 using game_x.share.ExternalApi.Etl998.Dtos.IsAccountExist;
 using game_x.share.ExternalApi.Etl998.Dtos.ModifyBettingLimit;
 using game_x.share.ExternalApi.Etl998.Dtos.PrepareTransfer;
+using game_x.share.ExternalApi.Etl998.Dtos.Register;
 using game_x.share.ExternalApi.Etl998.Dtos.SearchRecord;
 using game_x.share.ExternalApi.Etl998.Dtos.SearchTransfer;
+using game_x.share.ExternalApi.Etl998.Dtos.Wallet;
 using Refit;
 
 namespace game_x.infrastructure.ExternalApi.Etl998;
@@ -18,7 +17,7 @@ public interface IEtl998Api
 {
     /// <summary>Create Account API</summary>
     [Post("/CreateAccout")]
-    Task<ApiResponse<BaseResponse>> CreateAccountAsync([Body] CreateAccountRequest req);
+    Task<ApiResponse<BaseResponse>> RegisterAsync([Body] Etl998RegisterRequest req);
     
     /// <summary>Check Account Existence API</summary>
     [Post("/IsAccountExist")]
@@ -26,15 +25,15 @@ public interface IEtl998Api
     
     /// <summary>Get Account Balance API</summary>
     [Post("/AccoutBalance")]
-    Task<ApiResponse<BaseResponse>> GetAccountBalanceAsync([Body] AccountBalanceRequest req);
+    Task<ApiResponse<BaseResponse>> GetWalletAsync([Body] Etl998WalletRequest req);
     
     /// <summary>Prepare Transfer API</summary>
     [Post("/PrepareTransfer")]
-    Task<ApiResponse<BaseResponse>> PrepareTransferAsync([Body] PrepareTransferRequest req);
+    Task<ApiResponse<BaseResponse>> PrepareTransferAsync([Body] Etl998TransferRequest req);
     
     /// <summary>Confirm Transfer API</summary>
     [Post("/ConfirmTransfer")]
-    Task<ApiResponse<BaseResponse>> ConfirmTransferAsync([Body] ConfirmTransferRequest req);
+    Task<ApiResponse<BaseResponse>> ConfirmTransferAsync([Body] Etl998TransferRequest req);
     
     /// <summary>Confirm Transfer API</summary>
     [Post("/SearchTransfer")]

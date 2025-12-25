@@ -3,7 +3,7 @@ using game_x.share.ExternalApi.Etl998.Constants;
 
 namespace game_x.share.ExternalApi.Etl998.Dtos.PrepareTransfer;
 
-public sealed class PrepareTransferRequest
+public sealed class Etl998TransferRequest
 {
     [JsonPropertyName("account")]
     public required string Account { get; set; }
@@ -15,7 +15,7 @@ public sealed class PrepareTransferRequest
 
     /// <summary>Transfer a direction: "IN" = transfer in, "OUT" = transfer out.</summary>
     [JsonPropertyName("type")]
-    public required string Type { get; set; } = CreditTypes.Deposit;
+    public required string Type { get; set; } = Etl998CreditType.Deposit;
     /// <summary>Unique transfer order ID (up to 64 characters).</summary>
     [JsonPropertyName("customerorderid")]
     public required string CustomerOrderId { get; set; } = string.Empty;
