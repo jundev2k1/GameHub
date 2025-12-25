@@ -53,7 +53,6 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
     {
         var currentTime = DateTime.UtcNow;
         return await context.UserGameSessions
-            .AsNoTracking()
             .Include(ugs => ugs.Connections)
             .FirstOrDefaultAsync(ugs =>
                 ugs.UserId == userId
