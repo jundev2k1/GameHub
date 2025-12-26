@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Games.Services;
+using game_x.share.ExternalApi.Etl998.Converters;
 using game_x.share.ExternalApi.Etl998.Dtos.SearchRecord;
 using Microsoft.Extensions.Logging;
 
@@ -13,9 +14,9 @@ public sealed class SearchRecordHandler(
     IUserRepo userRepo,
     IEtl998Service service,
     ILogger<SearchRecordHandler> logger,
-    IAesEncryptor aesEncryptor): ICommandHandler<SearchRecordCommand, IReadOnlyCollection<SearchRecordResponse>>
+    IAesEncryptor aesEncryptor): ICommandHandler<SearchRecordCommand, IReadOnlyCollection<SearchRecordResult>>
 {
-    public async Task<IReadOnlyCollection<SearchRecordResponse>> Handle(SearchRecordCommand cmd, CancellationToken ct = default)
+    public async Task<IReadOnlyCollection<SearchRecordResult>> Handle(SearchRecordCommand cmd, CancellationToken ct = default)
     {
         try
         {
@@ -39,12 +40,17 @@ public sealed class SearchRecordHandler(
             {
                 Account = accountName, 
                 Password = aesEncryptor.Decrypt(password),
-                DateStart = cmd.DateStart,
-                DateEnd = cmd.DateEnd,
+                DateStart = EtlDateTimeConverter.ToEtlDate(cmd.DateStart),
+                DateEnd = EtlDateTimeConverter.ToEtlDate(cmd.DateEnd),
                 PageIndex = cmd.PageIndex,
                 PageSize = cmd.PageSize
             };
-            return await service.SearchRecordAsync(request);
+            var response = await service.SearchRecordAsync(request);
+            return response.Select(x => x.Adapt<SearchRecordResult>() with
+            {
+                BetTime = EtlDateTimeConverter.ToUtc(x.BetTime),
+                SettlementTime = EtlDateTimeConverter.ToUtc(x.SettlementTime),
+            }).ToList();
         }
         catch (Exception ex)
         {
