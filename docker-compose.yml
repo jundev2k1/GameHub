@@ -11,14 +11,10 @@ services:
   game-x.seq:
     image: datalust/seq:latest
 
-  game-x.srs:
-    image: ossrs/srs:5
-
 networks:
   dls-gamex:
     external: true
 
 volumes:
   seq-data:
-  srs-data:
   db-data:

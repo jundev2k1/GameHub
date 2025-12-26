@@ -75,6 +75,8 @@ services:
       - Etl998Settings__AgentId=${ETL998_AGENT_ID}
       - Etl998Settings__Md5Key=${ETL998_MD5_KEY}
       - Etl998Settings__DesKey=${ETL998_DES_KEY}
+      - GameSlotSettings__Host=${GAMESLOT_HOST}
+      - GameSlotSettings__Code=${GAMESLOT_PLATFORMCODE}
 
   game-x.seq:
     container_name: game-x.seq
@@ -89,20 +91,3 @@ services:
       - SEQ_FIRSTRUN_ADMINPASSWORD=admin1234
     volumes:
       - seq-data:/data
-
-  game-x.srs:
-    container_name: game-x.srs
-    ports:
-      - "1135:1935"   # RTMP port
-#      - "1985:1985"   # HTTP API port
-      - "8180:8080"   # HTTP server port
-    volumes:
-      - ./srs.conf:/usr/local/srs/conf/srs.conf
-      - ./ssl:/ssl:ro
-      - srs-data:/usr/local/srs/objs/nginx/html
-    command: ["./objs/srs", "-c", "conf/srs.conf"]
-    environment:
-      - TZ=Asia/Taipei
-    restart: always
-    networks:
-      - dls-gamex

@@ -131,7 +131,6 @@ services:
       - minio-data:/data
     command: server --console-address ":9001" /data
 
-
 # ========================
 # Volumes
 # ========================
