@@ -66,7 +66,8 @@ public sealed class WalletDepositHandler(
             {
                 balance.AdjustAmount(request.Amount, false);
             }, ct);
-
+            await unitOfWork.SaveChangesAsync(ct);
+            
             // Rollback all processing if the transaction fails at the third party
             if (request.PlatformId == GameConstants.PLATFORM_ID_G598)
                 await DepositToProviderWalletAsync(
