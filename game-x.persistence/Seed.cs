@@ -221,7 +221,7 @@ public static class Seed
             GamePlatform.Create("598彩票", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_G598),
             GamePlatform.Create("百家樂", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_GAMEBACCARAT),
             GamePlatform.Create("etl998", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT),
-            GamePlatform.Create("SAS Slot", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_GAMESLOT),
+            GamePlatform.Create("SAS Slot", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_SASSLOT),
         };
         foreach (var gamePlatform in gamePlatforms)
         {
@@ -332,7 +332,7 @@ public static class Seed
         await CreateEntity("998百家樂", "BAC002", GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT);
 
         // Seed game list for SAS Slot
-        await CreateEntity("Slot", "SLOT001", GameConstants.PLATFORM_ID_GAMESLOT);
+        await CreateEntity("Slot", "SLOT001", GameConstants.PLATFORM_ID_SASSLOT);
     }
 
     private static async Task SeedPublicConversation(GameXContext db, CancellationToken ct = default)

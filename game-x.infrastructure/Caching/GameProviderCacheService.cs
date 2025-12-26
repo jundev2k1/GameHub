@@ -135,8 +135,12 @@ public sealed class GameProviderCacheService(
     public GamePlatformDto BaccaratPlatform
         => PlatformList.FirstOrDefault(p => p.Id == GameConstants.PLATFORM_ID_GAMEBACCARAT)
             ?? throw new NotFoundException();
-    
+
     public GamePlatformDto Etl998Platform
         => PlatformList.FirstOrDefault(p => p.Id == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
+           ?? throw new NotFoundException();
+
+    public GamePlatformDto SasSlotPlatform
+        => PlatformList.FirstOrDefault(p => p.Id == GameConstants.PLATFORM_ID_SASSLOT)
            ?? throw new NotFoundException();
 }

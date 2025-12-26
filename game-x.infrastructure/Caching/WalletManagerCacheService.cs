@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
+using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
@@ -20,6 +21,7 @@ public sealed class WalletManagerCacheService(
     IGameProviderCacheService gameProviderCache,
     IGameBaccaratService gameBaccaratService,
     IEtl998Service etl998Service,
+    ISasSlotService sasSlotService,
     IGameProviderService gameProvider,
     IAppLogger<WalletManagerCacheService> logger) : CacheService(cache), IWalletManagerCacheService
 {
@@ -74,7 +76,14 @@ public sealed class WalletManagerCacheService(
             targetWallet: null,
             platform: gameProviderCache.Etl998Platform,
             balance: elt998Balance);
-        
+
+        var sasSlotBalance = await GetSasSlotWalletAsync(targetUser);
+        CreateOrUpdateExternalWallet(
+            wallet: userWallet,
+            targetWallet: null,
+            platform: gameProviderCache.SasSlotPlatform,
+            balance: sasSlotBalance);
+
         Set(cacheKey, userWallet);
     }
 
@@ -118,7 +127,7 @@ public sealed class WalletManagerCacheService(
                 platform: gameProviderCache.BaccaratPlatform,
                 balance: balance);
         }
-        
+
         if (platformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
         {
             var balance = await GetElt998WalletAsync(targetUser);
@@ -126,6 +135,16 @@ public sealed class WalletManagerCacheService(
                 wallet: userWallet,
                 targetWallet: targetWallet,
                 platform: gameProviderCache.Etl998Platform,
+                balance: balance);
+        }
+
+        if (platformId == GameConstants.PLATFORM_ID_SASSLOT)
+        {
+            var balance = await GetSasSlotWalletAsync(targetUser);
+            CreateOrUpdateExternalWallet(
+                wallet: userWallet,
+                targetWallet: targetWallet,
+                platform: gameProviderCache.SasSlotPlatform,
                 balance: balance);
         }
 
@@ -185,7 +204,7 @@ public sealed class WalletManagerCacheService(
                 Account = targetUser.UserExtend.Etl998ProviderAccount,
                 Password = targetUser.UserExtend.Etl998ProviderPassword
             };
-            
+
             var response = await etl998Service.GetWalletAsync(request);
             var externalWallet = response.FirstOrDefault();
             return externalWallet?.Money;
@@ -196,7 +215,24 @@ public sealed class WalletManagerCacheService(
             return null;
         }
     }
-    
+
+    private async Task<decimal?> GetSasSlotWalletAsync(User targetUser)
+    {
+        if (targetUser.UserExtend is null
+            || targetUser.UserExtend.SasSlotAccount.IsNullOrWhiteSpace()) return null;
+
+        try
+        {
+            var response = await sasSlotService.GetWalletAsync(targetUser.UserExtend.SasSlotAccount);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to get external wallet", ex.Message);
+            return null;
+        }
+    }
+
     private static void CreateOrUpdateExternalWallet(
         UserWalletDto wallet,
         UserWalletExternalItemDto? targetWallet,

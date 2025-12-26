@@ -1,6 +1,7 @@
 ﻿using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
+using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Utils;
@@ -17,6 +18,7 @@ public sealed class OnGameRegisterHandler(
     IGameProviderService gameProvider,
     IGameBaccaratService gameBaccarat,
     IEtl998Service etl998Service,
+    ISasSlotService sasSlotService,
     IGameAesEncryptor gameAesEncryptor,
     IAesEncryptor aesEncryptor) : IApplicationEventHandler<OnGameRegisterEvent>
 {
@@ -46,10 +48,16 @@ public sealed class OnGameRegisterHandler(
             await RegisterGameBaccaratUser(usrex, usrex.User.Nickname);
             return;
         }
-        
+
+        // Platform: Game etl998
         if (@event.GamePlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
         {
             await RegisterEtl998User(usrex, usrex.User.Nickname);
+        }
+
+        if (@event.GamePlatformId == GameConstants.PLATFORM_ID_SASSLOT)
+        {
+            await RegisterSasSlotUser(usrex, usrex.User.Nickname);
         }
     }
 
@@ -108,5 +116,13 @@ public sealed class OnGameRegisterHandler(
             if(data != null)
                 usrex.UpdateEtl998Account(account: account, nickname: nickName, password: aesEncryptor.Encrypt(password));
         }
+    }
+
+    private async Task RegisterSasSlotUser(UserExtend usrex, string nickName)
+    {
+        var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
+        var account = $"Gx{suffix}";
+        await sasSlotService.RegisterAsync(account, nickName);
+        usrex.UpdateSasSlotAccount(account, nickName);
     }
 }

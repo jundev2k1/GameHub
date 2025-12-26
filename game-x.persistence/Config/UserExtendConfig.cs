@@ -78,6 +78,18 @@ public class UserExtendConfig : IEntityTypeConfiguration<UserExtend>
             .HasMaxLength(4000)
             .HasDefaultValue(string.Empty);
 
+        builder.Property(urex => urex.SasSlotAccount)
+            .HasColumnName("usrex_slot_account")
+            .IsRequired()
+            .HasMaxLength(4000)
+            .HasDefaultValue(string.Empty);
+
+        builder.Property(urex => urex.SasSlotNickname)
+            .HasColumnName("usrex_slot_nickname")
+            .IsRequired()
+            .HasMaxLength(4000)
+            .HasDefaultValue(string.Empty);
+
         builder.HasOne(urex => urex.User)
             .WithOne(u => u.UserExtend)
             .HasForeignKey<UserExtend>(urex => urex.Id)

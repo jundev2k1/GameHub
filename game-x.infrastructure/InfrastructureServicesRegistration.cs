@@ -51,6 +51,8 @@ using System.Text.Json.Serialization;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.infrastructure.ExternalApi.Etl998;
 using game_x.infrastructure.ExternalApi.Etl998.Interceptors;
+using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
+using game_x.infrastructure.ExternalApi.SasSlot;
 
 namespace game_x.infrastructure;
 
@@ -98,6 +100,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
         services.AddScoped<IGameProviderService, GameProviderService>();
         services.AddScoped<IGameBaccaratService, GameBaccaratService>();
+        services.AddScoped<ISasSlotService, SasSlotService>();
         services.AddScoped<ISrsService, SrsService>();
         services.AddScoped<IEtl998Service, Etl998Service>();
         services.AddScoped<IFileStorageService, FileStorageService>();
@@ -291,6 +294,17 @@ public static class InfrastructureServicesRegistration
                 c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             })
             .AddHttpMessageHandler<HmacMessageHandler>()
+            .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
+
+        // SAS Slot API
+        services.AddRefitClient<ISasSlotApi>()
+            .ConfigureHttpClient(c =>
+            {
+                var baseUrl = configuration["GameSlotSettings:Host"]
+                    ?? throw new InvalidOperationException("GameSlotSettings:Host not configured");
+                c.BaseAddress = new Uri(baseUrl);
+                c.Timeout = TimeSpan.FromSeconds(5);
+            })
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
         // SRS API

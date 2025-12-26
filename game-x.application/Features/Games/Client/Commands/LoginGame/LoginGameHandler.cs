@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
+using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
@@ -22,6 +23,7 @@ public sealed class LoginGameHandler(
     IUserRepo userRepo,
     IGameProviderService gameProvider,
     IGameBaccaratService gameBaccarat,
+    ISasSlotService sasSlotService,
     IGameAesEncryptor gameAesEncryptor,
     IAesEncryptor aesEncryptor,
     IGameProviderCacheService gameProviderCache,
@@ -108,6 +110,12 @@ public sealed class LoginGameHandler(
             var result = await etl998Service.ForwardGameAsync(externalRequest);
             var data = result.FirstOrDefault();
             return data?.GameUrl;
+        }
+
+        if (gamePlatformId == GameConstants.PLATFORM_ID_SASSLOT)
+        {
+            var result = await sasSlotService.LoginAsync(usrex.SasSlotAccount, usrex.SasSlotNickname);
+            return result;
         }
 
         return null;

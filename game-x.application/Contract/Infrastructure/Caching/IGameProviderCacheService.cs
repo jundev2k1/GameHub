@@ -36,4 +36,5 @@ public interface IGameProviderCacheService
     GamePlatformDto G598Platform { get; }
     GamePlatformDto BaccaratPlatform { get; }
     GamePlatformDto Etl998Platform { get; }
+    GamePlatformDto SasSlotPlatform { get; }
 }
