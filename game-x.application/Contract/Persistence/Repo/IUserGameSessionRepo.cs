@@ -17,9 +17,13 @@ public interface IUserGameSessionRepo
 
     Task UpdateAsync(int id, Action<UserGameSession> updateAction, CancellationToken ct = default);
 
-    Task AddConnectionAsync(UserGameSessionConnection connection, CancellationToken ct = default);
+    Task RegisterConnectionAsync(UserGameSessionConnection connection, CancellationToken ct = default);
 
     Task UpdateConnectionAsync(long id, Action<UserGameSessionConnection> updateAction, CancellationToken ct = default);
 
-    Task BulkUpdateExpiredGameSessionsAsync(int pageSize, CancellationToken ct = default);
+    Task CheckOutAsync(string connectionId, CancellationToken ct = default);
+
+    Task<bool> PingAsync(string connectionId, CancellationToken ct = default);
+
+    Task BulkUpdateExpiredGameSessionsAsync(CancellationToken ct = default);
 }

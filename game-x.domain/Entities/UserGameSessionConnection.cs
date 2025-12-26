@@ -7,6 +7,7 @@ public sealed class UserGameSessionConnection : BaseEntity<long>
 
     public string ConnectionId { get; private set; } = string.Empty;
     public DateTime ConnectedAt { get; private set; }
+    public DateTime LastSeenAt { get; private set; }
     public DateTime? DisconnectedAt { get; private set; }
 
     public static UserGameSessionConnection Create(
@@ -17,8 +18,14 @@ public sealed class UserGameSessionConnection : BaseEntity<long>
         {
             UserGameSessionId = sessionId,
             ConnectionId = connectionId,
-            ConnectedAt = DateTime.UtcNow
+            ConnectedAt = DateTime.UtcNow,
+            LastSeenAt = DateTime.UtcNow,
         };
+    }
+
+    public void Ping()
+    {
+        LastSeenAt = DateTime.UtcNow;
     }
 
     public void Disconnect()

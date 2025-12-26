@@ -13,15 +13,12 @@ public sealed class GameSessionTimeoutCheckerJob(
 {
     public string JobId => "game-session-timeout-checker";
     public string CronExpression => jobOptions.Value.GameSessionTimeoutCheckerJob;
-    public bool IsInit => false;
-
-    /// <summary>Maximum number of records allowed to be processed per transaction</summary>
-    private const int LimitRangeCount = 1000;
+    public bool IsInit => true;
 
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
         logger.LogInformation("Job is running...");
-        await userGameSessionRepo.BulkUpdateExpiredGameSessionsAsync(LimitRangeCount, ct);
+        await userGameSessionRepo.BulkUpdateExpiredGameSessionsAsync(ct);
         logger.LogInformation("Job has stopped...");
     }
 }

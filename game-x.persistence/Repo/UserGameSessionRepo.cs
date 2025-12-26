@@ -3,10 +3,11 @@ using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.UserGameSessions.Dtos;
+using Microsoft.EntityFrameworkCore;
 
 namespace game_x.persistence.Repo;
 
-public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSessionRepo, IRepository
+public sealed class UserGameSessionRepo(GameXContext context, IUnitOfWork unitOfWork) : IUserGameSessionRepo, IRepository
 {
     public async Task<PaginationResult<UserGameSessionSearchItemDto>> GetsByCriteriaAsync(
         Func<IQueryable<UserGameSessionSearchItemDto>, IQueryable<UserGameSessionSearchItemDto>>? builder = null,
@@ -51,15 +52,13 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
 
     public async Task<UserGameSession?> GetCurrentSessionByUserIdAsync(string userId, int platformId, int? gameId, CancellationToken ct = default)
     {
-        var currentTime = DateTime.UtcNow;
         return await context.UserGameSessions
             .Include(ugs => ugs.Connections)
             .FirstOrDefaultAsync(ugs =>
                 ugs.UserId == userId
                 && ugs.PlatformId == platformId
                 && ugs.GameId == gameId
-                && !ugs.IsEnd
-                && ugs.Connections.Any(c => c.ConnectedAt < currentTime), ct);
+                && !ugs.IsEnd, ct);
     }
 
     public async Task CreateAsync(UserGameSession gameSession, CancellationToken ct = default)
@@ -76,7 +75,7 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
         updateAction?.Invoke(targetSession);
     }
 
-    public async Task AddConnectionAsync(UserGameSessionConnection connection, CancellationToken ct = default)
+    public async Task RegisterConnectionAsync(UserGameSessionConnection connection, CancellationToken ct = default)
     {
         await context.UserGameSessionConnections.AddAsync(connection, ct);
     }
@@ -90,15 +89,50 @@ public sealed class UserGameSessionRepo(GameXContext context) : IUserGameSession
         updateAction?.Invoke(targetSession);
     }
 
-    public async Task BulkUpdateExpiredGameSessionsAsync(int pageSize, CancellationToken ct = default)
+    public async Task CheckOutAsync(string connectionId, CancellationToken ct = default)
     {
-        var currentTime = DateTime.UtcNow.AddMinutes(5);
+        await context.UserGameSessionConnections
+            .Where(uc => uc.ConnectionId == connectionId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.DisconnectedAt, DateTime.UtcNow), ct);
+    }
 
+    public async Task<bool> PingAsync(string connectionId, CancellationToken ct = default)
+    {
+        bool isSuccess = true;
+        await unitOfWork.WithTransactionAsync(async () =>
+        {
+            var targetConnection = await context.UserGameSessionConnections
+                .FirstOrDefaultAsync(usc => usc.ConnectionId == connectionId, ct);
+            if (targetConnection == null)
+            {
+                isSuccess = false;
+                return;
+            }
+
+            targetConnection.Ping();
+        }, ct: ct);
+        return isSuccess;
+    }
+
+    public async Task BulkUpdateExpiredGameSessionsAsync(CancellationToken ct = default)
+    {
+        var expiredAt = DateTime.UtcNow.AddMinutes(5);
+
+        // Mark ended for User Sessions
         await context.UserGameSessions
             .Where(ugs =>
                 !ugs.IsEnd
                 && ugs.Connections.Any()
-                && ugs.Connections.All(c => c.DisconnectedAt != null && c.DisconnectedAt < currentTime))
+                && ugs.Connections.All(c => c.LastSeenAt < expiredAt))
             .ExecuteUpdateAsync(setters => setters.SetProperty(ugs => ugs.IsEnd, true), ct);
+
+        // Set DisconnectedAt to LastSeenAt if records have been updated by clean up job
+        await context.UserGameSessionConnections
+            .Where(c => c.Session.IsEnd && c.DisconnectedAt == null)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(
+                    c => c.DisconnectedAt,
+                    c => c.LastSeenAt),
+                ct);
     }
 }
