@@ -14,6 +14,7 @@ public sealed class UserExtend : BaseEntity<string>, IEntity
     public string Etl998ProviderAccount { get; private set; } = string.Empty;
     public string Etl998ProviderNickname { get; private set; } = string.Empty;
     public string Etl998ProviderPassword { get; private set; } = string.Empty;
+    public int Etl998ProviderTableLimit { get; private set; }
     public string SasSlotAccount { get; private set; } = string.Empty;
     public string SasSlotNickname { get; private set; } = string.Empty;
     
@@ -43,11 +44,12 @@ public sealed class UserExtend : BaseEntity<string>, IEntity
         GameBaccaratNickname = gameBaccaratNickname;
     }
     
-    public void UpdateEtl998Account(string account, string nickname, string password)
+    public void UpdateEtl998Account(string account, string nickname, string password, int limitId)
     {
         Etl998ProviderAccount = account;
         Etl998ProviderNickname = nickname;
         Etl998ProviderPassword = password;
+        Etl998ProviderTableLimit = limitId;
     }
 
     public void UpdateSasSlotAccount(string account, string nickname)

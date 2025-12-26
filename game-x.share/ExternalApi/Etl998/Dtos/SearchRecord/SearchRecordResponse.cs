@@ -7,31 +7,31 @@ public sealed class SearchRecordResponse
     [JsonPropertyName("username")]
     public string UserName { get; set; } = string.Empty;
     [JsonPropertyName("gametype")]
-    public string GameType { get; set; } = string.Empty;
+    public int GameType { get; set; }
     [JsonPropertyName("Tableid")]
-    public string TableId { get; set; } = string.Empty;
+    public int TableId { get; set; }
     [JsonPropertyName("Chang")]
-    public string ShoeNumber { get; set; } = string.Empty;
+    public int ShoeNumber { get; set; }
     /// <summary>Hand / round number.</summary>
     [JsonPropertyName("Ci")]
-    public string RoundNumber { get; set; } = string.Empty;
+    public int RoundNumber { get; set; }
     /// <summary>Banker / Dragon result.</summary>
     [JsonPropertyName("Zhuang")]
-    public string SystemResult { get; set; } = string.Empty;
+    public int SystemResult { get; set; }
     /// <summary>Player / Tiger result.</summary>
     [JsonPropertyName("Xian")]
-    public string PlayerResult { get; set; } = string.Empty;
+    public int PlayerResult { get; set; }
     [JsonPropertyName("He")]
-    public string Tie { get; set; } = string.Empty;
+    public int Tie { get; set; }
     [JsonPropertyName("Zhuangdui")]
-    public string BankerPair { get; set; } = string.Empty;
+    public int BankerPair { get; set; }
     [JsonPropertyName("Xiandui")]
-    public string PlayerPair { get; set; } = string.Empty;
+    public int PlayerPair { get; set; }
     /// <summary>Rolling / rebate amount.</summary>
     [JsonPropertyName("Ximaliang")]
-    public string Amount { get; set; } = string.Empty;
+    public int Amount { get; set; }
     [JsonPropertyName("Jieguo")]
-    public string Result { get; set; } = string.Empty;
+    public int Result { get; set; }
     /// <summary>IP address.</summary>
     [JsonPropertyName("IP")]
     public string Ip { get; set; } = string.Empty;
@@ -41,5 +41,5 @@ public sealed class SearchRecordResponse
     public string SettlementTime { get; set; } = string.Empty;
     /// <summary>Balance after settlement.</summary>
     [JsonPropertyName("Smoney")]
-    public string BalanceAfter { get; set; } = string.Empty;
+    public int BalanceAfter { get; set; }
 }

@@ -70,6 +70,8 @@ public sealed class WalletWithdrawalHandler(
                 balance.AdjustAmount(request.Amount, true);
             }, ct);
 
+            await unitOfWork.SaveChangesAsync(ct);
+            
             // Rollback all processing if the transaction fails at the third party
             if (request.PlatformId == GameConstants.PLATFORM_ID_G598)
                 await WithdrawalToProviderWalletAsync(

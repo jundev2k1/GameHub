@@ -21,7 +21,7 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
         var latestTransaction = await transactionRepo
             .GetLatestExternalTransactionAsync(@event.UserId, platform.LocalId, ct);
         if (latestTransaction is null) return;
-
+ 
         var platformWallet = await walletManagerCache.GetExternalWalletAsync(
             @event.UserId,
             platform.Id);

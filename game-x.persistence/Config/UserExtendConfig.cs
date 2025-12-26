@@ -78,6 +78,10 @@ public class UserExtendConfig : IEntityTypeConfiguration<UserExtend>
             .HasMaxLength(4000)
             .HasDefaultValue(string.Empty);
 
+        builder.Property(urex => urex.Etl998ProviderTableLimit)
+            .HasColumnName("usrex_etl998_table_limit")
+            .IsRequired();
+
         builder.Property(urex => urex.SasSlotAccount)
             .HasColumnName("usrex_slot_account")
             .IsRequired()

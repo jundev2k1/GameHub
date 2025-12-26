@@ -1,5 +1,3 @@
 namespace game_x.application.Features.Games.Client.Commands.Etl998.ModifyBettingLimit;
 
-public record ModifyBettingLimitCommand(
-    string AccountName, 
-    string Tables) : ICommand<bool>;
+public record ModifyBettingLimitCommand(int LimitId) : ICommand<bool>;
