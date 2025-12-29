@@ -39,36 +39,16 @@ public sealed class Game : BaseEntity<int>, IAuditable
         string desc,
         string note,
         int priority,
-        bool isActive,
-        ICollection<GameCategoryMapping>? categories,
-        ICollection<GameTypeMapping>? types,
-        ICollection<GameTagMapping>? tags,
-        int? thumbnailId = null)
+        bool isActive)
     {
         if (priority < 0)
             throw new ArgumentException("Priority must be greater than or equal to 0.", nameof(priority));
-        if (categories != null && categories.Count > 0 && categories.Count(c => c.IsPrimary) != 1)
-            throw new ArgumentException("There must be exactly one primary category.", nameof(categories));
-        if (types != null && types.Count > 0 && types.Count(t => t.IsPrimary) != 1)
-            throw new ArgumentException("There must be exactly one primary type.", nameof(types));
-        if (tags != null && tags.Count > 0 && tags.Count(t => t.IsPrimary) != 1)
-            throw new ArgumentException("There must be exactly one primary tag.", nameof(tags));
-        if (categories != null && (categories.Select(c => c.CategoryId).Distinct().Count() != categories.Count))
-            throw new ArgumentException("Categories contains duplicate category IDs.", nameof(categories));
-        if (types != null && (types.Select(t => t.TypeId).Distinct().Count() != types.Count))
-            throw new ArgumentException("Types contains duplicate type IDs.", nameof(types));
-        if (tags != null && (tags.Select(t => t.TagId).Distinct().Count() != tags.Count))
-            throw new ArgumentException("Tags contains duplicate tag IDs.", nameof(tags));
 
         Name = name;
         Description = desc;
         Note = note;
         Priority = priority;
         IsActive = isActive;
-        ThumbnailId = thumbnailId ?? ThumbnailId;
-        GameCategoryMappings = categories ?? GameCategoryMappings;
-        GameTypeMappings = types ?? GameTypeMappings;
-        GameTagMappings = tags ?? GameTagMappings;
     }
 
     public void UpdateThumbnail(MediaFile thumbnail)

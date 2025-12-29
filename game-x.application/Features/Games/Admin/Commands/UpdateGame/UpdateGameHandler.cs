@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Extensions;
+using MediatR;
 
 namespace game_x.application.Features.Games.Admin.Commands.UpdateGame;
 
@@ -21,28 +22,8 @@ public sealed class UpdateGameHandler(
         // Update game
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            var targetGame = await gameRepo.GetAsync(request.Id, ct);
-
-            ICollection<GameCategoryMapping>? categories = request.Categories != null
-                ? [.. GetCategoryMappings(request, targetGame)]
-                : null;
-            if (categories != null)
-                await gameRepo.DeleteAllCategoryMappingsAsync(request.Id, ct);
-
-            ICollection<GameTypeMapping>? types = request.Types != null
-                ? [.. GetTypeMappings(request, targetGame)]
-                : null;
-            if (types != null)
-                await gameRepo.DeleteAllTypeMappingsAsync(request.Id, ct);
-
-            ICollection<GameTagMapping>? tags = request.Tags != null
-                ? [.. GetTagMappings(request, targetGame)]
-                : null;
-            if (tags != null)
-                await gameRepo.DeleteAllTagMappingsAsync(request.Id, ct);
-
-            // Execute delete all mappings
-            await unitOfWork.SaveChangesAsync(ct);
+            // Insert category/type/tag if there are any updates
+            await InsertMappingsAsync(request, ct);
 
             // Execute update game
             await gameRepo.UpdateGameAsync(request.Id, async game =>
@@ -52,10 +33,7 @@ public sealed class UpdateGameHandler(
                     desc: request.Description.Trim(),
                     note: request.Note.Trim(),
                     priority: request.Priority,
-                    isActive: request.IsActive,
-                    categories: categories,
-                    types: types,
-                    tags: tags);
+                    isActive: request.IsActive);
 
                 // Handle upload if new thumbnail is provided
                 if (request.Thumbnail != null)
@@ -103,6 +81,42 @@ public sealed class UpdateGameHandler(
             if (invalidTagIds.Length > 0)
                 throw new BadRequestException($"Invalid tag ids: {invalidTagIds.JoinToString(", ")}");
         }
+    }
+
+    private async Task InsertMappingsAsync(UpdateGameCommand request, CancellationToken ct)
+    {
+        var targetGame = await gameRepo.GetAsync(request.Id, ct);
+
+        ICollection<GameCategoryMapping>? categories = request.Categories != null
+            ? [.. GetCategoryMappings(request, targetGame)]
+            : null;
+        if (categories != null)
+        {
+            await gameRepo.DeleteAllCategoryMappingsAsync(request.Id, ct);
+            await gameRepo.AddRangeGameCategoriesAsync(categories, ct);
+        }
+
+        ICollection<GameTypeMapping>? types = request.Types != null
+            ? [.. GetTypeMappings(request, targetGame)]
+            : null;
+        if (types != null)
+        {
+            await gameRepo.DeleteAllTypeMappingsAsync(request.Id, ct);
+            await gameRepo.AddRangeGameTypesAsync(types, ct);
+        }
+
+        ICollection<GameTagMapping>? tags = request.Tags != null
+            ? [.. GetTagMappings(request, targetGame)]
+            : null;
+        if (tags != null)
+        {
+            await gameRepo.DeleteAllTagMappingsAsync(request.Id, ct);
+            await gameRepo.AddRangeGameTagsAsync(tags, ct);
+        }
+
+        // Execute delete all mappings
+        await unitOfWork.SaveChangesAsync(ct);
+
     }
 
     private async Task HandleUploadNewThumbnail(Game game, FileUpload fileUpload, CancellationToken ct)

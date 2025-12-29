@@ -71,6 +71,21 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             pageSize);
     }
 
+    public async Task AddRangeGameCategoriesAsync(IEnumerable<GameCategoryMapping> gameCateMappings, CancellationToken ct = default)
+    {
+        await context.GameCategoryMappings.AddRangeAsync(gameCateMappings, ct);
+    }
+
+    public async Task AddRangeGameTypesAsync(IEnumerable<GameTypeMapping> gameTypeMappings, CancellationToken ct = default)
+    {
+        await context.GameTypeMappings.AddRangeAsync(gameTypeMappings, ct);
+    }
+
+    public async Task AddRangeGameTagsAsync(IEnumerable<GameTagMapping> gameTagMappings, CancellationToken ct = default)
+    {
+        await context.GameTagMappings.AddRangeAsync(gameTagMappings, ct);
+    }
+
     public async Task UpdateGameAsync(
         Guid gameId,
         Func<Game, Task> updateAction,
