@@ -93,7 +93,10 @@ public sealed class UpdateGameHandler(
         if (categories != null)
         {
             await gameRepo.DeleteAllCategoryMappingsAsync(request.Id, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+
             await gameRepo.AddRangeGameCategoriesAsync(categories, ct);
+            await unitOfWork.SaveChangesAsync(ct);
         }
 
         ICollection<GameTypeMapping>? types = request.Types != null
@@ -102,7 +105,10 @@ public sealed class UpdateGameHandler(
         if (types != null)
         {
             await gameRepo.DeleteAllTypeMappingsAsync(request.Id, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+
             await gameRepo.AddRangeGameTypesAsync(types, ct);
+            await unitOfWork.SaveChangesAsync(ct);
         }
 
         ICollection<GameTagMapping>? tags = request.Tags != null
@@ -111,12 +117,11 @@ public sealed class UpdateGameHandler(
         if (tags != null)
         {
             await gameRepo.DeleteAllTagMappingsAsync(request.Id, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+
             await gameRepo.AddRangeGameTagsAsync(tags, ct);
+            await unitOfWork.SaveChangesAsync(ct);
         }
-
-        // Execute delete all mappings
-        await unitOfWork.SaveChangesAsync(ct);
-
     }
 
     private async Task HandleUploadNewThumbnail(Game game, FileUpload fileUpload, CancellationToken ct)
