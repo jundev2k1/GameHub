@@ -13,7 +13,7 @@ public sealed class UpdateGameRecommendHandler(
         var gameList = gameProviderCache.GameList;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await gameRecommendRepo.UpdateAsync(request.Id, async recommend =>
+            await gameRecommendRepo.UpdateAsync(request.Id!.Value, async recommend =>
             {
                 // Check overlap time
                 var overlapItem = await gameRecommendRepo.GetOverlapItemAsync(recommend, ct);
