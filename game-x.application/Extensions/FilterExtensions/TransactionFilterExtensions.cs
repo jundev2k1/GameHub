@@ -78,13 +78,22 @@ public static class TransactionFilterExtensions
 
         if (type == TransactionTabType.Cash)
         {
-            return tx => tx.Type != TransactionType.BalanceAdjustment
-                && tx.Type != TransactionType.Init;
+            return tx => !new[]
+            {
+                TransactionType.BalanceAdjustment, 
+                TransactionType.Init
+            }.Contains(tx.Type);
         }
+
         if (type == TransactionTabType.Credit)
         {
-            return tx => tx.SourceType == TransactionSourceType.G598SnoGameProvider
-                || tx.SourceType == TransactionSourceType.BaccaratGameProvider;
+            return tx =>
+                new[]
+                {
+                    TransactionSourceType.G598SnoGameProvider,
+                    TransactionSourceType.BaccaratGameProvider,
+                    TransactionSourceType.Elt998GameProvider
+                }.Contains(tx.SourceType);
         }
 
         return _ => true;
