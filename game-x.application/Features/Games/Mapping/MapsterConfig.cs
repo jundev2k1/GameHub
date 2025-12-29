@@ -33,19 +33,19 @@ public sealed class MapsterConfig : IRegister
                 src => src.GameCategoryMappings
                     .Select(x => x.Adapt<GameCategoryInfo>())
                     .OrderBy(g => g.IsPrimary)
-                    .ThenBy(g => g.Priority))
+                    .ThenByDescending(g => g.Priority))
             .Map(
                 dest => dest.GameTypes,
                 src => src.GameTypeMappings
                     .Select(x => x.Adapt<GameTypeInfo>())
                     .OrderBy(g => g.IsPrimary)
-                    .ThenBy(g => g.Priority))
+                    .ThenByDescending(g => g.Priority))
             .Map(
                 dest => dest.GameTags,
                 src => src.GameTagMappings
                     .Select(x => x.Adapt<GameTagInfo>())
                     .OrderBy(g => g.IsPrimary)
-                    .ThenBy(g => g.Priority))
+                    .ThenByDescending(g => g.Priority))
             .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
             .Map(dest => dest.PlatformName, src => src.Platform.Name);
 
@@ -139,8 +139,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Items, src => src.Items.Select(i => i.Adapt<GameRecommendItemDto>()));
 
         cfg.NewConfig<GameRecommendItem, GameRecommendItemDto>()
-            .Map(dest => dest.LocalGameId, src => src.Game.PublicId)
-            .Map(dest => dest.GameId, src => src.GameId)
+            .Map(dest => dest.LocalGameId, src => src.GameId)
+            .Map(dest => dest.GameId, src => src.Game.PublicId)
             .Map(dest => dest.GameName, src => src.Game.Name)
             .Map(dest => dest.LocalPlatformId, src => src.Game.PlatformId)
             .Map(dest => dest.PlatformId, src => src.Game.Platform.PublicId)

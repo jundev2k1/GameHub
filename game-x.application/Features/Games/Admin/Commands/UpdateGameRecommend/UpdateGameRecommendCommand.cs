@@ -3,7 +3,7 @@
 namespace game_x.application.Features.Games.Admin.Commands.UpdateGameRecommend;
 
 public record UpdateGameRecommendCommand(
-    [property: JsonIgnore] Guid Id,
+    [property: JsonIgnore] Guid? Id,
     string Name,
     string Description,
     PublishStatus Status,

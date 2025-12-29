@@ -55,6 +55,7 @@ public sealed class OnGameRegisterHandler(
             await RegisterEtl998User(usrex, usrex.User.Nickname);
         }
 
+        // Platform: SAS Slot
         if (@event.GamePlatformId == GameConstants.PLATFORM_ID_SASSLOT)
         {
             await RegisterSasSlotUser(usrex, usrex.User.Nickname);

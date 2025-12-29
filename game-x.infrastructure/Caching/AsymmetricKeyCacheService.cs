@@ -25,6 +25,7 @@ public sealed class AsymmetricKeyCacheService(
     public string GameXPrivateKey => GetKey(AsymmetricKeyNames.GameX, AsymmetricKeyType.Private, AsymmetricType.ECDSA);
     public string GameXPublicKey  => GetKey(AsymmetricKeyNames.GameX, AsymmetricKeyType.Public,  AsymmetricType.ECDSA);
     public string UxmPublicKey  => GetKey(AsymmetricKeyNames.Uxm, AsymmetricKeyType.Public,  AsymmetricType.ECDSA);
+    public string SlotPublicKey => GetKey(AsymmetricKeyNames.Slot, AsymmetricKeyType.Public,  AsymmetricType.ECDSA);
 
     private string GetKey(string name, AsymmetricKeyType keyType, string algorithm)
     {

@@ -6,4 +6,5 @@ public interface IAsymmetricKeyCacheService
     string GameXPrivateKey { get; }
     string GameXPublicKey { get; }
     string UxmPublicKey { get; }
+    string SlotPublicKey { get; }
 }

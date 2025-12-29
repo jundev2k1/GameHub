@@ -17,6 +17,17 @@ public sealed class GameRecommendRepo(GameXContext context)
             .ToArrayAsync(ct);
     }
 
+    public async Task<GameRecommend> GetAsync(Guid id, CancellationToken ct = default)
+    {
+        return await context.GameRecommends
+            .AsNoTracking()
+            .Include(gr => gr.Items)
+            .ThenInclude(gri => gri.Game)
+            .ThenInclude(g => g.Platform)
+            .FirstOrDefaultAsync(gr => gr.PublicId == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+    }
+
     public async Task<GameRecommend?> GetOverlapItemAsync(GameRecommend recommend, CancellationToken ct = default)
     {
         var minDate = DateTime.MinValue;
@@ -32,6 +43,11 @@ public sealed class GameRecommendRepo(GameXContext context)
     public async Task AddAsync(GameRecommend recommend, CancellationToken ct = default)
     {
         await context.GameRecommends.AddAsync(recommend, ct);
+    }
+
+    public async Task AddItemsAsync(Guid id, IEnumerable<GameRecommendItem> items, CancellationToken ct = default)
+    {
+        await context.GameRecommendItems.AddRangeAsync(items, ct);
     }
 
     public async Task UpdateAsync(Guid id, Func<GameRecommend, Task> updateAction, CancellationToken ct = default)
@@ -50,5 +66,14 @@ public sealed class GameRecommendRepo(GameXContext context)
             ?? throw new NotFoundException(nameof(id), id);
 
         context.GameRecommends.Remove(targetRecommend);
+    }
+
+    public async Task DeleteAllItemsAsync(Guid id, CancellationToken ct = default)
+    {
+        var targetRecommends = await context.GameRecommendItems
+            .Where(i => i.GameRecommend.PublicId == id)
+            .ToArrayAsync(ct);
+
+        context.RemoveRange(targetRecommends);
     }
 }

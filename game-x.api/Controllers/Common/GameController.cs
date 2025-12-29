@@ -30,7 +30,7 @@ public sealed class GameController(
         var dateTime = DateTime.UtcNow;
         var data = gameProviderCache.GameRecommendList
             .FirstOrDefault(r => r.StartDate <= dateTime && r.EndDate >= dateTime);
-        var response = await Task.FromResult(data?.Items.OrderBy(i => i.Priority).ToArray() ?? []);
+        var response = await Task.FromResult(data?.Items.OrderByDescending(i => i.Priority).ToArray() ?? []);
         return ApiResponseFactory.Ok(response);
     }
 
@@ -38,7 +38,7 @@ public sealed class GameController(
     public async Task<IActionResult> GetPlatformListAsync()
     {
         var result = gameProviderCache.PlatformList
-            .OrderBy(platform => platform.Priority)
+            .OrderByDescending(platform => platform.Priority)
             .Select(platform => new
             {
                 platform.Id,
@@ -53,7 +53,7 @@ public sealed class GameController(
     public async Task<IActionResult> GetCategoryListAsync()
     {
         var result = gameProviderCache.CategoryList
-            .OrderBy(cate => cate.Priority)
+            .OrderByDescending(cate => cate.Priority)
             .Select(cate => new
             {
                 cate.Id,
@@ -68,7 +68,7 @@ public sealed class GameController(
     public async Task<IActionResult> GetGameTypeListAsync()
     {
         var result = gameProviderCache.GameTypeList
-            .OrderBy(type => type.Priority)
+            .OrderByDescending(type => type.Priority)
             .Select(type => new
             {
                 type.Id,

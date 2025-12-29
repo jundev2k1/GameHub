@@ -169,6 +169,12 @@ public static class Seed
                 AsymmetricType.ECDSA,
                 "----- BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEm1PhAmoUuAmQANNJFJov1Dra6kXt\r\nMM7OcxKGd0qtCZgNT375AasOYAKqxlhGZHX8ohfIF+Pa1bfbysSujYKGRw==\r\n-----END PUBLIC KEY-----",
                 "Uxm 公鑰"),
+            AsymmetricKey.Create(
+                AsymmetricKeyNames.Slot,
+                AsymmetricKeyType.Public,
+                AsymmetricType.ECDSA,
+                "----- BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEm1PhAmoUuAmQANNJFJov1Dra6kXt\r\nMM7OcxKGd0qtCZgNT375AasOYAKqxlhGZHX8ohfIF+Pa1bfbysSujYKGRw==\r\n-----END PUBLIC KEY-----",
+                "Uxm 公鑰"),
         };
 
         await context.AsymmetricKeys.AddRangeAsync(keys);

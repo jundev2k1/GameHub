@@ -9,7 +9,7 @@ public sealed class UpdateGameRecommendValidator : AbstractValidator<UpdateGameR
             .MaximumLength(50);
 
         RuleFor(x => x.Description)
-            .MaximumLength(4000).WithMessage($"{nameof(UpdateGameRecommendCommand.Description)} must be less than 4000 chacracters.");
+            .MaximumLength(4000).WithMessage($"{nameof(UpdateGameRecommendCommand.Description)} must be less than 4000 characters.");
 
         RuleFor(x => x.Status)
             .IsInEnum().WithMessage($"{nameof(UpdateGameRecommendCommand.Status)} is invalid.");
@@ -28,7 +28,7 @@ public sealed class UpdateGameRecommendValidator : AbstractValidator<UpdateGameR
             .NotNull().WithMessage("Items is required.")
             .Must(items => items.Select(i => i.GameId).Distinct().Count() == items.Length)
             .WithMessage("Duplicate GameId is not allowed in Items.")
-            .Must(items => items.All(i => i.Priority > 0))
+            .Must(items => items.All(i => i.Priority >= 0))
             .WithMessage("Game item priority must be greater than or equal 0.");
     }
 }

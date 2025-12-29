@@ -43,6 +43,7 @@ public sealed class GameXContext(
     public DbSet<GameTagMapping> GameTagMappings { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<GameRecommend> GameRecommends { get; set; }
+    public DbSet<GameRecommendItem> GameRecommendItems { get; set; }
     public DbSet<FiatCurrency> FiatCurrencies { get; set; }
     public DbSet<UserBankAccount> UserBankAccounts { get; set; }
     public DbSet<Conversation> Conversations { get; set; }

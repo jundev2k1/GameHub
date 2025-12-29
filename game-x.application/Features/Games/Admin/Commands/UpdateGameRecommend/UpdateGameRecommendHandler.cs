@@ -13,7 +13,7 @@ public sealed class UpdateGameRecommendHandler(
         var gameList = gameProviderCache.GameList;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await gameRecommendRepo.UpdateAsync(request.Id, async recommend =>
+            await gameRecommendRepo.UpdateAsync(request.Id!.Value, async recommend =>
             {
                 // Check overlap time
                 var overlapItem = await gameRecommendRepo.GetOverlapItemAsync(recommend, ct);
@@ -46,7 +46,13 @@ public sealed class UpdateGameRecommendHandler(
                         return recommendItem;
                     })
                     .ToList();
-                recommend.UpdateGame(recommendItems);
+
+                // Delete all of current recommend items
+                await gameRecommendRepo.DeleteAllItemsAsync(request.Id.Value, ct);
+                await unitOfWork.SaveChangesAsync(ct);
+
+                // Add new recommend items
+                await gameRecommendRepo.AddItemsAsync(request.Id.Value, recommendItems, ct);
             });
         }, ct);
 
