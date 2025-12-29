@@ -15,6 +15,7 @@ public sealed class DeleteGameTagHandler(
 
         // Refresh cache data after database updated
         await gameProviderCache.RefreshGameTagList();
+        await gameProviderCache.RefreshGameList();
         return Unit.Value;
     }
 }

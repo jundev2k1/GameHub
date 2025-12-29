@@ -23,6 +23,7 @@ public sealed class UpdateGameTagHandler(
 
         // Refresh cache data after database updated
         await gameProviderCache.RefreshGameTagList();
+        await gameProviderCache.RefreshGameList();
 
         return Unit.Value;
     }
