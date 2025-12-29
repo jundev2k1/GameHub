@@ -4,6 +4,8 @@ public interface IGameRecommendRepo
 {
     Task<GameRecommend[]> GetAllAsync(CancellationToken ct = default);
 
+    Task<GameRecommend> GetAsync(Guid id, CancellationToken ct = default);
+
     Task<GameRecommend?> GetOverlapItemAsync(GameRecommend recommend, CancellationToken ct = default);
 
     Task AddAsync(GameRecommend recommend, CancellationToken ct = default);

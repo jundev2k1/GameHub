@@ -17,6 +17,17 @@ public sealed class GameRecommendRepo(GameXContext context)
             .ToArrayAsync(ct);
     }
 
+    public async Task<GameRecommend> GetAsync(Guid id, CancellationToken ct = default)
+    {
+        return await context.GameRecommends
+            .AsNoTracking()
+            .Include(gr => gr.Items)
+            .ThenInclude(gri => gri.Game)
+            .ThenInclude(g => g.Platform)
+            .FirstOrDefaultAsync(gr => gr.PublicId == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+    }
+
     public async Task<GameRecommend?> GetOverlapItemAsync(GameRecommend recommend, CancellationToken ct = default)
     {
         var minDate = DateTime.MinValue;
