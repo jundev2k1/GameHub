@@ -107,22 +107,25 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
 
     public async Task DeleteAllCategoryMappingsAsync(Guid gameId, CancellationToken ct = default)
     {
-        await context.GameCategoryMappings
+        var categories = await context.GameCategoryMappings
             .Where(gcm => gcm.Game.PublicId == gameId)
-            .ExecuteDeleteAsync(ct);
+            .ToArrayAsync(ct);
+        context.RemoveRange(categories);
     }
 
     public async Task DeleteAllTypeMappingsAsync(Guid gameId, CancellationToken ct = default)
     {
-        await context.GameTypeMappings
+        var types = await context.GameTypeMappings
             .Where(gtm => gtm.Game.PublicId == gameId)
-            .ExecuteDeleteAsync(ct);
+            .ToArrayAsync(ct);
+        context.RemoveRange(types);
     }
 
     public async Task DeleteAllTagMappingsAsync(Guid gameId, CancellationToken ct = default)
     {
-        await context.GameTagMappings
+        var tags = await context.GameTagMappings
             .Where(gtm => gtm.Game.PublicId == gameId)
-            .ExecuteDeleteAsync(ct);
+            .ToArrayAsync(ct);
+        context.RemoveRange(tags);
     }
 }
