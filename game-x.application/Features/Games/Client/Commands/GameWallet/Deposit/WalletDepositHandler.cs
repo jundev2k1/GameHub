@@ -75,20 +75,20 @@ public sealed class WalletDepositHandler(
                 await DepositToProviderWalletAsync(
                     gameProviderAccount: currentUser.UserExtend!.GameProviderAccount,
                     sno: serialNumber,
-                    amount: transaction.Amount);
+                    amount: request.Amount);
 
             if (request.PlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
                 await DepositToBaccaratWalletAsync(
                     gameUserId: currentUser.UserExtend!.GameBaccaratUserId,
                     sno: serialNumber,
-                    amount: transaction.Amount);
+                    amount: request.Amount);
 
             if (request.PlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
                 await DepositToEtl998WalletAsync(
                     accountName: currentUser.UserExtend!.Etl998ProviderAccount,
                     password: currentUser.UserExtend!.Etl998ProviderPassword,
                     sno: serialNumber,
-                    amount: transaction.Amount);
+                    amount: request.Amount);
 
             var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
             await eventDispatcher.Publish(@event, ct);

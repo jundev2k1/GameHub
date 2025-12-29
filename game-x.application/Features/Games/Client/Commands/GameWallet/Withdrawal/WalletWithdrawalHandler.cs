@@ -79,24 +79,24 @@ public sealed class WalletWithdrawalHandler(
                 await WithdrawalToProviderWalletAsync(
                     gameProviderAccount: currentUser.UserExtend!.GameProviderAccount,
                     sno: transaction.TransactionExternal!.SerialNumber,
-                    amount: transaction.Amount);
+                    amount: request.Amount);
 
             if (request.PlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
                 await WithdrawalToBaccaratWalletAsync(
                     gameUserId: currentUser.UserExtend!.GameBaccaratUserId,
                     sno: transaction.TransactionExternal!.SerialNumber,
-                    amount: transaction.Amount);
+                    amount: request.Amount);
 
             if (request.PlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
             {
-                if (wallet.Amount < transaction.Amount)
+                if (wallet.Amount < request.Amount)
                     throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
                 await WithdrawalToEtl998WalletAsync(
                     accountName: currentUser.UserExtend!.Etl998ProviderAccount,
                     password: currentUser.UserExtend!.Etl998ProviderPassword,
                     sno: serialNumber,
-                    amount: transaction.Amount);
+                    amount: request.Amount);
             }
 
             var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
