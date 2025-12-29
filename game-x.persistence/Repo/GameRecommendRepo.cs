@@ -17,6 +17,18 @@ public sealed class GameRecommendRepo(GameXContext context)
             .ToArrayAsync(ct);
     }
 
+    public async Task<GameRecommend?> GetOverlapItemAsync(GameRecommend recommend, CancellationToken ct = default)
+    {
+        var minDate = DateTime.MinValue;
+        var maxDate = DateTime.MaxValue;
+        return await context.GameRecommends
+            .AsNoTracking()
+            .FirstOrDefaultAsync(gr => gr.PublicId != recommend.PublicId
+                && (recommend.StartDate ?? minDate) < (gr.EndDate ?? maxDate)
+                && (recommend.EndDate ?? maxDate) > (gr.StartDate ?? minDate),
+                ct);
+    }
+
     public async Task AddAsync(GameRecommend recommend, CancellationToken ct = default)
     {
         await context.GameRecommends.AddAsync(recommend, ct);
