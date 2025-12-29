@@ -1,10 +1,6 @@
-﻿using game_x.api.Common;
-using game_x.application.Common.Filters;
-using game_x.application.Contract.Infrastructure.Caching;
+﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Features.Games.Admin.Commands.UpdateGamePlatform;
 using game_x.application.Features.Games.Admin.Queries.GetGamePlatformDetail;
-using game_x.application.Features.Games.Admin.Queries.GetGameTypeDetail;
-using game_x.application.Features.Games.Admin.Queries.GetTypeByCriteria;
 
 namespace game_x.api.Controllers.BackOffice.Game;
 
@@ -17,7 +13,7 @@ public sealed class GamePlatformController(
     public async Task<IActionResult> GetGamePlatformListAsync()
     {
         var result = gameProviderCache.PlatformList
-            .OrderBy(platform => platform.Priority)
+            .OrderByDescending(platform => platform.Priority)
             .Select(platform => new
             {
                 platform.Id,

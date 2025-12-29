@@ -33,19 +33,19 @@ public sealed class MapsterConfig : IRegister
                 src => src.GameCategoryMappings
                     .Select(x => x.Adapt<GameCategoryInfo>())
                     .OrderBy(g => g.IsPrimary)
-                    .ThenBy(g => g.Priority))
+                    .ThenByDescending(g => g.Priority))
             .Map(
                 dest => dest.GameTypes,
                 src => src.GameTypeMappings
                     .Select(x => x.Adapt<GameTypeInfo>())
                     .OrderBy(g => g.IsPrimary)
-                    .ThenBy(g => g.Priority))
+                    .ThenByDescending(g => g.Priority))
             .Map(
                 dest => dest.GameTags,
                 src => src.GameTagMappings
                     .Select(x => x.Adapt<GameTagInfo>())
                     .OrderBy(g => g.IsPrimary)
-                    .ThenBy(g => g.Priority))
+                    .ThenByDescending(g => g.Priority))
             .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
             .Map(dest => dest.PlatformName, src => src.Platform.Name);
 

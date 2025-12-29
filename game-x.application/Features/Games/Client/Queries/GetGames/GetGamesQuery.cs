@@ -45,17 +45,17 @@ public record GetGamesItemDto(
     {
         Categories = [.. game.Categories
             .OrderByDescending(cate => cate.IsPrimary)
-            .ThenBy(cate => cate.Priority)
+            .ThenByDescending(cate => cate.Priority)
             .Select(cate => new GetGamesCategoryItemDto(cate.Id, cate.Name, cate.IsPrimary))];
 
         GameTypes = [.. game.GameTypes
-            .OrderByDescending(cate => cate.IsPrimary)
-            .ThenBy(cate => cate.Priority)
+            .OrderByDescending(type => type.IsPrimary)
+            .ThenByDescending(type => type.Priority)
             .Select(type => new GetGamesTypeItemDto(type.Id, type.Name, type.IsPrimary))];
 
         Tags = [.. game.GameTags
-            .OrderByDescending(cate => cate.IsPrimary)
-            .ThenBy(cate => cate.Priority)
+            .OrderByDescending(tag => tag.IsPrimary)
+            .ThenByDescending(tag => tag.Priority)
             .Select(tag => new GetGamesTagItemDto(tag.Id, tag.Name, tag.Icon, tag.Color, tag.IsPrimary))];
     }
 }
