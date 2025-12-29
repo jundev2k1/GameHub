@@ -1,11 +1,17 @@
-﻿using game_x.share.Extensions;
+﻿using System.Text.Json;
+using game_x.share.Extensions;
 using Newtonsoft.Json;
-using System.Text.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace game_x.share.Helper;
 
 public static class JsonHelper
 {
+    private static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+    
     public static bool IsJson(string input)
     {
         if (input.IsNullOrWhiteSpace())
@@ -54,6 +60,20 @@ public static class JsonHelper
         {
             result = null;
             return false;
+        }
+    }
+    
+    public static T ConvertJson<T>(string json)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<T>(json, JsonOpts)
+                   ?? throw new InvalidOperationException("Empty JSON payload");
+        }
+        catch (System.Text.Json.JsonException ex)
+        {
+            throw new InvalidOperationException(
+                $"Failed to parse JSON: {json}", ex);
         }
     }
 }
