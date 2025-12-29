@@ -34,6 +34,11 @@ public sealed class GameRecommendRepo(GameXContext context)
         await context.GameRecommends.AddAsync(recommend, ct);
     }
 
+    public async Task AddItemsAsync(Guid id, IEnumerable<GameRecommendItem> items, CancellationToken ct = default)
+    {
+        await context.GameRecommendItems.AddRangeAsync(items, ct);
+    }
+
     public async Task UpdateAsync(Guid id, Func<GameRecommend, Task> updateAction, CancellationToken ct = default)
     {
         var targetRecommend = await context.GameRecommends
@@ -50,5 +55,14 @@ public sealed class GameRecommendRepo(GameXContext context)
             ?? throw new NotFoundException(nameof(id), id);
 
         context.GameRecommends.Remove(targetRecommend);
+    }
+
+    public async Task DeleteAllItemsAsync(Guid id, CancellationToken ct = default)
+    {
+        var targetRecommends = await context.GameRecommendItems
+            .Where(i => i.GameRecommend.PublicId == id)
+            .ToArrayAsync(ct);
+
+        context.RemoveRange(targetRecommends);
     }
 }

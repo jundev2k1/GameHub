@@ -8,7 +8,11 @@ public interface IGameRecommendRepo
 
     Task AddAsync(GameRecommend recommend, CancellationToken ct = default);
 
+    Task AddItemsAsync(Guid id, IEnumerable<GameRecommendItem> items, CancellationToken ct = default);
+
     Task UpdateAsync(Guid id, Func<GameRecommend, Task> updateAction, CancellationToken ct = default);
 
     Task DeleteAsync(Guid id, CancellationToken ct = default);
+
+    Task DeleteAllItemsAsync(Guid id, CancellationToken ct = default);
 }
