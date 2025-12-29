@@ -298,6 +298,7 @@ public static class InfrastructureServicesRegistration
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
         // SAS Slot API
+        services.AddTransient<SlotMessageHandler>();
         services.AddRefitClient<ISasSlotApi>()
             .ConfigureHttpClient(c =>
             {
