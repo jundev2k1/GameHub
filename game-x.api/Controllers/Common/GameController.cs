@@ -24,6 +24,16 @@ public sealed class GameController(
         return ApiResponseFactory.Ok(result);
     }
 
+    [HttpGet("recommendations")]
+    public async Task<IActionResult> GetGameRecommendationsAsync()
+    {
+        var dateTime = DateTime.UtcNow;
+        var data = gameProviderCache.GameRecommendList
+            .FirstOrDefault(r => r.StartDate <= dateTime && r.EndDate >= dateTime);
+        var response = await Task.FromResult(data?.Items.OrderBy(i => i.Priority).ToArray() ?? []);
+        return ApiResponseFactory.Ok(response);
+    }
+
     [HttpGet("platforms")]
     public async Task<IActionResult> GetPlatformListAsync()
     {
