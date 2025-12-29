@@ -4,7 +4,9 @@ using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Email;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
+using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.ExternalApi.PaymentGateway;
+using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
 using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.FileStorage;
@@ -17,11 +19,15 @@ using game_x.infrastructure.Caching;
 using game_x.infrastructure.Email;
 using game_x.infrastructure.Eventing;
 using game_x.infrastructure.Extensions;
+using game_x.infrastructure.ExternalApi.Etl998;
+using game_x.infrastructure.ExternalApi.Etl998.Interceptors;
 using game_x.infrastructure.ExternalApi.GameBaccarat;
 using game_x.infrastructure.ExternalApi.GameBaccarat.Intercepters;
 using game_x.infrastructure.ExternalApi.GameProvider;
 using game_x.infrastructure.ExternalApi.GameProvider.Intercepters;
 using game_x.infrastructure.ExternalApi.PaymentGateway;
+using game_x.infrastructure.ExternalApi.SasSlot;
+using game_x.infrastructure.ExternalApi.SasSlot.Intercepters;
 using game_x.infrastructure.ExternalApi.Srs;
 using game_x.infrastructure.ExternalApi.Uxm;
 using game_x.infrastructure.logger;
@@ -48,11 +54,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
-using game_x.infrastructure.ExternalApi.Etl998;
-using game_x.infrastructure.ExternalApi.Etl998.Interceptors;
-using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
-using game_x.infrastructure.ExternalApi.SasSlot;
 
 namespace game_x.infrastructure;
 
@@ -305,6 +306,7 @@ public static class InfrastructureServicesRegistration
                 c.BaseAddress = new Uri(baseUrl);
                 c.Timeout = TimeSpan.FromSeconds(5);
             })
+            .AddHttpMessageHandler<SlotMessageHandler>()
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
         // SRS API
