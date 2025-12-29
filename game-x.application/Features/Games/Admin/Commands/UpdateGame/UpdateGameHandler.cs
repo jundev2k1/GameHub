@@ -41,6 +41,10 @@ public sealed class UpdateGameHandler(
             if (tags != null)
                 await gameRepo.DeleteAllTagMappingsAsync(request.Id, ct);
 
+            // Execute delete all mappings
+            await unitOfWork.SaveChangesAsync(ct);
+
+            // Execute update game
             await gameRepo.UpdateGameAsync(request.Id, async game =>
             {
                 game.UpdateGame(
