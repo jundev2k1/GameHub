@@ -29,7 +29,7 @@ public sealed class SlotMessageHandler(
             // Headers
             request.Headers.Add("X-Signature-Alg", "ES256");
             request.Headers.Add("X-Signature", signature);
-            request.Headers.Add("X-Key-Id", DateTime.UtcNow.ToString("yyyy-MM-dd"));
+            request.Headers.Add("X-Key-Id", "nmy-2025-12");
         }
 
         return await base.SendAsync(request, cancellationToken);
