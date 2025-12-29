@@ -1,7 +1,10 @@
 ﻿using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Exceptions;
+using game_x.share.Extensions;
 using game_x.share.ExternalApi.Uxm.Dtos;
+using game_x.share.Helper;
+using Refit;
 
 namespace game_x.infrastructure.ExternalApi.Uxm;
 
@@ -19,26 +22,14 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
                 data.Data.OrderNumber);
      
             var response = await uxmApi.CreateProxyWithdrawalOrderAsync(data);
-            if (!response.IsSuccessStatusCode || response.Content == null)
-            {
-                var apiEx = response.Error;
-                var errorContent = apiEx?.Content;
-                logger.LogError(
-                    apiEx ?? new Exception(),
-                    "UXM withdrawal failed. Status={Status}, Reason={Reason}, ErrorMessage={ErrorMessage}, ErrorContent={ErrorContent}",
-                    response.StatusCode,
-                    apiEx?.ReasonPhrase ?? response.ReasonPhrase ?? string.Empty,
-                    apiEx?.Message ?? string.Empty,
-                    errorContent ?? string.Empty);
-                throw new ExternalServiceException("UXM withdrawal failed");
-            }
-            logger.LogInformation("Withdrawal request successful，OrderUid: {OrderUid}", response.Content.Data.OrderUid!);
-            return response.Content;
+            var content = ValidateApiResponse(response);
+            logger.LogInformation("Withdrawal request successful，OrderUid: {OrderUid}", content.Data.OrderUid!);
+            return content;
         }
         catch (Exception ex)
         {
             logger.LogError("Failed to send withdrawal request to UXM: {Ex}", ex);
-            throw new BadRequestException(MessageCode.System.DependencyFailure);
+            throw;
         }
     }
 
@@ -54,22 +45,9 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
                 data.Data.OrderNumber);
 
             var response = await uxmApi.CreateProxyDepositOrderAsync(data);
-            if (!response.IsSuccessStatusCode || response.Content == null)
-            {
-                var apiEx = response.Error;
-                var errorContent = apiEx?.Content;
-                logger.LogError(
-                    apiEx ?? new Exception(),
-                    "UXM deposit failed. Status={Status}, Reason={Reason}, ErrorMessage={ErrorMessage}, ErrorContent={ErrorContent}",
-                    response.StatusCode,
-                    apiEx?.ReasonPhrase ?? response.ReasonPhrase ?? string.Empty,
-                    apiEx?.Message ?? string.Empty,
-                    errorContent ?? string.Empty);
-                
-                throw new ExternalServiceException("UXM deposit failed");
-            }
-            logger.LogInformation("Deposit request successful，OrderUid: {OrderUid}", response.Content.Data.OrderUid);
-            return response.Content;
+            var content = ValidateApiResponse(response);
+            logger.LogInformation("Deposit request successful，OrderUid: {OrderUid}", content.Data.OrderUid);
+            return content;
         }
         catch (Exception ex)
         {
@@ -77,4 +55,45 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
             throw;
         }
     }
+
+    private SecureResponse<T> ValidateApiResponse<T>(ApiResponse<SecureResponse<T>> response)
+    {
+        var content = response.Content;
+        if (!response.IsSuccessStatusCode || content == null)
+        {
+            var apiEx = response.Error;
+            logger.LogError(
+                apiEx ?? new Exception(),
+                "UXM failed. Status={Status}, Reason={Reason}, ErrorMessage={ErrorMessage}, ErrorContent={ErrorContent}",
+                response.StatusCode,
+                apiEx?.ReasonPhrase ?? response.ReasonPhrase ?? string.Empty,
+                apiEx?.Message ?? string.Empty,
+                apiEx?.Content ?? string.Empty);
+                
+            ValidateUxmErrors(response);
+            throw new ExternalServiceException("UXM failed");
+        }
+        return content;
+    }
+
+    private void ValidateUxmErrors<T>(ApiResponse<SecureResponse<T>> response)
+    {
+        if (response.Error == null) return;
+        var errorContent = JsonHelper.ConvertJson<UxmErrorResponse>(response.Error.Content ?? "{}");
+        if(new []
+           {
+               UxmErrorCode.InsufficientMerchantBalance, 
+               UxmErrorCode.InsufficientWalletBalance
+           }.Contains((UxmErrorCode)errorContent.ErrorCode))
+            throw new BadRequestException(MessageCode.Accounting.InsufficientBalance, new {message = response.Error.Content});
+    }
+}
+
+public sealed class UxmErrorResponse
+{
+    public string? Type { get; init; }
+    public string? Title { get; init; }
+    public int Status { get; init; }
+    public object? Errors { get; init; }
+    public int ErrorCode { get; init; }
 }
