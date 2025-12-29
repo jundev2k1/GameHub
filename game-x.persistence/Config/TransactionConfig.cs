@@ -50,6 +50,14 @@ public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
         builder.Property(x => x.BalanceAfter)
             .HasColumnName("balance_after")
             .IsRequired(false);
+
+        builder.Property(x => x.GameAmount)
+            .HasColumnName("game_amount")
+            .IsRequired();
+
+        builder.Property(x => x.GameBalanceAfter)
+            .HasColumnName("game_balance_after")
+            .IsRequired(false);
         
         builder.Property(x => x.Meta)
             .HasColumnName("meta")
@@ -84,5 +92,9 @@ public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
             .WithOne(x => x.Transaction)
             .HasForeignKey<TransactionExternal>(x => x.Id)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(tx => tx.Type);
+        builder.HasIndex(tx => tx.SourceType);
+        builder.HasIndex(tx => tx.Status);
     }
 }

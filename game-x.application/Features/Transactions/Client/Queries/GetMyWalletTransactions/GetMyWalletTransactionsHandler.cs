@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Extensions.FilterExtensions;
 using game_x.application.Features.Transactions.Dtos;
+using game_x.application.Features.Transactions.Enums;
 
 namespace game_x.application.Features.Transactions.Client.Queries.GetMyWalletTransactions;
 
@@ -14,6 +15,9 @@ public sealed class GetMyWalletTransactionsHandler(
 {
     public async Task<PaginationResult<WalletTransactionDto>> Handle(GetMyWalletTransactionsQuery request, CancellationToken ct = default)
     {
+        Enum.TryParse<TransactionTabType>(request.Mode, true, out var mode);
+        var isCreditMode = mode == TransactionTabType.Credit;
+
         var userId = userAccessor.GetUserId();
         var result = await transactionRepo.GetMyWalletTransactionsAsync(
             userId,
@@ -26,11 +30,11 @@ public sealed class GetMyWalletTransactionsHandler(
             request.PageSize ?? 20,
             ct);
 
-        MapAddressWalletForItems(result);
+        MapAddressWalletForItems(result, isCreditMode);
         return result;
     }
 
-    private static void MapAddressWalletForItems(PaginationResult<WalletTransactionDto> result)
+    private static void MapAddressWalletForItems(PaginationResult<WalletTransactionDto> result, bool isCreditMode)
     {
         var gameProviders = new[]
         {
@@ -65,6 +69,12 @@ public sealed class GetMyWalletTransactionsHandler(
             var isToPlatform = isDeposit && isGameTransaction;
             if (isToPlatform)
                 item.To = item.GamePlatformName;
+
+            if (isCreditMode && isGameTransaction && (isWithdrawal || isDeposit))
+            {
+                item.Amount = item.GameAmount;
+                item.BalanceAfter = item.GameBalanceAfter;
+            }
         }
     }
 }

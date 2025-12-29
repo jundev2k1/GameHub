@@ -84,6 +84,7 @@ public sealed class TronUsdtWithdrawalV2Handler(
             type: TransactionType.Withdrawal,
             userId: userId,
             amount: request.Amount,
+            gameAmount: 0,
             fee: feeAmount,
             cryptoTokenId: tokenId,
             note: request.Note);

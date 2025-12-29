@@ -20,6 +20,8 @@ public class Transaction: BaseEntity<int>, IAuditable
     public TransactionType Type { get; set; }
     public TransactionStatus Status { get; set; }
     public decimal? BalanceAfter { get; set; }
+    public decimal GameAmount { get; set; }
+    public decimal? GameBalanceAfter { get; set; }
     public string Meta { get; set; } = "{}";
     public string? Note { get; set; }
     public TransactionInternal? TransactionInternal { get; set; }
@@ -31,6 +33,7 @@ public class Transaction: BaseEntity<int>, IAuditable
     public static Transaction Create(
         string userId,
         decimal amount,
+        decimal gameAmount,
         int cryptoTokenId,
         TransactionSourceType sourceType,
         TransactionType type,
@@ -49,6 +52,7 @@ public class Transaction: BaseEntity<int>, IAuditable
             SourceType = sourceType,
             Type = type,
             Amount = amount,
+            GameAmount = gameAmount,
             Fee = fee,
             CryptoTokenId = cryptoTokenId,
             Status = status ?? TransactionStatus.Pending,
@@ -111,9 +115,18 @@ public class Transaction: BaseEntity<int>, IAuditable
         ActualAmount = actualAmount;
         BalanceAfter = balanceAfter;
         Status = TransactionStatus.Completed;
+        GameAmount = 0;
+        GameBalanceAfter = null;
 
         if (TransactionInternal != null)
             TransactionInternal.ConfirmedAt = DateTime.UtcNow;
+    }
+
+    public void ConfirmGameTx(decimal balanceAfter, decimal gameBalanceAfter)
+    {
+        ActualAmount = balanceAfter;
+        BalanceAfter = balanceAfter;
+        GameBalanceAfter = gameBalanceAfter;
     }
 }
 

@@ -6,6 +6,7 @@ namespace game_x.application.Events.WalletBalanceAdjustmentRequested;
 
 public sealed class WalletBalanceAdjustmentRequestedHandler(
     IUnitOfWork unitOfWork,
+    IUserBalanceRepo userBalanceRepo,
     ITransactionRepo transactionRepo,
     IGameProviderCacheService gameProviderCache,
     IWalletManagerCacheService walletManagerCache) : IApplicationEventHandler<WalletBalanceAdjustmentRequestedEvent>
@@ -32,9 +33,13 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
         // Write a balance adjustment transaction
         await unitOfWork.WithTransactionAsync(async () =>
         {
+            var currentBalances = await userBalanceRepo.GetBalancesByUserIdAsync(@event.UserId, ct);
+            var internalBalance = currentBalances.Sum(ub => ub.Amount);
+
             var differenceBalance = platformWallet.Amount - (latestTransaction.BalanceAfter ?? 0);
             var transaction = Transaction.Create(
                 @event.UserId,
+                0,
                 differenceBalance,
                 latestTransaction.CryptoTokenId,
                 GetTxSourceType(platform.Id),
@@ -44,7 +49,7 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
             var externalTx = TransactionExternal.Create(sno, platform.LocalId);
             transaction.AddTxExternal(externalTx);
 
-            transaction.Confirm(platformWallet.Amount, platformWallet.Amount);
+            transaction.ConfirmGameTx(internalBalance, platformWallet.Amount);
 
             await transactionRepo.AddAsync(transaction, ct);
         }, ct);

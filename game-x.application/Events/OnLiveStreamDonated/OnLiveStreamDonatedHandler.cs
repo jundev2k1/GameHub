@@ -113,6 +113,7 @@ public sealed class OnLiveStreamDonatedHandler(
             type: TransactionType.TransferSent,
             userId: userId,
             amount: amount,
+            gameAmount: 0,
             fee: feeAmount,
             cryptoTokenId: tokenId,
             note: "Livestream donations.");
