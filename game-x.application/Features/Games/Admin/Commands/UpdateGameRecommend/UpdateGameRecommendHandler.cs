@@ -15,6 +15,18 @@ public sealed class UpdateGameRecommendHandler(
         {
             await gameRecommendRepo.UpdateAsync(request.Id, async recommend =>
             {
+                // Check overlap time
+                var overlapItem = await gameRecommendRepo.GetOverlapItemAsync(recommend, ct);
+                if (overlapItem != null) throw new BadRequestException(
+                    MessageCode.System.TimeOverlap,
+                    new
+                    {
+                        id = overlapItem.PublicId,
+                        startDate = overlapItem.StartDate ?? DateTime.MinValue,
+                        endDate = overlapItem.EndDate ?? DateTime.MaxValue,
+                    });
+
+                // Execute update
                 recommend.Update(
                     request.Name,
                     request.Description,
@@ -35,7 +47,6 @@ public sealed class UpdateGameRecommendHandler(
                     })
                     .ToList();
                 recommend.UpdateGame(recommendItems);
-                await Task.CompletedTask;
             });
         }, ct);
 

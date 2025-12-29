@@ -14,6 +14,12 @@ public interface IGameRepo
         int pageSize = 20,
         CancellationToken ct = default);
 
+    Task AddRangeGameCategoriesAsync(IEnumerable<GameCategoryMapping> gameCateMappings, CancellationToken ct = default);
+
+    Task AddRangeGameTypesAsync(IEnumerable<GameTypeMapping> gameTypeMappings, CancellationToken ct = default);
+
+    Task AddRangeGameTagsAsync(IEnumerable<GameTagMapping> gameTagMappings, CancellationToken ct = default);
+
     Task UpdateGameAsync(
         Guid gameId,
         Func<Game, Task> updateAction,

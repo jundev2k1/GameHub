@@ -17,6 +17,18 @@ public sealed class CreateGameRecommendHandler(
             request.StartDate,
             request.EndDate);
         var gameList = gameProviderCache.GameList;
+        var reqGameIds = request.Items.Select(i => i.GameId);
+
+        var overlapItem = await gameRecommendRepo.GetOverlapItemAsync(gameRecommend, ct);
+        if (overlapItem != null) throw new BadRequestException(
+            MessageCode.System.TimeOverlap,
+            new
+            {
+                id = overlapItem.PublicId,
+                startDate = overlapItem.StartDate ?? DateTime.MinValue,
+                endDate = overlapItem.EndDate ?? DateTime.MaxValue,
+            });
+
         foreach (var item in request.Items)
         {
             var targetGame = gameList.FirstOrDefault(g => g.Id == item.GameId)

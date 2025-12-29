@@ -85,6 +85,9 @@ public static class MessageCode
         /// <summary>The current status of the entity is invalid.</summary>
         [EnumMetadata("The current status of the entity is invalid.")]
         InvalidCurrentStatus = 10025,
+        /// <summary>The specified time range overlaps with an existing item.</summary>
+        [EnumMetadata("The selected time period overlaps with an existing item. Please choose a different time range.")]
+        TimeOverlap = 10026,
         #endregion
 
         #region ■ Message group: Success
