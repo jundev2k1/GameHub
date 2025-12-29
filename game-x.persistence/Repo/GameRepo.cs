@@ -25,6 +25,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
     public async Task<Game> GetAsync(Guid gameId, CancellationToken ct = default)
     {
         return await context.Games
+            .AsNoTracking()
             .Include(g => g.GameCategoryMappings)
             .ThenInclude(gcm => gcm.Category)
             .Include(g => g.GameTypeMappings)
