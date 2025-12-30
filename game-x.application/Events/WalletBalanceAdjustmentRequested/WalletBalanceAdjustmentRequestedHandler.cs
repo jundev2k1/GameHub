@@ -27,11 +27,11 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
             @event.UserId,
             platform.Id);
         // In the case of the current balance remains unchanged, exit this function
-        if (latestTransaction.BalanceAfter == platformWallet.Amount)
+        if (latestTransaction.GameBalanceAfter == platformWallet.Amount)
             return;
 
         // Write a balance adjustment transaction
-        var differenceBalance = platformWallet.Amount - (latestTransaction.BalanceAfter ?? 0);
+        var differenceBalance = platformWallet.Amount - (latestTransaction.GameBalanceAfter ?? 0);
         await unitOfWork.WithTransactionAsync(async () =>
         {
             var currentBalances = await userBalanceRepo.GetBalancesByUserIdAsync(@event.UserId, ct);
