@@ -68,4 +68,15 @@ public sealed class UserBalance : BaseEntity<int>
         FrozenAmount -= amount;
         Amount += amount;
     }
+
+    public void FinalizeFrozen(decimal amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amount, nameof(amount));
+
+        if (FrozenAmount < amount)
+            throw new InsufficientBalanceException(amount, FrozenAmount);
+
+        FrozenAmount -= amount;
+    }
+
 }

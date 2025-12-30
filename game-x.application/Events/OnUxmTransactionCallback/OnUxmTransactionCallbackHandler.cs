@@ -47,7 +47,7 @@ public sealed class OnUxmTransactionCallbackHandler(
 
                     case TransactionType.Withdrawal:
                         var amount = @event.ActualAmount + (transaction.Fee ?? 0);
-                        balance.AdjustAmount(amount, false);
+                        balance.FinalizeFrozen(amount);
                         break;
 
                     default:
