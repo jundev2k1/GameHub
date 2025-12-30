@@ -2,8 +2,10 @@ using game_x.api.Common;
 using game_x.api.Dtos;
 using game_x.application.Common.Files;
 using game_x.application.Features.Chat.Commands.ClaimConversationById;
+using game_x.application.Features.Chat.Commands.DeleteMessage;
 using game_x.application.Features.Chat.Commands.SendMessage;
 using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
+using game_x.application.Features.Chat.Queries.ListMessageInPublicConversation;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListSupportConversations;
 using game_x.application.Features.Chat.Queries.ListUnassignedQueue;
@@ -32,7 +34,8 @@ public class ConversationController : BaseApiController
     [HttpPost("{convId}/claim")]
     public async Task<IActionResult> ClaimConversationAsync(Guid convId, [FromBody] ClaimConversationByIdCommand command, CancellationToken ct)
     {
-        var result = await Mediator.Send(command with {ConversationId = convId}, ct);
+        command.ConversationId = convId;
+        var result = await Mediator.Send(command, ct);
         return ApiResponseFactory.Ok(result);
     }
     
@@ -45,6 +48,26 @@ public class ConversationController : BaseApiController
             Cursor: parameters.Cursor
         );
         var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    /// <summary>List messages of the public conversation.</summary>
+    [HttpGet("public-messages")]
+    public async Task<IActionResult> GetPublicMessagesAsync([AsParameters] CursorCriteriaRequest parameters)
+    {
+        var query = new ListMessageInPublicConversationQuery(
+            Limit: parameters.Limit,
+            Cursor: parameters.Cursor
+        );
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpDelete("{convId:guid}/messages/{messageId:guid}")]
+    public async Task<IActionResult> ListMessagesInConversationAsync(
+        Guid convId, Guid messageId)
+    {
+        var result = await Mediator.Send(new DeleteMessageCommand(convId, messageId));
         return ApiResponseFactory.Ok(result);
     }
 

@@ -12,6 +12,20 @@ namespace game_x.infrastructure.SignalR.Services;
 public sealed class ChatHubService(IHubContext<ChatHub, IChatClient> hubContext)
     : IChatHubService, IHubServices
 {
+    public async Task SendDeletedMessageAsync(DeletedMessageDto dto)
+    {
+        switch (dto.ConversationType)
+        {
+            case ConversationType.Public:
+                await hubContext.Clients.Group(GroupNames.Public).MessageDeleted(dto);
+                break;
+            
+            default:
+                await hubContext.Clients.Group(GroupNames.Conversation(dto.ConversationId)).MessageDeleted(dto);
+                break;
+        }
+    }
+    
     public async Task SendMarkAsReadAsync(ConvUnreadDto res, string userId)
     {
         await hubContext.Clients.Group(GroupNames.Member(userId)).MarkAsRead(res);

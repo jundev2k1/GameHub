@@ -128,6 +128,14 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                    ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
     }
     
+    public async Task<Conversation> GetPublicConvAsync(CancellationToken ct = default)
+    {
+        return await context.Conversations
+                       .AsTracking()
+                       .FirstOrDefaultAsync(c => c.Type == ConversationType.Public, ct)
+                   ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+    }
+    
     public async Task<Conversation?> GetConvByIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default)
     {
         var result = await context.Conversations

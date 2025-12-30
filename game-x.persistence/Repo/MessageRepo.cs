@@ -152,6 +152,7 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
     {
         var convPk = await context.Conversations
             .AsNoTracking()
+            .IgnoreQueryFilters()
             .Where(c => c.PublicId == convId)
             .Select(c => c.Id)
             .SingleOrDefaultAsync(ct);
@@ -169,7 +170,6 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
             .Where(m => m.PublicId == id)
             .FirstOrDefaultAsync(ct)
             ?? throw new NotFoundException(MessageCode.Chatting.MessageNotFound);
-
     }
     
     public async Task<Message> GetByIdAsync(Guid id, CancellationToken ct = default)
@@ -194,5 +194,14 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
             .Where(m => m.ConversationId == convId)
             .OrderByDescending(m => m.SentAt)
             .FirstOrDefaultAsync(ct);
+    }
+    
+    public async Task UpdateAsync(Guid id, Action<Message> updateAction, CancellationToken ct = default)
+    {
+        var convMember = await context.Messages
+             .FirstOrDefaultAsync(c => c.PublicId == id, ct)
+         ?? throw new NotFoundException(MessageCode.Chatting.MessageNotFound);
+        updateAction.Invoke(convMember);
+        await context.SaveChangesAsync(ct);
     }
 }

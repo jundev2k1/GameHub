@@ -27,6 +27,8 @@ public sealed class Message: BaseEntity<int>, IAuditable
     public bool IsTombstone { get; set; }
     /// <summary>Timeline ordering</summary>
     public DateTime SentAt { get; set; } = DateTime.UtcNow;
+    public DateTime? DeletedAt { get; private set; }
+    public bool IsDeleted { get; private set; } = false;
     /// <summary>Mention all members (in Public Channel)</summary>
     public bool? IsMentionAll { get; set; }
     // Edit info
@@ -67,5 +69,11 @@ public sealed class Message: BaseEntity<int>, IAuditable
             IsMentionAll = isMentionAll
         };
         return msg;
+    }
+
+    public void Remove()
+    {
+        DeletedAt = DateTime.UtcNow;
+        IsDeleted = true;
     }
 }
