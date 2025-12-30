@@ -33,13 +33,13 @@ public sealed class CreateDepositChainTransactionHandler(
             var secretKey = gameXSettings.Value.PaymentGatewaySecretKey;
             bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(secretKey, result.Data, result.Signature);
             if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
-            
-            tx.UpdateProviderResponse(amount: result.Data.Amount, to: result.Data.WalletAddress);
-            
+
+            tx.UpdateProviderResponse(balanceAfter: null, amount: result.Data.Amount, to: result.Data.WalletAddress);
+
             await unitOfWork.CommitAsync(ct);
 
             var updatedTransaction = await transactionRepo.GetInternalByIdAsync(tx.PublicId, ct);
-            
+
             return new DepositChainTransactionResponseDto
             {
                 Amount = result.Data.Amount,
@@ -55,17 +55,17 @@ public sealed class CreateDepositChainTransactionHandler(
     }
 
     private async Task<Transaction> CreateTransaction(
-        TronUsdtDepositV2Command request, 
+        TronUsdtDepositV2Command request,
         string userId,
         CancellationToken ct)
     {
         var token = await cryptoTokenRepo.GetByIdAsync(request.CryptoTokenId, ct);
-        if(token.Status != CryptoTokenStatus.Active)
+        if (token.Status != CryptoTokenStatus.Active)
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
-        
+
         var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
         var txInternal = TransactionInternal.Create(orderNumber: orderNumber, providerId: request.Provider);
-        
+
         var tx = Transaction.Create(
             sourceType: TransactionSourceType.Uxm,
             type: TransactionType.Deposit,
@@ -73,9 +73,9 @@ public sealed class CreateDepositChainTransactionHandler(
             amount: request.Amount,
             cryptoTokenId: token.Id,
             note: request.Note);
-        
+
         tx.AddTxInternal(txInternal);
-        
+
         await transactionRepo.AddAsync(tx, ct);
         return tx;
     }

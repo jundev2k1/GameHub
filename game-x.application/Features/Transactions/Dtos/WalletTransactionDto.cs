@@ -1,4 +1,6 @@
-﻿namespace game_x.application.Features.Transactions.Dtos;
+﻿using System.Text.Json.Serialization;
+
+namespace game_x.application.Features.Transactions.Dtos;
 
 public sealed class WalletTransactionDto
 {
@@ -6,6 +8,12 @@ public sealed class WalletTransactionDto
     public string UserId { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public decimal? BalanceAfter { get; set; }
+    [JsonIgnore]
+    public decimal ActualAmount { get; set; }
+    [JsonIgnore]
+    public decimal GameAmount { get; set; }
+    [JsonIgnore]
+    public decimal? GameBalanceAfter { get; set; }
     public Guid CryptoTokenId { get; set; }
     public string? Note { get; set; } = string.Empty;
     public string Symbol { get; set; } = string.Empty;

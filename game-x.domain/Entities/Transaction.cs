@@ -20,6 +20,8 @@ public class Transaction: BaseEntity<int>, IAuditable
     public TransactionType Type { get; set; }
     public TransactionStatus Status { get; set; }
     public decimal? BalanceAfter { get; set; }
+    public decimal GameAmount { get; set; }
+    public decimal? GameBalanceAfter { get; set; }
     public string Meta { get; set; } = "{}";
     public string? Note { get; set; }
     public TransactionInternal? TransactionInternal { get; set; }
@@ -86,6 +88,7 @@ public class Transaction: BaseEntity<int>, IAuditable
     }
     
     public void UpdateProviderResponse(
+        decimal? balanceAfter,
         decimal? amount = null,
         decimal? actualAmount = null,
         string? providerOrderId = null, 
@@ -94,6 +97,7 @@ public class Transaction: BaseEntity<int>, IAuditable
         DateTime? confirmedAt = null,
         DateTime? completedAt = null)
     {
+        BalanceAfter = balanceAfter;
         Amount = amount ?? Amount;
         ActualAmount = actualAmount ?? ActualAmount;
         CompletedAt = completedAt ?? CompletedAt;
@@ -111,9 +115,19 @@ public class Transaction: BaseEntity<int>, IAuditable
         ActualAmount = actualAmount;
         BalanceAfter = balanceAfter;
         Status = TransactionStatus.Completed;
+        GameBalanceAfter = null;
 
         if (TransactionInternal != null)
             TransactionInternal.ConfirmedAt = DateTime.UtcNow;
+    }
+
+    public void ConfirmGameTx(decimal actualAmount, decimal balanceAfter, decimal gameBalanceAfter)
+    {
+        ActualAmount = actualAmount;
+        BalanceAfter = balanceAfter;
+        GameBalanceAfter = gameBalanceAfter;
+        Status = TransactionStatus.Completed;
+        CompletedAt = DateTime.UtcNow;
     }
 }
 

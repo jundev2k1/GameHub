@@ -1,9 +1,5 @@
 using game_x.application.Common.Abstractions.Pagination;
-using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
-using game_x.application.Features.Games.Dtos;
-using game_x.application.Features.Transactions.Client.Queries.GetMyWalletTransactions;
 using game_x.application.Features.Transactions.Dtos;
-using game_x.share.Extensions;
 using game_x.share.ExternalApi.PaymentGateway.Dtos;
 using game_x.share.ExternalApi.Uxm.Dtos;
 
@@ -66,7 +62,7 @@ public static class TransactionMapping
     public static PaginationResult<ListTransactionInternalDto> ToSearchResult(this PaginationResult<Transaction> data)
     {
         var result = new PaginationResult<ListTransactionInternalDto>(
-            items: [.. data.Items.Adapt<IEnumerable<ListTransactionInternalDto>>()],
+            items: data.Items.Select(i => i.Adapt<ListTransactionInternalDto>()),
             totalItems: data.TotalItems,
             totalPages: data.TotalPages,
             pageIndex: data.PageNumber,

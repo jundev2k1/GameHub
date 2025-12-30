@@ -248,17 +248,29 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
         await context.Transactions.AddAsync(transaction, ct);
     }
 
-    public async Task PatchUpdateAsync(Guid publicId, Action<Transaction> updateAction, CancellationToken ct = default)
+    public async Task UpdateAsync(Guid publicId, Action<Transaction> updateAction, CancellationToken ct = default)
     {
         var tx = await context.Transactions
+            .Include(t => t.CryptoToken)
+            .Include(t => t.TransactionInternal)
+            .Include(t => t.TransactionExternal)
             .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
             ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionNotFound);
 
         updateAction.Invoke(tx);
-        await context.SaveChangesAsync(ct);
     }
+    public async Task UpdateAsync(Guid publicId, Func<Transaction, Task> updateAction, CancellationToken ct = default)
+    {
+        var tx = await context.Transactions
+            .Include(t => t.CryptoToken)
+            .Include(t => t.TransactionInternal)
+            .Include(t => t.TransactionExternal)
+            .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)
+            ?? throw new NotFoundException(MessageCode.Transaction.ChainTransactionNotFound);
 
-    public async Task PutUpdateAsync(Transaction transaction, CancellationToken ct = default)
+        await updateAction.Invoke(tx);
+    }
+    public async Task UpdateAsync(Transaction transaction, CancellationToken ct = default)
     {
         context.Entry(transaction).State = EntityState.Modified;
         await context.SaveChangesAsync(ct);

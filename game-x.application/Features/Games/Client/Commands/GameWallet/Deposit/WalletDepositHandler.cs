@@ -60,33 +60,35 @@ public sealed class WalletDepositHandler(
             request.Note);
 
         // Create transaction and adjust balance
+        decimal? balanceAfter = null;
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await userBalanceRepo.UpdateAsync(currentBalance.PublicId, balance =>
             {
                 balance.AdjustAmount(request.Amount, false);
+                balanceAfter = balance.Amount;
             }, ct);
             await unitOfWork.SaveChangesAsync(ct);
-            
+
             // Rollback all processing if the transaction fails at the third party
             if (request.PlatformId == GameConstants.PLATFORM_ID_G598)
                 await DepositToProviderWalletAsync(
                     gameProviderAccount: currentUser.UserExtend!.GameProviderAccount,
                     sno: serialNumber,
-                    amount: transaction.Amount);
-            
+                    amount: request.Amount);
+
             if (request.PlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
                 await DepositToBaccaratWalletAsync(
                     gameUserId: currentUser.UserExtend!.GameBaccaratUserId,
                     sno: serialNumber,
-                    amount: transaction.Amount);
-            
+                    amount: request.Amount);
+
             if (request.PlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
                 await DepositToEtl998WalletAsync(
-                    accountName: currentUser.UserExtend!.Etl998ProviderAccount, 
+                    accountName: currentUser.UserExtend!.Etl998ProviderAccount,
                     password: currentUser.UserExtend!.Etl998ProviderPassword,
                     sno: serialNumber,
-                    amount: transaction.Amount);
+                    amount: request.Amount);
 
             var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
             await eventDispatcher.Publish(@event, ct);
@@ -95,7 +97,7 @@ public sealed class WalletDepositHandler(
             var walletRefreshed = await walletManagerCache.GetExternalWalletAsync(
                 currentUser.Id,
                 request.PlatformId);
-            transaction.Confirm(walletRefreshed.Amount, walletRefreshed.Amount);
+            transaction.ConfirmGameTx(request.Amount, balanceAfter!.Value, walletRefreshed.Amount);
             await transactionRepo.AddAsync(transaction, ct);
         }, ct);
 
@@ -192,16 +194,16 @@ public sealed class WalletDepositHandler(
         };
         await gameBaccarat.DepositAsync(request);
     }
-    
+
     private async Task DepositToEtl998WalletAsync(
-        string accountName, 
-        string password, 
+        string accountName,
+        string password,
         decimal amount,
         string sno)
     {
         var prepareRequest = new Etl998TransferRequest
         {
-            Account = accountName, 
+            Account = accountName,
             Password = password,
             CustomerOrderId = sno,
             Credit = amount,

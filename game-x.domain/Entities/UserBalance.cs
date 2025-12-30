@@ -1,16 +1,17 @@
+using game_x.domain.Exceptions;
 using System.ComponentModel.DataAnnotations;
 
 namespace game_x.domain.Entities;
 
 public sealed class UserBalance : BaseEntity<int>
 {
-    public Guid PublicId { get; set; }
-    public string UserId { get; set; } = String.Empty;
-    public User User { get; set; } = null!;
-    public int CryptoTokenId { get; set; }
-    public CryptoToken CryptoToken { get; set; } = null!;
-    public decimal Amount { get; set; } // Available balance
-    public decimal FrozenAmount { get; set; }
+    public Guid PublicId { get; private set; }
+    public string UserId { get; private set; } = String.Empty;
+    public User User { get; private set; } = null!;
+    public int CryptoTokenId { get; private set; }
+    public CryptoToken CryptoToken { get; private set; } = null!;
+    public decimal Amount { get; private set; } // Available balance
+    public decimal FrozenAmount { get; private set; }
     public decimal TotalAmount => Amount + FrozenAmount; //  Additional support for backend queries and reporting
 
     [Timestamp]
@@ -19,8 +20,7 @@ public sealed class UserBalance : BaseEntity<int>
     public static UserBalance Create(
         string userId,
         int cryptoTokenId,
-        decimal amount
-    )
+        decimal amount)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
 
@@ -35,6 +35,8 @@ public sealed class UserBalance : BaseEntity<int>
         return userBalance;
     }
 
+    public static decimal GetWithdrawalFee() => 0m;
+
     public void AdjustAmount(decimal amount, bool isIncrease)
     {
         var amountAfter = isIncrease
@@ -43,5 +45,27 @@ public sealed class UserBalance : BaseEntity<int>
         ArgumentOutOfRangeException.ThrowIfLessThan(amountAfter, 0);
 
         Amount = amountAfter;
+    }
+
+    public void Freeze(decimal amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amount, nameof(amount));
+
+        if (Amount < amount)
+            throw new InsufficientBalanceException(amount, Amount);
+
+        Amount -= amount;
+        FrozenAmount += amount;
+    }
+
+    public void Unfreeze(decimal amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amount, nameof(amount));
+
+        if (FrozenAmount < amount)
+            throw new InsufficientBalanceException(amount, FrozenAmount);
+
+        FrozenAmount -= amount;
+        Amount += amount;
     }
 }

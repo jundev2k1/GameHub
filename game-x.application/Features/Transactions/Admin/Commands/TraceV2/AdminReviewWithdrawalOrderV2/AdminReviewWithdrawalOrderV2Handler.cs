@@ -1,7 +1,6 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.PaymentGateway;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnWithdrawalOrderReviewed;
 using game_x.application.Features.Transactions.Dtos;
@@ -15,7 +14,6 @@ namespace game_x.application.Features.Transactions.Admin.Commands.TraceV2.AdminR
 public sealed class AdminReviewWithdrawalOrderV2Handler(
     IPaymentGatewayService pgService,
     IUnitOfWork unitOfWork,
-    IUserBalanceService userBalanceService,
     ITransactionRepo transactionRepo,
     IApplicationEventDispatcher eventDispatcher,
     IUserBalanceRepo userBalanceRepo,
@@ -54,7 +52,7 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
     private async Task HandleApproveTransactionAsync(Transaction transaction, CancellationToken ct)
     {
         transaction.UpdateStatus(TransactionStatus.Approved);
-        await transactionRepo.PutUpdateAsync(transaction, ct);
+        await transactionRepo.UpdateAsync(transaction, ct);
         await SendPaymentGatewayRequest(transaction, ct);
     }
     
@@ -65,7 +63,7 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
         await unitOfWork.WithTransactionAsync(
             async () =>
             {
-                await transactionRepo.PutUpdateAsync(transaction, ct);
+                await transactionRepo.UpdateAsync(transaction, ct);
                 await TryRefundFrozenBalanceAsync(transaction, ct);
             }, ct);
     }
@@ -82,7 +80,7 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
         }
         catch (Exception ex)
         {
-            await transactionRepo.PatchUpdateAsync(tx.PublicId, x =>
+            await transactionRepo.UpdateAsync(tx.PublicId, x =>
             {
                 x.Status = TransactionStatus.Failed;
                 x.UpdateMeta(m => m.ErrorMessage = ex.Message);
@@ -102,13 +100,13 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
     
     private async Task TryRefundFrozenBalanceAsync(Transaction tx, CancellationToken ct)
     {
-        UserBalance? balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId);
-        if (balance == null)
-            throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
-        decimal refundAmount = tx.TotalAmount;
+        UserBalance? balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId)
+            ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+
+        var refundAmount = tx.TotalAmount;
         try
         {
-            userBalanceService.Unfreeze(balance, refundAmount);
+            balance.Unfreeze(refundAmount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
         }
         catch (Exception ex)

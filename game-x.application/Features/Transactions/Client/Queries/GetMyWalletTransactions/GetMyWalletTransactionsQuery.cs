@@ -8,4 +8,5 @@ public record GetMyWalletTransactionsQuery(
     IEnumerable<QueryFilter> Filters,
     IEnumerable<QuerySort> Sorts,
     int? PageIndex,
-    int? PageSize) : IQuery<PaginationResult<WalletTransactionDto>>;
+    int? PageSize,
+    string Mode) : IQuery<PaginationResult<WalletTransactionDto>>;

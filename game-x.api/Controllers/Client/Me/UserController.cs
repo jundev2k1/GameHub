@@ -120,7 +120,8 @@ public sealed class UserController(
             filters,
             sorts,
             parameters.PageNumber,
-            parameters.PageSize);
+            parameters.PageSize,
+            parameters.TabType);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }

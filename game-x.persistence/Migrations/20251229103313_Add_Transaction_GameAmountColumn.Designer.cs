@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20251229103313_Add_Transaction_GameAmountColumn")]
+    partial class Add_Transaction_GameAmountColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1967,10 +1970,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("current_version");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deleted_at");
-
                     b.Property<int>("EditCount")
                         .HasColumnType("integer")
                         .HasColumnName("edit_count");
@@ -1978,12 +1977,6 @@ namespace game_x.persistence.Migrations
                     b.Property<DateTime?>("EditedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("edited_at");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_deleted");
 
                     b.Property<bool?>("IsMentionAll")
                         .HasColumnType("boolean")
@@ -2052,19 +2045,16 @@ namespace game_x.persistence.Migrations
                         .HasName("pk_messages");
 
                     b.HasIndex("ReplyToMessageId")
-                        .HasDatabaseName("ix_messages_reply_to_message_id")
-                        .HasFilter("\"is_deleted\" = false");
+                        .HasDatabaseName("ix_messages_reply_to_message_id");
 
                     b.HasIndex("SenderUserId")
                         .HasDatabaseName("ix_messages_sender_user_id");
 
                     b.HasIndex("ConversationId", "Id")
-                        .HasDatabaseName("ix_messages_conversation_id_id")
-                        .HasFilter("\"is_deleted\" = false");
+                        .HasDatabaseName("ix_messages_conversation_id_id");
 
                     b.HasIndex("ConversationId", "SentAt")
-                        .HasDatabaseName("ix_messages_conversation_id_sent_at")
-                        .HasFilter("\"is_deleted\" = false");
+                        .HasDatabaseName("ix_messages_conversation_id_sent_at");
 
                     b.ToTable("messages", (string)null);
                 });
