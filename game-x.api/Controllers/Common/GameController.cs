@@ -1,5 +1,6 @@
 ﻿using game_x.api.Dtos;
 using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Features.Games.Admin.Queries.GetCurrentGameRecommends;
 using game_x.application.Features.Games.Client.Queries.GetGames;
 using System.Reflection;
 
@@ -27,10 +28,8 @@ public sealed class GameController(
     [HttpGet("recommendations")]
     public async Task<IActionResult> GetGameRecommendationsAsync()
     {
-        var dateTime = DateTime.UtcNow;
-        var data = gameProviderCache.GameRecommendList
-            .FirstOrDefault(r => ((r.StartDate ?? DateTime.MinValue) <= dateTime) && ((r.EndDate ?? DateTime.MaxValue) >= dateTime));
-        var response = await Task.FromResult(data?.Items.OrderByDescending(i => i.Priority).ToArray() ?? []);
+        var query = new GetCurrentGameRecommendsQuery();
+        var response = await Mediator.Send(query);
         return ApiResponseFactory.Ok(response);
     }
 

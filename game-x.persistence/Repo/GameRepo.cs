@@ -10,7 +10,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
     public async Task<Game[]> GetAllAsync(CancellationToken ct = default)
     {
         return await context.Games
-            .AsNoTracking()
+            .AsSplitQuery()
             .Include(g => g.Platform)
             .Include(g => g.GameCategoryMappings)
             .ThenInclude(gcm => gcm.Category)
@@ -44,7 +44,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
         CancellationToken ct = default)
     {
         var query = context.Games
-            .AsNoTracking()
+            .AsSplitQuery()
             .Include(g => g.Platform)
             .Include(g => g.GameCategoryMappings)
             .ThenInclude(gcm => gcm.Category)

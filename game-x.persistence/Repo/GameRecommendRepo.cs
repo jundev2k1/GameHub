@@ -10,10 +10,8 @@ public sealed class GameRecommendRepo(GameXContext context)
     public async Task<GameRecommend[]> GetAllAsync(CancellationToken ct = default)
     {
         return await context.GameRecommends
-            .AsNoTracking()
+            .AsSplitQuery()
             .Include(gr => gr.Items)
-            .ThenInclude(gri => gri.Game)
-            .ThenInclude(g => g.Platform)
             .ToArrayAsync(ct);
     }
 

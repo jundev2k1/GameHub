@@ -5,9 +5,9 @@ using game_x.application.Features.Games.Dtos;
 namespace game_x.application.Features.Games.Client.Queries.GetGames;
 
 public sealed class GetGamesHandler(
-    IGameProviderCacheService gameProviderCache) : IQueryHandler<GetGamesQuery, PaginationResult<GetGamesItemDto>>
+    IGameProviderCacheService gameProviderCache) : IQueryHandler<GetGamesQuery, PaginationResult<GameItemDto>>
 {
-    public async Task<PaginationResult<GetGamesItemDto>> Handle(GetGamesQuery request, CancellationToken ct = default)
+    public async Task<PaginationResult<GameItemDto>> Handle(GetGamesQuery request, CancellationToken ct = default)
     {
         var searchResult = gameProviderCache.GameList
             .OrderByDescending(g => g.Priority)
@@ -19,7 +19,7 @@ public sealed class GetGamesHandler(
             .Take(request.PageSize)
             .Select(MapToListItem)
             .ToArray();
-        var result = new PaginationResult<GetGamesItemDto>(
+        var result = new PaginationResult<GameItemDto>(
             items: await Task.WhenAll(items),
             totalItems: totalItems,
             totalPages: (int)Math.Ceiling((decimal)totalItems / request.PageSize),
@@ -44,14 +44,14 @@ public sealed class GetGamesHandler(
                 || game.Name.Contains(request.Keyword.Trim(), StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private async Task<GetGamesItemDto> MapToListItem(GameInfoDto game)
+    private async Task<GameItemDto> MapToListItem(GameInfoDto game)
     {
         if (game.Thumbnail != null)
         {
             var thumbnailUrl = await gameProviderCache.GetGameThumbnail(game);
             game.Thumbnail.Url = thumbnailUrl;
         }
-        var result = new GetGamesItemDto(game);
+        var result = new GameItemDto(game);
         return result;
     }
 }

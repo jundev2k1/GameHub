@@ -139,11 +139,6 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Items, src => src.Items.Select(i => i.Adapt<GameRecommendItemDto>()));
 
         cfg.NewConfig<GameRecommendItem, GameRecommendItemDto>()
-            .Map(dest => dest.LocalGameId, src => src.GameId)
-            .Map(dest => dest.GameId, src => src.Game.PublicId)
-            .Map(dest => dest.GameName, src => src.Game.Name)
-            .Map(dest => dest.LocalPlatformId, src => src.Game.PlatformId)
-            .Map(dest => dest.PlatformId, src => src.Game.Platform.PublicId)
-            .Map(dest => dest.PlatformName, src => src.Game.Platform.Name);
+            .Map(dest => dest.LocalGameId, src => src.GameId);
     }
 }

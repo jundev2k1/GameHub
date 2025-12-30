@@ -22,15 +22,26 @@ public sealed class GameRecommendItemDto
 {
     [JsonIgnore]
     public int LocalGameId { get; set; }
-    public Guid GameId { get; set; }
-    public string GameName { get; set; } = string.Empty;
-    [JsonIgnore]
-    public int LocalPlatformId { get; set; }
-    public Guid PlatformId { get; set; }
-    public string PlatformName { get; set; } = string.Empty;
     public int Priority { get; set; } = 0;
     public string? CustomTitle { get; set; }
     public bool IsActive { get; set; } = true;
+    [JsonIgnore]
     public DateTime CreatedAt { get; set; }
+    [JsonIgnore]
     public DateTime? UpdatedAt { get; set; }
+}
+
+public record GameRecommendListItemDto : GameItemDto
+{
+    public string? CustomTitle { get; init; }
+    public int Priority { get; init; }
+    public bool IsActive { get; init; }
+
+    public GameRecommendListItemDto(GameInfoDto gameInfo, GameRecommendItemDto recommendItem)
+        : base(gameInfo)
+    {
+        CustomTitle = recommendItem.CustomTitle;
+        Priority = recommendItem.Priority;
+        IsActive = recommendItem.IsActive;
+    }
 }
