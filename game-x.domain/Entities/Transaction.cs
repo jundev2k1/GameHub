@@ -127,6 +127,8 @@ public class Transaction: BaseEntity<int>, IAuditable
         ActualAmount = balanceAfter;
         BalanceAfter = balanceAfter;
         GameBalanceAfter = gameBalanceAfter;
+        Status = TransactionStatus.Completed;
+        CompletedAt = DateTime.UtcNow;
     }
 }
 
