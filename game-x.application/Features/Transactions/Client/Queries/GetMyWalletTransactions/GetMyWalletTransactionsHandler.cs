@@ -51,6 +51,7 @@ public sealed class GetMyWalletTransactionsHandler(
 
             var isDeposit = item.Type == TransactionType.Deposit;
             var isWithdrawal = item.Type == TransactionType.Withdrawal;
+            var isBalanceAdjustment = item.Type == TransactionType.BalanceAdjustment;
 
             var isFromCash = (isWithdrawal && isUxmTransaction)
                 || (isDeposit && isGameTransaction);
@@ -71,14 +72,13 @@ public sealed class GetMyWalletTransactionsHandler(
                 item.To = item.GamePlatformName;
 
             item.Amount = item.ActualAmount;
-            if (!isWithdrawal && !isDeposit) continue;
+            if (!isWithdrawal && !isDeposit && !isBalanceAdjustment) continue;
 
             // Map transaction amount according Credit mode
-            if (isCreditMode && isGameTransaction)
+            if (isCreditMode && isGameTransaction && !isBalanceAdjustment)
             {
-                item.Amount = isDeposit
-                    ? item.ActualAmount
-                    : Math.Abs(item.ActualAmount) * -1;
+                if (isWithdrawal)
+                    item.Amount = Math.Abs(item.ActualAmount) * -1;
 
                 item.BalanceAfter = item.GameBalanceAfter;
             }
@@ -86,9 +86,8 @@ public sealed class GetMyWalletTransactionsHandler(
             // Map transaction amount according Cash mode
             if (!isCreditMode)
             {
-                item.Amount = isDeposit
-                    ? Math.Abs(item.ActualAmount) * -1
-                    : item.ActualAmount;
+                if (isDeposit)
+                    item.Amount = Math.Abs(item.ActualAmount) * -1;
             }
         }
     }
