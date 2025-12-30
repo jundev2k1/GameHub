@@ -34,7 +34,7 @@ public sealed class CreateDepositChainTransactionHandler(
             bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(secretKey, result.Data, result.Signature);
             if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
 
-            tx.UpdateProviderResponse(amount: result.Data.Amount, to: result.Data.WalletAddress);
+            tx.UpdateProviderResponse(balanceAfter: null, amount: result.Data.Amount, to: result.Data.WalletAddress);
 
             await unitOfWork.CommitAsync(ct);
 
