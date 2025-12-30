@@ -68,8 +68,7 @@ public sealed class GameXContext(
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(GameXContext).Assembly);
         builder.ApplyAuditColumnsConfiguration();
-
-        // Set table name to snake case for identities
+        builder.IgnoreRemovedRecords();
         builder.UseSnakeCaseIdentityTableNames();
     }
 

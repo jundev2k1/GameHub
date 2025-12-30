@@ -28,6 +28,7 @@ public interface IChatClient
     Task MemberAdded(ConversationMemberDto dto);
     /// <summary>Send it whenever a message is sent.</summary>
     Task MessageCreated(MessageSignalDto dto);
+    Task MessageDeleted(DeletedMessageDto dto);
     Task MarkAsRead(ConvUnreadDto dto);
     Task MessageFailed(MessageFailedSignalDto signalDto);
     /// <summary>Notify that the user received a friend request</summary>

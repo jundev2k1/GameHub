@@ -6,6 +6,7 @@ namespace game_x.application.Contract.Infrastructure.SignalR.Services;
 
 public interface IChatHubService
 {
+    Task SendDeletedMessageAsync(DeletedMessageDto dto);
     Task SendMarkAsReadAsync(ConvUnreadDto res, string userId);
     Task SendPublicMessageAsync(CreatedMessageSignalResult res);
     Task SendSupportMessageAsync(CreatedMessageSignalResult res);
