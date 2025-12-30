@@ -1,6 +1,4 @@
-using System.Text.Json;
 using game_x.application.Contract.Infrastructure.Logger;
-using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
@@ -8,13 +6,13 @@ using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Features.Transactions.Dtos;
 using game_x.share.Context;
+using System.Text.Json;
 
 namespace game_x.application.Events.OnUxmTransactionCallback;
 
 public sealed class OnUxmTransactionCallbackHandler(
     IUnitOfWork unitOfWork,
     IClientHubService clientHubService,
-    IUserBalanceService userBalanceService,
     ITransactionRepo transactionRepo,
     IUserBalanceRepo userBalanceRepo,
     IUserRepo userRepo,
@@ -27,30 +25,29 @@ public sealed class OnUxmTransactionCallbackHandler(
     {
         try
         {
-            Transaction? transaction = await transactionRepo.GetByOrderNumberAsync(@event.OrderNumber ?? string.Empty, ct);
-
-            if (transaction == null)
-                throw new NotFoundException(MessageCode.Transaction.TradeNotFound,
+            var transaction = await transactionRepo.GetByOrderNumberAsync(@event.OrderNumber ?? string.Empty, ct)
+                ?? throw new NotFoundException(
+                    MessageCode.Transaction.TradeNotFound,
                     $"Transaction with order number '{@event.OrderNumber}' not found.");
 
             // Anti-spam request if the Transaction has already been updated
             if (transaction.Status == TransactionStatus.Completed)
                 throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
 
-            UserBalance? balance = transaction.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId);
-            if (balance == null)
-                throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+            var balance = transaction.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId)
+                ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
             await unitOfWork.WithTransactionAsync(async () =>
             {
                 switch (transaction.Type)
                 {
                     case TransactionType.Deposit:
-                        userBalanceService.IncreaseAmount(balance, @event.ActualAmount);
+                        balance.AdjustAmount(@event.ActualAmount, true);
                         break;
 
                     case TransactionType.Withdrawal:
-                        userBalanceService.FinalizeFrozen(balance, @event.ActualAmount + (transaction.Fee ?? 0));
+                        var amount = @event.ActualAmount + (transaction.Fee ?? 0);
+                        balance.AdjustAmount(amount, false);
                         break;
 
                     default:

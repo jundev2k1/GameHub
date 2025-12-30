@@ -1,5 +1,4 @@
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnTransactionInternalCreated;
 using game_x.application.Features.Transactions.Dtos;
@@ -8,7 +7,6 @@ using game_x.application.Utils;
 namespace game_x.application.Features.Transactions.Client.Commands.TraceV2.TronUsdtWithdrawalV2;
 
 public sealed class TronUsdtWithdrawalV2Handler(
-    IUserBalanceService userBalanceService,
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IUserAccessor userAccessor,
@@ -39,7 +37,7 @@ public sealed class TronUsdtWithdrawalV2Handler(
         {
             await transactionRepo.AddAsync(tx, ct);
             
-            userBalanceService.Freeze(balance, totalAmount);
+            balance.Freeze(totalAmount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
             await eventDispatcher.Publish(new OnTransactionInternalCreatedEvent(tx.Adapt<TransactionInternalDto>()), ct);
         }, ct);
@@ -101,7 +99,7 @@ public sealed class TronUsdtWithdrawalV2Handler(
         var balance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
             ?? throw new BadRequestException(MessageCode.Accounting.WalletNotFound);
 
-        decimal feeAmount = userBalanceService.GetWithdrawalFee();
+        decimal feeAmount = UserBalance.GetWithdrawalFee();
         decimal totalAmount = amount + feeAmount;
 
         if (balance.Amount < totalAmount)

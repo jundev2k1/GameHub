@@ -2,7 +2,6 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Infrastructure.Services.Wallet;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnWithdrawalOrderReviewed;
 using game_x.application.Features.Transactions.Dtos;
@@ -16,7 +15,6 @@ namespace game_x.application.Features.Transactions.Admin.Commands.AdminReviewWit
 public sealed class AdminReviewWithdrawalOrderHandler(
     IUxmService uxmService,
     IUnitOfWork unitOfWork,
-    IUserBalanceService userBalanceService,
     ITransactionRepo transactionRepo,
     IApplicationEventDispatcher eventDispatcher,
     IUserBalanceRepo userBalanceRepo,
@@ -112,15 +110,13 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     
     private async Task TryRefundFrozenBalanceAsync(Transaction tx, CancellationToken ct)
     {
-        UserBalance? balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId);
-        if (balance == null)
-            throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+        UserBalance? balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId)
+            ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
-        decimal refundAmount = tx.TotalAmount;
-
+        var refundAmount = tx.TotalAmount;
         try
         {
-            userBalanceService.Unfreeze(balance, refundAmount);
+            balance.Unfreeze(refundAmount);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
         }
         catch (Exception ex)
