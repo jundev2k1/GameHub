@@ -29,7 +29,7 @@ public sealed class GameController(
     {
         var dateTime = DateTime.UtcNow;
         var data = gameProviderCache.GameRecommendList
-            .FirstOrDefault(r => r.StartDate <= dateTime && r.EndDate >= dateTime);
+            .FirstOrDefault(r => ((r.StartDate ?? DateTime.MinValue) <= dateTime) && ((r.EndDate ?? DateTime.MaxValue) >= dateTime));
         var response = await Task.FromResult(data?.Items.OrderByDescending(i => i.Priority).ToArray() ?? []);
         return ApiResponseFactory.Ok(response);
     }
