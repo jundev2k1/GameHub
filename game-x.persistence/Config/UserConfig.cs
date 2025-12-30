@@ -26,6 +26,10 @@ public class UserConfig : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasConversion<short>()
             .HasDefaultValue(UserStatus.Active);
+
+        builder.Property(u => u.Notes)
+            .IsRequired()
+            .HasDefaultValue(string.Empty);
         
         builder.HasOne(uk => uk.Avatar)
             .WithMany()

@@ -9,7 +9,11 @@ public sealed class CreateCustomerSupportHandler(
 {
     public async Task<Unit> Handle(CreateCustomerSupportCommand request, CancellationToken ct = default)
     {
-        var newUser = UserEntity.Create(request.Email, request.Email);
+        var newUser = UserEntity.Create(
+            userName: request.Email,
+            email: request.Email,
+            nickName: request.Nickname,
+            notes: request.Notes);
         await userRepo.AddUserAsync(
             user: newUser,
             rawPassword: request.Password,

@@ -13,6 +13,7 @@ public class User : IdentityUser, IEntity, IAuditable
     public DateTime UpdatedAt { get; set; }
     public int? AvatarId { get; set; }
     public MediaFile? Avatar { get; set; }
+    public string Notes { get; set; } = string.Empty;
     public ICollection<Transaction> Transactions { get; set; } = [];
 
     /// <summary>The user's balance in all currencies in the system.</summary>
@@ -33,6 +34,7 @@ public class User : IdentityUser, IEntity, IAuditable
         string nickName = "",
         string phoneNumber = "",
         string countryCode = "",
+        string notes = "",
         UserStatus status = UserStatus.Active,
         List<UserRole>? userRoles = null)
     {
@@ -51,6 +53,7 @@ public class User : IdentityUser, IEntity, IAuditable
             CountryCode = countryCode,
             Status = status,
             UserRoles = userRoles ?? [],
+            Notes = notes,
         };
     }
 
