@@ -99,8 +99,8 @@ public sealed class TronUsdtWithdrawalHandler(
         decimal feeAmount = UserBalance.GetWithdrawalFee();
         decimal totalAmount = amount + feeAmount;
 
-        // if (balance.Amount < totalAmount)
-        //     throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
+        if (balance.Amount < totalAmount)
+            throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
         return (token, balance, feeAmount, totalAmount);
     }
