@@ -61,8 +61,14 @@ public static class TransactionMapping
 
     public static PaginationResult<ListTransactionInternalDto> ToSearchResult(this PaginationResult<Transaction> data)
     {
+        var dtos = data.Items.Select(i =>
+        {
+            var dto = i.Adapt<ListTransactionInternalDto>();
+            dto.Amount = Math.Abs(dto.Amount);
+            return dto;
+        });
         var result = new PaginationResult<ListTransactionInternalDto>(
-            items: [.. data.Items.Adapt<IEnumerable<ListTransactionInternalDto>>()],
+            items: dtos,
             totalItems: data.TotalItems,
             totalPages: data.TotalPages,
             pageIndex: data.PageNumber,
