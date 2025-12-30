@@ -1,9 +1,5 @@
 using game_x.application.Common.Abstractions.Pagination;
-using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
-using game_x.application.Features.Games.Dtos;
-using game_x.application.Features.Transactions.Client.Queries.GetMyWalletTransactions;
 using game_x.application.Features.Transactions.Dtos;
-using game_x.share.Extensions;
 using game_x.share.ExternalApi.PaymentGateway.Dtos;
 using game_x.share.ExternalApi.Uxm.Dtos;
 
@@ -57,7 +53,7 @@ public static class TransactionMapping
         (
             MerchantNumber: merchantNumber,
             OrderNumber: transaction.TransactionInternal?.OrderNumber ?? String.Empty,
-            Amount: transaction.Amount,
+            Amount: Math.Abs(transaction.Amount),
             To: transaction.TransactionInternal?.ToAddress ?? string.Empty,
             Remark: transaction.Note ?? string.Empty
         );
