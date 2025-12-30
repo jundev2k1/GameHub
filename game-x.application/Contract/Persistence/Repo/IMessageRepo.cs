@@ -1,4 +1,3 @@
-using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Features.Chat.Dtos;
 
 namespace game_x.application.Contract.Persistence.Repo;
@@ -22,4 +21,5 @@ public interface IMessageRepo
     Task<Message> CheckExistAsync(Guid id, CancellationToken ct = default);
     Task<Message> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<Message?> GetLastedMessageAsync(int convId, CancellationToken ct = default);
+    Task UpdateAsync(Guid id, Action<Message> updateAction, CancellationToken ct = default);
 }

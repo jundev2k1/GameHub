@@ -1,3 +1,4 @@
+using game_x.persistence.Extensions;
 using game_x.share.Helper;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,9 +14,9 @@ public sealed class MessageConfig : IEntityTypeConfiguration<Message>
         builder.HasKey(x => x.Id);
         
         // Indexes
-        builder.HasIndex(x => new { x.ConversationId, x.SentAt });
-        builder.HasIndex(x => new { x.ConversationId, x.Id });
-        builder.HasIndex(x => x.ReplyToMessageId);
+        builder.AddSoftDeleteIndex(x => new { x.ConversationId, x.SentAt });
+        builder.AddSoftDeleteIndex(x => new { x.ConversationId, x.Id });
+        builder.AddSoftDeleteIndex(x => x.ReplyToMessageId);
         
         // Properties
         builder.Property(x => x.Id)
@@ -64,6 +65,16 @@ public sealed class MessageConfig : IEntityTypeConfiguration<Message>
         builder.Property(x => x.SentAt)
             .HasColumnName("sent_at")
             .HasColumnType("timestamp with time zone")
+            .IsRequired();
+        
+        builder.Property(x => x.DeletedAt)
+            .HasColumnName("deleted_at")
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
+        
+        builder.Property(x => x.IsDeleted)
+            .HasColumnName("is_deleted")
+            .HasDefaultValue(false)
             .IsRequired();
         
         builder.Property(x => x.EditedAt)

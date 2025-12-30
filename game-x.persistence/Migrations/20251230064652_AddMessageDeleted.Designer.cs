@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20251230064652_AddMessageDeleted")]
+    partial class AddMessageDeleted
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2830,14 +2833,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("fee");
 
-                    b.Property<decimal>("GameAmount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("game_amount");
-
-                    b.Property<decimal?>("GameBalanceAfter")
-                        .HasColumnType("numeric")
-                        .HasColumnName("game_balance_after");
-
                     b.Property<string>("Meta")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -2889,15 +2884,6 @@ namespace game_x.persistence.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("ix_transactions_public_id");
-
-                    b.HasIndex("SourceType")
-                        .HasDatabaseName("ix_transactions_source_type");
-
-                    b.HasIndex("Status")
-                        .HasDatabaseName("ix_transactions_status");
-
-                    b.HasIndex("Type")
-                        .HasDatabaseName("ix_transactions_type");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_transactions_user_id");

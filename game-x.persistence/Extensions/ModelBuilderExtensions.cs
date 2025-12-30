@@ -30,6 +30,7 @@ public static class ModelBuilderExtensions
         }
     }
 
+    /// <summary>Set table name to snake case for identities.</summary>
     public static void UseSnakeCaseIdentityTableNames(this ModelBuilder builder)
     {
         builder.Entity<IdentityUserClaim<string>>(b => b.ToTable("user_claims"));
@@ -37,5 +38,10 @@ public static class ModelBuilderExtensions
         builder.Entity<IdentityUserToken<string>>(b => b.ToTable("user_tokens"));
         builder.Entity<Role>(b => b.ToTable("roles"));
         builder.Entity<IdentityRoleClaim<string>>(b => b.ToTable("role_claims"));
+    }
+    
+    public static void IgnoreRemovedRecords(this ModelBuilder builder)
+    {
+        builder.Entity<Message>().HasQueryFilter(x => x.IsDeleted == false);
     }
 }
