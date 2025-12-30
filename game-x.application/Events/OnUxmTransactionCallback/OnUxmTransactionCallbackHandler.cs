@@ -55,7 +55,7 @@ public sealed class OnUxmTransactionCallbackHandler(
                 }
                 await userBalanceRepo.PutUpdateAsync(balance, ct);
                 
-                await transactionRepo.PatchUpdateAsync(transaction.PublicId, order =>
+                await transactionRepo.UpdateAsync(transaction.PublicId, order =>
                 {
                     order.UpdateStatus(TransactionStatus.Completed);
                     order.UpdateProviderResponse(

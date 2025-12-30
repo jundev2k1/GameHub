@@ -47,31 +47,41 @@ public sealed class AdminReviewWithdrawalOrderHandler(
                 throw new BadRequestException(MessageCode.System.InvalidParameters);
         }
 
-        await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(tx.Adapt<TransactionInternalDto>()), ct);
+        var txNotification = tx.Adapt<TransactionInternalDto>();
+        txNotification.Amount = Math.Abs(txNotification.Amount);
+        await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(txNotification), ct);
 
         return tx.Adapt<ListTransactionInternalDto>();
     }
 
     private async Task HandleApproveTransactionAsync(Transaction transaction, CancellationToken ct)
     {
-        transaction.UpdateStatus(TransactionStatus.Approved);
-        await SendUxmWithdrawalOrderAsync(transaction, ct);
-        await transactionRepo.PutUpdateAsync(transaction, ct);
+        Exception? ex = null;
+        await unitOfWork.WithTransactionAsync(async () =>
+        {
+            await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
+            {
+                tx.UpdateStatus(TransactionStatus.Approved);
+                ex = await SendUxmWithdrawalOrderAsync(tx, ct);
+            });
+        }, ct);
+
+        if (ex != null) throw ex;
     }
 
     private async Task HandleRejectTransactionAsync(Transaction transaction, CancellationToken ct)
     {
-        transaction.UpdateStatus(TransactionStatus.Rejected);
-
-        await unitOfWork.WithTransactionAsync(
-            async () =>
+        await unitOfWork.WithTransactionAsync(async () =>
+        {
+            await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
             {
-                await TryRefundFrozenBalanceAsync(transaction, ct);
-                await transactionRepo.PutUpdateAsync(transaction, ct);
+                await TryRefundFrozenBalanceAsync(tx, ct);
+                transaction.UpdateStatus(TransactionStatus.Rejected);
             }, ct);
+        }, ct);
     }
 
-    private async Task SendUxmWithdrawalOrderAsync(Transaction tx, CancellationToken ct)
+    private async Task<Exception?> SendUxmWithdrawalOrderAsync(Transaction tx, CancellationToken ct)
     {
         try
         {
@@ -85,7 +95,6 @@ public sealed class AdminReviewWithdrawalOrderHandler(
                 Data = requestData,
                 Signature = asymmetricCryptoService.Sign(gameXPrivateKey, requestData)
             };
-
             var result = await uxmService.CreateWithdrawalOrderAsync(uxmRequest);
 
             // Verify UXM signature
@@ -93,20 +102,17 @@ public sealed class AdminReviewWithdrawalOrderHandler(
             var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
             if (!isValid)
                 throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
+
+            return null;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, ex.Message);
-            await unitOfWork.WithTransactionAsync(async () =>
-            {
-                await TryRefundFrozenBalanceAsync(tx, ct);
-                await transactionRepo.PatchUpdateAsync(tx.PublicId, x =>
-                {
-                    x.Status = TransactionStatus.Failed;
-                    x.UpdateMeta(m => m.ErrorMessage = ex.Message);
-                }, ct);
-            }, ct);
-            throw;
+            await TryRefundFrozenBalanceAsync(tx, ct);
+            tx.UpdateStatus(TransactionStatus.Failed);
+            tx.UpdateMeta(m => m.ErrorMessage = ex.Message);
+
+            return ex;
         }
     }
 

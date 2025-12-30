@@ -52,7 +52,7 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
     private async Task HandleApproveTransactionAsync(Transaction transaction, CancellationToken ct)
     {
         transaction.UpdateStatus(TransactionStatus.Approved);
-        await transactionRepo.PutUpdateAsync(transaction, ct);
+        await transactionRepo.UpdateAsync(transaction, ct);
         await SendPaymentGatewayRequest(transaction, ct);
     }
     
@@ -63,7 +63,7 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
         await unitOfWork.WithTransactionAsync(
             async () =>
             {
-                await transactionRepo.PutUpdateAsync(transaction, ct);
+                await transactionRepo.UpdateAsync(transaction, ct);
                 await TryRefundFrozenBalanceAsync(transaction, ct);
             }, ct);
     }
@@ -80,7 +80,7 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
         }
         catch (Exception ex)
         {
-            await transactionRepo.PatchUpdateAsync(tx.PublicId, x =>
+            await transactionRepo.UpdateAsync(tx.PublicId, x =>
             {
                 x.Status = TransactionStatus.Failed;
                 x.UpdateMeta(m => m.ErrorMessage = ex.Message);
