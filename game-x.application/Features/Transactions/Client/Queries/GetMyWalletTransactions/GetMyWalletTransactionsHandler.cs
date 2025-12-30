@@ -70,10 +70,25 @@ public sealed class GetMyWalletTransactionsHandler(
             if (isToPlatform)
                 item.To = item.GamePlatformName;
 
-            if (isCreditMode && isGameTransaction && (isWithdrawal || isDeposit))
+            item.Amount = item.ActualAmount;
+            if (!isWithdrawal && !isDeposit) continue;
+
+            // Map transaction amount according Credit mode
+            if (isCreditMode && isGameTransaction)
             {
-                item.Amount = -item.ActualAmount;
+                item.Amount = isDeposit
+                    ? item.ActualAmount
+                    : Math.Abs(item.ActualAmount) * -1;
+
                 item.BalanceAfter = item.GameBalanceAfter;
+            }
+
+            // Map transaction amount according Cash mode
+            if (!isCreditMode)
+            {
+                item.Amount = isDeposit
+                    ? Math.Abs(item.ActualAmount) * -1
+                    : item.ActualAmount;
             }
         }
     }

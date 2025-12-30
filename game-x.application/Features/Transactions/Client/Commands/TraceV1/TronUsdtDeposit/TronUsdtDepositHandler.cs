@@ -37,16 +37,16 @@ public sealed class CreateDepositChainTransactionHandler(
             var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
             var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
             if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
-            
+
             tx.UpdateProviderResponse(
                 amount: result.Data.Amount,
                 providerOrderId: result.Data.OrderUid,
                 to: result.Data.To);
-            
+
             await unitOfWork.CommitAsync(ct);
 
             var updatedTransaction = await transactionRepo.GetInternalByIdAsync(tx.PublicId, ct);
-            
+
             return new DepositChainTransactionResponseDto
             {
                 Amount = result.Data.Amount,
@@ -62,17 +62,17 @@ public sealed class CreateDepositChainTransactionHandler(
     }
 
     private async Task<Transaction> CreateTransaction(
-        TronUsdtDepositCommand request, 
+        TronUsdtDepositCommand request,
         string userId,
         CancellationToken ct)
     {
         var token = await cryptoTokenRepo.GetByIdAsync(request.CryptoTokenId, ct);
-        if(token.Status != CryptoTokenStatus.Active)
+        if (token.Status != CryptoTokenStatus.Active)
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
-        
+
         var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
         var txInternal = TransactionInternal.Create(orderNumber: orderNumber);
-        
+
         var tx = Transaction.Create(
             sourceType: TransactionSourceType.Uxm,
             type: TransactionType.Deposit,
@@ -80,9 +80,9 @@ public sealed class CreateDepositChainTransactionHandler(
             amount: request.Amount,
             cryptoTokenId: token.Id,
             note: request.Note);
-        
+
         tx.AddTxInternal(txInternal);
-        
+
         await transactionRepo.AddAsync(tx, ct);
         return tx;
     }
@@ -91,7 +91,7 @@ public sealed class CreateDepositChainTransactionHandler(
     {
         var merchantNumber = gameXSettings.Value.MerchantNumber;
         var gameXPrivateKey = asymmetricKeyCacheService.GameXPrivateKey;
-        
+
         var requestData = tx.ToUxmDepositOrderRequest(merchantNumber);
 
         return new SecureRequest<UxmDepositOrderRequest>

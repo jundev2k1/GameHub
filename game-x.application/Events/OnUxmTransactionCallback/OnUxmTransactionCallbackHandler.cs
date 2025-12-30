@@ -54,21 +54,19 @@ public sealed class OnUxmTransactionCallbackHandler(
                         throw new BadRequestException(MessageCode.System.InvalidParameters);
                 }
                 await userBalanceRepo.PutUpdateAsync(balance, ct);
-                
+
                 await transactionRepo.UpdateAsync(transaction.PublicId, order =>
                 {
                     order.UpdateStatus(TransactionStatus.Completed);
                     order.UpdateProviderResponse(
+                        balanceAfter: balance.TotalAmount,
                         actualAmount: @event.ActualAmount,
                         providerOrderId: @event.ProviderOrderId,
                         hash: @event.Hash,
                         confirmedAt: @event.ConfirmedAt,
-                        completedAt: DateTime.UtcNow
-                    );
-                    
-                    order.BalanceAfter = balance.TotalAmount;
+                        completedAt: DateTime.UtcNow);
                 }, ct);
-                
+
                 var transactionInternal = transaction.Adapt<TransactionInternalDto>();
                 await SendToMember(transactionInternal, ct);
                 await SendToAdmin(transactionInternal, ct);

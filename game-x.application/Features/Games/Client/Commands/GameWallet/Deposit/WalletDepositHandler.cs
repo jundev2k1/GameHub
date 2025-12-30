@@ -97,7 +97,7 @@ public sealed class WalletDepositHandler(
             var walletRefreshed = await walletManagerCache.GetExternalWalletAsync(
                 currentUser.Id,
                 request.PlatformId);
-            transaction.ConfirmGameTx(-request.Amount, balanceAfter!.Value, walletRefreshed.Amount);
+            transaction.ConfirmGameTx(request.Amount, balanceAfter!.Value, walletRefreshed.Amount);
             await transactionRepo.AddAsync(transaction, ct);
         }, ct);
 

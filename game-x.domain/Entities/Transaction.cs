@@ -88,6 +88,7 @@ public class Transaction: BaseEntity<int>, IAuditable
     }
     
     public void UpdateProviderResponse(
+        decimal balanceAfter,
         decimal? amount = null,
         decimal? actualAmount = null,
         string? providerOrderId = null, 
@@ -96,6 +97,7 @@ public class Transaction: BaseEntity<int>, IAuditable
         DateTime? confirmedAt = null,
         DateTime? completedAt = null)
     {
+        BalanceAfter = balanceAfter;
         Amount = amount ?? Amount;
         ActualAmount = actualAmount ?? ActualAmount;
         CompletedAt = completedAt ?? CompletedAt;
