@@ -72,7 +72,7 @@ public sealed class GetMyWalletTransactionsHandler(
 
             if (isCreditMode && isGameTransaction && (isWithdrawal || isDeposit))
             {
-                item.Amount = item.GameAmount;
+                item.Amount = -item.ActualAmount;
                 item.BalanceAfter = item.GameBalanceAfter;
             }
         }

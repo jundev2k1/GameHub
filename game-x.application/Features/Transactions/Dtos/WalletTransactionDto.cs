@@ -9,6 +9,8 @@ public sealed class WalletTransactionDto
     public decimal Amount { get; set; }
     public decimal? BalanceAfter { get; set; }
     [JsonIgnore]
+    public decimal ActualAmount { get; set; }
+    [JsonIgnore]
     public decimal GameAmount { get; set; }
     [JsonIgnore]
     public decimal? GameBalanceAfter { get; set; }

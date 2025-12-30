@@ -64,6 +64,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
             .Map(dest => dest.BalanceAfter, src => src.BalanceAfter)
+            .Map(dest => dest.ActualAmount, src => src.ActualAmount)
             .Map(dest => dest.GameAmount, src => src.GameAmount)
             .Map(dest => dest.GameBalanceAfter, src => src.GameBalanceAfter)
             .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : (Guid?)null)

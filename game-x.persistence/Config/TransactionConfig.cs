@@ -51,10 +51,6 @@ public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
             .HasColumnName("balance_after")
             .IsRequired(false);
 
-        builder.Property(x => x.GameAmount)
-            .HasColumnName("game_amount")
-            .IsRequired();
-
         builder.Property(x => x.GameBalanceAfter)
             .HasColumnName("game_balance_after")
             .IsRequired(false);

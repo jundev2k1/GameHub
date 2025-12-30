@@ -103,7 +103,7 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
         UserBalance? balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId)
             ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
-        var refundAmount = Math.Abs(tx.Amount) + tx.Fee ?? 0;
+        var refundAmount = tx.TotalAmount;
         try
         {
             balance.Unfreeze(refundAmount);

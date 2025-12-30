@@ -78,7 +78,6 @@ public sealed class CreateDepositChainTransactionHandler(
             type: TransactionType.Deposit,
             userId: userId,
             amount: request.Amount,
-            gameAmount: 0,
             cryptoTokenId: token.Id,
             note: request.Note);
         

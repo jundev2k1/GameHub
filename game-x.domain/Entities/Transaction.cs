@@ -33,7 +33,6 @@ public class Transaction: BaseEntity<int>, IAuditable
     public static Transaction Create(
         string userId,
         decimal amount,
-        decimal gameAmount,
         int cryptoTokenId,
         TransactionSourceType sourceType,
         TransactionType type,
@@ -52,7 +51,6 @@ public class Transaction: BaseEntity<int>, IAuditable
             SourceType = sourceType,
             Type = type,
             Amount = amount,
-            GameAmount = gameAmount,
             Fee = fee,
             CryptoTokenId = cryptoTokenId,
             Status = status ?? TransactionStatus.Pending,
@@ -115,16 +113,15 @@ public class Transaction: BaseEntity<int>, IAuditable
         ActualAmount = actualAmount;
         BalanceAfter = balanceAfter;
         Status = TransactionStatus.Completed;
-        GameAmount = 0;
         GameBalanceAfter = null;
 
         if (TransactionInternal != null)
             TransactionInternal.ConfirmedAt = DateTime.UtcNow;
     }
 
-    public void ConfirmGameTx(decimal balanceAfter, decimal gameBalanceAfter)
+    public void ConfirmGameTx(decimal actualAmount, decimal balanceAfter, decimal gameBalanceAfter)
     {
-        ActualAmount = balanceAfter;
+        ActualAmount = actualAmount;
         BalanceAfter = balanceAfter;
         GameBalanceAfter = gameBalanceAfter;
         Status = TransactionStatus.Completed;

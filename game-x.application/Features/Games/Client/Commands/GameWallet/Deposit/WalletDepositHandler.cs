@@ -97,7 +97,7 @@ public sealed class WalletDepositHandler(
             var walletRefreshed = await walletManagerCache.GetExternalWalletAsync(
                 currentUser.Id,
                 request.PlatformId);
-            transaction.ConfirmGameTx(balanceAfter!.Value, walletRefreshed.Amount);
+            transaction.ConfirmGameTx(-request.Amount, balanceAfter!.Value, walletRefreshed.Amount);
             await transactionRepo.AddAsync(transaction, ct);
         }, ct);
 
@@ -144,8 +144,7 @@ public sealed class WalletDepositHandler(
     {
         var tx = Transaction.Create(
             userId: userId,
-            amount: -amount,
-            gameAmount: amount,
+            amount: amount,
             cryptoTokenId: cryptoTokenId,
             sourceType: sourceType,
             type: TransactionType.Deposit,

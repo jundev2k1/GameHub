@@ -48,7 +48,6 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         }
 
         var txNotification = tx.Adapt<TransactionInternalDto>();
-        txNotification.Amount = Math.Abs(txNotification.Amount);
         await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(txNotification), ct);
 
         return tx.Adapt<ListTransactionInternalDto>();
@@ -121,7 +120,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         var balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId)
             ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
-        var refundAmount = Math.Abs(tx.Amount) + tx.Fee ?? 0;
+        var refundAmount = tx.TotalAmount;
         try
         {
             balance.Unfreeze(refundAmount);

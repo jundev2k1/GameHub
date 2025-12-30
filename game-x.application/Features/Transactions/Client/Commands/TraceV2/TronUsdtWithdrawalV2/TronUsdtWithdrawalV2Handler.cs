@@ -74,7 +74,7 @@ public sealed class TronUsdtWithdrawalV2Handler(
         
         var txInternal = TransactionInternal.Create(
             orderNumber: orderNumber,
-            fromAddress: "",
+            fromAddress: string.Empty,
             toAddress: request.To,
             providerId: request.Provider);
         var tx = Transaction.Create(
@@ -82,7 +82,6 @@ public sealed class TronUsdtWithdrawalV2Handler(
             type: TransactionType.Withdrawal,
             userId: userId,
             amount: request.Amount,
-            gameAmount: 0,
             fee: feeAmount,
             cryptoTokenId: tokenId,
             note: request.Note);

@@ -31,15 +31,14 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
             return;
 
         // Write a balance adjustment transaction
+        var differenceBalance = platformWallet.Amount - (latestTransaction.BalanceAfter ?? 0);
         await unitOfWork.WithTransactionAsync(async () =>
         {
             var currentBalances = await userBalanceRepo.GetBalancesByUserIdAsync(@event.UserId, ct);
             var internalBalance = currentBalances.Sum(ub => ub.Amount);
 
-            var differenceBalance = platformWallet.Amount - (latestTransaction.BalanceAfter ?? 0);
             var transaction = Transaction.Create(
                 @event.UserId,
-                0,
                 differenceBalance,
                 latestTransaction.CryptoTokenId,
                 GetTxSourceType(platform.Id),
@@ -49,7 +48,7 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
             var externalTx = TransactionExternal.Create(sno, platform.LocalId);
             transaction.AddTxExternal(externalTx);
 
-            transaction.ConfirmGameTx(internalBalance, platformWallet.Amount);
+            transaction.ConfirmGameTx(differenceBalance, internalBalance, platformWallet.Amount);
 
             await transactionRepo.AddAsync(transaction, ct);
         }, ct);

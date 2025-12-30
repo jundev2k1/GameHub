@@ -106,7 +106,7 @@ public sealed class WalletWithdrawalHandler(
             var walletRefreshed = await walletManagerCache.GetExternalWalletAsync(
                 currentUser.Id,
                 request.PlatformId);
-            transaction.ConfirmGameTx(balanceAfter!.Value, walletRefreshed.Amount);
+            transaction.ConfirmGameTx(request.Amount, balanceAfter!.Value, walletRefreshed.Amount);
             await transactionRepo.AddAsync(transaction, ct);
         }, ct);
 
@@ -153,7 +153,6 @@ public sealed class WalletWithdrawalHandler(
             type: TransactionType.Withdrawal,
             userId: userId,
             amount: amount,
-            gameAmount: -amount,
             cryptoTokenId: cryptoTokenId,
             note: note);
 

@@ -53,7 +53,7 @@ public static class TransactionMapping
         (
             MerchantNumber: merchantNumber,
             OrderNumber: transaction.TransactionInternal?.OrderNumber ?? String.Empty,
-            Amount: Math.Abs(transaction.Amount),
+            Amount: transaction.Amount,
             To: transaction.TransactionInternal?.ToAddress ?? string.Empty,
             Remark: transaction.Note ?? string.Empty
         );
@@ -61,14 +61,8 @@ public static class TransactionMapping
 
     public static PaginationResult<ListTransactionInternalDto> ToSearchResult(this PaginationResult<Transaction> data)
     {
-        var dtos = data.Items.Select(i =>
-        {
-            var dto = i.Adapt<ListTransactionInternalDto>();
-            dto.Amount = Math.Abs(dto.Amount);
-            return dto;
-        });
         var result = new PaginationResult<ListTransactionInternalDto>(
-            items: dtos,
+            items: data.Items.Select(i => i.Adapt<ListTransactionInternalDto>()),
             totalItems: data.TotalItems,
             totalPages: data.TotalPages,
             pageIndex: data.PageNumber,
