@@ -39,6 +39,7 @@ public sealed class CreateDepositChainTransactionHandler(
             if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
 
             tx.UpdateProviderResponse(
+                null,
                 amount: result.Data.Amount,
                 providerOrderId: result.Data.OrderUid,
                 to: result.Data.To);

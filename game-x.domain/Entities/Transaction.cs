@@ -88,7 +88,7 @@ public class Transaction: BaseEntity<int>, IAuditable
     }
     
     public void UpdateProviderResponse(
-        decimal balanceAfter,
+        decimal? balanceAfter,
         decimal? amount = null,
         decimal? actualAmount = null,
         string? providerOrderId = null, 
