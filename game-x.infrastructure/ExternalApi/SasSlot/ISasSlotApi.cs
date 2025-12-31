@@ -1,4 +1,5 @@
 ﻿using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
+using game_x.share.ExternalApi.SasSlot.Dtos.GetWallet;
 using game_x.share.ExternalApi.SasSlot.Dtos.Login;
 using game_x.share.ExternalApi.SasSlot.Dtos.Withdrawal;
 using Refit;
@@ -11,6 +12,14 @@ public interface ISasSlotApi
     [Post("/ext/session")]
     Task<ApiResponse<SasSlotLoginResponse>> LoginAsync(
         [Body] SasSlotLoginRequest request,
+        [Header("X-Signature")] string signature,
+        [Header("X-Signature-Alg")] string signatureAlg,
+        [Header("X-Key-Id")] string keyId);
+
+    /// <summary>Get wallet API</summary>
+    [Post("/ext/balance")]
+    Task<ApiResponse<SasSlotGetWalletResponse>> GetWalletAsync(
+        [Body] SasSlotGetWalletRequest request,
         [Header("X-Signature")] string signature,
         [Header("X-Signature-Alg")] string signatureAlg,
         [Header("X-Key-Id")] string keyId);

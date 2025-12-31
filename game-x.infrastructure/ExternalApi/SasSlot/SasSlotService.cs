@@ -5,6 +5,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
 using game_x.share.Extensions;
 using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
+using game_x.share.ExternalApi.SasSlot.Dtos.GetWallet;
 using game_x.share.ExternalApi.SasSlot.Dtos.Login;
 using game_x.share.ExternalApi.SasSlot.Dtos.Withdrawal;
 using game_x.share.Settings;
@@ -71,9 +72,39 @@ public sealed class SasSlotService(
 
     public async Task<decimal> GetWalletAsync(string account)
     {
-        // TODO (SAS Slot): add the SAS Slot's logic to get wallet
-        await Task.CompletedTask;
-        return 0;
+        var request = new SasSlotGetWalletRequest
+        {
+            PlatformCode = settings.Value.Code,
+            ExtUserId = account,
+            Nonce = Guid.NewGuid().ToString(),
+            Ts = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        };
+        try
+        {
+            var signature = Sign(request);
+            logger.LogInformation("Send the get wallet request to SAS Slot: account = {Account}", request.ExtUserId);
+
+            var result = await gameApi.GetWalletAsync(
+                request,
+                signature,
+                DefaultSignatureAlg,
+                DefaultKeyId);
+            if (!result.IsSuccessStatusCode || result.Content == null)
+            {
+                logger.LogError($"Response failed: Status={result.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            var response = result.Content;
+
+            logger.LogInformation("Get wallet request successful，data: {wallet}", JsonSerializer.Serialize(response));
+            return response.TotalBalance;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to send the get wallet request to SAS Slot: {Ex}", ex);
+            throw;
+        }
     }
 
     public async Task DepositAsync(string account, decimal amount, string sno)
