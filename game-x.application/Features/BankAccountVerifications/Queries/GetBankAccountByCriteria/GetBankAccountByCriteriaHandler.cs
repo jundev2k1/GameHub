@@ -2,16 +2,15 @@
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Extensions.FilterExtensions;
-using game_x.application.Features.BankAccountVerifications.Dtos;
 using game_x.application.Features.BankAccountVerifications.Mapping;
 
 namespace game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountByCriteria;
 
 public sealed class GetBankAccountByCriteriaHandler(
     ICriteriaBuilder<UserBankAccount> builder,
-    IUserRepo userRepo) : IQueryHandler<GetBankAccountByCriteriaQuery, PaginationResult<BankAccountListItemDto>>
+    IUserRepo userRepo) : IQueryHandler<GetBankAccountByCriteriaQuery, PaginationResult<GetBankAccountByCriteriaSearchItem>>
 {
-    public async Task<PaginationResult<BankAccountListItemDto>> Handle(GetBankAccountByCriteriaQuery request, CancellationToken ct = default)
+    public async Task<PaginationResult<GetBankAccountByCriteriaSearchItem>> Handle(GetBankAccountByCriteriaQuery request, CancellationToken ct = default)
     {
         var items = await userRepo.GetUserBankAccountByCriteria(
             query => builder.Apply(
