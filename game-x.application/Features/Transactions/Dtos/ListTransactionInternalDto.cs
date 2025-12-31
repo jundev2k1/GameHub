@@ -20,4 +20,5 @@ public class ListTransactionInternalDto
     public DateTime UpdatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     public DateTime? ConfirmedAt { get; set; }
+    public DateTime? DateReviewed { get; set; }
 }

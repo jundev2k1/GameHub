@@ -1,6 +1,7 @@
 ﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Features.Transactions.Dtos;
 using game_x.application.Features.Transactions.Shared.Queries.GetCryptoTokenList;
+using game_x.share.Extensions;
 
 namespace game_x.application.Features.Transactions.Mapping;
 
@@ -15,7 +16,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.OrderNumber, src => src.TransactionInternal != null ? src.TransactionInternal.OrderNumber : null)
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
-            .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null);
+            .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null)
+            .Map(dest => dest.DateReviewed, src => src.DateReviewed);
 
         cfg.NewConfig<Transaction, TransactionInternalDetailDto>()
             .Map(dest => dest.Id, src => src.PublicId)
@@ -27,7 +29,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.ToAddress, src => src.TransactionInternal != null ? src.TransactionInternal.ToAddress : null)
             .Map(dest => dest.OrderUid, src => src.TransactionInternal != null ? src.TransactionInternal.OrderUid : null)
             .Map(dest => dest.OrderNumber, src => src.TransactionInternal != null ? src.TransactionInternal.OrderNumber : null)
-            .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null);
+            .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null)
+            .Map(dest => dest.DateReviewed, src => src.DateReviewed);
 
         cfg.NewConfig<Transaction, TransactionInternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
@@ -39,21 +42,22 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Hash, src => src.TransactionInternal != null ? src.TransactionInternal.Hash : null)
             .Map(dest => dest.FromAddress, src => src.TransactionInternal != null ? src.TransactionInternal.FromAddress : null)
             .Map(dest => dest.ToAddress, src => src.TransactionInternal != null ? src.TransactionInternal.ToAddress : null)
-            .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null);
+            .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null)
+            .Map(dest => dest.DateReviewed, src => src.DateReviewed);
 
         cfg.NewConfig<TransactionInternalDto, TransactionNotificationDto>()
-            .Map(dest => dest.Status, src => src.Status.ToString().ToLower())
-            .Map(dest => dest.Type, src => src.Type.ToString().ToLower());
+            .Map(dest => dest.Status, src => src.Status.ToString().ToCamelCase())
+            .Map(dest => dest.Type, src => src.Type.ToString().ToCamelCase());
 
         cfg.NewConfig<TransactionInternalDto, ClientTransactionDto>()
             .Map(dest => dest.TransactionId, src => src.Id)
-            .Map(dest => dest.Status, src => src.Status.ToString().ToLower())
-            .Map(dest => dest.Type, src => src.Type.ToString().ToLower());
+            .Map(dest => dest.Status, src => src.Status.ToString().ToCamelCase())
+            .Map(dest => dest.Type, src => src.Type.ToString().ToCamelCase());
 
         cfg.NewConfig<TransactionInternalDto, AdminTransactionDto>()
-            .Map(dest => dest.Status, src => src.Status.ToString().ToLower())
-            .Map(dest => dest.Network, src => src.Network.ToString().ToLower())
-            .Map(dest => dest.Type, src => src.Type.ToString().ToLower());
+            .Map(dest => dest.Status, src => src.Status.ToString().ToCamelCase())
+            .Map(dest => dest.Network, src => src.Network.ToString().ToCamelCase())
+            .Map(dest => dest.Type, src => src.Type.ToString().ToCamelCase());
 
         cfg.NewConfig<CryptoToken, CryptoTokenDto>()
             .Map(dest => dest.Id, src => src.PublicId);

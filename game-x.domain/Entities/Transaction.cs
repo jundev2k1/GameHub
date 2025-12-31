@@ -4,30 +4,31 @@ using game_x.domain.Shared;
 
 namespace game_x.domain.Entities;
 
-public class Transaction: BaseEntity<int>, IAuditable
+public class Transaction : BaseEntity<int>, IAuditable
 {
-    public Guid PublicId { get; set; }
-    public string UserId { get; set; } = string.Empty;
-    public User User { get; set; } = null!;
+    public Guid PublicId { get; private set; }
+    public string UserId { get; private set; } = string.Empty;
+    public User User { get; private set; } = null!;
     /// <summary>The funds used for the transaction.</summary>
-    public decimal Amount { get; set; }
+    public decimal Amount { get; private set; }
     /// <summary>The amount of funds the user actually transferred.</summary>
-    public decimal? ActualAmount { get; set; }
-    public decimal? Fee { get; set; }
-    public int CryptoTokenId { get; set; }
-    public CryptoToken CryptoToken { get; set; } = null!;
-    public TransactionSourceType SourceType { get; set; }
-    public TransactionType Type { get; set; }
-    public TransactionStatus Status { get; set; }
-    public decimal? BalanceAfter { get; set; }
-    public decimal GameAmount { get; set; }
-    public decimal? GameBalanceAfter { get; set; }
-    public string Meta { get; set; } = "{}";
-    public string? Note { get; set; }
-    public TransactionInternal? TransactionInternal { get; set; }
-    public TransactionExternal? TransactionExternal { get; set; }
-    public DateTime? CompletedAt { get; set; }
-    
+    public decimal? ActualAmount { get; private set; }
+    public decimal? Fee { get; private set; }
+    public int CryptoTokenId { get; private set; }
+    public CryptoToken CryptoToken { get; private set; } = null!;
+    public TransactionSourceType SourceType { get; private set; }
+    public TransactionType Type { get; private set; }
+    public TransactionStatus Status { get; private set; }
+    public decimal? BalanceAfter { get; private set; }
+    public decimal GameAmount { get; private set; }
+    public decimal? GameBalanceAfter { get; private set; }
+    public string Meta { get; private set; } = "{}";
+    public string? Note { get; private set; }
+    public TransactionInternal? TransactionInternal { get; private set; }
+    public TransactionExternal? TransactionExternal { get; private set; }
+    public DateTime? CompletedAt { get; private set; }
+    public DateTime? DateReviewed { get; private set; }
+
     public decimal TotalAmount => Amount + (Fee ?? 0);
 
     public static Transaction Create(
@@ -57,41 +58,41 @@ public class Transaction: BaseEntity<int>, IAuditable
             Note = note,
         };
     }
-    
+
     [NotMapped]
     public TransactionMeta MetaObject
     {
         get => JsonSerializer.Deserialize<TransactionMeta>(Meta) ?? new();
         set => Meta = JsonSerializer.Serialize(value, JsonOptions.NoEscape);
     }
-    
+
     public void UpdateMeta(Action<TransactionMeta> updater)
     {
         var meta = MetaObject;
         updater(meta);
         MetaObject = meta;
     }
-    
+
     public void UpdateStatus(TransactionStatus status)
     {
         Status = status;
     }
-    
+
     public void AddTxInternal(TransactionInternal txInternal)
     {
-        TransactionInternal =  txInternal;
+        TransactionInternal = txInternal;
     }
-    
+
     public void AddTxExternal(TransactionExternal txExternal)
     {
-        TransactionExternal =  txExternal;
+        TransactionExternal = txExternal;
     }
-    
+
     public void UpdateProviderResponse(
         decimal? balanceAfter,
         decimal? amount = null,
         decimal? actualAmount = null,
-        string? providerOrderId = null, 
+        string? providerOrderId = null,
         string? hash = null,
         string? to = null,
         DateTime? confirmedAt = null,
@@ -108,6 +109,14 @@ public class Transaction: BaseEntity<int>, IAuditable
             TransactionInternal.ToAddress = to ?? TransactionInternal.ToAddress;
             TransactionInternal.ConfirmedAt = confirmedAt ?? TransactionInternal.ConfirmedAt;
         }
+    }
+
+    public void Review(bool isApprove)
+    {
+        Status = isApprove
+            ? TransactionStatus.Approved
+            : TransactionStatus.Rejected;
+        DateReviewed = DateTime.UtcNow;
     }
 
     public void Confirm(decimal actualAmount, decimal balanceAfter)

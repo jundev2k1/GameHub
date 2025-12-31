@@ -69,6 +69,10 @@ public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
             .HasColumnType("timestamp with time zone")
             .IsRequired(false);
         
+        builder.Property(rt => rt.DateReviewed)
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
+        
         builder.HasOne(x => x.CryptoToken)
             .WithMany()
             .HasForeignKey(x => x.CryptoTokenId)

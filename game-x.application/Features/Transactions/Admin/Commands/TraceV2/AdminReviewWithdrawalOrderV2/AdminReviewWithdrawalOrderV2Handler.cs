@@ -82,9 +82,10 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
         {
             await transactionRepo.UpdateAsync(tx.PublicId, x =>
             {
-                x.Status = TransactionStatus.Failed;
+                x.UpdateStatus(TransactionStatus.Failed);
                 x.UpdateMeta(m => m.ErrorMessage = ex.Message);
             }, ct);
+            await unitOfWork.SaveChangesAsync(ct);
             await TryRefundFrozenBalanceAsync(tx, ct);
             throw;
         }

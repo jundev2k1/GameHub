@@ -60,7 +60,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         {
             await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
             {
-                tx.UpdateStatus(TransactionStatus.Approved);
+                tx.Review(true);
                 ex = await SendUxmWithdrawalOrderAsync(tx, ct);
             });
         }, ct);
@@ -75,7 +75,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
             await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
             {
                 await TryRefundFrozenBalanceAsync(tx, ct);
-                transaction.UpdateStatus(TransactionStatus.Rejected);
+                tx.Review(false);
             }, ct);
         }, ct);
     }
