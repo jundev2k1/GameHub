@@ -29,6 +29,7 @@ public sealed class SasSlotService(
             ExtUserId = account,
             Nickname = nickname,
             Nonce = Guid.NewGuid().ToString(),
+            Ts = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
         };
         var signature = Sign(request);
         try
