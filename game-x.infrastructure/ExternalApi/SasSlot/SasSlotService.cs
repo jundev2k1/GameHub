@@ -7,6 +7,7 @@ using game_x.share.Extensions;
 using game_x.share.ExternalApi.SasSlot.Dtos.Login;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace game_x.infrastructure.ExternalApi.SasSlot;
 
@@ -41,7 +42,7 @@ public sealed class SasSlotService(
                 DefaultKeyId);
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
-                logger.LogError($"Response failed: Status={result.StatusCode}");
+                logger.LogError($"Response failed: Status={result.StatusCode} | {JsonSerializer.Serialize(result.Error)}" + result.Content != null ? JsonSerializer.Serialize(result.Content) : string.Empty);
                 throw new ExternalServiceException();
             }
 
