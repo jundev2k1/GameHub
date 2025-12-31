@@ -19,6 +19,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
         var query = context.Transactions
             .AsNoTracking()
             .Where(x => x.SourceType == TransactionSourceType.Uxm)
+            .Include(x => x.User)
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionInternal)
             .AsQueryable();
@@ -48,7 +49,8 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         var query = context.Transactions
             .AsNoTracking()
-            .Where(x => x.SourceType != TransactionSourceType.Uxm)
+            .Where(x => x.SourceType != TransactionSourceType.Uxm && x.SourceType != TransactionSourceType.GameX)
+            .Include(x => x.User)
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionExternal)
                 .ThenInclude(x => x!.GamePlatform)
@@ -80,6 +82,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         var query = context.Transactions
             .AsNoTracking()
+            .Include(x => x.User)
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionInternal)
             .Where(x => x.UserId == userId && x.SourceType == TransactionSourceType.Uxm)
@@ -111,10 +114,11 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         var query = context.Transactions
             .AsNoTracking()
+            .Include(x => x.User)
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionExternal)
                 .ThenInclude(x => x!.GamePlatform)
-            .Where(x => x.UserId == userId && x.SourceType != TransactionSourceType.Uxm)
+            .Where(x => x.UserId == userId && x.SourceType != TransactionSourceType.Uxm && x.SourceType != TransactionSourceType.GameX)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -174,6 +178,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     public async Task<Transaction?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct)
     {
         return await context.Transactions
+            .AsNoTracking()
             .Include(t => t.User)
             .ThenInclude(u => u.UserBalances)
             .Include(t => t.CryptoToken)

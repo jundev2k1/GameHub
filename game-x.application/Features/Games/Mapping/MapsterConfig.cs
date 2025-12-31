@@ -107,6 +107,8 @@ public sealed class MapsterConfig : IRegister
     {
         cfg.NewConfig<Transaction, TransactionExternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Email, src => src.User.Email)
+            .Map(dest => dest.Nickname, src => src.User.Nickname)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
             .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : Guid.Empty)
             .Map(dest => dest.GamePlatformName, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : null)
@@ -116,14 +118,18 @@ public sealed class MapsterConfig : IRegister
 
         cfg.NewConfig<Transaction, ListTransactionExternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Email, src => src.User.Email)
+            .Map(dest => dest.Nickname, src => src.User.Nickname)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
             .Map(dest => dest.GamePlatformId, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.PublicId : Guid.Empty)
-            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : String.Empty)
+            .Map(dest => dest.GamePlatformName, src => src.TransactionExternal != null ? src.TransactionExternal.GamePlatform.Name : string.Empty)
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network);
         
         cfg.NewConfig<Transaction, TransactionExternalDetailDto>()
             .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Email, src => src.User.Email)
+            .Map(dest => dest.Nickname, src => src.User.Nickname)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)

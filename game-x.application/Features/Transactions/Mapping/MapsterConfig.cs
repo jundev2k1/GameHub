@@ -11,6 +11,8 @@ public sealed class MapsterConfig : IRegister
     {
         cfg.NewConfig<Transaction, ListTransactionInternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Email, src => src.User.Email)
+            .Map(dest => dest.Nickname, src => src.User.Nickname)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
             .Map(dest => dest.OrderUid, src => src.TransactionInternal != null ? src.TransactionInternal.OrderUid : null)
             .Map(dest => dest.OrderNumber, src => src.TransactionInternal != null ? src.TransactionInternal.OrderNumber : null)
@@ -21,6 +23,8 @@ public sealed class MapsterConfig : IRegister
 
         cfg.NewConfig<Transaction, TransactionInternalDetailDto>()
             .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Email, src => src.User.Email)
+            .Map(dest => dest.Nickname, src => src.User.Nickname)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
@@ -34,6 +38,8 @@ public sealed class MapsterConfig : IRegister
 
         cfg.NewConfig<Transaction, TransactionInternalDto>()
             .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Email, src => src.User.Email)
+            .Map(dest => dest.Nickname, src => src.User.Nickname)
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)

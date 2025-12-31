@@ -67,7 +67,8 @@ public sealed class OnUxmTransactionCallbackHandler(
                         completedAt: DateTime.UtcNow);
                 }, ct);
 
-                var transactionInternal = transaction.Adapt<TransactionInternalDto>();
+                var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
+                var transactionInternal = newTx.Adapt<TransactionInternalDto>();
                 await SendToMember(transactionInternal, ct);
                 await SendToAdmin(transactionInternal, ct);
             }, ct);
