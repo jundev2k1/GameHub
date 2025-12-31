@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
 using game_x.share.Extensions;
+using game_x.share.ExternalApi.SasSlot.Dtos.DeletePublicKey;
 using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
 using game_x.share.ExternalApi.SasSlot.Dtos.GetWallet;
 using game_x.share.ExternalApi.SasSlot.Dtos.Login;
@@ -177,6 +178,40 @@ public sealed class SasSlotService(
         catch (Exception ex)
         {
             logger.LogError("Failed to send withdrawal request to SAS Slot: {Ex}", ex);
+            throw;
+        }
+    }
+
+    public async Task DeletePublicKeyAsync()
+    {
+        var request = new SasSlotDeletePublicKeyRequest
+        {
+            PlatformCode = settings.Value.Code,
+            KeyId = DefaultKeyId,
+            Nonce = Guid.NewGuid().ToString(),
+            Ts = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        };
+        try
+        {
+            var signature = Sign(request);
+            logger.LogInformation("Send delete public key request to SAS Slot.");
+
+            var result = await gameApi.DeletePublicKeyAsync(
+                request,
+                signature,
+                DefaultSignatureAlg,
+                DefaultKeyId);
+            if (!result.IsSuccessStatusCode)
+            {
+                logger.LogError($"Response failed: Status={result.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            logger.LogInformation("Delete public key request successful");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to send the delete public key request to SAS Slot: {Ex}", ex);
             throw;
         }
     }

@@ -1,4 +1,5 @@
-﻿using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
+﻿using game_x.share.ExternalApi.SasSlot.Dtos.DeletePublicKey;
+using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
 using game_x.share.ExternalApi.SasSlot.Dtos.GetWallet;
 using game_x.share.ExternalApi.SasSlot.Dtos.Login;
 using game_x.share.ExternalApi.SasSlot.Dtos.Withdrawal;
@@ -36,6 +37,14 @@ public interface ISasSlotApi
     [Post("/ext/withdrawal")]
     Task<ApiResponse<SasSlotWithdrawalResponse>> WithdrawalAsync(
         [Body] SasSlotWithdrawalRequest request,
+        [Header("X-Signature")] string signature,
+        [Header("X-Signature-Alg")] string signatureAlg,
+        [Header("X-Key-Id")] string keyId);
+
+    /// <summary>Delete Public Key API</summary>
+    [Post("/ext/platforms/keys")]
+    Task<ApiResponse<SasSlotDeletePublicKeyResponse>> DeletePublicKeyAsync(
+        [Body] SasSlotDeletePublicKeyRequest request,
         [Header("X-Signature")] string signature,
         [Header("X-Signature-Alg")] string signatureAlg,
         [Header("X-Key-Id")] string keyId);
