@@ -8,6 +8,7 @@ using game_x.share.ExternalApi.SasSlot.Dtos.DeletePublicKey;
 using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
 using game_x.share.ExternalApi.SasSlot.Dtos.GetWallet;
 using game_x.share.ExternalApi.SasSlot.Dtos.Login;
+using game_x.share.ExternalApi.SasSlot.Dtos.RegisterPublicKey;
 using game_x.share.ExternalApi.SasSlot.Dtos.Withdrawal;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
@@ -178,6 +179,41 @@ public sealed class SasSlotService(
         catch (Exception ex)
         {
             logger.LogError("Failed to send withdrawal request to SAS Slot: {Ex}", ex);
+            throw;
+        }
+    }
+
+    public async Task RegisterPublicKeyAsync()
+    {
+        var request = new SasSlotRegisterPublicKeyRequest
+        {
+            PlatformCode = settings.Value.Code,
+            KeyId = DefaultKeyId,
+            PublicKeyPem = asymmetricKeyCacheService.GameXPublicKey,
+            Nonce = Guid.NewGuid().ToString(),
+            Ts = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        };
+        try
+        {
+            var signature = Sign(request);
+            logger.LogInformation("Send register public key request to SAS Slot.");
+
+            var result = await gameApi.RegisterPublicKeyAsync(
+                request,
+                signature,
+                DefaultSignatureAlg,
+                DefaultKeyId);
+            if (!result.IsSuccessStatusCode)
+            {
+                logger.LogError($"Response failed: Status={result.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            logger.LogInformation("Register public key request successful");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to send the register public key request to SAS Slot: {Ex}", ex);
             throw;
         }
     }

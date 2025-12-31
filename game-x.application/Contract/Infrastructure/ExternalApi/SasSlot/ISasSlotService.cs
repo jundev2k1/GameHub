@@ -12,5 +12,7 @@ public interface ISasSlotService
 
     Task WithdrawalAsync(string account, decimal amount, string sno);
 
+    Task RegisterPublicKeyAsync();
+
     Task DeletePublicKeyAsync();
 }

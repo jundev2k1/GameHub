@@ -2,6 +2,7 @@
 using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
 using game_x.share.ExternalApi.SasSlot.Dtos.GetWallet;
 using game_x.share.ExternalApi.SasSlot.Dtos.Login;
+using game_x.share.ExternalApi.SasSlot.Dtos.RegisterPublicKey;
 using game_x.share.ExternalApi.SasSlot.Dtos.Withdrawal;
 using Refit;
 
@@ -37,6 +38,14 @@ public interface ISasSlotApi
     [Post("/ext/withdrawal")]
     Task<ApiResponse<SasSlotWithdrawalResponse>> WithdrawalAsync(
         [Body] SasSlotWithdrawalRequest request,
+        [Header("X-Signature")] string signature,
+        [Header("X-Signature-Alg")] string signatureAlg,
+        [Header("X-Key-Id")] string keyId);
+
+    /// <summary>Register Public Key API</summary>
+    [Post("/ext/platforms/keys/new")]
+    Task<ApiResponse<SasSlotRegisterPublicKeyResponse>> RegisterPublicKeyAsync(
+        [Body] SasSlotRegisterPublicKeyRequest request,
         [Header("X-Signature")] string signature,
         [Header("X-Signature-Alg")] string signatureAlg,
         [Header("X-Key-Id")] string keyId);
