@@ -9,4 +9,6 @@ public interface ISasSlotService
     Task<decimal> GetWalletAsync(string account);
 
     Task DepositAsync(string account, decimal amount, string sno);
+
+    Task WithdrawalAsync(string account, decimal amount, string sno);
 }

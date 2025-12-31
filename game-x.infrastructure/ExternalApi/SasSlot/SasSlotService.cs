@@ -6,6 +6,7 @@ using game_x.application.Exceptions;
 using game_x.share.Extensions;
 using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
 using game_x.share.ExternalApi.SasSlot.Dtos.Login;
+using game_x.share.ExternalApi.SasSlot.Dtos.Withdrawal;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
@@ -103,13 +104,48 @@ public sealed class SasSlotService(
                 throw new ExternalServiceException();
             }
 
-            var response = result.Content;
-
             logger.LogInformation("Deposit request successful");
         }
         catch (Exception ex)
         {
             logger.LogError("Failed to send deposit request to SAS Slot: {Ex}", ex);
+            throw;
+        }
+    }
+
+    public async Task WithdrawalAsync(string account, decimal amount, string sno)
+    {
+        var request = new SasSlotWithdrawalRequest
+        {
+            PlatformCode = settings.Value.Code,
+            ExtUserId = account,
+            RefId = sno,
+            Amount = amount,
+            IsPromo = false,
+            Nonce = Guid.NewGuid().ToString(),
+            Ts = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        };
+        try
+        {
+            var signature = Sign(request);
+            logger.LogInformation("Send withdrawal request to SAS Slot: account = {Account}, Sno = {refId}", request.ExtUserId, request.RefId);
+
+            var result = await gameApi.WithdrawalAsync(
+                request,
+                signature,
+                DefaultSignatureAlg,
+                DefaultKeyId);
+            if (!result.IsSuccessStatusCode || result.Content == null || !result.Content.Success)
+            {
+                logger.LogError($"Response failed: Status={result.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            logger.LogInformation("Withdrawal request successful");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to send withdrawal request to SAS Slot: {Ex}", ex);
             throw;
         }
     }

@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
+using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
@@ -27,6 +28,7 @@ public sealed class WalletWithdrawalHandler(
     IGameProviderService gameProvider,
     IGameBaccaratService gameBaccarat,
     IEtl998Service etl998Service,
+    ISasSlotService sasSlotService,
     IGameProviderCacheService gameProviderCache,
     IGamePlatformService gamePlatformService,
     IWalletManagerCacheService walletManagerCache) : ICommandHandler<WalletWithdrawalCommand, ListTransactionExternalDto>
@@ -62,6 +64,8 @@ public sealed class WalletWithdrawalHandler(
         var wallet = await walletManagerCache.GetExternalWalletAsync(
             currentUser.Id,
             request.PlatformId);
+        if (wallet.Amount < request.Amount)
+            throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
         decimal? balanceAfter = null;
         await unitOfWork.WithTransactionAsync(async () =>
@@ -88,16 +92,17 @@ public sealed class WalletWithdrawalHandler(
                     amount: request.Amount);
 
             if (request.PlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
-            {
-                if (wallet.Amount < request.Amount)
-                    throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
-
                 await WithdrawalToEtl998WalletAsync(
                     accountName: currentUser.UserExtend!.Etl998ProviderAccount,
                     password: currentUser.UserExtend!.Etl998ProviderPassword,
                     sno: serialNumber,
                     amount: request.Amount);
-            }
+
+            if (request.PlatformId == GameConstants.PLATFORM_ID_SASSLOT)
+                await WithdrawalToSasSlotWalletAsync(
+                    account: currentUser.UserExtend!.SasSlotAccount,
+                    sno: serialNumber,
+                    amount: request.Amount);
 
             var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
             await eventDispatcher.Publish(@event, ct);
@@ -223,5 +228,13 @@ public sealed class WalletWithdrawalHandler(
         };
         await etl998Service.PrepareTransferAsync(prepareRequest);
         await etl998Service.ConfirmTransferAsync(prepareRequest);
+    }
+
+    private async Task WithdrawalToSasSlotWalletAsync(
+        string account,
+        decimal amount,
+        string sno)
+    {
+        await sasSlotService.WithdrawalAsync(account, amount, sno);
     }
 }
