@@ -131,7 +131,7 @@ public sealed class SasSlotService(
                 signature,
                 DefaultSignatureAlg,
                 DefaultKeyId);
-            if (!result.IsSuccessStatusCode || result.Content == null || !result.Content.Success)
+            if (!result.IsSuccessStatusCode)
             {
                 logger.LogError($"Response failed: Status={result.StatusCode}");
                 throw new ExternalServiceException();
@@ -168,7 +168,7 @@ public sealed class SasSlotService(
                 signature,
                 DefaultSignatureAlg,
                 DefaultKeyId);
-            if (!result.IsSuccessStatusCode || result.Content == null || !result.Content.Success)
+            if (!result.IsSuccessStatusCode)
             {
                 logger.LogError($"Response failed: Status={result.StatusCode}");
                 throw new ExternalServiceException();

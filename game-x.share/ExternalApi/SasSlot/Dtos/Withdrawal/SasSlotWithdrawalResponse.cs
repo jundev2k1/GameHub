@@ -2,6 +2,4 @@
 
 public sealed class SasSlotWithdrawalResponse
 {
-    public bool Success { get; set; }
-    public bool RefId { get; set; }
 }
