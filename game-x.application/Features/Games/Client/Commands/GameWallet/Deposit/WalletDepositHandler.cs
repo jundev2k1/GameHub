@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
+using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
@@ -13,6 +14,7 @@ using game_x.share.ExternalApi.Etl998.Constants;
 using game_x.share.ExternalApi.Etl998.Dtos.PrepareTransfer;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Deposit;
 using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
+using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
 
 namespace game_x.application.Features.Games.Client.Commands.GameWallet.Deposit;
 
@@ -27,6 +29,7 @@ public sealed class WalletDepositHandler(
     IGameProviderService gameProvider,
     IGameBaccaratService gameBaccarat,
     IEtl998Service etl998Service,
+    ISasSlotService sasSlotService,
     IGamePlatformService gamePlatformService,
     IGameProviderCacheService gameProviderCache,
     IWalletManagerCacheService walletManagerCache) : ICommandHandler<WalletDepositCommand, ListTransactionExternalDto>
@@ -87,6 +90,12 @@ public sealed class WalletDepositHandler(
                 await DepositToEtl998WalletAsync(
                     accountName: currentUser.UserExtend!.Etl998ProviderAccount,
                     password: currentUser.UserExtend!.Etl998ProviderPassword,
+                    sno: serialNumber,
+                    amount: request.Amount);
+
+            if (request.PlatformId == GameConstants.PLATFORM_ID_SASSLOT)
+                await DepositToSasSlotWalletAsync(
+                    account: currentUser.UserExtend!.SasSlotAccount,
                     sno: serialNumber,
                     amount: request.Amount);
 
@@ -211,5 +220,10 @@ public sealed class WalletDepositHandler(
         };
         await etl998Service.PrepareTransferAsync(prepareRequest);
         await etl998Service.ConfirmTransferAsync(prepareRequest);
+    }
+
+    private async Task DepositToSasSlotWalletAsync(string account, decimal amount, string sno)
+    {
+        await sasSlotService.DepositAsync(account, amount, sno);
     }
 }

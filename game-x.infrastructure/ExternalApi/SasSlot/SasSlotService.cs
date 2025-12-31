@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
 using game_x.share.Extensions;
+using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
 using game_x.share.ExternalApi.SasSlot.Dtos.Login;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
@@ -31,9 +32,9 @@ public sealed class SasSlotService(
             Nonce = Guid.NewGuid().ToString(),
             Ts = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
         };
-        var signature = Sign(request);
         try
         {
+            var signature = Sign(request);
             logger.LogInformation("Send login request to SAS Slot: account = {Account}, nickname = {nickname}", request.ExtUserId, request.Nickname);
 
             var result = await gameApi.LoginAsync(
@@ -43,7 +44,7 @@ public sealed class SasSlotService(
                 DefaultKeyId);
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
-                logger.LogError($"Response failed: Status={result.StatusCode} | {result.ReasonPhrase ?? string.Empty} | {result.RequestMessage?.RequestUri?.ToStringOrEmpty()} | " + result.Content != null ? JsonSerializer.Serialize(result.Content) : string.Empty);
+                logger.LogError($"Response failed: Status={result.StatusCode}");
                 throw new ExternalServiceException();
             }
 
@@ -72,6 +73,45 @@ public sealed class SasSlotService(
         // TODO (SAS Slot): add the SAS Slot's logic to get wallet
         await Task.CompletedTask;
         return 0;
+    }
+
+    public async Task DepositAsync(string account, decimal amount, string sno)
+    {
+        var request = new SasSlotDepositRequest
+        {
+            PlatformCode = settings.Value.Code,
+            ExtUserId = account,
+            RefId = sno,
+            Amount = amount,
+            IsPromo = false,
+            Nonce = Guid.NewGuid().ToString(),
+            Ts = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        };
+        try
+        {
+            var signature = Sign(request);
+            logger.LogInformation("Send deposit request to SAS Slot: account = {Account}, Sno = {refId}", request.ExtUserId, request.RefId);
+
+            var result = await gameApi.DepositAsync(
+                request,
+                signature,
+                DefaultSignatureAlg,
+                DefaultKeyId);
+            if (!result.IsSuccessStatusCode || result.Content == null || !result.Content.Success)
+            {
+                logger.LogError($"Response failed: Status={result.StatusCode}");
+                throw new ExternalServiceException();
+            }
+
+            var response = result.Content;
+
+            logger.LogInformation("Deposit request successful");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to send deposit request to SAS Slot: {Ex}", ex);
+            throw;
+        }
     }
 
     private string Sign<T>(T request) where T : class

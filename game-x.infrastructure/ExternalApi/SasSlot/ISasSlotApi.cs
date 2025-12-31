@@ -1,4 +1,5 @@
-﻿using game_x.share.ExternalApi.SasSlot.Dtos.Login;
+﻿using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
+using game_x.share.ExternalApi.SasSlot.Dtos.Login;
 using Refit;
 
 namespace game_x.infrastructure.ExternalApi.SasSlot;
@@ -9,6 +10,14 @@ public interface ISasSlotApi
     [Post("/ext/session")]
     Task<ApiResponse<SasSlotLoginResponse>> LoginAsync(
         [Body] SasSlotLoginRequest request,
+        [Header("X-Signature")] string signature,
+        [Header("X-Signature-Alg")] string signatureAlg,
+        [Header("X-Key-Id")] string keyId);
+
+    /// <summary>Deposit API</summary>
+    [Post("/ext/deposit")]
+    Task<ApiResponse<SasSlotDepositResponse>> DepositAsync(
+        [Body] SasSlotDepositRequest request,
         [Header("X-Signature")] string signature,
         [Header("X-Signature-Alg")] string signatureAlg,
         [Header("X-Key-Id")] string keyId);
