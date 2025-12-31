@@ -47,6 +47,14 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
         await context.BulkInsertAsync(list, config);
     }
 
+    public async Task UpdateAsync(int id, Action<UserBalance> updateAction, CancellationToken ct = default)
+    {
+        var targetBalance = await context.UserBalances
+            .FirstOrDefaultAsync(x => x.Id == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+
+        updateAction.Invoke(targetBalance);
+    }
     public async Task UpdateAsync(Guid id, Action<UserBalance> updateAction, CancellationToken ct = default)
     {
         var targetBalance = await context.UserBalances
@@ -55,7 +63,6 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
 
         updateAction.Invoke(targetBalance);
     }
-    
     public async Task UpdateAsync(Guid id, Func<UserBalance, Task> updateAction, CancellationToken ct = default)
     {
         var targetBalance = await context.UserBalances

@@ -54,6 +54,7 @@ public interface ITransactionRepo
 
     /// <summary>Only update the fields that are passed in.</summary>
     Task UpdateAsync(Guid publicId, Action<Transaction> updateAction, CancellationToken ct = default);
+    Task UpdateAsync(Guid publicId, Func<Transaction, Task> updateAction, CancellationToken ct = default);
     /// <summary>Override all data of the record.</summary>
     Task UpdateAsync(Transaction transaction, CancellationToken ct = default);
 }

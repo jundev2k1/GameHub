@@ -76,8 +76,8 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         {
             await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
             {
-                await TryRefundFrozenBalanceAsync(tx, ct);
                 tx.Review(false, userAccessor.GetUserId());
+                await TryRefundFrozenBalanceAsync(tx, ct);
             }, ct);
         }, ct);
     }
@@ -108,11 +108,17 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, ex.Message);
-            await TryRefundFrozenBalanceAsync(tx, ct);
-            tx.UpdateStatus(TransactionStatus.Failed);
-            tx.UpdateMeta(m => m.ErrorMessage = ex.Message);
+            await unitOfWork.WithTransactionAsync(async () =>
+            {
+                await transactionRepo.UpdateAsync(tx.PublicId, async transaction =>
+                {
+                    transaction.UpdateStatus(TransactionStatus.Failed);
+                    transaction.UpdateMeta(m => m.ErrorMessage = ex.Message);
+                    await TryRefundFrozenBalanceAsync(tx, ct);
+                }, ct);
+            }, ct);
 
+            logger.LogError(ex, ex.Message);
             return ex;
         }
     }
@@ -121,24 +127,10 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     {
         var balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId)
             ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
-
-        var refundAmount = tx.TotalAmount;
-        try
+        await userBalanceRepo.UpdateAsync(tx.CryptoTokenId, balance =>
         {
+            var refundAmount = tx.TotalAmount;
             balance.Unfreeze(refundAmount);
-            await userBalanceRepo.PutUpdateAsync(balance, ct);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(
-                "[TronWithdrawal] ❌ Balance compensation failed，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}, Err={ex}",
-                tx.UserId,
-                tx.CryptoTokenId,
-                tx.TransactionInternal?.OrderNumber ?? string.Empty,
-                refundAmount,
-                ex);
-
-            throw new BadRequestException(MessageCode.Accounting.InsufficientFrozenBalance);
-        }
+        }, ct);
     }
 }
