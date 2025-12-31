@@ -17,6 +17,8 @@ public static class JsonSignatureNormalizer
 
     public static object NormalizeAndSerialize(object data)
     {
+        if (data is string) return data;
+
         // 將物件轉成 Dictionary<string, object>
         var dictionary = ConvertToDictionary(data);
 
