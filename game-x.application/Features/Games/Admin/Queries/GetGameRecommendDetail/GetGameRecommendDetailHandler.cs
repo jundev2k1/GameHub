@@ -18,8 +18,7 @@ public sealed class GetGameRecommendDetailHandler(
         var tasks = dto.Items.Select(i => MapToListItem(i, gameList));
         var allItems = await Task.WhenAll(tasks);
         var items = allItems.Where(i => i != null).ToArray()!;
-        var result = dto.Adapt<GetGameRecommendDetailDto>();
-        result.Items = items!;
+        var result = MapToResult(dto, items!);
         return result;
     }
 
@@ -33,5 +32,22 @@ public sealed class GetGameRecommendDetailHandler(
         }
         var result = new GameRecommendListItemDto(gameInfo, item);
         return result;
+    }
+
+    private static GetGameRecommendDetailDto MapToResult(GameRecommendDto dto, GameRecommendListItemDto[] items)
+    {
+        return new GetGameRecommendDetailDto
+        {
+            Id = dto.Id,
+            Name = dto.Name,
+            Description = dto.Description,
+            BannerId = dto.BannerId,
+            Status = dto.Status,
+            StartDate = dto.StartDate,
+            EndDate = dto.EndDate,
+            Items = items,
+            CreatedAt = dto.CreatedAt,
+            UpdatedAt = dto.UpdatedAt,
+        };
     }
 }

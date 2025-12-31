@@ -141,8 +141,5 @@ public sealed class MapsterConfig : IRegister
 
         cfg.NewConfig<GameRecommendItem, GameRecommendItemDto>()
             .Map(dest => dest.LocalGameId, src => src.GameId);
-
-        cfg.NewConfig<GameRecommendDto, GetGameRecommendDetailDto>()
-            .Map(dest => dest.Items, src => Array.Empty<GameRecommendListItemDto>());
     }
 }
