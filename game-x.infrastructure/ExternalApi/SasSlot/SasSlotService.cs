@@ -1,5 +1,7 @@
-﻿using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
 using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
 using game_x.share.Extensions;
 using game_x.share.ExternalApi.SasSlot.Dtos.Login;
@@ -11,8 +13,13 @@ namespace game_x.infrastructure.ExternalApi.SasSlot;
 public sealed class SasSlotService(
     IOptions<GameSlotSettings> settings,
     ISasSlotApi gameApi,
+    IAsymmetricCryptoService asymmetricCryptoService,
+    IAsymmetricKeyCacheService asymmetricKeyCacheService,
     IAppLogger<SasSlotService> logger) : ISasSlotService
 {
+    private const string DefaultSignatureAlg = "ES256";
+    private const string DefaultKeyId = "nmy-2025-12";
+
     public async Task<string> LoginAsync(string account, string nickname)
     {
         var request = new SasSlotLoginRequest
@@ -22,12 +29,16 @@ public sealed class SasSlotService(
             Nickname = nickname,
             Nonce = Guid.NewGuid().ToString(),
         };
-
+        var signature = Sign(request);
         try
         {
             logger.LogInformation("Send login request to SAS Slot: account = {Account}, nickname = {nickname}", request.ExtUserId, request.Nickname);
 
-            var result = await gameApi.LoginAsync(request);
+            var result = await gameApi.LoginAsync(
+                request,
+                signature,
+                DefaultSignatureAlg,
+                DefaultKeyId);
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
                 logger.LogError($"Response failed: Status={result.StatusCode}");
@@ -43,7 +54,7 @@ public sealed class SasSlotService(
         }
         catch (Exception ex)
         {
-            logger.LogError("Failed to send login request to GameBaccarat: {Ex}", ex);
+            logger.LogError("Failed to send login request to SAS Slot: {Ex}", ex);
             throw;
         }
     }
@@ -59,5 +70,12 @@ public sealed class SasSlotService(
         // TODO (SAS Slot): add the SAS Slot's logic to get wallet
         await Task.CompletedTask;
         return 0;
+    }
+
+    private string Sign<T>(T request) where T : class
+    {
+        var GameXPrivateKey = asymmetricKeyCacheService.GameXPrivateKey;
+        var signature = asymmetricCryptoService.Sign(GameXPrivateKey, request);
+        return signature;
     }
 }

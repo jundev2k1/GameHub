@@ -298,7 +298,7 @@ public static class InfrastructureServicesRegistration
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
         // SAS Slot API
-        services.AddTransient<SlotMessageHandler>();
+        //services.AddTransient<SlotMessageHandler>();
         services.AddRefitClient<ISasSlotApi>()
             .ConfigureHttpClient(c =>
             {
@@ -307,7 +307,7 @@ public static class InfrastructureServicesRegistration
                 c.BaseAddress = new Uri(baseUrl);
                 c.Timeout = TimeSpan.FromSeconds(5);
             })
-            .AddHttpMessageHandler<SlotMessageHandler>()
+            //.AddHttpMessageHandler<SlotMessageHandler>()
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
         // SRS API

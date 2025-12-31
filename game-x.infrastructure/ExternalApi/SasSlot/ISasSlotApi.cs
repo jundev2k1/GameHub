@@ -7,5 +7,9 @@ public interface ISasSlotApi
 {
     /// <summary>Login API</summary>
     [Post("/ext/session")]
-    Task<ApiResponse<SasSlotLoginResponse>> LoginAsync([Body] SasSlotLoginRequest request);
+    Task<ApiResponse<SasSlotLoginResponse>> LoginAsync(
+        [Body] SasSlotLoginRequest request,
+        [Header("X-Signature")] string signature,
+        [Header("X-Signature-Alg")] string signatureAlg,
+        [Header("X-Key-Id")] string keyId);
 }
