@@ -54,7 +54,11 @@ public sealed class GamePlatformService(
         if ((gamePlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
             && (usrex.Etl998ProviderAccount.IsNullOrWhiteSpace() || usrex.Etl998ProviderPassword.IsNullOrWhiteSpace()))
             return false;
-        
+
+        if ((gamePlatformId == GameConstants.PLATFORM_ID_SASSLOT)
+            && (usrex.SasSlotAccount.IsNullOrWhiteSpace() || usrex.SasSlotNickname.IsNullOrWhiteSpace()))
+            return false;
+
         return true;
     }
 }
