@@ -42,7 +42,7 @@ public sealed class SasSlotService(
                 DefaultKeyId);
             if (!result.IsSuccessStatusCode || result.Content == null)
             {
-                logger.LogError($"Response failed: Status={result.StatusCode} | {JsonSerializer.Serialize(result.Error)}" + result.Content != null ? JsonSerializer.Serialize(result.Content) : string.Empty);
+                logger.LogError($"Response failed: Status={result.StatusCode} | {result.ReasonPhrase} | {result.RequestMessage?.RequestUri} | " + result.Content != null ? JsonSerializer.Serialize(result.Content) : string.Empty);
                 throw new ExternalServiceException();
             }
 
