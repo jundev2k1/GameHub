@@ -47,10 +47,11 @@ public sealed class AdminReviewWithdrawalOrderHandler(
                 throw new BadRequestException(MessageCode.System.InvalidParameters);
         }
 
-        var txNotification = tx.Adapt<TransactionInternalDto>();
+        var newTx = await transactionRepo.GetInternalByIdAsync(tx.PublicId, ct);
+        var txNotification = newTx.Adapt<TransactionInternalDto>();
         await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(txNotification), ct);
 
-        return tx.Adapt<ListTransactionInternalDto>();
+        return newTx.Adapt<ListTransactionInternalDto>();
     }
 
     private async Task HandleApproveTransactionAsync(Transaction transaction, CancellationToken ct)
