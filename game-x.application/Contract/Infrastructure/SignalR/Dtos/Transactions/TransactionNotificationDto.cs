@@ -4,6 +4,8 @@ public class TransactionNotificationDto
 {
     public Guid Id { get; set; }
     public string? UserId { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string Nickname { get; set; } = string.Empty;
     public string OrderNumber { get; set; } = string.Empty;
     public string? Hash { get; set; }
     public string? FromAddress { get; set; }
@@ -14,6 +16,8 @@ public class TransactionNotificationDto
     public decimal? BalanceAfter { get; set; }
     public Guid CryptoTokenId { get; set; }
     public DateTime? ConfirmedAt { get; set; }
+    public string? ReviewedById { get; set; }
+    public string? ReviewedBy { get; set; }
     public DateTime? DateReviewed { get; set; }
     public string Status { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
