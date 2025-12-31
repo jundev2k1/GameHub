@@ -3,7 +3,6 @@ using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.UserGameSessions.Dtos;
-using Microsoft.EntityFrameworkCore;
 
 namespace game_x.persistence.Repo;
 
@@ -22,6 +21,7 @@ public sealed class UserGameSessionRepo(GameXContext context, IUnitOfWork unitOf
             {
                 UserId = ugs.UserId,
                 Nickname = ugs.User.Nickname,
+                Email = ugs.User.Email ?? string.Empty,
                 PlatformId = ugs.Platform.PublicId,
                 PlatformName = ugs.Platform.Name,
                 GameId = ugs.Game != null ? ugs.Game.PublicId : null,

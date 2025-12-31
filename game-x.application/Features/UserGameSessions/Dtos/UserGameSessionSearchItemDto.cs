@@ -4,6 +4,7 @@ public sealed class UserGameSessionSearchItemDto
 {
     public string UserId { get; set; } = string.Empty;
     public string Nickname { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public Guid PlatformId { get; set; }
     public string PlatformName { get; set; } = string.Empty;
     public Guid? GameId { get; set; }
