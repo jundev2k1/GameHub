@@ -18,6 +18,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     ITransactionRepo transactionRepo,
     IApplicationEventDispatcher eventDispatcher,
     IUserBalanceRepo userBalanceRepo,
+    IUserAccessor userAccessor,
     IAppLogger<AdminReviewWithdrawalOrderHandler> logger,
     IOptions<GameXSettings> gameXSettings,
     IAsymmetricKeyCacheService asymmetricKeyCacheService,
@@ -61,7 +62,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         {
             await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
             {
-                tx.Review(true);
+                tx.Review(true, userAccessor.GetUserId());
                 ex = await SendUxmWithdrawalOrderAsync(tx, ct);
             });
         }, ct);
@@ -76,7 +77,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
             await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
             {
                 await TryRefundFrozenBalanceAsync(tx, ct);
-                tx.Review(false);
+                tx.Review(false, userAccessor.GetUserId());
             }, ct);
         }, ct);
     }

@@ -21,6 +21,8 @@ public class TransactionInternalDetailDto
     public NetworkType Network { get; set; }
     public DateTime? ConfirmedAt { get; set; }
     public TransactionStatus Status { get; set; }
+    public string? ReviewedById { get; set; }
+    public string? ReviewedBy { get; set; }
     public string? Note { get; set; }
     public string? Meta { get; set; }
     public DateTime CreatedAt { get; set; }

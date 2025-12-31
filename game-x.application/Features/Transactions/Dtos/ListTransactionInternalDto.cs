@@ -18,6 +18,8 @@ public class ListTransactionInternalDto
     public NetworkType Network { get; set; }
     public TransactionType Type { get; set; }
     public TransactionStatus Status { get; set; }
+    public string? ReviewedById { get; set; }
+    public string? ReviewedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }

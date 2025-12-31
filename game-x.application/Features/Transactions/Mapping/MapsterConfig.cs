@@ -19,6 +19,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
             .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null)
+            .Map(dest => dest.ReviewedById, src => src.ReviewedById)
+            .Map(dest => dest.ReviewedBy, src => src.ReviewedBy != null ? src.ReviewedBy.Nickname : null)
             .Map(dest => dest.DateReviewed, src => src.DateReviewed);
 
         cfg.NewConfig<Transaction, TransactionInternalDetailDto>()
@@ -34,6 +36,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.OrderUid, src => src.TransactionInternal != null ? src.TransactionInternal.OrderUid : null)
             .Map(dest => dest.OrderNumber, src => src.TransactionInternal != null ? src.TransactionInternal.OrderNumber : null)
             .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null)
+            .Map(dest => dest.ReviewedById, src => src.ReviewedById)
+            .Map(dest => dest.ReviewedBy, src => src.ReviewedBy != null ? src.ReviewedBy.Nickname : null)
             .Map(dest => dest.DateReviewed, src => src.DateReviewed);
 
         cfg.NewConfig<Transaction, TransactionInternalDto>()
@@ -49,6 +53,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.FromAddress, src => src.TransactionInternal != null ? src.TransactionInternal.FromAddress : null)
             .Map(dest => dest.ToAddress, src => src.TransactionInternal != null ? src.TransactionInternal.ToAddress : null)
             .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null)
+            .Map(dest => dest.ReviewedById, src => src.ReviewedById)
+            .Map(dest => dest.ReviewedBy, src => src.ReviewedBy != null ? src.ReviewedBy.Nickname : null)
             .Map(dest => dest.DateReviewed, src => src.DateReviewed);
 
         cfg.NewConfig<TransactionInternalDto, TransactionNotificationDto>()

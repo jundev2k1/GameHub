@@ -16,6 +16,8 @@ public class TransactionInternalDto
     public NetworkType Network { get; set; }
     public TransactionType Type { get; set; }
     public TransactionStatus Status { get; set; }
+    public string? ReviewedById { get; set; }
+    public string? ReviewedBy { get; set; }
     public string? OrderUid { get; set; }
     public string OrderNumber { get; set; } = string.Empty;
     public string? Hash { get; set; }

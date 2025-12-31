@@ -27,6 +27,8 @@ public class Transaction : BaseEntity<int>, IAuditable
     public TransactionInternal? TransactionInternal { get; private set; }
     public TransactionExternal? TransactionExternal { get; private set; }
     public DateTime? CompletedAt { get; private set; }
+    public string? ReviewedById { get; private set; }
+    public User? ReviewedBy { get; private set; }
     public DateTime? DateReviewed { get; private set; }
 
     public decimal TotalAmount => Amount + (Fee ?? 0);
@@ -111,11 +113,12 @@ public class Transaction : BaseEntity<int>, IAuditable
         }
     }
 
-    public void Review(bool isApprove)
+    public void Review(bool isApprove, string reviewedById)
     {
         Status = isApprove
             ? TransactionStatus.Approved
             : TransactionStatus.Rejected;
+        ReviewedById = reviewedById;
         DateReviewed = DateTime.UtcNow;
     }
 

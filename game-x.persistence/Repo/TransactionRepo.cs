@@ -22,6 +22,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .Include(x => x.User)
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionInternal)
+            .Include(x => x.ReviewedBy)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -85,6 +86,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .Include(x => x.User)
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionInternal)
+            .Include(x => x.ReviewedBy)
             .Where(x => x.UserId == userId && x.SourceType == TransactionSourceType.Uxm)
             .AsQueryable();
 
@@ -183,6 +185,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .ThenInclude(u => u.UserBalances)
             .Include(t => t.CryptoToken)
             .Include(t => t.TransactionInternal)
+            .Include(x => x.ReviewedBy)
             .FirstOrDefaultAsync(x => x.TransactionInternal != null && x.TransactionInternal.OrderNumber == orderNumber, ct);
     }
 
@@ -194,6 +197,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
                 .ThenInclude(u => u.UserBalances)
             .Include(t => t.CryptoToken)
             .Include(x => x.TransactionInternal)
+            .Include(x => x.ReviewedBy)
             .FirstOrDefaultAsync(x => x.PublicId == publicId, ct)
             ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
