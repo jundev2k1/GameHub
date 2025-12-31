@@ -175,6 +175,8 @@ public sealed class WalletDepositHandler(
             return TransactionSourceType.BaccaratGameProvider;
         if (platformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
             return TransactionSourceType.Elt998GameProvider;
+        if (platformId == GameConstants.PLATFORM_ID_SASSLOT)
+            return TransactionSourceType.SasSlotProvider;
 
         throw new NotSupportedException($"This platform ({platformId}) is not support.");
     }
