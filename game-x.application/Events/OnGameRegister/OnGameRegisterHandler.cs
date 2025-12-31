@@ -129,6 +129,6 @@ public sealed class OnGameRegisterHandler(
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}";
         await sasSlotService.RegisterAsync(account, nickName);
-        usrex.UpdateSasSlotAccount(account, nickName);
+        usrex.UpdateSasSlotAccount("user1", "user1");
     }
 }
