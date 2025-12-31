@@ -7,6 +7,7 @@ public class AdminDto
     public string Email { get; set; } = string.Empty;
     public string Nickname { get; set; } = string.Empty;
     public UserStatus Status { get; set; }
+    public string? Notes { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }
