@@ -354,19 +354,16 @@ public sealed class UserRepo(
             page,
             pageSize);
     }
-    public async Task<PaginationResult<UserDto>> GetTalentByCriteriaAsync(
-        Func<IQueryable<UserDto>, IQueryable<UserDto>>? queryBuilder = null,
+    public async Task<PaginationResult<TalentListItemDto>> GetTalentByCriteriaAsync(
+        Func<IQueryable<TalentListItemDto>, IQueryable<TalentListItemDto>>? queryBuilder = null,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default)
     {
-        var baseQuery = userManager.Users
+        var query = userManager.Users
             .AsNoTracking()
             .Where(u => !u.IsDeleted && u.UserRoles.Any(ur => ur.Role.NormalizedName == AppRoles.Talent.ToUpper()))
-            .AsQueryable();
-
-        var query = baseQuery
-            .Select(u => new UserDto
+            .Select(u => new TalentListItemDto
             {
                 Id = u.Id,
                 Nickname = u.Nickname,
@@ -375,9 +372,11 @@ public sealed class UserRepo(
                 Status = u.Status,
                 CountryCode = u.CountryCode,
                 EmailConfirmed = u.EmailConfirmed,
+                Balance = u.TalentWallet != null ? u.TalentWallet.Balance : 0,
                 CreatedAt = u.CreatedAt,
                 UpdatedAt = u.UpdatedAt
-            });
+            })
+            .AsQueryable();
 
         if (queryBuilder != null)
             query = queryBuilder(query);
@@ -388,7 +387,7 @@ public sealed class UserRepo(
             .Take(pageSize)
             .ToListAsync(ct);
 
-        return new PaginationResult<UserDto>(
+        return new PaginationResult<TalentListItemDto>(
             items,
             totalCount,
             (int)Math.Ceiling((decimal)totalCount / pageSize),

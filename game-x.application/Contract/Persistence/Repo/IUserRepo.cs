@@ -57,8 +57,8 @@ public interface IUserRepo
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default);
-    Task<PaginationResult<UserDto>> GetTalentByCriteriaAsync(
-        Func<IQueryable<UserDto>, IQueryable<UserDto>>? queryBuilder = null,
+    Task<PaginationResult<TalentListItemDto>> GetTalentByCriteriaAsync(
+        Func<IQueryable<TalentListItemDto>, IQueryable<TalentListItemDto>>? queryBuilder = null,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default);
