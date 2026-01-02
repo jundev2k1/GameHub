@@ -332,7 +332,7 @@ public sealed class UserRepo(
                 EmailConfirmed = u.EmailConfirmed,
                 Balance = u.UserBalances.Sum(ub => ub.Amount),
                 FrozenBalance = u.UserBalances.Sum(ub => ub.FrozenAmount),
-                TotalBalance = u.UserBalances.Sum(ub => ub.TotalAmount),
+                TotalBalance = u.UserBalances.Sum(ub => ub.Amount + ub.FrozenAmount),
                 CreatedAt = u.CreatedAt,
                 UpdatedAt = u.UpdatedAt
             })
