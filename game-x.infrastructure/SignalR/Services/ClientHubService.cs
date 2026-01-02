@@ -4,32 +4,31 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Features.Accounts.User.Dtos;
-using game_x.application.Features.Friends.Dtos;
+using game_x.infrastructure.SignalR.Facade;
 using game_x.infrastructure.SignalR.Hubs;
-using Microsoft.AspNetCore.SignalR;
 
 namespace game_x.infrastructure.SignalR.Services;
 
-public sealed class ClientHubService(IHubContext<ClientHub, IClientHub> hubContext)
+public sealed class ClientHubService(ActorHubFacade<ClientHub, IClientHub> actorHub)
     : IClientHubService, IHubServices
 {
     public async Task SendNotificationToMemberAsync(string memberId, NotificationDto message)
     {
-        await hubContext.Clients.Group($"member-{memberId}").ReceiveNotification(message);
+        await actorHub.Member(memberId).ReceiveNotification(message);
     }
 
     public async Task SendTransactionToMemberAsync(string memberId, ClientTransactionDto transaction)
     {
-        await hubContext.Clients.Group($"member-{memberId}").TransactionUpdated(transaction);
+        await actorHub.Member(memberId).TransactionUpdated(transaction);
     }
 
-    public async Task SendVerifyUpdateAsync(string userId, VerificationStatusDto verificationStatus)
+    public async Task SendVerifyUpdateAsync(string memberId, VerificationStatusDto verificationStatus)
     {
-        await hubContext.Clients.Group($"member-{userId}").UserVerifyUpdated(verificationStatus);
+        await actorHub.Member(memberId).UserVerifyUpdated(verificationStatus);
     }
 
-    public async Task SendWalletsToMemberAsync(string userId, ClientWalletsDto wallets)
+    public async Task SendWalletsToMemberAsync(string memberId, ClientWalletsDto wallets)
     {
-        await hubContext.Clients.Group($"member-{userId}").WalletsUpdated(wallets);
+        await actorHub.Member(memberId).WalletsUpdated(wallets);
     }
 }
