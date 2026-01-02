@@ -24,7 +24,7 @@ public sealed class AdminHubService(ActorHubFacade<AdminHub, IAdminHub> actorHub
 
     public async Task SendTransactionToAllAdminAsync(AdminTransactionDto transaction)
     {
-        await hubContext.Clients.Group($"admin-group").TransactionUpdated(transaction);
+        await actorHub.AdminAll().TransactionUpdated(transaction);
     }
 
     public async Task SendTransactionToAdminAsync(string adminId, AdminTransactionDto transaction)
