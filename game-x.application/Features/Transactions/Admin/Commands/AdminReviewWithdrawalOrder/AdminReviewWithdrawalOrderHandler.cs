@@ -125,8 +125,6 @@ public sealed class AdminReviewWithdrawalOrderHandler(
 
     private async Task TryRefundFrozenBalanceAsync(Transaction tx, CancellationToken ct)
     {
-        var balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId)
-            ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
         await userBalanceRepo.UpdateAsync(tx.CryptoTokenId, balance =>
         {
             var refundAmount = tx.TotalAmount;

@@ -17,21 +17,22 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
     ITransactionRepo transactionRepo,
     IApplicationEventDispatcher eventDispatcher,
     IUserBalanceRepo userBalanceRepo,
-    IAppLogger<Transaction> logger,
+    IUserAccessor userAccessor,
     IOptions<GameXSettings> gameXSettings,
-    IAsymmetricCryptoService asymmetricCryptoService)
+    IAsymmetricCryptoService asymmetricCryptoService,
+    IAppLogger<AdminReviewWithdrawalOrderV2Handler> logger)
     : ICommandHandler<AdminReviewWithdrawalOrderV2Command, ListTransactionInternalDto>
 {
     public async Task<ListTransactionInternalDto> Handle(AdminReviewWithdrawalOrderV2Command request, CancellationToken ct = default)
     {
         var tx = await transactionRepo.GetInternalByIdAsync(request.OrderId ?? Guid.Empty, ct);
-        
+
         if (!tx.Type.Equals(TransactionType.Withdrawal))
             throw new BadRequestException(MessageCode.Transaction.InvalidTradeType);
-        
+
         if (!tx.Status.Equals(TransactionStatus.Pending))
             throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
-        
+
         switch (request.OrderStatus)
         {
             case TransactionStatus.Approved:
@@ -43,32 +44,41 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
             default:
                 throw new BadRequestException(MessageCode.System.InvalidParameters);
         }
-        
-        await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(tx.Adapt<TransactionInternalDto>()), ct);
-        
-        return tx.Adapt<ListTransactionInternalDto>();
+
+        var newTx = await transactionRepo.GetInternalByIdAsync(request.OrderId ?? Guid.Empty, ct);
+        await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(newTx.Adapt<TransactionInternalDto>()), ct);
+
+        return newTx.Adapt<ListTransactionInternalDto>();
     }
 
     private async Task HandleApproveTransactionAsync(Transaction transaction, CancellationToken ct)
     {
-        transaction.UpdateStatus(TransactionStatus.Approved);
-        await transactionRepo.UpdateAsync(transaction, ct);
-        await SendPaymentGatewayRequest(transaction, ct);
-    }
-    
-    private async Task HandleRejectTransactionAsync(Transaction transaction, CancellationToken ct)
-    {
-        transaction.UpdateStatus(TransactionStatus.Rejected);
-        
-        await unitOfWork.WithTransactionAsync(
-            async () =>
+        Exception? ex = null;
+        await unitOfWork.WithTransactionAsync(async () =>
+        {
+            await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
             {
-                await transactionRepo.UpdateAsync(transaction, ct);
-                await TryRefundFrozenBalanceAsync(transaction, ct);
-            }, ct);
+                tx.Review(true, userAccessor.GetUserId());
+                ex = await SendPaymentGatewayRequest(tx, ct);
+            });
+        }, ct);
+
+        if (ex != null) throw ex;
     }
 
-    private async Task SendPaymentGatewayRequest(Transaction tx, CancellationToken ct)
+    private async Task HandleRejectTransactionAsync(Transaction transaction, CancellationToken ct)
+    {
+        await unitOfWork.WithTransactionAsync(async () =>
+        {
+            await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
+            {
+                tx.Review(false, userAccessor.GetUserId());
+                await TryRefundFrozenBalanceAsync(tx, ct);
+            }, ct);
+        }, ct);
+    }
+
+    private async Task<Exception?> SendPaymentGatewayRequest(Transaction tx, CancellationToken ct)
     {
         try
         {
@@ -76,21 +86,27 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
             var result = await pgService.ProxyWithdrawalAsync(pgRequest);
             var secretKey = gameXSettings.Value.PaymentGatewaySecretKey;
             bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(secretKey, result.Data, result.Signature);
-            if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
+            if (!isValid) return new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
+
+            return null;
         }
         catch (Exception ex)
         {
-            await transactionRepo.UpdateAsync(tx.PublicId, x =>
+            await unitOfWork.WithTransactionAsync(async () =>
             {
-                x.UpdateStatus(TransactionStatus.Failed);
-                x.UpdateMeta(m => m.ErrorMessage = ex.Message);
+                await transactionRepo.UpdateAsync(tx.PublicId, async transaction =>
+                {
+                    transaction.UpdateStatus(TransactionStatus.Failed);
+                    transaction.UpdateMeta(m => m.ErrorMessage = ex.Message);
+                    await TryRefundFrozenBalanceAsync(tx, ct);
+                }, ct);
             }, ct);
-            await unitOfWork.SaveChangesAsync(ct);
-            await TryRefundFrozenBalanceAsync(tx, ct);
-            throw;
+
+            logger.LogError(ex, ex.Message);
+            return ex;
         }
     }
-    
+
     private SecureRequest<WithdrawalOrderRequest> CreatePaymentGatewayRequest(Transaction tx, PaymentGatewayProvider providerId)
     {
         var secretKey = gameXSettings.Value.PaymentGatewaySecretKey;
@@ -98,28 +114,13 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
         var signature = asymmetricCryptoService.PaymentGatewaySign(secretKey, payload);
         return new SecureRequest<WithdrawalOrderRequest> { Data = payload, Signature = signature };
     }
-    
+
     private async Task TryRefundFrozenBalanceAsync(Transaction tx, CancellationToken ct)
     {
-        UserBalance? balance = tx.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == tx.CryptoTokenId)
-            ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
-
-        var refundAmount = tx.TotalAmount;
-        try
+        await userBalanceRepo.UpdateAsync(tx.CryptoTokenId, balance =>
         {
+            var refundAmount = tx.TotalAmount;
             balance.Unfreeze(refundAmount);
-            await userBalanceRepo.PutUpdateAsync(balance, ct);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(
-                "[TronWithdrawal] ❌ Balance compensation failed，UserId={UserId}, TokenId={TokenId}, OrderNo={OrderNo}, Refund={RefundAmount}, Err={ex}",
-                tx.UserId, 
-                tx.CryptoTokenId, 
-                tx.TransactionInternal?.OrderNumber ?? string.Empty, 
-                refundAmount,
-                ex);
-            throw new BadRequestException(MessageCode.Accounting.InsufficientFrozenBalance);
-        }
+        }, ct);
     }
 }
