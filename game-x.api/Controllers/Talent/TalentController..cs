@@ -1,7 +1,7 @@
 using game_x.api.Common;
 using game_x.application.Common.Filters;
 using game_x.application.Features.TalentWallets.Queries.GetTalentWallet;
-using game_x.application.Features.TalentWallets.Queries.GetTalentWalletTransactions;
+using game_x.application.Features.TalentWallets.Queries.GetMyTalentWalletTransactions;
 
 namespace game_x.api.Controllers.Talent;
 
@@ -14,7 +14,7 @@ public sealed class TalentController : BaseApiController
     {
         var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
         var sorts = QueryConverter.ToSorts(parameters.Sorts);
-        var query = new GetTalentWalletTransactionsQuery(
+        var query = new GetMyTalentWalletTransactionsQuery(
             filters,
             sorts,
             parameters.PageNumber ?? 1,
