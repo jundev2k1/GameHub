@@ -312,21 +312,16 @@ public sealed class UserRepo(
             .ToArray();
         return [kycStatus, .. bankAccountStatuses];
     }
-    public async Task<PaginationResult<UserDto>> GetUserByCriteriaAsync(
-        Func<IQueryable<UserDto>, IQueryable<UserDto>>? queryBuilder = null,
+    public async Task<PaginationResult<UserListItemDto>> GetUserByCriteriaAsync(
+        Func<IQueryable<UserListItemDto>, IQueryable<UserListItemDto>>? queryBuilder = null,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default)
     {
-        var baseQuery = userManager.Users
-            .Include(u => u.UserRoles)
-            .ThenInclude(ur => ur.Role)
-            .Where(u => !u.IsDeleted &&
-                        u.UserRoles.Any(ur => ur.Role.NormalizedName == AppRoles.User.ToUpper()))
-            .AsQueryable();
-
-        var query = baseQuery
-            .Select(u => new UserDto
+        var query = userManager.Users
+            .AsNoTracking()
+            .Where(u => !u.IsDeleted && u.UserRoles.Any(ur => ur.Role.NormalizedName == AppRoles.User.ToUpper()))
+            .Select(u => new UserListItemDto
             {
                 Id = u.Id,
                 Nickname = u.Nickname,
@@ -335,9 +330,13 @@ public sealed class UserRepo(
                 Status = u.Status,
                 CountryCode = u.CountryCode,
                 EmailConfirmed = u.EmailConfirmed,
+                Balance = u.UserBalances.Sum(ub => ub.Amount),
+                FrozenBalance = u.UserBalances.Sum(ub => ub.FrozenAmount),
+                TotalBalance = u.UserBalances.Sum(ub => ub.TotalAmount),
                 CreatedAt = u.CreatedAt,
                 UpdatedAt = u.UpdatedAt
-            });
+            })
+            .AsQueryable();
 
         if (queryBuilder != null)
             query = queryBuilder(query);
@@ -348,7 +347,7 @@ public sealed class UserRepo(
             .Take(pageSize)
             .ToListAsync(ct);
 
-        return new PaginationResult<UserDto>(
+        return new PaginationResult<UserListItemDto>(
             items,
             totalCount,
             (int)Math.Ceiling((decimal)totalCount / pageSize),
@@ -362,8 +361,7 @@ public sealed class UserRepo(
         CancellationToken ct = default)
     {
         var baseQuery = userManager.Users
-            .Include(u => u.UserRoles)
-            .ThenInclude(ur => ur.Role)
+            .AsNoTracking()
             .Where(u => !u.IsDeleted && u.UserRoles.Any(ur => ur.Role.NormalizedName == AppRoles.Talent.ToUpper()))
             .AsQueryable();
 

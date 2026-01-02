@@ -52,8 +52,8 @@ public interface IUserRepo
 
     Task<VerificationStatusDto[]> GetVerificationStatusList(string userId, CancellationToken ct = default);
 
-    Task<PaginationResult<UserDto>> GetUserByCriteriaAsync(
-        Func<IQueryable<UserDto>, IQueryable<UserDto>>? queryBuilder = null,
+    Task<PaginationResult<UserListItemDto>> GetUserByCriteriaAsync(
+        Func<IQueryable<UserListItemDto>, IQueryable<UserListItemDto>>? queryBuilder = null,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default);

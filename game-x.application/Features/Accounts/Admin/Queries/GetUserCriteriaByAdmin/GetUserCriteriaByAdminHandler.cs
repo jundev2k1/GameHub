@@ -8,10 +8,10 @@ namespace game_x.application.Features.AccountManagement.Admin.Queries.GetUserCri
 
 public sealed class GetUserCriteriaByAdminHandler(
     IUserRepo userRepo,
-    ICriteriaBuilder<UserDto> builder)
-    : IQueryHandler<GetUserCriteriaByAdminQuery, PaginationResult<UserDto>>
+    ICriteriaBuilder<UserListItemDto> builder)
+    : IQueryHandler<GetUserCriteriaByAdminQuery, PaginationResult<UserListItemDto>>
 {
-    public async Task<PaginationResult<UserDto>> Handle(GetUserCriteriaByAdminQuery request,
+    public async Task<PaginationResult<UserListItemDto>> Handle(GetUserCriteriaByAdminQuery request,
         CancellationToken ct = default)
     {
         var items = await userRepo.GetUserByCriteriaAsync(
@@ -20,11 +20,9 @@ public sealed class GetUserCriteriaByAdminHandler(
                 request.Filters,
                 request.Sorts,
                 keyword =>
-                    user =>
-                        (user.Nickname != null && user.Nickname.Contains(keyword)) ||
-                        (user.UserName != null && user.UserName.Contains(keyword)) ||
-                        (user.Email != null && user.Email.Contains(keyword)))
-            ,
+                    user => (user.Nickname != null && user.Nickname.Contains(keyword))
+                        || (user.UserName != null && user.UserName.Contains(keyword))
+                        || (user.Email != null && user.Email.Contains(keyword))),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);

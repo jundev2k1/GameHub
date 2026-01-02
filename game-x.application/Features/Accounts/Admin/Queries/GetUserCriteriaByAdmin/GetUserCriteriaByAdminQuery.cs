@@ -8,4 +8,4 @@ public record GetUserCriteriaByAdminQuery(
     IEnumerable<QueryFilter> Filters,
     IEnumerable<QuerySort> Sorts,
     int? PageIndex,
-    int? PageSize) : IQuery<PaginationResult<UserDto>>;
+    int? PageSize) : IQuery<PaginationResult<UserListItemDto>>;
