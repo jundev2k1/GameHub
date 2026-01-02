@@ -6,6 +6,7 @@ using game_x.application.Features.BankAccountVerifications.Dtos;
 using game_x.application.Features.Kyc.Dtos;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
+using game_x.infrastructure.SignalR.Groups;
 using game_x.share.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -44,8 +45,8 @@ public sealed class AdminHub(
         if (userId.IsNotNullOrEmpty())
             logger.LogInformation($"Admin User connected ({nameof(AdminHub)}): {userId}");
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"admin-{userId}");
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"admin-group");
+        await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Admin(userId!));
+        await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Broadcast(AppRoles.Admin));
         await base.OnConnectedAsync();
     }
 
@@ -61,7 +62,7 @@ public sealed class AdminHub(
         var command = new MarkAsReadCommand(notificationId, adminUserId);
         await sender.Send(command);
     }
-
+    
     public async Task MarkAllNotificationsAsRead()
     {
         var adminUserId = Context.UserIdentifier!;

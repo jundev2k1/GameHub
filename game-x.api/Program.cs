@@ -16,7 +16,7 @@ using Serilog.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, services, loggerConfig) =>
+builder.Host.UseSerilog((context, _, loggerConfig) =>
 {
     loggerConfig
         .Filter.ByExcluding(Matching.WithProperty<string>("RequestPath", p => p.Contains("/healthz")))
