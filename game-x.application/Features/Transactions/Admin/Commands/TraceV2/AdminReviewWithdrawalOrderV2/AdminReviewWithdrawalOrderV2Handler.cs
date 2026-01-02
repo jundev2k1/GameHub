@@ -117,7 +117,7 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
 
     private async Task TryRefundFrozenBalanceAsync(Transaction tx, CancellationToken ct)
     {
-        await userBalanceRepo.UpdateByTokenIdAsync(tx.CryptoTokenId, balance =>
+        await userBalanceRepo.UpdateByTokenIdAsync(tx.UserId, tx.CryptoTokenId, balance =>
         {
             var refundAmount = tx.TotalAmount;
             balance.Unfreeze(refundAmount);

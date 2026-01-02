@@ -13,7 +13,7 @@ public interface IUserBalanceRepo
     Task UpdateAsync(Guid id, Action<UserBalance> updateAction, CancellationToken ct = default);
     Task UpdateAsync(Guid id, Func<UserBalance, Task> updateAction, CancellationToken ct = default);
 
-    Task UpdateByTokenIdAsync(int id, Action<UserBalance> updateAction, CancellationToken ct = default);
+    Task UpdateByTokenIdAsync(string userId, int id, Action<UserBalance> updateAction, CancellationToken ct = default);
 
     Task PutUpdateAsync(UserBalance userBalance, CancellationToken ct = default);
 }

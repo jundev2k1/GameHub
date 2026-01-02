@@ -71,10 +71,10 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
 
         await updateAction.Invoke(targetBalance);
     }
-    public async Task UpdateByTokenIdAsync(int id, Action<UserBalance> updateAction, CancellationToken ct = default)
+    public async Task UpdateByTokenIdAsync(string userId, int id, Action<UserBalance> updateAction, CancellationToken ct = default)
     {
         var targetBalance = await context.UserBalances
-            .FirstOrDefaultAsync(x => x.CryptoTokenId == id, ct)
+            .FirstOrDefaultAsync(x => x.UserId == userId && x.CryptoTokenId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
 
         updateAction.Invoke(targetBalance);
