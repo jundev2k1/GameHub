@@ -17,7 +17,10 @@ public sealed class GetCurrentGameRecommendsHandler(
             .ToDictionary(g => g.LocalId, g => g);
         var tasks = data.Items.Select(i => MapToListItem(i, gameList));
         var items = await Task.WhenAll(tasks);
-        return items.Where(i => i != null).ToArray()!;
+        return items
+            .Where(i => i != null && i.IsActive)
+            .OrderByDescending(i => i!.Priority)
+            .ToArray()!;
     }
 
     private async Task<GameRecommendListItemDto?> MapToListItem(GameRecommendItemDto item, Dictionary<int, GameInfoDto> gameList)
