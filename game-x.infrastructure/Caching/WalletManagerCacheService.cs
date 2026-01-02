@@ -45,6 +45,13 @@ public sealed class WalletManagerCacheService(
             ?? throw new NotFoundException(nameof(platformId), platformId);
     }
 
+    public async Task<bool> IsExistExternalWalletAsync(string userId, Guid platformId)
+    {
+        var currentWallet = await GetWalletAsync(userId);
+        return currentWallet.ExternalWallets
+            .Any(ew => ew.PlatformId == platformId);
+    }
+
     public async Task RefreshWalletAsync(string userId)
     {
         var cacheKey = $"{CacheKeyPrefix}{userId}";

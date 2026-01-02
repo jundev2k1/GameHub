@@ -15,6 +15,8 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
     {
         // Refresh balance from the third party first
         await walletManagerCache.RefreshExternalWalletAsync(@event.UserId, @event.PlatformId);
+        var isExist = await walletManagerCache.IsExistExternalWalletAsync(@event.UserId, @event.PlatformId);
+        if (!isExist) throw new BadRequestException(MessageCode.System.DependencyFailure);
 
         var platform = gameProviderCache.PlatformList
             .FirstOrDefault(pl => pl.Id == @event.PlatformId)
@@ -22,7 +24,7 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
         var latestTransaction = await transactionRepo
             .GetLatestExternalTransactionAsync(@event.UserId, platform.LocalId, ct);
         if (latestTransaction is null) return;
- 
+
         var platformWallet = await walletManagerCache.GetExternalWalletAsync(
             @event.UserId,
             platform.Id);
