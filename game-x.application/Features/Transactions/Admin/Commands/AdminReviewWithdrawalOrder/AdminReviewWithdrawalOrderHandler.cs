@@ -74,11 +74,11 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
+            await transactionRepo.UpdateAsync(transaction.PublicId, tx =>
             {
                 tx.Review(false, userAccessor.GetUserId());
-                await TryRefundFrozenBalanceAsync(tx, ct);
             }, ct);
+            await TryRefundFrozenBalanceAsync(transaction, ct);
         }, ct);
     }
 
@@ -110,12 +110,12 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         {
             await unitOfWork.WithTransactionAsync(async () =>
             {
-                await transactionRepo.UpdateAsync(tx.PublicId, async transaction =>
+                await transactionRepo.UpdateAsync(tx.PublicId, transaction =>
                 {
                     transaction.UpdateStatus(TransactionStatus.Failed);
                     transaction.UpdateMeta(m => m.ErrorMessage = ex.Message);
-                    await TryRefundFrozenBalanceAsync(tx, ct);
                 }, ct);
+                await TryRefundFrozenBalanceAsync(tx, ct);
             }, ct);
 
             logger.LogError(ex, ex.Message);
