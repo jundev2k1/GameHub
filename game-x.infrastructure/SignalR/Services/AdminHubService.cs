@@ -23,6 +23,11 @@ public sealed class AdminHubService(IHubContext<AdminHub, IAdminHub> hubContext)
         await hubContext.Clients.All.ReceiveNotification(message);
     }
 
+    public async Task SendTransactionToAllAdminAsync(AdminTransactionDto transaction)
+    {
+        await hubContext.Clients.Group($"admin-group").TransactionUpdated(transaction);
+    }
+
     public async Task SendTransactionToAdminAsync(string adminId, AdminTransactionDto transaction)
     {
         await hubContext.Clients.Group($"admin-{adminId}").TransactionUpdated(transaction);

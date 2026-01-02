@@ -15,11 +15,10 @@ public sealed class OnUxmTransactionCallbackHandler(
     IClientHubService clientHubService,
     ITransactionRepo transactionRepo,
     IUserBalanceRepo userBalanceRepo,
-    IUserRepo userRepo,
     INotificationRepo notificationRepo,
     IAdminHubService adminHubService,
     IApplicationEventDispatcher eventDispatcher,
-    IAppLogger<Transaction> logger) : IApplicationEventHandler<OnUxmTransactionCallbackEvent>
+    IAppLogger<OnUxmTransactionCallbackHandler> logger) : IApplicationEventHandler<OnUxmTransactionCallbackEvent>
 {
     public async Task Handle(OnUxmTransactionCallbackEvent @event, CancellationToken ct = default)
     {
@@ -37,6 +36,8 @@ public sealed class OnUxmTransactionCallbackHandler(
             var balance = transaction.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId)
                 ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
+            var userId = transaction.UserId;
+            NotificationDto? notification = null;
             await unitOfWork.WithTransactionAsync(async () =>
             {
                 switch (transaction.Type)
@@ -66,18 +67,22 @@ public sealed class OnUxmTransactionCallbackHandler(
                         confirmedAt: @event.ConfirmedAt,
                         completedAt: DateTime.UtcNow);
                 }, ct);
-
+                // Ensure the audit log records the order status updated by the external API
+                using (AuditSourceContext.Use(AuditSource.External))
+                {
+                    await unitOfWork.SaveChangesAsync(ct);
+                }
                 var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
-                var transactionInternal = newTx.Adapt<TransactionInternalDto>();
-                await SendToMember(transactionInternal, ct);
-                await SendToAdmin(transactionInternal, ct);
+                notification = await SendNotificationAsync(newTx.Adapt<TransactionInternalDto>(), ct);
             }, ct);
 
-            // Ensure the audit log records the order status updated by the external API
-            using (AuditSourceContext.Use(AuditSource.External))
-            {
-                await unitOfWork.SaveChangesAsync(ct);
-            }
+            var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
+            var transactionInternal = newTx.Adapt<TransactionInternalDto>();
+            await SendToMember(transactionInternal, notification!, ct);
+            await SendToAdmin(transactionInternal);
+
+            await clientHubService.SendNotificationToMemberAsync(userId, notification.Adapt<NotificationDto>());
+            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(userId), ct);
         }
         catch (Exception ex)
         {
@@ -85,27 +90,27 @@ public sealed class OnUxmTransactionCallbackHandler(
         }
     }
 
-    private async Task SendToMember(TransactionInternalDto transaction, CancellationToken ct)
+    private async Task<NotificationDto> SendNotificationAsync(TransactionInternalDto transaction, CancellationToken ct)
     {
-        var userId = transaction.UserId;
         var notification = Notification.Create(
             NotificationMessageKey.Transaction_Completed,
-            userId,
+            transaction.UserId,
             NotificationType.Transaction,
             NotificationSeverity.Success,
             JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
         await notificationRepo.AddNotificationAsync(notification, ct);
-        await clientHubService.SendNotificationToMemberAsync(userId, notification.Adapt<NotificationDto>());
-        await clientHubService.SendTransactionToMemberAsync(userId, transaction.Adapt<ClientTransactionDto>());
-        await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(userId), ct);
+        return notification.Adapt<NotificationDto>();
     }
 
-    private async Task SendToAdmin(TransactionInternalDto transaction, CancellationToken ct)
+    private async Task SendToMember(TransactionInternalDto transaction, NotificationDto notification, CancellationToken ct)
     {
-        var adminUsers = await userRepo.GetAdminUsers(ct);
-        foreach (var adminUser in adminUsers)
-        {
-            await adminHubService.SendTransactionToAdminAsync(adminUser.Id, transaction.Adapt<AdminTransactionDto>());
-        }
+        var userId = transaction.UserId;
+        await clientHubService.SendNotificationToMemberAsync(userId, notification);
+        await clientHubService.SendTransactionToMemberAsync(userId, transaction.Adapt<ClientTransactionDto>());
+    }
+
+    private async Task SendToAdmin(TransactionInternalDto transaction)
+    {
+        await adminHubService.SendTransactionToAllAdminAsync(transaction.Adapt<AdminTransactionDto>());
     }
 }
