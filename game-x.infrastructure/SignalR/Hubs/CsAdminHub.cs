@@ -6,6 +6,7 @@ using game_x.application.Features.BankAccountVerifications.Dtos;
 using game_x.application.Features.Kyc.Dtos;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
 using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
+using game_x.infrastructure.SignalR.Groups;
 using game_x.share.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -39,8 +40,8 @@ public sealed class CsAdminHub(
         if (userId.IsNotNullOrEmpty())
             logger.LogInformation("Admin User connected ({hubName}): {userId}", nameof(CsAdminHub), userId);
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"cs-admin-{userId}");
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"cs-admin-group");
+        await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Cs(userId!));
+        await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Broadcast(AppRoles.Cs));
         await base.OnConnectedAsync();
     }
 

@@ -41,7 +41,7 @@ public sealed class GameHub(
             loginToken!.GamePlatformId,
             loginToken.GameId);
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"games-{loginToken!.GamePlatformId}-{userId}");
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"games-{loginToken.GamePlatformId}-{userId}");
 
         logger.LogInformation("GameHub ({PlatformId}) connected: {UserId}", loginToken.GamePlatformId, userId);
         await base.OnConnectedAsync();

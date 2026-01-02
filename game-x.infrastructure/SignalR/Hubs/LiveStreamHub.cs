@@ -8,6 +8,7 @@ using game_x.application.Features.LiveStreams.Streaming.Commands.PerformAction;
 using game_x.application.Features.LiveStreams.Streaming.Commands.SendChatMessage;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.application.Features.LiveStreams.Streaming.Queries.GetViewersByStream;
+using game_x.infrastructure.SignalR.Groups;
 using game_x.share.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +19,7 @@ namespace game_x.infrastructure.SignalR.Hubs;
 
 public interface ILiveStreamHub
 {
-    Task NotifyMessageFailed(string MessageId);
+    Task NotifyMessageFailed(string messageId);
 
     Task OnMemberAction(LiveStreamBanInfo banInfo);
 
@@ -74,12 +75,12 @@ public sealed class LiveStreamHub(
             ?? throw new ForbiddenException("Stream not found.");
 
         // Add to groups, one for all members, one for the specific member
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"stream-{streamKey}");
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"stream-{streamKey}-member-{userId}");
+        await Groups.AddToGroupAsync(Context.ConnectionId, LiveStreamGroups.Stream(streamKey!));
+        await Groups.AddToGroupAsync(Context.ConnectionId, LiveStreamGroups.StreamMember(streamKey!, userId));
 
-        // If the user is the host, add to host group
+        // If the user is the host, add to a host group
         if (userId == streamInfo.AssignedTo?.Id)
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"stream-{streamKey}-host");
+            await Groups.AddToGroupAsync(Context.ConnectionId, LiveStreamGroups.StreamHost(streamKey!));
 
         logger.LogInformation("LiveStreamHub {StreamKey} connected: {UserId}", streamKey!, userId);
         await base.OnConnectedAsync();

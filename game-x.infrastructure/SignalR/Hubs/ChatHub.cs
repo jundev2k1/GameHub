@@ -11,6 +11,7 @@ using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Commands.TouchDelivery;
 using game_x.application.Features.Chat.Dtos;
+using game_x.infrastructure.SignalR.Groups;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -60,25 +61,18 @@ public sealed class ChatHub(
             userId = userAccessor.GetUserId();
             role = userAccessor.GetRoles();
     
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.OnlineAll);
+            await Groups.AddToGroupAsync(Context.ConnectionId, ChatGroups.OnlineAll);
             
             if (Context.User?.IsInRole(AppRoles.User) == true)
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Member(userId));
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.User));
+                await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Member(userId));
+                await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Broadcast(AppRoles.User));
             }
         
             // If the user is an Admin/Cs, also add them to role groups (so they get broadcasts)
-            if (Context.User?.IsInRole(AppRoles.Admin) == true)
+            if (Context.User?.IsInRole(AppRoles.Admin) == true || Context.User?.IsInRole(AppRoles.Cs) == true)
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.Admin));
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Admin(userId));
-            }
-    
-            if (Context.User?.IsInRole(AppRoles.Cs) == true)
-            {
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Role(AppRoles.Cs));
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Cs(userId));
+                await Groups.AddToGroupAsync(Context.ConnectionId, ChatGroups.BackOffice());
             }
     
             logger.LogInformation("ChatHub {Role} connected: {UserId}",role.ToString(), userId);
@@ -88,7 +82,7 @@ public sealed class ChatHub(
             userId = Context.UserIdentifier;
             if (string.IsNullOrWhiteSpace(userId)) { Context.Abort(); return; }
             role = AppRole.Of(AppRoles.Guest);
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Guest(userId));
+            await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Guest(userId));
         }
         
         logger.LogInformation("ChatHub {Role} connected: {UserId}", role.ToString(), userId);
@@ -138,10 +132,10 @@ public sealed class ChatHub(
                 role = AppRole.Of(AppRoles.Guest);
             }
             
-            if(role.IsCs || role.IsAdmin)
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.IdleAgent);
+            if(role.IsBackOffice)
+                await Groups.AddToGroupAsync(Context.ConnectionId, ChatGroups.IdleAgent);
             else
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.IdleMember(userId));
+                await Groups.AddToGroupAsync(Context.ConnectionId, ChatGroups.IdleMember(userId));
         }
         catch (Exception ex)
         {
@@ -162,7 +156,7 @@ public sealed class ChatHub(
             var member = await convMemberRepo.GetByConvIdAndUserIdAsync(existedConv.PublicId, userId, ct);
             
             if(member?.IsHidden != true)
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.PublicIdle, ct);
+                await Groups.AddToGroupAsync(Context.ConnectionId, ChatGroups.PublicIdle, ct);
         }
         catch (Exception ex)
         {
@@ -191,10 +185,10 @@ public sealed class ChatHub(
                 role = AppRole.Of(AppRoles.Guest);
             }
             
-            if(role.IsCs || role.IsAdmin)
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.IdleAgent);
+            if(role.IsBackOffice)
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatGroups.IdleAgent);
             else
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.IdleMember(userId));
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatGroups.IdleMember(userId));
         }
         catch (Exception ex)
         {
@@ -208,7 +202,7 @@ public sealed class ChatHub(
     {
         try
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.PublicIdle);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatGroups.PublicIdle);
         }
         catch (Exception ex)
         {
@@ -242,7 +236,7 @@ public sealed class ChatHub(
                 ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
             
             await sender.Send(new TouchDeliveryCommand(existedConv.PublicId), ct);
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Public, ct);
+            await Groups.AddToGroupAsync(Context.ConnectionId, ChatGroups.Public, ct);
         }
         catch (Exception ex)
         {
@@ -256,7 +250,7 @@ public sealed class ChatHub(
     {
         try
         {
-            return Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Public);
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatGroups.Public);
         }
         catch (Exception ex)
         {
@@ -274,9 +268,9 @@ public sealed class ChatHub(
             if (role.IsUser)
             {
                 var me = userAccessor.GetUserId();
-                return Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.MemberInbox(me));
+                return Groups.AddToGroupAsync(Context.ConnectionId, ChatGroups.MemberInbox(me));
             }
-            return Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.AgentInbox);
+            return Groups.AddToGroupAsync(Context.ConnectionId, ChatGroups.AgentInbox);
             
         }
         catch (Exception ex)
@@ -295,9 +289,9 @@ public sealed class ChatHub(
             if (role.IsUser)
             {
                 var me = userAccessor.GetUserId();
-                return Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.MemberInbox(me));
+                return Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatGroups.MemberInbox(me));
             }
-            return Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.AgentInbox);
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatGroups.AgentInbox);
         }
         catch (Exception ex)
         {
@@ -334,7 +328,7 @@ public sealed class ChatHub(
                 await sender.Send(new TouchDeliveryCommand(convId));
             }
             
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(convId));
+            await Groups.AddToGroupAsync(Context.ConnectionId, ChatGroups.Conversation(convId));
         }
         catch (Exception ex)
         {
@@ -348,7 +342,7 @@ public sealed class ChatHub(
     { 
         try
         {
-            return Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Conversation(convId));
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatGroups.Conversation(convId));
         }
         catch (Exception ex)
         {
@@ -392,7 +386,7 @@ public sealed class ChatHub(
     {
         try
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(convId));
+            await Groups.AddToGroupAsync(Context.ConnectionId, ChatGroups.Conversation(convId));
         }
         catch (Exception ex)
         {
@@ -406,7 +400,7 @@ public sealed class ChatHub(
     { 
         try
         {
-            return Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Conversation(convId));
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatGroups.Conversation(convId));
         }
         catch (Exception ex)
         {

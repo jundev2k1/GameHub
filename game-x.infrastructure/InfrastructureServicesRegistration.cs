@@ -54,6 +54,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using game_x.infrastructure.SignalR.Facade;
 
 namespace game_x.infrastructure;
 
@@ -116,6 +117,10 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IHmacNonceStore, HmacNonceStore>();
         services.AddScoped<IHmacValidator, HmacValidator>();
 
+        services.AddScoped(typeof(ActorHubFacade<,>));
+        services.AddScoped(typeof(LiveStreamHubFacade<,>));
+        services.AddScoped(typeof(ChatHubFacade<,>));
+        
         // Add service DI
         services.Scan(scan => scan.FromApplicationDependencies()
             .AddClasses(c => c.AssignableTo<IServices>().Where(t => !t.IsAbstract))

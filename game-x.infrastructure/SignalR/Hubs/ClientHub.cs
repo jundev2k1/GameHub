@@ -12,6 +12,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
+using game_x.infrastructure.SignalR.Groups;
 
 namespace game_x.infrastructure.SignalR.Hubs;
 
@@ -48,11 +49,11 @@ public sealed class ClientHub(
         if (userId.IsNotNullOrEmpty())
             logger.LogInformation($"User connected ({nameof(ClientHub)}): {userId}");
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"member-{userId}");
-
+        await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Member(userId!));
+        await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Broadcast(AppRoles.User));
         await base.OnConnectedAsync();
 
-        // Send live streaming shortcuts to live streaming talent
+        // Send live-streaming shortcuts to live-streaming talent
         if (userId.IsNotNullOrEmpty())
             await HandleSendLiveStreamShortcut(userId!);
     }
