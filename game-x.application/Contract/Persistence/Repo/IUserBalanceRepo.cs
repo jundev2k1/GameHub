@@ -10,9 +10,10 @@ public interface IUserBalanceRepo
     Task BulkInsertAsync(IEnumerable<UserBalance> userBalances);
 
     Task UpdateAsync(int id, Action<UserBalance> updateAction, CancellationToken ct = default);
-
     Task UpdateAsync(Guid id, Action<UserBalance> updateAction, CancellationToken ct = default);
     Task UpdateAsync(Guid id, Func<UserBalance, Task> updateAction, CancellationToken ct = default);
+
+    Task UpdateByTokenIdAsync(int id, Action<UserBalance> updateAction, CancellationToken ct = default);
 
     Task PutUpdateAsync(UserBalance userBalance, CancellationToken ct = default);
 }

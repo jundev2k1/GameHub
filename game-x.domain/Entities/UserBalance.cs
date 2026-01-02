@@ -6,7 +6,7 @@ namespace game_x.domain.Entities;
 public sealed class UserBalance : BaseEntity<int>
 {
     public Guid PublicId { get; private set; }
-    public string UserId { get; private set; } = String.Empty;
+    public string UserId { get; private set; } = string.Empty;
     public User User { get; private set; } = null!;
     public int CryptoTokenId { get; private set; }
     public CryptoToken CryptoToken { get; private set; } = null!;
@@ -52,7 +52,7 @@ public sealed class UserBalance : BaseEntity<int>
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amount, nameof(amount));
 
         if (Amount < amount)
-            throw new InsufficientBalanceException(amount, Amount);
+            throw new InsufficientBalanceException(Amount, amount);
 
         Amount -= amount;
         FrozenAmount += amount;
@@ -63,7 +63,7 @@ public sealed class UserBalance : BaseEntity<int>
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amount, nameof(amount));
 
         if (FrozenAmount < amount)
-            throw new InsufficientBalanceException(amount, FrozenAmount);
+            throw new InsufficientBalanceException(FrozenAmount, amount);
 
         FrozenAmount -= amount;
         Amount += amount;
@@ -74,7 +74,7 @@ public sealed class UserBalance : BaseEntity<int>
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amount, nameof(amount));
 
         if (FrozenAmount < amount)
-            throw new InsufficientBalanceException(amount, FrozenAmount);
+            throw new InsufficientBalanceException(FrozenAmount, amount);
 
         FrozenAmount -= amount;
     }
