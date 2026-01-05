@@ -1,6 +1,7 @@
+using game_x.domain.Exceptions;
+using game_x.domain.Shared;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
-using game_x.domain.Shared;
 
 namespace game_x.domain.Entities;
 
@@ -141,6 +142,17 @@ public class Transaction : BaseEntity<int>, IAuditable
         Status = TransactionStatus.Completed;
         CompletedAt = DateTime.UtcNow;
     }
+
+    public void Cancel()
+    {
+        if (!CanCancelTransaction())
+            throw new BusinessRuleViolationException($"Current Status ({Status}) cannot cancel.");
+
+        Status = TransactionStatus.Failed;
+    }
+
+    public bool CanCancelTransaction()
+        => Status is (TransactionStatus.Pending or TransactionStatus.Approved);
 }
 
 public class TransactionMeta

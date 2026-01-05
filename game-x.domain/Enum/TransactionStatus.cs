@@ -11,5 +11,7 @@ public enum TransactionStatus
     /// <summary>Admin rejects the transaction; withdrawal only</summary>
     Rejected = 3,
     /// <summary>The transaction with Uxm failed</summary>
-    Failed = 4
+    Failed = 4,
+    /// <summary>The transaction is cancelled by admin</summary>
+    Cancelled = 5
 }

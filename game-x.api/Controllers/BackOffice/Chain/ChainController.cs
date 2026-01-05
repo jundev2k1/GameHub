@@ -1,6 +1,7 @@
 using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Transactions.Admin.Commands.AdminReviewWithdrawalOrder;
+using game_x.application.Features.Transactions.Admin.Commands.CancelTransaction;
 using game_x.application.Features.Transactions.Admin.Queries.GetTransactionCriteriaByAdmin;
 using game_x.application.Features.Transactions.Admin.Queries.GetTransactionDetailById;
 
@@ -27,7 +28,7 @@ public sealed class ChainController : BaseApiController
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
-    
+
     [HttpGet("{transactionId:guid}")]
     public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
     {
@@ -35,11 +36,19 @@ public sealed class ChainController : BaseApiController
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
     }
-    
+
+    [HttpPost("{transactionId:guid}/cancellation")]
+    public async Task<IActionResult> CancelTransactionAsync(Guid transactionId)
+    {
+        var command = new CancelTransactionCommand(transactionId);
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
     [HttpPost("{orderId:guid}/withdrawal-review")]
     public async Task<IActionResult> ReviewWithdrawalOrderAsync(Guid orderId, [FromBody] AdminReviewWithdrawalOrderCommand command, CancellationToken ct)
     {
-        var result = await Mediator.Send(command with {OrderId = orderId}, ct);
+        var result = await Mediator.Send(command with { OrderId = orderId }, ct);
         return ApiResponseFactory.Ok(result);
     }
 }
