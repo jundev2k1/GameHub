@@ -9,7 +9,6 @@ using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Chat.Dtos;
 using game_x.infrastructure.Extensions;
-using game_x.share.Helper;
 
 namespace game_x.infrastructure.Identity;
 
@@ -206,31 +205,25 @@ public sealed class ConversationService(
     
     public async Task<ConversationDetailDto> GetConvByIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default)
     {
-        var conv = await conversationRepo.GetConvByIdAndUserIdAsync(convId, userId, ct)
-            ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+        var conv = await conversationRepo.GetConvByIdAndUserIdAsync(convId, userId, ct);
         var convDto = await BuildConversationDto(conv, ct);
         return convDto.Adapt<ConversationDetailDto>();
     }
     
     // --- Helpers ---
     private async Task<CursorResult<ConversationDto>> BuildConversationListing(
-        IQueryable<Conversation> src,
+        IQueryable<ConversationItemDto> src,
         int limit,
         string? cursor,
         CancellationToken ct)
     {
-        var fp = CursorHelper.ComputeFp($"q:");
-
-        var result = await SeekCursorBuilder<Conversation>
+        var result = await SeekCursorBuilder<ConversationItemDto>
             .For(src)
             .Keys(
                 c => c.LastMessageAt,
-                c => c.Messages
-                    .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
-                    .Select(m => m.Id)
-                    .FirstOrDefault())
+                c => int.MinValue)
             .Sort(desc1: true, desc2: true)
-            .FromCursor(cursor, fp)
+            .FromCursor(cursor, "")
             .Limit(limit)
             .ExecuteAsync(c => c, ct);
 
@@ -243,16 +236,16 @@ public sealed class ConversationService(
     {
         string? avatarUrl = null;
         if (file != null) avatarUrl = await fileCache.GetFileUrl(file, ct);
-        return avatarUrl;
+        return avatarUrl;   
     }
     
-    private async Task<ConversationDto> BuildConversationDto(Conversation conv, CancellationToken ct)
+    private async Task<ConversationDto> BuildConversationDto(ConversationItemDto conv, CancellationToken ct)
     {
         var dto = conv.Adapt<ConversationDto>();
         return dto with
         {
-            CustomerAvatarUrl = await GetAvatarUrl(conv.Customer?.Avatar, ct),
-            LastUserAvatarUrl = await GetAvatarUrl(conv.Messages.FirstOrDefault()?.SenderUser?.Avatar, ct)
+            CustomerAvatarUrl = await GetAvatarUrl(conv.CustomerAvatar, ct),
+            LastUserAvatarUrl = await GetAvatarUrl(conv.LastMessage?.SenderAvatar, ct)
         };
     }
 }

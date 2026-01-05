@@ -44,7 +44,7 @@ public sealed class UnfriendHandler(
 
             if (existedConv != null)
             {
-                await conversationRepo.PatchUpdateAsync(existedConv.PublicId, x =>
+                await conversationRepo.UpdateAsync(existedConv.PublicId, x =>
                 {
                     x.Status = ConversationStatus.Closed;
                 }, ct);

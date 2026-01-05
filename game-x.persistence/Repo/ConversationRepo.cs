@@ -2,49 +2,93 @@ using System.Linq.Expressions;
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.application.Features.Chat.Dtos;
 using game_x.domain.Constants;
 
 namespace game_x.persistence.Repo;
 
 public class ConversationRepo(GameXContext context): IConversationRepo, IRepository
 {
-    private IQueryable<Conversation> BuildConversationListing(IQueryable<Conversation> query, string userId)
+    private IQueryable<ConversationItemDto> BuildConversationListing(
+        IQueryable<Conversation> query, 
+        string userId,
+        bool? getUnreadCount = null,
+        bool? isBackOffice = null)
     {
-        return query
-            .AsNoTracking()
-            .Include(c => c.Customer)
-                .ThenInclude(c => c!.Avatar)
-            .Include(c => c.Messages
-                .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
-                .Take(1))
-                .ThenInclude(x => x.SenderUser)
-                    .ThenInclude(x => x!.Avatar)
-            .Where(c => c.Messages.Any() && c.Type != ConversationType.Public)
-            .Select(c => new Conversation
+        var baseQuery =
+                query
+                .AsNoTracking()
+                .Where(c =>
+                    c.Type != ConversationType.Public && c.Messages.Any()
+                )
+                .Select(c => new
+                {
+                    Conv = c,
+                    LastMessageId = c.Messages
+                        .Where(m => !m.IsDeleted)
+                        .OrderByDescending(m => m.SentAt)
+                        .Select(m => m.Id)
+                        .FirstOrDefault()
+                });
+        
+        return
+            from x in baseQuery
+            join m in context.Messages
+                    .AsNoTracking()
+                    .Include(m => m.SenderUser)
+                        .ThenInclude(u => u != null ? u.Avatar : null)
+                on x.LastMessageId equals m.Id into lm
+            from lastMessage in lm.DefaultIfEmpty()
+            select new ConversationItemDto
             {
-                Id = c.Id,
-                PublicId  = c.PublicId,
-                Type = c.Type,
-                CustomerId = c.CustomerId,
-                Customer = c.Customer,
-                GuestId = c.GuestId,
-                AssignedAgentId = c.AssignedAgentId,
-                AssignedAgent = c.AssignedAgent,
-                LastMessageAt = c.LastMessageAt,
-                Messages = c.Messages,
-                Status = c.Status,
-                UnreadCount = context.Messages.Count(m =>
-                    m.ConversationId == c.Id &&
-                    context.ConversationMembers.Any(cm =>
-                        cm.ConversationId == c.Id &&
-                        cm.UserId == userId &&
-                        (cm.LastReadMessageId == null || m.Id > cm.LastReadMessageId)
-                    ))
-            });
+                Id = x.Conv.PublicId,
+                GuestId = x.Conv.GuestId,
+                Type = x.Conv.Type,
+                Status = x.Conv.Status,
+                CustomerId = x.Conv.CustomerId,
+                CustomerDisplayName = x.Conv.Customer != null
+                    ? x.Conv.Customer.Nickname
+                    : null,
+                CustomerAvatar = x.Conv.Customer != null
+                    ? x.Conv.Customer.Avatar
+                    : null,
+                LastMessageAt = x.Conv.LastMessageAt,
+                LastMessage = lastMessage == null
+                    ? null
+                    : new LastMessageItemDto
+                    {
+                        Id = lastMessage.Id,
+                        PublicId = lastMessage.PublicId,
+                        SenderActorId = lastMessage.SenderActorId,
+                        SenderRole = lastMessage.SenderRole,
+                        SenderName = lastMessage.SenderUser != null
+                            ? lastMessage.SenderUser.Nickname ?? lastMessage.SenderUser.UserName
+                            : string.Empty,
+                        SenderAvatar = lastMessage.SenderUser != null
+                            ? lastMessage.SenderUser.Avatar
+                            : null,
+                        SentAt = lastMessage.SentAt,
+                        Text = lastMessage.Text,
+                        Kind = lastMessage.Kind
+                    },
+                IsHidden = false,
+                UnreadCount = getUnreadCount == true 
+                    ? context.Messages.Count(m =>
+                        m.Conversation.Id == x.Conv.Id 
+                        && (isBackOffice == true 
+                            ? x.Conv.LastResolvedMessageId == null || m.Id > x.Conv.LastResolvedMessageId 
+                            : context.ConversationMembers.Any(cm =>
+                                cm.Conversation.Id == x.Conv.Id &&
+                                cm.UserId == userId &&
+                                (cm.LastReadMessageId == null || m.Id > cm.LastReadMessageId)
+                            ))
+                        ) 
+                    : null
+            };
     }
     
     // ---- Cursor-based queue for unassigned support conversations (next-only) ----
-    public IQueryable<Conversation> GetUnassignedQueueByCursorAsync(string userId, CancellationToken ct = default)
+    public IQueryable<ConversationItemDto> GetUnassignedQueueByCursorAsync(string userId, CancellationToken ct = default)
     {
         // --- Base feed: only open, unassigned support conversations ---
         var query = context.Conversations
@@ -53,15 +97,15 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                      && c.AssignedAgentId == null);
         return BuildConversationListing(query, userId);
     }
-
-    public IQueryable<Conversation> GetSupportConversationsAsync(string userId, CancellationToken ct = default)
+    
+    public IQueryable<ConversationItemDto> GetSupportConversationsAsync(string userId, CancellationToken ct = default)
     {
         IQueryable<Conversation> query = context.Conversations
             .Where(c => c.Type == ConversationType.Support && c.Status == ConversationStatus.Claimed);
-        return BuildConversationListing(query, userId);
+        return BuildConversationListing(query, userId, true, true);
     }
 
-    public IQueryable<Conversation> GetHiddenConversationsForClientAsync(string userId, CancellationToken ct = default)
+    public IQueryable<ConversationItemDto> GetHiddenConversationsForClientAsync(string userId, CancellationToken ct = default)
     {
         // Retrieve all private hidden conversations and group chats
         Expression<Func<Conversation, bool>> minePredicate =
@@ -73,7 +117,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         return BuildConversationListing(query, userId);
     }
 
-    public IQueryable<Conversation> GetMyConversationsForClientAsync(string userId, CancellationToken ct = default)
+    public IQueryable<ConversationItemDto> GetMyConversationsForClientAsync(string userId, CancellationToken ct = default)
     {
         // Retrieve all private conversations and group chats
         Expression<Func<Conversation, bool>> minePredicate =
@@ -83,7 +127,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                   m.UserId == userId &&
                   m.IsHidden != true);
         IQueryable<Conversation> query = context.Conversations.Where(minePredicate);
-        return BuildConversationListing(query, userId);
+        return BuildConversationListing(query, userId, true);
     }
 
     public async Task<Conversation?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
@@ -113,19 +157,87 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 c.CustomerId == actorId || c.GuestId == actorId, ct);
     }
     
-    public async Task<Conversation> GetConvByIdAsync(Guid convId, CancellationToken ct = default)
+    public async Task<IReadOnlyCollection<ConversationUnreadDto>> GetSupportConvUnreadAsync(CancellationToken ct = default)
+    {
+        var baseQuery = context.Conversations
+            .AsTracking()
+            .Where(x => x.Type == ConversationType.Support);
+            
+        int claimedConvUnread = await baseQuery
+            .Where(c => c.Status == ConversationStatus.Claimed)
+            .SumAsync(x => x.Messages.Count(m => x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId), ct);
+
+        int openedConvUnread = await baseQuery.CountAsync(x => x.Status == ConversationStatus.Open, ct);
+        
+        return
+        [
+            new ConversationUnreadDto(ConversationStatus.Claimed, claimedConvUnread),
+            new ConversationUnreadDto(ConversationStatus.Open, openedConvUnread)
+        ];
+    }
+    
+    public async Task<int> CountSupportConvUnreadAsync(Guid id, CancellationToken ct = default)
     {
         return await context.Conversations
-                       .AsTracking()
-                       .Include(c => c.Customer)
-                           .ThenInclude(c => c!.Avatar)
-                       .Include(c => c.Messages
-                           .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
-                           .Take(1))
-                           .ThenInclude(x => x.SenderUser)
-                                .ThenInclude(x => x!.Avatar)
-                       .FirstOrDefaultAsync(c => c.PublicId == convId, ct)
-                   ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+            .AsTracking()
+            .Where(x => x.Type == ConversationType.Support && x.PublicId == id)
+            .SumAsync(x => x.Messages.Count(m => 
+                x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId), ct);
+    }
+    
+    public async Task<int> CountSupportConvReadAsync(Guid id, int messageId, CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .AsTracking()
+            .Where(x => x.PublicId == id)
+            .SumAsync(x => x.Messages.Count(m => m.Id < messageId &&
+                (x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId)), ct);
+    }
+    
+    public async Task<ConversationItemDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default)
+    {
+        var conv = await context.Conversations
+            .AsTracking()
+            .Where(x => x.PublicId == convId)
+            .Select(c => new
+            {
+                Conv = c,
+                LastMessage = c.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault()
+            })
+            .Select(x => new ConversationItemDto
+            {
+                Id = x.Conv.PublicId,
+                GuestId = x.Conv.GuestId,
+                Type = x.Conv.Type,
+                Status = x.Conv.Status,
+                CustomerId = x.Conv.CustomerId,
+                CustomerDisplayName = x.Conv.Customer != null ? x.Conv.Customer.Nickname : null,
+                CustomerAvatar =  x.Conv.Customer != null ? x.Conv.Customer.Avatar: null,
+                LastMessageAt = x.Conv.LastMessageAt,
+                LastMessage = x.LastMessage == null
+                ? null
+                : new LastMessageItemDto
+                {
+                    Id = x.LastMessage.Id,
+                    PublicId = x.LastMessage.PublicId,
+                    SenderActorId = x.LastMessage.SenderActorId,
+                    SenderRole = x.LastMessage.SenderRole,
+                    SenderName = x.LastMessage.SenderUser != null
+                        ? x.LastMessage.SenderUser.Nickname
+                        : string.Empty,
+                    SenderAvatar = x.LastMessage.SenderUser != null
+                        ? x.LastMessage.SenderUser.Avatar
+                        : null,
+                    SentAt = x.LastMessage.SentAt,
+                    Text = x.LastMessage.Text,
+                    Kind = x.LastMessage.Kind
+                },
+            })
+            .FirstOrDefaultAsync(ct);
+
+        if(conv == null)
+            throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+        return conv;
     }
     
     public async Task<Conversation> GetPublicConvAsync(CancellationToken ct = default)
@@ -136,29 +248,58 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                    ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
     }
     
-    public async Task<Conversation?> GetConvByIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default)
+    public async Task<ConversationItemDto> GetConvByIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default)
     {
-        var result = await context.Conversations
-                       .AsTracking()
-                       .Include(x => x.Members)
-                       .Include(c => c.Customer)
-                           .ThenInclude(c => c!.Avatar)
-                       .Include(c => c.Messages
-                           .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
-                           .Take(1))
-                           .ThenInclude(x => x.SenderUser)
-                                .ThenInclude(x => x!.Avatar)
-                       .Where(c => c.PublicId == convId && c.Members.Any(cm => cm.UserId == userId))
-                       .Select(x => new
-                       {
-                           conv = x,
-                           member = x.Members.FirstOrDefault(m => m.UserId == userId)
-                       })
-                       .FirstOrDefaultAsync(ct)
-                   ?? throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
-
-        result.conv.IsHidden = result.member?.IsHidden;
-        return result.conv;
+        var conv = await context.Conversations
+            .AsTracking()
+            .Where(c => c.PublicId == convId && c.Members.Any(cm => cm.UserId == userId))
+            .Select(c => new
+            {
+                Conv = c,
+                Member = context.ConversationMembers
+                    .Where(x => x.ConversationId == c.Id)
+                    .FirstOrDefault(m => m.UserId == userId),
+                LastMessage = context.Messages
+                    .Where(x => x.ConversationId == c.Id)
+                    .OrderByDescending(m => m.SentAt)
+                    .FirstOrDefault()
+            })
+            .Select(x => new ConversationItemDto
+            {
+                Id = x.Conv.PublicId,
+                GuestId = x.Conv.GuestId,
+                Type = x.Conv.Type,
+                Status = x.Conv.Status,
+                CustomerId = x.Conv.CustomerId,
+                CustomerDisplayName = x.Conv.Customer != null ? x.Conv.Customer.Nickname : null,
+                CustomerAvatar = x.Conv.Customer != null ? x.Conv.Customer.Avatar : null,
+                LastMessageAt = x.Conv.LastMessageAt,
+                LastMessage = x.LastMessage == null
+                ? null
+                : new LastMessageItemDto
+                {
+                    Id = x.LastMessage.Id,
+                    PublicId = x.LastMessage.PublicId,
+                    SenderActorId = x.LastMessage.SenderActorId,
+                    SenderRole = x.LastMessage.SenderRole,
+                    SenderName =
+                        x.LastMessage.SenderUser != null
+                            ? x.LastMessage.SenderUser.Nickname
+                            : string.Empty,
+                    SenderAvatar = x.LastMessage.SenderUser != null
+                        ? x.LastMessage.SenderUser.Avatar
+                        : null,
+                    SentAt = x.LastMessage.SentAt,
+                    Text = x.LastMessage.Text,
+                    Kind = x.LastMessage.Kind
+                },
+                IsHidden = x.Member != null ? x.Member.IsHidden : false
+            })
+            .FirstOrDefaultAsync(ct);
+        
+        if(conv == null)
+            throw new NotFoundException(MessageCode.Chatting.ConversationNotFound);
+        return conv;
     }
     
     public async Task<Conversation?> FindForPairAsync(string userA, string userB, CancellationToken ct = default)
@@ -205,7 +346,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         await context.Conversations.AddAsync(conv, ct);
     }
     
-    public async Task PatchUpdateAsync(Guid publicId, Action<Conversation> updateAction, CancellationToken ct = default)
+    public async Task UpdateAsync(Guid publicId, Action<Conversation> updateAction, CancellationToken ct = default)
     {
         var conv = await context.Conversations
             .FirstOrDefaultAsync(c => c.PublicId == publicId, ct)

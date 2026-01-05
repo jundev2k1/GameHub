@@ -38,7 +38,7 @@ public class RespondFriendRequestHandler(
             await socialLinkRepo.UpdateAsync(link.PublicId, x => { x.Respond(cmd.Accept); }, ct);
             if (existedConv?.Status == ConversationStatus.Closed)
             {
-                await conversationRepo.PatchUpdateAsync(existedConv.PublicId, x =>
+                await conversationRepo.UpdateAsync(existedConv.PublicId, x =>
                 {
                     x.Status = ConversationStatus.Open;
                 }, ct);

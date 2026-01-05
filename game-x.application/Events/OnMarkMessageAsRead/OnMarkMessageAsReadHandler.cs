@@ -11,7 +11,7 @@ public sealed class OnMarkMessageAsReadHandler(
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await chatHubService.SendMarkAsReadAsync(@event.Dto, @event.UserId);
+            await chatHubService.SendMarkAsReadAsync(@event.Dto, @event.UserId, @event.Role);
         }, ct);
     }
 }
