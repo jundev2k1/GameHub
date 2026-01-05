@@ -20,15 +20,18 @@ public sealed class UpdateGameRecommendHandler(
             await gameRecommendRepo.UpdateAsync(request.Id!.Value, async recommend =>
             {
                 // Check overlap time
-                var overlapItem = await gameRecommendRepo.GetOverlapItemAsync(recommend, ct);
-                if (overlapItem != null) throw new BadRequestException(
-                    MessageCode.System.TimeOverlap,
-                    new
-                    {
-                        id = overlapItem.PublicId,
-                        startDate = overlapItem.StartDate ?? DateTime.MinValue,
-                        endDate = overlapItem.EndDate ?? DateTime.MaxValue,
-                    });
+                if (request.Status == PublishStatus.Published && request.Status != recommend.Status)
+                {
+                    var overlapItem = await gameRecommendRepo.GetOverlapItemAsync(recommend, ct);
+                    if (overlapItem != null) throw new BadRequestException(
+                        MessageCode.System.TimeOverlap,
+                        new
+                        {
+                            id = overlapItem.PublicId,
+                            startDate = overlapItem.StartDate ?? DateTime.MinValue,
+                            endDate = overlapItem.EndDate ?? DateTime.MaxValue,
+                        });
+                }
 
                 // Execute update
                 recommend.Update(
@@ -36,6 +39,7 @@ public sealed class UpdateGameRecommendHandler(
                     request.Description,
                     request.StartDate,
                     request.EndDate);
+                recommend.SetStatus(request.Status);
                 var recommendItems = request.Items
                     .Select(item =>
                     {
