@@ -1,13 +1,14 @@
 using game_x.api.Common;
 using game_x.api.Dtos;
 using game_x.application.Common.Files;
+using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Features.Chat.Commands.ClaimConversationById;
 using game_x.application.Features.Chat.Commands.DeleteMessage;
 using game_x.application.Features.Chat.Commands.SendMessage;
 using game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 using game_x.application.Features.Chat.Queries.ListMessageInPublicConversation;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
-using game_x.application.Features.Chat.Queries.ListSupportConversations;
+using game_x.application.Features.Chat.Queries.ListSupportConvUnread;
 using game_x.application.Features.Chat.Queries.ListUnassignedQueue;
 using game_x.application.Features.Chat.Queries.ListWindowMessagesInConversation;
 
@@ -15,11 +16,9 @@ namespace game_x.api.Controllers.BackOffice.Chat;
 
 [Route("api/back-office/conversations")]
 [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
-public class ConversationController : BaseApiController
+public class ConversationController(IConversationService conversationService) : BaseApiController
 {
-    /// <summary>
-    /// List unassigned support conversations. Cursor-based pagination.
-    /// </summary>
+    /// <summary>List unassigned support conversations. Cursor-based pagination.</summary>
     [HttpGet("queue")]
     public async Task<IActionResult> GetConversationQueueAsync([AsParameters] CursorCriteriaRequest parameters)
     {
@@ -41,13 +40,20 @@ public class ConversationController : BaseApiController
     
     /// <summary> List conversations for current logged-in user </summary>
     [HttpGet("me")]
-    public async Task<IActionResult> GetSupportConversationAsync([AsParameters] CursorCriteriaRequest parameters)
+    public async Task<IActionResult> GetSupportConversationAsync([AsParameters] CursorCriteriaRequest parameters, CancellationToken ct)
     {
-        var query = new ListSupportConversationsQuery(
-            Limit: parameters.Limit,
-            Cursor: parameters.Cursor
-        );
-        var result = await Mediator.Send(query);
+        var result = await conversationService.GetSupportConversationsAsync(
+            limit: parameters.Limit ?? 20,
+            cursor: parameters.Cursor,
+            ct: ct);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    /// <summary> List conversations for current logged-in user </summary>
+    [HttpGet("support-unread")]
+    public async Task<IActionResult> GetSupportConvUnreadAsync( CancellationToken ct)
+    {
+        var result = await Mediator.Send(new ListSupportConvUnreadQuery(), ct);
         return ApiResponseFactory.Ok(result);
     }
     

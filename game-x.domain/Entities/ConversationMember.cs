@@ -35,15 +35,21 @@ public sealed class ConversationMember: BaseEntity<int>, IAuditable
         RoleInConversation role,
         DateTime? lastDeliveredAt = null
     )
+    => new()
     {
-        var convMember = new ConversationMember
-        {
-            Conversation = conv,
-            UserId = userId,
-            Role = role,
-            JoinedAt = DateTime.UtcNow,
-            LastDeliveredAt = lastDeliveredAt,
-        };
-        return convMember;
+        Conversation = conv,
+        UserId = userId,
+        Role = role,
+        JoinedAt = DateTime.UtcNow,
+        LastDeliveredAt = lastDeliveredAt,
+    };
+
+    public void OnRead(int messageId)
+    {
+        if (LastReadMessageId is null || messageId > LastReadMessageId)
+            LastReadMessageId = messageId;
+                    
+        LastDeliveredAt = DateTime.UtcNow;
+        LastSeenAt = LastDeliveredAt;
     }
 }

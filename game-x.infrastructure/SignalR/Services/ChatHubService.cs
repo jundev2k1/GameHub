@@ -28,9 +28,13 @@ public sealed class ChatHubService(
         }
     }
     
-    public async Task SendMarkAsReadAsync(ConvUnreadDto res, string userId)
+    public async Task SendMarkAsReadAsync(ConvUnreadDto res, string userId, AppRole role)
     {
-        await actorHub.Member(userId).MarkAsRead(res);
+        if(role.IsUser)
+            await actorHub.Member(userId).MarkAsRead(res);
+        
+        if(role.IsBackOffice)
+            await chatHub.BackOffice().MarkAsRead(res);
     }
     
     public async Task SendPublicMessageAsync(CreatedMessageSignalResult res)

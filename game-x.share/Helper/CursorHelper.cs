@@ -58,28 +58,6 @@ public static class CursorHelper
                 throw new ArgumentException("k1Utc must be UTC.", nameof(k1Utc));
             return Encode(new Payload(v, d, k1Utc.Ticks, k2, f));
         }
-
-        // Decode token to keys.
-        public static bool TryDecodeKeys(
-            string? token,
-            out DateTime k1Utc,
-            out int k2,
-            out Dir d,
-            out string? f)
-        {
-            k1Utc = default;
-            k2 = 0;
-            d = Dir.Older;
-            f = null;
-
-            if (!TryDecode(token, out var p) || p is null) return false;
-
-            k1Utc = new DateTime(p.K1, DateTimeKind.Utc);
-            k2 = p.K2;
-            d = p.D;
-            f = p.F;
-            return true;
-        }
     }
 
     // Web-safe Base64 without padding.

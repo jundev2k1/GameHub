@@ -54,6 +54,15 @@ public sealed class ConversationConfig : IEntityTypeConfiguration<Conversation>
             .HasColumnName("last_message_at")
             .HasColumnType("timestamp with time zone")
             .IsRequired();
+
+        builder.Property(x => x.LastResolvedAt)
+            .HasColumnName("last_resolved_at")
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
+
+        builder.Property(x => x.LastResolvedMessageId)
+            .HasColumnName("last_resolved_message_id")
+            .IsRequired(false);
         
         builder.Property(x => x.GuestId)
             .HasColumnName("guest_id")
