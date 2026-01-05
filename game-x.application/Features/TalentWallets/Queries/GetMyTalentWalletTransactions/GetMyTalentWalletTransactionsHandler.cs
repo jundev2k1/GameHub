@@ -9,20 +9,21 @@ namespace game_x.application.Features.TalentWallets.Queries.GetMyTalentWalletTra
 
 public sealed class GetMyTalentWalletTransactionsHandler(
     IUserAccessor userAccessor,
-    ICriteriaBuilder<TalentWalletTransaction> criteriaBuilder,
+    ICriteriaBuilder<TalentWalletTransactionDto> criteriaBuilder,
     ITalentWalletRepo talentWalletRepo) : IQueryHandler<GetMyTalentWalletTransactionsQuery, PaginationResult<TalentWalletTransactionDto>>
 {
     public async Task<PaginationResult<TalentWalletTransactionDto>> Handle(GetMyTalentWalletTransactionsQuery request, CancellationToken ct = default)
     {
         var talentId = userAccessor.GetUserId();
         var searchResult = await talentWalletRepo.GetsByCriteriaAsync(
+            talentId,
             query => criteriaBuilder.Apply(
-                query.Where(q => q.TalentId == talentId),
+                query,
                 request.Filters,
                 request.Sorts),
             request.PageIndex,
             request.PageSize,
             ct);
-        return searchResult.ToSearchResult();
+        return searchResult;
     }
 }

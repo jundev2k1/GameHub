@@ -30,6 +30,12 @@ public sealed class OnLiveStreamDonatedHandler(
         var donorInfo = await userRepo.GetUserByIdAsync(@event.UserId, ct);
         await unitOfWork.WithTransactionAsync(async () =>
         {
+            await CreateTransaction(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
+            await CreateDonation(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
+            await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift);
+            await CreateNotificationForDonor(@event.UserId, this.StreamDonation!, ct);
+            await CreateNotificationForStreamer(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
+
             // Decrease user balance
             await userBalanceRepo.UpdateAsync(@event.UserBalanceId, ub =>
             {
@@ -49,7 +55,8 @@ public sealed class OnLiveStreamDonatedHandler(
                     @event.StreamInfo.AssignedTo!.Id,
                     TalentTransactionType.Commission,
                     talentAmount,
-                    balanceAfter);
+                    balanceAfter,
+                    this.StreamDonation!.Id.ToString());
                 talentWallet.AddTransaction(tx);
             }, ct);
             // Increase system balance
@@ -58,15 +65,13 @@ public sealed class OnLiveStreamDonatedHandler(
                 var newBalance = wallet.Balance + systemAmount;
                 wallet.AdjustBalance(newBalance);
 
-                var tx = SystemWalletTransaction.Create(wallet.Id, systemAmount, newBalance);
+                var tx = SystemWalletTransaction.Create(
+                    wallet.Id,
+                    systemAmount,
+                    newBalance,
+                    this.StreamDonation!.Id.ToString());
                 wallet.AddTransaction(tx);
             }, ct);
-
-            await CreateTransaction(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
-            await CreateDonation(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
-            await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift);
-            await CreateNotificationForDonor(@event.UserId, this.StreamDonation!, ct);
-            await CreateNotificationForStreamer(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
         }, ct);
 
         // Notify donor

@@ -1,4 +1,5 @@
 ﻿using game_x.application.Common.Filters;
+using game_x.application.Features.TalentWallets.DTOs;
 
 namespace game_x.application.Features.TalentWallets.Queries.GetMyTalentWalletTransactions;
 
@@ -6,9 +7,9 @@ public sealed class GetMyTalentWalletTransactionsValidator : AbstractValidator<G
 {
     private readonly string[] _allowFields =
     {
-        nameof(TalentWalletTransaction.PublicId),
-        nameof(TalentWalletTransaction.Type),
-        nameof(TalentWalletTransaction.CreatedAt),
+        nameof(TalentWalletTransactionDto.Id),
+        nameof(TalentWalletTransactionDto.Type),
+        nameof(TalentWalletTransactionDto.CreatedAt),
     };
 
     public GetMyTalentWalletTransactionsValidator()
