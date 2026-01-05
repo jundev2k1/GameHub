@@ -8,8 +8,8 @@ public sealed class TalentWalletTransactionDto
     public decimal Amount { get; set; }
     public TalentTransactionType Type { get; set; }
     public string? ReferenceId { get; set; }
-    public string? DonerEmail { get; set; }
-    public string? DonerNickname { get; set; }
+    public string? DonorEmail { get; set; }
+    public string? DonorNickname { get; set; }
     public decimal? DonatedAmount { get; set; }
     public decimal? TalentReceive { get; set; }
     public decimal? SystemReceive { get; set; }

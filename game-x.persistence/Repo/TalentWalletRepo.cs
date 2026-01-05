@@ -62,8 +62,8 @@ public sealed class TalentWalletRepo(GameXContext dbContext) : ITalentWalletRepo
             var targetMapping = mappingDatas.FirstOrDefault(m => m.PublicId.ToString() == i.ReferenceId);
             if (targetMapping != null)
             {
-                i.DonerNickname = targetMapping.Donor.Nickname;
-                i.DonerEmail = targetMapping.Donor.Email;
+                i.DonorNickname = targetMapping.Donor.Nickname;
+                i.DonorEmail = targetMapping.Donor.Email;
                 i.DonatedAmount = targetMapping.Amount;
             }
         });
