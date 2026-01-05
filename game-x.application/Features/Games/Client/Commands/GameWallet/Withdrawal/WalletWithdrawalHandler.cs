@@ -73,7 +73,7 @@ public sealed class WalletWithdrawalHandler(
             await userBalanceRepo.UpdateAsync(currentBalance.PublicId, balance =>
             {
                 balance.AdjustAmount(request.Amount, true);
-                balanceAfter = balance.Amount;
+                balanceAfter = balance.TotalAmount;
             }, ct);
 
             await unitOfWork.SaveChangesAsync(ct);
