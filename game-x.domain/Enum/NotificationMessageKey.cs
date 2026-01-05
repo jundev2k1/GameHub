@@ -17,6 +17,7 @@ public enum NotificationMessageKey : short
     Transaction_Approved = 403,
     Transaction_Rejected = 404,
     Transaction_Reviewed = 405,
+    Transaction_Cancelled = 406,
 
     // Enum group key: UserLedger module
     UserLedger_Created = 500,

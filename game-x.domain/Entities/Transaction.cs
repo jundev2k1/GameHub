@@ -1,12 +1,13 @@
+using game_x.domain.Exceptions;
+using game_x.domain.Shared;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
-using game_x.domain.Shared;
 
 namespace game_x.domain.Entities;
 
 public class Transaction : BaseEntity<int>, IAuditable
 {
-    public Guid PublicId { get; private set; }
+    public Guid PublicId { get; private set; } = Guid.CreateVersion7();
     public string UserId { get; private set; } = string.Empty;
     public User User { get; private set; } = null!;
     /// <summary>The funds used for the transaction.</summary>
@@ -141,6 +142,17 @@ public class Transaction : BaseEntity<int>, IAuditable
         Status = TransactionStatus.Completed;
         CompletedAt = DateTime.UtcNow;
     }
+
+    public void Cancel()
+    {
+        if (!CanCancelTransaction())
+            throw new BusinessRuleViolationException($"Current Status ({Status}) cannot cancel.");
+
+        Status = TransactionStatus.Failed;
+    }
+
+    public bool CanCancelTransaction()
+        => Status is (TransactionStatus.Pending or TransactionStatus.Approved);
 }
 
 public class TransactionMeta

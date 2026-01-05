@@ -2,17 +2,17 @@
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.TalentWallets.DTOs;
-using game_x.application.Features.TalentWallets.Mapping;
 
 namespace game_x.application.Features.TalentWallets.Queries.GetTalentWalletTransactions;
 
 public sealed class GetTalentWalletTransactionsHandler(
-    ICriteriaBuilder<TalentWalletTransaction> criteriaBuilder,
+    ICriteriaBuilder<TalentWalletTransactionDto> criteriaBuilder,
     ITalentWalletRepo talentWalletRepo) : IQueryHandler<GetTalentWalletTransactionsQuery, PaginationResult<TalentWalletTransactionDto>>
 {
     public async Task<PaginationResult<TalentWalletTransactionDto>> Handle(GetTalentWalletTransactionsQuery request, CancellationToken ct = default)
     {
         var searchResult = await talentWalletRepo.GetsByCriteriaAsync(
+            null,
             query => criteriaBuilder.Apply(
                 query,
                 request.Filters,
@@ -20,6 +20,6 @@ public sealed class GetTalentWalletTransactionsHandler(
             request.PageIndex,
             request.PageSize,
             ct);
-        return searchResult.ToSearchResult();
+        return searchResult;
     }
 }
