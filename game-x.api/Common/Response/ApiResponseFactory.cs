@@ -17,6 +17,9 @@ public static class ApiResponseFactory
     public static IActionResult NoContent(Enum? code = null)
         => Build<object?>(null, code ?? MessageCode.System.NoContent, (int)HttpStatusCode.OK);
 
+    public static IActionResult Accepted(Enum? code = null)
+        => Build<object?>(null, code ?? MessageCode.System.Accepted, (int)HttpStatusCode.Accepted);
+
     // ------ ERROR --------
     public static ApiResponse<object?> Error(Enum code, string? message = null, int? statusCode = (int)HttpStatusCode.BadRequest, object? errorDetail = null)
     {
