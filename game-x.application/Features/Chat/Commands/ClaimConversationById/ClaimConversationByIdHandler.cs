@@ -20,7 +20,7 @@ public sealed class ClaimConversationByIdHandler(
             async () =>
             {
                 await conversationRepo
-                    .PatchUpdateAsync(request.ConversationId, updatedOrder =>
+                    .UpdateAsync(request.ConversationId, updatedOrder =>
                     {
                         if(updatedOrder.Status != ConversationStatus.Open)
                             throw new BadRequestException(MessageCode.Chatting.ConversationAlreadyClaimed);

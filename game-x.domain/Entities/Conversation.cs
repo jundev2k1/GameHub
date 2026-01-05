@@ -28,34 +28,44 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
     public User? AssignedAgent { get; set; }
     /// <summary>Powers list ordering; Updated on every message; used to order inbox/queues</summary>
     public DateTime LastMessageAt { get; set; } = DateTime.UtcNow;
+
+    #region BackOffice read messages
+    /// <summary>The last time Admin or Cs seen the conversation</summary>
+    public DateTime? LastResolvedAt { get; private set; }
+    public int? LastResolvedMessageId { get; private set; }
+    #endregion 
+    
     /// <summary>Linked users (for both Support & Direct)</summary>
-    public ICollection<ConversationMember> Members { get; set; } = new List<ConversationMember>();
-    public ICollection<Message> Messages { get; set; } = new List<Message>();
+    public ICollection<ConversationMember> Members { get; set; } = [];
+    public ICollection<Message> Messages { get; set; } = [];
     [NotMapped]
-    public int? UnreadCount { get; set; }
+    public int? UnreadCount { get; private set; }
     [NotMapped]
-    public bool? IsHidden { get; set; }
+    public bool? IsHidden { get; private set; }
     
     public static Conversation Create(
         ConversationType type,
         string? senderUserId = null,
         string? senderGuestId = null
     )
+    => new()
     {
-        var conv = new Conversation
-        {
-            Type = type,
-            Status = ConversationStatus.Open,
-            CustomerId = senderUserId,
-            GuestId = senderGuestId,
-            LastMessageAt = DateTime.UtcNow
-        };
-        return conv;
-    }
+        Type = type,
+        Status = ConversationStatus.Open,
+        CustomerId = senderUserId,
+        GuestId = senderGuestId,
+        LastMessageAt = DateTime.UtcNow
+    };
     
     public void Claim(string agentId)
     {
         Status = ConversationStatus.Claimed;
         AssignedAgentId =  agentId;
+    }
+
+    public void OnBackOfficeRead(int messageId)
+    {
+        LastResolvedMessageId = messageId;
+        LastResolvedAt = DateTime.UtcNow;
     }
 }

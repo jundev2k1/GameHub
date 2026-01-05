@@ -40,7 +40,7 @@ public sealed class BlockHandler(
             SocialLinkDto? linkDto;
             if (existedConv != null)
             {
-                await conversationRepo.PatchUpdateAsync(existedConv.PublicId, x =>
+                await conversationRepo.UpdateAsync(existedConv.PublicId, x =>
                 {
                     x.Status = ConversationStatus.Closed;
                 }, ct);

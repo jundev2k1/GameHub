@@ -517,8 +517,8 @@ public sealed class ChatHub(
             await Clients.Caller.MessageFailed(new MessageFailedSignalDto( cmd.ClientLocalId, cmd.ConversationId));
         }
     }
-    
-    [Authorize(Roles = AppRoles.User)]
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs},{AppRoles.User}")]
     public async Task MarkAsRead(MarkMessageAsReadCommand cmd)
     {
         try

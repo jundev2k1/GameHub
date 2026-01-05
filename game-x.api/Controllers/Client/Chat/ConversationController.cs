@@ -2,12 +2,12 @@ using game_x.api.Common;
 using game_x.api.Dtos;
 using game_x.application.Common.Files;
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Features.Chat.Commands.HideToggleConversation;
 using game_x.application.Features.Chat.Commands.MarkLatestMessageAsRead;
 using game_x.application.Features.Chat.Commands.SendMessage;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Queries.GetAllUnReads;
-using game_x.application.Features.Chat.Queries.GetConversationDetail;
 using game_x.application.Features.Chat.Queries.ListHiddenConversationsForClient;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
@@ -17,7 +17,9 @@ namespace game_x.api.Controllers.Client.Chat;
 
 [Authorize(Roles = AppRoles.User)]
 [Route("api/user")]
-public class ConversationController(IUserAccessor userAccessor
+public class ConversationController(
+    IUserAccessor userAccessor,
+    IConversationService conversationService
 ) : BaseApiController
 {
     [HttpPost("conversations/{convId:guid}/hide-toggle")]
@@ -83,10 +85,11 @@ public class ConversationController(IUserAccessor userAccessor
     }
     
     [HttpGet("conversations/{convId:guid}")]
-    public async Task<IActionResult> GetConversationDetailsAsync(Guid convId)
+    public async Task<IActionResult> GetConversationDetailsAsync(Guid convId, CancellationToken ct)
     {
-        var result = await Mediator.Send(new GetConversationDetailQuery(convId));
-        return ApiResponseFactory.Ok(result);
+        var userId = userAccessor.GetUserId();
+        var conv = await conversationService.GetConvByIdAndUserIdAsync(convId, userId, ct);
+        return ApiResponseFactory.Ok(conv);
     }
     
     [HttpGet("conversations/{convId:guid}/messages/{anchorId:guid}/window")]
