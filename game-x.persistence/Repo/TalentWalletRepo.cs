@@ -53,6 +53,7 @@ public sealed class TalentWalletRepo(GameXContext dbContext) : ITalentWalletRepo
             .ToArray();
         var mappingDatas = await dbContext.LiveStreamDonations
             .AsNoTracking()
+            .Include(lsd => lsd.Donor)
             .Where(lsd => donationIds.Contains(lsd.PublicId))
             .ToArrayAsync(ct);
         items.ForEach(i =>
