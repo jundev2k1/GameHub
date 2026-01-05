@@ -185,6 +185,15 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId), ct);
     }
     
+    public async Task<int> CountSupportConvReadAsync(Guid id, int messageId, CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .AsTracking()
+            .Where(x => x.PublicId == id)
+            .SumAsync(x => x.Messages.Count(m => m.Id < messageId &&
+                (x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId)), ct);
+    }
+    
     public async Task<ConversationItemDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default)
     {
         var conv = await context.Conversations

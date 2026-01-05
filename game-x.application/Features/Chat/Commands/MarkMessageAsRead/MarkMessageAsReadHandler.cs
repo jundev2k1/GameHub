@@ -54,7 +54,7 @@ public sealed class MarkMessageAsReadHandler(
                 await unitOfWork.CommitAsync(ct);
 
                 var dto = await convMemberRepo.GetUnreadAsync(member.ConversationId, userId, ct)
-                          ?? new ConvUnreadDto(cmd.ConversationId, 0);
+                          ?? new ConvUnreadDto { ConversationId = cmd.ConversationId, Unread = 0 };
                 await dispatcher.Publish(new OnMarkMessageAsReadEvent(dto, userId, role), ct);
             },ct);
         }
@@ -76,6 +76,10 @@ public sealed class MarkMessageAsReadHandler(
         if (conv.Type != ConversationType.Support)
             throw new BadRequestException(MessageCode.Chatting.ConversationNotFound);
         
+        if(conv.LastResolvedMessageId != null && readMessage.Id <= conv.LastResolvedMessageId)
+            throw new BadRequestException(MessageCode.Chatting.MessageAlreadyRead);
+        
+        var readCount = await convRepo.CountSupportConvReadAsync(conv.PublicId, readMessage.Id, ct);
         try
         {
             await unitOfWork.WithTransactionAsync(async () =>
@@ -87,7 +91,12 @@ public sealed class MarkMessageAsReadHandler(
                 await unitOfWork.CommitAsync(ct);
 
                 var unreadMessage = await convRepo.CountSupportConvUnreadAsync(conv.PublicId, ct);
-                var dto = new ConvUnreadDto(cmd.ConversationId, unreadMessage);
+                var dto = new ConvUnreadDto
+                {
+                    ConversationId = cmd.ConversationId, 
+                    Unread = unreadMessage, 
+                    Read = readCount
+                };
                 await dispatcher.Publish(new OnMarkMessageAsReadEvent(dto, userId, role), ct);
             },ct);
         }

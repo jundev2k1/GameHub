@@ -21,7 +21,7 @@ public class ConversationMemberRepo(GameXContext context): IConversationMemberRe
                 && (m.LastReadMessageId == null || x.Id > m.LastReadMessageId)),
             })
             .Where(x => x.Unread > 0)
-            .Select(x => new ConvUnreadDto(x.PublicId, x.Unread))
+            .Select(x => new ConvUnreadDto {ConversationId = x.PublicId, Unread = x.Unread})
             .ToListAsync(ct);
     }
     
@@ -30,11 +30,11 @@ public class ConversationMemberRepo(GameXContext context): IConversationMemberRe
         return await context.ConversationMembers
             .AsNoTracking()
             .Where(m => m.UserId == userId && m.ConversationId == convId)
-            .Select(m => new ConvUnreadDto (
-                m.Conversation.PublicId,
-         context.Messages.Count(x =>
+            .Select(m => new ConvUnreadDto {
+                ConversationId = m.Conversation.PublicId,
+                Unread = context.Messages.Count(x =>
                   x.ConversationId == m.ConversationId 
-                    && (m.LastReadMessageId == null || x.Id > m.LastReadMessageId))))
+                    && (m.LastReadMessageId == null || x.Id > m.LastReadMessageId))})
             .FirstOrDefaultAsync(ct);
     }
     
