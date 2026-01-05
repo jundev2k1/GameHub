@@ -28,6 +28,7 @@ public sealed class TalentWalletRepo(GameXContext dbContext) : ITalentWalletRepo
                     Amount = twt.Amount,
                     Type = twt.Type,
                     ReferenceId = twt.ReferenceId,
+                    TalentReceive = twt.Amount,
                     SystemReceive = swt != null ? swt.Amount : 0,
                     BalanceAfter = twt.BalanceAfter,
                     CreatedAt = twt.CreatedAt,
