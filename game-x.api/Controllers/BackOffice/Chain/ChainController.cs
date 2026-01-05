@@ -2,6 +2,7 @@ using game_x.api.Dtos;
 using game_x.application.Common.Filters;
 using game_x.application.Features.Transactions.Admin.Commands.AdminReviewWithdrawalOrder;
 using game_x.application.Features.Transactions.Admin.Commands.CancelTransaction;
+using game_x.application.Features.Transactions.Admin.Commands.CreateTransaction;
 using game_x.application.Features.Transactions.Admin.Queries.GetTransactionCriteriaByAdmin;
 using game_x.application.Features.Transactions.Admin.Queries.GetTransactionDetailById;
 
@@ -35,6 +36,13 @@ public sealed class ChainController : BaseApiController
         var query = new GetTransactionDetailByIdQuery(transactionId);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateTransactionAsync(CreateTransactionCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
     }
 
     [HttpPost("{transactionId:guid}/cancellation")]

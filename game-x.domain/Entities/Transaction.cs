@@ -7,7 +7,7 @@ namespace game_x.domain.Entities;
 
 public class Transaction : BaseEntity<int>, IAuditable
 {
-    public Guid PublicId { get; private set; }
+    public Guid PublicId { get; private set; } = Guid.CreateVersion7();
     public string UserId { get; private set; } = string.Empty;
     public User User { get; private set; } = null!;
     /// <summary>The funds used for the transaction.</summary>

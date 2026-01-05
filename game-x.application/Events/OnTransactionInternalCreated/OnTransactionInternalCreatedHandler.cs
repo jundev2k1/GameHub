@@ -44,12 +44,11 @@ public sealed class OnTransactionInternalCreatedHandler(
             await adminHubService.SendNotificationAsync(
                 adminUser.Id,
                 notification.Adapt<NotificationDto>());
-
-            // Send transaction to all the admin
-            await adminHubService.SendTransactionToAdminAsync(
-                adminUser.Id,
-                transaction.Adapt<AdminTransactionDto>());
         }
+
+        // Send transaction to all the admin
+        await adminHubService.SendTransactionToAllAdminAsync(
+            transaction.Adapt<AdminTransactionDto>());
     }
     
     private async Task SendUpdateWalletToMember(string userId, CancellationToken ct)
