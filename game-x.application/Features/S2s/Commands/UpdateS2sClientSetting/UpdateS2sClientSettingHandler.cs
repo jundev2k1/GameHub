@@ -13,7 +13,7 @@ public sealed class UpdateS2sClientSettingHandler(
             await s2SClientSettingRepo.UpdateAsync(request.AppCode, setting =>
             {
                 if (setting.ClientId != request.ClientId)
-                    throw new BadRequestException("ClientId is invalid.");
+                    throw new NotFoundException("Client ID was not found.");
 
                 setting.UpdateInfo(request.AppName.Trim(), request.Notes.Trim());
                 setting.UpdateConfig(request.Host, AllowedIp.Of(request.AllowedIps));

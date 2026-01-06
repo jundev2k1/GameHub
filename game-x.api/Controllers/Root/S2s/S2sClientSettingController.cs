@@ -1,4 +1,5 @@
 ﻿using game_x.application.Features.S2s.Commands.CreateS2sClientSetting;
+using game_x.application.Features.S2s.Commands.SwitchS2sClientSettingStatus;
 using game_x.application.Features.S2s.Commands.UpdateS2sClientSetting;
 
 namespace game_x.api.Controllers.Root.S2s;
@@ -42,10 +43,32 @@ public sealed class S2sClientSettingController : BaseApiController
     /// <param name="clientId">The unique identifier of the third-party S2S client that owns the setting</param>
     /// <param name="appCode">The application code identifying the platform-specific setting to be updated</param>
     /// <param name="command">The request payload containing the updated integration key and configuration details</param>
-    /// <returns>Returns HTTP 204 (No Content) when the S2S client setting is successfully updated</returns>
+    /// <returns>Returns HTTP 200 when the S2S client setting is successfully updated</returns>
     [HttpPut("{clientId}/settings/{appCode}")]
     public async Task<IActionResult> UpdateSettingAsync(string clientId, string appCode, UpdateS2sClientSettingCommand command)
     {
+        await Mediator.Send(command with { ClientId = clientId, AppCode = appCode });
+        return ApiResponseFactory.NoContent();
+    }
+
+    /// <summary>
+    /// Switches the status of an S2S client setting
+    /// </summary>
+    /// <remarks>
+    /// This API toggles the status of a platform-specific setting of a third-party
+    /// Server-to-Server (S2S) client. A setting represents an integration key and
+    /// configuration for a specific platform or channel (such as web, mobile app, or device)
+    /// <br />
+    /// When the setting is inactive, all server-to-server authentication requests
+    /// using the associated integration key will be rejected
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client that owns the setting</param>
+    /// <param name="appCode">The application code identifying the platform-specific setting whose status will be switched</param>
+    /// <returns>Returns HTTP 200 when the S2S client setting status is successfully updated</returns>
+    [HttpPatch("{clientId}/settings/{appCode}/status")]
+    public async Task<IActionResult> SwitchS2sClientSettingStatusAsync(string clientId, string appCode)
+    {
+        var command = new SwitchS2sClientSettingStatusCommand(clientId, appCode);
         await Mediator.Send(command with { ClientId = clientId, AppCode = appCode });
         return ApiResponseFactory.NoContent();
     }
