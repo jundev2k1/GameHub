@@ -1,4 +1,5 @@
 ﻿using game_x.application.Features.S2s.Commands.CreateS2sClient;
+using game_x.application.Features.S2s.Commands.DeleteS2sClient;
 using game_x.application.Features.S2s.Commands.UpdateS2sClient;
 
 namespace game_x.api.Controllers.Root.S2s;
@@ -37,6 +38,23 @@ public sealed class S2sClientController : BaseApiController
     public async Task<IActionResult> UpdateS2sClientAsync(string clientId, UpdateS2sClientCommand command)
     {
         await Mediator.Send(command with { ClientId = clientId });
+        return ApiResponseFactory.NoContent();
+    }
+
+    /// <summary>
+    /// Deletes an existing Server-to-Server (S2S) client
+    /// </summary>
+    /// <remarks>
+    /// This API permanently removes an S2S client configuration and revokes
+    /// all associated credentials, preventing further server-to-server access
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the S2S client to be deleted</param>
+    /// <returns>Returns HTTP 204 (No Content) when the S2S client is successfully deleted</returns>
+    [HttpDelete("{clientId}")]
+    public async Task<IActionResult> DeleteS2sClientAsync(string clientId)
+    {
+        var command = new DeleteS2sClientCommand(clientId);
+        await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
     }
 }
