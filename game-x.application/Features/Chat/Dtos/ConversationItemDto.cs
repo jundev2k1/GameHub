@@ -22,7 +22,7 @@ public sealed record LastMessageItemDto
     public string? SenderActorId { get; init; }
     public string? SenderName { get; init; } 
     public MediaFile? SenderAvatar { get; init; }
-    public RoleInConversation SenderRole { get; set; }
+    public RoleInConversation? SenderRole { get; set; }
     public DateTime SentAt { get; init; } 
     public string? Text { get; init; } 
     public MessageKind Kind { get; init; }

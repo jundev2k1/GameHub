@@ -193,7 +193,8 @@ public sealed class ConversationService(
     public async Task<ListedConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
     {
         var src = await conversationRepo.GetMyConversationsForGuestAsync(guestId, ct);
-        return src?.Adapt<ConversationDto>().Adapt<ListedConversationDto>();
+        var convDto = src?.Adapt<ConversationDto>();
+        return convDto?.Adapt<ListedConversationDto>();
     }
     
     public async Task<ConversationDetailDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default)

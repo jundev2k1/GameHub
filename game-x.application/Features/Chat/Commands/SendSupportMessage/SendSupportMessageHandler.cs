@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnSupportConversationUnread;
 using game_x.application.Events.OnSupportMessageCreated;
 using game_x.application.Features.Chat.Dtos;
 
@@ -9,7 +10,7 @@ namespace game_x.application.Features.Chat.Commands.SendSupportMessage;
 
 public sealed class SendSupportMessageHandler(
     IUnitOfWork unitOfWork,
-    IConversationRepo conversationRepo,
+    IConversationRepo convRepo,
     IConversationMemberRepo conversationMemberRepo,
     IMessageRepo messageRepo,
     IMessageService messageService,
@@ -24,7 +25,7 @@ public sealed class SendSupportMessageHandler(
         var now = DateTime.UtcNow;
 
         // Each customer has only one conversation with customer support; if none exists, a new one will be created
-        var conv = await conversationRepo.GetSupportConversationAsync(senderActorId, ct);
+        var conv = await convRepo.GetSupportConversationAsync(senderActorId, ct);
         // Only user need join into a group (guest is not allowed)
         ConversationMember? convMember = null;
         await unitOfWork.BeginTransactionAsync(ct);
@@ -88,7 +89,9 @@ public sealed class SendSupportMessageHandler(
                 Conv: updatedConv.Adapt<ConversationSignalDto>(),
                 InboxUpsert: updatedConv.Adapt<InboxUpsertSignalDto>());
             
+            var convUnread = await convRepo.GetSupportConvUnreadAsync(ct);
             await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
+            await eventDispatcher.Publish(new OnSupportConversationUnreadEvent(convUnread), ct);
             
             return new SendSupportMessageResult(request.ClientLocalId);
         }
@@ -107,7 +110,7 @@ public sealed class SendSupportMessageHandler(
             senderUserId: userId,
             senderGuestId: userId is null ? actorId : null);
                 
-        await conversationRepo.AddAsync(conv, ct);
+        await convRepo.AddAsync(conv, ct);
         return conv;
     }
     

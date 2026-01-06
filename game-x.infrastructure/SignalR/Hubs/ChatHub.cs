@@ -511,7 +511,7 @@ public sealed class ChatHub(
         {
             var userId = userAccessor.GetUserId();
             var ct = Context.ConnectionAborted;
-            await sender.Send(cmd with {IsAgent = true, SenderActorId = userId, SenderUserId = userId }, ct);
+            await sender.Send(cmd with {IsAgent = true, SenderActorId = userId, SenderUserId = userId}, ct);
         }
         catch (Exception ex)
         {
