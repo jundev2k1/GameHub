@@ -14,7 +14,6 @@ using game_x.share.ExternalApi.Etl998.Constants;
 using game_x.share.ExternalApi.Etl998.Dtos.PrepareTransfer;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Deposit;
 using game_x.share.ExternalApi.GameProvider.Dtos.Deposit;
-using game_x.share.ExternalApi.SasSlot.Dtos.Deposit;
 
 namespace game_x.application.Features.Games.Client.Commands.GameWallet.Deposit;
 
@@ -69,7 +68,7 @@ public sealed class WalletDepositHandler(
             await userBalanceRepo.UpdateAsync(currentBalance.PublicId, balance =>
             {
                 balance.AdjustAmount(request.Amount, false);
-                balanceAfter = balance.Amount;
+                balanceAfter = balance.TotalAmount;
             }, ct);
             await unitOfWork.SaveChangesAsync(ct);
 

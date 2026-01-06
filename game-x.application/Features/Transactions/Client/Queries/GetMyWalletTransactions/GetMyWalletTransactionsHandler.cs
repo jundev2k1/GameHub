@@ -76,7 +76,7 @@ public sealed class GetMyWalletTransactionsHandler(
                 continue;
 
             // Map transaction amount according Credit mode
-            if (isCreditMode && !isBalanceAdjustment)
+            if (isCreditMode)
             {
                 if (isWithdrawal)
                     item.Amount = Math.Abs(item.ActualAmount) * -1;
