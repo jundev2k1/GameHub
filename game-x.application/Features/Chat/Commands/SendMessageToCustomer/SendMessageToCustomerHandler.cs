@@ -44,6 +44,12 @@ public sealed class SendMessageToCustomerHandler(
             conv.LastMessageAt = now;
 
             await messageService.CreateMessageAttachmentsAsync(msg: message, attachments: request.Attachments, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+            
+            await conversationRepo.UpdateAsync(conv.PublicId, x =>
+            {
+                x.OnBackOfficeRead(message.Id);
+            }, ct);
             
             await unitOfWork.CommitAsync(ct);
             

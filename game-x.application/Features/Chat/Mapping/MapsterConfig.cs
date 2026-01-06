@@ -1,4 +1,5 @@
 ﻿using game_x.application.Features.Chat.Dtos;
+using game_x.share.Extensions;
 
 namespace game_x.application.Features.Chat.Mapping;
 
@@ -6,10 +7,29 @@ public sealed class MapsterConfig : IRegister
 {
     public void Register(TypeAdapterConfig cfg)
     {
+        cfg.NewConfig<Conversation, ConversationDto>()
+            .Map(dest => dest.ConversationId, src => src.PublicId)
+            .Map(dest => dest.CustomerAvatarUrl, src => string.Empty)
+            .Map(dest => dest.LastSenderRole, src => src.Messages.FirstOrDefault()!.SenderRole)
+            .Map(dest => dest.LastUserId, src => src.Messages.FirstOrDefault() != null ? src.Messages.FirstOrDefault()!.SenderActorId : null)
+            .Map(dest => dest.LastUserName, src => src.Messages.FirstOrDefault() != null 
+                ? src.Messages.FirstOrDefault()!.SenderUser != null
+                    ? 
+                    src.Messages.FirstOrDefault()!.SenderUser!.Nickname.IsNotNullOrEmpty()
+                        ? src.Messages.FirstOrDefault()!.SenderUser!.Nickname
+                        : src.Messages.FirstOrDefault()!.SenderUser!.UserName
+                    : string.Empty
+                : string.Empty)
+            .Map(dest => dest.LastUserAvatarUrl, src => string.Empty)
+            .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault() != null ? src.Messages.FirstOrDefault()!.PublicId : Guid.Empty)
+            .Map(dest => dest.LastMessageText, src => 
+                src.Messages.FirstOrDefault() != null ? src.Messages.FirstOrDefault()!.Kind == MessageKind.Text ? src.Messages.FirstOrDefault()!.Text : "[Attachment]" : null)
+            .Map(dest => dest.LastMessageKind, src => src.Messages.FirstOrDefault() != null ? src.Messages.FirstOrDefault()!.Kind : MessageKind.Text);
+        
         cfg.NewConfig<ConversationItemDto, ConversationDto>()
             .Map(dest => dest.ConversationId, src => src.Id)
             .Map(dest => dest.CustomerAvatarUrl, src => string.Empty)
-            .Map(dest => dest.LastSenderRole, src => src.LastMessage != null ? src.LastMessage.SenderRole : RoleInConversation.Member)
+            .Map(dest => dest.LastSenderRole, src => src.LastMessage != null ? src.LastMessage.SenderRole : null)
             .Map(dest => dest.LastUserId, src => src.LastMessage != null ? src.LastMessage.SenderActorId : null)
             .Map(dest => dest.LastUserName, src => src.LastMessage != null ? src.LastMessage.SenderName : string.Empty)
             .Map(dest => dest.LastUserAvatarUrl, src => string.Empty)

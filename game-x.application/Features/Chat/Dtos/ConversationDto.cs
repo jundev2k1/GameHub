@@ -5,7 +5,7 @@ public sealed record ConversationDto(
     string? GuestId,
     ConversationStatus Status,
     ConversationType Type,
-    RoleInConversation LastSenderRole,
+    RoleInConversation? LastSenderRole,
     string? CustomerId,
     string? CustomerDisplayName,
     string? CustomerAvatarUrl,

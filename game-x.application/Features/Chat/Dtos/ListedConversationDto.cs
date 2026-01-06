@@ -7,7 +7,7 @@ public sealed record ListedConversationDto(
     string LastUserId,
     string LastUserName,
     string? LastUserAvatarUrl,
-    RoleInConversation LastSenderRole,
+    RoleInConversation? LastSenderRole,
     DateTime LastMessageAt,
     Guid LastMessageId,
     string LastMessageText,
