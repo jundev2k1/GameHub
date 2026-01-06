@@ -47,5 +47,7 @@ public sealed class S2SCredentialConfig : IEntityTypeConfiguration<S2SCredential
             .WithMany(scs => scs.Credentials)
             .HasForeignKey(sc => sc.SettingId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(sc => sc.KeyId).IsUnique();
     }
 }

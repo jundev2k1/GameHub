@@ -48,5 +48,7 @@ public sealed class S2SClientSettingConfig : IEntityTypeConfiguration<S2SClientS
             .WithMany(sc => sc.Settings)
             .HasForeignKey(scs => scs.ClientId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(scs => scs.AppCode).IsUnique();
     }
 }
