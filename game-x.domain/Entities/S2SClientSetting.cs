@@ -22,6 +22,7 @@ public sealed class S2SClientSetting : BaseEntity<int>
         string appCode,
         string appName,
         string host,
+        AllowedIp allowedIps,
         string notes)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(clientId);
@@ -33,6 +34,7 @@ public sealed class S2SClientSetting : BaseEntity<int>
             AppCode = appCode,
             AppName = appName,
             Host = host,
+            AllowedIps = allowedIps,
             IsActive = true,
             Notes = notes
         };

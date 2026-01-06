@@ -7,7 +7,7 @@ using game_x.application.Features.S2s.Queries.GetAllS2sClients;
 namespace game_x.api.Controllers.Root.S2s;
 
 [Authorize(Roles = AppRoles.Root)]
-[Route("api/root/s2s/client")]
+[Route("api/root/s2s/clients")]
 public sealed class S2sClientController : BaseApiController
 {
     /// <summary>
