@@ -14,10 +14,15 @@ public sealed class ChatHubService(
     ChatHubFacade<ChatHub, IChatClient> chatHub)
     : IChatHubService, IHubServices
 {
+    public async Task SendSupportConversationUnreadAsync(IReadOnlyCollection<ConversationUnreadDto> dto)
+    {
+        await chatHub.BackOffice().SupportConversationUnread(dto);
+    }
+    
     public async Task SendSupportConversationClaimedAsync(ConversationSignalDto dto)
     {
         if (dto.Type == ConversationType.Support)
-            await chatHub.BackOffice().ConversationUpdated(dto);
+            await chatHub.BackOffice().ConversationClaimed(dto);
     }
     
     public async Task SendDeletedMessageAsync(DeletedMessageDto dto)

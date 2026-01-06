@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnMarkMessageAsRead;
+using game_x.application.Events.OnSupportConversationUnread;
 using game_x.application.Features.Chat.Dtos;
 
 namespace game_x.application.Features.Chat.Commands.MarkMessageAsRead;
@@ -99,7 +100,9 @@ public sealed class MarkMessageAsReadHandler(
                     Unread = unreadMessage, 
                     Read = readCount
                 };
+                var convUnread = await convRepo.GetSupportConvUnreadAsync(ct);
                 await dispatcher.Publish(new OnMarkMessageAsReadEvent(dto, userId, role), ct);
+                await dispatcher.Publish(new OnSupportConversationUnreadEvent(convUnread), ct);
             },ct);
         }
         catch (Exception ex)

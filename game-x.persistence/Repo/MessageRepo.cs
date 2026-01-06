@@ -185,7 +185,6 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
             .Where(m => m.PublicId == id)
             .FirstOrDefaultAsync(ct)
             ?? throw new NotFoundException(MessageCode.Chatting.MessageNotFound);
-
     }
     
     public async Task<Message?> GetLastedMessageAsync(int convId, CancellationToken ct = default)
