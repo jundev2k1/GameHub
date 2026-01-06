@@ -19,20 +19,20 @@ public sealed class S2sClientSettingRepo(GameXContext dbContext) : IS2sClientSet
         await dbContext.S2sClientSettings.AddAsync(entity, ct);
     }
 
-    public async Task UpdateAsync(int id, Action<S2SClientSetting> updateAction, CancellationToken ct = default)
+    public async Task UpdateAsync(string appCode, Action<S2SClientSetting> updateAction, CancellationToken ct = default)
     {
         var target = await dbContext.S2sClientSettings
-            .FirstOrDefaultAsync(scs => scs.Id == id, ct)
-            ?? throw new NotFoundException(nameof(id), id);
+            .FirstOrDefaultAsync(scs => scs.AppCode == appCode, ct)
+            ?? throw new NotFoundException(nameof(appCode), appCode);
 
         updateAction?.Invoke(target);
     }
 
-    public async Task DeleteAsync(int id, CancellationToken ct = default)
+    public async Task DeleteAsync(string appCode, CancellationToken ct = default)
     {
         var target = await dbContext.S2sClientSettings
-            .FirstOrDefaultAsync(scs => scs.Id == id, ct)
-            ?? throw new NotFoundException(nameof(id), id);
+            .FirstOrDefaultAsync(scs => scs.AppCode == appCode, ct)
+            ?? throw new NotFoundException(nameof(appCode), appCode);
 
         dbContext.S2sClientSettings.Remove(target);
     }

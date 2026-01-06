@@ -6,7 +6,7 @@ public interface IS2sClientSettingRepo
 
     Task CreateAsync(S2SClientSetting entity, CancellationToken ct = default);
 
-    Task UpdateAsync(int id, Action<S2SClientSetting> updateAction, CancellationToken ct = default);
+    Task UpdateAsync(string appCode, Action<S2SClientSetting> updateAction, CancellationToken ct = default);
 
-    Task DeleteAsync(int id, CancellationToken ct = default);
+    Task DeleteAsync(string appCode, CancellationToken ct = default);
 }

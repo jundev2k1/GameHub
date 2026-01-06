@@ -14,7 +14,6 @@ public sealed class CreateS2sClientSettingHandler(
 
         var entity = S2SClientSetting.Create(
             request.ClientId!,
-            request.AppCode.Trim(),
             request.AppName.Trim(),
             request.Host.Trim(),
             AllowedIp.Of(request.AllowIps),

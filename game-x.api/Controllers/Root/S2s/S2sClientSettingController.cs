@@ -1,4 +1,5 @@
 ﻿using game_x.application.Features.S2s.Commands.CreateS2sClientSetting;
+using game_x.application.Features.S2s.Commands.UpdateS2sClientSetting;
 
 namespace game_x.api.Controllers.Root.S2s;
 
@@ -25,5 +26,27 @@ public sealed class S2sClientSettingController : BaseApiController
     {
         await Mediator.Send(command with { ClientId = clientId });
         return ApiResponseFactory.Created();
+    }
+
+    /// <summary>
+    /// Updates a setting of a third-party Server-to-Server (S2S) client
+    /// </summary>
+    /// <remarks>
+    /// This API updates an existing S2S client setting that represents an integration
+    /// key and configuration for a specific platform or channel (such as web, mobile
+    /// app, or device)
+    /// <br/>
+    /// The setting is identified by the provided app code and is associated with
+    /// the specified third-party S2S client.
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client that owns the setting</param>
+    /// <param name="appCode">The application code identifying the platform-specific setting to be updated</param>
+    /// <param name="command">The request payload containing the updated integration key and configuration details</param>
+    /// <returns>Returns HTTP 204 (No Content) when the S2S client setting is successfully updated</returns>
+    [HttpPut("{clientId}/settings/{appCode}")]
+    public async Task<IActionResult> UpdateSettingAsync(string clientId, string appCode, UpdateS2sClientSettingCommand command)
+    {
+        await Mediator.Send(command with { ClientId = clientId, AppCode = appCode });
+        return ApiResponseFactory.NoContent();
     }
 }

@@ -19,19 +19,17 @@ public sealed class S2SClientSetting : BaseEntity<int>
 
     public static S2SClientSetting Create(
         string clientId,
-        string appCode,
         string appName,
         string host,
         AllowedIp allowedIps,
         string notes)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(clientId);
-        ArgumentException.ThrowIfNullOrWhiteSpace(appCode);
 
         return new S2SClientSetting
         {
             ClientId = clientId,
-            AppCode = appCode,
+            AppCode = GenerateAppCode(),
             AppName = appName,
             Host = host,
             AllowedIps = allowedIps,
@@ -53,4 +51,6 @@ public sealed class S2SClientSetting : BaseEntity<int>
     }
 
     public void UpdateStatus(bool isActive) => IsActive = isActive;
+
+    private static string GenerateAppCode() => $"APP-{Guid.CreateVersion7():N[..8]}".ToUpperInvariant();
 }
