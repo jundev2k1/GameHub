@@ -2,6 +2,7 @@
 using game_x.application.Features.S2s.Commands.DeleteS2sClient;
 using game_x.application.Features.S2s.Commands.SwitchS2sClientStatus;
 using game_x.application.Features.S2s.Commands.UpdateS2sClient;
+using game_x.application.Features.S2s.Queries.GetAllS2sClients;
 
 namespace game_x.api.Controllers.Root.S2s;
 
@@ -9,6 +10,22 @@ namespace game_x.api.Controllers.Root.S2s;
 [Route("api/root/s2s/client")]
 public sealed class S2sClientController : BaseApiController
 {
+    /// <summary>
+    /// Retrieves all Server-to-Server (S2S) clients
+    /// </summary>
+    /// <remarks>
+    /// This API returns a list of all registered S2S clients, including their
+    /// configuration metadata and current status
+    /// </remarks>
+    /// <returns>Returns HTTP 200 (OK) with the list of S2S clients</returns>
+    [HttpGet]
+    public async Task<IActionResult> GetAllS2sClientsAsync()
+    {
+        var query = new GetAllS2sClientsQuery();
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
     /// <summary>
     /// Creates a new Server-to-Server (S2S) client configuration
     /// </summary>
