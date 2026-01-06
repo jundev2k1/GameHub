@@ -4,6 +4,7 @@ using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnDirectMessageCreated;
 using game_x.application.Events.OnPublicMessageCreated;
+using game_x.application.Events.OnSupportConversationUnread;
 using game_x.application.Events.OnSupportMessageCreatedV2;
 using game_x.application.Features.Chat.Dtos;
 
@@ -11,6 +12,7 @@ namespace game_x.application.Features.Chat.Commands.SendMessage;
 
 public sealed class SendMessageHandler(
     IUnitOfWork unitOfWork,
+    IConversationRepo convRepo,
     IConversationRepo conversationRepo,
     IMessageRepo messageRepo,
     IMessageMentionRepo messageMentionRepo,
@@ -135,8 +137,12 @@ public sealed class SendMessageHandler(
                 await eventDispatcher.Publish(new OnDirectMessageCreatedEvent(dto), ct);
                 break;
             case ConversationType.Support:
+            {
+                var convUnread = await convRepo.GetSupportConvUnreadAsync(ct);
                 await eventDispatcher.Publish(new OnSupportMessageCreatedV2Event(dto), ct);
+                await eventDispatcher.Publish(new OnSupportConversationUnreadEvent(convUnread), ct);
                 break;
+            }
             case ConversationType.Public:
                 await eventDispatcher.Publish(new OnPublicMessageCreatedEvent(dto), ct);
                 break;

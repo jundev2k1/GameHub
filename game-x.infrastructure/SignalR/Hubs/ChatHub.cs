@@ -38,6 +38,8 @@ public interface IChatClient
     Task Unfriend(UnfriendSignalDto dto);
     Task FriendBlocked(FriendBlockedSignalDto dto);
     Task FriendUnblocked(FriendBlockedSignalDto dto);
+    Task SupportConversationUnread(IReadOnlyCollection<ConversationUnreadDto> dto);
+    Task ConversationClaimed(ConversationSignalDto signalDto);
 }
 
 public sealed class ChatHub(
