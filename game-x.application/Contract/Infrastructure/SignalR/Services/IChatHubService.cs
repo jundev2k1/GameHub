@@ -9,7 +9,7 @@ public interface IChatHubService
     Task SendSupportConversationUnreadAsync(IReadOnlyCollection<ConversationUnreadDto> dto);
     Task SendSupportConversationClaimedAsync(ConversationSignalDto dto);
     Task SendDeletedMessageAsync(DeletedMessageDto dto);
-    Task SendMarkAsReadAsync(ConvUnreadDto res, string userId, AppRole role);
+    Task SendMarkAsReadAsync(ConversationSignalDto dto, string userId, AppRole role);
     Task SendPublicMessageAsync(CreatedMessageSignalResult res);
     Task SendSupportMessageAsync(CreatedMessageSignalResult res);
     Task SendSupportMessageV2Async(CreatedMessageSignalResult res);
