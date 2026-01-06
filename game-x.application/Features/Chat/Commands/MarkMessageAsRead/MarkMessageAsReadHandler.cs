@@ -26,7 +26,7 @@ public sealed class MarkMessageAsReadHandler(
             ?? throw new NotFoundException(MessageCode.Chatting.MessageNotFound);
         
         if (role.IsUser) await MarkAsReadForClient(me, role, cmd, readMessage, ct);
-        if (role.IsBackOffice) await MarkAsReadForBackOffice(me, role, readMessage, cmd, ct);
+        if (role.IsBackOffice) await MarkAsReadForBackOffice(readMessage, cmd, ct);
         return Unit.Value;
     }
 
@@ -67,8 +67,6 @@ public sealed class MarkMessageAsReadHandler(
     }
     
     private async Task MarkAsReadForBackOffice(
-        string userId,
-        AppRole role,
         Message readMessage,
         MarkMessageAsReadCommand cmd,
         CancellationToken ct)
@@ -79,8 +77,6 @@ public sealed class MarkMessageAsReadHandler(
         
         if(conv.LastResolvedMessageId != null && readMessage.Id <= conv.LastResolvedMessageId)
             throw new BadRequestException(MessageCode.Chatting.MessageAlreadyRead);
-        
-        var readCount = await convRepo.CountSupportConvReadAsync(conv.PublicId, readMessage.Id, ct);
         try
         {
             await unitOfWork.WithTransactionAsync(async () =>
@@ -90,18 +86,7 @@ public sealed class MarkMessageAsReadHandler(
                     c.OnBackOfficeRead(readMessage.Id);
                 }, ct);
                 await unitOfWork.CommitAsync(ct);
-
-                var unreadMessage = await convRepo.CountSupportConvUnreadAsync(conv.PublicId, ct);
-                var dto = new ConvUnreadDto
-                {
-                    ConversationId = cmd.ConversationId,
-                    Type = conv.Type,
-                    Status = conv.Status,
-                    Unread = unreadMessage, 
-                    Read = readCount
-                };
                 var convUnread = await convRepo.GetSupportConvUnreadAsync(ct);
-                await dispatcher.Publish(new OnMarkMessageAsReadEvent(dto, userId, role), ct);
                 await dispatcher.Publish(new OnSupportConversationUnreadEvent(convUnread), ct);
             },ct);
         }
