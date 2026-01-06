@@ -1,5 +1,6 @@
 ﻿using game_x.application.Features.S2s.Commands.CreateS2sClient;
 using game_x.application.Features.S2s.Commands.DeleteS2sClient;
+using game_x.application.Features.S2s.Commands.SwitchS2sClientStatus;
 using game_x.application.Features.S2s.Commands.UpdateS2sClient;
 
 namespace game_x.api.Controllers.Root.S2s;
@@ -31,13 +32,30 @@ public sealed class S2sClientController : BaseApiController
     /// This API updates the configuration of an existing S2S client, including
     /// metadata, permissions, or security-related settings
     /// </remarks>
-    /// <param name="clientId">The unique identifier of the S2S client to be updated.</param>
+    /// <param name="clientId">The unique identifier of the S2S client to be updated</param>
     /// <param name="command">The request payload containing updated S2S client information</param>
-    /// <returns>Returns HTTP 204 (No Content) when the S2S client is successfully updated</returns>
+    /// <returns>Returns HTTP 200 when the S2S client is successfully updated</returns>
     [HttpPut("{clientId}")]
     public async Task<IActionResult> UpdateS2sClientAsync(string clientId, UpdateS2sClientCommand command)
     {
         await Mediator.Send(command with { ClientId = clientId });
+        return ApiResponseFactory.NoContent();
+    }
+
+    /// <summary>
+    /// Switches the status of a Server-to-Server (S2S) client
+    /// </summary>
+    /// <remarks>
+    /// This API toggles the status of an existing S2S client between active and inactive.
+    /// When inactive, all server-to-server authentication attempts using this client will be rejected
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the S2S client whose status will be switched</param>
+    /// <returns>Returns HTTP 200 when the S2S client status is successfully updated</returns>
+    [HttpPatch("{clientId}/status")]
+    public async Task<IActionResult> SwitchS2sClientStatusAsync(string clientId)
+    {
+        var command = new SwitchS2sClientStatusCommand(clientId);
+        await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
     }
 
