@@ -1,0 +1,39 @@
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Exceptions;
+
+namespace game_x.persistence.Repo;
+
+public sealed class S2sClientSettingRepo(GameXContext dbContext) : IS2sClientSettingRepo, IRepository
+{
+    public async Task<S2SClientSetting[]> GetAllByClientIdAsync(string clientId, CancellationToken ct = default)
+    {
+        return await dbContext.S2sClientSettings
+            .AsNoTracking()
+            .Where(scs => scs.ClientId == clientId)
+            .ToArrayAsync(ct);
+    }
+
+    public async Task CreateAsync(S2SClientSetting entity, CancellationToken ct = default)
+    {
+        await dbContext.S2sClientSettings.AddAsync(entity, ct);
+    }
+
+    public async Task UpdateAsync(int id, Action<S2SClientSetting> updateAction, CancellationToken ct = default)
+    {
+        var target = await dbContext.S2sClientSettings
+            .FirstOrDefaultAsync(scs => scs.Id == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+
+        updateAction?.Invoke(target);
+    }
+
+    public async Task DeleteAsync(int id, CancellationToken ct = default)
+    {
+        var target = await dbContext.S2sClientSettings
+            .FirstOrDefaultAsync(scs => scs.Id == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+
+        dbContext.S2sClientSettings.Remove(target);
+    }
+}
