@@ -190,7 +190,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         return await context.Conversations
             .AsTracking()
             .Where(x => x.PublicId == id)
-            .SumAsync(x => x.Messages.Count(m => m.Id < messageId &&
+            .SumAsync(x => x.Messages.Count(m => m.Id <= messageId &&
                 (x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId)), ct);
     }
     

@@ -14,6 +14,12 @@ public sealed class ChatHubService(
     ChatHubFacade<ChatHub, IChatClient> chatHub)
     : IChatHubService, IHubServices
 {
+    public async Task SendSupportConversationClaimedAsync(ConversationSignalDto dto)
+    {
+        if (dto.Type == ConversationType.Support)
+            await chatHub.BackOffice().ConversationUpdated(dto);
+    }
+    
     public async Task SendDeletedMessageAsync(DeletedMessageDto dto)
     {
         switch (dto.ConversationType)

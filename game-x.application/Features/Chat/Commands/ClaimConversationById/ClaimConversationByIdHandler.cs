@@ -1,5 +1,8 @@
 using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnSupportConversationClaimed;
 
 namespace game_x.application.Features.Chat.Commands.ClaimConversationById;
 
@@ -7,37 +10,38 @@ public sealed class ClaimConversationByIdHandler(
     IUnitOfWork unitOfWork,
     IUserAccessor userAccessor, 
     IConversationRepo conversationRepo,
-    IConversationMemberRepo conversationMemberRepo) 
-    : IRequestHandler<ClaimConversationByIdCommand, Unit>
+    IConversationService conversationService,
+    IConversationMemberRepo conversationMemberRepo,
+    IApplicationEventDispatcher eventDispatcher): IRequestHandler<ClaimConversationByIdCommand, Unit>
 {
-    
-    public async Task<Unit> Handle(
-        ClaimConversationByIdCommand request, CancellationToken ct)
+    public async Task<Unit> Handle(ClaimConversationByIdCommand request, CancellationToken ct)
     {
         var userId = userAccessor.GetUserId();
         Conversation? conv = null;
-        await unitOfWork.WithTransactionAsync(
-            async () =>
-            {
-                await conversationRepo
-                    .UpdateAsync(request.ConversationId, updatedOrder =>
-                    {
-                        if(updatedOrder.Status != ConversationStatus.Open)
-                            throw new BadRequestException(MessageCode.Chatting.ConversationAlreadyClaimed);
-                        updatedOrder.Claim(userId);
-                        conv = updatedOrder;
-                    }, ct);
+        await unitOfWork.WithTransactionAsync(async () =>
+        {
+            await conversationRepo.UpdateAsync(request.ConversationId, updatedOrder =>
+                {
+                    if(updatedOrder.Status != ConversationStatus.Open)
+                        throw new BadRequestException(MessageCode.Chatting.ConversationAlreadyClaimed);
+                    updatedOrder.Claim(userId);
+                    conv = updatedOrder;
+                }, ct);
 
-                if(conv is null)
-                    throw new BadRequestException(MessageCode.Chatting.ConversationNotFound);
+            if(conv is null)
+                throw new BadRequestException(MessageCode.Chatting.ConversationNotFound);
 
-                var convMember = ConversationMember.Create(
-                    conv: conv,
-                    userId: userId,
-                    role: RoleInConversation.Agent);
-        
-                await conversationMemberRepo.AddAsync(convMember, ct);
-            }, ct);
+            var convMember = ConversationMember.Create(
+                conv: conv,
+                userId: userId,
+                role: RoleInConversation.Agent);
+    
+            await conversationMemberRepo.AddAsync(convMember, ct);
+            await unitOfWork.CommitAsync(ct);
+            
+            var updatedConv = await conversationService.GetConvByIdAsync(conv.PublicId, ct);
+            await eventDispatcher.Publish(new OnSupportConversationClaimedEvent(updatedConv.Adapt<ConversationSignalDto>()), ct);
+        }, ct);
 
         return Unit.Value;
     }

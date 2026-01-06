@@ -30,8 +30,11 @@ public class ConversationMemberRepo(GameXContext context): IConversationMemberRe
         return await context.ConversationMembers
             .AsNoTracking()
             .Where(m => m.UserId == userId && m.ConversationId == convId)
+            .Include(m => m.Conversation)
             .Select(m => new ConvUnreadDto {
                 ConversationId = m.Conversation.PublicId,
+                Type = m.Conversation.Type,
+                Status = m.Conversation.Status,
                 Unread = context.Messages.Count(x =>
                   x.ConversationId == m.ConversationId 
                     && (m.LastReadMessageId == null || x.Id > m.LastReadMessageId))})
