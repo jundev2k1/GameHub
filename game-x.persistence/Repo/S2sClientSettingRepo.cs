@@ -1,6 +1,8 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.application.Features.S2s.DTOs;
+using Mapster;
 
 namespace game_x.persistence.Repo;
 
@@ -12,6 +14,19 @@ public sealed class S2sClientSettingRepo(GameXContext dbContext) : IS2sClientSet
             .AsNoTracking()
             .Where(scs => scs.ClientId == clientId)
             .ToArrayAsync(ct);
+    }
+
+    public async Task<S2sClientSettingDetailDto> GetDetailAsync(string appCode, CancellationToken ct = default)
+    {
+        var data = await dbContext.S2sClientSettings
+            .AsNoTracking()
+            .Include(scs => scs.Client)
+            .Include(scs => scs.Credentials)
+                .ThenInclude(sc => sc.Materials)
+            .FirstOrDefaultAsync(scs => scs.AppCode == appCode, ct)
+            ?? throw new NotFoundException(nameof(appCode), appCode);
+
+        return data.Adapt<S2sClientSettingDetailDto>();
     }
 
     public async Task CreateAsync(S2SClientSetting entity, CancellationToken ct = default)

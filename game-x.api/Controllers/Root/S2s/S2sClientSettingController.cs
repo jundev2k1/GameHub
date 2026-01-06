@@ -1,6 +1,7 @@
 ﻿using game_x.application.Features.S2s.Commands.CreateS2sClientSetting;
 using game_x.application.Features.S2s.Commands.SwitchS2sClientSettingStatus;
 using game_x.application.Features.S2s.Commands.UpdateS2sClientSetting;
+using game_x.application.Features.S2s.Queries.GetSettingDetail;
 
 namespace game_x.api.Controllers.Root.S2s;
 
@@ -8,6 +9,45 @@ namespace game_x.api.Controllers.Root.S2s;
 [Route("api/root/s2s/clients")]
 public sealed class S2sClientSettingController : BaseApiController
 {
+    /// <summary>
+    /// Retrieves detailed information of an S2S client setting
+    /// </summary>
+    /// <remarks>
+    /// This API returns the complete detail of a platform-specific setting for a third-party Server-to-Server (S2S) client
+    /// <br />
+    /// The response includes:
+    /// <list type="number">
+    ///   <item>
+    ///     <description>
+    ///       Parent S2S client information (third-party identity and metadata)
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <description>
+    ///       Target setting information identified by the app code
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <description>
+    ///       All associated credentials, integration keys
+    ///       and related configuration materials required for server-to-server authentication
+    ///     </description>
+    ///   </item>
+    /// </list>
+    /// <br />
+    /// A setting represents an integration configuration for a specific platform
+    /// or channel, such as web, mobile app, or device
+    /// </remarks>
+    /// <param name="appCode">The application code identifying the platform-specific S2S client setting whose details will be retrieved</param>
+    /// <returns>Returns HTTP 200 (OK) with the S2S client setting detail, including parent client information and all associated credentials</returns>
+    [HttpGet("{clientId}/settings/{appCode}")]
+    public async Task<IActionResult> GetSettingDetailAsync(string clientId, string appCode)
+    {
+        var query = new GetSettingDetailQuery(clientId, appCode);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
     /// <summary>
     /// Creates a new setting for a third-party Server-to-Server (S2S) client
     /// </summary>

@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-
-namespace game_x.domain.Entities;
+﻿namespace game_x.domain.Entities;
 
 public sealed class S2SCredential : BaseEntity<int>
 {
@@ -37,15 +35,6 @@ public sealed class S2SCredential : BaseEntity<int>
     {
         Status = CredentialStatus.Inactive;
         ExpiredAt = DateTime.UtcNow;
-    }
-
-    private static string GenerateClientSecret()
-    {
-        // 32 bytes = 256-bit
-        var bytes = new byte[32];
-        RandomNumberGenerator.Fill(bytes);
-
-        return Convert.ToBase64String(bytes);
     }
 
     private static string GenerateKeyId()
