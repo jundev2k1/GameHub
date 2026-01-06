@@ -15,8 +15,7 @@ public sealed class SendSupportMessageHandler(
     IMessageService messageService,
     IConversationService conversationService,
     IAppLogger<Message> logger,
-    IApplicationEventDispatcher eventDispatcher
-    ) : IRequestHandler<SendSupportMessageCommand, SendSupportMessageResult>
+    IApplicationEventDispatcher eventDispatcher) : IRequestHandler<SendSupportMessageCommand, SendSupportMessageResult>
 {
     public async Task<SendSupportMessageResult> Handle(SendSupportMessageCommand request, CancellationToken ct)
     {

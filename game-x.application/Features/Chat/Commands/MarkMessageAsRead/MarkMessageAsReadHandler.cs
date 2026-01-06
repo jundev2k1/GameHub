@@ -93,7 +93,9 @@ public sealed class MarkMessageAsReadHandler(
                 var unreadMessage = await convRepo.CountSupportConvUnreadAsync(conv.PublicId, ct);
                 var dto = new ConvUnreadDto
                 {
-                    ConversationId = cmd.ConversationId, 
+                    ConversationId = cmd.ConversationId,
+                    Type = conv.Type,
+                    Status = conv.Status,
                     Unread = unreadMessage, 
                     Read = readCount
                 };
