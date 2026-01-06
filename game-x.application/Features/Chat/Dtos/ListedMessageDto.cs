@@ -2,6 +2,7 @@ namespace game_x.application.Features.Chat.Dtos;
 
 public record ListedMessageDto(
     Guid Id,
+    int Index,
     Guid ConversationId,
     string SenderActorId,
     MessageKind Kind,
