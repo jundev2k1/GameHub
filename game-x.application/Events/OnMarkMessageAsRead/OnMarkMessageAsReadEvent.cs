@@ -1,5 +1,5 @@
-using game_x.application.Features.Chat.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 
 namespace game_x.application.Events.OnMarkMessageAsRead;
 
-public record OnMarkMessageAsReadEvent(ConvUnreadDto Dto, string UserId, AppRole Role) : IApplicationEvent;
+public record OnMarkMessageAsReadEvent(ConversationSignalDto Dto, string UserId, AppRole Role) : IApplicationEvent;
