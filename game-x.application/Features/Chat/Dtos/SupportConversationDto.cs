@@ -11,6 +11,8 @@ public sealed record SupportConversationDto(
     string LastUserName,
     RoleInConversation LastSenderRole,
     DateTime LastMessageAt,
+    DateTime? LastResolvedAt,
+    int? LastResolvedMessageId,
     Guid LastMessageId,
     string LastMessageText,
     MessageKind LastMessageKind,

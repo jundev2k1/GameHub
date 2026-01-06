@@ -14,6 +14,7 @@ public sealed record ConversationDto(
     string? LastUserAvatarUrl,
     DateTime LastMessageAt,
     Guid LastMessageId,
+    int? LastMessageIndex,
     string LastMessageText,
     MessageKind LastMessageKind,
     int? UnreadCount,

@@ -34,6 +34,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.LastUserName, src => src.LastMessage != null ? src.LastMessage.SenderName : string.Empty)
             .Map(dest => dest.LastUserAvatarUrl, src => string.Empty)
             .Map(dest => dest.LastMessageId, src => src.LastMessage != null ? src.LastMessage.PublicId : Guid.Empty)
+            .Map(dest => dest.LastMessageIndex, src => src.LastMessage!.Id)
             .Map(dest => dest.LastMessageText, src => 
                 src.LastMessage != null ? src.LastMessage.Kind == MessageKind.Text ? src.LastMessage.Text : "[Attachment]" : null)
             .Map(dest => dest.LastMessageKind, src => src.LastMessage != null ? src.LastMessage.Kind : MessageKind.Text);
@@ -46,6 +47,7 @@ public sealed class MapsterConfig : IRegister
   
         cfg.NewConfig<MessageDto, ListedMessageDto>()
             .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.Index, src => src.Id)
             .Map(dest => dest.SenderUserNickname, src => src.SenderUser!.Nickname);
         
         cfg.NewConfig<MessageAttachment, MessageAttachmentDto>()

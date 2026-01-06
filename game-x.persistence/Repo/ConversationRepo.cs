@@ -53,6 +53,8 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 CustomerAvatar = x.Conv.Customer != null
                     ? x.Conv.Customer.Avatar
                     : null,
+                LastResolvedAt = x.Conv.LastResolvedAt,
+                LastResolvedMessageId = x.Conv.LastResolvedMessageId,
                 LastMessageAt = x.Conv.LastMessageAt,
                 LastMessage = lastMessage == null
                     ? null

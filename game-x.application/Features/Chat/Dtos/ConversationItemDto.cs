@@ -10,6 +10,8 @@ public sealed record ConversationItemDto
     public string? CustomerDisplayName { get; init; } 
     public MediaFile? CustomerAvatar { get; init; }
     public DateTime LastMessageAt { get; init; }
+    public DateTime? LastResolvedAt { get; init; }
+    public int? LastResolvedMessageId { get; init; }
     public LastMessageItemDto? LastMessage { get; init; }
     public bool? IsHidden { get; init; }
     public int? UnreadCount { get; init; }
