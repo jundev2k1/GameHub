@@ -8,11 +8,13 @@ using game_x.application.Utils;
 using game_x.share.ExternalApi.Etl998.Dtos.IsAccountExist;
 using game_x.share.ExternalApi.Etl998.Dtos.Register;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Register;
+using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
 
 namespace game_x.application.Events.OnGameRegister;
 
 public sealed class OnGameRegisterHandler(
+    IUserAccessor userAccessor,
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IGameProviderService gameProvider,
@@ -64,6 +66,7 @@ public sealed class OnGameRegisterHandler(
 
     private async Task RegisterGame598User(UserExtend usrex, string nickName)
     {
+        // Register new account
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}";
         var password = GameProviderPasswordGenerator.Generate(5, 13);
@@ -76,6 +79,20 @@ public sealed class OnGameRegisterHandler(
         };
         await gameProvider.RegisterAsync(request);
 
+        // Try login for the first time
+        var loginRequest = new GameLoginRequest
+        {
+            Account = account,
+            Passwd = password,
+            Gamecode = "KRF3",
+            Address = "lobby",
+            Locale = "zh-Hant",
+            ReturnUrl = "",
+        };
+        var ip = userAccessor.GetIpAddress();
+        await gameProvider.LoginAsync(loginRequest, ip);
+
+        // Update Game 598 account
         usrex.UpdateG598Account(account, gameAesEncryptor.Encrypt(password), nickName, 0M);
     }
 
@@ -128,7 +145,7 @@ public sealed class OnGameRegisterHandler(
     {
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}";
-        await sasSlotService.RegisterAsync(account, nickName);
+        await sasSlotService.LoginAsync(account, nickName);
         usrex.UpdateSasSlotAccount(account, nickName);
     }
 }
