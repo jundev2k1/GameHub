@@ -187,11 +187,6 @@ public sealed class WalletWithdrawalHandler(
         throw new NotSupportedException($"This platform ({platformId}) is not support.");
     }
 
-    private Task<decimal> GetAmountAsync(Guid gamePlatformId)
-    {
-
-    }
-
     private async Task WithdrawalToProviderWalletAsync(string gameProviderAccount, string sno, decimal amount)
     {
         var withdrawalRequest = new GameWithdrawalRequest
