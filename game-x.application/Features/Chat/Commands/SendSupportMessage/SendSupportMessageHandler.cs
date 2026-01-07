@@ -59,6 +59,20 @@ public sealed class SendSupportMessageHandler(
                 ct: ct);
             
             await messageService.CreateMessageAttachmentsAsync(msg: message, attachments: request.Attachments, ct);
+
+            if (conv.GuestId != null)
+            {
+                await unitOfWork.SaveChangesAsync(ct);
+                await convRepo.UpdateAsync(conv.PublicId, x => { x.OnGuestRead(message.Id); }, ct);
+            }
+
+            if (conv.CustomerId != null)
+            {
+                await unitOfWork.SaveChangesAsync(ct);
+                var member = await conversationMemberRepo.GetByConvIdAndUserIdAsync(conv.PublicId, conv.CustomerId, ct);
+                if(member != null)
+                    await conversationMemberRepo.UpdateAsync(member.Id, x => { x.OnRead(message.Id); }, ct);
+            }
             
             conv.LastMessageAt = now;
             
