@@ -1,10 +1,8 @@
 using game_x.api.Dtos;
-using game_x.application.Common.Abstractions.Events;
 using game_x.application.Common.Files;
 using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Commands.RevokeAllOtherToken;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
@@ -16,14 +14,14 @@ using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 using game_x.application.Features.Accounts.User.Queries.GetSelfVerificationStatusList;
 using game_x.application.Features.Auth.Client.Commands.ChangePasswordUser;
 using game_x.application.Features.Transactions.Client.Queries.GetMyWalletTransactions;
+using game_x.application.Features.UserWallet.Commands.RefreshWallet;
 
 namespace game_x.api.Controllers.Client.Me;
 
 [Route("api/user/me")]
 public sealed class UserController(
     IUserAccessor userAccessor,
-    IRefreshTokenManagerCacheService refreshTokenManager,
-    IApplicationEventDispatcher eventDispatcher) : BaseApiController
+    IRefreshTokenManagerCacheService refreshTokenManager) : BaseApiController
 {
     [Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
     [HttpGet]
@@ -72,9 +70,8 @@ public sealed class UserController(
     [HttpPost("balances/{platformId:guid}/refresh")]
     public async Task<IActionResult> RefreshWalletAsync(Guid platformId)
     {
-        var userId = userAccessor.GetUserId();
-        var @event = new OnUserBalanceUpdatedEvent(userId, platformId);
-        await eventDispatcher.Publish(@event);
+        var command = new RefreshWalletCommand(platformId);
+        await Mediator.Send(command);
         return ApiResponseFactory.Accepted();
     }
 
