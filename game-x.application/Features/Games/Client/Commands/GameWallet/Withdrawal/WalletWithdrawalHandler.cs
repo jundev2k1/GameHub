@@ -48,6 +48,16 @@ public sealed class WalletWithdrawalHandler(
         var balanceAdjustmentEvent = new WalletBalanceAdjustmentRequestedEvent(currentUser.Id, targetPlatform.Id);
         await eventDispatcher.Publish(balanceAdjustmentEvent, ct);
 
+        // Get and check if user's wallet have enough money?
+        var wallet = await walletManagerCache.GetExternalWalletAsync(
+            currentUser.Id,
+            request.PlatformId);
+        var actualAmount = request.PlatformId == GameConstants.PLATFORM_ID_SASSLOT
+            ? wallet.Amount
+            : request.Amount;
+        if (wallet.Amount < actualAmount)
+            throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
+
         // Create transaction
         var currentBalance = await GetUserBalanceAsync(currentUser.Id, request, ct);
         var serialNumber = GameProviderUtils.SnoGenerate();
@@ -56,23 +66,17 @@ public sealed class WalletWithdrawalHandler(
             currentUser.Id,
             serialNumber,
             currentBalance.CryptoToken.Id,
-            request.Amount,
+            actualAmount,
             targetPlatform.LocalId,
             txSourceType,
             request.Note);
-
-        var wallet = await walletManagerCache.GetExternalWalletAsync(
-            currentUser.Id,
-            request.PlatformId);
-        if (wallet.Amount < request.Amount)
-            throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
         decimal? balanceAfter = null;
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await userBalanceRepo.UpdateAsync(currentBalance.PublicId, balance =>
             {
-                balance.AdjustAmount(request.Amount, true);
+                balance.AdjustAmount(actualAmount, true);
                 balanceAfter = balance.TotalAmount;
             }, ct);
 
@@ -83,26 +87,26 @@ public sealed class WalletWithdrawalHandler(
                 await WithdrawalToProviderWalletAsync(
                     gameProviderAccount: currentUser.UserExtend!.GameProviderAccount,
                     sno: transaction.TransactionExternal!.SerialNumber,
-                    amount: request.Amount);
+                    amount: actualAmount);
 
             if (request.PlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
                 await WithdrawalToBaccaratWalletAsync(
                     gameUserId: currentUser.UserExtend!.GameBaccaratUserId,
                     sno: transaction.TransactionExternal!.SerialNumber,
-                    amount: request.Amount);
+                    amount: actualAmount);
 
             if (request.PlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
                 await WithdrawalToEtl998WalletAsync(
                     accountName: currentUser.UserExtend!.Etl998ProviderAccount,
                     password: currentUser.UserExtend!.Etl998ProviderPassword,
                     sno: serialNumber,
-                    amount: request.Amount);
+                    amount: actualAmount);
 
             if (request.PlatformId == GameConstants.PLATFORM_ID_SASSLOT)
                 await WithdrawalToSasSlotWalletAsync(
                     account: currentUser.UserExtend!.SasSlotAccount,
                     sno: serialNumber,
-                    amount: request.Amount);
+                    amount: actualAmount);
 
             var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
             await eventDispatcher.Publish(@event, ct);
@@ -111,7 +115,7 @@ public sealed class WalletWithdrawalHandler(
             var walletRefreshed = await walletManagerCache.GetExternalWalletAsync(
                 currentUser.Id,
                 request.PlatformId);
-            transaction.ConfirmGameTx(request.Amount, balanceAfter!.Value, walletRefreshed.Amount);
+            transaction.ConfirmGameTx(actualAmount, balanceAfter!.Value, walletRefreshed.Amount);
             await transactionRepo.AddAsync(transaction, ct);
         }, ct);
 
@@ -181,6 +185,11 @@ public sealed class WalletWithdrawalHandler(
             return TransactionSourceType.SasSlotProvider;
 
         throw new NotSupportedException($"This platform ({platformId}) is not support.");
+    }
+
+    private Task<decimal> GetAmountAsync(Guid gamePlatformId)
+    {
+
     }
 
     private async Task WithdrawalToProviderWalletAsync(string gameProviderAccount, string sno, decimal amount)
