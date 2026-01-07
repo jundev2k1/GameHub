@@ -153,11 +153,19 @@ public sealed class SendMessageHandler(
     {
         var msg = await messageRepo.GetByIdAsync(message.PublicId, ct);
         var updatedConv = await conversationService.GetConvByIdAsync(request.ConversationId, ct);
+        
+        int? clientUnreadCount = null;
+        if (updatedConv.GuestId != null)
+            clientUnreadCount = await convRepo.CountConvUnreadByGuestIdAsync(updatedConv.GuestId, updatedConv.ConversationId, ct);
+            
+        if (updatedConv.CustomerId != null)
+            clientUnreadCount = await convRepo.CountConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct);
+        
         var unreadCount = await convRepo.CountSupportConvUnreadAsync(updatedConv.ConversationId, ct);
         var msgSignalDto = await messageService.GetMessageDtoAsync(msg.Adapt<MessageDto>(), ct);
         return new CreatedMessageSignalResult(
             Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
-            Conv: updatedConv.Adapt<ConversationSignalDto>() with {UnreadCount = unreadCount},
+            Conv: updatedConv.Adapt<ConversationSignalDto>() with {BackOfficeUnreadCount = unreadCount, ClientUnreadCount = clientUnreadCount},
             InboxUpsert: updatedConv.Adapt<InboxUpsertSignalDto>());
     }
 }

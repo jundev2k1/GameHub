@@ -190,11 +190,11 @@ public sealed class ConversationService(
         return result.Transform(dtoItems);
     }
 
-    public async Task<ListedConversationDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
+    public async Task<ConversationDetailDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
     {
         var src = await conversationRepo.GetMyConversationsForGuestAsync(guestId, ct);
         var convDto = src?.Adapt<ConversationDto>();
-        return convDto?.Adapt<ListedConversationDto>();
+        return convDto?.Adapt<ConversationDetailDto>();
     }
     
     public async Task<ConversationDetailDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default)

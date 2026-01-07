@@ -46,6 +46,9 @@ public sealed class ChatHubService(
         
         if(role.IsBackOffice)
             await chatHub.BackOffice().ConversationUpdated(dto);
+        
+        if(role.IsGuest)
+            await actorHub.Guest(userId).ConversationUpdated(dto);
     }
     
     public async Task SendPublicMessageAsync(CreatedMessageSignalResult res)

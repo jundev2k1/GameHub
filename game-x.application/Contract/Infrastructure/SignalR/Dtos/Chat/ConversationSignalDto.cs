@@ -16,4 +16,5 @@ public sealed record ConversationSignalDto(
     Guid LastMessageId,
     string LastMessageText,
     MessageKind LastMessageKind,
-    int? UnreadCount);
+    int? BackOfficeUnreadCount,
+    int? ClientUnreadCount);

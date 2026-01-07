@@ -33,7 +33,12 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
     /// <summary>The last time Admin or Cs seen the conversation</summary>
     public DateTime? LastResolvedAt { get; private set; }
     public int? LastResolvedMessageId { get; private set; }
-    #endregion 
+    #endregion
+    
+    #region Guest read messages
+    public DateTime? LastGuestReadAt { get; private set; }
+    public int? LastGuestReadMessageId { get; private set; }
+    #endregion
     
     /// <summary>Linked users (for both Support & Direct)</summary>
     public ICollection<ConversationMember> Members { get; set; } = [];
@@ -67,5 +72,11 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
     {
         LastResolvedMessageId = messageId;
         LastResolvedAt = DateTime.UtcNow;
+    }
+    
+    public void OnGuestRead(int messageId)
+    {
+        LastGuestReadMessageId = messageId;
+        LastGuestReadAt = DateTime.UtcNow;
     }
 }
