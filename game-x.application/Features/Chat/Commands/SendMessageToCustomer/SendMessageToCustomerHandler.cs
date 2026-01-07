@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnSupportConversationUnread;
 using game_x.application.Events.OnSupportMessageCreated;
 using game_x.application.Features.Chat.Dtos;
 
@@ -85,8 +86,9 @@ public sealed class SendMessageToCustomerHandler(
                 Conv: updatedConv.Adapt<ConversationSignalDto>() with{BackOfficeUnreadCount = 0, ClientUnreadCount = clientUnreadCount},
                 InboxUpsert: updatedConv.Adapt<InboxUpsertSignalDto>());
             
+            var convUnread = await convRepo.GetSupportConvUnreadAsync(ct);
             await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
-            
+            await eventDispatcher.Publish(new OnSupportConversationUnreadEvent(convUnread), ct);
             return new SendMessageToCustomerResult(request.ClientLocalId, conv.PublicId);
         }
         catch(Exception ex)

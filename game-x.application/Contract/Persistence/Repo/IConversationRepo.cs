@@ -16,7 +16,7 @@ public interface IConversationRepo
     Task<ConversationItemDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default);
     Task<Conversation> GetPublicConvAsync(CancellationToken ct = default);
     Task<ConversationItemDto> GetConvByIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default);
-    Task<Conversation?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default);
+    Task<ConversationItemDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default);
     Task<Conversation?> FindForPairAsync(string userA, string userB, CancellationToken ct = default);
     Task<Conversation?> FindPublicAsync(CancellationToken ct = default);
     Task<Conversation> GetByIdAsync(Guid convId, CancellationToken ct = default);
