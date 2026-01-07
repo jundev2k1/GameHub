@@ -31,4 +31,9 @@ public sealed class ClientHubService(ActorHubFacade<ClientHub, IClientHub> actor
     {
         await actorHub.Member(memberId).WalletsUpdated(wallets);
     }
+
+    public async Task NotifyWalletSynchronizationFailedAsync(string memberId, Guid platformId)
+    {
+        await actorHub.Member(memberId).NotifyWalletSynchronizationFailed(platformId);
+    }
 }

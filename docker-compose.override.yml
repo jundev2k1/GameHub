@@ -77,6 +77,7 @@ services:
       - Etl998Settings__DesKey=${ETL998_DES_KEY}
       - GameSlotSettings__Host=${GAMESLOT_HOST}
       - GameSlotSettings__Code=${GAMESLOT_PLATFORMCODE}
+      - GameSlotSettings__LoginUrl=${GAMESLOT_LOGINURL}
 
   game-x.seq:
     container_name: game-x.seq

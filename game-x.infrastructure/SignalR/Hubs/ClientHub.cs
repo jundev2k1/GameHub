@@ -32,6 +32,8 @@ public interface IClientHub
     Task GameBalanceUpdated(GameBalanceNotificationDto notificationDto);
 
     Task OnReceiveLiveStreamingShortcuts(LiveStreamShortcutInfo[] streamInfo);
+
+    Task NotifyWalletSynchronizationFailed(Guid platformId);
 }
 
 [Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]

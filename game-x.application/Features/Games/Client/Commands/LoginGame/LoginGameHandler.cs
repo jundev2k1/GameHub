@@ -15,6 +15,7 @@ using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.Helper;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
+using System.Web;
 
 namespace game_x.application.Features.Games.Client.Commands.LoginGame;
 
@@ -30,6 +31,7 @@ public sealed class LoginGameHandler(
     IGamePlatformService gamePlatformService,
     IEtl998Service etl998Service,
     IOptions<GameProviderSettings> gameSettings,
+    IOptions<GameSlotSettings> gameSlotSettings,
     IApplicationEventDispatcher eventDispatcher,
     IOptions<Etl998Settings> settings) : ICommandHandler<LoginGameCommand, LoginGameResult>
 {
@@ -130,6 +132,18 @@ public sealed class LoginGameHandler(
 
             var uri = new Uri(url);
             return $"{domain}{uri.PathAndQuery}";
+        }
+
+        if (gamePlatformId == GameConstants.PLATFORM_ID_SASSLOT)
+        {
+            var loginUrl = gameSlotSettings.Value.LoginUrl;
+            if (loginUrl.IsNullOrWhiteSpace()) return url;
+
+            var uri = new Uri(url);
+            var queryParams = HttpUtility.ParseQueryString(uri.Query);
+            var ticket = queryParams.Get("ticket");
+
+            return $"{loginUrl}?ticket={ticket}";
         }
 
         // Fallback
