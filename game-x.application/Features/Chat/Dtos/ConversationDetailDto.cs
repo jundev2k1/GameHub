@@ -9,6 +9,8 @@ public sealed record ConversationDetailDto(
     string? CustomerId,
     string? CustomerDisplayName,
     string? CustomerAvatarUrl,
+    DateTime? LastResolvedAt,
+    int? LastResolvedMessageId,
     DateTime? LastGuestReadAt,
     int? LastGuestReadMessageId,
     DateTime? LastUserReadAt,

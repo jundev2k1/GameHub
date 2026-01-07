@@ -156,6 +156,8 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 CustomerDisplayName = x.Conv.Customer != null ? x.Conv.Customer.Nickname : null,
                 CustomerAvatar =  x.Conv.Customer != null ? x.Conv.Customer.Avatar: null,
                 LastMessageAt = x.Conv.LastMessageAt,
+                LastGuestReadMessageId = x.Conv.LastGuestReadMessageId,
+                LastGuestReadAt = x.Conv.LastGuestReadAt,
                 LastMessage = x.LastMessage == null
                     ? null
                     : new LastMessageItemDto
@@ -262,6 +264,10 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 CustomerId = x.Conv.CustomerId,
                 CustomerDisplayName = x.Conv.Customer != null ? x.Conv.Customer.Nickname : null,
                 CustomerAvatar =  x.Conv.Customer != null ? x.Conv.Customer.Avatar: null,
+                LastResolvedAt = x.Conv.LastResolvedAt,
+                LastResolvedMessageId = x.Conv.LastResolvedMessageId,
+                LastGuestReadMessageId = x.Conv.LastGuestReadMessageId,
+                LastGuestReadAt = x.Conv.LastGuestReadAt,
                 LastMessageAt = x.Conv.LastMessageAt,
                 LastMessage = x.LastMessage == null
                 ? null
@@ -324,6 +330,10 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 CustomerAvatar = x.Conv.Customer != null ? x.Conv.Customer.Avatar : null,
                 LastUserReadAt = x.Member!.LastSeenAt,
                 LastUserReadMessageId = x.Member.LastReadMessageId,
+                LastResolvedAt = x.Conv.LastResolvedAt,
+                LastResolvedMessageId = x.Conv.LastResolvedMessageId,
+                LastGuestReadMessageId = x.Conv.LastGuestReadMessageId,
+                LastGuestReadAt = x.Conv.LastGuestReadAt,
                 LastMessageAt = x.Conv.LastMessageAt,
                 LastMessage = x.LastMessage == null
                 ? null
