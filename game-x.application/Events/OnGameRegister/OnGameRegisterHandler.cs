@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Utils;
@@ -22,7 +23,8 @@ public sealed class OnGameRegisterHandler(
     IEtl998Service etl998Service,
     ISasSlotService sasSlotService,
     IGameAesEncryptor gameAesEncryptor,
-    IAesEncryptor aesEncryptor) : IApplicationEventHandler<OnGameRegisterEvent>
+    IAesEncryptor aesEncryptor,
+    IAppLogger<OnGameRegisterEvent> logger) : IApplicationEventHandler<OnGameRegisterEvent>
 {
     public async Task Handle(OnGameRegisterEvent @event, CancellationToken ct = default)
     {
@@ -80,17 +82,24 @@ public sealed class OnGameRegisterHandler(
         await gameProvider.RegisterAsync(request);
 
         // Try login for the first time
-        var loginRequest = new GameLoginRequest
+        try
         {
-            Account = account,
-            Passwd = password,
-            Gamecode = "KRF3",
-            Address = "lobby",
-            Locale = "zh-Hant",
-            ReturnUrl = "",
-        };
-        var ip = userAccessor.GetIpAddress();
-        await gameProvider.LoginAsync(loginRequest, ip);
+            var loginRequest = new GameLoginRequest
+            {
+                Account = account,
+                Passwd = password,
+                Gamecode = "KRF3",
+                Address = "lobby",
+                Locale = "zh-Hant",
+                ReturnUrl = "",
+            };
+            var ip = userAccessor.GetIpAddress();
+            await gameProvider.LoginAsync(loginRequest, ip);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex.StackTrace ?? ex.Message);
+        }
 
         // Update Game 598 account
         usrex.UpdateG598Account(account, gameAesEncryptor.Encrypt(password), nickName, 0M);
