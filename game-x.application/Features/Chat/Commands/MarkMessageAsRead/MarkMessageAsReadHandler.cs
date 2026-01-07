@@ -51,7 +51,7 @@ public sealed class MarkMessageAsReadHandler(
                      ?? throw new BadRequestException(MessageCode.Chatting.IsNotMember);
         
         if(member.LastReadMessageId != null && readMessage.Id <= member.LastReadMessageId)
-            throw new BadRequestException(MessageCode.Chatting.MessageAlreadyRead);
+            return;
         
         try
         {
@@ -91,7 +91,7 @@ public sealed class MarkMessageAsReadHandler(
             throw new BadRequestException(MessageCode.Chatting.ConversationNotFound);
         
         if(conv.LastResolvedMessageId != null && readMessage.Id <= conv.LastResolvedMessageId)
-            throw new BadRequestException(MessageCode.Chatting.MessageAlreadyRead);
+            return;
         try
         {
             await unitOfWork.WithTransactionAsync(async () =>
@@ -128,7 +128,7 @@ public sealed class MarkMessageAsReadHandler(
             throw new BadRequestException(MessageCode.Chatting.ConversationNotFound);
         
         if(conv.LastGuestReadMessageId != null && readMessage.Id <= conv.LastGuestReadMessageId)
-            throw new BadRequestException(MessageCode.Chatting.MessageAlreadyRead);
+            return;
         
         try
         {
