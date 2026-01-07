@@ -12,8 +12,15 @@ public sealed record ConversationSignalDto(
     string LastUserId,
     string LastUserName,
     string? LastUserAvatarUrl,
+    DateTime? LastResolvedAt,
+    int? LastResolvedMessageId,
+    DateTime? LastGuestReadAt,
+    int? LastGuestReadMessageId,
+    DateTime? LastUserReadAt,
+    int? LastUserReadMessageId,
     DateTime LastMessageAt,
     Guid LastMessageId,
     string LastMessageText,
     MessageKind LastMessageKind,
-    int? UnreadCount);
+    int? BackOfficeUnreadCount,
+    int? ClientUnreadCount);

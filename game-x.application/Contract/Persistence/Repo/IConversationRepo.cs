@@ -11,12 +11,12 @@ public interface IConversationRepo
     Task<Conversation?> GetSupportConversationAsync(string actorId, CancellationToken ct = default);
     Task<IReadOnlyCollection<ConversationUnreadDto>> GetSupportConvUnreadAsync(CancellationToken ct = default);
     Task<int> CountSupportConvUnreadAsync(Guid id, CancellationToken ct = default);
-    /// <summary>Count how many will be read.</summary>
-    Task<int> CountSupportConvReadAsync(Guid id, int messageId, CancellationToken ct = default);
+    Task<int> CountConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default);
+    Task<int> CountConvUnreadByGuestIdAsync(string guestId, Guid id, CancellationToken ct = default);
     Task<ConversationItemDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default);
     Task<Conversation> GetPublicConvAsync(CancellationToken ct = default);
     Task<ConversationItemDto> GetConvByIdAndUserIdAsync(Guid convId, string userId, CancellationToken ct = default);
-    Task<Conversation?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default);
+    Task<ConversationItemDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default);
     Task<Conversation?> FindForPairAsync(string userA, string userB, CancellationToken ct = default);
     Task<Conversation?> FindPublicAsync(CancellationToken ct = default);
     Task<Conversation> GetByIdAsync(Guid convId, CancellationToken ct = default);

@@ -136,21 +136,51 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         return BuildConversationListing(query, userId, true);
     }
 
-    public async Task<Conversation?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
+    public async Task<ConversationItemDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
     {
-        // Retrieve all private conversations and group chats
-        Expression<Func<Conversation, bool>> minePredicate = c => c.GuestId == guestId;
-        IQueryable<Conversation> query = context.Conversations.Where(minePredicate);
-        return await query
+        return await context.Conversations
             .AsTracking()
-            .OrderDescending()
-            .Include(c => c.Messages
-                .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
-                .Take(1))
-            .Where(c => c.Messages.Any())
-            .FirstOrDefaultAsync(c =>
-                c.Type == ConversationType.Support &&
-                c.GuestId == guestId, ct);
+            .Where(x => x.GuestId == guestId && x.Type == ConversationType.Support)
+            .Select(c => new
+            {
+                Conv = c,
+                LastMessage = c.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault()
+            })
+            .Select(x => new ConversationItemDto
+            {
+                Id = x.Conv.PublicId,
+                GuestId = x.Conv.GuestId,
+                Type = x.Conv.Type,
+                Status = x.Conv.Status,
+                CustomerId = x.Conv.CustomerId,
+                CustomerDisplayName = x.Conv.Customer != null ? x.Conv.Customer.Nickname : null,
+                CustomerAvatar =  x.Conv.Customer != null ? x.Conv.Customer.Avatar: null,
+                LastMessageAt = x.Conv.LastMessageAt,
+                LastGuestReadMessageId = x.Conv.LastGuestReadMessageId,
+                LastGuestReadAt = x.Conv.LastGuestReadAt,
+                LastMessage = x.LastMessage == null
+                    ? null
+                    : new LastMessageItemDto
+                    {
+                        Id = x.LastMessage.Id,
+                        PublicId = x.LastMessage.PublicId,
+                        SenderActorId = x.LastMessage.SenderActorId,
+                        SenderRole = x.LastMessage.SenderRole,
+                        SenderName = x.LastMessage.SenderUser != null
+                            ? x.LastMessage.SenderUser.Nickname
+                            : string.Empty,
+                        SenderAvatar = x.LastMessage.SenderUser != null
+                            ? x.LastMessage.SenderUser.Avatar
+                            : null,
+                        SentAt = x.LastMessage.SentAt,
+                        Text = x.LastMessage.Text,
+                        Kind = x.LastMessage.Kind
+                    },
+                UnreadCount = context.Messages.Count(m =>
+                    m.Conversation.Id == x.Conv.Id && x.Conv.LastGuestReadMessageId == null || m.Id > x.Conv.LastGuestReadMessageId 
+                )
+            })
+            .FirstOrDefaultAsync(ct);
     }
     
     public async Task<Conversation?> GetSupportConversationAsync(string actorId, CancellationToken ct = default)
@@ -191,13 +221,28 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId), ct);
     }
     
-    public async Task<int> CountSupportConvReadAsync(Guid id, int messageId, CancellationToken ct = default)
+    public async Task<int> CountConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default)
     {
         return await context.Conversations
             .AsTracking()
-            .Where(x => x.PublicId == id)
-            .SumAsync(x => x.Messages.Count(m => m.Id <= messageId &&
-                (x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId)), ct);
+            .Where(x => x.CustomerId == userId && x.PublicId == id)
+            .SelectMany(c =>
+                context.ConversationMembers
+                    .Where(m => m.ConversationId == c.Id && m.UserId == userId)
+                    .SelectMany(m =>
+                        c.Messages.Where(msg =>
+                            m.LastReadMessageId == null || msg.Id > m.LastReadMessageId)))
+            .CountAsync(ct);
+    }
+    
+    public async Task<int> CountConvUnreadByGuestIdAsync(string guestId, Guid id, CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .AsTracking()
+            .Where(x => x.GuestId == guestId && x.PublicId == id)
+            .SelectMany(c => c.Messages
+                .Where(m => c.LastGuestReadMessageId == null || m.Id > c.LastGuestReadMessageId))
+            .CountAsync(ct);
     }
     
     public async Task<ConversationItemDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default)
@@ -219,6 +264,10 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 CustomerId = x.Conv.CustomerId,
                 CustomerDisplayName = x.Conv.Customer != null ? x.Conv.Customer.Nickname : null,
                 CustomerAvatar =  x.Conv.Customer != null ? x.Conv.Customer.Avatar: null,
+                LastResolvedAt = x.Conv.LastResolvedAt,
+                LastResolvedMessageId = x.Conv.LastResolvedMessageId,
+                LastGuestReadMessageId = x.Conv.LastGuestReadMessageId,
+                LastGuestReadAt = x.Conv.LastGuestReadAt,
                 LastMessageAt = x.Conv.LastMessageAt,
                 LastMessage = x.LastMessage == null
                 ? null
@@ -279,6 +328,12 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 CustomerId = x.Conv.CustomerId,
                 CustomerDisplayName = x.Conv.Customer != null ? x.Conv.Customer.Nickname : null,
                 CustomerAvatar = x.Conv.Customer != null ? x.Conv.Customer.Avatar : null,
+                LastUserReadAt = x.Member!.LastSeenAt,
+                LastUserReadMessageId = x.Member.LastReadMessageId,
+                LastResolvedAt = x.Conv.LastResolvedAt,
+                LastResolvedMessageId = x.Conv.LastResolvedMessageId,
+                LastGuestReadMessageId = x.Conv.LastGuestReadMessageId,
+                LastGuestReadAt = x.Conv.LastGuestReadAt,
                 LastMessageAt = x.Conv.LastMessageAt,
                 LastMessage = x.LastMessage == null
                 ? null

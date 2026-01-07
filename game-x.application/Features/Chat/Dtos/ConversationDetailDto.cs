@@ -9,6 +9,12 @@ public sealed record ConversationDetailDto(
     string? CustomerId,
     string? CustomerDisplayName,
     string? CustomerAvatarUrl,
+    DateTime? LastResolvedAt,
+    int? LastResolvedMessageId,
+    DateTime? LastGuestReadAt,
+    int? LastGuestReadMessageId,
+    DateTime? LastUserReadAt,
+    int? LastUserReadMessageId,
     string LastUserId,
     string LastUserName,
     string? LastUserAvatarUrl,
@@ -16,4 +22,5 @@ public sealed record ConversationDetailDto(
     Guid LastMessageId,
     string LastMessageText,
     MessageKind LastMessageKind,
-    bool? IsHidden);
+    bool? IsHidden,
+    int? UnreadCount);

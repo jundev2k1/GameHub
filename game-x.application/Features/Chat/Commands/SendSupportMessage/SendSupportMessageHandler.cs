@@ -59,6 +59,20 @@ public sealed class SendSupportMessageHandler(
                 ct: ct);
             
             await messageService.CreateMessageAttachmentsAsync(msg: message, attachments: request.Attachments, ct);
+
+            if (conv.GuestId != null)
+            {
+                await unitOfWork.SaveChangesAsync(ct);
+                await convRepo.UpdateAsync(conv.PublicId, x => { x.OnGuestRead(message.Id); }, ct);
+            }
+
+            if (conv.CustomerId != null)
+            {
+                await unitOfWork.SaveChangesAsync(ct);
+                var member = await conversationMemberRepo.GetByConvIdAndUserIdAsync(conv.PublicId, conv.CustomerId, ct);
+                if(member != null)
+                    await conversationMemberRepo.UpdateAsync(member.Id, x => { x.OnRead(message.Id); }, ct);
+            }
             
             conv.LastMessageAt = now;
             
@@ -83,11 +97,18 @@ public sealed class SendSupportMessageHandler(
             };
             
             var updatedConv = await conversationService.GetConvByIdAsync(conv.PublicId, ct);
+            int? clientUnreadCount = null;
+            if (updatedConv.GuestId != null)
+                clientUnreadCount = await convRepo.CountConvUnreadByGuestIdAsync(updatedConv.GuestId, updatedConv.ConversationId, ct);
+            
+            if (updatedConv.CustomerId != null)
+                clientUnreadCount = await convRepo.CountConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct);
+                
             var unreadCount = await convRepo.CountSupportConvUnreadAsync(updatedConv.ConversationId, ct);
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
             var dto = new CreatedMessageSignalResult(
                 Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
-                Conv: updatedConv.Adapt<ConversationSignalDto>() with {UnreadCount = unreadCount},
+                Conv: updatedConv.Adapt<ConversationSignalDto>() with {BackOfficeUnreadCount = unreadCount, ClientUnreadCount = clientUnreadCount},
                 InboxUpsert: updatedConv.Adapt<InboxUpsertSignalDto>());
             
             var convUnread = await convRepo.GetSupportConvUnreadAsync(ct);

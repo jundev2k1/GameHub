@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnSupportConversationUnread;
 using game_x.application.Events.OnSupportMessageCreated;
 using game_x.application.Features.Chat.Dtos;
 
@@ -10,7 +11,7 @@ namespace game_x.application.Features.Chat.Commands.SendMessageToCustomer;
 
 public sealed class SendMessageToCustomerHandler(
     IUnitOfWork unitOfWork,
-    IConversationRepo conversationRepo,
+    IConversationRepo convRepo,
     IConversationService conversationService,
     IMessageRepo messageRepo,
     IMessageService messageService,
@@ -24,7 +25,7 @@ public sealed class SendMessageToCustomerHandler(
         var senderUserId = userAccessor.GetUserId();
         var now = DateTime.UtcNow;
 
-        var conv = await conversationRepo.GetByIdAsync(request.ConversationId, ct);
+        var conv = await convRepo.GetByIdAsync(request.ConversationId, ct);
         
         // The conversation needs to be claimed before sending a message
         if(conv.Status != ConversationStatus.Claimed)
@@ -46,7 +47,7 @@ public sealed class SendMessageToCustomerHandler(
             await messageService.CreateMessageAttachmentsAsync(msg: message, attachments: request.Attachments, ct);
             await unitOfWork.SaveChangesAsync(ct);
             
-            await conversationRepo.UpdateAsync(conv.PublicId, x =>
+            await convRepo.UpdateAsync(conv.PublicId, x =>
             {
                 x.OnBackOfficeRead(message.Id);
             }, ct);
@@ -72,14 +73,22 @@ public sealed class SendMessageToCustomerHandler(
             };
             
             var updatedConv = await conversationService.GetConvByIdAsync(conv.PublicId, ct);
+            int? clientUnreadCount = null;
+            if (updatedConv.GuestId != null)
+                clientUnreadCount = await convRepo.CountConvUnreadByGuestIdAsync(updatedConv.GuestId, updatedConv.ConversationId, ct);
+            
+            if (updatedConv.CustomerId != null)
+                clientUnreadCount = await convRepo.CountConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct);
+            
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
             var dto = new CreatedMessageSignalResult(
                 Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
-                Conv: updatedConv.Adapt<ConversationSignalDto>(),
+                Conv: updatedConv.Adapt<ConversationSignalDto>() with {BackOfficeUnreadCount = 0, ClientUnreadCount = clientUnreadCount},
                 InboxUpsert: updatedConv.Adapt<InboxUpsertSignalDto>());
             
+            var convUnread = await convRepo.GetSupportConvUnreadAsync(ct);
             await eventDispatcher.Publish(new OnSupportMessageCreatedEvent(dto), ct);
-            
+            await eventDispatcher.Publish(new OnSupportConversationUnreadEvent(convUnread), ct);
             return new SendMessageToCustomerResult(request.ClientLocalId, conv.PublicId);
         }
         catch(Exception ex)

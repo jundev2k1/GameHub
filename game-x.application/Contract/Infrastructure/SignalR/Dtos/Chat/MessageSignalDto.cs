@@ -4,6 +4,7 @@ namespace game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 
 public record MessageSignalDto(
     Guid Id,
+    int Index,
     string ClientLocalId,
     Guid ConversationId,
     string SenderActorId,
