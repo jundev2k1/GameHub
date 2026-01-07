@@ -40,7 +40,8 @@ public sealed class GetMyWalletTransactionsHandler(
         {
             TransactionSourceType.G598SnoGameProvider,
             TransactionSourceType.BaccaratGameProvider,
-            TransactionSourceType.Elt998GameProvider
+            TransactionSourceType.Elt998GameProvider,
+            TransactionSourceType.SasSlotProvider,
         };
         var cashKey = "cash";
 
