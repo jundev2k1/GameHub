@@ -153,7 +153,6 @@ public sealed class SasSlotService(
             PlatformCode = settings.Value.Code,
             ExtUserId = account,
             RefId = sno,
-            Amount = amount,
             IsPromo = false,
             Nonce = Guid.NewGuid().ToString(),
             Ts = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
