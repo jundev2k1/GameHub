@@ -148,9 +148,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 .OrderByDescending(m => m.SentAt).ThenByDescending(m => m.Id)
                 .Take(1))
             .Where(c => c.Messages.Any())
-            .FirstOrDefaultAsync(c =>
-                c.Type == ConversationType.Support &&
-                c.GuestId == guestId, ct);
+            .FirstOrDefaultAsync(c => c.Type == ConversationType.Support && c.GuestId == guestId, ct);
     }
     
     public async Task<Conversation?> GetSupportConversationAsync(string actorId, CancellationToken ct = default)
@@ -191,13 +189,27 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId), ct);
     }
     
-    public async Task<int> CountSupportConvReadAsync(Guid id, int messageId, CancellationToken ct = default)
+    public async Task<int> CountConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default)
     {
         return await context.Conversations
             .AsTracking()
-            .Where(x => x.PublicId == id)
-            .SumAsync(x => x.Messages.Count(m => m.Id <= messageId &&
-                (x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId)), ct);
+            .Where(x => x.CustomerId == userId && x.PublicId == id)
+            .Select(x => new
+            {
+                Member = context.ConversationMembers.Where(m => m.ConversationId == x.Id && m.UserId == userId).Take(1).FirstOrDefault(),
+                x.Messages
+            })
+            .SumAsync(x => x.Messages.Count(m => 
+                x.Member!.LastReadMessageId == null || m.Id > x.Member.LastReadMessageId), ct);
+    }
+    
+    public async Task<int> CountConvUnreadByGuestIdAsync(string guestId, Guid id, CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .AsTracking()
+            .Where(x => x.GuestId == guestId && x.PublicId == id)
+            .SumAsync(x => x.Messages.Count(m => 
+                x.LastGuestReadMessageId == null || m.Id > x.LastGuestReadMessageId), ct);
     }
     
     public async Task<ConversationItemDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default)
@@ -279,6 +291,8 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 CustomerId = x.Conv.CustomerId,
                 CustomerDisplayName = x.Conv.Customer != null ? x.Conv.Customer.Nickname : null,
                 CustomerAvatar = x.Conv.Customer != null ? x.Conv.Customer.Avatar : null,
+                LastUserReadAt = x.Member!.LastSeenAt,
+                LastUserReadMessageId = x.Member.LastReadMessageId,
                 LastMessageAt = x.Conv.LastMessageAt,
                 LastMessage = x.LastMessage == null
                 ? null

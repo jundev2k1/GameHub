@@ -420,7 +420,7 @@ public sealed class ChatHub(
         {
             var userId = userAccessor.GetUserId();
             var ct = Context.ConnectionAborted;
-            await sender.Send(cmd with {SenderActorId = userId, SenderUserId = userId }, ct);
+            await sender.Send(cmd with {SenderActorId = userId, SenderUserId = userId}, ct);
         }
         catch (Exception ex)
         {
@@ -526,6 +526,23 @@ public sealed class ChatHub(
         try
         {
             await sender.Send(cmd);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Error reading message");
+            throw;
+        }
+    }
+    
+    [AllowAnonymous]
+    public async Task MarkAsReadForGuest(MarkMessageAsReadCommand cmd)
+    {
+        try
+        {
+            var guestId = Context.UserIdentifier;
+            if (string.IsNullOrWhiteSpace(guestId)) { return; }
+            var ct = Context.ConnectionAborted;
+            await sender.Send(cmd with {GuestId = guestId}, ct);
         }
         catch (Exception ex)
         {

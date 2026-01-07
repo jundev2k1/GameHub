@@ -4,9 +4,9 @@ using game_x.application.Features.Chat.Dtos;
 namespace game_x.application.Features.Chat.Queries.ListMyConversationsForGuest;
 
 public sealed class ListMyConversationsForGuestHandler(IConversationService conversationService)
-    : IRequestHandler<ListMyConversationsForGuestQuery, ListedConversationDto?>
+    : IRequestHandler<ListMyConversationsForGuestQuery, ConversationDetailDto?>
 {
-    public async Task<ListedConversationDto?> Handle(ListMyConversationsForGuestQuery request, CancellationToken ct)
+    public async Task<ConversationDetailDto?> Handle(ListMyConversationsForGuestQuery request, CancellationToken ct)
     {
         return await conversationService.GetMyConversationsForGuestAsync(guestId: request.GuestId, ct: ct);
     }

@@ -92,6 +92,6 @@ public sealed class GameXContext(
         return result;
     }
 
-    public bool IsAuditSaveInProgress { get; set; } = false;
-    public bool IsDisableTimestamps { get; set; } = false;
+    public bool IsAuditSaveInProgress { get; set; }
+    public bool IsDisableTimestamps { get; set; }
 }

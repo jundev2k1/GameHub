@@ -12,6 +12,10 @@ public sealed record ConversationItemDto
     public DateTime LastMessageAt { get; init; }
     public DateTime? LastResolvedAt { get; init; }
     public int? LastResolvedMessageId { get; init; }
+    public DateTime? LastGuestReadAt { get; init; }
+    public int? LastGuestReadMessageId { get; init; }
+    public DateTime? LastUserReadAt { get; init; }
+    public int? LastUserReadMessageId { get; init; }
     public LastMessageItemDto? LastMessage { get; init; }
     public bool? IsHidden { get; init; }
     public int? UnreadCount { get; init; }
