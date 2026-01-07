@@ -156,6 +156,8 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 CustomerDisplayName = x.Conv.Customer != null ? x.Conv.Customer.Nickname : null,
                 CustomerAvatar =  x.Conv.Customer != null ? x.Conv.Customer.Avatar: null,
                 LastMessageAt = x.Conv.LastMessageAt,
+                LastGuestReadMessageId = x.Conv.LastGuestReadMessageId,
+                LastGuestReadAt = x.Conv.LastGuestReadAt,
                 LastMessage = x.LastMessage == null
                     ? null
                     : new LastMessageItemDto

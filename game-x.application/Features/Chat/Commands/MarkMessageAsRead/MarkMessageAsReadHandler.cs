@@ -134,10 +134,7 @@ public sealed class MarkMessageAsReadHandler(
         {
             await unitOfWork.WithTransactionAsync(async () =>
             {
-                await convRepo.UpdateAsync(conv.PublicId, c =>
-                {
-                    c.OnBackOfficeRead(readMessage.Id);
-                }, ct);
+                await convRepo.UpdateAsync(conv.PublicId, c => { c.OnGuestRead(readMessage.Id); }, ct);
                 await unitOfWork.CommitAsync(ct);
 
                 var updatedConv = await conversationService.GetConvByIdAsync(cmd.ConversationId, ct);

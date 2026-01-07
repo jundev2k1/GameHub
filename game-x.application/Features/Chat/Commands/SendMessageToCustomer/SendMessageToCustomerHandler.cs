@@ -83,7 +83,7 @@ public sealed class SendMessageToCustomerHandler(
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);
             var dto = new CreatedMessageSignalResult(
                 Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
-                Conv: updatedConv.Adapt<ConversationSignalDto>() with{BackOfficeUnreadCount = 0, ClientUnreadCount = clientUnreadCount},
+                Conv: updatedConv.Adapt<ConversationSignalDto>() with {BackOfficeUnreadCount = 0, ClientUnreadCount = clientUnreadCount},
                 InboxUpsert: updatedConv.Adapt<InboxUpsertSignalDto>());
             
             var convUnread = await convRepo.GetSupportConvUnreadAsync(ct);
