@@ -94,6 +94,7 @@ public static class TransactionFilterExtensions
                     TransactionSourceType.BaccaratGameProvider,
                     TransactionSourceType.Elt998GameProvider,
                     TransactionSourceType.SasSlotProvider,
+                    TransactionSourceType.AtgProvider,
                 }.Contains(tx.SourceType);
         }
 
