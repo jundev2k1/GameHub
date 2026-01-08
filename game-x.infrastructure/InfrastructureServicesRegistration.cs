@@ -348,7 +348,14 @@ public static class InfrastructureServicesRegistration
             {
                 var baseUrl = configuration["AtgSettings:Host"]
                               ?? throw new InvalidOperationException("AtgSettings:Host is not configured");
-                c.BaseAddress = new Uri(baseUrl);
+                
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                    throw new InvalidOperationException("AtgSettings:Host is missing");
+
+                if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri))
+                    throw new InvalidOperationException($"Invalid AtgSettings:Host: {baseUrl}");
+                
+                c.BaseAddress = uri;
                 c.Timeout = TimeSpan.FromSeconds(5);
             })
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
