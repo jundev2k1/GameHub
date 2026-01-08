@@ -55,7 +55,7 @@ public static class Seed
 
     private static async Task SeedAppSettings(GameXContext context)
     {
-        var settings = new AppSetting[]
+        var settings = new[]
         {
             AppSetting.Create(AppSettingConstant.KEY_TALENT_COMMISSION_RATE, "70", string.Empty, true),
         };
@@ -123,7 +123,7 @@ public static class Seed
 
     private static async Task SeedSystemWallet(GameXContext context)
     {
-        var wallets = new SystemWallet[]
+        var wallets = new[]
         {
             SystemWallet.Create(SystemWalletType.LiveStreamDonation),
         };
@@ -222,12 +222,13 @@ public static class Seed
 
     private static async Task SeedGamePlatforms(GameXContext context)
     {
-        var gamePlatforms = new GamePlatform[]
+        var gamePlatforms = new[]
         {
             GamePlatform.Create("598彩票", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_G598),
             GamePlatform.Create("百家樂", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_GAMEBACCARAT),
             GamePlatform.Create("etl998", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT),
             GamePlatform.Create("SAS Slot", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_SASSLOT),
+            GamePlatform.Create("ATG", string.Empty, string.Empty, 0, GameConstants.PLATFORM_ID_ATG),
         };
         foreach (var gamePlatform in gamePlatforms)
         {
@@ -248,7 +249,7 @@ public static class Seed
     {
         if (await context.GameCategories.AnyAsync()) return;
 
-        var gameCategories = new GameCategory[]
+        var gameCategories = new []
         {
             GameCategory.Create("彩票", "Lottery", string.Empty, 0, GameCategories["彩票"])
         };
@@ -339,6 +340,19 @@ public static class Seed
 
         // Seed game list for SAS Slot
         await CreateEntity("Slot", "SLOT001", GameConstants.PLATFORM_ID_SASSLOT);
+        
+        // Seed game list for ATG
+        await CreateEntity("台灣麻將", "mahjong", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("火箭升空", "rocket-crash", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("泡泡糖", "bubble-gum", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("戰神賽特", "egyptian-mythology", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("孫行者", "son-go-ku", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("赤三國", "scarlet-three-kingdoms", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("戰神賽特2覺醒之力", "golden-seth", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("武俠", "wuxia-caishen", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("骰子比大小", "dice1", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("通比妞妞", "casino-bull", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("搶莊妞妞", "banker-bull", GameConstants.PLATFORM_ID_ATG);
     }
 
     private static async Task SeedPublicConversation(GameXContext db, CancellationToken ct = default)

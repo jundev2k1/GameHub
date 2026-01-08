@@ -16,6 +16,7 @@ using game_x.share.Helper;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 using System.Web;
+using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
 
 namespace game_x.application.Features.Games.Client.Commands.LoginGame;
 
@@ -30,6 +31,7 @@ public sealed class LoginGameHandler(
     IGameProviderCacheService gameProviderCache,
     IGamePlatformService gamePlatformService,
     IEtl998Service etl998Service,
+    IAtgService atgService,
     IOptions<GameProviderSettings> gameSettings,
     IOptions<GameSlotSettings> gameSlotSettings,
     IApplicationEventDispatcher eventDispatcher,
@@ -117,6 +119,12 @@ public sealed class LoginGameHandler(
         if (gamePlatformId == GameConstants.PLATFORM_ID_SASSLOT)
         {
             var result = await sasSlotService.LoginAsync(usrex.SasSlotAccount, usrex.SasSlotNickname);
+            return result;
+        }
+        
+        if (gamePlatformId == GameConstants.PLATFORM_ID_ATG)
+        {
+            var result = await atgService.PlayGameAsync(usrex.AtgUserName, request.GameCode, usrex.AtgFullname);
             return result;
         }
 

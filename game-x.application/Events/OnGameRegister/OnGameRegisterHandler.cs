@@ -1,4 +1,5 @@
-﻿using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
+﻿using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
+using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
@@ -6,6 +7,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Utils;
+using game_x.share.ExternalApi.Atg.Dtos.Register;
 using game_x.share.ExternalApi.Etl998.Dtos.IsAccountExist;
 using game_x.share.ExternalApi.Etl998.Dtos.Register;
 using game_x.share.ExternalApi.GameBaccarat.Dtos.Register;
@@ -22,6 +24,7 @@ public sealed class OnGameRegisterHandler(
     IGameBaccaratService gameBaccarat,
     IEtl998Service etl998Service,
     ISasSlotService sasSlotService,
+    IAtgService atgService,
     IGameAesEncryptor gameAesEncryptor,
     IAesEncryptor aesEncryptor,
     IAppLogger<OnGameRegisterEvent> logger) : IApplicationEventHandler<OnGameRegisterEvent>
@@ -30,45 +33,50 @@ public sealed class OnGameRegisterHandler(
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await userRepo.UpdateUserExtendAsync(@event.UserId, async usrex =>
+            await userRepo.UpdateUserExtendAsync(@event.UserId, async ue =>
             {
-                await UpdateUserExtendAsync(@event, usrex);
+                await UpdateUserExtendAsync(@event, ue);
             }, ct);
         }, ct);
     }
 
-    private async Task UpdateUserExtendAsync(OnGameRegisterEvent @event, UserExtend usrex)
+    private async Task UpdateUserExtendAsync(OnGameRegisterEvent @event, UserExtend ue)
     {
         // Platform: Game598
         if (@event.GamePlatformId == GameConstants.PLATFORM_ID_G598)
         {
-            await RegisterGame598User(usrex, usrex.User.Nickname);
+            await RegisterGame598User(ue, ue.User.Nickname);
             return;
         }
 
         // Platform: Game Baccarat
         if (@event.GamePlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
         {
-            await RegisterGameBaccaratUser(usrex, usrex.User.Nickname);
+            await RegisterGameBaccaratUser(ue, ue.User.Nickname);
             return;
         }
 
         // Platform: Game etl998
         if (@event.GamePlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
         {
-            await RegisterEtl998User(usrex, usrex.User.Nickname);
+            await RegisterEtl998User(ue, ue.User.Nickname);
         }
 
         // Platform: SAS Slot
         if (@event.GamePlatformId == GameConstants.PLATFORM_ID_SASSLOT)
         {
-            await RegisterSasSlotUser(usrex, usrex.User.Nickname);
+            await RegisterSasSlotUser(ue, ue.User.Nickname);
+        }
+        
+        if (@event.GamePlatformId == GameConstants.PLATFORM_ID_ATG)
+        {
+            await RegisterAtgUser(ue);
         }
     }
 
     private async Task RegisterGame598User(UserExtend usrex, string nickName)
     {
-        // Register new account
+        // Register a new account
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}";
         var password = GameProviderPasswordGenerator.Generate(5, 13);
@@ -81,7 +89,7 @@ public sealed class OnGameRegisterHandler(
         };
         await gameProvider.RegisterAsync(request);
 
-        // Try login for the first time
+        // Try to log in for the first time
         try
         {
             var loginRequest = new GameLoginRequest
@@ -120,7 +128,7 @@ public sealed class OnGameRegisterHandler(
         usrex.UpdateBaccaratAccount(response.UserId, account, aesEncryptor.Encrypt(password), nickName);
     }
 
-    private async Task RegisterEtl998User(UserExtend usrex, string nickName)
+    private async Task RegisterEtl998User(UserExtend ue, string nickName)
     {
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}".ToLower();
@@ -142,7 +150,7 @@ public sealed class OnGameRegisterHandler(
             var response = await etl998Service.RegisterAsync(request);
             var data = response.FirstOrDefault();
             if(data != null)
-                usrex.UpdateEtl998Account(
+                ue.UpdateEtl998Account(
                     account: account, 
                     nickname: nickName, 
                     password: aesEncryptor.Encrypt(password),
@@ -150,11 +158,29 @@ public sealed class OnGameRegisterHandler(
         }
     }
 
-    private async Task RegisterSasSlotUser(UserExtend usrex, string nickName)
+    private async Task RegisterSasSlotUser(UserExtend ue, string nickName)
     {
         var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
         var account = $"Gx{suffix}";
         await sasSlotService.LoginAsync(account, nickName);
-        usrex.UpdateSasSlotAccount(account, nickName);
+        ue.UpdateSasSlotAccount(account, nickName);
+    }
+    
+    private async Task RegisterAtgUser(UserExtend ue)
+    {
+        var suffix = DateTime.UtcNow.ToString("yyyyMMddHHmmssf");
+        var account = $"Gx{suffix}".ToLower();
+        var request = new AtgRegisterRequest
+        {
+            Username = account,
+            Email = ue.User.Email ?? String.Empty,
+            Fullname = ue.User.Nickname
+        };
+        var isSuccess = await atgService.RegisterAsync(request);
+        if(isSuccess)
+            ue.UpdateAtgAccount(
+                userName: account,
+                email: ue.User.Email ?? String.Empty,
+                fullname: ue.User.Nickname);
     }
 }

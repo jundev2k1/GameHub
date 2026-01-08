@@ -39,26 +39,30 @@ public sealed class GamePlatformService(
         return await userRepo.GetUserByIdAsync(user.Id, ct);
     }
 
-    private static bool CheckExistAccount(UserExtend? usrex, Guid gamePlatformId)
+    private static bool CheckExistAccount(UserExtend? ue, Guid gamePlatformId)
     {
-        if (usrex is null) return false;
+        if (ue is null) return false;
 
         if ((gamePlatformId == GameConstants.PLATFORM_ID_G598)
-            && (usrex.GameProviderAccount.IsNullOrWhiteSpace() || usrex.GameProviderPassword.IsNullOrWhiteSpace()))
+            && (ue.GameProviderAccount.IsNullOrWhiteSpace() || ue.GameProviderPassword.IsNullOrWhiteSpace()))
             return false;
 
         if ((gamePlatformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
-            && (usrex.GameBaccaratAccount.IsNullOrWhiteSpace() || usrex.GameBaccaratPassword.IsNullOrWhiteSpace()))
+            && (ue.GameBaccaratAccount.IsNullOrWhiteSpace() || ue.GameBaccaratPassword.IsNullOrWhiteSpace()))
             return false;
 
         if ((gamePlatformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
-            && (usrex.Etl998ProviderAccount.IsNullOrWhiteSpace() || usrex.Etl998ProviderPassword.IsNullOrWhiteSpace()))
+            && (ue.Etl998ProviderAccount.IsNullOrWhiteSpace() || ue.Etl998ProviderPassword.IsNullOrWhiteSpace()))
             return false;
 
         if ((gamePlatformId == GameConstants.PLATFORM_ID_SASSLOT)
-            && (usrex.SasSlotAccount.IsNullOrWhiteSpace() || usrex.SasSlotNickname.IsNullOrWhiteSpace()))
+            && (ue.SasSlotAccount.IsNullOrWhiteSpace() || ue.SasSlotNickname.IsNullOrWhiteSpace()))
             return false;
 
+        if ((gamePlatformId == GameConstants.PLATFORM_ID_ATG)
+            && (ue.AtgUserName.IsNullOrWhiteSpace() || ue.AtgEmail.IsNullOrWhiteSpace()))
+            return false;
+        
         return true;
     }
 }

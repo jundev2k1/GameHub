@@ -27,7 +27,6 @@ using game_x.infrastructure.ExternalApi.GameProvider;
 using game_x.infrastructure.ExternalApi.GameProvider.Intercepters;
 using game_x.infrastructure.ExternalApi.PaymentGateway;
 using game_x.infrastructure.ExternalApi.SasSlot;
-using game_x.infrastructure.ExternalApi.SasSlot.Intercepters;
 using game_x.infrastructure.ExternalApi.Srs;
 using game_x.infrastructure.ExternalApi.Uxm;
 using game_x.infrastructure.logger;
@@ -54,6 +53,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
+using game_x.infrastructure.ExternalApi.Atg;
 using game_x.infrastructure.SignalR.Facade;
 
 namespace game_x.infrastructure;
@@ -105,6 +106,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<ISasSlotService, SasSlotService>();
         services.AddScoped<ISrsService, SrsService>();
         services.AddScoped<IEtl998Service, Etl998Service>();
+        services.AddScoped<IAtgService, AtgService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
 
         // Add security services
@@ -338,6 +340,17 @@ public static class InfrastructureServicesRegistration
                 c.Timeout = TimeSpan.FromSeconds(5);
             })
             .AddHttpMessageHandler<Etl998Md5MessageHandler>()
+            .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
+        
+        // ATG API
+        services.AddRefitClient<IAtgApi>()
+            .ConfigureHttpClient(c =>
+            {
+                var baseUrl = configuration["AtgSettings:Host"]
+                              ?? throw new InvalidOperationException("AtgSettings:Host is not configured");
+                c.BaseAddress = new Uri(baseUrl);
+                c.Timeout = TimeSpan.FromSeconds(5);
+            })
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
         
         return services;

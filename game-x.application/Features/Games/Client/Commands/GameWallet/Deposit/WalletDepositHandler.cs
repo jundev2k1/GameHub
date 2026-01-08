@@ -1,4 +1,5 @@
 using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
@@ -29,6 +30,7 @@ public sealed class WalletDepositHandler(
     IGameBaccaratService gameBaccarat,
     IEtl998Service etl998Service,
     ISasSlotService sasSlotService,
+    IAtgService atgService,
     IGamePlatformService gamePlatformService,
     IGameProviderCacheService gameProviderCache,
     IWalletManagerCacheService walletManagerCache) : ICommandHandler<WalletDepositCommand, ListTransactionExternalDto>
@@ -98,6 +100,12 @@ public sealed class WalletDepositHandler(
                     sno: serialNumber,
                     amount: request.Amount);
 
+            if (request.PlatformId == GameConstants.PLATFORM_ID_ATG)
+                await DepositToAtgWalletAsync(
+                    account: currentUser.UserExtend!.AtgUserName,
+                    sno: serialNumber,
+                    amount: request.Amount);
+            
             var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
             await eventDispatcher.Publish(@event, ct);
 
@@ -176,7 +184,8 @@ public sealed class WalletDepositHandler(
             return TransactionSourceType.Elt998GameProvider;
         if (platformId == GameConstants.PLATFORM_ID_SASSLOT)
             return TransactionSourceType.SasSlotProvider;
-
+        if (platformId == GameConstants.PLATFORM_ID_ATG)
+            return TransactionSourceType.AtgProvider;
         throw new NotSupportedException($"This platform ({platformId}) is not support.");
     }
 
@@ -226,5 +235,14 @@ public sealed class WalletDepositHandler(
     private async Task DepositToSasSlotWalletAsync(string account, decimal amount, string sno)
     {
         await sasSlotService.DepositAsync(account, amount, sno);
+    }
+    
+    private async Task DepositToAtgWalletAsync(string account, decimal amount, string sno)
+    {
+        await atgService.UpdateGameBalanceAsync(
+            username: account, 
+            balance: amount, 
+            action: "in",
+            transferId: sno);
     }
 }
