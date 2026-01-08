@@ -52,5 +52,5 @@ public sealed class S2SClientSetting : BaseEntity<int>
 
     public void UpdateStatus(bool isActive) => IsActive = isActive;
 
-    private static string GenerateAppCode() => $"APP-{Guid.CreateVersion7():N[..8]}".ToUpperInvariant();
+    private static string GenerateAppCode() => $"APP-{Guid.CreateVersion7():N}".ToUpperInvariant();
 }

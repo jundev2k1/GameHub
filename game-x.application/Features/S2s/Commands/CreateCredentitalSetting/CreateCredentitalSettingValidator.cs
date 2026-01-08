@@ -4,7 +4,7 @@ public sealed class CreateCredentitalSettingValidator : AbstractValidator<Create
 {
     public CreateCredentitalSettingValidator()
     {
-        RuleFor(x => x.Keys)
+        RuleFor(x => x.Method)
             .IsInEnum().WithMessage("Authentication method is invalid.");
 
         RuleFor(x => x.Keys)

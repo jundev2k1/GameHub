@@ -10,7 +10,7 @@ public sealed class UpdateS2sClientSettingHandler(
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await s2SClientSettingRepo.UpdateAsync(request.AppCode, setting =>
+            await s2SClientSettingRepo.UpdateAsync(request.AppCode!, setting =>
             {
                 if (setting.ClientId != request.ClientId)
                     throw new NotFoundException("Client ID was not found.");

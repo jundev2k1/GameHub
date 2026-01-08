@@ -1,51 +1,41 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Features.S2s.Commands.CreateCredentitalSetting;
+namespace game_x.application.Features.S2s.Commands.RotateCredentialSetting;
 
-public sealed class CreateCredentitalSettingHandler(
+public sealed class RotateCredentialSettingHandler(
     IUnitOfWork unitOfWork,
-    IS2sClientSettingRepo s2SClientSettingRepo,
     IS2sCredentialRepo s2SCredentialRepo,
-    IAuthGenerator authGenerator) : ICommandHandler<CreateCredentitalSettingCommand>
+    IAuthGenerator authGenerator) : ICommandHandler<RotateCredentialSettingCommand>
 {
-    public async Task<Unit> Handle(CreateCredentitalSettingCommand request, CancellationToken ct = default)
+    public async Task<Unit> Handle(RotateCredentialSettingCommand request, CancellationToken ct = default)
     {
-        var canAddNewKey = await s2SCredentialRepo.CanAddKeyAsync(request.AppCode!, CredentialDirection.Inbound, ct);
-        if (!canAddNewKey)
-            throw new BadRequestException(MessageCode.System.Conflict);
+        var currentCredential = await s2SCredentialRepo.GetByKeyIdAsync(
+            request.KeyId,
+            CredentialDirection.Inbound,
+            ct);
+        if (currentCredential.ClientSetting.AppCode != request.AppCode
+            || currentCredential.ClientSetting.ClientId != request.ClientId)
+            throw new BadRequestException($"AppCode({request.AppCode}) or ClientId({request.ClientId}) are invalid.");
 
-        var s2sSetting = await s2SClientSettingRepo.GetByAppCodeAsync(request.AppCode!, ct);
         var credential = S2SCredential.Create(
-            request.Method,
+            currentCredential.AuthMethod,
             CredentialDirection.Inbound,
             KeyUsageScope.ApiRequest,
-            s2sSetting.Id);
-        var materialItems = GetMaterialItems(request.Method, request.Keys);
+            currentCredential.SettingId);
+        var materialItems = GetMaterialItems(currentCredential.AuthMethod);
         credential.AddMaterials(materialItems);
 
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await s2SCredentialRepo.CreateAsync(credential, ct);
+            await s2SCredentialRepo.RotateAsync(request.KeyId, credential, ct);
         }, ct);
 
         return Unit.Value;
     }
 
-    private IEnumerable<S2SCredentialMaterial> GetMaterialItems(
-        AuthMethod method,
-        CredentialMaterialItem[] items)
+    private IEnumerable<S2SCredentialMaterial> GetMaterialItems(AuthMethod method)
     {
-        if (items.Length > 0)
-        {
-            foreach (var item in items)
-            {
-                yield return S2SCredentialMaterial.Create(item.Type, item.Value, item.IsEncrypted);
-            }
-
-            yield break;
-        }
-
         switch (method)
         {
             case AuthMethod.ApiKey:

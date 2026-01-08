@@ -15,15 +15,25 @@ public sealed class S2sCredentialRepo(GameXContext dbContext) : IS2sCredentialRe
             .ToArrayAsync(ct);
     }
 
-    public async Task<bool> CanAddKeyAsync(string appCode, CredentialDirection direction, CancellationToken ct = default)
+    public async Task<S2SCredential> GetByKeyIdAsync(string keyId, CredentialDirection direction, CancellationToken ct = default)
     {
-        return await dbContext.S2sClientSettings
+        return await dbContext.S2sCredentials
             .AsNoTracking()
-            .AnyAsync(scs => scs.AppCode == appCode
-                && scs.IsActive
-                && !scs.Credentials.Any(c =>
-                    c.Direction == direction
-                    && c.Status == CredentialStatus.Active), ct);
+            .Include(sc => sc.Materials)
+            .Include(sc => sc.ClientSetting)
+            .FirstOrDefaultAsync(sc => sc.KeyId == keyId && sc.Direction == direction, ct)
+            ?? throw new NotFoundException(nameof(keyId), keyId);
+    }
+
+    public async Task<S2SCredential?> GetActiveCredentialAsync(string appCode, CredentialDirection direction, CancellationToken ct = default)
+    {
+        return await dbContext.S2sCredentials
+            .AsNoTracking()
+            .OrderByDescending(sc => sc.CreatedAt)
+            .FirstOrDefaultAsync(sc => sc.ClientSetting.AppCode == appCode
+                && sc.ClientSetting.IsActive
+                && sc.Direction == direction
+                && sc.Status == CredentialStatus.Active, ct);
     }
 
     public async Task<S2SCredential[]> GetsBySettingAsync(int settingId, CancellationToken ct = default)
@@ -33,6 +43,25 @@ public sealed class S2sCredentialRepo(GameXContext dbContext) : IS2sCredentialRe
             .Include(sc => sc.Materials)
             .Where(sc => sc.SettingId == settingId)
             .ToArrayAsync(ct);
+    }
+
+    public async Task<S2SCredential?> GetsByKeyIdAsync(string keyId, CancellationToken ct = default)
+    {
+        return await dbContext.S2sCredentials
+            .AsNoTracking()
+            .Include(sc => sc.Materials)
+            .FirstOrDefaultAsync(sc => sc.KeyId == keyId, ct);
+    }
+
+    public async Task<bool> CanAddKeyAsync(string appCode, CredentialDirection direction, CancellationToken ct = default)
+    {
+        return await dbContext.S2sClientSettings
+            .AsNoTracking()
+            .AnyAsync(scs => scs.AppCode == appCode
+                && scs.IsActive
+                && !scs.Credentials.Any(c =>
+                    c.Direction == direction
+                    && c.Status == CredentialStatus.Active), ct);
     }
 
     public async Task CreateAsync(S2SCredential entity, CancellationToken ct = default)
@@ -53,5 +82,15 @@ public sealed class S2sCredentialRepo(GameXContext dbContext) : IS2sCredentialRe
             ?? throw new NotFoundException(nameof(keyId), keyId);
 
         await updateAction(target);
+    }
+
+    public async Task RotateAsync(string keyId, S2SCredential credential, CancellationToken ct = default)
+    {
+        var target = await dbContext.S2sCredentials
+            .FirstOrDefaultAsync(sc => sc.KeyId == keyId && sc.Direction == CredentialDirection.Inbound, ct)
+            ?? throw new NotFoundException(nameof(keyId), keyId);
+
+        target.Deactivate();
+        await dbContext.S2sCredentials.AddAsync(credential, ct);
     }
 }

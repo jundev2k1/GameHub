@@ -10,7 +10,7 @@ public sealed class UpdateS2sClientHandler(
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await s2SClientRepo.UpdateAsync(request.ClientId, s2sClient =>
+            await s2SClientRepo.UpdateAsync(request.ClientId!, s2sClient =>
             {
                 s2sClient.UpdateInfo(request.ClientName, request.ClientCode, request.Notes);
             }, ct);

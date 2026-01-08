@@ -19,11 +19,11 @@ public sealed class S2SCredential : BaseEntity<int>
         AuthMethod authMethod,
         CredentialDirection direction,
         KeyUsageScope usageScope,
-        int? id = null)
+        int settingId)
     {
         return new S2SCredential
         {
-            Id = id ?? default,
+            SettingId = settingId,
             KeyId = GenerateKeyId(),
             AuthMethod = authMethod,
             Direction = direction,

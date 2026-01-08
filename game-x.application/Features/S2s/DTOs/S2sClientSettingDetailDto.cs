@@ -14,7 +14,9 @@ public sealed class S2sClientSettingDetailDto
     public string AppCode { get; set; } = string.Empty;
     public string AppName { get; set; } = string.Empty;
     public string Host { get; set; } = string.Empty;
-    public string[] AllowIps { get; set; } = [];
+    [JsonIgnore]
+    public string AllowedIpsString { get; set; } = string.Empty;
+    public string[] AllowedIps => AllowedIpsString.Split(",");
     public bool IsSettingActive { get; set; }
     public string SettingNotes { get; set; } = string.Empty;
     public S2sCredentialDto[] Credentials { get; set; } = [];

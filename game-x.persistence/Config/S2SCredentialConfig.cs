@@ -35,7 +35,7 @@ public sealed class S2SCredentialConfig : IEntityTypeConfiguration<S2SCredential
             .IsRequired();
 
         builder.Property(sc => sc.ExpiredAt)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(sc => sc.CreatedAt)
             .IsRequired();

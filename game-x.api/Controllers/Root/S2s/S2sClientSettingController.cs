@@ -1,5 +1,6 @@
 ﻿using game_x.application.Features.S2s.Commands.CreateCredentitalSetting;
 using game_x.application.Features.S2s.Commands.CreateS2sClientSetting;
+using game_x.application.Features.S2s.Commands.RotateCredentialSetting;
 using game_x.application.Features.S2s.Commands.SwitchS2sClientSettingStatus;
 using game_x.application.Features.S2s.Commands.UpdateS2sClientSetting;
 using game_x.application.Features.S2s.Queries.GetSettingDetail;
@@ -134,5 +135,13 @@ public sealed class S2sClientSettingController : BaseApiController
     {
         await Mediator.Send(command with { ClientId = clientId, AppCode = appCode });
         return ApiResponseFactory.Created();
+    }
+
+    [HttpPost("{clientId}/settings/{appCode}/credentials/{keyId}/actions/rotate")]
+    public async Task<IActionResult> RotateCredentialAsync(string clientId, string appCode, string keyId)
+    {
+        var command = new RotateCredentialSettingCommand(clientId, appCode, keyId);
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
     }
 }
