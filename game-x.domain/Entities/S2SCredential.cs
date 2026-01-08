@@ -42,6 +42,12 @@ public sealed class S2SCredential : BaseEntity<int>
         ExpiredAt = DateTime.UtcNow;
     }
 
+    public void Revoke()
+    {
+        Status = CredentialStatus.Revoked;
+        ExpiredAt = DateTime.UtcNow;
+    }
+
     private static string GenerateKeyId()
     {
         return $"k_{Guid.CreateVersion7():N}";

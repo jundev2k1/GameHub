@@ -77,6 +77,7 @@ public sealed class S2sCredentialRepo(GameXContext dbContext) : IS2sCredentialRe
     public async Task UpdateAsync(string keyId, Func<S2SCredential, Task> updateAction, CancellationToken ct = default)
     {
         var target = await dbContext.S2sCredentials
+            .Include(sc => sc.ClientSetting)
             .Include(sc => sc.Materials)
             .FirstOrDefaultAsync(sc => sc.KeyId == keyId, ct)
             ?? throw new NotFoundException(nameof(keyId), keyId);

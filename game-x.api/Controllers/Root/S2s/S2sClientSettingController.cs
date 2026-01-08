@@ -1,5 +1,6 @@
 ﻿using game_x.application.Features.S2s.Commands.CreateCredentitalSetting;
 using game_x.application.Features.S2s.Commands.CreateS2sClientSetting;
+using game_x.application.Features.S2s.Commands.RevokeCredentialSetting;
 using game_x.application.Features.S2s.Commands.RotateCredentialSetting;
 using game_x.application.Features.S2s.Commands.SwitchS2sClientSettingStatus;
 using game_x.application.Features.S2s.Commands.UpdateS2sClientSetting;
@@ -137,10 +138,52 @@ public sealed class S2sClientSettingController : BaseApiController
         return ApiResponseFactory.Created();
     }
 
-    [HttpPost("{clientId}/settings/{appCode}/credentials/{keyId}/actions/rotate")]
+    /// <summary>
+    /// Rotates an existing S2S credential
+    /// </summary>
+    /// <remarks>
+    /// This endpoint performs a credential rotation for a specific platform setting
+    /// of a third-party Server-to-Server (S2S) client.
+    /// <br />
+    /// Credential rotation generates a new integration key while invalidating
+    /// the previous key, allowing clients to update secrets without service interruption.
+    /// <br />
+    /// After rotation, all server-to-server authentication requests must use
+    /// the newly generated credential.
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client</param>
+    /// <param name="appCode">The application code identifying the platform-specific setting</param>
+    /// <param name="keyId">The unique identifier of the credential to be rotated</param>
+    /// <returns>Returns 204 No Content when the credential is successfully rotated</returns>
+    [HttpPatch("{clientId}/settings/{appCode}/credentials/{keyId}/actions/rotate")]
     public async Task<IActionResult> RotateCredentialAsync(string clientId, string appCode, string keyId)
     {
         var command = new RotateCredentialSettingCommand(clientId, appCode, keyId);
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
+    /// <summary>
+    /// Revokes an existing S2S credential
+    /// </summary>
+    /// <remarks>
+    /// This endpoint permanently revokes a credential associated with a specific
+    /// platform setting of a third-party Server-to-Server (S2S) client.
+    /// <br />
+    /// Once revoked, the credential can no longer be used for any server-to-server
+    /// authentication requests, and access using this key will be rejected immediately.
+    /// <br />
+    /// This action is irreversible and should be used when a credential is compromised
+    /// or no longer required.
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client</param>
+    /// <param name="appCode">The application code identifying the platform-specific setting</param>
+    /// <param name="keyId">The unique identifier of the credential to be revoked</param>
+    /// <returns>Returns 204 No Content when the credential is successfully revoked</returns>
+    [HttpPatch("{clientId}/settings/{appCode}/credentials/{keyId}/actions/revoke")]
+    public async Task<IActionResult> RevokeCredentialAsync(string clientId, string appCode, string keyId)
+    {
+        var command = new RevokeCredentialSettingCommand(clientId, appCode, keyId);
         await Mediator.Send(command);
         return ApiResponseFactory.NoContent();
     }
