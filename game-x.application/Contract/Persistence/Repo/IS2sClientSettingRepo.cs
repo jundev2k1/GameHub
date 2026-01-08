@@ -8,6 +8,8 @@ public interface IS2sClientSettingRepo
 
     Task<S2sClientSettingDetailDto> GetDetailAsync(string appCode, CancellationToken ct = default);
 
+    Task<S2SClientSetting> GetByAppCodeAsync(string appCode, CancellationToken ct = default);
+
     Task CreateAsync(S2SClientSetting entity, CancellationToken ct = default);
 
     Task UpdateAsync(string appCode, Action<S2SClientSetting> updateAction, CancellationToken ct = default);

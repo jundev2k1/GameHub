@@ -18,10 +18,12 @@ public sealed class S2SCredential : BaseEntity<int>
     public static S2SCredential Create(
         AuthMethod authMethod,
         CredentialDirection direction,
-        KeyUsageScope usageScope)
+        KeyUsageScope usageScope,
+        int? id = null)
     {
         return new S2SCredential
         {
+            Id = id ?? default,
             KeyId = GenerateKeyId(),
             AuthMethod = authMethod,
             Direction = direction,
@@ -30,6 +32,9 @@ public sealed class S2SCredential : BaseEntity<int>
             ActivatedAt = DateTime.UtcNow
         };
     }
+
+    public void AddMaterials(IEnumerable<S2SCredentialMaterial> materials)
+        => Materials = [.. materials];
 
     public void Deactivate()
     {

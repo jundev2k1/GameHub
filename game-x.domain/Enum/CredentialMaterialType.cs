@@ -2,7 +2,10 @@
 
 public enum CredentialMaterialType : short
 {
-    Secret = 1,
-    PublicKey = 2,
-    PrivateKey = 3,
+    EcdsaPublicKey = 0,
+    EcdsaPrivateKey = 1,
+    RsaPublicKey = 2,
+    RsaPrivateKey = 3,
+    ApiKey = 4,
+    HmacSecret = 5,
 }

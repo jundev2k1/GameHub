@@ -15,6 +15,17 @@ public sealed class S2sCredentialRepo(GameXContext dbContext) : IS2sCredentialRe
             .ToArrayAsync(ct);
     }
 
+    public async Task<bool> CanAddKeyAsync(string appCode, CredentialDirection direction, CancellationToken ct = default)
+    {
+        return await dbContext.S2sClientSettings
+            .AsNoTracking()
+            .AnyAsync(scs => scs.AppCode == appCode
+                && scs.IsActive
+                && !scs.Credentials.Any(c =>
+                    c.Direction == direction
+                    && c.Status == CredentialStatus.Active), ct);
+    }
+
     public async Task<S2SCredential[]> GetsBySettingAsync(int settingId, CancellationToken ct = default)
     {
         return await dbContext.S2sCredentials

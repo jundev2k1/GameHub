@@ -6,6 +6,8 @@ public interface IS2sCredentialRepo
 
     Task<S2SCredential[]> GetsBySettingAsync(int settingId, CancellationToken ct = default);
 
+    Task<bool> CanAddKeyAsync(string appCode, CredentialDirection direction, CancellationToken ct = default);
+
     Task CreateAsync(S2SCredential entity, CancellationToken ct = default);
 
     Task CreateRangeAsync(IEnumerable<S2SCredential> entities, CancellationToken ct = default);

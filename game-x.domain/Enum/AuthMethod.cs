@@ -2,8 +2,8 @@
 
 public enum AuthMethod : short
 {
-    HmacSha256 = 1,
-    RsaSha256 = 2,
-    EcdsaP256 = 3,
-    EcdsaP384 = 4
+    ApiKey = 0,
+    Hmac = 1,
+    Rsa = 2,
+    Ecdsa = 3,
 }

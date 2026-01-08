@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.S2s.Commands.CreateS2sClientSetting;
+﻿using game_x.application.Features.S2s.Commands.CreateCredentitalSetting;
+using game_x.application.Features.S2s.Commands.CreateS2sClientSetting;
 using game_x.application.Features.S2s.Commands.SwitchS2sClientSettingStatus;
 using game_x.application.Features.S2s.Commands.UpdateS2sClientSetting;
 using game_x.application.Features.S2s.Queries.GetSettingDetail;
@@ -111,5 +112,27 @@ public sealed class S2sClientSettingController : BaseApiController
         var command = new SwitchS2sClientSettingStatusCommand(clientId, appCode);
         await Mediator.Send(command with { ClientId = clientId, AppCode = appCode });
         return ApiResponseFactory.NoContent();
+    }
+
+    /// <summary>
+    /// Creates a new credential for an S2S client platform setting.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint creates an integration credential (such as an API key or secret)
+    /// for a specific platform configuration of a third-party Server-to-Server (S2S) client.
+    /// <br />
+    /// The credential is associated with the specified client and platform and can be used
+    /// for server-to-server authentication requests, subject to the activation status
+    /// of the corresponding setting.
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client</param>
+    /// <param name="appCode">The application code identifying the platform-specific setting</param>
+    /// <param name="command">The credential creation request payload</param>
+    /// <returns>Returns 201 when the credential is successfully created</returns>
+    [HttpPost("{clientId}/settings/{appCode}/credentials")]
+    public async Task<IActionResult> CreateCredentialAsync(string clientId, string appCode, CreateCredentitalSettingCommand command)
+    {
+        await Mediator.Send(command with { ClientId = clientId, AppCode = appCode });
+        return ApiResponseFactory.Created();
     }
 }

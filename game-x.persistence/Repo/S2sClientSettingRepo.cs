@@ -29,6 +29,15 @@ public sealed class S2sClientSettingRepo(GameXContext dbContext) : IS2sClientSet
         return data.Adapt<S2sClientSettingDetailDto>();
     }
 
+    public async Task<S2SClientSetting> GetByAppCodeAsync(string appCode, CancellationToken ct = default)
+    {
+        return await dbContext.S2sClientSettings
+            .AsNoTracking()
+            .Include(scs => scs.Client)
+            .FirstOrDefaultAsync(scs => scs.AppCode == appCode, ct)
+            ?? throw new NotFoundException(nameof(appCode), appCode);
+    }
+
     public async Task CreateAsync(S2SClientSetting entity, CancellationToken ct = default)
     {
         await dbContext.S2sClientSettings.AddAsync(entity, ct);
