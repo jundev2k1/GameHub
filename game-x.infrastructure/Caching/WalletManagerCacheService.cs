@@ -275,11 +275,11 @@ public sealed class WalletManagerCacheService(
     private async Task<decimal?> GetAtgWalletAsync(User targetUser)
     {
         var username = targetUser.UserExtend?.AtgUserName;
-        if (username == null) return null;
+        if (username.IsNullOrEmpty() ) return null;
 
         try
         {
-            var response = await atgService.GetGameBalanceAsync(username);
+            var response = await atgService.GetGameBalanceAsync(username!);
             decimal.TryParse(response.Balance, out var balance);
             return balance;
         }
