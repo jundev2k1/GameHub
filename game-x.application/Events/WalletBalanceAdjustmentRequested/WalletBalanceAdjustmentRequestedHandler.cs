@@ -66,6 +66,8 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
             return TransactionSourceType.Elt998GameProvider;
         if (platformId == GameConstants.PLATFORM_ID_SASSLOT)
             return TransactionSourceType.SasSlotProvider;
+        if (platformId == GameConstants.PLATFORM_ID_ATG)
+            return TransactionSourceType.AtgProvider;
 
         throw new NotSupportedException($"This platform ({platformId}) is not support.");
     }
