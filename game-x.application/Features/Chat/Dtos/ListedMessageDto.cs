@@ -10,7 +10,7 @@ public record ListedMessageDto(
     string? SenderUserNickname,
     string? SenderUserAvatarUrl,
     string? Text,
-    Guid? ReplyToMessageId, 
+    Guid? ReplyToMessageId,
     bool IsTombstone, 
     DateTime SentAt, 
     DateTime? EditedAt, 
