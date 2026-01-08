@@ -1,4 +1,5 @@
 using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
@@ -29,6 +30,7 @@ public sealed class WalletWithdrawalHandler(
     IGameBaccaratService gameBaccarat,
     IEtl998Service etl998Service,
     ISasSlotService sasSlotService,
+    IAtgService atgService,
     IGameProviderCacheService gameProviderCache,
     IGamePlatformService gamePlatformService,
     IWalletManagerCacheService walletManagerCache) : ICommandHandler<WalletWithdrawalCommand, ListTransactionExternalDto>
@@ -48,7 +50,7 @@ public sealed class WalletWithdrawalHandler(
         var balanceAdjustmentEvent = new WalletBalanceAdjustmentRequestedEvent(currentUser.Id, targetPlatform.Id);
         await eventDispatcher.Publish(balanceAdjustmentEvent, ct);
 
-        // Get and check if user's wallet have enough money?
+        // Get and check if a user's wallet has enough money?
         var wallet = await walletManagerCache.GetExternalWalletAsync(
             currentUser.Id,
             request.PlatformId);
@@ -105,6 +107,12 @@ public sealed class WalletWithdrawalHandler(
             if (request.PlatformId == GameConstants.PLATFORM_ID_SASSLOT)
                 await WithdrawalToSasSlotWalletAsync(
                     account: currentUser.UserExtend!.SasSlotAccount,
+                    sno: serialNumber,
+                    amount: actualAmount);
+            
+            if (request.PlatformId == GameConstants.PLATFORM_ID_ATG)
+                await WithdrawalToAtgWalletAsync(
+                    account: currentUser.UserExtend!.AtgUserName,
                     sno: serialNumber,
                     amount: actualAmount);
 
@@ -183,6 +191,8 @@ public sealed class WalletWithdrawalHandler(
             return TransactionSourceType.Elt998GameProvider;
         if (platformId == GameConstants.PLATFORM_ID_SASSLOT)
             return TransactionSourceType.SasSlotProvider;
+        if (platformId == GameConstants.PLATFORM_ID_ATG)
+            return TransactionSourceType.AtgProvider;
 
         throw new NotSupportedException($"This platform ({platformId}) is not support.");
     }
@@ -242,5 +252,14 @@ public sealed class WalletWithdrawalHandler(
         string sno)
     {
         await sasSlotService.WithdrawalAsync(account, amount, sno);
+    }
+    
+    private async Task WithdrawalToAtgWalletAsync(string account, decimal amount, string sno)
+    {
+        await atgService.UpdateGameBalanceAsync(
+            username: account,
+            balance: amount,
+            action: "out",
+            transferId: sno);
     }
 }

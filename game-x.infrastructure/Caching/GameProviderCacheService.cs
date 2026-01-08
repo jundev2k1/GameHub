@@ -115,6 +115,19 @@ public sealed class GameProviderCacheService(
         return url;
     }
 
+    public (string? token, DateTime? expiredTime) GetProviderToken(Guid platformId)
+    {
+        var token = Get<string>($"{_prefixCache}:{platformId}:provider-token");
+        var expiredTime = Get<DateTime?>($"{_prefixCache}:{platformId}:provider-token-expired-time");
+        return (token, expiredTime);
+    }
+
+    public void SetProviderToken(Guid platformId, string token, DateTime expiredTime)
+    {
+        Set($"{_prefixCache}:{platformId}:provider-token", token);
+        Set($"{_prefixCache}:{platformId}:provider-token-expired-time", expiredTime);
+    }
+    
     public GamePlatformDto[] PlatformList
         => Get<GamePlatformDto[]>($"{_prefixCache}:platform:list") ?? [];
     public GameCategoryDto[] CategoryList
@@ -142,5 +155,9 @@ public sealed class GameProviderCacheService(
 
     public GamePlatformDto SasSlotPlatform
         => PlatformList.FirstOrDefault(p => p.Id == GameConstants.PLATFORM_ID_SASSLOT)
+           ?? throw new NotFoundException();
+    
+    public GamePlatformDto AtgPlatform
+        => PlatformList.FirstOrDefault(p => p.Id == GameConstants.PLATFORM_ID_ATG)
            ?? throw new NotFoundException();
 }

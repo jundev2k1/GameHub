@@ -26,6 +26,10 @@ public interface IGameProviderCacheService
 
     Task<string> GetGameThumbnail(GameInfoDto game);
 
+    (string? token, DateTime? expiredTime) GetProviderToken(Guid platformId);
+
+    void SetProviderToken(Guid platformId, string token, DateTime expiredTime);
+  
     GamePlatformDto[] PlatformList { get; }
     GameCategoryDto[] CategoryList { get; }
     GameTypeDto[] GameTypeList { get; }
@@ -37,4 +41,5 @@ public interface IGameProviderCacheService
     GamePlatformDto BaccaratPlatform { get; }
     GamePlatformDto Etl998Platform { get; }
     GamePlatformDto SasSlotPlatform { get; }
+    GamePlatformDto AtgPlatform { get; }
 }

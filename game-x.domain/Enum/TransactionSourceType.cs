@@ -14,4 +14,6 @@ public enum TransactionSourceType
     Elt998GameProvider = 4,
     /// <summary>The transaction takes place with the third-party game Sas Slot provider</summary>
     SasSlotProvider = 5,
+    /// <summary>The transaction takes place with the third-party game ATG provider</summary>
+    AtgProvider = 6,
 }

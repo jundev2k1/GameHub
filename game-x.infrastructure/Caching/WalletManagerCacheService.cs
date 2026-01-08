@@ -1,5 +1,6 @@
 ﻿using game_x.application.Common.Abstractions.Events;
 using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
@@ -25,6 +26,7 @@ public sealed class WalletManagerCacheService(
     IEtl998Service etl998Service,
     ISasSlotService sasSlotService,
     IGameProviderService gameProvider,
+    IAtgService atgService,
     IApplicationEventDispatcher eventDispatcher,
     IAppLogger<WalletManagerCacheService> logger) : CacheService(cache), IWalletManagerCacheService
 {
@@ -98,6 +100,14 @@ public sealed class WalletManagerCacheService(
             platform: gameProviderCache.SasSlotPlatform,
             balance: sasSlotBalance);
 
+        var atgBalance = await GetAtgWalletAsync(targetUser);
+        await CreateOrUpdateExternalWalletAsync(
+            userId: userId,
+            wallet: userWallet,
+            targetWallet: null,
+            platform: gameProviderCache.AtgPlatform,
+            balance: atgBalance);
+        
         Set(cacheKey, userWallet);
     }
 
@@ -163,6 +173,17 @@ public sealed class WalletManagerCacheService(
                 wallet: userWallet,
                 targetWallet: targetWallet,
                 platform: gameProviderCache.SasSlotPlatform,
+                balance: balance);
+        }
+
+        if (platformId == GameConstants.PLATFORM_ID_ATG)
+        {
+            var balance = await GetAtgWalletAsync(targetUser);
+            await CreateOrUpdateExternalWalletAsync(
+                userId: userId,
+                wallet: userWallet,
+                targetWallet: targetWallet,
+                platform: gameProviderCache.AtgPlatform,
                 balance: balance);
         }
 
@@ -251,6 +272,24 @@ public sealed class WalletManagerCacheService(
         }
     }
 
+    private async Task<decimal?> GetAtgWalletAsync(User targetUser)
+    {
+        var username = targetUser.UserExtend?.AtgUserName;
+        if (username == null) return null;
+
+        try
+        {
+            var response = await atgService.GetGameBalanceAsync(username);
+            decimal.TryParse(response.Balance, out var balance);
+            return balance;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to get external wallet", ex.Message);
+            return null;
+        }
+    }
+    
     private async Task CreateOrUpdateExternalWalletAsync(
         string userId,
         UserWalletDto wallet,

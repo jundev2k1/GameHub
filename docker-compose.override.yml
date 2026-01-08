@@ -78,6 +78,10 @@ services:
       - GameSlotSettings__Host=${GAMESLOT_HOST}
       - GameSlotSettings__Code=${GAMESLOT_PLATFORMCODE}
       - GameSlotSettings__LoginUrl=${GAMESLOT_LOGINURL}
+      - AtgSettings__Host=${ATG_HOST}
+      - AtgSettings__XOperator=${ATG_X_OPERATOR}
+      - AtgSettings__XOperatorKey=${ATG_X_OPERATOR_KEY}
+      - AtgSettings__ProviderId=${ATG_PROVIDER_ID}
 
   game-x.seq:
     container_name: game-x.seq

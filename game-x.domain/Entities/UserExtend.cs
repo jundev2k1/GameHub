@@ -17,7 +17,9 @@ public sealed class UserExtend : BaseEntity<string>, IEntity
     public int Etl998ProviderTableLimit { get; private set; }
     public string SasSlotAccount { get; private set; } = string.Empty;
     public string SasSlotNickname { get; private set; } = string.Empty;
-    
+    public string AtgUserName { get; private set; } = string.Empty;
+    public string AtgEmail { get; private set; } = string.Empty;
+    public string AtgFullname { get; private set; } = string.Empty;
     public static UserExtend Create() => new ();
 
     public void UpdateG598Account(
@@ -56,5 +58,12 @@ public sealed class UserExtend : BaseEntity<string>, IEntity
     {
         SasSlotAccount = account;
         SasSlotNickname = nickname;
+    }
+    
+    public void UpdateAtgAccount(string userName, string email, string fullname)
+    {
+        AtgUserName = userName;
+        AtgEmail = email;
+        AtgFullname = fullname;
     }
 }
