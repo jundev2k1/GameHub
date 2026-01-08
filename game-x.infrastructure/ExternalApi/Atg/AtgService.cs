@@ -35,7 +35,7 @@ public class AtgService(
             
                 if (content == null || !result.IsSuccessful || result.Content == null)
                 {
-                    logger.LogError($"Response failed: ErrorCode={result.Content}, ErrorMessage={result.Error?.Message}");
+                    logger.LogError($"Response failed: ErrorCode={result.StatusCode}, ErrorMessage={result.Error?.Content}");
                     throw new ExternalServiceException();
                 }
             
@@ -89,7 +89,7 @@ public class AtgService(
             
             if (content == null || !result.IsSuccessful || result.Content == null)
             {
-                logger.LogError($"Response failed: ErrorCode={result.Content}, ErrorMessage={result.Error?.Message}");
+                logger.LogError($"Response failed: ErrorCode={result.StatusCode}, ErrorMessage={result.Error?.Content}");
                 throw new ExternalServiceException();
             }
             
@@ -117,7 +117,7 @@ public class AtgService(
             
             if (content == null || !result.IsSuccessful || result.Content == null)
             {
-                logger.LogError($"Response failed: ErrorCode={result.Content}, ErrorMessage={result.Error?.Message}");
+                logger.LogError($"Response failed: ErrorCode={result.StatusCode}, ErrorMessage={result.Error?.Content}");
                 throw new ExternalServiceException();
             }
             
@@ -155,7 +155,7 @@ public class AtgService(
             
             if (content == null || !result.IsSuccessful || result.Content == null)
             {
-                logger.LogError($"Response failed: ErrorCode={result.Content}, ErrorMessage={result.Error?.Message}");
+                logger.LogError($"Response failed: ErrorCode={result.StatusCode}, ErrorMessage={result.Error?.Content}");
                 throw new ExternalServiceException();
             }
             
@@ -183,7 +183,7 @@ public class AtgService(
             
             if (content == null || !result.IsSuccessful || result.Content == null)
             {
-                logger.LogError($"Response failed: ErrorCode={result.Content}, ErrorMessage={result.Error?.Message}");
+                logger.LogError($"Response failed: ErrorCode={result.StatusCode}, ErrorMessage={result.Error?.Content}");
                 throw new ExternalServiceException();
             }
             
@@ -213,7 +213,7 @@ public class AtgService(
             
             if (content == null || !result.IsSuccessful || result.Content == null)
             {
-                logger.LogError($"Response failed: ErrorCode={result.Content}, ErrorMessage={result.Error?.Message}");
+                logger.LogError($"Response failed: ErrorCode={result.StatusCode}, ErrorMessage={result.Error?.Content}");
                 throw new ExternalServiceException();
             }
             
@@ -244,7 +244,7 @@ public class AtgService(
             
             if (content == null || !result.IsSuccessful || result.Content == null)
             {
-                logger.LogError($"Response failed: ErrorCode={result.Content}, ErrorMessage={result.Error?.Message}");
+                logger.LogError($"Response failed: ErrorCode={result.StatusCode}, ErrorMessage={result.Error?.Content}");
                 throw new ExternalServiceException();
             }
             
