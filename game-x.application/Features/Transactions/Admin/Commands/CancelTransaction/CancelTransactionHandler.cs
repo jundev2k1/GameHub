@@ -29,7 +29,7 @@ public sealed class CancelTransactionHandler(
                 await userBalanceRepo.UpdateByTokenIdAsync(tx.UserId, tx.CryptoTokenId, balance =>
                 {
                     balance.Unfreeze(tx.Amount);
-                });
+                }, ct);
             }, ct);
         }, ct);
 

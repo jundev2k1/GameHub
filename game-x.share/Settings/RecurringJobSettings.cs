@@ -6,4 +6,5 @@ public sealed class RecurringJobSettings : BaseSettings
     public string ExpiredTokenCleanupJob { get; set; } = string.Empty;
     public string StreamTimeoutCheckerJob { get; set; } = string.Empty;
     public string GameSessionTimeoutCheckerJob { get; set; } = string.Empty;
+    public string ExpiredTransactionJob { get; set; } = string.Empty;
 }
