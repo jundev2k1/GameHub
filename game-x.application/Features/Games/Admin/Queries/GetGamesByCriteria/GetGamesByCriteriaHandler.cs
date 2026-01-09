@@ -17,7 +17,9 @@ public sealed class GetGamesByCriteriaHandler(
                 query,
                 request.Filters,
                 request.Sorts,
-                keyword => entity => entity.Name.ToLower().Contains(keyword.ToLower()),
+                keyword => entity => 
+                    entity.Name.ToLower().Contains(keyword.ToLower()) 
+                    || entity.GameCode.ToLower().Contains(keyword.ToLower()),
                 GameFilterExtensions.Options),
             request.PageIndex,
             request.PageSize,

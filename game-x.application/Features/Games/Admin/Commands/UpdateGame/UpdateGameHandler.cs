@@ -43,7 +43,7 @@ public sealed class UpdateGameHandler(
         // Refresh cache
         await gameProviderCache.RefreshGameList();
         await gameProviderCache.RefreshGameRecommendList();
-
+        
         return Unit.Value;
     }
 
