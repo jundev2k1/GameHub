@@ -32,6 +32,16 @@ public class Transaction : BaseEntity<int>, IAuditable
     public User? ReviewedBy { get; private set; }
     public DateTime? DateReviewed { get; private set; }
 
+    #region Handle Timeout transaction
+
+    public DateTime? ExpiredAt { get; private set; }
+    /// <summary>
+    /// The transaction used to refund money to the user in the case where the user deposits money into a transaction that has timed out.
+    /// </summary>
+    public int? RefundTransactionId { get; private set; }
+
+    #endregion
+
     public decimal TotalAmount => Amount + (Fee ?? 0);
 
     public static Transaction Create(
@@ -153,6 +163,16 @@ public class Transaction : BaseEntity<int>, IAuditable
 
     public bool CanCancelTransaction()
         => Status is (TransactionStatus.Pending or TransactionStatus.Approved);
+    
+    public void Expired()
+    {
+        ExpiredAt = DateTime.UtcNow;
+    }
+    
+    public void Refund(int transactionId)
+    {
+        RefundTransactionId = transactionId;
+    }
 }
 
 public class TransactionMeta
