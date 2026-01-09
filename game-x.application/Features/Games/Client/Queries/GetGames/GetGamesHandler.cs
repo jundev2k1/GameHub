@@ -31,7 +31,8 @@ public sealed class GetGamesHandler(
     private static Func<GameInfoDto, bool> GetFilterCondition(GetGamesQuery request)
     {
         return game =>
-            ((request.Platform == null)
+            game.IsActive 
+            && ((request.Platform == null)
                 || (game.PlatformId == request.Platform))
             && ((request.Categories == null)
                 || game.Categories.Any(c => request.Categories.Contains(c.Id)))
