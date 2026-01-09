@@ -45,7 +45,7 @@ public sealed class CreateGameRecommendHandler(
             await gameRecommendRepo.AddAsync(gameRecommend, ct);
         }, ct);
 
-        // Refresh cache data after database updated
+        // Refresh cache data after the database updated
         await gameProviderCache.RefreshGameRecommendList();
 
         return Unit.Value;

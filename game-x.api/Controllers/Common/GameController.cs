@@ -7,8 +7,7 @@ using System.Reflection;
 namespace game_x.api.Controllers.Common;
 
 [Route("/api/game")]
-public sealed class GameController(
-    IGameProviderCacheService gameProviderCache) : BaseApiController
+public sealed class GameController(IGameProviderCacheService gameProviderCache) : BaseApiController
 {
     [HttpGet("list")]
     public async Task<IActionResult> GetGameListAsync([AsParameters] GetGamesRequest request)
@@ -26,10 +25,10 @@ public sealed class GameController(
     }
 
     [HttpGet("recommendations")]
-    public async Task<IActionResult> GetGameRecommendationsAsync()
+    public async Task<IActionResult> GetGameRecommendationsAsync(CancellationToken ct)
     {
         var query = new GetCurrentGameRecommendsQuery();
-        var response = await Mediator.Send(query);
+        var response = await Mediator.Send(query, ct);
         return ApiResponseFactory.Ok(response);
     }
 

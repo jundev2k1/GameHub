@@ -1,20 +1,43 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.application.Features.Games.Dtos;
 
 namespace game_x.persistence.Repo;
 
 public sealed class GameRecommendRepo(GameXContext context)
     : IGameRecommendRepo, IRepository
 {
-    public async Task<GameRecommend[]> GetAllAsync(CancellationToken ct = default)
+    public async Task<GameRecommendDto[]> GetAllAsync(CancellationToken ct = default)
     {
         return await context.GameRecommends
-            .AsSplitQuery()
-            .Include(gr => gr.Items)
+            .AsNoTracking()
+            .Select(gr => new GameRecommendDto
+            {
+                LocalId = gr.Id,
+                Id = gr.PublicId,
+                Name = gr.Name,
+                Description = gr.Description ?? string.Empty,
+                BannerId = gr.BannerId,
+                Status = gr.Status,
+                StartDate = gr.StartDate,
+                EndDate = gr.EndDate,
+                CreatedAt = gr.CreatedAt,
+                UpdatedAt = gr.UpdatedAt,
+                Items = gr.Items.Select(i => new GameRecommendItemDto
+                {
+                    LocalGameId = i.GameId,
+                    Priority = i.Priority,
+                    CustomTitle = i.Game.Name,
+                    IsActive = i.IsActive,
+                    IsGameActive = i.Game.IsActive,
+                    CreatedAt = i.CreatedAt,
+                    UpdatedAt = i.UpdatedAt,
+                }).ToArray()
+            })
             .ToArrayAsync(ct);
     }
-
+    
     public async Task<GameRecommend> GetAsync(Guid id, CancellationToken ct = default)
     {
         return await context.GameRecommends

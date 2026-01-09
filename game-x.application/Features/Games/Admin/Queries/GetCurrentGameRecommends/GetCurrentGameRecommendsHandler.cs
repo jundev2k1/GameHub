@@ -15,10 +15,12 @@ public sealed class GetCurrentGameRecommendsHandler(
 
         var gameList = gameProviderCache.GameList
             .ToDictionary(g => g.LocalId, g => g);
-        var tasks = data.Items.Select(i => MapToListItem(i, gameList));
+        var tasks = data.Items
+            .Where(x => x is {IsActive: true, IsGameActive: true})
+            .Select(i => MapToListItem(i, gameList));
         var items = await Task.WhenAll(tasks);
         return items
-            .Where(i => i != null && i.IsActive)
+            .Where(i => i?.IsActive == true)
             .OrderByDescending(i => i!.Priority)
             .ToArray()!;
     }

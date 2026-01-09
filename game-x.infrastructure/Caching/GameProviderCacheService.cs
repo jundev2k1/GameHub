@@ -74,8 +74,8 @@ public sealed class GameProviderCacheService(
     public async Task RefreshGameRecommendList()
     {
         var cacheKey = $"{_prefixCache}:game-recommend:list";
-        var gameRecommendList = await gameRecommendRepo.GetAllAsync();
-        Set(cacheKey, gameRecommendList.Select(g => g.Adapt<GameRecommendDto>()).ToArray());
+        var dto = await gameRecommendRepo.GetAllAsync();
+        Set(cacheKey, dto);
     }
 
     public async Task RefreshGameList()

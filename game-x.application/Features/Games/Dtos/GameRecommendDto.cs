@@ -24,7 +24,9 @@ public sealed class GameRecommendItemDto
     public int LocalGameId { get; set; }
     public int Priority { get; set; } = 0;
     public string? CustomTitle { get; set; }
+    [JsonIgnore]
     public bool IsActive { get; set; } = true;
+    public bool IsGameActive { get; set; } = true;
     [JsonIgnore]
     public DateTime CreatedAt { get; set; }
     [JsonIgnore]
