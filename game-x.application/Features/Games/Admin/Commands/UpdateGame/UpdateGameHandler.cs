@@ -3,7 +3,6 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Extensions;
-using MediatR;
 
 namespace game_x.application.Features.Games.Admin.Commands.UpdateGame;
 
@@ -43,6 +42,7 @@ public sealed class UpdateGameHandler(
 
         // Refresh cache
         await gameProviderCache.RefreshGameList();
+        await gameProviderCache.RefreshGameRecommendList();
 
         return Unit.Value;
     }
