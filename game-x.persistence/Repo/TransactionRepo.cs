@@ -258,7 +258,8 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
         
         var expiredTransactions = await context.Transactions
             .Where(x => 
-                x.Status == TransactionStatus.Pending
+                x.Type == TransactionType.Deposit
+                && x.Status == TransactionStatus.Pending
                 && x.ExpiredAt == null
                 && x.CreatedAt <= threshold)
             .ToListAsync(ct);
