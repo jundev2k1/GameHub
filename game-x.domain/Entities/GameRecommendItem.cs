@@ -8,7 +8,7 @@ public sealed class GameRecommendItem : BaseEntity<int>, IAuditable
     public int GameId { get; private set; }
     public Game Game { get; private set; } = default!;
 
-    public int Priority { get; private set; } = 0;
+    public int Priority { get; private set; }
     public string? CustomTitle { get; private set; }
     public bool IsActive { get; private set; } = true;
 

@@ -1,5 +1,4 @@
-﻿using game_x.application.Features.Games.Admin.Queries.GetGameRecommendDetail;
-using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
+﻿using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
 using game_x.application.Features.Games.Dtos;
 
 namespace game_x.application.Features.Games.Mapping;
@@ -143,11 +142,10 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<GameRecommend, GameRecommendDto>()
             .Map(dest => dest.LocalId, src => src.Id)
             .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.Items, src => src.Items
-                .Where(x => x.IsActive)
-                .Select(i => i.Adapt<GameRecommendItemDto>()));
+            .Map(dest => dest.Items, src => src.Items.Select(i => i.Adapt<GameRecommendItemDto>()));
 
         cfg.NewConfig<GameRecommendItem, GameRecommendItemDto>()
-            .Map(dest => dest.LocalGameId, src => src.GameId);
+            .Map(dest => dest.LocalGameId, src => src.GameId)
+            .Map(dest => dest.IsGameActive, src => src.Game.IsActive);
     }
 }

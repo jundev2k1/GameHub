@@ -1,8 +1,10 @@
-﻿namespace game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Features.Games.Dtos;
+
+namespace game_x.application.Contract.Persistence.Repo;
 
 public interface IGameRecommendRepo
 {
-    Task<GameRecommend[]> GetAllAsync(CancellationToken ct = default);
+    Task<GameRecommendDto[]> GetAllAsync(CancellationToken ct = default);
 
     Task<GameRecommend> GetAsync(Guid id, CancellationToken ct = default);
 

@@ -13,7 +13,7 @@ public sealed class UpdateGameRecommendHandler(
         var gameList = gameProviderCache.GameList;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            // Delete all of current recommend items
+            // Delete all of the current recommended items
             await gameRecommendRepo.DeleteAllItemsAsync(request.Id!.Value, ct);
             await unitOfWork.SaveChangesAsync(ct);
 
@@ -57,10 +57,10 @@ public sealed class UpdateGameRecommendHandler(
 
                 // Add new recommend items
                 await gameRecommendRepo.AddItemsAsync(request.Id.Value, recommendItems, ct);
-            });
+            }, ct);
         }, ct);
 
-        // Refresh cache data after database updated
+        // Refresh cache data after the database updated
         await gameProviderCache.RefreshGameRecommendList();
 
         return Unit.Value;
