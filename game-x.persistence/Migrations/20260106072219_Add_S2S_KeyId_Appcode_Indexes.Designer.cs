@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20260106072219_Add_S2S_KeyId_Appcode_Indexes")]
+    partial class Add_S2S_KeyId_Appcode_Indexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -347,14 +350,6 @@ namespace game_x.persistence.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("guest_id");
-
-                    b.Property<DateTime?>("LastGuestReadAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_guest_read_at");
-
-                    b.Property<int?>("LastGuestReadMessageId")
-                        .HasColumnType("integer")
-                        .HasColumnName("last_guest_read_message_id");
 
                     b.Property<DateTime>("LastMessageAt")
                         .HasColumnType("timestamp with time zone")
@@ -2659,7 +2654,7 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("direction");
 
-                    b.Property<DateTime?>("ExpiredAt")
+                    b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expired_at");
 
@@ -3548,24 +3543,6 @@ namespace game_x.persistence.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text")
                         .HasColumnName("id");
-
-                    b.Property<string>("AtgEmail")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("")
-                        .HasColumnName("atg_email");
-
-                    b.Property<string>("AtgFullname")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("")
-                        .HasColumnName("atg_fullname");
-
-                    b.Property<string>("AtgUserName")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("")
-                        .HasColumnName("atg_user_name");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")

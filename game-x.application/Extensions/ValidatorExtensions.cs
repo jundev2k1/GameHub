@@ -1,4 +1,6 @@
-﻿namespace game_x.application.Extensions;
+﻿using game_x.application.Features.S2s.Commands.CreateCredentitalSetting;
+
+namespace game_x.application.Extensions;
 
 public static class CommonValidatorExtensions
 {

@@ -1,0 +1,95 @@
+﻿using game_x.application.Features.S2s.Commands.CreateS2sClient;
+using game_x.application.Features.S2s.Commands.DeleteS2sClient;
+using game_x.application.Features.S2s.Commands.SwitchS2sClientStatus;
+using game_x.application.Features.S2s.Commands.UpdateS2sClient;
+using game_x.application.Features.S2s.Queries.GetAllS2sClients;
+
+namespace game_x.api.Controllers.Root.S2s;
+
+[Authorize(Roles = AppRoles.Root)]
+[Route("api/root/s2s/clients")]
+public sealed class S2sClientController : BaseApiController
+{
+    /// <summary>
+    /// Retrieves all Server-to-Server (S2S) clients
+    /// </summary>
+    /// <remarks>
+    /// This API returns a list of all registered S2S clients, including their
+    /// configuration metadata and current status
+    /// </remarks>
+    /// <returns>Returns HTTP 200 (OK) with the list of S2S clients</returns>
+    [HttpGet]
+    public async Task<IActionResult> GetAllS2sClientsAsync()
+    {
+        var query = new GetAllS2sClientsQuery();
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    /// <summary>
+    /// Creates a new Server-to-Server (S2S) client configuration
+    /// </summary>
+    /// <remarks>
+    /// This API registers a new S2S client used for server-to-server authentication
+    /// and secure communication between external applications and the system
+    /// </remarks>
+    /// <param name="command">The request payload containing S2S client information</param>
+    /// <returns>Returns HTTP 201 (Created) when the S2S client is successfully created</returns>
+    [HttpPost]
+    public async Task<IActionResult> CreateS2sClientAsync(CreateS2sClientCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.Created();
+    }
+
+    /// <summary>
+    /// Updates an existing Server-to-Server (S2S) client configuration
+    /// </summary>
+    /// <remarks>
+    /// This API updates the configuration of an existing S2S client, including
+    /// metadata, permissions, or security-related settings
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the S2S client to be updated</param>
+    /// <param name="command">The request payload containing updated S2S client information</param>
+    /// <returns>Returns HTTP 200 when the S2S client is successfully updated</returns>
+    [HttpPut("{clientId}")]
+    public async Task<IActionResult> UpdateS2sClientAsync(string clientId, UpdateS2sClientCommand command)
+    {
+        await Mediator.Send(command with { ClientId = clientId });
+        return ApiResponseFactory.NoContent();
+    }
+
+    /// <summary>
+    /// Switches the status of a Server-to-Server (S2S) client
+    /// </summary>
+    /// <remarks>
+    /// This API toggles the status of an existing S2S client between active and inactive.
+    /// When inactive, all server-to-server authentication attempts using this client will be rejected
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the S2S client whose status will be switched</param>
+    /// <returns>Returns HTTP 200 when the S2S client status is successfully updated</returns>
+    [HttpPatch("{clientId}/status")]
+    public async Task<IActionResult> SwitchS2sClientStatusAsync(string clientId)
+    {
+        var command = new SwitchS2sClientStatusCommand(clientId);
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
+    /// <summary>
+    /// Deletes an existing Server-to-Server (S2S) client
+    /// </summary>
+    /// <remarks>
+    /// This API permanently removes an S2S client configuration and revokes
+    /// all associated credentials, preventing further server-to-server access
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the S2S client to be deleted</param>
+    /// <returns>Returns HTTP 204 (No Content) when the S2S client is successfully deleted</returns>
+    [HttpDelete("{clientId}")]
+    public async Task<IActionResult> DeleteS2sClientAsync(string clientId)
+    {
+        var command = new DeleteS2sClientCommand(clientId);
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+}

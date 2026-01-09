@@ -19,6 +19,10 @@ public sealed class GameXContext(
         IdentityUserToken<string>>(options)
 {
     public DbSet<AppSetting> AppSettings { get; set; }
+    public DbSet<S2SClient> S2sClients { get; set; }
+    public DbSet<S2SClientSetting> S2sClientSettings { get; set; }
+    public DbSet<S2SCredential> S2sCredentials { get; set; }
+    public DbSet<S2SCredentialMaterial> S2sCredentialMaterials { get; set; }
     public DbSet<User> AppUsers { get; set; }
     public DbSet<UserExtend> UserExtends { get; set; }
     public DbSet<UserRole> AppUserRoles { get; set; }
