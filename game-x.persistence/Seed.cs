@@ -353,6 +353,7 @@ public static class Seed
         await CreateEntity("骰子比大小", "dice1", GameConstants.PLATFORM_ID_ATG);
         await CreateEntity("通比妞妞", "casino-bull", GameConstants.PLATFORM_ID_ATG);
         await CreateEntity("搶莊妞妞", "banker-bull", GameConstants.PLATFORM_ID_ATG);
+        await CreateEntity("賽馬", "horse-racing", GameConstants.PLATFORM_ID_ATG);
     }
 
     private static async Task SeedPublicConversation(GameXContext db, CancellationToken ct = default)
