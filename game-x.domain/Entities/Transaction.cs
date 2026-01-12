@@ -158,7 +158,7 @@ public class Transaction : BaseEntity<int>, IAuditable
         if (!CanCancelTransaction())
             throw new BusinessRuleViolationException($"Current Status ({Status}) cannot cancel.");
 
-        Status = TransactionStatus.Failed;
+        Status = TransactionStatus.Cancelled;
     }
 
     public bool CanCancelTransaction()
