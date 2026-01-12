@@ -8,19 +8,19 @@ namespace game_x.application.Contract.Infrastructure.SignalR.Services;
 
 public interface ICsAdminHubService
 {
-    Task SendNotificationAsync(string adminId, NotificationDto message);
+    Task SendNotificationToOneAsync(string adminId, NotificationDto message);
 
     Task SendNotificationToAllAsync(NotificationDto message);
 
-    Task SendTransactionToAdminAsync(string adminId, AdminTransactionDto transaction);
+    Task SendTransactionToOneAsync(string adminId, AdminTransactionDto transaction);
 
-    Task SendVerificationToAdminAsync(string adminId, UserKycListItemDto message);
+    Task SendVerificationToOneAsync(string adminId, UserKycListItemDto message);
 
-    Task SendVerificationToAdminAsync(string adminId, BankAccountListItemDto message);
+    Task SendVerificationToOneAsync(string adminId, BankAccountListItemDto message);
 
-    Task NotifyOrderTxReviewedToAdminAsync(AdminOrderReviewedDto order);
+    Task NotifyOrderTxReviewedToOneAsync(AdminOrderReviewedDto order);
 
-    Task NotifyOrderKycReviewedToAdminAsync(AdminOrderReviewedDto order);
+    Task NotifyOrderKycReviewedToOneAsync(AdminOrderReviewedDto order);
 
-    Task NotifyOrderBankAccountReviewedToAdminAsync(AdminOrderReviewedDto order);
+    Task NotifyOrderBankAccountReviewedToOneAsync(AdminOrderReviewedDto order);
 }

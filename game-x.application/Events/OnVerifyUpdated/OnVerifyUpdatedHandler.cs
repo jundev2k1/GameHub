@@ -67,13 +67,13 @@ public sealed class OnVerifyUpdatedHandler(
             case VerificationStatusType.Kyc:
                 dto.UnderReviewCount = kycCount;
                 await adminHubService.NotifyOrderKycReviewedToAdminAsync(dto);
-                await csAdminHubService.NotifyOrderKycReviewedToAdminAsync(dto);
+                await csAdminHubService.NotifyOrderKycReviewedToOneAsync(dto);
                 break;
 
             case VerificationStatusType.BankAccount:
                 dto.UnderReviewCount += bankAccountCount;
                 await adminHubService.NotifyOrderBankAccountReviewedToAdminAsync(dto);
-                await csAdminHubService.NotifyOrderBankAccountReviewedToAdminAsync(dto);
+                await csAdminHubService.NotifyOrderBankAccountReviewedToOneAsync(dto);
                 break;
         }
     }

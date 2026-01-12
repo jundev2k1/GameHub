@@ -32,15 +32,19 @@ public sealed class TronUsdtWithdrawalHandler(
             ct: ct);
 
         var tx = await CreateTransaction(request, userId, feeAmount, token.Id,ct);
+        Transaction? createdTx = null;
         await unitOfWork.WithTransactionAsync( async () =>
         {
             balance.Freeze(totalAmount);
             await transactionRepo.AddAsync(tx, ct);
             await userBalanceRepo.PutUpdateAsync(balance, ct);
-            await eventDispatcher.Publish(new OnTransactionInternalCreatedEvent(tx.Adapt<TransactionInternalDto>()), ct);
+            await unitOfWork.CommitAsync(ct);
+
+            createdTx = await transactionRepo.GetInternalByIdAsync(tx.PublicId, ct);
+            await eventDispatcher.Publish(new OnTransactionInternalCreatedEvent(createdTx.Adapt<TransactionInternalDto>()), ct);
         }, ct);
         
-        return tx.Adapt<ListTransactionInternalDto>();
+        return createdTx.Adapt<ListTransactionInternalDto>();
     }
    
     private async Task ValidateKyc(

@@ -64,7 +64,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
             {
                 tx.Review(true, userAccessor.GetUserId());
                 ex = await SendUxmWithdrawalOrderAsync(tx, ct);
-            });
+            }, ct);
         }, ct);
 
         if (ex != null) throw ex;

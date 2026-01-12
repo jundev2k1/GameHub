@@ -154,7 +154,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 Status = x.Conv.Status,
                 CustomerId = x.Conv.CustomerId,
                 CustomerDisplayName = x.Conv.Customer != null ? x.Conv.Customer.Nickname : null,
-                CustomerAvatar =  x.Conv.Customer != null ? x.Conv.Customer.Avatar: null,
+                CustomerAvatar = x.Conv.Customer != null ? x.Conv.Customer.Avatar: null,
                 LastMessageAt = x.Conv.LastMessageAt,
                 LastGuestReadMessageId = x.Conv.LastGuestReadMessageId,
                 LastGuestReadAt = x.Conv.LastGuestReadAt,
@@ -177,8 +177,8 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                         Kind = x.LastMessage.Kind
                     },
                 UnreadCount = context.Messages.Count(m =>
-                    m.Conversation.Id == x.Conv.Id && x.Conv.LastGuestReadMessageId == null || m.Id > x.Conv.LastGuestReadMessageId 
-                )
+                    m.Conversation.Id == x.Conv.Id
+                && (x.Conv.LastGuestReadMessageId == null || m.Id > x.Conv.LastGuestReadMessageId))
             })
             .FirstOrDefaultAsync(ct);
     }

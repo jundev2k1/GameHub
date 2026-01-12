@@ -45,8 +45,7 @@ public sealed class MapsterConfig : IRegister
                 src => src.UserKyc != null && src.UserKyc.Status == KycStatus.Approved)
             .Map(
                 dest => dest.IsBankConfirmed,
-                src => src.UserBankAccounts != null
-                    && src.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved));
+                src => src.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved));
 
         cfg.NewConfig<UserDetailDto, GetSelfUserResult>()
             .Map(dest => dest.Roles, src => src.Roles.Items);
