@@ -25,6 +25,9 @@ public sealed class CancelTransactionHandler(
                 if (tx.SourceType != TransactionSourceType.Uxm && tx.Type != TransactionType.Withdrawal)
                     return;
 
+                // Only unfreeze balance with withdrawal transaction
+                if (tx.Type != TransactionType.Withdrawal) return;
+
                 // In case of that is a Uxm withdrawal transaction, Unlock balance
                 await userBalanceRepo.UpdateByTokenIdAsync(tx.UserId, tx.CryptoTokenId, balance =>
                 {
