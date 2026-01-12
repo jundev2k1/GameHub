@@ -143,7 +143,8 @@ public sealed class UserRepo(
 
         // Search with keyword
         if (keyword.IsNotNullOrEmpty())
-            query = query.Where(u => u.Nickname.ToLower().Contains(keyword.ToLower()));
+            query = query.Where(u => u.Nickname.ToLower().Contains(keyword.ToLower())
+                || (u.Email != null && u.Email.ToLower().Contains(keyword.ToLower())));
 
         // Search with kyc or bank account confirmed status
         var isUser = roles != null && roles.Contains(AppRoles.User);
