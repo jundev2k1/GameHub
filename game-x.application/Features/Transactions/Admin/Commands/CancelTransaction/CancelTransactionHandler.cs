@@ -36,7 +36,7 @@ public sealed class CancelTransactionHandler(
             }, ct);
         }, ct);
 
-        // Create notification and send it to related users
+        // Create a notification and send it to related users
         var @event = new OnTransactionUpdatedEvent(request.TransactionId);
         await eventDispatcher.Publish(@event, ct);
 
