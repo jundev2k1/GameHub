@@ -8,11 +8,13 @@ public sealed class AssignTalentHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     ILiveStreamRepo liveStreamRepo,
+    ILiveStreamManagerCacheService liveStreamManager,
     IFileManagerCacheService fileManagerCache) : ICommandHandler<AssignTalentCommand, UserSummaryInfo>
 {
     public async Task<UserSummaryInfo> Handle(AssignTalentCommand request, CancellationToken ct = default)
     {
         User? talent = null;
+        var streamKey = string.Empty;
         await liveStreamRepo.UpdateAsync(request.Id, async livestream =>
         {
             // Check overlapping times before assigning talent
@@ -28,6 +30,8 @@ public sealed class AssignTalentHandler(
             livestream.AssignStream(talent.Id);
 
             await unitOfWork.SaveChangesAsync(ct);
+
+            streamKey = livestream.StreamKey;
         }, ct);
 
         var result = talent.Adapt<UserSummaryInfo>();
@@ -37,6 +41,11 @@ public sealed class AssignTalentHandler(
             result.AvatarId = talent.AvatarId;
             result.Avatar = avatarInfo?.Url;
         }
+
+        // Update stream cache
+        var targetStream = liveStreamManager.GetLiveStreamStatus(streamKey);
+        targetStream!.AssignedTo = result;
+        liveStreamManager.UpdateStreamInfo(targetStream);
 
         return result;
     }
