@@ -48,7 +48,7 @@ public sealed class OnWithdrawalOrderReviewedHandler(
                 transaction.UserId,
                 transaction.Adapt<ClientTransactionDto>());
 
-            var (withdrawalCount, kycCount, bankAccountCount) = await adminStatistics.GetUnderReviewStatisticsAsync(ct);
+            var (withdrawalCount, _, _) = await adminStatistics.GetUnderReviewStatisticsAsync(ct);
             var orderReviewedDto = new AdminOrderReviewedDto
             {
                 Id = transaction.Id,
