@@ -1,6 +1,8 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.Dtos;
+using game_x.application.Features.LiveStreams.Categories.Dtos;
+using game_x.application.Features.LiveStreams.Streaming.Dtos;
 
 namespace game_x.application.Features.LiveStreams.Schedules.Commands.AssignTalent;
 
@@ -44,8 +46,16 @@ public sealed class AssignTalentHandler(
 
         // Update stream cache
         var targetStream = liveStreamManager.GetLiveStreamStatus(streamKey);
-        targetStream!.AssignedTo = result;
-        liveStreamManager.UpdateStreamInfo(targetStream);
+        if (targetStream != null)
+        {
+            targetStream!.AssignedTo = result;
+            liveStreamManager.UpdateStreamInfo(targetStream);
+        }
+        else
+        {
+            var schedule = await liveStreamRepo.GetByStreamKeyAsync(streamKey, ct);
+            await InitStreamInfoAsync(schedule, ct);
+        }
 
         return result;
     }
@@ -70,5 +80,32 @@ public sealed class AssignTalentHandler(
                     });
             }
         }
+    }
+
+    private async Task InitStreamInfoAsync(LivestreamSchedule streamSetting, CancellationToken ct)
+    {
+        var streamInfo = new LiveStreamStatusDto
+        {
+            LocalId = streamSetting.Id,
+            Id = streamSetting.PublicId,
+            Title = streamSetting.Title,
+            Description = streamSetting.Description ?? string.Empty,
+            ThumbnailId = streamSetting.ThumbnailId,
+            StreamKey = streamSetting.StreamKey,
+            LiveAt = streamSetting.StartAt ?? DateTime.UtcNow,
+            OfflineAt = streamSetting.EndAt,
+            StartTime = streamSetting.StartTime,
+            EndTime = streamSetting.EndTime,
+            ClientId = null,
+            AssignedTo = streamSetting.AssignedTo?.Adapt<UserSummaryInfo>(),
+            Categories = [.. streamSetting.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())]
+        };
+        if (streamSetting.AssignedTo != null && streamSetting.AssignedTo.Avatar != null)
+        {
+            var avatar = await fileManagerCache.GetFileInfo(streamSetting.AssignedTo.Avatar, ct);
+            streamInfo.AssignedTo!.Avatar = avatar?.Url;
+        }
+
+        liveStreamManager.InitLiveStream(streamInfo);
     }
 }

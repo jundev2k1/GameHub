@@ -56,8 +56,11 @@ public sealed class CreateScheduleHandler(
             await liveStreamRepo.CreateAsync(liveStreamEntity, ct);
         }, ct);
 
-        var schedule = await liveStreamRepo.GetByStreamKeyAsync(liveStreamEntity.StreamKey, ct);
-        await InitStreamInfo(schedule, ct);
+        if (request.TalentId.IsNotNullOrEmpty())
+        {
+            var schedule = await liveStreamRepo.GetByStreamKeyAsync(liveStreamEntity.StreamKey, ct);
+            await InitStreamInfo(schedule, ct);
+        }
 
         return Unit.Value;
     }
