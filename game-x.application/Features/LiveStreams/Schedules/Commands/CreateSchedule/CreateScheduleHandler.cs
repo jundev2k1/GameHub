@@ -1,5 +1,9 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Accounts.Dtos;
+using game_x.application.Features.LiveStreams.Categories.Dtos;
 using game_x.application.Features.LiveStreams.Schedules.Dtos;
+using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.share.Extensions;
 
 namespace game_x.application.Features.LiveStreams.Schedules.Commands.CreateSchedule;
@@ -8,7 +12,9 @@ public sealed class CreateScheduleHandler(
     IUnitOfWork unitOfWork,
     ILiveStreamRepo liveStreamRepo,
     ILiveStreamCategoryRepo liveStreamCategoryRepo,
-    IUserRepo userRepo) : ICommandHandler<CreateScheduleCommand>
+    IUserRepo userRepo,
+    IFileManagerCacheService fileManagerCache,
+    ILiveStreamManagerCacheService liveStreamManager) : ICommandHandler<CreateScheduleCommand>
 {
     public async Task<Unit> Handle(CreateScheduleCommand request, CancellationToken ct = default)
     {
@@ -49,6 +55,9 @@ public sealed class CreateScheduleHandler(
         {
             await liveStreamRepo.CreateAsync(liveStreamEntity, ct);
         }, ct);
+
+        var schedule = await liveStreamRepo.GetByStreamKeyAsync(liveStreamEntity.StreamKey, ct);
+        await InitStreamInfo(schedule, ct);
 
         return Unit.Value;
     }
@@ -91,5 +100,32 @@ public sealed class CreateScheduleHandler(
                     });
             }
         }
+    }
+
+    private async Task InitStreamInfo(LivestreamSchedule streamSetting, CancellationToken ct)
+    {
+        var streamInfo = new LiveStreamStatusDto
+        {
+            LocalId = streamSetting.Id,
+            Id = streamSetting.PublicId,
+            Title = streamSetting.Title,
+            Description = streamSetting.Description ?? string.Empty,
+            ThumbnailId = streamSetting.ThumbnailId,
+            StreamKey = streamSetting.StreamKey,
+            LiveAt = streamSetting.StartAt ?? DateTime.UtcNow,
+            OfflineAt = streamSetting.EndAt,
+            StartTime = streamSetting.StartTime,
+            EndTime = streamSetting.EndTime,
+            ClientId = null,
+            AssignedTo = streamSetting.AssignedTo?.Adapt<UserSummaryInfo>(),
+            Categories = [.. streamSetting.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())]
+        };
+        if (streamSetting.AssignedTo != null && streamSetting.AssignedTo.Avatar != null)
+        {
+            var avatar = await fileManagerCache.GetFileInfo(streamSetting.AssignedTo.Avatar, ct);
+            streamInfo.AssignedTo!.Avatar = avatar?.Url;
+        }
+
+        liveStreamManager.InitLiveStream(streamInfo);
     }
 }

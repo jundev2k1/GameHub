@@ -9,7 +9,11 @@ public interface ILiveStreamManagerCacheService
     #region Stream Management
     Dictionary<string, string[]> GetAllStreamKeys();
 
+    Task InitLiveStreamsAsync();
+
     void InitLiveStream(LiveStreamStatusDto streamInfo);
+
+    void UpdateStreamInfo(LiveStreamStatusDto streamInfo);
 
     void ConnectLiveStream(string streamKey);
 

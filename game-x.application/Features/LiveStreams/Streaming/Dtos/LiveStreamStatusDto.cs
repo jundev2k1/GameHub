@@ -22,7 +22,7 @@ public sealed class LiveStreamStatusDto
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public LiveStreamCategorySummaryDto[] Categories { get; set; } = [];
-    public string ClientId { get; set; } = string.Empty;
+    public string? ClientId { get; set; }
     public UserSummaryInfo? AssignedTo { get; set; }
     public List<BlackListItemDto> BlackList { get; set; } = [];
 }

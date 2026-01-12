@@ -1,6 +1,8 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
+using game_x.application.Features.Accounts.Dtos;
+using game_x.application.Features.LiveStreams.Categories.Dtos;
 using game_x.application.Features.LiveStreams.Gifts.Dtos;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.share.Extensions;
@@ -10,6 +12,7 @@ namespace game_x.infrastructure.Caching;
 
 public sealed class LiveStreamManagerCacheService(
     IMemoryCache cache,
+    ILiveStreamRepo liveStreamRepo,
     ILiveStreamGiftRepo liveStreamGiftRepo,
     ILiveStreamDonationRepo liveStreamDonationRepo,
     IFileManagerCacheService fileManagerCache)
@@ -23,6 +26,36 @@ public sealed class LiveStreamManagerCacheService(
         var cacheKey = $"{LiveStreamPrefix}streams";
         var result = Get<Dictionary<string, string[]>>(cacheKey) ?? [];
         return result;
+    }
+
+    public async Task InitLiveStreamsAsync()
+    {
+        var schedules = await liveStreamRepo.GetActiveStreamsAsync();
+        foreach (var schedule in schedules)
+        {
+            var streamInfo = new LiveStreamStatusDto
+            {
+                LocalId = schedule.Id,
+                Id = schedule.PublicId,
+                Title = schedule.Title,
+                Description = schedule.Description ?? string.Empty,
+                ThumbnailId = schedule.ThumbnailId,
+                StreamKey = schedule.StreamKey,
+                LiveAt = schedule.StartAt ?? DateTime.UtcNow,
+                OfflineAt = schedule.EndAt,
+                StartTime = schedule.StartTime,
+                EndTime = schedule.EndTime,
+                ClientId = null,
+                AssignedTo = schedule.AssignedTo?.Adapt<UserSummaryInfo>(),
+                Categories = [.. schedule.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())]
+            };
+            if (schedule.AssignedTo != null && schedule.AssignedTo.Avatar != null)
+            {
+                var avatar = await fileManagerCache.GetFileInfo(schedule.AssignedTo.Avatar);
+                streamInfo.AssignedTo!.Avatar = avatar?.Url;
+            }
+            InitLiveStream(streamInfo);
+        }
     }
 
     public void InitLiveStream(LiveStreamStatusDto streamInfo)
@@ -41,6 +74,12 @@ public sealed class LiveStreamManagerCacheService(
             ? [.. streamList, streamInfo.StreamKey]
             : [streamInfo.StreamKey];
         Set(cacheListKey, streamDic);
+    }
+
+    public void UpdateStreamInfo(LiveStreamStatusDto streamInfo)
+    {
+        var cacheKey = $"{LiveStreamPrefix}streams:{streamInfo.StreamKey}";
+        Set(cacheKey, streamInfo);
     }
 
     public void ConnectLiveStream(string streamKey)

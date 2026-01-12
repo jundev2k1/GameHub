@@ -40,6 +40,18 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             pageSize);
     }
 
+    public async Task<LivestreamSchedule[]> GetActiveStreamsAsync(CancellationToken ct = default)
+    {
+        LiveStreamStatus[] activeStatus = [LiveStreamStatus.Scheduled, LiveStreamStatus.Live];
+        return await context.LiveStreamSchedules
+            .AsNoTracking()
+            .Include(ls => ls.CategoryMappings)
+            .Include(ls => ls.Thumbnail)
+            .Include(ls => ls.AssignedTo)
+            .Where(ls => activeStatus.Contains(ls.Status) && ls.AssignedId != null)
+            .ToArrayAsync(ct);
+    }
+
     public async Task<LivestreamSchedule[]> GetExpiredStreams(CancellationToken ct = default)
     {
         var now = DateTime.UtcNow;

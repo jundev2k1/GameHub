@@ -31,7 +31,7 @@ public sealed class PublishStreamHandler(
             if (streamSetting.EndTime < DateTime.UtcNow)
                 throw new ForbiddenException("Stream has ended.");
 
-            await InitStreamInfo(streamSetting, request.ClientId, ct);
+            InitStreamInfo(streamSetting, request.ClientId);
         }
 
         // Check if the stream has ended for more than 10 minutes
@@ -41,6 +41,9 @@ public sealed class PublishStreamHandler(
             && streamInfo.OfflineAt.HasValue
             && ((DateTime.UtcNow - streamInfo.OfflineAt.Value).Minutes > 10))
             throw new ForbiddenException("Stream has ended.");
+
+        // Update talent info
+        await UpdateStreamInfoAsync(streamInfo, streamSetting, request.ClientId, ct);
 
         // Connect to the stream if not connected
         liveStreamManager.ConnectLiveStream(streamSetting.StreamKey);
@@ -62,7 +65,7 @@ public sealed class PublishStreamHandler(
         return Unit.Value;
     }
 
-    private async Task InitStreamInfo(LivestreamSchedule streamSetting, string clientId, CancellationToken ct)
+    private void InitStreamInfo(LivestreamSchedule streamSetting, string clientId)
     {
         var streamInfo = new LiveStreamStatusDto
         {
@@ -80,12 +83,22 @@ public sealed class PublishStreamHandler(
             AssignedTo = streamSetting.AssignedTo?.Adapt<UserSummaryInfo>(),
             Categories = [.. streamSetting.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())]
         };
+
+        liveStreamManager.InitLiveStream(streamInfo);
+    }
+
+    private async Task UpdateStreamInfoAsync(
+        LiveStreamStatusDto streamInfo,
+        LivestreamSchedule streamSetting,
+        string clientId,
+        CancellationToken ct)
+    {
+        streamInfo.ClientId = clientId;
         if (streamSetting.AssignedTo != null && streamSetting.AssignedTo.Avatar != null)
         {
             var avatar = await fileManagerCache.GetFileInfo(streamSetting.AssignedTo.Avatar, ct);
             streamInfo.AssignedTo!.Avatar = avatar?.Url;
         }
-
-        liveStreamManager.InitLiveStream(streamInfo);
+        liveStreamManager.UpdateStreamInfo(streamInfo);
     }
 }
