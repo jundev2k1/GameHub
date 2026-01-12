@@ -16,7 +16,8 @@ public sealed class GetMyTransactionsValidator : AbstractValidator<GetMyTransact
         nameof(ListTransactionInternalDto.ActualAmount),
         nameof(ListTransactionInternalDto.Type),
         nameof(ListTransactionInternalDto.UpdatedAt),
-        nameof(ListTransactionInternalDto.CreatedAt)
+        nameof(ListTransactionInternalDto.CreatedAt),
+        nameof(ListTransactionInternalDto.ExpiredAt)
     ];
     
     private readonly string[] _allowSortFields =
