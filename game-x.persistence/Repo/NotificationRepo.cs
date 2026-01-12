@@ -86,6 +86,13 @@ public sealed class NotificationRepo(GameXContext context) : INotificationRepo, 
         await context.Notifications.AddAsync(notification, ct);
     }
 
+    public async Task AddRangeNotificationsAsync(
+        IEnumerable<Notification> notifications,
+        CancellationToken ct = default)
+    {
+        await context.Notifications.AddRangeAsync(notifications, ct);
+    }
+
     public async Task MarkAllAsReadAsync(string userId, CancellationToken ct = default)
     {
         await context.Notifications

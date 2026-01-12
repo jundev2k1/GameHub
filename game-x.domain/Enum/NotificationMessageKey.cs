@@ -33,7 +33,7 @@ public enum NotificationMessageKey : short
     Friend_Request_Created = 800,
     Friend_Request_Accepted = 801,
     Direct_Mention = 802,
-    
+
     // Enum group key: Live Stream
     LiveStream_Upcoming = 900,
     LiveStream_TimeoutCancelled = 901,
@@ -42,7 +42,7 @@ public enum NotificationMessageKey : short
     LiveStream_ScheduleCancelled = 904,
     LiveStream_DonationSuccessful = 905,
     LiveStream_DonationReceived = 906,
+    LiveStream_Started = 907,
 
-    
     // Enum group key: ...
 }

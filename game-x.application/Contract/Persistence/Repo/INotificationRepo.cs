@@ -21,6 +21,8 @@ public interface INotificationRepo
 
     Task AddNotificationAsync(Notification notification, CancellationToken ct = default);
 
+    Task AddRangeNotificationsAsync(IEnumerable<Notification> notifications, CancellationToken ct = default);
+
     Task MarkAllAsReadAsync(string userId, CancellationToken ct = default);
 
     Task MarkAsReadAsync(Guid notificationCode, string userId, CancellationToken ct = default);

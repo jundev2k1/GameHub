@@ -1,4 +1,6 @@
-﻿namespace game_x.application.Features.LiveStreams.Remainders.Commands.UpdateStreamRemainders;
+﻿using System.Text.Json.Serialization;
+
+namespace game_x.application.Features.LiveStreams.Remainders.Commands.UpdateStreamRemainders;
 
 public record UpdateStreamRemaindersCommand(
     [property: JsonIgnore] string? StreamKey,

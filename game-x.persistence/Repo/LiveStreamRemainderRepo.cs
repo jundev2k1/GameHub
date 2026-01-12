@@ -37,6 +37,16 @@ public sealed class LiveStreamRemainderRepo(GameXContext dbContext) : ILiveStrea
             .ToArrayAsync(ct);
     }
 
+    public async Task<LiveStreamReminder[]> GetRemaindersForNotificationByStreamKeyAsync(string streamKey, CancellationToken ct = default)
+    {
+        return await dbContext.LiveStreamRemainders
+            .AsNoTracking()
+            .Include(lsr => lsr.User)
+            .Include(lsr => lsr.Schedule)
+            .Where(lsr => lsr.Schedule.StreamKey == streamKey && lsr.Schedule.Status == LiveStreamStatus.Scheduled)
+            .ToArrayAsync(ct);
+    }
+
     public async Task CreateAsync(LiveStreamReminder remainder, CancellationToken ct = default)
     {
         await dbContext.LiveStreamRemainders.AddAsync(remainder, ct);
@@ -56,6 +66,15 @@ public sealed class LiveStreamRemainderRepo(GameXContext dbContext) : ILiveStrea
             ?? throw new NotFoundException("Target Remainder was not found.");
 
         target.MarkAsSent();
+    }
+
+    public async Task MarkAsSentsAsync(int streamId, NotificationChannel channel, CancellationToken ct = default)
+    {
+        await dbContext.LiveStreamRemainders
+            .Where(lr => lr.ScheduleId == streamId && lr.Channel == channel)
+            .ExecuteUpdateAsync(setter => setter
+                .SetProperty(lr => lr.Status, ReminderStatus.Sent)
+                .SetProperty(lr => lr.SentAt, DateTime.UtcNow), ct);
     }
 
     public async Task DeleteAsync(string userId, int streamId, CancellationToken ct = default)

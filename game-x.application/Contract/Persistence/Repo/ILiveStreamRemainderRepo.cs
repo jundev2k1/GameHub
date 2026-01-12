@@ -8,11 +8,15 @@ public interface ILiveStreamRemainderRepo
 
     Task<LiveStreamReminder[]> GetAllPendingRemaindersAsync(string userId, CancellationToken ct = default);
 
+    Task<LiveStreamReminder[]> GetRemaindersForNotificationByStreamKeyAsync(string streamKey, CancellationToken ct = default);
+
     Task CreateAsync(LiveStreamReminder remainder, CancellationToken ct = default);
 
     Task CreateRangeAsync(IEnumerable<LiveStreamReminder> remainders, CancellationToken ct = default);
 
     Task MarkAsSentAsync(string userId, int streamId, NotificationChannel channel, CancellationToken ct = default);
+
+    Task MarkAsSentsAsync(int streamId, NotificationChannel channel, CancellationToken ct = default);
 
     Task DeleteAsync(string userId, int streamId, CancellationToken ct = default);
     Task DeleteAsync(string userId, int streamId, NotificationChannel channel, CancellationToken ct = default);

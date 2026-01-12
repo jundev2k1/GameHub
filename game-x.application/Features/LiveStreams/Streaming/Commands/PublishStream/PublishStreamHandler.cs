@@ -1,9 +1,11 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Contract.Jobs;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.Dtos;
 using game_x.application.Features.LiveStreams.Categories.Dtos;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
+using game_x.application.Features.LiveStreams.Streaming.Jobs;
 
 namespace game_x.application.Features.LiveStreams.Streaming.Commands.PublishStream;
 
@@ -12,7 +14,8 @@ public sealed class PublishStreamHandler(
     ILiveStreamRepo liveStreamRepo,
     ILiveStreamManagerCacheService liveStreamManager,
     IFileManagerCacheService fileManagerCache,
-    ILiveStreamHubService liveStreamHub) : ICommandHandler<PublishStreamCommand>
+    ILiveStreamHubService liveStreamHub,
+    IJobScheduler jobScheduler) : ICommandHandler<PublishStreamCommand>
 {
     public async Task<Unit> Handle(PublishStreamCommand request, CancellationToken ct = default)
     {
@@ -61,6 +64,11 @@ public sealed class PublishStreamHandler(
             schedule.StartStream();
             await unitOfWork.SaveChangesAsync(ct);
         }, ct);
+
+        // Send notifications for all subscribers
+        jobScheduler.Schedule<SendRemaindersJob>(
+            job => job.ExecuteAsync(streamInfo.StreamKey, ct),
+            TimeSpan.FromSeconds(0));
 
         return Unit.Value;
     }
