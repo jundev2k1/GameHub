@@ -13,7 +13,7 @@ namespace game_x.infrastructure.SignalR.Services;
 public sealed class CsAdminHubService(ActorHubFacade<CsAdminHub, ICsAdminHub> actorHub)
     : ICsAdminHubService, IHubServices
 {
-    public async Task SendNotificationAsync(string userId, NotificationDto message)
+    public async Task SendNotificationToOneAsync(string userId, NotificationDto message)
     {
         await actorHub.Cs(userId).ReceiveNotification(message);
     }
@@ -23,32 +23,32 @@ public sealed class CsAdminHubService(ActorHubFacade<CsAdminHub, ICsAdminHub> ac
         await actorHub.All().ReceiveNotification(message);
     }
     
-    public async Task SendTransactionToAdminAsync(string userId, AdminTransactionDto transaction)
+    public async Task SendTransactionToOneAsync(string userId, AdminTransactionDto transaction)
     {
         await actorHub.Cs(userId).TransactionUpdated(transaction);
     }
 
-    public async Task SendVerificationToAdminAsync(string userId, UserKycListItemDto verification)
+    public async Task SendVerificationToOneAsync(string userId, UserKycListItemDto verification)
     {
         await actorHub.Cs(userId).KycCreated(verification);
     }
 
-    public async Task SendVerificationToAdminAsync(string userId, BankAccountListItemDto verification)
+    public async Task SendVerificationToOneAsync(string userId, BankAccountListItemDto verification)
     {
         await actorHub.Cs(userId).BankAccountCreated(verification);
     }
 
-    public async Task NotifyOrderTxReviewedToAdminAsync(AdminOrderReviewedDto order)
+    public async Task NotifyOrderTxReviewedToOneAsync(AdminOrderReviewedDto order)
     {
         await actorHub.CsAll().TransactionReviewed(order);
     }
 
-    public async Task NotifyOrderKycReviewedToAdminAsync(AdminOrderReviewedDto order)
+    public async Task NotifyOrderKycReviewedToOneAsync(AdminOrderReviewedDto order)
     {
         await actorHub.CsAll().KycReviewed(order);
     }
 
-    public async Task NotifyOrderBankAccountReviewedToAdminAsync(AdminOrderReviewedDto order)
+    public async Task NotifyOrderBankAccountReviewedToOneAsync(AdminOrderReviewedDto order)
     {
         await actorHub.CsAll().BankAccountReviewed(order);
     }

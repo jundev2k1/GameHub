@@ -56,7 +56,7 @@ public sealed class OnWithdrawalOrderReviewedHandler(
                 UnderReviewCount = withdrawalCount,
             };
             await adminHubService.NotifyOrderTxReviewedToAdminAsync(orderReviewedDto);
-            await csAdminHubService.NotifyOrderTxReviewedToAdminAsync(orderReviewedDto);
+            await csAdminHubService.NotifyOrderTxReviewedToOneAsync(orderReviewedDto);
 
             await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
         }
