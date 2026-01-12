@@ -252,6 +252,22 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
                 && (x.TransactionExternal.GamePlatformId == localPlatformId), ct);
     }
 
+    public async Task<int> ExpiredTransactionAsync(int expireTimeSeconds, CancellationToken ct = default)
+    {
+        var threshold = DateTime.UtcNow.AddSeconds(-expireTimeSeconds);
+        
+        var expiredTransactions = await context.Transactions
+            .Where(x => 
+                x.Type == TransactionType.Deposit
+                && x.Status == TransactionStatus.Pending
+                && x.ExpiredAt == null
+                && x.CreatedAt <= threshold)
+            .ToListAsync(ct);
+        
+        foreach (var tx in expiredTransactions) { tx.Expired(); }
+        return expiredTransactions.Count;
+    }
+
     public async Task AddAsync(Transaction transaction, CancellationToken ct = default)
     {
         await context.Transactions.AddAsync(transaction, ct);

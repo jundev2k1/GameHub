@@ -50,6 +50,8 @@ public interface ITransactionRepo
 
     Task<Transaction?> GetLatestExternalTransactionAsync(string userId, int localPlatformId, CancellationToken ct = default);
     
+    Task<int> ExpiredTransactionAsync(int expireTimeSeconds, CancellationToken ct = default);
+    
     Task AddAsync(Transaction transaction, CancellationToken ct = default);
 
     /// <summary>Only update the fields that are passed in.</summary>

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20260109095104_AddTransactionExpired")]
+    partial class AddTransactionExpired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1806,57 +1809,6 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_livestream_gift_prices_crypto_token_id");
 
                     b.ToTable("livestream_gift_prices", (string)null);
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.LiveStreamReminder", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<short>("Channel")
-                        .HasColumnType("smallint")
-                        .HasColumnName("channel");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("ScheduleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("schedule_id");
-
-                    b.Property<DateTime?>("SentAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("sent_at");
-
-                    b.Property<short>("Status")
-                        .HasColumnType("smallint")
-                        .HasColumnName("status");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_livestream_remainders");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_livestream_remainders_user_id");
-
-                    b.HasIndex("ScheduleId", "UserId", "Channel")
-                        .IsUnique()
-                        .HasDatabaseName("ix_livestream_remainders_schedule_id_user_id_channel");
-
-                    b.ToTable("livestream_remainders", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.LivestreamSchedule", b =>
@@ -4380,27 +4332,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("CryptoToken");
 
                     b.Navigation("LiveStreamGift");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.LiveStreamReminder", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.LivestreamSchedule", "Schedule")
-                        .WithMany()
-                        .HasForeignKey("ScheduleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_livestream_remainders_live_stream_schedules_schedule_id");
-
-                    b.HasOne("game_x.domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_livestream_remainders_asp_net_users_user_id");
-
-                    b.Navigation("Schedule");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.LivestreamSchedule", b =>
