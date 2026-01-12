@@ -31,7 +31,7 @@ public sealed class LiveStreamController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPost("{streamKey}/reminders")]
+    [HttpPost("{streamKey}/remainders")]
     public async Task<IActionResult> SubscribeStreamAsync(string streamKey, SubscribeStreamCommand command)
     {
         await Mediator.Send(command with { StreamKey = streamKey });
