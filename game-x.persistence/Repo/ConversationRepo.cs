@@ -178,8 +178,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                     },
                 UnreadCount = context.Messages.Count(m =>
                     m.Conversation.Id == x.Conv.Id
-                    && x.Conv.LastGuestReadMessageId == null || m.Id > x.Conv.LastGuestReadMessageId 
-                )
+                && (x.Conv.LastGuestReadMessageId == null || m.Id > x.Conv.LastGuestReadMessageId))
             })
             .FirstOrDefaultAsync(ct);
     }
