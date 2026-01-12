@@ -1,15 +1,15 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Features.LiveStreams.Remainders.Commands.UpdateStreamRemainders;
+namespace game_x.application.Features.LiveStreams.Reminders.Commands.UpdateStreamReminders;
 
-public sealed class UpdateStreamRemaindersHandler(
+public sealed class UpdateStreamRemindersHandler(
     IUserAccessor userAccessor,
     IUnitOfWork unitOfWork,
     ILiveStreamRepo liveStreamRepo,
-    ILiveStreamRemainderRepo streamRemainderRepo) : ICommandHandler<UpdateStreamRemaindersCommand>
+    ILiveStreamReminderRepo streamRemainderRepo) : ICommandHandler<UpdateStreamRemindersCommand>
 {
-    public async Task<Unit> Handle(UpdateStreamRemaindersCommand request, CancellationToken ct = default)
+    public async Task<Unit> Handle(UpdateStreamRemindersCommand request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
         var schedule = await liveStreamRepo.GetByStreamKeyAsync(request.StreamKey!, ct);
@@ -25,10 +25,10 @@ public sealed class UpdateStreamRemaindersHandler(
             // Create new channels
             if (request.Channels.Length > 0)
             {
-                var remainders = request.Channels
+                var reminders = request.Channels
                     .Select(channel => LiveStreamReminder.Create(schedule.Id, userId, channel))
                     .ToArray();
-                await streamRemainderRepo.CreateRangeAsync(remainders, ct);
+                await streamRemainderRepo.CreateRangeAsync(reminders, ct);
             }
         }, ct);
 

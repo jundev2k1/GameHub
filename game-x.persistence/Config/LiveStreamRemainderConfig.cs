@@ -6,7 +6,7 @@ public sealed class LiveStreamRemainderConfig : IEntityTypeConfiguration<LiveStr
 {
     public void Configure(EntityTypeBuilder<LiveStreamReminder> builder)
     {
-        builder.ToTable("livestream_remainders");
+        builder.ToTable("livestream_reminders");
 
         builder.HasKey(lr => lr.Id);
 

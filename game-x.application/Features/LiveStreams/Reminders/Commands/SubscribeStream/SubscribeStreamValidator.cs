@@ -1,4 +1,4 @@
-﻿namespace game_x.application.Features.LiveStreams.Remainders.Commands.SubscribeStream;
+﻿namespace game_x.application.Features.LiveStreams.Reminders.Commands.SubscribeStream;
 
 public sealed class SubscribeStreamValidator : AbstractValidator<SubscribeStreamCommand>
 {

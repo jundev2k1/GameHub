@@ -4,11 +4,11 @@ using game_x.application.Exceptions;
 
 namespace game_x.persistence.Repo;
 
-public sealed class LiveStreamRemainderRepo(GameXContext dbContext) : ILiveStreamRemainderRepo, IRepository
+public sealed class LiveStreamReminderRepo(GameXContext dbContext) : ILiveStreamReminderRepo, IRepository
 {
     public async Task<int> CountAllByStreamIdAsync(int streamId, CancellationToken ct = default)
     {
-        return await dbContext.LiveStreamRemainders
+        return await dbContext.LiveStreamReminders
             .AsNoTracking()
             .CountAsync(lr => lr.ScheduleId == streamId && lr.Status == ReminderStatus.Pending, ct);
     }
@@ -19,7 +19,7 @@ public sealed class LiveStreamRemainderRepo(GameXContext dbContext) : ILiveStrea
         int count,
         CancellationToken ct = default)
     {
-        return await dbContext.LiveStreamRemainders
+        return await dbContext.LiveStreamReminders
             .AsNoTracking()
             .Where(lr => lr.ScheduleId == streamId && lr.Status == ReminderStatus.Pending)
             .Skip(offset)
@@ -27,9 +27,9 @@ public sealed class LiveStreamRemainderRepo(GameXContext dbContext) : ILiveStrea
             .ToArrayAsync(ct);
     }
 
-    public async Task<LiveStreamReminder[]> GetAllPendingRemaindersAsync(string userId, CancellationToken ct = default)
+    public async Task<LiveStreamReminder[]> GetAllPendingRemindersAsync(string userId, CancellationToken ct = default)
     {
-        return await dbContext.LiveStreamRemainders
+        return await dbContext.LiveStreamReminders
             .AsNoTracking()
             .Include(lr => lr.Schedule)
             .Include(lr => lr.User)
@@ -37,9 +37,9 @@ public sealed class LiveStreamRemainderRepo(GameXContext dbContext) : ILiveStrea
             .ToArrayAsync(ct);
     }
 
-    public async Task<LiveStreamReminder[]> GetRemaindersForNotificationByStreamKeyAsync(string streamKey, CancellationToken ct = default)
+    public async Task<LiveStreamReminder[]> GetRemindersForNotificationByStreamKeyAsync(string streamKey, CancellationToken ct = default)
     {
-        return await dbContext.LiveStreamRemainders
+        return await dbContext.LiveStreamReminders
             .AsNoTracking()
             .Include(lsr => lsr.User)
             .Include(lsr => lsr.Schedule)
@@ -47,30 +47,30 @@ public sealed class LiveStreamRemainderRepo(GameXContext dbContext) : ILiveStrea
             .ToArrayAsync(ct);
     }
 
-    public async Task CreateAsync(LiveStreamReminder remainder, CancellationToken ct = default)
+    public async Task CreateAsync(LiveStreamReminder reminder, CancellationToken ct = default)
     {
-        await dbContext.LiveStreamRemainders.AddAsync(remainder, ct);
+        await dbContext.LiveStreamReminders.AddAsync(reminder, ct);
     }
 
-    public async Task CreateRangeAsync(IEnumerable<LiveStreamReminder> remainders, CancellationToken ct = default)
+    public async Task CreateRangeAsync(IEnumerable<LiveStreamReminder> reminders, CancellationToken ct = default)
     {
-        await dbContext.LiveStreamRemainders.AddRangeAsync(remainders, ct);
+        await dbContext.LiveStreamReminders.AddRangeAsync(reminders, ct);
     }
 
     public async Task MarkAsSentAsync(string userId, int streamId, NotificationChannel channel, CancellationToken ct = default)
     {
-        var target = await dbContext.LiveStreamRemainders
+        var target = await dbContext.LiveStreamReminders
             .FirstOrDefaultAsync(lr => (lr.UserId == userId)
                 && (lr.ScheduleId == streamId)
                 && (lr.Channel == channel), ct)
-            ?? throw new NotFoundException("Target Remainder was not found.");
+            ?? throw new NotFoundException("Target Reminder was not found.");
 
         target.MarkAsSent();
     }
 
     public async Task MarkAsSentsAsync(int streamId, NotificationChannel channel, CancellationToken ct = default)
     {
-        await dbContext.LiveStreamRemainders
+        await dbContext.LiveStreamReminders
             .Where(lr => lr.ScheduleId == streamId && lr.Channel == channel)
             .ExecuteUpdateAsync(setter => setter
                 .SetProperty(lr => lr.Status, ReminderStatus.Sent)
@@ -79,7 +79,7 @@ public sealed class LiveStreamRemainderRepo(GameXContext dbContext) : ILiveStrea
 
     public async Task DeleteAsync(string userId, int streamId, CancellationToken ct = default)
     {
-        await dbContext.LiveStreamRemainders
+        await dbContext.LiveStreamReminders
             .Where(lr => (lr.UserId == userId)
                 && (lr.ScheduleId == streamId))
             .ExecuteDeleteAsync(ct);
@@ -87,7 +87,7 @@ public sealed class LiveStreamRemainderRepo(GameXContext dbContext) : ILiveStrea
 
     public async Task DeleteAsync(string userId, int streamId, NotificationChannel channel, CancellationToken ct = default)
     {
-        await dbContext.LiveStreamRemainders
+        await dbContext.LiveStreamReminders
             .Where(lr => (lr.UserId == userId)
                 && (lr.ScheduleId == streamId)
                 && (lr.Channel == channel))

@@ -66,7 +66,7 @@ public sealed class PublishStreamHandler(
         }, ct);
 
         // Send notifications for all subscribers
-        jobScheduler.Schedule<SendRemaindersJob>(
+        jobScheduler.Schedule<SendRemindersJob>(
             job => job.ExecuteAsync(streamInfo.StreamKey, ct),
             TimeSpan.FromSeconds(0));
 

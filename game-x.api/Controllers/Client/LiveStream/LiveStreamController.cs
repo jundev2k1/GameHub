@@ -1,6 +1,6 @@
 ﻿using game_x.api.Dtos;
-using game_x.application.Features.LiveStreams.Remainders.Commands.SubscribeStream;
-using game_x.application.Features.LiveStreams.Remainders.Commands.UpdateStreamRemainders;
+using game_x.application.Features.LiveStreams.Reminders.Commands.SubscribeStream;
+using game_x.application.Features.LiveStreams.Reminders.Commands.UpdateStreamReminders;
 using game_x.application.Features.LiveStreams.Streaming.Commands.JoinLiveStream;
 using game_x.application.Features.LiveStreams.Streaming.Queries.GetChatMessageInStream;
 
@@ -32,7 +32,7 @@ public sealed class LiveStreamController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPost("{streamKey}/remainders")]
+    [HttpPost("{streamKey}/reminders")]
     public async Task<IActionResult> SubscribeStreamAsync(string streamKey, SubscribeStreamCommand command)
     {
         await Mediator.Send(command with { StreamKey = streamKey });
@@ -40,8 +40,8 @@ public sealed class LiveStreamController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPut("{streamKey}/remainders")]
-    public async Task<IActionResult> UpdateStreamRemainderAsync(string streamKey, UpdateStreamRemaindersCommand command)
+    [HttpPut("{streamKey}/reminders")]
+    public async Task<IActionResult> UpdateStreamRemainderAsync(string streamKey, UpdateStreamRemindersCommand command)
     {
         await Mediator.Send(command with { StreamKey = streamKey });
         return ApiResponseFactory.NoContent();

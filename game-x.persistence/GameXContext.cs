@@ -58,7 +58,7 @@ public sealed class GameXContext(
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<LivestreamSchedule> LiveStreamSchedules { get; set; }
     public DbSet<LiveStreamCategory> LiveStreamCategories { get; set; }
-    public DbSet<LiveStreamReminder> LiveStreamRemainders { get; set; }
+    public DbSet<LiveStreamReminder> LiveStreamReminders { get; set; }
     public DbSet<SocialLink> SocialLinks { get; set; }
     public DbSet<LiveStreamGift> LiveStreamGifts { get; set; }
     public DbSet<LiveStreamDonation> LiveStreamDonations { get; set; }

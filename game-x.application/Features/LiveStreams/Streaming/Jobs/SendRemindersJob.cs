@@ -8,40 +8,40 @@ using System.Text.Json;
 
 namespace game_x.application.Features.LiveStreams.Streaming.Jobs;
 
-public sealed class SendRemaindersJob(
-    ILiveStreamRemainderRepo streamRemainderRepo,
+public sealed class SendRemindersJob(
+    ILiveStreamReminderRepo streamReminderRepo,
     IUnitOfWork unitOfWork,
     INotificationRepo notificationRepo,
     IClientHubService clientHubService,
     IEmailService emailService,
-    IAppLogger<SendRemaindersJob> logger)
+    IAppLogger<SendRemindersJob> logger)
 {
     public async Task ExecuteAsync(string streamKey, CancellationToken ct = default)
     {
-        logger.LogInformation("[Job] SendRemaindersJob for Stream ({StreamKey})", streamKey);
-        var remainders = await streamRemainderRepo
-            .GetRemaindersForNotificationByStreamKeyAsync(streamKey, ct);
-        var remainderGroups = remainders.GroupBy(r => r.Channel);
-        foreach (var group in remainderGroups)
+        logger.LogInformation("[Job] SendRemindersJob for Stream ({StreamKey})", streamKey);
+        var reminders = await streamReminderRepo
+            .GetRemindersForNotificationByStreamKeyAsync(streamKey, ct);
+        var reminderGroups = reminders.GroupBy(r => r.Channel);
+        foreach (var group in reminderGroups)
         {
             switch (group.Key)
             {
                 case NotificationChannel.Push:
-                    await PushNotificationAsync(remainders, ct);
+                    await PushNotificationAsync(reminders, ct);
                     break;
 
                 case NotificationChannel.Email:
-                    await SendEmailAsync(remainders, ct);
+                    await SendEmailAsync(reminders, ct);
                     break;
 
                 case NotificationChannel.SMS:
-                    await SendSmsAsync(remainders, ct);
+                    await SendSmsAsync(reminders, ct);
                     break;
             }
         }
     }
 
-    private async Task PushNotificationAsync(IEnumerable<LiveStreamReminder> remainders, CancellationToken ct)
+    private async Task PushNotificationAsync(IEnumerable<LiveStreamReminder> reminders, CancellationToken ct)
     {
         static string CreateMetadata(LiveStreamReminder reminder)
         {
@@ -58,7 +58,7 @@ public sealed class SendRemaindersJob(
         IEnumerable<Notification> notifications = [];
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            notifications = remainders
+            notifications = reminders
                 .Select(r => Notification.Create(
                     NotificationMessageKey.LiveStream_Started,
                     r.UserId,
@@ -70,9 +70,9 @@ public sealed class SendRemaindersJob(
             // Create notifications in DB
             await notificationRepo.AddRangeNotificationsAsync(notifications, ct);
 
-            // Mark as sent for all remainders in a live stream
-            var firstItem = remainders.FirstOrDefault();
-            await streamRemainderRepo.MarkAsSentsAsync(firstItem!.ScheduleId, NotificationChannel.Push, ct);
+            // Mark as sent for all reminders in a live stream
+            var firstItem = reminders.FirstOrDefault();
+            await streamReminderRepo.MarkAsSentsAsync(firstItem!.ScheduleId, NotificationChannel.Push, ct);
         }, ct);
 
         // Send notification for subscribers
@@ -84,29 +84,29 @@ public sealed class SendRemaindersJob(
         }
     }
 
-    private async Task SendEmailAsync(IEnumerable<LiveStreamReminder> remainders, CancellationToken ct)
+    private async Task SendEmailAsync(IEnumerable<LiveStreamReminder> reminders, CancellationToken ct)
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            foreach (var remainder in remainders)
+            foreach (var reminder in reminders)
             {
-                await streamRemainderRepo.MarkAsSentAsync(
-                    remainder.UserId,
-                    remainder.Schedule.Id,
-                    remainder.Channel,
+                await streamReminderRepo.MarkAsSentAsync(
+                    reminder.UserId,
+                    reminder.Schedule.Id,
+                    reminder.Channel,
                     ct);
                 await emailService.SendLiveStreamRemainderEmailAsync(
-                    remainder.User.Email!,
-                    remainder.Schedule);
+                    reminder.User.Email!,
+                    reminder.Schedule);
             }
         }, ct);
     }
 
-    private static async Task SendSmsAsync(IEnumerable<LiveStreamReminder> remainders, CancellationToken ct)
+    private static async Task SendSmsAsync(IEnumerable<LiveStreamReminder> reminders, CancellationToken ct)
     {
         // TODO (LiveStreamRemainder): Add logic to send SMS for subscribers
         await Task.CompletedTask;
-        _ = remainders;
+        _ = reminders;
         _ = ct;
     }
 }
