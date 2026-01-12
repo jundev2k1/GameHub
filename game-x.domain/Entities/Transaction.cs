@@ -131,6 +131,7 @@ public class Transaction : BaseEntity<int>, IAuditable
             : TransactionStatus.Rejected;
         ReviewedById = reviewedById;
         DateReviewed = DateTime.UtcNow;
+        ExpiredAt = null;
     }
 
     public void Confirm(decimal actualAmount, decimal balanceAfter)
@@ -139,7 +140,7 @@ public class Transaction : BaseEntity<int>, IAuditable
         BalanceAfter = balanceAfter;
         Status = TransactionStatus.Completed;
         GameBalanceAfter = null;
-
+        ExpiredAt = null;
         if (TransactionInternal != null)
             TransactionInternal.ConfirmedAt = DateTime.UtcNow;
     }
@@ -150,6 +151,7 @@ public class Transaction : BaseEntity<int>, IAuditable
         BalanceAfter = balanceAfter;
         GameBalanceAfter = gameBalanceAfter;
         Status = TransactionStatus.Completed;
+        ExpiredAt = null;
         CompletedAt = DateTime.UtcNow;
     }
 
