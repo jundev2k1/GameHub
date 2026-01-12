@@ -58,6 +58,14 @@ public sealed class LiveStreamRemainderRepo(GameXContext dbContext) : ILiveStrea
         target.MarkAsSent();
     }
 
+    public async Task DeleteAsync(string userId, int streamId, CancellationToken ct = default)
+    {
+        await dbContext.LiveStreamRemainders
+            .Where(lr => (lr.UserId == userId)
+                && (lr.ScheduleId == streamId))
+            .ExecuteDeleteAsync(ct);
+    }
+
     public async Task DeleteAsync(string userId, int streamId, NotificationChannel channel, CancellationToken ct = default)
     {
         await dbContext.LiveStreamRemainders

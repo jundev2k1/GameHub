@@ -14,5 +14,6 @@ public interface ILiveStreamRemainderRepo
 
     Task MarkAsSentAsync(string userId, int streamId, NotificationChannel channel, CancellationToken ct = default);
 
+    Task DeleteAsync(string userId, int streamId, CancellationToken ct = default);
     Task DeleteAsync(string userId, int streamId, NotificationChannel channel, CancellationToken ct = default);
 }
