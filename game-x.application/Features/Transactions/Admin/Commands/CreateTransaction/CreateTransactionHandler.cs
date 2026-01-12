@@ -14,8 +14,10 @@ public sealed class CreateTransactionHandler(
 {
     public async Task<Unit> Handle(CreateTransactionCommand request, CancellationToken ct = default)
     {
+        var isDeposit = request.Type == TransactionType.Deposit;
+
         var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(request.UserId, request.CryptoTokenId, ct);
-        if (userBalance.Amount + request.Amount < 0)
+        if (!isDeposit && (userBalance.Amount - request.Amount < 0))
             throw new InsufficientBalanceException(userBalance.Amount, request.Amount);
 
         Transaction? transaction = null;
@@ -24,7 +26,7 @@ public sealed class CreateTransactionHandler(
             var balanceAfter = 0M;
             await userBalanceRepo.UpdateByTokenIdAsync(request.UserId, userBalance.CryptoTokenId, balance =>
             {
-                balance.AdjustAmount(request.Amount, true);
+                balance.AdjustAmount(request.Amount, isDeposit);
                 balanceAfter = balance.TotalAmount;
             }, ct);
 
