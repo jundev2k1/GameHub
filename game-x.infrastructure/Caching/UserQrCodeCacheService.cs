@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace game_x.infrastructure.Caching;
 
-public class UserQrCodeCacheCacheService(IMemoryCache cache) : CacheService(cache), IUserQrCodeCacheService
+public class UserQrCodeCacheService(IMemoryCache cache) : CacheService(cache), IUserQrCodeCacheService
 {
     private readonly string _prefix = "userQrCode:";
     private readonly int _timeSecondExpiration = 30;
