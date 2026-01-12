@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace game_x.domain.Entities;
 
-public class TransactionInternal: BaseEntity<int>
+public class TransactionInternal : BaseEntity<int>
 {
     public Transaction Transaction { get; set; } = null!;
     /// <summary>Payment Gateway ProviderId.</summary>
@@ -19,9 +19,10 @@ public class TransactionInternal: BaseEntity<int>
     public string? ToAddress { get; set; }
     /// <summary>The time when the transaction is completed.</summary>
     public DateTime? ConfirmedAt { get; set; }
-    
+
     public static TransactionInternal Create(
         string orderNumber,
+        string? referenceId = null,
         PaymentGatewayProvider? providerId = null,
         string? fromAddress = null,
         string? toAddress = null)
@@ -29,19 +30,20 @@ public class TransactionInternal: BaseEntity<int>
         var txInternal = new TransactionInternal
         {
             OrderNumber = orderNumber,
+            OrderUid = referenceId,
             FromAddress = fromAddress,
             ToAddress = toAddress,
             ProviderId = providerId ?? PaymentGatewayProvider.Uxm,
-            
+
         };
         return txInternal;
     }
-    
+
     public static bool IsValidAddress(NetworkType network, string address)
     {
         var trc20Regexp = @"^T[a-zA-Z0-9]{33}$";
         var erc20Regexp = @"^0x[a-fA-F0-9]{40}$";
-        
+
         if (address.IsNullOrWhiteSpace())
             return false;
 

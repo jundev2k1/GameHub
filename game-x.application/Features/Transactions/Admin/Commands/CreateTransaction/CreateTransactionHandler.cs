@@ -1,6 +1,7 @@
 ﻿using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnTransactionInternalCreated;
 using game_x.application.Features.Transactions.Dtos;
+using game_x.application.Utils;
 using game_x.domain.Exceptions;
 
 namespace game_x.application.Features.Transactions.Admin.Commands.CreateTransaction;
@@ -27,7 +28,8 @@ public sealed class CreateTransactionHandler(
                 balanceAfter = balance.TotalAmount;
             }, ct);
 
-            var internalTx = TransactionInternal.Create(request.Sno);
+            var sno = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
+            var internalTx = TransactionInternal.Create(sno, request.OrderUId);
             transaction = Transaction.Create(
                 request.UserId,
                 request.Amount,
