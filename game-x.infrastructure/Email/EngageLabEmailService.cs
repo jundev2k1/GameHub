@@ -95,6 +95,32 @@ public class EngageLabEmailService(
         await SendAsync(to, subject, bodyBuilder.ToString());
     }
 
+    public async Task SendLiveStreamCancellationEmailAsync(string to, LivestreamSchedule schedule)
+    {
+        var subject = "Livestream Cancelled";
+
+        var bodyBuilder = new StringBuilder();
+        bodyBuilder.AppendLine("<p>The following livestream has been cancelled:</p>");
+        bodyBuilder.AppendLine($"<h3>{schedule.Title}</h3>");
+
+        if (!string.IsNullOrWhiteSpace(schedule.CancellationReason))
+        {
+            bodyBuilder.AppendLine("<br />");
+            bodyBuilder.AppendLine(
+                $"<p><strong>Reason:</strong> {schedule.CancellationReason}</p>"
+            );
+        }
+
+        bodyBuilder.AppendLine("<br /><br />");
+        bodyBuilder.AppendLine(
+            "<p style=\"font-size:12px;color:#777777;\">" +
+            "We apologize for any inconvenience caused." +
+            "</p>"
+        );
+
+        await SendAsync(to, subject, bodyBuilder.ToString());
+    }
+
     public static string StripHtmlTags(string html)
     {
         return !html.IsNullOrWhiteSpace()

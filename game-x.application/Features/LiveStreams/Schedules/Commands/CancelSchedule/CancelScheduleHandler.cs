@@ -1,7 +1,9 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Contract.Jobs;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.LiveStreams.Streaming.Jobs;
 using game_x.share.Extensions;
 
 namespace game_x.application.Features.LiveStreams.Schedules.Commands.CancelSchedule;
@@ -11,7 +13,8 @@ public sealed class CancelScheduleHandler(
     ILiveStreamRepo liveStreamRepo,
     ILiveStreamManagerCacheService liveStreamManager,
     ISrsService srsService,
-    ILiveStreamHubService liveStreamHub) : ICommandHandler<CancelScheduleCommand>
+    ILiveStreamHubService liveStreamHub,
+    IJobScheduler jobScheduler) : ICommandHandler<CancelScheduleCommand>
 {
     public async Task<Unit> Handle(CancelScheduleCommand request, CancellationToken ct = default)
     {
@@ -27,6 +30,12 @@ public sealed class CancelScheduleHandler(
 
         // Notify all viewers and host
         await liveStreamHub.NotifyCancelStream(streamKey, request.Reason);
+
+        // Send notifications for all subscribers
+        jobScheduler.Schedule<SendRemindersJob>(
+            job => job.ExecuteAsync(streamKey, ct),
+            TimeSpan.FromSeconds(0));
+
         return Unit.Value;
     }
 

@@ -43,6 +43,8 @@ public sealed class SendRemindersJob(
 
     private async Task PushNotificationAsync(IEnumerable<LiveStreamReminder> reminders, CancellationToken ct)
     {
+        if (!reminders.Any()) return;
+
         static string CreateMetadata(LiveStreamReminder reminder)
         {
             var metadata = new Hashtable
@@ -55,23 +57,31 @@ public sealed class SendRemindersJob(
             return JsonSerializer.Serialize(metadata);
         }
 
+        static Notification CreateNotification(LiveStreamReminder reminder)
+        {
+            var isStartStream = reminder.Schedule.Status == LiveStreamStatus.Live;
+            return Notification.Create(
+                isStartStream
+                    ? NotificationMessageKey.LiveStream_Started
+                    : NotificationMessageKey.LiveStream_ScheduleCancelled,
+                reminder.UserId,
+                NotificationType.LiveStream,
+                isStartStream ? NotificationSeverity.Info : NotificationSeverity.Error,
+                CreateMetadata(reminder));
+        }
+
         IEnumerable<Notification> notifications = [];
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            notifications = reminders
-                .Select(r => Notification.Create(
-                    NotificationMessageKey.LiveStream_Started,
-                    r.UserId,
-                    NotificationType.Info,
-                    NotificationSeverity.Info,
-                    CreateMetadata(r)));
+            var firstItem = reminders.FirstOrDefault();
+
+            notifications = reminders.Select(CreateNotification);
             if (!notifications.Any()) return;
 
             // Create notifications in DB
             await notificationRepo.AddRangeNotificationsAsync(notifications, ct);
 
             // Mark as sent for all reminders in a live stream
-            var firstItem = reminders.FirstOrDefault();
             await streamReminderRepo.MarkAsSentsAsync(firstItem!.ScheduleId, NotificationChannel.Push, ct);
         }, ct);
 
@@ -86,20 +96,31 @@ public sealed class SendRemindersJob(
 
     private async Task SendEmailAsync(IEnumerable<LiveStreamReminder> reminders, CancellationToken ct)
     {
+        if (!reminders.Any()) return;
+
+        var schedule = reminders.FirstOrDefault()!.Schedule;
+        var isStartStream = schedule.Status == LiveStreamStatus.Live;
+
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            foreach (var reminder in reminders)
+            await streamReminderRepo.MarkAsSentsAsync(schedule.Id, NotificationChannel.Email, ct);
+        }, ct);
+
+        foreach (var reminder in reminders)
+        {
+            if (isStartStream)
             {
-                await streamReminderRepo.MarkAsSentAsync(
-                    reminder.UserId,
-                    reminder.Schedule.Id,
-                    reminder.Channel,
-                    ct);
                 await emailService.SendLiveStreamRemainderEmailAsync(
                     reminder.User.Email!,
                     reminder.Schedule);
             }
-        }, ct);
+            else
+            {
+                await emailService.SendLiveStreamCancellationEmailAsync(
+                    reminder.User.Email!,
+                    reminder.Schedule);
+            }
+        }
     }
 
     private static async Task SendSmsAsync(IEnumerable<LiveStreamReminder> reminders, CancellationToken ct)

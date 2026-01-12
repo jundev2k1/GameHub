@@ -43,7 +43,9 @@ public sealed class LiveStreamReminderRepo(GameXContext dbContext) : ILiveStream
             .AsNoTracking()
             .Include(lsr => lsr.User)
             .Include(lsr => lsr.Schedule)
-            .Where(lsr => lsr.Schedule.StreamKey == streamKey && lsr.Schedule.Status == LiveStreamStatus.Scheduled)
+            .Where(lsr => lsr.Schedule.StreamKey == streamKey
+                && lsr.Schedule.Status == LiveStreamStatus.Scheduled
+                && lsr.Status == ReminderStatus.Pending)
             .ToArrayAsync(ct);
     }
 

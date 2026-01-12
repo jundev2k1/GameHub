@@ -11,6 +11,8 @@ public interface IEmailService
     Task SendResetPasswordEmailAsync(string to, string code);
 
     Task SendLiveStreamRemainderEmailAsync(string to, LivestreamSchedule schedule);
+
+    Task SendLiveStreamCancellationEmailAsync(string to, LivestreamSchedule schedule);
 }
 
 public class EngageLabEmailRequest
