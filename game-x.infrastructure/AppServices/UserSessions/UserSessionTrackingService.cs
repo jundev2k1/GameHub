@@ -40,7 +40,7 @@ public sealed class UserSessionTrackingService(
                     ?? throw new BadRequestException("Wallet was not found.");
 
                 // Handle for new session
-                var userSession = UserGameSession.Create(userId, platformInfo.LocalId, gameInfo?.LocalId);
+                var userSession = UserGameSession.Create(userId, platformInfo.LocalId, gameInfo?.LocalId, targetBalance.Amount);
                 var connection = UserGameSessionConnection.Create(userSession.Id, connectionId);
                 userSession.RegisterConnection(connection);
 
