@@ -1,6 +1,8 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.Dtos;
+using game_x.application.Features.LiveStreams.Categories.Dtos;
+using game_x.application.Features.LiveStreams.Streaming.Dtos;
 
 namespace game_x.application.Features.LiveStreams.Schedules.Commands.AssignTalent;
 
@@ -8,11 +10,13 @@ public sealed class AssignTalentHandler(
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     ILiveStreamRepo liveStreamRepo,
+    ILiveStreamManagerCacheService liveStreamManager,
     IFileManagerCacheService fileManagerCache) : ICommandHandler<AssignTalentCommand, UserSummaryInfo>
 {
     public async Task<UserSummaryInfo> Handle(AssignTalentCommand request, CancellationToken ct = default)
     {
         User? talent = null;
+        var streamKey = string.Empty;
         await liveStreamRepo.UpdateAsync(request.Id, async livestream =>
         {
             // Check overlapping times before assigning talent
@@ -28,6 +32,8 @@ public sealed class AssignTalentHandler(
             livestream.AssignStream(talent.Id);
 
             await unitOfWork.SaveChangesAsync(ct);
+
+            streamKey = livestream.StreamKey;
         }, ct);
 
         var result = talent.Adapt<UserSummaryInfo>();
@@ -36,6 +42,19 @@ public sealed class AssignTalentHandler(
             var avatarInfo = await fileManagerCache.GetFileInfo(talent.Avatar, ct);
             result.AvatarId = talent.AvatarId;
             result.Avatar = avatarInfo?.Url;
+        }
+
+        // Update stream cache
+        var targetStream = liveStreamManager.GetLiveStreamStatus(streamKey);
+        if (targetStream != null)
+        {
+            targetStream!.AssignedTo = result;
+            liveStreamManager.UpdateStreamInfo(targetStream);
+        }
+        else
+        {
+            var schedule = await liveStreamRepo.GetByStreamKeyAsync(streamKey, ct);
+            await InitStreamInfoAsync(schedule, ct);
         }
 
         return result;
@@ -61,5 +80,32 @@ public sealed class AssignTalentHandler(
                     });
             }
         }
+    }
+
+    private async Task InitStreamInfoAsync(LivestreamSchedule streamSetting, CancellationToken ct)
+    {
+        var streamInfo = new LiveStreamStatusDto
+        {
+            LocalId = streamSetting.Id,
+            Id = streamSetting.PublicId,
+            Title = streamSetting.Title,
+            Description = streamSetting.Description ?? string.Empty,
+            ThumbnailId = streamSetting.ThumbnailId,
+            StreamKey = streamSetting.StreamKey,
+            LiveAt = streamSetting.StartAt ?? DateTime.UtcNow,
+            OfflineAt = streamSetting.EndAt,
+            StartTime = streamSetting.StartTime,
+            EndTime = streamSetting.EndTime,
+            ClientId = null,
+            AssignedTo = streamSetting.AssignedTo?.Adapt<UserSummaryInfo>(),
+            Categories = [.. streamSetting.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())]
+        };
+        if (streamSetting.AssignedTo != null && streamSetting.AssignedTo.Avatar != null)
+        {
+            var avatar = await fileManagerCache.GetFileInfo(streamSetting.AssignedTo.Avatar, ct);
+            streamInfo.AssignedTo!.Avatar = avatar?.Url;
+        }
+
+        liveStreamManager.InitLiveStream(streamInfo);
     }
 }

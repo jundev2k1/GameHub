@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.Srs;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.share.Extensions;
 
 namespace game_x.application.Features.LiveStreams.Schedules.Commands.CancelSchedule;
 
@@ -33,10 +34,10 @@ public sealed class CancelScheduleHandler(
     {
         // Update the stream status in cache
         var streamInfo = liveStreamManager.GetLiveStreamStatus(streamKey);
-        if (streamInfo is null) return;
+        if (streamInfo is null || streamInfo.ClientId.IsNullOrEmpty()) return;
 
         // Stop the stream in SRS
-        await srsService.KickClientAsync(streamInfo.ClientId);
+        await srsService.KickClientAsync(streamInfo.ClientId!);
 
         // Remove the stream from cache
         liveStreamManager.RemoveLiveStream(streamKey);

@@ -1,4 +1,5 @@
 ﻿using game_x.api.Dtos;
+using game_x.application.Features.LiveStreams.Remainders.Commands.SubscribeStream;
 using game_x.application.Features.LiveStreams.Streaming.Commands.JoinLiveStream;
 using game_x.application.Features.LiveStreams.Streaming.Queries.GetChatMessageInStream;
 
@@ -27,5 +28,13 @@ public sealed class LiveStreamController : BaseApiController
             request.PageSize);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.User)]
+    [HttpPost("{streamKey}/reminders")]
+    public async Task<IActionResult> SubscribeStreamAsync(string streamKey, SubscribeStreamCommand command)
+    {
+        await Mediator.Send(command with { StreamKey = streamKey });
+        return ApiResponseFactory.Created();
     }
 }

@@ -62,6 +62,7 @@ try
 
     var liveStreamManager = serviceProvider.GetRequiredService<ILiveStreamManagerCacheService>();
     await liveStreamManager.RefreshGiftCacheAsync();
+    await liveStreamManager.InitLiveStreamsAsync();
 
     var appSettingCache = serviceProvider.GetRequiredService<IAppSettingCacheService>();
     appSettingCache.RefreshCache();

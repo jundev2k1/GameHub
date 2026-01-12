@@ -10,6 +10,8 @@ public interface ILiveStreamRepo
         int pageSize = 20,
         CancellationToken ct = default);
 
+    Task<LivestreamSchedule[]> GetActiveStreamsAsync(CancellationToken ct = default);
+
     Task<LivestreamSchedule[]> GetExpiredStreams(CancellationToken ct = default);
 
     Task<LivestreamSchedule> GetByIdAsync(Guid id, CancellationToken ct = default);
