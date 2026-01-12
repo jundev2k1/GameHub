@@ -57,6 +57,7 @@ public static class Seed
     {
         var settings = new[]
         {
+            AppSetting.Create(AppSettingConstant.KEY_CLIENT_PAGE_URL, string.Empty, string.Empty, true),
             AppSetting.Create(AppSettingConstant.KEY_TALENT_COMMISSION_RATE, "70", string.Empty, true),
         };
 

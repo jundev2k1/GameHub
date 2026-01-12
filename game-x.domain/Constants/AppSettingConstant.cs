@@ -2,5 +2,6 @@
 
 public static class AppSettingConstant
 {
+    public const string KEY_CLIENT_PAGE_URL = "client_page_url";
     public const string KEY_TALENT_COMMISSION_RATE = "talent_commission_rate";
 }

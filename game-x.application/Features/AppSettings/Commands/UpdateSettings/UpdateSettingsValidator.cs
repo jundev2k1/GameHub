@@ -1,4 +1,5 @@
 ﻿using game_x.application.Features.AppSettings.DTOs;
+using game_x.share.Extensions;
 
 namespace game_x.application.Features.AppSettings.Commands.UpdateSettings;
 
@@ -16,7 +17,11 @@ public sealed class UpdateSettingsValidator : AbstractValidator<UpdateSettingsCo
     private bool HaveValidAppSetting(AppSettingInputDto setting)
     {
         if (setting.Key is AppSettingConstant.KEY_TALENT_COMMISSION_RATE
-            && (!decimal.TryParse(setting.Value, out var rate) || (rate < 0 || rate > 100)))
+            && (!decimal.TryParse(setting.Value, out var rate) || rate < 0 || rate > 100))
+            return false;
+
+        if (setting.Key is AppSettingConstant.KEY_CLIENT_PAGE_URL
+            && setting.Value.IsNotNullOrEmpty() && !Uri.TryCreate(setting.Value, UriKind.RelativeOrAbsolute, out var _))
             return false;
 
         return true;

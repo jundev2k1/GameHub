@@ -25,6 +25,9 @@ public sealed class AppSettingCacheService(
 
     public bool IsExist(string key) => Datasource.Any(x => x.Key == key);
 
+    public string ClientPageUrl =>
+        Datasource.FirstOrDefault(i => i.Key == AppSettingConstant.KEY_CLIENT_PAGE_URL)?.Value ?? string.Empty;
+
     public decimal TalentCommissionRate => decimal.Parse(
         Datasource.FirstOrDefault(i => i.Key == AppSettingConstant.KEY_TALENT_COMMISSION_RATE)?.Value ?? "0");
 }

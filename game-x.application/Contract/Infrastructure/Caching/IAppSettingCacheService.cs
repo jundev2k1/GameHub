@@ -12,5 +12,6 @@ public interface IAppSettingCacheService
 
     bool IsExist(string key);
 
+    string ClientPageUrl { get; }
     decimal TalentCommissionRate { get; }
 }
