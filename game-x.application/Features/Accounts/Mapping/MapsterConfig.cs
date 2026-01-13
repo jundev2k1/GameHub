@@ -30,7 +30,7 @@ public sealed class MapsterConfig : IRegister
                 src => src.UserKyc != null ? src.UserKyc.DateOfBirth : (DateTime?)null)
             .Map(
                 dest => dest.Balances,
-                src => src.UserBalances.Select(ub => ub.Adapt<BalanceInfo>()).ToArray())
+                src => src.UserBalances.Adapt<BalanceInfo[]>())
             .Map(
                 dest => dest.UserExtendInfo,
                 src => src.UserExtend.Adapt<UserExtendDto>())

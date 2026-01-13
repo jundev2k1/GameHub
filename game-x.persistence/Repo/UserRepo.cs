@@ -103,11 +103,9 @@ public sealed class UserRepo(
         var result = await context.Users
             .AsNoTracking()
             .Where(u => u.Id == userId && !u.IsDeleted)
-            .Include(u => u.UserBalances)
-                .ThenInclude(x => x.CryptoToken)
             .ProjectToType<UserDetailDto>()
             .FirstOrDefaultAsync(ct)
-            ?? throw new NotFoundException();
+            ?? throw new NotFoundException(nameof(userId), userId);
 
         if (result.AvatarId.HasValue)
         {

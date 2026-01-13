@@ -1,18 +1,25 @@
-using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.Dtos;
+using game_x.application.Features.Accounts.User.Dtos;
 
 namespace game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 
-public sealed class GetUserDetailByAdminHandler(IUserRepo userRepo)
-    : IQueryHandler<GetUserDetailByAdminQuery, UserDetailDto>
-{
-    public async Task<UserDetailDto> Handle(GetUserDetailByAdminQuery request, CancellationToken ct = default)
-    {
-        var userDetail = await userRepo.GetUserDetailAsync(request.UserId, ct);
+public record GetUserDetailByAdminQuery(string UserId) : IQuery<GetUserDetailByAdminResult>;
 
-        if (userDetail is null)
-            throw new NotFoundException(MessageCode.User.UserNotFound);
-
-        return userDetail;
-    }
-}
+public record GetUserDetailByAdminResult(
+    string UserId,
+    string Username,
+    string Email,
+    string Nickname, 
+    string FullName,
+    string AvatarUrl,
+    DateTime? DateOfBirth,
+    string? ResidentialAddress,
+    bool IsEmailConfirmed,
+    bool IsKycConfirmed,
+    bool IsBankConfirmed,
+    BalanceInfo[] InternalBalances,
+    UserWalletExternalItemDto[] ExternalBalances,
+    UserExtendDto UserExtendInfo,
+    string[] Roles,
+    DateTime? CreatedAt,
+    DateTime? UpdatedAt);
