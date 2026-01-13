@@ -102,6 +102,8 @@ public sealed class UserRepo(
     {
         var result = await context.Users
             .AsNoTracking()
+            .Include(u => u.UserBalances)
+            .ThenInclude(ub => ub.CryptoToken)
             .Where(u => u.Id == userId && !u.IsDeleted)
             .ProjectToType<UserDetailDto>()
             .FirstOrDefaultAsync(ct)
