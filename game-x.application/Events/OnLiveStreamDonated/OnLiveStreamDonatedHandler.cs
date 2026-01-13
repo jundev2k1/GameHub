@@ -56,7 +56,7 @@ public sealed class OnLiveStreamDonatedHandler(
                     TalentTransactionType.Commission,
                     talentAmount,
                     balanceAfter,
-                    this.StreamDonation!.Id.ToString());
+                    this.StreamDonation!.Id);
                 talentWallet.AddTransaction(tx);
             }, ct);
             // Increase system balance
@@ -69,7 +69,7 @@ public sealed class OnLiveStreamDonatedHandler(
                     wallet.Id,
                     systemAmount,
                     newBalance,
-                    this.StreamDonation!.Id.ToString());
+                    this.StreamDonation!.Id);
                 wallet.AddTransaction(tx);
             }, ct);
         }, ct);

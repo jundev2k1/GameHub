@@ -8,7 +8,7 @@ public sealed class TalentWalletTransaction : BaseEntity<long>
     public decimal Amount { get; private set; }
     public TalentTransactionType Type { get; private set; }
     public decimal BalanceAfter { get; private set; }
-    public string? ReferenceId { get; private set; }
+    public Guid? ReferenceId { get; private set; }
     public string? AdjustedBy { get; private set; }
 
     public static TalentWalletTransaction Create(
@@ -16,7 +16,7 @@ public sealed class TalentWalletTransaction : BaseEntity<long>
         TalentTransactionType type,
         decimal amount,
         decimal balanceAfter,
-        string? referenceId = null,
+        Guid? referenceId = null,
         string? adjustedBy = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(talentId);

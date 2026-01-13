@@ -51,8 +51,7 @@ public sealed class TalentWalletRepo(GameXContext dbContext) : ITalentWalletRepo
             .Select(i => i.Adapt<TalentWalletTransactionDto>())
             .ToListAsync(ct);
 
-        var donationIds = items.Select(i => Guid.TryParse(i.ReferenceId, out var id) ? id : (Guid?)null)
-            .Where(id => id != null)
+        var donationIds = items.Select(i => i.ReferenceId)
             .ToArray();
         var mappingDatas = await dbContext.LiveStreamDonations
             .AsNoTracking()
@@ -61,7 +60,7 @@ public sealed class TalentWalletRepo(GameXContext dbContext) : ITalentWalletRepo
             .ToArrayAsync(ct);
         items.ForEach(i =>
         {
-            var targetMapping = mappingDatas.FirstOrDefault(m => m.PublicId.ToString() == i.ReferenceId);
+            var targetMapping = mappingDatas.FirstOrDefault(m => m.PublicId == i.ReferenceId);
             if (targetMapping != null)
             {
                 i.DonorNickname = targetMapping.Donor.Nickname;

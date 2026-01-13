@@ -7,7 +7,7 @@ public sealed class TalentWalletTransactionDto
     public string Nickname { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public TalentTransactionType Type { get; set; }
-    public string? ReferenceId { get; set; }
+    public Guid? ReferenceId { get; set; }
     public string? DonorEmail { get; set; }
     public string? DonorNickname { get; set; }
     public decimal? DonatedAmount { get; set; }
