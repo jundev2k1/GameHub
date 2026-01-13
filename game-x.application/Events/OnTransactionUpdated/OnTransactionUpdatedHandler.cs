@@ -31,24 +31,25 @@ public sealed class OnTransactionUpdatedHandler(
 
     private async Task SendNotificationToAdmin(TransactionInternalDto transaction, CancellationToken ct)
     {
+        var adminUsers = await userRepo.GetAdminUsers(ct);
+        var notifications = adminUsers.Select(u => Notification.Create(
+            NotificationMessageKey.Transaction_Cancelled,
+            u.Id,
+            NotificationType.Transaction,
+            NotificationSeverity.Error));
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            var adminUsers = await userRepo.GetAdminUsers(ct);
-            foreach (var adminUser in adminUsers)
-            {
-                var notification = Notification.Create(
-                    NotificationMessageKey.Transaction_Cancelled,
-                    adminUser.Id,
-                    NotificationType.Transaction,
-                    NotificationSeverity.Error);
-                await notificationRepo.AddNotificationAsync(notification, ct);
-
-                // Send notification to all the admin
-                await adminHubService.SendNotificationAsync(
-                    adminUser.Id,
-                    notification.Adapt<NotificationDto>());
-            }
+            await notificationRepo.AddRangeNotificationsAsync(notifications, ct);
         }, ct);
+
+        // Send notification to all the admin
+        var adminNotification = notifications.FirstOrDefault();
+        if (adminNotification != null)
+        {
+            await adminHubService.SendNotificationAsync(
+                adminNotification.UserId!,
+                adminNotification.Adapt<NotificationDto>());
+        }
 
         // Send transaction to all the admin
         var adminTxDto = transaction.Adapt<AdminTransactionDto>();
