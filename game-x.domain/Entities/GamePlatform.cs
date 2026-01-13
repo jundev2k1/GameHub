@@ -8,8 +8,9 @@ public sealed class GamePlatform : BaseEntity<int>
     public string Note { get; private set; } = string.Empty;
     public int Priority { get; private set; }
     public bool IsActive { get; private set; } = true;
-    public ICollection<Game> Games { get; private set; } = null!;
-    public ICollection<TransactionExternal> TransactionExternals { get; private set; } = null!;
+    public ICollection<GamePlatformBalance> Balances { get; private set; } = [];
+    public ICollection<Game> Games { get; private set; } = [];
+    public ICollection<TransactionExternal> TransactionExternals { get; private set; } = [];
 
     public static GamePlatform Create(string name, string desc, string note, int priority, Guid? publicId = null)
     {

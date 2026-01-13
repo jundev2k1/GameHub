@@ -17,6 +17,5 @@ public sealed class LiveStreamScheduleClientItemDto
     public LiveStreamStatus Status { get; set; }
     public UserSummaryInfo? AssignedTo { get; set; }
     public int ViewCount { get; set; }
-    public bool ReminderFlg { get; set; }
     public NotificationChannel[] ReminderChannels { get; set; } = [];
 }
