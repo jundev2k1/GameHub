@@ -12,7 +12,7 @@ public sealed class UpdateStreamRemindersHandler(
     public async Task<Unit> Handle(UpdateStreamRemindersCommand request, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
-        var schedule = await liveStreamRepo.GetByStreamKeyAsync(request.StreamKey!, ct);
+        var schedule = await liveStreamRepo.GetByIdAsync(request.StreamId!.Value, ct);
         if (schedule.Status != LiveStreamStatus.Scheduled)
             throw new BadRequestException(MessageCode.System.InvalidResourceState);
 

@@ -32,18 +32,18 @@ public sealed class LiveStreamController : BaseApiController
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPost("{streamKey}/reminders")]
-    public async Task<IActionResult> SubscribeStreamAsync(string streamKey, SubscribeStreamCommand command)
+    [HttpPost("{streamId:guid}/reminders")]
+    public async Task<IActionResult> SubscribeStreamAsync(Guid streamId, SubscribeStreamCommand command)
     {
-        await Mediator.Send(command with { StreamKey = streamKey });
+        await Mediator.Send(command with { StreamId = streamId });
         return ApiResponseFactory.Created();
     }
 
     [Authorize(Roles = AppRoles.User)]
-    [HttpPut("{streamKey}/reminders")]
-    public async Task<IActionResult> UpdateStreamRemainderAsync(string streamKey, UpdateStreamRemindersCommand command)
+    [HttpPut("{streamId:guid}/reminders")]
+    public async Task<IActionResult> UpdateStreamRemainderAsync(Guid streamId, UpdateStreamRemindersCommand command)
     {
-        await Mediator.Send(command with { StreamKey = streamKey });
+        await Mediator.Send(command with { StreamId = streamId });
         return ApiResponseFactory.NoContent();
     }
 }

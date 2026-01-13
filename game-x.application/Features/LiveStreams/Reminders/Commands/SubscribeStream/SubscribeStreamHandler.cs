@@ -11,7 +11,7 @@ public sealed class SubscribeStreamHandler(
 {
     public async Task<Unit> Handle(SubscribeStreamCommand request, CancellationToken ct = default)
     {
-        var targetStream = await liveStreamRepo.GetByStreamKeyAsync(request.StreamKey!, ct);
+        var targetStream = await liveStreamRepo.GetByIdAsync(request.StreamId!.Value, ct);
         if (targetStream.Status != LiveStreamStatus.Scheduled)
             throw new BadRequestException(MessageCode.System.InvalidResourceState);
 

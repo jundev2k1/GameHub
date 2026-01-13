@@ -3,5 +3,5 @@
 namespace game_x.application.Features.LiveStreams.Reminders.Commands.UpdateStreamReminders;
 
 public record UpdateStreamRemindersCommand(
-    [property: JsonIgnore] string? StreamKey,
+    [property: JsonIgnore] Guid? StreamId,
     NotificationChannel[] Channels) : ICommand;
