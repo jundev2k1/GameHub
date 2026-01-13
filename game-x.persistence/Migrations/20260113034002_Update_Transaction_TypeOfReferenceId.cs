@@ -11,23 +11,17 @@ namespace game_x.persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<Guid>(
-                name: "reference_id",
-                table: "talent_wallet_transactions",
-                type: "uuid",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
+            migrationBuilder.Sql(@"
+                ALTER TABLE talent_wallet_transactions
+                ALTER COLUMN reference_id
+                TYPE uuid
+                USING reference_id::uuid;");
 
-            migrationBuilder.AlterColumn<Guid>(
-                name: "reference_id",
-                table: "system_wallet_transactions",
-                type: "uuid",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
+            migrationBuilder.Sql(@"
+                ALTER TABLE system_wallet_transactions
+                ALTER COLUMN reference_id
+                TYPE uuid
+                USING reference_id::uuid;");
         }
 
         /// <inheritdoc />
