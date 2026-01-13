@@ -10,6 +10,8 @@ public interface ILiveStreamReminderRepo
 
     Task<LiveStreamReminder[]> GetRemindersForNotificationByStreamKeyAsync(string streamKey, CancellationToken ct = default);
 
+    Task<Dictionary<Guid, NotificationChannel[]>> GetStreamRemindersAsync(IEnumerable<Guid> ids, CancellationToken ct = default);
+
     Task CreateAsync(LiveStreamReminder reminder, CancellationToken ct = default);
 
     Task CreateRangeAsync(IEnumerable<LiveStreamReminder> reminders, CancellationToken ct = default);

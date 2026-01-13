@@ -1,12 +1,14 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.LiveStreams.Schedules.Dtos;
 
 namespace game_x.application.Features.LiveStreams.Streaming.Queries.GetActiveStreams;
 
 public sealed class GetActiveStreamsHandler(
     ILiveStreamManagerCacheService liveStreamManager,
-    IFileManagerCacheService fileManagerCache) : IQueryHandler<GetActiveStreamsQuery, PaginationResult<LiveStreamScheduleClientItemDto>>
+    IFileManagerCacheService fileManagerCache,
+    ILiveStreamReminderRepo streamReminderRepo) : IQueryHandler<GetActiveStreamsQuery, PaginationResult<LiveStreamScheduleClientItemDto>>
 {
     public async Task<PaginationResult<LiveStreamScheduleClientItemDto>> Handle(GetActiveStreamsQuery request, CancellationToken ct = default)
     {
@@ -27,8 +29,9 @@ public sealed class GetActiveStreamsHandler(
             .ToArray();
 
         // Return result
+        var dataResult = await MapDetailDataAsync(items!, ct);
         var result = new PaginationResult<LiveStreamScheduleClientItemDto>(
-            items!,
+            dataResult,
             totalCount,
             totalPageCount,
             request.PageIndex,
@@ -54,11 +57,26 @@ public sealed class GetActiveStreamsHandler(
 
         // Map to DTO
         var dto = stream.Adapt<LiveStreamScheduleClientItemDto>();
-
-        // Get viewer count
-        var viewCount = liveStreamManager.GetViewerCount(streamKey);
-        dto.ViewCount = viewCount;
-
         return dto;
+    }
+
+    private async Task<IEnumerable<LiveStreamScheduleClientItemDto>> MapDetailDataAsync(
+        IEnumerable<LiveStreamScheduleClientItemDto> items,
+        CancellationToken ct)
+    {
+        var streamIds = items.Select(x => x.Id);
+        var reminders = await streamReminderRepo.GetStreamRemindersAsync(streamIds, ct);
+
+        foreach (var item in items)
+        {
+            if (reminders.TryGetValue(item.Id, out var channels))
+                item.ReminderChannels = channels;
+
+            // Get viewer count
+            var viewCount = liveStreamManager.GetViewerCount(item.StreamKey);
+            item.ViewCount = viewCount;
+        }
+
+        return items;
     }
 }
