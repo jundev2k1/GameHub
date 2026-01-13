@@ -27,15 +27,15 @@ public sealed class SendRemindersJob(
             switch (group.Key)
             {
                 case NotificationChannel.Push:
-                    await PushNotificationAsync(reminders, ct);
+                    await PushNotificationAsync(group, ct);
                     break;
 
                 case NotificationChannel.Email:
-                    await SendEmailAsync(reminders, ct);
+                    await SendEmailAsync(group, ct);
                     break;
 
                 case NotificationChannel.SMS:
-                    await SendSmsAsync(reminders, ct);
+                    await SendSmsAsync(group, ct);
                     break;
             }
         }
