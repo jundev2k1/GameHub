@@ -39,6 +39,7 @@ public sealed class GameXContext(
     public DbSet<CryptoToken> CryptoTokens { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<GamePlatform> GamePlatforms { get; set; }
+    public DbSet<GamePlatformBalance> GamePlatformBalances { get; set; }
     public DbSet<GameCategory> GameCategories { get; set; }
     public DbSet<GameCategoryMapping> GameCategoryMappings { get; set; }
     public DbSet<GameType> GameTypes { get; set; }

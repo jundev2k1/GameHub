@@ -21,6 +21,7 @@ public sealed class WalletManagerCacheService(
     IMemoryCache cache,
     IUserBalanceRepo userBalanceRepo,
     IUserRepo userRepo,
+    IGamePlatformBalanceRepo platformBalanceRepo,
     IGameProviderCacheService gameProviderCache,
     IGameBaccaratService gameBaccaratService,
     IEtl998Service etl998Service,
@@ -31,6 +32,27 @@ public sealed class WalletManagerCacheService(
     IAppLogger<WalletManagerCacheService> logger) : CacheService(cache), IWalletManagerCacheService
 {
     private const string CacheKeyPrefix = "wallet-manager:";
+
+    public async Task InitExternalWalletAsync(string userId, UserWalletDto userWalletDto, CancellationToken ct = default)
+    {
+        var balances = await platformBalanceRepo.GetBalancesByUserIdAsync(userId, ct);
+        foreach (var balance in balances)
+        {
+            var targetPlatform = gameProviderCache.PlatformList
+                .FirstOrDefault(pl => pl.LocalId == balance.PlatformId);
+            if (targetPlatform is null) return;
+
+            var (availableBalance, lockedBalance, _) = balance.GetBalance();
+            await CreateOrUpdateExternalWalletAsync(
+                userId,
+                userWalletDto,
+                null,
+                targetPlatform,
+                availableBalance,
+                lockedBalance,
+                balance.LastSyncedAt);
+        }
+    }
 
     public async Task<UserWalletDto> GetWalletAsync(string userId)
     {
@@ -60,53 +82,17 @@ public sealed class WalletManagerCacheService(
     public async Task RefreshWalletAsync(string userId)
     {
         var cacheKey = $"{CacheKeyPrefix}{userId}";
-        var targetUser = await userRepo.GetUserByIdAsync(userId);
+
+        // Refresh internal wallet with the actual balance from DB
         var userBalances = await userBalanceRepo.GetBalancesByUserIdAsync(userId);
         var userWallet = new UserWalletDto
         {
-            InternalWallets = [.. userBalances.Select(ub => ub.Adapt<UserWalletInternalItemDto>())],
+            InternalWallets = userBalances.Adapt<List<UserWalletInternalItemDto>>(),
             ExternalWallets = [],
         };
 
-        var g598Balance = await GetGame598WalletAsync(targetUser);
-        await CreateOrUpdateExternalWalletAsync(
-            userId: userId,
-            wallet: userWallet,
-            targetWallet: null,
-            platform: gameProviderCache.G598Platform,
-            balance: g598Balance);
-
-        var baccaratBalance = await GetBaccaratWalletAsync(targetUser);
-        await CreateOrUpdateExternalWalletAsync(
-            userId: userId,
-            wallet: userWallet,
-            targetWallet: null,
-            platform: gameProviderCache.BaccaratPlatform,
-            balance: baccaratBalance);
-
-        var elt998Balance = await GetElt998WalletAsync(targetUser);
-        await CreateOrUpdateExternalWalletAsync(
-            userId: userId,
-            wallet: userWallet,
-            targetWallet: null,
-            platform: gameProviderCache.Etl998Platform,
-            balance: elt998Balance);
-
-        var sasSlotBalance = await GetSasSlotWalletAsync(targetUser);
-        await CreateOrUpdateExternalWalletAsync(
-            userId: userId,
-            wallet: userWallet,
-            targetWallet: null,
-            platform: gameProviderCache.SasSlotPlatform,
-            balance: sasSlotBalance);
-
-        var atgBalance = await GetAtgWalletAsync(targetUser);
-        await CreateOrUpdateExternalWalletAsync(
-            userId: userId,
-            wallet: userWallet,
-            targetWallet: null,
-            platform: gameProviderCache.AtgPlatform,
-            balance: atgBalance);
+        // Refresh external wallet with snapshots of lastest balances
+        await InitExternalWalletAsync(userId, userWallet);
         
         Set(cacheKey, userWallet);
     }
@@ -140,18 +126,21 @@ public sealed class WalletManagerCacheService(
                 wallet: userWallet,
                 targetWallet: targetWallet,
                 platform: gameProviderCache.G598Platform,
-                balance: balance);
+                availableBalance: balance,
+                lockedBalance: 0);      // G598 platform doesn't return locked balance
         }
 
         if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
         {
+            // TODO (Baccarat wallet): update locked balance after Baccarat platform began supporting it
             var balance = await GetBaccaratWalletAsync(targetUser);
             await CreateOrUpdateExternalWalletAsync(
                 userId: userId,
                 wallet: userWallet,
                 targetWallet: targetWallet,
                 platform: gameProviderCache.BaccaratPlatform,
-                balance: balance);
+                availableBalance: balance,
+                lockedBalance: 0);      // Baccarat platform doesn't support locked balance now, it will be added in the future
         }
 
         if (platformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
@@ -162,7 +151,8 @@ public sealed class WalletManagerCacheService(
                 wallet: userWallet,
                 targetWallet: targetWallet,
                 platform: gameProviderCache.Etl998Platform,
-                balance: balance);
+                availableBalance: balance?.Balance,
+                lockedBalance: balance?.LockedBalance);
         }
 
         if (platformId == GameConstants.PLATFORM_ID_SASSLOT)
@@ -173,7 +163,8 @@ public sealed class WalletManagerCacheService(
                 wallet: userWallet,
                 targetWallet: targetWallet,
                 platform: gameProviderCache.SasSlotPlatform,
-                balance: balance);
+                availableBalance: balance,
+                lockedBalance: 0);      // SAS Slot platform doesn't support locked balance now
         }
 
         if (platformId == GameConstants.PLATFORM_ID_ATG)
@@ -184,7 +175,8 @@ public sealed class WalletManagerCacheService(
                 wallet: userWallet,
                 targetWallet: targetWallet,
                 platform: gameProviderCache.AtgPlatform,
-                balance: balance);
+                availableBalance: balance,
+                lockedBalance: 0);      // ATG platform doesn't return locked balance
         }
 
         var cacheKey = $"{CacheKeyPrefix}{userId}";
@@ -230,7 +222,7 @@ public sealed class WalletManagerCacheService(
         }
     }
 
-    private async Task<decimal?> GetElt998WalletAsync(User targetUser)
+    private async Task<(decimal Balance, decimal LockedBalance)?> GetElt998WalletAsync(User targetUser)
     {
         if (targetUser.UserExtend is null
             || targetUser.UserExtend.Etl998ProviderAccount.IsNullOrWhiteSpace()
@@ -246,7 +238,7 @@ public sealed class WalletManagerCacheService(
 
             var response = await etl998Service.GetWalletAsync(request);
             var externalWallet = response.FirstOrDefault();
-            return externalWallet?.Money;
+            return externalWallet != null ? (externalWallet.Money, externalWallet.LockMoney) : null;
         }
         catch (Exception ex)
         {
@@ -295,22 +287,31 @@ public sealed class WalletManagerCacheService(
         UserWalletDto wallet,
         UserWalletExternalItemDto? targetWallet,
         GamePlatformDto platform,
-        decimal? balance)
+        decimal? availableBalance,
+        decimal? lockedBalance,
+        DateTime? lastSyncAt = null)
     {
         // Not create if null
-        if (!balance.HasValue)
+        if (!availableBalance.HasValue)
         {
-            RemoveExternalWallet(wallet, platform.Id);
-
             var @event = new OnExternalApiFailedEvent(userId, platform.Id, ExternalApiAction.SyncWallet, string.Empty);
             await eventDispatcher.Publish(@event);
             return;
         }
 
+        // Sync balance in database
+        await platformBalanceRepo.SyncOrCreateAsync(
+            userId,
+            platform.LocalId,
+            availableBalance.Value,
+            lockedBalance ?? 0);
+
         // Update target external wallet if exists
         if (targetWallet != null)
         {
-            targetWallet.Amount = balance.Value;
+            targetWallet.Amount = availableBalance.Value;
+            targetWallet.LockedAmount = lockedBalance ?? 0;
+            targetWallet.LastSyncAt = lastSyncAt ?? DateTime.UtcNow;
             return;
         }
 
@@ -319,13 +320,10 @@ public sealed class WalletManagerCacheService(
         {
             PlatformId = platform.Id,
             PlatformName = platform.Name,
-            Amount = balance.Value,
+            Amount = availableBalance.Value,
+            LockedAmount = lockedBalance ?? 0,
+            LastSyncAt = lastSyncAt ?? DateTime.UtcNow,
         };
         wallet.ExternalWallets.Add(targetWallet);
-    }
-
-    private static void RemoveExternalWallet(UserWalletDto wallet, Guid platformId)
-    {
-        wallet.ExternalWallets = [.. wallet.ExternalWallets.Where(w => w.PlatformId != platformId)];
     }
 }
