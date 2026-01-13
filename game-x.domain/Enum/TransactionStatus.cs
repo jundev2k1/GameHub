@@ -13,5 +13,7 @@ public enum TransactionStatus
     /// <summary>The transaction with Uxm failed</summary>
     Failed = 4,
     /// <summary>The transaction is cancelled by admin</summary>
-    Cancelled = 5
+    Cancelled = 5,
+    /// <summary>The transaction is timeout</summary>
+    Expired = 6,
 }
