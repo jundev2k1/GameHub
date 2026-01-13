@@ -16,7 +16,10 @@ public sealed class GetTalentWalletTransactionsHandler(
             query => criteriaBuilder.Apply(
                 query,
                 request.Filters,
-                request.Sorts),
+                request.Sorts,
+                keyword => tx => tx.Nickname.Contains(keyword)
+                    || (tx.DonorEmail != null && tx.DonorEmail.Contains(keyword))
+                    || (tx.DonorNickname != null && tx.DonorNickname.Contains(keyword))),
             request.PageIndex,
             request.PageSize,
             ct);
