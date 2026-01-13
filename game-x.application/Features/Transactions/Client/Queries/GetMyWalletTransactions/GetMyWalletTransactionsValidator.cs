@@ -71,7 +71,7 @@ public sealed class GetMyWalletTransactionsValidator : AbstractValidator<GetMyWa
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .ToList();
 
-        var allValidStatuses = Enum.GetNames<ChainTransactionStatus>().ToList();
+        var allValidStatuses = Enum.GetNames<TransactionStatus>().ToList();
 
         foreach (var val in arr)
         {

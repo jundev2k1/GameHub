@@ -72,7 +72,7 @@ public sealed class GetMyGameTransactionsValidator : AbstractValidator<GetMyGame
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .ToList();
 
-        var allValidStatuses = Enum.GetNames(typeof(ChainTransactionStatus)).ToList();
+        var allValidStatuses = Enum.GetNames(typeof(TransactionStatus)).ToList();
 
         foreach (var val in arr)
         {
