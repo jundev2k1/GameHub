@@ -1,4 +1,5 @@
 ﻿using game_x.application.Features.Accounts.Admin.Queries.GetSelfUserProfile;
+using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
 using game_x.application.Features.Accounts.Dtos;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
@@ -46,6 +47,10 @@ public sealed class MapsterConfig : IRegister
             .Map(
                 dest => dest.IsBankConfirmed,
                 src => src.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved));
+
+        cfg.NewConfig<UserDetailDto, GetUserDetailByAdminResult>()
+            .Map(dest => dest.Roles, src => src.Roles.Items)
+            .Map(dest => dest.InternalBalances, src => src.Balances);
 
         cfg.NewConfig<UserDetailDto, GetSelfUserResult>()
             .Map(dest => dest.Roles, src => src.Roles.Items);

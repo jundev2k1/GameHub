@@ -13,16 +13,7 @@ public sealed class GetUserDetailByAdminHandler(
         var externalBalances = await platformBalanceRepo.GetBalancesByUserIdAsync(userDetail.UserId, ct);
         return userDetail.Adapt<GetUserDetailByAdminResult>() with
         {
-            Roles = userDetail.Roles.Items,
-            InternalBalances = userDetail.Balances,
-            ExternalBalances = [..externalBalances.Select(eb => new UserWalletExternalItemDto
-            {
-                PlatformId = eb.Platform.PublicId,
-                PlatformName = eb.Platform.Name,
-                Amount = eb.AvailableBalance,
-                LockedAmount = eb.LockedBalance,
-                LastSyncAt = eb.LastSyncedAt,
-            })],
+            ExternalBalances = externalBalances.Adapt<UserWalletExternalItemDto[]>(),
         };
     }
 }
