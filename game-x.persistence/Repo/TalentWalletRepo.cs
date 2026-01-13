@@ -18,23 +18,30 @@ public sealed class TalentWalletRepo(GameXContext dbContext) : ITalentWalletRepo
     {
         var query = dbContext.TalentWalletTransactions
             .AsNoTracking()
-            .Join(dbContext.SystemWalletTransactions,
+            .Join(dbContext.LiveStreamDonations,
                 twt => twt.ReferenceId,
+                lsd => lsd.PublicId,
+                (twt, lsd) => new { twt, lsd })
+            .Join(dbContext.SystemWalletTransactions,
+                gr => gr.twt.ReferenceId,
                 swt => swt.ReferenceId,
-                (twt, swt) => new TalentWalletTransactionDto
+                (gr, swt) => new TalentWalletTransactionDto
                 {
-                    Id = twt.PublicId,
-                    TalentId = twt.TalentId,
-                    Nickname = twt.TalentWallet.Talent.Nickname,
-                    Amount = twt.Amount,
-                    Type = twt.Type,
-                    ReferenceId = twt.ReferenceId,
-                    TalentReceive = twt.Amount,
+                    Id = gr.twt.PublicId,
+                    TalentId = gr.twt.TalentId,
+                    Nickname = gr.twt.TalentWallet.Talent.Nickname,
+                    Amount = gr.twt.Amount,
+                    Type = gr.twt.Type,
+                    ReferenceId = gr.twt.ReferenceId,
+                    DonorNickname = gr.lsd.Donor.Nickname,
+                    DonorEmail = gr.lsd.Donor.Email,
+                    DonatedAmount = gr.lsd.Amount,
+                    TalentReceive = gr.twt.Amount,
                     SystemReceive = swt != null ? swt.Amount : 0,
-                    BalanceAfter = twt.BalanceAfter,
-                    AdjustedBy = twt.AdjustedBy,
-                    CreatedAt = twt.CreatedAt,
-                    UpdatedAt = twt.UpdatedAt,
+                    BalanceAfter = gr.twt.BalanceAfter,
+                    AdjustedBy = gr.twt.AdjustedBy,
+                    CreatedAt = gr.twt.CreatedAt,
+                    UpdatedAt = gr.twt.UpdatedAt,
                 })
             .AsQueryable();
         if (talentId != null)
@@ -51,23 +58,6 @@ public sealed class TalentWalletRepo(GameXContext dbContext) : ITalentWalletRepo
             .Select(i => i.Adapt<TalentWalletTransactionDto>())
             .ToListAsync(ct);
 
-        var donationIds = items.Select(i => i.ReferenceId)
-            .ToArray();
-        var mappingDatas = await dbContext.LiveStreamDonations
-            .AsNoTracking()
-            .Include(lsd => lsd.Donor)
-            .Where(lsd => donationIds.Contains(lsd.PublicId))
-            .ToArrayAsync(ct);
-        items.ForEach(i =>
-        {
-            var targetMapping = mappingDatas.FirstOrDefault(m => m.PublicId == i.ReferenceId);
-            if (targetMapping != null)
-            {
-                i.DonorNickname = targetMapping.Donor.Nickname;
-                i.DonorEmail = targetMapping.Donor.Email;
-                i.DonatedAmount = targetMapping.Amount;
-            }
-        });
         return new PaginationResult<TalentWalletTransactionDto>(
             items,
             totalCount,
