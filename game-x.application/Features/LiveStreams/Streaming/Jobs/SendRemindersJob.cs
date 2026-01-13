@@ -52,7 +52,7 @@ public sealed class SendRemindersJob(
                 { "title", reminder.Schedule.Title },
                 { "startTime", reminder.Schedule.StartTime },
                 { "endTime", reminder.Schedule.EndTime },
-                { "streamKey", reminder.Schedule.StreamKey },
+                { "streamId", reminder.Schedule.PublicId },
             };
             return JsonSerializer.Serialize(metadata);
         }
