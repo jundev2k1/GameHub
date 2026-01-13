@@ -56,8 +56,8 @@ public sealed class LiveStreamReminderRepo(GameXContext dbContext) : ILiveStream
     {
         return await dbContext.LiveStreamReminders
             .AsNoTracking()
+            .Where(lsr => ids.Contains(lsr.Schedule.PublicId))
             .GroupBy(lsr => lsr.Schedule.PublicId)
-            .Where(gr => ids.Contains(gr.Key))
             .ToDictionaryAsync(gr => gr.Key, gr => gr.Select(lsr => lsr.Channel).ToArray(), ct);
     }
 
