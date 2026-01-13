@@ -121,7 +121,7 @@ public sealed class OnLiveStreamDonatedHandler(
             fee: feeAmount,
             cryptoTokenId: tokenId,
             note: "Livestream donations.");
-        var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
+        var orderNumber = OrderNoGenerator.Otc();
         var lastedBalanceAfter = await transactionRepo.GetLatestBalanceAfterAsync(transaction.UserId, ct);
         var transactionInternal = TransactionInternal.Create(
             orderNumber: orderNumber,

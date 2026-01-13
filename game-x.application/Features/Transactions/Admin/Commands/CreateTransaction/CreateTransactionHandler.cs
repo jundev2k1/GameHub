@@ -30,7 +30,7 @@ public sealed class CreateTransactionHandler(
                 balanceAfter = balance.TotalAmount;
             }, ct);
 
-            var sno = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
+            var sno = OrderNoGenerator.Otc();
             var internalTx = TransactionInternal.Create(sno, request.OrderUId);
             transaction = Transaction.Create(
                 request.UserId,

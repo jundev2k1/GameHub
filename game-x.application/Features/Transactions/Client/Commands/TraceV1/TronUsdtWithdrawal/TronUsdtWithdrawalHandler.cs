@@ -19,21 +19,21 @@ public sealed class TronUsdtWithdrawalHandler(
     {
         string userId = userAccessor.GetUserId();
         int minimumAmount = 10;
-        if(request.Amount < minimumAmount)
+        if (request.Amount < minimumAmount)
             throw new BadRequestException(MessageCode.Accounting.InvalidAmount);
 
         await ValidateKyc(userId, ct);
-        
+
         var (token, balance, feeAmount, totalAmount) = await ResolveBalanceInfoAsync(
-            userId: userId, 
-            amount: request.Amount, 
+            userId: userId,
+            amount: request.Amount,
             cryptoTokenId: request.CryptoTokenId,
             to: request.To,
             ct: ct);
 
-        var tx = await CreateTransaction(request, userId, feeAmount, token.Id,ct);
+        var tx = CreateTransaction(request, userId, feeAmount, token.Id);
         Transaction? createdTx = null;
-        await unitOfWork.WithTransactionAsync( async () =>
+        await unitOfWork.WithTransactionAsync(async () =>
         {
             balance.Freeze(totalAmount);
             await transactionRepo.AddAsync(tx, ct);
@@ -43,20 +43,20 @@ public sealed class TronUsdtWithdrawalHandler(
             createdTx = await transactionRepo.GetInternalByIdAsync(tx.PublicId, ct);
             await eventDispatcher.Publish(new OnTransactionInternalCreatedEvent(createdTx.Adapt<TransactionInternalDto>()), ct);
         }, ct);
-        
+
         return createdTx.Adapt<ListTransactionInternalDto>();
     }
-   
+
     private async Task ValidateKyc(
-        string userId, 
+        string userId,
         CancellationToken ct = default)
     {
         try
         {
             var userKyc = await userRepo.GetKycProfileAsync(userId, ct)
                 ?? throw new Exception();
-        
-            if(userKyc.Status != KycStatus.Approved)
+
+            if (userKyc.Status != KycStatus.Approved)
                 throw new Exception();
         }
         catch
@@ -64,21 +64,19 @@ public sealed class TronUsdtWithdrawalHandler(
             throw new BadRequestException(MessageCode.User.KycInvalid);
         }
     }
-    
-    private async Task<Transaction> CreateTransaction(
-        TronUsdtWithdrawalCommand request, 
-        string userId, 
+
+    private static Transaction CreateTransaction(
+        TronUsdtWithdrawalCommand request,
+        string userId,
         decimal feeAmount,
-        int tokenId,
-        CancellationToken ct = default)
+        int tokenId)
     {
-        var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
-        
+        var orderNumber = OrderNoGenerator.Otc();
         var txInternal = TransactionInternal.Create(
             orderNumber: orderNumber,
             fromAddress: string.Empty,
             toAddress: request.To);
-        
+
         var tx = Transaction.Create(
             sourceType: TransactionSourceType.Uxm,
             type: TransactionType.Withdrawal,
@@ -91,12 +89,12 @@ public sealed class TronUsdtWithdrawalHandler(
         tx.AddTxInternal(txInternal);
         return tx;
     }
-    
+
     private async Task<(CryptoToken Token, UserBalance Balance, decimal FeeAmount, decimal TotalAmount)>
         ResolveBalanceInfoAsync(string userId, decimal amount, Guid cryptoTokenId, string to, CancellationToken ct)
     {
         var token = await ValidateTokenAsync(cryptoTokenId, to, ct);
-        
+
         var balance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
             ?? throw new BadRequestException(MessageCode.Accounting.WalletNotFound);
 
@@ -108,14 +106,14 @@ public sealed class TronUsdtWithdrawalHandler(
 
         return (token, balance, feeAmount, totalAmount);
     }
-    
+
     private async Task<CryptoToken> ValidateTokenAsync(Guid cryptoTokenId, string to, CancellationToken ct)
     {
         var token = await cryptoTokenRepo.GetByIdAsync(cryptoTokenId, ct);
 
         if (token.Status != CryptoTokenStatus.Active)
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
-                
+
         if (!TransactionInternal.IsValidAddress(token.Network, to))
             throw new BadRequestException(MessageCode.Transaction.InvalidTransactionAddress);
 

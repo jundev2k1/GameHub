@@ -31,7 +31,7 @@ public sealed class TronUsdtWithdrawalV2Handler(
             to: request.To,
             ct: ct);
 
-        var tx = await CreateTransaction(request, userId, feeAmount, token.Id, ct);
+        var tx = CreateTransaction(request, userId, feeAmount, token.Id);
 
         await unitOfWork.WithTransactionAsync( async () =>
         {
@@ -63,15 +63,13 @@ public sealed class TronUsdtWithdrawalV2Handler(
         }
     }
     
-    private async Task<Transaction> CreateTransaction(
+    private static Transaction CreateTransaction(
         TronUsdtWithdrawalV2Command request, 
         string userId, 
         decimal feeAmount,
-        int tokenId,
-        CancellationToken ct = default)
+        int tokenId)
     {
-        var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
-        
+        var orderNumber = OrderNoGenerator.Otc();
         var txInternal = TransactionInternal.Create(
             orderNumber: orderNumber,
             fromAddress: string.Empty,

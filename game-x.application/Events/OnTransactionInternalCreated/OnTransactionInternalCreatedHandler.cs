@@ -1,10 +1,10 @@
-using System.Text.Json;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
 using game_x.application.Features.Transactions.Dtos;
+using System.Text.Json;
 
 namespace game_x.application.Events.OnTransactionInternalCreated;
 
@@ -18,39 +18,42 @@ public sealed class OnTransactionInternalCreatedHandler(
     public async Task Handle(OnTransactionInternalCreatedEvent @event, CancellationToken ct = default)
     {
         var targetTransaction = @event.Transaction;
+
+        IEnumerable<Notification> notifications = [];
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await SendUpdateWalletToMember(targetTransaction.UserId, ct);
-            await SendNotificationToAdmin(targetTransaction, ct);
+            notifications = await CreateAdminNotifications(targetTransaction, ct);
+            await notificationRepo.AddRangeNotificationsAsync(notifications, ct);
         }, ct);
-    }
 
-    private async Task SendNotificationToAdmin(TransactionInternalDto transaction, CancellationToken ct)
-    {
-        var adminUsers = await userRepo.GetAdminUsers(ct);
-
-        var metadata = JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>());
-        foreach (var adminUser in adminUsers)
+        // Send notification to all the admin
+        var adminNotification = notifications.FirstOrDefault();
+        if (adminNotification != null)
         {
-            var notification = Notification.Create(
-                NotificationMessageKey.Transaction_Created,
-                adminUser.Id,
-                NotificationType.Transaction,
-                NotificationSeverity.Success,
-                metadata);
-            await notificationRepo.AddNotificationAsync(notification, ct);
-
-            // Send notification to all the admin
-            await adminHubService.SendNotificationAsync(
-                adminUser.Id,
-                notification.Adapt<NotificationDto>());
+            await adminHubService.SendNotificationToAllAsync(
+                adminNotification.Adapt<NotificationDto>());
         }
 
         // Send transaction to all the admin
         await adminHubService.SendTransactionToAllAdminAsync(
-            transaction.Adapt<AdminTransactionDto>());
+            targetTransaction.Adapt<AdminTransactionDto>());
     }
-    
+
+    private async Task<IEnumerable<Notification>> CreateAdminNotifications(TransactionInternalDto transaction, CancellationToken ct)
+    {
+        var adminUsers = await userRepo.GetAdminUsers(ct);
+
+        var metadata = JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>());
+        var notifications = adminUsers.Select(u => Notification.Create(
+            NotificationMessageKey.Transaction_Created,
+            u.Id,
+            NotificationType.Transaction,
+            NotificationSeverity.Success,
+            metadata));
+        return notifications;
+    }
+
     private async Task SendUpdateWalletToMember(string userId, CancellationToken ct)
     {
         var @event = new OnUserBalanceUpdatedEvent(userId);

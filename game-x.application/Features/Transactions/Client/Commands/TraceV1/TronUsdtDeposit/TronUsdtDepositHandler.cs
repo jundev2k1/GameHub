@@ -71,7 +71,7 @@ public sealed class CreateDepositChainTransactionHandler(
         if (token.Status != CryptoTokenStatus.Active)
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
 
-        var orderNumber = await OrderNoGenerator.GenerateUniqueOtcOrderNoAsync(transactionRepo, ct);
+        var orderNumber = OrderNoGenerator.Otc();
         var txInternal = TransactionInternal.Create(orderNumber: orderNumber);
 
         var tx = Transaction.Create(
