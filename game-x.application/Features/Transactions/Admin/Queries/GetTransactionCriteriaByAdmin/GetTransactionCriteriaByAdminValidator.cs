@@ -76,7 +76,7 @@ public sealed class GetTransactionCriteriaByAdminValidator : AbstractValidator<G
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .ToList();
         
-        var allValidStatuses = Enum.GetNames(typeof(ChainTransactionStatus)).ToList();
+        var allValidStatuses = Enum.GetNames(typeof(TransactionStatus)).ToList();
         
         foreach (var val in arr)
         {

@@ -33,22 +33,28 @@ public static class TransactionFilterExtensions
         if (raw.IsNullOrEmpty())
             return _ => true;
 
-        var statusList = raw
+        var parsedStatuses = raw
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(s => s.Trim().ToUpperInvariant())
-            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => s.Trim())
+            .Where(s => Enum.TryParse<TransactionStatus>(s, true, out _))
+            .Select(s => Enum.Parse<TransactionStatus>(s, true))
+            .Distinct()
             .ToList();
-
-        if (statusList.Count == 0)
+        
+        if (parsedStatuses.Count == 0)
             return _ => false;
-
-        var validStatuses = statusList.Select(item =>
-        {
-            Enum.TryParse<TransactionStatus>(item, ignoreCase: true, out var status);
-            return status;
-        }).ToList();
-
-        return transaction => validStatuses.Contains(transaction.Status);
+        
+        bool includePending = parsedStatuses.Remove(TransactionStatus.Pending);
+        bool includeExpired = parsedStatuses.Remove(TransactionStatus.Expired);
+        
+        return transaction =>
+            parsedStatuses.Contains(transaction.Status)
+            || (includePending
+                && transaction.Status == TransactionStatus.Pending
+                && transaction.ExpiredAt == null)
+            || (includeExpired
+                && transaction.Status == TransactionStatus.Pending
+                && transaction.ExpiredAt != null);
     }
 
     /// <summary>Builds a filter by platform</summary>
