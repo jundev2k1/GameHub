@@ -73,9 +73,13 @@ public sealed class GetMyWalletTransactionsHandler(
             if (isToPlatform)
                 item.To = item.GamePlatformName;
 
-            item.Amount = item.ActualAmount;
+            if (isWithdrawal && isUxmTransaction)
+                item.Amount = Math.Abs(item.Amount) * -1;
+
             if (!isGameTransaction || (!isWithdrawal && !isDeposit && !isBalanceAdjustment))
                 continue;
+
+            item.Amount = item.ActualAmount;
 
             // Map transaction amount according Credit mode
             if (isCreditMode)
