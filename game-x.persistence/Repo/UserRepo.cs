@@ -336,7 +336,7 @@ public sealed class UserRepo(
                 Balance = u.UserBalances.Sum(ub => ub.Amount),
                 FrozenBalance = u.UserBalances.Sum(ub => ub.FrozenAmount),
                 GamePoint = context.GamePlatformBalances.Where(gpb => gpb.UserId == u.Id).Sum(gpb => gpb.AvailableBalance),
-                LockedGamePoint = context.GamePlatformBalances.Where(gpb => gpb.UserId == u.Id).Sum(gpb => gpb.AvailableBalance),
+                LockedGamePoint = context.GamePlatformBalances.Where(gpb => gpb.UserId == u.Id).Sum(gpb => gpb.LockedBalance),
                 CreatedAt = u.CreatedAt,
                 UpdatedAt = u.UpdatedAt
             })
