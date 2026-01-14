@@ -50,10 +50,7 @@ public sealed class MapsterConfig : IRegister
 
         cfg.NewConfig<UserDetailDto, GetUserDetailByAdminResult>()
             .Map(dest => dest.Roles, src => src.Roles.Items)
-            .Map(dest => dest.InternalBalances, src => src.Balances)
-            .Ignore(dest => dest.TotalBalance)
-            .Ignore(dest => dest.TotalGamePoint)
-            .Ignore(dest => dest.TotalAsset);
+            .Map(dest => dest.InternalBalances, src => src.Balances);
 
         cfg.NewConfig<UserDetailDto, GetSelfUserResult>()
             .Map(dest => dest.Roles, src => src.Roles.Items);

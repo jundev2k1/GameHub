@@ -18,13 +18,11 @@ public record GetUserDetailByAdminResult(
     bool IsKycConfirmed,
     bool IsBankConfirmed,
     BalanceInfo[] InternalBalances,
+    decimal TotalBalance,
     UserWalletExternalItemDto[] ExternalBalances,
+    decimal TotalGamePoint,
+    decimal TotalAsset,
     UserExtendDto UserExtendInfo,
     string[] Roles,
     DateTime? CreatedAt,
-    DateTime? UpdatedAt)
-{
-    public decimal TotalBalance => InternalBalances.Sum(b => b.TotalAmount);
-    public decimal TotalGamePoint => ExternalBalances.Sum(b => b.TotalAmount);
-    public decimal TotalAsset => TotalBalance + TotalGamePoint;
-};
+    DateTime? UpdatedAt);

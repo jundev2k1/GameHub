@@ -11,9 +11,16 @@ public sealed class GetUserDetailByAdminHandler(
     {
         var userDetail = await userRepo.GetUserDetailAsync(request.UserId, ct);
         var externalBalances = await platformBalanceRepo.GetBalancesByUserIdAsync(userDetail.UserId, ct);
+
+        var externalBalanceDtos = externalBalances.Adapt<UserWalletExternalItemDto[]>();
+        var totalBalance = userDetail.Balances.Sum(b => b.TotalAmount);
+        var totalGamePoint = externalBalanceDtos.Sum(b => b.TotalAmount);
         return userDetail.Adapt<GetUserDetailByAdminResult>() with
         {
-            ExternalBalances = externalBalances.Adapt<UserWalletExternalItemDto[]>(),
+            ExternalBalances = externalBalanceDtos,
+            TotalBalance = totalBalance,
+            TotalGamePoint = totalGamePoint,
+            TotalAsset = totalBalance + totalGamePoint,
         };
     }
 }
