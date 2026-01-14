@@ -9,4 +9,5 @@ public class UserListItemDto : UserDto
     public decimal GamePoint { get; set; }
     public decimal LockedGamePoint { get; set; }
     public decimal TotalGamePoint => GamePoint + LockedGamePoint;
+    public decimal TotalAsset => TotalBalance + TotalGamePoint;
 }
