@@ -9,6 +9,11 @@ namespace game_x.infrastructure.Security;
 
 public sealed class UserAccessor(IHttpContextAccessor httpContextAccessor) : IUserAccessor, IServices
 {
+    public bool IsLoggedIn()
+    {
+        return httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
+    }
+
     public string GetUserId()
     {
         return httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)

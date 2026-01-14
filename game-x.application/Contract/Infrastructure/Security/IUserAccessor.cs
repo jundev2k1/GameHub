@@ -4,6 +4,8 @@ namespace game_x.application.Contract.Infrastructure.Security;
 
 public interface IUserAccessor
 {
+    bool IsLoggedIn();
+
     string GetUserId();
 
     string GetJwtId();

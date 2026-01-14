@@ -66,13 +66,16 @@ public sealed class GetActiveStreamsHandler(
         IEnumerable<LiveStreamScheduleClientItemDto> items,
         CancellationToken ct)
     {
-        var reminders = await streamReminderRepo.GetUnSendingRemindersAsync(
-            items.Select(x => x.Id),
-            userAccessor.GetUserId(),
-            ct);
+        var isLoggedIn = userAccessor.IsLoggedIn();
+        var reminders = isLoggedIn
+            ? await streamReminderRepo.GetUnSendingRemindersAsync(
+                items.Select(x => x.Id),
+                userAccessor.GetUserId(),
+                ct)
+            : [];
         foreach (var item in items)
         {
-            if (reminders.TryGetValue(item.Id, out var channels))
+            if (isLoggedIn && reminders.TryGetValue(item.Id, out var channels))
                 item.ReminderChannels = channels;
 
             // Get viewer count
