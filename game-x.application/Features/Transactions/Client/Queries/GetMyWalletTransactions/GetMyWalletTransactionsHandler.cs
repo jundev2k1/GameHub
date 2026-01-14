@@ -56,6 +56,9 @@ public sealed class GetMyWalletTransactionsHandler(
             var isDonationOut = item.Type == TransactionType.TransferSent;
             var isBalanceAdjustment = item.Type == TransactionType.BalanceAdjustment;
 
+            // Wallet ledgers tab will display the actual amount instead of transaction amount
+            item.Amount = item.ActualAmount;
+
             #region Transaction address mapping
             var isFromCash = (isWithdrawal && isUxmTransaction)
                 || (isDeposit && isGameTransaction);
@@ -87,20 +90,18 @@ public sealed class GetMyWalletTransactionsHandler(
             if (!isGameTransaction || (!isWithdrawal && !isDeposit && !isBalanceAdjustment))
                 continue;
 
-            item.Amount = item.ActualAmount;
-
             // Map transaction amount according Credit mode
             if (isCreditMode)
             {
                 if (isWithdrawal)
-                    item.Amount = Math.Abs(item.ActualAmount) * -1;
+                    item.Amount = Math.Abs(item.Amount) * -1;
 
                 item.BalanceAfter = item.GameBalanceAfter;
             }
 
             // Map transaction amount according Cash mode
             if (!isCreditMode && isDeposit)
-                item.Amount = Math.Abs(item.ActualAmount) * -1; 
+                item.Amount = Math.Abs(item.Amount) * -1; 
             #endregion
         }
     }
