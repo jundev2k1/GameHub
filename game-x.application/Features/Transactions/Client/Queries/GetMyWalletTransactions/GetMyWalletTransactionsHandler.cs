@@ -53,8 +53,10 @@ public sealed class GetMyWalletTransactionsHandler(
 
             var isDeposit = item.Type == TransactionType.Deposit;
             var isWithdrawal = item.Type == TransactionType.Withdrawal;
+            var isDonationOut = item.Type == TransactionType.TransferSent;
             var isBalanceAdjustment = item.Type == TransactionType.BalanceAdjustment;
 
+            #region Transaction address mapping
             var isFromCash = (isWithdrawal && isUxmTransaction)
                 || (isDeposit && isGameTransaction);
             if (isFromCash)
@@ -71,11 +73,17 @@ public sealed class GetMyWalletTransactionsHandler(
 
             var isToPlatform = isDeposit && isGameTransaction;
             if (isToPlatform)
-                item.To = item.GamePlatformName;
+                item.To = item.GamePlatformName; 
+            #endregion
 
             if (isWithdrawal && isUxmTransaction)
                 item.Amount = Math.Abs(item.Amount) * -1;
 
+            // Cash tab: the amount of donation transaction must be a negative value
+            if (!isCreditMode && isDonationOut)
+                item.Amount = Math.Abs(item.Amount) * -1;
+
+            #region Only handle in game transactions
             if (!isGameTransaction || (!isWithdrawal && !isDeposit && !isBalanceAdjustment))
                 continue;
 
@@ -92,7 +100,8 @@ public sealed class GetMyWalletTransactionsHandler(
 
             // Map transaction amount according Cash mode
             if (!isCreditMode && isDeposit)
-                item.Amount = Math.Abs(item.ActualAmount) * -1;
+                item.Amount = Math.Abs(item.ActualAmount) * -1; 
+            #endregion
         }
     }
 }
