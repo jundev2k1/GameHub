@@ -20,7 +20,6 @@ public sealed class UpdateStreamRemindersHandler(
         {
             // Delete all channels of user from current stream
             await streamRemainderRepo.DeleteAsync(userId, schedule.Id, ct);
-            await unitOfWork.SaveChangesAsync(ct);
 
             // Create new channels
             if (request.Channels.Length > 0)

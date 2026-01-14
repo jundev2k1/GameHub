@@ -61,6 +61,17 @@ public sealed class LiveStreamReminderRepo(GameXContext dbContext) : ILiveStream
             .ToDictionaryAsync(gr => gr.Key, gr => gr.Select(lsr => lsr.Channel).ToArray(), ct);
     }
 
+    public async Task<Dictionary<Guid, NotificationChannel[]>> GetUnSendingRemindersAsync(
+        IEnumerable<Guid> ids,
+        CancellationToken ct = default)
+    {
+        return await dbContext.LiveStreamReminders
+            .AsNoTracking()
+            .Where(lsr => ids.Contains(lsr.Schedule.PublicId) && lsr.Status == ReminderStatus.Pending)
+            .GroupBy(lsr => lsr.Schedule.PublicId)
+            .ToDictionaryAsync(gr => gr.Key, gr => gr.Select(lsr => lsr.Channel).ToArray(), ct);
+    }
+
     public async Task CreateAsync(LiveStreamReminder reminder, CancellationToken ct = default)
     {
         await dbContext.LiveStreamReminders.AddAsync(reminder, ct);

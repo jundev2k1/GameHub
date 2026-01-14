@@ -65,7 +65,7 @@ public sealed class GetActiveStreamsHandler(
         CancellationToken ct)
     {
         var streamIds = items.Select(x => x.Id);
-        var reminders = await streamReminderRepo.GetStreamRemindersAsync(streamIds, ct);
+        var reminders = await streamReminderRepo.GetUnSendingRemindersAsync(streamIds, ct);
 
         foreach (var item in items)
         {
