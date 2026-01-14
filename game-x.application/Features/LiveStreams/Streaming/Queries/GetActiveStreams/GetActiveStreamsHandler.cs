@@ -1,11 +1,13 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.LiveStreams.Schedules.Dtos;
 
 namespace game_x.application.Features.LiveStreams.Streaming.Queries.GetActiveStreams;
 
 public sealed class GetActiveStreamsHandler(
+    IUserAccessor userAccessor,
     ILiveStreamManagerCacheService liveStreamManager,
     IFileManagerCacheService fileManagerCache,
     ILiveStreamReminderRepo streamReminderRepo) : IQueryHandler<GetActiveStreamsQuery, PaginationResult<LiveStreamScheduleClientItemDto>>
@@ -64,9 +66,10 @@ public sealed class GetActiveStreamsHandler(
         IEnumerable<LiveStreamScheduleClientItemDto> items,
         CancellationToken ct)
     {
-        var streamIds = items.Select(x => x.Id);
-        var reminders = await streamReminderRepo.GetUnSendingRemindersAsync(streamIds, ct);
-
+        var reminders = await streamReminderRepo.GetUnSendingRemindersAsync(
+            items.Select(x => x.Id),
+            userAccessor.GetUserId(),
+            ct);
         foreach (var item in items)
         {
             if (reminders.TryGetValue(item.Id, out var channels))
