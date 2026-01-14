@@ -9,7 +9,7 @@ public record GetUserDetailByAdminResult(
     string UserId,
     string Username,
     string Email,
-    string Nickname, 
+    string Nickname,
     string FullName,
     string AvatarUrl,
     DateTime? DateOfBirth,
@@ -22,4 +22,9 @@ public record GetUserDetailByAdminResult(
     UserExtendDto UserExtendInfo,
     string[] Roles,
     DateTime? CreatedAt,
-    DateTime? UpdatedAt);
+    DateTime? UpdatedAt)
+{
+    public decimal TotalBalance => InternalBalances.Sum(b => b.TotalAmount);
+    public decimal TotalGamePoint => ExternalBalances.Sum(b => b.TotalAmount);
+    public decimal TotalAsset => TotalBalance + TotalGamePoint;
+};
