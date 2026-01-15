@@ -20,7 +20,7 @@ public sealed class ResendCodeUserHandler(
         var targetEmail = request.Email;
 
         // Case: ForgotPassword, validate current user identity
-        if (request.Purpose == VerificationPurposes.ChangePassword)
+        if (request.Purpose is VerificationPurposes.ChangePassword or VerificationPurposes.Withdrawal)
         {
             var userId = userAccessor.GetUserId();
             var targetUser = await userRepo.GetUserByIdAsync(userId, ct);

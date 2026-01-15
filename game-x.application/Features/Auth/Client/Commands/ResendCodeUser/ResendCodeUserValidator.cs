@@ -8,17 +8,19 @@ public sealed class ResendCodeUserValidator : AbstractValidator<ResendCodeUserCo
     public ResendCodeUserValidator()
     {
         RuleFor(x => x.Purpose)
-            .Must(p => p == VerificationPurposes.ChangePassword
-                || p == VerificationPurposes.EmailVerification
-                || p == VerificationPurposes.ForgotPassword)
-            .WithMessage("Invalid purpose. Must be 'ForgotPassword' or 'EmailVerification' or 'ChangePassword'.");
+            .Must(p => p is VerificationPurposes.ChangePassword
+                or VerificationPurposes.EmailVerification
+                or VerificationPurposes.ForgotPassword
+                or VerificationPurposes.Withdrawal)
+            .WithMessage("Invalid purpose. Must be 'ForgotPassword' or 'EmailVerification' or 'ChangePassword' or 'Withdrawal'.");
 
-        When(x => x.Purpose == VerificationPurposes.ChangePassword, () =>
-        {
-            RuleFor(x => x.Email)
-                .Must(email => email == null)
-                .WithMessage("Email must be null or empty when purpose is 'ForgotPassword'.");
-        });
+        When(x => x.Purpose is VerificationPurposes.ChangePassword
+            or VerificationPurposes.Withdrawal, () =>
+            {
+                RuleFor(x => x.Email)
+                    .Must(email => email == null)
+                    .WithMessage("Email must be null or empty when purpose is 'ForgotPassword'.");
+            });
 
         var requireEmailPurposes = new[] { VerificationPurposes.EmailVerification, VerificationPurposes.ForgotPassword };
         When(x => requireEmailPurposes.Contains(x.Purpose), () =>
