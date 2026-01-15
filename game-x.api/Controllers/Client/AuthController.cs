@@ -64,8 +64,8 @@ public sealed class AuthController : BaseApiController
     {
         if (request.Purpose == EmailVerificationPurpose.AccountActivation)
         {
-            var result = await Mediator.Send(new VerifyEmailForRegistrationCommand(request.Email ?? string.Empty, request.Code));
-            return ApiResponseFactory.Ok(result, MessageCode.User.EmailVerifySuccess);
+            await Mediator.Send(new VerifyEmailForRegistrationCommand(request.Email ?? string.Empty, request.Code));
+            return ApiResponseFactory.NoContent(MessageCode.User.EmailVerifySuccess);
         }
 
         if (request.Purpose == EmailVerificationPurpose.PasswordReset)
