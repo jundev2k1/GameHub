@@ -95,6 +95,7 @@ public sealed class AuthController : BaseApiController
             EmailVerificationPurpose.AccountActivation => VerificationPurposes.EmailVerification,
             EmailVerificationPurpose.PasswordReset => VerificationPurposes.ForgotPassword,
             EmailVerificationPurpose.PasswordChange => VerificationPurposes.ChangePassword,
+            EmailVerificationPurpose.Withdrawal => VerificationPurposes.Withdrawal,
             _ => throw new BadRequestException(),
         };
         var command = request.Adapt<ResendCodeUserCommand>() with { Purpose = purpose };
