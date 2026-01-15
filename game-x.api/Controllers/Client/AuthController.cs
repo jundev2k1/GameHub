@@ -100,6 +100,6 @@ public sealed class AuthController : BaseApiController
         };
         var command = request.Adapt<ResendCodeUserCommand>() with { Purpose = purpose };
         await Mediator.Send(command);
-        return ApiResponseFactory.Ok(MessageCode.System.EmailSendSuccess);
+        return ApiResponseFactory.NoContent(MessageCode.System.EmailSendSuccess);
     }
 }

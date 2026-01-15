@@ -83,10 +83,10 @@ services:
       - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
       - EngageLabSettings__ApiKey=${EngageLab_ApiKey}
       - EngageLabSettings__From=${EngageLab_From}
-      - SpamProtectionSettings_MaxVerifyAttempts=${SpamProtection_MaxVerifyAttempts}
-      - SpamProtectionSettings_VerifyLockMinutes=${SpamProtection_VerifyLockMinutes}
-      - SpamProtectionSettings_VerifySlidingMinutes=${SpamProtection_VerifySlidingMinutes}
-      - SpamProtectionSettings_VerifyEmailCooldownSeconds=${SpamProtection_VerifyEmailCooldownSeconds}
+      - SpamProtectionSettings__MaxVerifyAttempts=${SpamProtection_MaxVerifyAttempts}
+      - SpamProtectionSettings__VerifyLockMinutes=${SpamProtection_VerifyLockMinutes}
+      - SpamProtectionSettings__VerifySlidingMinutes=${SpamProtection_VerifySlidingMinutes}
+      - SpamProtectionSettings__VerifyEmailCooldownSeconds=${SpamProtection_VerifyEmailCooldownSeconds}
       - GameXSettings__MerchantNumber=${GAME_X_MERCHANT_NUMBER}
       - GameXSettings__PaymentGatewayPlatformId=${GAME_X_PAYMENT_GATEWAY_PLATFORM_ID}
       - GameXSettings__PaymentGatewayApiKey=${GAME_X_PAYMENT_GATEWAY_API_KEY}
