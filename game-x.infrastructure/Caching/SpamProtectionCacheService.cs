@@ -35,7 +35,7 @@ public sealed class SpamProtectionCacheService(
 
         Set(key, expiry, new MemoryCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = duration
+            AbsoluteExpirationRelativeToNow = duration ?? spamSetting.Value.VerifyEmailCooldown
         });
 
         return Task.CompletedTask;
