@@ -101,10 +101,6 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             .ThenInclude(lsm => lsm.Category)
             .Include(ls => ls.AssignedTo)
             .ThenInclude(u => u != null ? u.Avatar : null)
-            .Include(ls => ls.AssignedTo)
-            .ThenInclude(u => u != null ? u.UserKyc : null)
-            .Include(ls => ls.AssignedTo)
-            .ThenInclude(u => u != null ? u.UserBankAccounts : null)
             .Include(ls => ls.Thumbnail)
             .FirstOrDefaultAsync(ls => ls.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
@@ -118,10 +114,6 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
             .ThenInclude(lsm => lsm.Category)
             .Include(ls => ls.AssignedTo)
             .ThenInclude(u => u != null ? u.Avatar : null)
-            .Include(ls => ls.AssignedTo)
-            .ThenInclude(u => u != null ? u.UserKyc : null)
-            .Include(ls => ls.AssignedTo)
-            .ThenInclude(u => u != null ? u.UserBankAccounts : null)
             .Include(ls => ls.Thumbnail)
             .FirstOrDefaultAsync(ls => ls.StreamKey == streamKey, ct)
             ?? throw new NotFoundException(nameof(streamKey), streamKey);
