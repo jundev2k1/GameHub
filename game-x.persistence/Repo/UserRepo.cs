@@ -225,7 +225,7 @@ public sealed class UserRepo(
             .Include(uk => uk.FrontImage)
             .Include(uk => uk.BackImage)
             .FirstOrDefaultAsync(u => u.UserId == userId && !u.User.IsDeleted, ct)
-            ?? throw new NotFoundException();
+            ?? throw new BadRequestException(MessageCode.User.KycInvalid);
     }
 
     public async Task<PaginationResult<UserBankAccount>> GetUserBankAccountByCriteria(

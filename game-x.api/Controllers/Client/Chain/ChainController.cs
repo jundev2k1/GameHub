@@ -13,21 +13,21 @@ namespace game_x.api.Controllers.Client.Chain;
 public sealed class ChainController : BaseApiController
 {
     [HttpPost("withdrawal")]
-    public async Task<IActionResult> CreateWithdrawalTransactionAsync(TronUsdtWithdrawalCommand command, CancellationToken ct)
+    public async Task<IActionResult> CreateWithdrawalTransactionAsync(TronUsdtWithdrawalCommand command, CancellationToken ct = default)
     {
         var result = await Mediator.Send(command, ct);
         return ApiResponseFactory.Ok(result);
     }
 
     [HttpPost("deposit")]
-    public async Task<IActionResult> CreateDepositTransactionAsync(TronUsdtDepositCommand command, CancellationToken ct)
+    public async Task<IActionResult> CreateDepositTransactionAsync(TronUsdtDepositCommand command, CancellationToken ct = default)
     {
         var result = await Mediator.Send(command, ct);
         return ApiResponseFactory.Ok(result);
     }
 
     [HttpGet("me")]
-    public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] GetTransactionsRequest parameters)
+    public async Task<IActionResult> GetTransactionByCriteriaAsync([AsParameters] GetTransactionsRequest parameters, CancellationToken ct = default)
     {
         var paramExtends = new Dictionary<string, string>();
         if (parameters.TransactionStatuses.IsNotNullOrEmpty())
@@ -40,15 +40,15 @@ public sealed class ChainController : BaseApiController
             sorts,
             parameters.PageNumber,
             parameters.PageSize);
-        var result = await Mediator.Send(query);
+        var result = await Mediator.Send(query, ct);
         return ApiResponseFactory.Ok(result);
     }
 
     [HttpGet("{transactionId:guid}")]
-    public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId)
+    public async Task<IActionResult> GetTransactionByIdAsync(Guid transactionId, CancellationToken ct = default)
     {
         var query = new GetMyTransactionDetailQuery(transactionId);
-        var result = await Mediator.Send(query);
+        var result = await Mediator.Send(query, ct);
         return ApiResponseFactory.Ok(result);
     }
 }

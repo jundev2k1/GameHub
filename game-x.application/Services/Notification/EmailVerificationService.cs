@@ -1,7 +1,6 @@
 using game_x.application.Contract.Infrastructure.Email;
 using game_x.application.Contract.Infrastructure.Services.EmailProcessor;
 using game_x.application.Contract.Infrastructure.Services.VerificationCode;
-using game_x.application.Services.Verification;
 
 namespace game_x.application.Services.Notification;
 
