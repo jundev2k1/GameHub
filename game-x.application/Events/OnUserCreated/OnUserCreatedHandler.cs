@@ -13,6 +13,6 @@ public sealed class OnUserCreatedHandler(IEmailVerificationProcessor emailVerifi
         emailVerification.SendVerificationEmail(@event.Email, VerificationPurposes.EmailVerification);
 
         // Anti-spam resend email, block resend for 60 seconds
-        await spamProtection.SetResendCooldownAsync(@event.Email, TimeSpan.FromSeconds(60));
+        await spamProtection.SetResendCooldownAsync(@event.Email);
     }
 }

@@ -26,4 +26,14 @@ public sealed class SpamProtectionSettings : BaseSettings
     /// Gets the sliding window duration as a TimeSpan.
     /// </summary>
     public TimeSpan VerifySlidingWindow => TimeSpan.FromMinutes(VerifySlidingMinutes);
+
+    /// <summary>
+    /// Minimum interval (in seconds) between sending verification emails
+    /// to the same user to prevent email spam.
+    /// </summary>
+    public required int VerifyEmailCooldownSeconds { get; set; }
+    /// <summary>
+    /// Gets the email cooldown duration as a TimeSpan.
+    /// </summary>
+    public TimeSpan VerifyEmailCooldown => TimeSpan.FromSeconds(VerifyEmailCooldownSeconds);
 }

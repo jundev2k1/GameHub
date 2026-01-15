@@ -28,10 +28,10 @@ public sealed class SpamProtectionCacheService(
         return Task.FromResult<TimeSpan?>(null);
     }
 
-    public Task SetResendCooldownAsync(string email, TimeSpan duration)
+    public Task SetResendCooldownAsync(string email, TimeSpan? duration = null)
     {
         var key = GetResendKey(email);
-        var expiry = DateTimeOffset.UtcNow.Add(duration);
+        var expiry = DateTimeOffset.UtcNow.Add(duration ?? spamSetting.Value.VerifyEmailCooldown);
 
         Set(key, expiry, new MemoryCacheEntryOptions
         {

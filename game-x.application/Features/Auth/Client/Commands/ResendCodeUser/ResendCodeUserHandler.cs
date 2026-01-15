@@ -57,7 +57,7 @@ public sealed class ResendCodeUserHandler(
         emailVerification.SendVerificationEmail(targetEmail!, request.Purpose);
 
         // Action: set resend cooldown (default: 60s)
-        await spamProtection.SetResendCooldownAsync(targetEmail!, TimeSpan.FromSeconds(60));
+        await spamProtection.SetResendCooldownAsync(targetEmail!);
         return Unit.Value;
     }
 }

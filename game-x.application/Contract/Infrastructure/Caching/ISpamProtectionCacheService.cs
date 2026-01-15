@@ -7,7 +7,7 @@ public interface ISpamProtectionCacheService
 
     Task<TimeSpan?> GetResendWaitTimeAsync(string email);
 
-    Task SetResendCooldownAsync(string email, TimeSpan duration);
+    Task SetResendCooldownAsync(string email, TimeSpan? duration = null);
 
     // -- Verify attempt limiter --
     Task<bool> IsVerifyLockedAsync(string email);
