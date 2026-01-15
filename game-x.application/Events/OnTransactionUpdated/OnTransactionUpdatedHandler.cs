@@ -29,11 +29,11 @@ public sealed class OnTransactionUpdatedHandler(
             notification.Adapt<NotificationDto>());
 
         // Send transaction to all the admin
-        var adminTxDto = transaction.Adapt<AdminTransactionDto>();
+        var adminTxDto = txDto.Adapt<AdminTransactionDto>();
         await adminHubService.SendTransactionToAllAdminAsync(adminTxDto);
 
         // Send transaction to target user
-        var clientTxDto = transaction.Adapt<ClientTransactionDto>();
+        var clientTxDto = txDto.Adapt<ClientTransactionDto>();
         await clientHubService.SendTransactionToMemberAsync(transaction.UserId, clientTxDto);
 
         // Refresh balance for target user
