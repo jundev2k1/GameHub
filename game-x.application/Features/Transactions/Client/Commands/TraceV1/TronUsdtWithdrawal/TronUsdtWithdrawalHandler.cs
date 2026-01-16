@@ -23,7 +23,7 @@ public sealed class TronUsdtWithdrawalHandler(
     /// <summary>The minimum allowed amount for creating a withdrawal transaction</summary>
     private const decimal MinimumAmount = 10;
     /// <summary>The user ID from token</summary>
-    private readonly string UserId = userAccessor.GetUserId();
+    private readonly string _userId = userAccessor.GetUserId();
 
     public async Task<ListTransactionInternalDto> Handle(TronUsdtWithdrawalCommand request, CancellationToken ct = default)
     {
@@ -44,7 +44,7 @@ public sealed class TronUsdtWithdrawalHandler(
             }, ct);
         }, ct);
 
-        // Get latest transaction after creating
+        // Get the latest transaction after creating
         var createdTransaction = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
 
         // Publish event
@@ -61,7 +61,7 @@ public sealed class TronUsdtWithdrawalHandler(
             throw new BadRequestException(MessageCode.Accounting.InvalidAmount);
 
         // 2. Check if the user has been KYC verified
-        var userKyc = await userRepo.GetKycProfileAsync(this.UserId, ct);
+        var userKyc = await userRepo.GetKycProfileAsync(this._userId, ct);
         if (userKyc.Status != KycStatus.Approved)
             throw new BadRequestException(MessageCode.User.KycInvalid);
 
@@ -78,7 +78,7 @@ public sealed class TronUsdtWithdrawalHandler(
         if (isLocked)
         {
             var retryTime = await spamProtection.GetVerifyRetryAfterAsync(email);
-            var retrySeconds = (int)retryTime.Value.TotalSeconds;
+            var retrySeconds = retryTime != null ? (int)retryTime.Value.TotalSeconds : 0;
             throw new BadRequestException(
                 MessageCode.User.VerifyTooManyFailedAttempts,
                 new { Cooldown = retrySeconds });
@@ -108,9 +108,8 @@ public sealed class TronUsdtWithdrawalHandler(
             toAddress: request.To);
 
         var tx = Transaction.Create(
-            sourceType: TransactionSourceType.Uxm,
             type: TransactionType.Withdrawal,
-            userId: this.UserId,
+            userId: this._userId,
             amount: request.Amount,
             fee: this.FeeAmount,
             cryptoTokenId: this.TokenId,
@@ -133,7 +132,7 @@ public sealed class TronUsdtWithdrawalHandler(
 
     private async Task ValidateBalanceAsync(decimal amount, CancellationToken ct)
     {
-        var balance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(this.UserId, this.TokenId, ct)
+        var balance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(this._userId, this.TokenId, ct)
             ?? throw new BadRequestException(MessageCode.Accounting.WalletNotFound);
 
         this.FeeAmount = UserBalance.GetWithdrawalFee();
@@ -145,7 +144,7 @@ public sealed class TronUsdtWithdrawalHandler(
         this.BalanceId = balance.Id;
     }
 
-    private int TokenId { get; set; } = default!;
+    private int TokenId { get; set; }
     private int BalanceId { get; set; }
     private decimal FeeAmount { get; set; }
     private decimal TotalAmount { get; set; }

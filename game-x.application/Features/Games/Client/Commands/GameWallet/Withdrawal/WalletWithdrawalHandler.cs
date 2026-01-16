@@ -63,14 +63,12 @@ public sealed class WalletWithdrawalHandler(
         // Create transaction
         var currentBalance = await GetUserBalanceAsync(currentUser.Id, request, ct);
         var serialNumber = GameProviderUtils.SnoGenerate();
-        var txSourceType = GetTxSourceType(targetPlatform.Id);
         var transaction = CreateTransaction(
             currentUser.Id,
             serialNumber,
             currentBalance.CryptoToken.Id,
             actualAmount,
             targetPlatform.LocalId,
-            txSourceType,
             request.Note);
 
         decimal? balanceAfter = null;
@@ -162,11 +160,9 @@ public sealed class WalletWithdrawalHandler(
         int cryptoTokenId,
         decimal amount,
         int localPlatformId,
-        TransactionSourceType sourceType,
         string? note)
     {
         var tx = Transaction.Create(
-            sourceType: sourceType,
             type: TransactionType.Withdrawal,
             userId: userId,
             amount: amount,
@@ -179,22 +175,6 @@ public sealed class WalletWithdrawalHandler(
         tx.AddTxExternal(txExternal);
 
         return tx;
-    }
-
-    private static TransactionSourceType GetTxSourceType(Guid platformId)
-    {
-        if (platformId == GameConstants.PLATFORM_ID_G598)
-            return TransactionSourceType.G598SnoGameProvider;
-        if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
-            return TransactionSourceType.BaccaratGameProvider;
-        if (platformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
-            return TransactionSourceType.Elt998GameProvider;
-        if (platformId == GameConstants.PLATFORM_ID_SASSLOT)
-            return TransactionSourceType.SasSlotProvider;
-        if (platformId == GameConstants.PLATFORM_ID_ATG)
-            return TransactionSourceType.AtgProvider;
-
-        throw new NotSupportedException($"This platform ({platformId}) is not support.");
     }
 
     private async Task WithdrawalToProviderWalletAsync(string gameProviderAccount, string sno, decimal amount)

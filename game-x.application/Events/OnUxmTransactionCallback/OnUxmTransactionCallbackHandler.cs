@@ -78,7 +78,7 @@ public sealed class OnUxmTransactionCallbackHandler(
 
             var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
             var transactionInternal = newTx.Adapt<TransactionInternalDto>();
-            await SendToMember(transactionInternal, notification!, ct);
+            await SendToMember(transactionInternal, notification!);
             await SendToAdmin(transactionInternal);
 
             await clientHubService.SendNotificationToMemberAsync(userId, notification.Adapt<NotificationDto>());
@@ -102,7 +102,7 @@ public sealed class OnUxmTransactionCallbackHandler(
         return notification.Adapt<NotificationDto>();
     }
 
-    private async Task SendToMember(TransactionInternalDto transaction, NotificationDto notification, CancellationToken ct)
+    private async Task SendToMember(TransactionInternalDto transaction, NotificationDto notification)
     {
         var userId = transaction.UserId;
         await clientHubService.SendNotificationToMemberAsync(userId, notification);

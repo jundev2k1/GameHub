@@ -40,6 +40,8 @@ public interface ITransactionRepo
     Task<Transaction?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct);
 
     Task<Transaction> GetInternalByIdAsync(Guid publicId, CancellationToken ct = default);
+    
+    Task<TransactionTransferDto> GetTransferByIdAsync(Guid publicId, CancellationToken ct = default);
 
     Task<Transaction> GetExternalByIdAsync(Guid publicId, CancellationToken ct = default);
 

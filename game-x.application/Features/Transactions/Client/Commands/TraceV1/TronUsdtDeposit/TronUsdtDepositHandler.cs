@@ -75,7 +75,6 @@ public sealed class CreateDepositChainTransactionHandler(
         var txInternal = TransactionInternal.Create(orderNumber: orderNumber);
 
         var tx = Transaction.Create(
-            sourceType: TransactionSourceType.Uxm,
             type: TransactionType.Deposit,
             userId: userId,
             amount: request.Amount,

@@ -43,7 +43,6 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
                 @event.UserId,
                 differenceBalance,
                 latestTransaction.CryptoTokenId,
-                GetTxSourceType(platform.Id),
                 TransactionType.BalanceAdjustment);
 
             var sno = GameProviderUtils.SnoGenerate();
@@ -54,21 +53,5 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
 
             await transactionRepo.AddAsync(transaction, ct);
         }, ct);
-    }
-
-    private static TransactionSourceType GetTxSourceType(Guid platformId)
-    {
-        if (platformId == GameConstants.PLATFORM_ID_G598)
-            return TransactionSourceType.G598SnoGameProvider;
-        if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
-            return TransactionSourceType.BaccaratGameProvider;
-        if (platformId == GameConstants.PLATFORM_ID_ETL998_GAMEBACCARAT)
-            return TransactionSourceType.Elt998GameProvider;
-        if (platformId == GameConstants.PLATFORM_ID_SASSLOT)
-            return TransactionSourceType.SasSlotProvider;
-        if (platformId == GameConstants.PLATFORM_ID_ATG)
-            return TransactionSourceType.AtgProvider;
-
-        throw new NotSupportedException($"This platform ({platformId}) is not support.");
     }
 }

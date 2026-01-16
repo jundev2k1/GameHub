@@ -16,7 +16,7 @@ public sealed class TransactionInternalConfig : IEntityTypeConfiguration<Transac
         
         builder.Property(x => x.OrderNumber)
             .HasColumnName("order_number")
-            .IsRequired();
+            .IsRequired(false);
         
         builder.Property(x => x.Hash)
             .HasColumnName("hash")
@@ -37,6 +37,10 @@ public sealed class TransactionInternalConfig : IEntityTypeConfiguration<Transac
         
         builder.Property(x => x.ProviderId)
             .HasColumnName("provider_id")
+            .IsRequired(false);
+        
+        builder.Property(x => x.SourceType)
+            .HasColumnName("source_type")
             .IsRequired();
         
         builder.HasOne(i => i.Transaction)

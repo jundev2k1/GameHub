@@ -37,10 +37,7 @@ public sealed class OnLiveStreamDonatedHandler(
             await CreateNotificationForStreamer(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
 
             // Decrease user balance
-            await userBalanceRepo.UpdateAsync(@event.UserBalanceId, ub =>
-            {
-                ub.AdjustAmount(@event.Amount, false);
-            }, ct);
+            await userBalanceRepo.UpdateAsync(@event.UserBalanceId, ub => { ub.AdjustAmount(@event.Amount, false); }, ct);
 
             decimal commissionRate = appSettingCache.TalentCommissionRate;
             decimal talentAmount = (@event.Amount / 100) * commissionRate;
@@ -114,7 +111,6 @@ public sealed class OnLiveStreamDonatedHandler(
         CancellationToken ct = default)
     {
         var transaction = Transaction.Create(
-            sourceType: TransactionSourceType.GameX,
             type: TransactionType.TransferSent,
             userId: userId,
             amount: amount,
@@ -126,7 +122,8 @@ public sealed class OnLiveStreamDonatedHandler(
         var transactionInternal = TransactionInternal.Create(
             orderNumber: orderNumber,
             fromAddress: string.Empty,
-            toAddress: string.Empty);
+            toAddress: string.Empty,
+            sourceType: TransactionSourceType.GameX);
         transaction.AddTxInternal(transactionInternal);
 
         var balanceAfter = lastedBalanceAfter - amount;
