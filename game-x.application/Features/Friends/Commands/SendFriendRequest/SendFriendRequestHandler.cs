@@ -43,6 +43,7 @@ public sealed class SendFriendRequestHandler(
                 
                 await socialLinkRepo.UpdateAsync(existed.PublicId, x =>
                 {
+                    x.Reset();
                     x.State = SocialLinkState.Pending;
                     x.RequesterUserId = me;
                     x.AddresseeUserId = req.TargetUserId;

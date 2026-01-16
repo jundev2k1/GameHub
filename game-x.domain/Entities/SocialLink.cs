@@ -68,6 +68,15 @@ public sealed class SocialLink: BaseEntity<int>, IAuditable
     }
 
     public bool IsFriend => Kind == SocialLinkKind.Friendship && State == SocialLinkState.Accepted;
+    
+    public void Reset()
+    {
+        RequesterUserId = null;
+        AddresseeUserId = null;
+        BlockerUserId = null;
+        BlockedUserId = null;
+        RespondedAt = DateTime.UtcNow;
+    }
 }
 
 public static class SocialLinkPair

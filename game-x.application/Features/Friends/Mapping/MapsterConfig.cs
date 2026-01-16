@@ -1,4 +1,6 @@
-﻿using game_x.application.Features.Accounts.Dtos;
+﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos.Friend;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Features.Accounts.Dtos;
 using game_x.application.Features.Friends.Dtos;
 
 namespace game_x.application.Features.Friends.Mapping;
@@ -20,5 +22,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.BlockerAvatarUrl, src => string.Empty)
             .Map(dest => dest.BlockedNickname, src => src.BlockedUser!.Nickname)
             .Map(dest => dest.BlockedAvatarUrl, src => string.Empty);
+        
+        cfg.NewConfig<FriendResponseSignalDto, FriendResponseNotificationDto>()
+            .Map(dest => dest.Id, src => src.LinkId); 
     }
 }

@@ -50,6 +50,7 @@ public sealed class BlockHandler(
             {
                 await socialLinkRepo.UpdateAsync(existed.PublicId, x =>
                 {
+                    x.Reset();
                     x.Kind = SocialLinkKind.Block;
                     x.State = SocialLinkState.Blocked;
                     x.BlockerUserId = me;
