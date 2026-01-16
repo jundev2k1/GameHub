@@ -13,6 +13,7 @@ using game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 using game_x.application.Features.Accounts.User.Queries.GetSelfUserBalance;
 using game_x.application.Features.Accounts.User.Queries.GetSelfVerificationStatusList;
 using game_x.application.Features.Auth.Client.Commands.ChangePasswordUser;
+using game_x.application.Features.Transactions.Client.Commands.TraceV1.TransferBetweenFriends;
 using game_x.application.Features.Transactions.Client.Queries.GetMyWalletTransactions;
 using game_x.application.Features.UserWallet.Commands.RefreshWallet;
 
@@ -133,6 +134,13 @@ public sealed class UserController(
             parameters.PageSize,
             parameters.TabType);
         var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpPost("transfer")]
+    public async Task<IActionResult> CreateTransferAsync(TransferBetweenFriendsCommand command, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(command, ct);
         return ApiResponseFactory.Ok(result);
     }
 }
