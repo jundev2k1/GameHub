@@ -4,7 +4,6 @@ using game_x.application.Features.Transactions.Client.Commands.TraceV1.TronUsdtD
 using game_x.application.Features.Transactions.Client.Queries.GetMyTransactionDetail;
 using game_x.application.Features.Transactions.Client.Queries.GetMyTransactions;
 using game_x.api.Dtos;
-using game_x.application.Features.Transactions.Client.Commands.TraceV1.TransferBetweenFriends;
 
 namespace game_x.api.Controllers.Client.Chain;
 
@@ -50,13 +49,6 @@ public sealed class ChainController : BaseApiController
     {
         var query = new GetMyTransactionDetailQuery(transactionId);
         var result = await Mediator.Send(query, ct);
-        return ApiResponseFactory.Ok(result);
-    }
-    
-    [HttpPost("transfer")]
-    public async Task<IActionResult> CreateTransferAsync(TransferBetweenFriendsCommand command, CancellationToken ct = default)
-    {
-        var result = await Mediator.Send(command, ct);
         return ApiResponseFactory.Ok(result);
     }
 }
