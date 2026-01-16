@@ -9,7 +9,6 @@ namespace game_x.application.Events.OnTransactionUpdated;
 
 public sealed class OnTransactionUpdatedHandler(
     IUnitOfWork unitOfWork,
-    IUserRepo userRepo,
     ITransactionRepo transactionRepo,
     INotificationRepo notificationRepo,
     IClientHubService clientHubService,
@@ -21,42 +20,40 @@ public sealed class OnTransactionUpdatedHandler(
         var transaction = await transactionRepo.GetInternalByIdAsync(@event.TransactionId, ct);
         var txDto = transaction.Adapt<TransactionInternalDto>();
 
-        // Create and send notification, transaction for admin
-        await SendNotificationToAdmin(txDto, ct);
+        // Create notification in DB
+        var notification = await CreateNotificationAsync(txDto, ct);
+
+        // Send notification to all the admin
+        await adminHubService.SendNotificationAsync(
+            transaction.UserId,
+            notification.Adapt<NotificationDto>());
+
+        // Send transaction to all the admin
+        var adminTxDto = txDto.Adapt<AdminTransactionDto>();
+        await adminHubService.SendTransactionToAllAdminAsync(adminTxDto);
+
+        // Send transaction to target user
+        var clientTxDto = txDto.Adapt<ClientTransactionDto>();
+        await clientHubService.SendTransactionToMemberAsync(transaction.UserId, clientTxDto);
 
         // Refresh balance for target user
         var balanceUpdatedEvent = new OnUserBalanceUpdatedEvent(transaction.UserId);
         await eventDispatcher.Publish(balanceUpdatedEvent, ct);
     }
 
-    private async Task SendNotificationToAdmin(TransactionInternalDto transaction, CancellationToken ct)
+    private async Task<Notification> CreateNotificationAsync(TransactionInternalDto transaction, CancellationToken ct)
     {
-        var adminUsers = await userRepo.GetAdminUsers(ct);
-        var notifications = adminUsers.Select(u => Notification.Create(
+        // Create notification for the user whom is own target transaction
+        var notification = Notification.Create(
             NotificationMessageKey.Transaction_Cancelled,
-            u.Id,
+            transaction.UserId,
             NotificationType.Transaction,
-            NotificationSeverity.Error));
+            NotificationSeverity.Error);
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await notificationRepo.AddRangeNotificationsAsync(notifications, ct);
+            await notificationRepo.AddNotificationAsync(notification, ct);
         }, ct);
 
-        // Send notification to all the admin
-        var adminNotification = notifications.FirstOrDefault();
-        if (adminNotification != null)
-        {
-            await adminHubService.SendNotificationAsync(
-                adminNotification.UserId!,
-                adminNotification.Adapt<NotificationDto>());
-        }
-
-        // Send transaction to all the admin
-        var adminTxDto = transaction.Adapt<AdminTransactionDto>();
-        await adminHubService.SendTransactionToAllAdminAsync(adminTxDto);
-
-        // Send transaction to target user
-        var clientTxDto = transaction.Adapt<ClientTransactionDto>();
-        await clientHubService.SendTransactionToMemberAsync(transaction.UserId, clientTxDto);
+        return notification;
     }
 }

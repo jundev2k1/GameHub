@@ -1,4 +1,6 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.LiveStreams.Categories.Dtos;
 using game_x.application.Features.LiveStreams.Schedules.Dtos;
 
 namespace game_x.application.Features.LiveStreams.Schedules.Commands.UpdateSchedule;
@@ -6,10 +8,12 @@ namespace game_x.application.Features.LiveStreams.Schedules.Commands.UpdateSched
 public sealed class UpdateScheduleHandler(
     IUnitOfWork unitOfWork,
     ILiveStreamRepo liveStreamRepo,
-    ILiveStreamCategoryRepo liveStreamCategoryRepo) : ICommandHandler<UpdateScheduleCommand>
+    ILiveStreamCategoryRepo liveStreamCategoryRepo,
+    ILiveStreamManagerCacheService liveStreamManagerCache) : ICommandHandler<UpdateScheduleCommand>
 {
     public async Task<Unit> Handle(UpdateScheduleCommand request, CancellationToken ct = default)
     {
+        var streamKey = string.Empty;
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await liveStreamRepo.UpdateAsync(request.Id, async liveStream =>
@@ -24,8 +28,14 @@ public sealed class UpdateScheduleHandler(
                     request.Description,
                     request.Notes,
                     categoryMappings);
+
+                streamKey = liveStream.StreamKey;
             }, ct);
         }, ct);
+
+        // Refresh cache after updating
+        await RefreshCacheAsync(streamKey, ct);
+
         return Unit.Value;
     }
 
@@ -88,5 +98,19 @@ public sealed class UpdateScheduleHandler(
             categoryList.Add(categoryMapping);
         }
         return categoryList;
+    }
+
+    private async Task RefreshCacheAsync(string streamKey, CancellationToken ct)
+    {
+        var schedule = await liveStreamRepo.GetByStreamKeyAsync(streamKey, ct);
+        var livestream = liveStreamManagerCache.GetLiveStreamStatus(streamKey);
+        if (livestream is null) return;
+
+        livestream.Title = schedule.Title;
+        livestream.StartTime = schedule.StartTime;
+        livestream.EndTime = schedule.EndTime;
+        livestream.Description = schedule.Description ?? string.Empty;
+        livestream.Categories = [.. schedule.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())];
+        liveStreamManagerCache.UpdateStreamInfo(livestream);
     }
 }
