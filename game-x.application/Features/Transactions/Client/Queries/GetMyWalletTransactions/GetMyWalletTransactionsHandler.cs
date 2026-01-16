@@ -36,20 +36,12 @@ public sealed class GetMyWalletTransactionsHandler(
 
     private static void MapAddressWalletForItems(PaginationResult<WalletTransactionDto> result, bool isCreditMode)
     {
-        var gameProviders = new[]
-        {
-            TransactionSourceType.G598SnoGameProvider,
-            TransactionSourceType.BaccaratGameProvider,
-            TransactionSourceType.Elt998GameProvider,
-            TransactionSourceType.SasSlotProvider,
-            TransactionSourceType.AtgProvider,
-        };
         var cashKey = "cash";
 
         foreach (var item in result.Items)
         {
-            var isGameTransaction = gameProviders.Contains(item.SourceType);
-            var isUxmTransaction = item.SourceType == TransactionSourceType.Uxm;
+            var isGameTransaction = item.SourceType == WalletSourceType.External;
+            var isUxmTransaction = item.SourceType == WalletSourceType.Internal;
 
             var isDeposit = item.Type == TransactionType.Deposit;
             var isWithdrawal = item.Type == TransactionType.Withdrawal;

@@ -21,14 +21,11 @@ public sealed class CancelTransactionHandler(
                 // Update status to cancel
                 tx.Cancel();
 
-                // Exit if this isn't a Uxm withdrawal transaction
-                if (tx.SourceType != TransactionSourceType.Uxm && tx.Type != TransactionType.Withdrawal)
-                    return;
-
+                // Exit if this isn't an Uxm withdrawal transaction
                 // Only unfreeze balance with withdrawal transaction
-                if (tx.Type != TransactionType.Withdrawal) return;
-
-                // In case of that is a Uxm withdrawal transaction, Unlock balance
+                if (tx.TransactionInternal != null || tx.Type != TransactionType.Withdrawal) return;
+                
+                // In case of that is an Uxm withdrawal transaction, Unlock balance
                 await userBalanceRepo.UpdateByTokenIdAsync(tx.UserId, tx.CryptoTokenId, balance =>
                 {
                     balance.Unfreeze(tx.Amount);

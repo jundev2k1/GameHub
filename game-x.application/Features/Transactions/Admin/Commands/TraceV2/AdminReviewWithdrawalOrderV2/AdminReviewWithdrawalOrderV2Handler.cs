@@ -82,7 +82,7 @@ public sealed class AdminReviewWithdrawalOrderV2Handler(
     {
         try
         {
-            var pgRequest = CreatePaymentGatewayRequest(tx, tx.TransactionInternal!.ProviderId);
+            var pgRequest = CreatePaymentGatewayRequest(tx, tx.TransactionInternal?.ProviderId ?? PaymentGatewayProvider.Uxm);
             var result = await pgService.ProxyWithdrawalAsync(pgRequest);
             var secretKey = gameXSettings.Value.PaymentGatewaySecretKey;
             bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(secretKey, result.Data, result.Signature);

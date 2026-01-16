@@ -34,6 +34,8 @@ public interface IClientHub
     Task OnReceiveLiveStreamingShortcuts(LiveStreamShortcutInfo[] streamInfo);
 
     Task NotifyWalletSynchronizationFailed(Guid platformId);
+    /// <summary>Notify when member transfer or received money between friends.</summary>
+    Task TransactionTransfer(TransactionTransferSignalDto orderInfo);
 }
 
 [Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]

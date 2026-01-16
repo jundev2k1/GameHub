@@ -12,4 +12,5 @@ public interface IClientHubService
     Task SendVerifyUpdateAsync(string userId, VerificationStatusDto verificationStatus);
     Task SendWalletsToMemberAsync(string userId, ClientWalletsDto wallets);
     Task NotifyWalletSynchronizationFailedAsync(string userId, Guid platformId);
+    Task SendTransactionTransferAsync(string memberId, TransactionTransferSignalDto transaction);
 }

@@ -109,7 +109,6 @@ public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(tx => tx.Type);
-        builder.HasIndex(tx => tx.SourceType);
         builder.HasIndex(tx => tx.Status);
     }
 }

@@ -29,15 +29,14 @@ public sealed class CreateTransactionHandler(
                 balance.AdjustAmount(request.Amount, isDeposit);
                 balanceAfter = balance.TotalAmount;
             }, ct);
-
+                
             var sno = OrderNoGenerator.Otc();
             var internalTx = TransactionInternal.Create(sno, request.OrderUId);
             transaction = Transaction.Create(
-                request.UserId,
-                request.Amount,
-                userBalance.CryptoTokenId,
-                TransactionSourceType.Uxm,
-                request.Type,
+                userId: request.UserId,
+                amount: request.Amount,
+                cryptoTokenId: userBalance.CryptoTokenId,
+                type: request.Type,
                 note: request.Message);
             transaction.AddTxInternal(internalTx);
             transaction.Confirm(request.Amount, balanceAfter);

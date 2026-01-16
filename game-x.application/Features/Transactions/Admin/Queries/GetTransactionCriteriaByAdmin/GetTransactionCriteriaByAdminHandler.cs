@@ -21,8 +21,8 @@ public sealed class GetTransactionCriteriaByAdminHandler(
                 request.Sorts,
                 searchByKeyCondition: keyword => x => 
                     x.PublicId.ToString().Contains(keyword) 
-                    || x.TransactionInternal!.OrderUid!.Contains(keyword)
-                    || x.TransactionInternal!.OrderNumber.Contains(keyword),
+                    || x.TransactionInternal!.OrderUid != null && x.TransactionInternal!.OrderUid.Contains(keyword)
+                    || x.TransactionInternal!.OrderNumber != null && x.TransactionInternal!.OrderNumber.Contains(keyword),
                 options: TransactionFilterExtensions.InternalOptions),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,

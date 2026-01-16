@@ -4,7 +4,6 @@ using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 using game_x.application.Features.Transactions.Dtos;
 using game_x.domain.Constants;
-using Mapster;
 
 namespace game_x.persistence.Repo;
 
@@ -18,7 +17,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         var query = context.Transactions
             .AsNoTracking()
-            .Where(x => x.SourceType == TransactionSourceType.Uxm)
+            .Where(x => x.TransactionInternal != null)
             .Include(x => x.User)
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionInternal)
@@ -50,11 +49,11 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         var query = context.Transactions
             .AsNoTracking()
-            .Where(x => x.SourceType != TransactionSourceType.Uxm && x.SourceType != TransactionSourceType.GameX)
-            .Include(x => x.User)
-            .Include(x => x.CryptoToken)
             .Include(x => x.TransactionExternal)
                 .ThenInclude(x => x!.GamePlatform)
+            .Where(x => x.TransactionExternal != null)
+            .Include(x => x.User)
+            .Include(x => x.CryptoToken)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -87,7 +86,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionInternal)
             .Include(x => x.ReviewedBy)
-            .Where(x => x.UserId == userId && x.SourceType == TransactionSourceType.Uxm)
+            .Where(x => x.UserId == userId && x.TransactionInternal != null)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -120,7 +119,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionExternal)
                 .ThenInclude(x => x!.GamePlatform)
-            .Where(x => x.UserId == userId && x.SourceType != TransactionSourceType.Uxm && x.SourceType != TransactionSourceType.GameX)
+            .Where(x => x.UserId == userId && x.TransactionExternal != null)
             .AsQueryable();
 
         if (queryBuilder != null)
@@ -150,9 +149,39 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
         var query = context.Transactions
             .AsNoTracking()
             .Where(x => x.UserId == userId)
-            .ProjectToType<WalletTransactionDto>()
+            .Select(tx => new WalletTransactionDto
+            {
+                Id = tx.PublicId,
+                UserId = tx.UserId,
+                Type = tx.Type,
+                Status = tx.Status,
+                Amount = tx.Amount,
+                BalanceAfter = tx.BalanceAfter,
+                ActualAmount = tx.ActualAmount ?? 0,
+                GameAmount = tx.GameAmount,
+                GameBalanceAfter = tx.GameBalanceAfter,
+                Note = tx.Note,
+                CryptoTokenId = tx.CryptoToken.PublicId,
+                Symbol = tx.CryptoToken.Symbol,
+                Network = tx.CryptoToken.Network,
+                GamePlatformId = tx.TransactionExternal != null ? tx.TransactionExternal.GamePlatform.PublicId : null,
+                GamePlatformName = tx.TransactionExternal != null ? tx.TransactionExternal.GamePlatform.Name : null,
+                SourceType = tx.TransactionInternal != null ? WalletSourceType.Internal : WalletSourceType.External,
+                From = tx.TransactionInternal != null 
+                    ? tx.TransactionInternal.SourceType == TransactionSourceType.Uxm
+                        ? tx.TransactionInternal.FromAddress
+                        : tx.TransactionInternal.Transferor != null ? tx.TransactionInternal.Transferor.Nickname : null
+                    : null,
+                To = tx.TransactionInternal != null 
+                    ? tx.TransactionInternal.SourceType == TransactionSourceType.Uxm
+                        ? tx.TransactionInternal.FromAddress
+                        : tx.TransactionInternal.Receiver != null ? tx.TransactionInternal.Receiver.Nickname : null
+                    : null,
+                CreatedAt = tx.CreatedAt,
+                UpdatedAt = tx.UpdatedAt
+            })
             .AsQueryable();
-
+        
         if (queryBuilder != null)
             query = queryBuilder(query);
 
@@ -202,6 +231,40 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
     }
 
+    public async Task<TransactionTransferDto> GetTransferByIdAsync(Guid publicId, CancellationToken ct = default)
+    {
+        return await context.Transactions
+            .AsNoTracking()
+            .Where(x => x.PublicId == publicId)
+            .Select(x => new TransactionTransferDto
+            {
+                Id = x.PublicId,
+                Status = x.Status,
+                Type = x.Type,
+                Amount = x.Amount,
+                BalanceAfter = x.BalanceAfter,
+                Note = x.Note,
+                SourceType = x.TransactionInternal != null 
+                    ? x.TransactionInternal.SourceType 
+                    : TransactionSourceType.Uxm,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+                ReceiverId = x.TransactionInternal != null ? x.TransactionInternal.ReceiverId : null,
+                TransferorId = x.TransactionInternal != null ? x.TransactionInternal.TransferorId : null,
+                From = x.TransactionInternal!= null && x.TransactionInternal.Transferor != null 
+                    ? x.TransactionInternal.Transferor.Nickname 
+                    : String.Empty,
+                To = x.TransactionInternal != null && x.TransactionInternal.Receiver != null 
+                    ? x.TransactionInternal.Receiver.Nickname 
+                    : string.Empty,
+                CryptoTokenId = x.CryptoToken.PublicId,
+                Symbol = x.CryptoToken.Symbol,
+                Network = x.CryptoToken.Network,
+            })
+            .FirstOrDefaultAsync(ct)
+            ?? throw new NotFoundException(MessageCode.Transaction.TradeNotFound);
+    }
+    
     public async Task<Transaction> GetExternalByIdAsync(Guid publicId, CancellationToken ct = default)
     {
         return await context.Transactions

@@ -6,7 +6,6 @@ public enum NetworkType
 {
     [Display(Name = "Tron")]
     Tron = 1,
-
     [Display(Name = "Ethereum")]
     Ethereum = 2
 }

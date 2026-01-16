@@ -93,15 +93,7 @@ public static class TransactionFilterExtensions
 
         if (type == TransactionTabType.Credit)
         {
-            return tx =>
-                new[]
-                {
-                    TransactionSourceType.G598SnoGameProvider,
-                    TransactionSourceType.BaccaratGameProvider,
-                    TransactionSourceType.Elt998GameProvider,
-                    TransactionSourceType.SasSlotProvider,
-                    TransactionSourceType.AtgProvider,
-                }.Contains(tx.SourceType);
+            return tx => tx.SourceType == WalletSourceType.External;
         }
 
         return _ => true;

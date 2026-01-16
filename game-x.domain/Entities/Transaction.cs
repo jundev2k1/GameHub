@@ -17,7 +17,6 @@ public class Transaction : BaseEntity<int>, IAuditable
     public decimal? Fee { get; private set; }
     public int CryptoTokenId { get; private set; }
     public CryptoToken CryptoToken { get; private set; } = null!;
-    public TransactionSourceType SourceType { get; private set; }
     public TransactionType Type { get; private set; }
     public TransactionStatus Status { get; private set; }
     public decimal? BalanceAfter { get; private set; }
@@ -48,7 +47,6 @@ public class Transaction : BaseEntity<int>, IAuditable
         string userId,
         decimal amount,
         int cryptoTokenId,
-        TransactionSourceType sourceType,
         TransactionType type,
         TransactionStatus? status = null,
         decimal? fee = null,
@@ -62,7 +60,6 @@ public class Transaction : BaseEntity<int>, IAuditable
         return new()
         {
             UserId = userId,
-            SourceType = sourceType,
             Type = type,
             Amount = amount,
             Fee = fee,
@@ -115,13 +112,9 @@ public class Transaction : BaseEntity<int>, IAuditable
         Amount = amount ?? Amount;
         ActualAmount = actualAmount ?? ActualAmount;
         CompletedAt = completedAt ?? CompletedAt;
+        
         if (TransactionInternal != null)
-        {
-            TransactionInternal.OrderUid = providerOrderId ?? TransactionInternal.OrderUid;
-            TransactionInternal.Hash = hash ?? TransactionInternal.Hash;
-            TransactionInternal.ToAddress = to ?? TransactionInternal.ToAddress;
-            TransactionInternal.ConfirmedAt = confirmedAt ?? TransactionInternal.ConfirmedAt;
-        }
+            TransactionInternal.UpdateUxmInfo(providerOrderId, hash, to, confirmedAt);
     }
 
     public void Review(bool isApprove, string reviewedById)
@@ -139,8 +132,8 @@ public class Transaction : BaseEntity<int>, IAuditable
         BalanceAfter = balanceAfter;
         Status = TransactionStatus.Completed;
         GameBalanceAfter = null;
-        if (TransactionInternal != null)
-            TransactionInternal.ConfirmedAt = DateTime.UtcNow;
+        
+        if (TransactionInternal != null) TransactionInternal.Confirm();
     }
 
     public void ConfirmGameTx(decimal actualAmount, decimal balanceAfter, decimal gameBalanceAfter)
@@ -171,6 +164,14 @@ public class Transaction : BaseEntity<int>, IAuditable
     public void Refund(int transactionId)
     {
         RefundTransactionId = transactionId;
+    }
+    
+    public void CompleteTransfer(decimal balanceAfter)
+    {
+        ActualAmount = Amount;
+        BalanceAfter = balanceAfter;
+        Status = TransactionStatus.Completed;
+        CompletedAt = DateTime.UtcNow;
     }
 }
 
