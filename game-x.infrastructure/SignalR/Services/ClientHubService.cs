@@ -12,16 +12,16 @@ namespace game_x.infrastructure.SignalR.Services;
 public sealed class ClientHubService(ActorHubFacade<ClientHub, IClientHub> actorHub)
     : IClientHubService, IHubServices
 {
-    public async Task SendNotificationToMemberAsync(string memberId, NotificationDto message)
+    public async Task SendNotificationToMemberAsync(string memberId, NotificationDto dto)
     {
-        await actorHub.Member(memberId).ReceiveNotification(message);
+        await actorHub.Member(memberId).ReceiveNotification(dto);
     }
 
     public async Task SendTransactionToMemberAsync(string memberId, ClientTransactionDto transaction)
     {
         await actorHub.Member(memberId).TransactionUpdated(transaction);
     }
-
+ 
     public async Task SendVerifyUpdateAsync(string memberId, VerificationStatusDto verificationStatus)
     {
         await actorHub.Member(memberId).UserVerifyUpdated(verificationStatus);

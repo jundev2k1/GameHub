@@ -7,7 +7,7 @@ public interface IConversationRepo
     IQueryable<ConversationItemDto> GetUnassignedQueueByCursorAsync(string userId, CancellationToken ct = default); 
     IQueryable<ConversationItemDto> GetSupportConversationsAsync(string userId, CancellationToken ct = default);
     IQueryable<ConversationItemDto> GetHiddenConversationsForClientAsync(string userId, CancellationToken ct = default);
-    IQueryable<ConversationItemDto> GetMyConversationsForClientAsync(string userId, CancellationToken ct = default);
+    IQueryable<ConversationItemDto> GetMyConversationsForClientAsync(string userId, ConversationType? type, CancellationToken ct = default);
     Task<Conversation?> GetSupportConversationAsync(string actorId, CancellationToken ct = default);
     Task<IReadOnlyCollection<ConversationUnreadDto>> GetSupportConvUnreadAsync(CancellationToken ct = default);
     Task<int> CountSupportConvUnreadAsync(Guid id, CancellationToken ct = default);

@@ -15,6 +15,7 @@ public sealed class ListMyConversationsForClientHandler(IUserAccessor userAccess
             userId: userId,
             limit: request.Limit ?? 20,
             cursor: request.Cursor,
+            type: request.Type,
             ct: ct);
     }
 }

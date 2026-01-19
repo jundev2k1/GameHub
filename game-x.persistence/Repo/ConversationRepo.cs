@@ -123,15 +123,16 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         return BuildConversationListing(query, userId);
     }
 
-    public IQueryable<ConversationItemDto> GetMyConversationsForClientAsync(string userId, CancellationToken ct = default)
+    public IQueryable<ConversationItemDto> GetMyConversationsForClientAsync(string userId, ConversationType? type, CancellationToken ct = default)
     {
         // Retrieve all private conversations and group chats
         Expression<Func<Conversation, bool>> minePredicate =
-            c => c.CustomerId == userId
-              || context.ConversationMembers.Any(m => 
-                  m.ConversationId == c.Id && 
-                  m.UserId == userId &&
-                  m.IsHidden != true);
+            c => (type == null || c.Type == type)
+                 && (c.CustomerId == userId
+                     || context.ConversationMembers.Any(m => 
+                         m.ConversationId == c.Id && 
+                         m.UserId == userId &&
+                         m.IsHidden != true));
         IQueryable<Conversation> query = context.Conversations.Where(minePredicate);
         return BuildConversationListing(query, userId, true);
     }

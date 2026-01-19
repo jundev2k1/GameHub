@@ -7,7 +7,7 @@ namespace game_x.application.Contract.Infrastructure.SignalR.Services;
 
 public interface IClientHubService
 {
-    Task SendNotificationToMemberAsync(string memberId, NotificationDto message);
+    Task   SendNotificationToMemberAsync(string memberId, NotificationDto dto);
     Task SendTransactionToMemberAsync(string memberId, ClientTransactionDto transaction);
     Task SendVerifyUpdateAsync(string userId, VerificationStatusDto verificationStatus);
     Task SendWalletsToMemberAsync(string userId, ClientWalletsDto wallets);

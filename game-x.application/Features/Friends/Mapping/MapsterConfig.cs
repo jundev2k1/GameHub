@@ -25,5 +25,8 @@ public sealed class MapsterConfig : IRegister
         
         cfg.NewConfig<FriendResponseSignalDto, FriendResponseNotificationDto>()
             .Map(dest => dest.Id, src => src.LinkId); 
+        
+        cfg.NewConfig<FriendRequestSignalDto, FriendRequestNotificationDto>()
+            .Map(dest => dest.Id, src => src.LinkId); 
     }
 }

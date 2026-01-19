@@ -47,11 +47,14 @@ public class ConversationController(
     
     /// <summary>List conversations for current logged-in user</summary>
     [HttpGet("conversations/me")]
-    public async Task<IActionResult> GetMyConversationsAsync([AsParameters] CursorCriteriaRequest parameters)
+    public async Task<IActionResult> GetMyConversationsAsync(
+        [AsParameters] CursorCriteriaRequest parameters,
+        [FromQuery(Name = "type")] ConversationType? type)
     {
         var query = new ListMyConversationsForClientQuery(
             Limit: parameters.Limit,
-            Cursor: parameters.Cursor
+            Cursor: parameters.Cursor,
+            Type: type
         );
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);

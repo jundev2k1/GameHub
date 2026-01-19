@@ -31,7 +31,7 @@ public sealed class SendFriendRequestHandler(
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
-            SocialLinkDto? socialLinkDto;
+            SocialLinkDto? socialLinkDto = null;
             if (existed != null)
             {
                 if (existed.Kind == SocialLinkKind.Block)
@@ -40,23 +40,23 @@ public sealed class SendFriendRequestHandler(
                     throw new BadRequestException(MessageCode.Chatting.WaitToAccept);
                 if (existed.State == SocialLinkState.Accepted) 
                     throw new BadRequestException(MessageCode.Chatting.AlreadyFriend);
-                
+
+                SocialLink? updatedLink = null;
                 await socialLinkRepo.UpdateAsync(existed.PublicId, x =>
                 {
-                    x.Reset();
-                    x.State = SocialLinkState.Pending;
-                    x.RequesterUserId = me;
-                    x.AddresseeUserId = req.TargetUserId;
-                    x.RespondedAt = null;
+                    x.OnSendFriendRequest(me, req.TargetUserId);
+                    updatedLink = x;
                 }, ct);
                 await unitOfWork.CommitAsync(ct);
-                
-                var existedAvatarUrl = 
-                    existed.RequesterUser?.Avatar != null 
-                        ? await fileCache.GetFileUrl(existed.RequesterUser.Avatar, ct) 
-                        : null;
 
-                socialLinkDto = existed.Adapt<SocialLinkDto>() with { RequesterAvatarUrl = existedAvatarUrl };
+                if (updatedLink != null)
+                {
+                    var existedAvatarUrl = 
+                        updatedLink.RequesterUser?.Avatar != null 
+                            ? await fileCache.GetFileUrl(updatedLink.RequesterUser.Avatar, ct) 
+                            : null;
+                    socialLinkDto = updatedLink.Adapt<SocialLinkDto>() with { RequesterAvatarUrl = existedAvatarUrl };
+                }
             }
             else
             {
@@ -79,7 +79,8 @@ public sealed class SendFriendRequestHandler(
 
                 socialLinkDto = createdLink.Adapt<SocialLinkDto>() with { RequesterAvatarUrl = requesterAvatarUrl };
             }
-            await dispatcher.Publish(new OnSendFriendRequestEvent(socialLinkDto), ct);
+            if(socialLinkDto != null)
+                await dispatcher.Publish(new OnSendFriendRequestEvent(socialLinkDto), ct);
             return Unit.Value;
         }
         catch (Exception ex)

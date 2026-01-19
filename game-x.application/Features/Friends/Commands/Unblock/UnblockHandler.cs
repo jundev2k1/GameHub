@@ -35,9 +35,7 @@ public sealed class UnblockHandler(
         {
             await socialLinkRepo.UpdateAsync(existed.PublicId, x =>
             {
-                x.State = SocialLinkState.Declined;
-                x.Kind = SocialLinkKind.Friendship;
-                x.RespondedAt = null;
+                x.OnUnBlock();
             }, ct);
             
             await unitOfWork.CommitAsync(ct);

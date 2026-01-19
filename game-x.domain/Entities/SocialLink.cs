@@ -69,13 +69,43 @@ public sealed class SocialLink: BaseEntity<int>, IAuditable
 
     public bool IsFriend => Kind == SocialLinkKind.Friendship && State == SocialLinkState.Accepted;
     
-    public void Reset()
+    private void Reset()
     {
         RequesterUserId = null;
         AddresseeUserId = null;
         BlockerUserId = null;
         BlockedUserId = null;
+    }
+
+    public void OnSendFriendRequest(string requesterId, string addresseeId)
+    {
+        Reset();
+        State = SocialLinkState.Pending;
+        RequesterUserId = requesterId;
+        AddresseeUserId = addresseeId;
+        RespondedAt = null;
+    }
+    
+    public void OnUnFriend()
+    {
+        State = SocialLinkState.Declined;
+    }
+
+    public void OnBlock(string blockerId, string blockedUserId)
+    {
+        Reset();
+        Kind = SocialLinkKind.Block;
+        State = SocialLinkState.Blocked;
+        BlockerUserId = blockerId;
+        BlockedUserId = blockedUserId;
         RespondedAt = DateTime.UtcNow;
+    }
+    
+    public void OnUnBlock()
+    {
+        State = SocialLinkState.Declined;
+        Kind = SocialLinkKind.Friendship;
+        RespondedAt = null;
     }
 }
 
