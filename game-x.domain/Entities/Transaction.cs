@@ -166,12 +166,13 @@ public class Transaction : BaseEntity<int>, IAuditable
         RefundTransactionId = transactionId;
     }
     
-    public void CompleteTransfer(decimal balanceAfter)
+    public void CompleteTransfer(decimal balanceAfter, int referenceId)
     {
         ActualAmount = Amount;
         BalanceAfter = balanceAfter;
         Status = TransactionStatus.Completed;
         CompletedAt = DateTime.UtcNow;
+        TransactionInternal?.UpdateReferenceId(referenceId);
     }
 }
 
