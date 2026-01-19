@@ -166,16 +166,21 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
                 Network = tx.CryptoToken.Network,
                 GamePlatformId = tx.TransactionExternal != null ? tx.TransactionExternal.GamePlatform.PublicId : null,
                 GamePlatformName = tx.TransactionExternal != null ? tx.TransactionExternal.GamePlatform.Name : null,
-                SourceType = tx.TransactionInternal != null ? WalletSourceType.Internal : WalletSourceType.External,
+                SourceType = tx.TransactionInternal != null ? tx.TransactionInternal.SourceType : null,
+                WalletSourceType = tx.TransactionInternal != null ? WalletSourceType.Internal : WalletSourceType.External,
                 From = tx.TransactionInternal != null 
-                    ? tx.TransactionInternal.SourceType == TransactionSourceType.Uxm
+                    ? tx.TransactionInternal.SourceType == TransactionSourceType.Payment
                         ? tx.TransactionInternal.FromAddress
-                        : tx.TransactionInternal.Transferor != null ? tx.TransactionInternal.Transferor.Nickname : null
+                        : tx.Type == TransactionType.TransferSent
+                         ? tx.User.Nickname
+                         : tx.TransactionInternal.Reference != null ? tx.TransactionInternal.Reference.User.Nickname : null
                     : null,
                 To = tx.TransactionInternal != null 
-                    ? tx.TransactionInternal.SourceType == TransactionSourceType.Uxm
-                        ? tx.TransactionInternal.FromAddress
-                        : tx.TransactionInternal.Receiver != null ? tx.TransactionInternal.Receiver.Nickname : null
+                    ? tx.TransactionInternal.SourceType == TransactionSourceType.Payment
+                        ? tx.TransactionInternal.ToAddress
+                        : tx.Type == TransactionType.TransferReceived
+                            ? tx.User.Nickname
+                            : tx.TransactionInternal.Reference != null ? tx.TransactionInternal.Reference.User.Nickname : null
                     : null,
                 CreatedAt = tx.CreatedAt,
                 UpdatedAt = tx.UpdatedAt
@@ -235,7 +240,10 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         return await context.Transactions
             .AsNoTracking()
-            .Where(x => x.PublicId == publicId)
+            .Where(x => 
+                x.PublicId == publicId && 
+                x.TransactionInternal != null && 
+                x.TransactionInternal.SourceType == TransactionSourceType.Transfer)
             .Select(x => new TransactionTransferDto
             {
                 Id = x.PublicId,
@@ -244,19 +252,29 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
                 Amount = x.Amount,
                 BalanceAfter = x.BalanceAfter,
                 Note = x.Note,
-                SourceType = x.TransactionInternal != null 
-                    ? x.TransactionInternal.SourceType 
-                    : TransactionSourceType.Uxm,
+                SourceType = x.TransactionInternal!.SourceType,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
-                ReceiverId = x.TransactionInternal != null ? x.TransactionInternal.ReceiverId : null,
-                TransferorId = x.TransactionInternal != null ? x.TransactionInternal.TransferorId : null,
-                From = x.TransactionInternal!= null && x.TransactionInternal.Transferor != null 
-                    ? x.TransactionInternal.Transferor.Nickname 
+                ReceiverId = x.TransactionInternal != null 
+                    ? x.Type == TransactionType.TransferReceived
+                        ? x.UserId
+                        : x.TransactionInternal.Reference != null ? x.TransactionInternal.Reference.UserId : null
+                    : null,
+                TransferorId = x.TransactionInternal != null 
+                    ? x.Type == TransactionType.TransferSent
+                        ? x.UserId 
+                        : x.TransactionInternal.Reference != null ? x.TransactionInternal.Reference.UserId : null
+                    : null,
+                From = x.TransactionInternal != null 
+                    ? x.Type == TransactionType.TransferSent
+                        ? x.User.Nickname
+                        : x.TransactionInternal.Reference != null ? x.TransactionInternal.Reference.User.Nickname : String.Empty
                     : String.Empty,
-                To = x.TransactionInternal != null && x.TransactionInternal.Receiver != null 
-                    ? x.TransactionInternal.Receiver.Nickname 
-                    : string.Empty,
+                To = x.TransactionInternal != null 
+                    ? x.Type == TransactionType.TransferReceived
+                        ? x.User.Nickname
+                        : x.TransactionInternal.Reference != null ? x.TransactionInternal.Reference.User.Nickname : String.Empty
+                    : String.Empty,
                 CryptoTokenId = x.CryptoToken.PublicId,
                 Symbol = x.CryptoToken.Symbol,
                 Network = x.CryptoToken.Network,
@@ -358,6 +376,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
 
         await updateAction.Invoke(tx);
     }
+    
     public async Task UpdateAsync(Transaction transaction, CancellationToken ct = default)
     {
         context.Entry(transaction).State = EntityState.Modified;

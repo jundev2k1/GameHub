@@ -21,7 +21,8 @@ public sealed class WalletTransactionDto
     public string? GamePlatformName { get; set; } = string.Empty;
     public NetworkType Network { get; set; }
     public TransactionType Type { get; set; }
-    public WalletSourceType SourceType { get; set; }
+    public TransactionSourceType? SourceType { get; set; }
+    public WalletSourceType WalletSourceType { get; set; }
     public TransactionStatus Status { get; set; }
     public string? From { get; set; }
     public string? To { get; set; }

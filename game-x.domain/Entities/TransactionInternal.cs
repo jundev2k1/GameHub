@@ -7,7 +7,7 @@ public class TransactionInternal : BaseEntity<int>
     public Transaction Transaction { get; private set; } = null!;
     /// <summary>Payment Gateway ProviderId.</summary>
     public PaymentGatewayProvider? ProviderId { get; private set; }
-    public TransactionSourceType SourceType { get; private set; } = TransactionSourceType.Uxm;
+    public TransactionSourceType SourceType { get; private set; } = TransactionSourceType.Payment;
 
     #region Transfer with the UXM service
     /// <summary>Provider Order Id (e.g. Uxm Service).</summary>
@@ -25,32 +25,26 @@ public class TransactionInternal : BaseEntity<int>
     #endregion
 
     #region Transfer between friends
-    public string? ReceiverId { get; private set; }
-    public User? Receiver { get; private set; }
-    public string? TransferorId { get; private set; }
-    public User? Transferor { get; private set; }
+    public int? ReferenceId { get; private set; }
+    public Transaction? Reference { get; private set; }
     #endregion
 
     public static TransactionInternal Create(
         string? orderNumber = null,
-        string? referenceId = null,
+        string? providerOrderId = null,
         PaymentGatewayProvider? providerId = null,
         string? fromAddress = null,
         string? toAddress = null,
-        TransactionSourceType? sourceType = null,
-        string? transferorId = null,
-        string? receiverId = null)
+        TransactionSourceType? sourceType = null)
     {
         return new()
         {
             OrderNumber = orderNumber,
-            OrderUid = referenceId,
+            OrderUid = providerOrderId,
             FromAddress = fromAddress,
             ToAddress = toAddress,
             ProviderId = providerId,
-            SourceType = sourceType ?? TransactionSourceType.Uxm,
-            TransferorId = transferorId,
-            ReceiverId = receiverId,
+            SourceType = sourceType ?? TransactionSourceType.Payment
         };
     }
 
@@ -87,5 +81,9 @@ public class TransactionInternal : BaseEntity<int>
         Hash = hash ?? Hash;
         ToAddress = to ?? ToAddress;
         ConfirmedAt = confirmedAt ?? ConfirmedAt;
+    }
+    
+    public void UpdateReferenceId(int referenceId) {
+        ReferenceId = referenceId;
     }
 }

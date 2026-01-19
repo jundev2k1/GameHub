@@ -43,6 +43,10 @@ public sealed class TransactionInternalConfig : IEntityTypeConfiguration<Transac
             .HasColumnName("source_type")
             .IsRequired();
         
+        builder.Property(x => x.ReferenceId)
+            .HasColumnName("reference_id")
+            .IsRequired(false);
+        
         builder.HasOne(i => i.Transaction)
             .WithOne(t => t.TransactionInternal)
             .HasForeignKey<TransactionInternal>(i => i.Id)

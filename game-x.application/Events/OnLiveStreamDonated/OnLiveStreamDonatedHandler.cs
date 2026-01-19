@@ -123,7 +123,7 @@ public sealed class OnLiveStreamDonatedHandler(
             orderNumber: orderNumber,
             fromAddress: string.Empty,
             toAddress: string.Empty,
-            sourceType: TransactionSourceType.GameX);
+            sourceType: TransactionSourceType.Donate);
         transaction.AddTxInternal(transactionInternal);
 
         var balanceAfter = lastedBalanceAfter - amount;
