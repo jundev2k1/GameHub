@@ -182,9 +182,10 @@ public sealed class ConversationService(
         string userId,
         int limit,
         string? cursor,
+        ConversationType? type,
         CancellationToken ct = default)
     {
-        var src = conversationRepo.GetMyConversationsForClientAsync(userId, ct);
+        var src = conversationRepo.GetMyConversationsForClientAsync(userId, type, ct);
         var result = await BuildConversationListing(src, limit, cursor, ct);
         var dtoItems = result.Items.Adapt<IEnumerable<ListedConversationDto>>();
         return result.Transform(dtoItems);
