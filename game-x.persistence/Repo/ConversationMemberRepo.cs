@@ -19,26 +19,38 @@ public class ConversationMemberRepo(GameXContext context): IConversationMemberRe
                 Unread = context.Messages.Count(x =>
                 x.ConversationId == m.ConversationId 
                 && (m.LastReadMessageId == null || x.Id > m.LastReadMessageId)),
+                m.Conversation.Status,
+                m.Conversation.Type,
             })
             .Where(x => x.Unread > 0)
-            .Select(x => new ConvUnreadDto {ConversationId = x.PublicId, Unread = x.Unread})
+            .Select(x => new ConvUnreadDto
+            {
+                ConversationId = x.PublicId,
+                Type = x.Type,
+                Status = x.Status,
+                Unread = x.Unread
+            })
             .ToListAsync(ct);
     }
     
-    public async Task<ConvUnreadDto?> GetUnreadAsync(int convId, string userId, CancellationToken ct = default)
+    public async Task<IReadOnlyCollection<ConversationUnreadDto>> GetTotalUnreadByUserIdAsync(string userId, ConversationType? type, CancellationToken ct = default)
     {
-        return await context.ConversationMembers
-            .AsNoTracking()
-            .Where(m => m.UserId == userId && m.ConversationId == convId)
-            .Include(m => m.Conversation)
-            .Select(m => new ConvUnreadDto {
-                ConversationId = m.Conversation.PublicId,
-                Type = m.Conversation.Type,
-                Status = m.Conversation.Status,
-                Unread = context.Messages.Count(x =>
-                  x.ConversationId == m.ConversationId 
-                    && (m.LastReadMessageId == null || x.Id > m.LastReadMessageId))})
-            .FirstOrDefaultAsync(ct);
+        var convUnread = await context.ConversationMembers
+            .AsTracking()
+            .Where(x => 
+                x.UserId == userId &&
+                x.Conversation.Status == ConversationStatus.Open &&
+                (type == null || x.Conversation.Type == type))
+            .Select(x => new
+            {
+                x.ConversationId,
+                x.LastReadMessageId,
+            })
+            .SumAsync(x => context.Messages.Count(m =>
+                m.ConversationId == x.ConversationId 
+                && (x.LastReadMessageId == null || m.Id > x.LastReadMessageId)), ct);
+
+        return [new ConversationUnreadDto(ConversationStatus.Open, convUnread)];
     }
     
     public async Task<bool> CheckExistMemberAsync(int convId, string userId, CancellationToken ct = default)

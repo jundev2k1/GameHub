@@ -8,6 +8,7 @@ using game_x.application.Features.Chat.Commands.MarkLatestMessageAsRead;
 using game_x.application.Features.Chat.Commands.SendMessage;
 using game_x.application.Features.Chat.Commands.SendSupportMessage;
 using game_x.application.Features.Chat.Queries.GetAllUnReads;
+using game_x.application.Features.Chat.Queries.ListConvUnreadByUser;
 using game_x.application.Features.Chat.Queries.ListHiddenConversationsForClient;
 using game_x.application.Features.Chat.Queries.ListMessagesInConversation;
 using game_x.application.Features.Chat.Queries.ListMyConversationsForClient;
@@ -35,6 +36,14 @@ public class ConversationController(
     public async Task<IActionResult> GetAllUnReadsAsync()
     {
         var result = await Mediator.Send(new GetAllUnReadsQuery());
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    /// <summary>Summary all unread messages.</summary>
+    [HttpGet("conversations/count-all-unread")]
+    public async Task<IActionResult> CountAllUnReadsAsync([FromQuery] ConversationType? type)
+    {
+        var result = await Mediator.Send(new ListConvByUserQuery(type));
         return ApiResponseFactory.Ok(result);
     }
     

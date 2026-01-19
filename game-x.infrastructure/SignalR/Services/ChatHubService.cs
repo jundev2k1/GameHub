@@ -51,6 +51,11 @@ public sealed class ChatHubService(
             await actorHub.Guest(userId).ConversationUpdated(dto);
     }
     
+    public async Task SendTotalUnreadCountAsync(string userId, int totalUnreadCount)
+    {
+        await actorHub.Member(userId).TotalUnreadCount(totalUnreadCount);
+    }
+    
     public async Task SendPublicMessageAsync(CreatedMessageSignalResult res)
     {
         var msgDto = res.Msg;

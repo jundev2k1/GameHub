@@ -5,6 +5,7 @@ using game_x.application.Exceptions;
 using game_x.application.Features.Chat.Dtos;
 using game_x.domain.Constants;
 using game_x.share.Extensions;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace game_x.persistence.Repo;
 
