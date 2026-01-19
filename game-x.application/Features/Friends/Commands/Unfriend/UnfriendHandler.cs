@@ -37,7 +37,7 @@ public sealed class UnfriendHandler(
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
-            await socialLinkRepo.UpdateAsync(existed.PublicId, x => { x.State = SocialLinkState.Declined; }, ct);
+            await socialLinkRepo.UpdateAsync(existed.PublicId, x => { x.OnUnFriend(); }, ct);
             if (existedConv != null)
             {
                 await conversationRepo.UpdateAsync(existedConv.PublicId, x =>
