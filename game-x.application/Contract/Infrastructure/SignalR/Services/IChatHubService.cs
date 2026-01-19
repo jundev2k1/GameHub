@@ -10,6 +10,7 @@ public interface IChatHubService
     Task SendSupportConversationClaimedAsync(ConversationSignalDto dto);
     Task SendDeletedMessageAsync(DeletedMessageDto dto);
     Task SendMarkAsReadAsync(ConversationSignalDto dto, string userId, AppRole role);
+    Task SendTotalUnreadCountAsync(string userId, int totalUnreadCount);
     Task SendPublicMessageAsync(CreatedMessageSignalResult res);
     Task SendSupportMessageAsync(CreatedMessageSignalResult res);
     Task SendSupportMessageV2Async(CreatedMessageSignalResult res);

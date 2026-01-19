@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnClientCountTotalUnread;
 using game_x.application.Events.OnDirectMessageCreated;
 using game_x.application.Events.OnPublicMessageCreated;
 using game_x.application.Events.OnSupportConversationUnread;
@@ -14,6 +15,7 @@ public sealed class SendMessageHandler(
     IUnitOfWork unitOfWork,
     IConversationRepo convRepo,
     IConversationRepo conversationRepo,
+    IConversationMemberRepo convMemberRepo,
     IMessageRepo messageRepo,
     IMessageMentionRepo messageMentionRepo,
     IMessageService messageService,
@@ -134,8 +136,27 @@ public sealed class SendMessageHandler(
         switch (conv.Type)
         {
             case ConversationType.Direct:
+            {
+                // Count total unread messages when sending friend messages.
+                if (conv.Type is ConversationType.Direct)
+                {
+                    var memberList = await convMemberRepo.GetMembersByConvIdAsync(conv.PublicId, ct);
+                    var targetUserId = memberList
+                        .Where(x => x.IsHidden != true && x.UserId != request.SenderActorId)
+                        .Select(x => x.UserId)
+                        .FirstOrDefault();
+                    if (targetUserId != null)
+                    {
+                        var unreadDto =
+                            await convMemberRepo.GetTotalUnreadByUserIdAsync(targetUserId, ConversationType.Direct, ct);
+                        var totalUnreadCount = unreadDto.FirstOrDefault()?.UnreadCount ?? 0;
+                        await eventDispatcher.Publish(new OnClientCountTotalUnreadEvent(targetUserId, totalUnreadCount), ct);
+                    }
+                }
+                
                 await eventDispatcher.Publish(new OnDirectMessageCreatedEvent(dto), ct);
                 break;
+            }
             case ConversationType.Support:
             {
                 var convUnread = await convRepo.GetSupportConvUnreadAsync(ct);

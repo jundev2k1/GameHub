@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnClientCountTotalUnread;
 using game_x.application.Events.OnMarkMessageAsRead;
 using game_x.application.Events.OnSupportConversationUnread;
 
@@ -70,6 +71,15 @@ public sealed class MarkMessageAsReadHandler(
                 
                 var dto = updatedConv.Adapt<ConversationSignalDto>() with {ClientUnreadCount = clientUnreadCount};
                 await dispatcher.Publish(new OnMarkMessageAsReadEvent(dto, userId, role), ct);
+
+                // Count total unread messages when sending friend messages.
+                if (updatedConv.Type is ConversationType.Direct)
+                {
+                    var unreadDto =
+                        await convMemberRepo.GetTotalUnreadByUserIdAsync(userId, ConversationType.Direct, ct);
+                    var totalUnreadCount = unreadDto.FirstOrDefault()?.UnreadCount ?? 0;
+                    await dispatcher.Publish(new OnClientCountTotalUnreadEvent(userId, totalUnreadCount), ct);
+                }
             },ct);
         }
         catch (Exception ex)
