@@ -40,8 +40,8 @@ public sealed class GetMyWalletTransactionsHandler(
 
         foreach (var item in result.Items)
         {
-            var isGameTransaction = item.SourceType == WalletSourceType.External;
-            var isUxmTransaction = item.SourceType == WalletSourceType.Internal;
+            var isGameTransaction = item.WalletSourceType == WalletSourceType.External;
+            var isUxmTransaction = item.WalletSourceType == WalletSourceType.Internal;
 
             var isDeposit = item.Type == TransactionType.Deposit;
             var isWithdrawal = item.Type == TransactionType.Withdrawal;

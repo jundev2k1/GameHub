@@ -74,7 +74,9 @@ public sealed class TronUsdtWithdrawalV2Handler(
             orderNumber: orderNumber,
             fromAddress: string.Empty,
             toAddress: request.To,
-            providerId: request.Provider);
+            providerId: request.Provider,
+            sourceType: TransactionSourceType.Payment);
+        
         var tx = Transaction.Create(
             type: TransactionType.Withdrawal,
             userId: userId,

@@ -64,7 +64,10 @@ public sealed class CreateDepositChainTransactionHandler(
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
 
         var orderNumber = OrderNoGenerator.Otc();
-        var txInternal = TransactionInternal.Create(orderNumber: orderNumber, providerId: request.Provider);
+        var txInternal = TransactionInternal.Create(
+            orderNumber: orderNumber, 
+            providerId: request.Provider,
+            sourceType: TransactionSourceType.Payment);
         var tx = Transaction.Create(
             type: TransactionType.Deposit,
             userId: userId,

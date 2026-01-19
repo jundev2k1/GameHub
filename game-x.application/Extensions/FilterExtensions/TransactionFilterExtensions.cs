@@ -93,9 +93,9 @@ public static class TransactionFilterExtensions
 
         if (type == TransactionTabType.Credit)
         {
-            return tx => tx.SourceType == WalletSourceType.External;
+            return tx => tx.WalletSourceType == WalletSourceType.External;
         }
-
+ 
         return _ => true;
     }
 }

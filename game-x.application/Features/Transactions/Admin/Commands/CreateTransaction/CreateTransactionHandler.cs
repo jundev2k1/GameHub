@@ -31,7 +31,10 @@ public sealed class CreateTransactionHandler(
             }, ct);
                 
             var sno = OrderNoGenerator.Otc();
-            var internalTx = TransactionInternal.Create(sno, request.OrderUId);
+            var internalTx = TransactionInternal.Create(
+                orderNumber: sno, 
+                providerOrderId: request.OrderUId,
+                sourceType: TransactionSourceType.Refund);
             transaction = Transaction.Create(
                 userId: request.UserId,
                 amount: request.Amount,
