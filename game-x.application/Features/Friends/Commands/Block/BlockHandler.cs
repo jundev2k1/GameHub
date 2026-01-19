@@ -37,7 +37,7 @@ public sealed class BlockHandler(
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
-            SocialLinkDto? linkDto = null;
+            SocialLinkDto linkDto;
             if (existedConv != null)
             {
                 await conversationRepo.UpdateAsync(existedConv.PublicId, x =>
@@ -45,25 +45,21 @@ public sealed class BlockHandler(
                     x.Status = ConversationStatus.Closed;
                 }, ct);
             }
-            
-            SocialLink? updatedLink = null;
+
             if (existed != null)
             {
+                existed.OnBlock(me, req.TargetUserId);
                 await socialLinkRepo.UpdateAsync(existed.PublicId, x =>
                 {
                     x.OnBlock(me, req.TargetUserId);
-                    updatedLink = x;
                 }, ct);
                 await unitOfWork.CommitAsync(ct);
 
-                if (updatedLink != null)
-                {
-                    var existedAvatarUrl =
-                        updatedLink.BlockerUser?.Avatar != null
-                            ? await fileCache.GetFileUrl(updatedLink.BlockerUser.Avatar, ct)
-                            : null;
-                    linkDto = updatedLink.Adapt<SocialLinkDto>() with { BlockerAvatarUrl = existedAvatarUrl };
-                }
+                var existedAvatarUrl =
+                    existed.BlockerUser?.Avatar != null
+                        ? await fileCache.GetFileUrl(existed.BlockerUser.Avatar, ct)
+                        : null;
+                linkDto = existed.Adapt<SocialLinkDto>() with { BlockerAvatarUrl = existedAvatarUrl };
             }
             else
             {
@@ -85,9 +81,7 @@ public sealed class BlockHandler(
         
                 linkDto = createdLink.Adapt<SocialLinkDto>() with {BlockerAvatarUrl = blockerAvatarUrl};
             }
-            
-            if(linkDto != null)
-                await dispatcher.Publish(new OnFriendBlockedEvent(linkDto), ct);
+            await dispatcher.Publish(new OnFriendBlockedEvent(linkDto), ct);
             return Unit.Value;
         }
         catch (Exception ex)
