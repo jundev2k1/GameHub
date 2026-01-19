@@ -63,8 +63,22 @@ public sealed class SendMessageHandler(
             
             conv.LastMessageAt = DateTime.UtcNow;
             
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.SaveChangesAsync(ct);
 
+            if (conv.Type == ConversationType.Direct)
+            {
+                var member = await convMemberRepo.GetByConvIdAndUserIdAsync(conv.PublicId, actorId, ct);
+                if (member != null)
+                {
+                    await convMemberRepo.UpdateAsync(member.Id, m =>
+                    {
+                        m.OnRead(message.Id);
+                    }, ct);
+                }
+            }
+            
+            await unitOfWork.CommitAsync(ct);
+            
             await SendSignalAsync(request, conv, message, ct);
            
             return new SendMessageResult(request.ClientLocalId, request.ConversationId);
