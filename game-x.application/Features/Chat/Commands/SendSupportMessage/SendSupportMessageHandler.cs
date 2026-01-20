@@ -102,7 +102,7 @@ public sealed class SendSupportMessageHandler(
                 clientUnreadCount = await convRepo.CountConvUnreadByGuestIdAsync(updatedConv.GuestId, updatedConv.ConversationId, ct);
             
             if (updatedConv.CustomerId != null)
-                clientUnreadCount = await convRepo.CountConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct);
+                clientUnreadCount = await convRepo.CountSupportConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct);
                 
             var unreadCount = await convRepo.CountSupportConvUnreadAsync(updatedConv.ConversationId, ct);
             var msgSignalDto = await messageService.GetMessageDtoAsync(msgDto, ct);

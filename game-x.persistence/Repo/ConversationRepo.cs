@@ -244,11 +244,25 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId), ct);
     }
     
-    public async Task<int> CountConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default)
+    public async Task<int> CountSupportConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default)
     {
         return await context.Conversations
             .AsTracking()
             .Where(x => x.CustomerId == userId && x.PublicId == id)
+            .SelectMany(c =>
+                context.ConversationMembers
+                    .Where(m => m.ConversationId == c.Id && m.UserId == userId)
+                    .SelectMany(m =>
+                        c.Messages.Where(msg =>
+                            m.LastReadMessageId == null || msg.Id > m.LastReadMessageId)))
+            .CountAsync(ct);
+    }
+    
+    public async Task<int> CountConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .AsTracking()
+            .Where(x => x.PublicId == id && x.Members.Any(m => m.UserId == userId))
             .SelectMany(c =>
                 context.ConversationMembers
                     .Where(m => m.ConversationId == c.Id && m.UserId == userId)

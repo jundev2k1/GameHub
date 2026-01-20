@@ -11,6 +11,7 @@ public interface IConversationRepo
     Task<Conversation?> GetSupportConversationAsync(string actorId, CancellationToken ct = default);
     Task<IReadOnlyCollection<ConversationUnreadDto>> GetSupportConvUnreadAsync(CancellationToken ct = default);
     Task<int> CountSupportConvUnreadAsync(Guid id, CancellationToken ct = default);
+    Task<int> CountSupportConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default);
     Task<int> CountConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default);
     Task<int> CountConvUnreadByGuestIdAsync(string guestId, Guid id, CancellationToken ct = default);
     Task<ConversationItemDto> GetConvByIdAsync(Guid convId, CancellationToken ct = default);
