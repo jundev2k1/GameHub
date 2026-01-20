@@ -12,10 +12,10 @@ public class TransactionTransferSignalDto
     public string? Note { get; set; }
     public Guid CryptoTokenId { get; set; }
     public string Symbol { get; set; } = string.Empty;
-    public NetworkType Network { get; set; }
-    public TransactionType Type { get; set; }
-    public TransactionStatus Status { get; set; }
-    public TransactionSourceType SourceType { get; set; }
+    public string? Network { get; set; }
+    public string? Type { get; set; }
+    public string? Status { get; set; }
+    public string? SourceType { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

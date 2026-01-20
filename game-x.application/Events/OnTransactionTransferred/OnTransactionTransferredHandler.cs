@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Transactions.Dtos;
 
 namespace game_x.application.Events.OnTransactionTransferred;
 
@@ -13,28 +14,27 @@ public sealed class OnTransactionTransferredHandler(
 {
     public async Task Handle(OnTransactionTransferredEvent @event, CancellationToken ct = default)
     {
-        await SendToMember(@event.Dto, ct);
+        await SendToMember(@event.TxDto, @event.SignalDto, ct);
     }
 
-    private async Task SendToMember(TransactionTransferSignalDto tx, CancellationToken ct)
+    private async Task SendToMember(TransactionTransferDto txDto, TransactionTransferSignalDto txData, CancellationToken ct)
     {
-        if (tx.Type == TransactionType.TransferReceived && tx.ReceiverId != null)
+        if (txDto.Type == TransactionType.TransferReceived && txDto.ReceiverId != null)
         {
             var notification = Notification.Create(
                 NotificationMessageKey.Transaction_Received,
-                tx.ReceiverId,
+                txDto.ReceiverId,
                 NotificationType.Transaction,
                 NotificationSeverity.Success,
-                JsonSerializer.Serialize(tx));
+                JsonSerializer.Serialize(txData));
             await unitOfWork.WithTransactionAsync(async () =>
             {
                 await notificationRepo.AddNotificationAsync(notification, ct);
             }, ct);
-            await clientHubService.SendNotificationToMemberAsync(tx.ReceiverId, notification.Adapt<NotificationDto>());
+            await clientHubService.SendNotificationToMemberAsync(txDto.ReceiverId, notification.Adapt<NotificationDto>());
         }
         
-        string? userId = tx.Type == TransactionType.TransferReceived ? tx.ReceiverId : tx.TransferorId;
-        if (userId != null)
-            await clientHubService.SendTransactionTransferAsync(userId, tx);
+        string? userId = txDto.Type == TransactionType.TransferReceived ? txDto.ReceiverId : txDto.TransferorId;
+        if (userId != null) await clientHubService.SendTransactionTransferAsync(userId, txData);
     }
 }
