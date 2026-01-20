@@ -340,7 +340,18 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 LastMessage = context.Messages
                     .Where(x => x.ConversationId == c.Id)
                     .OrderByDescending(m => m.SentAt)
-                    .FirstOrDefault()
+                    .FirstOrDefault(),
+                Counterpart = c.Type == ConversationType.Direct
+                    ? c.Members
+                        .Where(x => x.UserId != userId)
+                        .Select(x => new
+                        {
+                            x.User.Id,
+                            x.User.Nickname,
+                            x.User.Avatar
+                        })
+                        .FirstOrDefault()
+                    : null
             })
             .Select(x => new ConversationItemDto
             {
@@ -377,7 +388,10 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                     Text = x.LastMessage.Text,
                     Kind = x.LastMessage.Kind
                 },
-                IsHidden = x.Member != null ? x.Member.IsHidden : false
+                IsHidden = x.Member != null ? x.Member.IsHidden : false,
+                CounterpartUserId = x.Counterpart != null ? x.Counterpart.Id : null,
+                CounterpartDisplayName = x.Counterpart != null ? x.Counterpart.Nickname : null,
+                CounterpartAvatar = x.Counterpart != null ? x.Counterpart.Avatar : null
             })
             .FirstOrDefaultAsync(ct);
         
