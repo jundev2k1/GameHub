@@ -66,7 +66,7 @@ public sealed class MarkMessageAsReadHandler(
 
                 var updatedConv = await conversationService.GetConvByIdAsync(cmd.ConversationId, ct);
                 int? clientUnreadCount = updatedConv.CustomerId != null
-                    ? await convRepo.CountConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct)
+                    ? await convRepo.CountSupportConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct)
                     : null;
                 
                 var dto = updatedConv.Adapt<ConversationSignalDto>() with {ClientUnreadCount = clientUnreadCount};

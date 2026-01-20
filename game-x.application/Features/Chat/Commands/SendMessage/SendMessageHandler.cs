@@ -146,7 +146,7 @@ public sealed class SendMessageHandler(
     
     private async Task SendSignalAsync(SendMessageCommand request, Conversation conv, Message message, CancellationToken ct)
     {
-        var dto = await GetMessageDtoAsync(request, message, ct);
+        var (dto, counterpartId) = await GetMessageDtoAsync(request, message, ct);
         switch (conv.Type)
         {
             case ConversationType.Direct:
@@ -154,17 +154,12 @@ public sealed class SendMessageHandler(
                 // Count total unread messages when sending friend messages.
                 if (conv.Type is ConversationType.Direct)
                 {
-                    var memberList = await convMemberRepo.GetMembersByConvIdAsync(conv.PublicId, ct);
-                    var targetUserId = memberList
-                        .Where(x => x.IsHidden != true && x.UserId != request.SenderActorId)
-                        .Select(x => x.UserId)
-                        .FirstOrDefault();
-                    if (targetUserId != null)
+                    if (counterpartId != null)
                     {
                         var unreadDto =
-                            await convMemberRepo.GetTotalUnreadByUserIdAsync(targetUserId, ConversationType.Direct, ct);
+                            await convMemberRepo.GetTotalUnreadByUserIdAsync(counterpartId, ConversationType.Direct, ct);
                         var totalUnreadCount = unreadDto.FirstOrDefault()?.UnreadCount ?? 0;
-                        await eventDispatcher.Publish(new OnClientCountTotalUnreadEvent(targetUserId, totalUnreadCount), ct);
+                        await eventDispatcher.Publish(new OnClientCountTotalUnreadEvent(counterpartId, totalUnreadCount), ct);
                     }
                 }
                 
@@ -184,23 +179,39 @@ public sealed class SendMessageHandler(
         }
     }
     
-    private async Task<CreatedMessageSignalResult> GetMessageDtoAsync(SendMessageCommand request, Message message, CancellationToken ct)
+    private async Task<(CreatedMessageSignalResult result, string? counterpartId)> GetMessageDtoAsync(SendMessageCommand request, Message message, CancellationToken ct)
     {
         var msg = await messageRepo.GetByIdAsync(message.PublicId, ct);
         var updatedConv = await conversationService.GetConvByIdAsync(request.ConversationId, ct);
+        
+        string? counterpartId = null;
         
         int? clientUnreadCount = null;
         if (updatedConv.GuestId != null)
             clientUnreadCount = await convRepo.CountConvUnreadByGuestIdAsync(updatedConv.GuestId, updatedConv.ConversationId, ct);
             
         if (updatedConv.CustomerId != null)
-            clientUnreadCount = await convRepo.CountConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct);
+            clientUnreadCount = await convRepo.CountSupportConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct);
+
+        if (updatedConv.Type == ConversationType.Direct)
+        {
+            var memberList = await convMemberRepo.GetMembersByConvIdAsync(updatedConv.ConversationId, ct);
+            counterpartId = memberList
+                .Where(x => x.IsHidden != true && x.UserId != request.SenderActorId)
+                .Select(x => x.UserId)
+                .FirstOrDefault();
+            if (counterpartId != null)
+            {
+                clientUnreadCount = await convRepo.CountConvUnreadByUserIdAsync(counterpartId, updatedConv.ConversationId, ct);
+            }
+        }
         
         var unreadCount = await convRepo.CountSupportConvUnreadAsync(updatedConv.ConversationId, ct);
         var msgSignalDto = await messageService.GetMessageDtoAsync(msg.Adapt<MessageDto>(), ct);
-        return new CreatedMessageSignalResult(
+        return (new CreatedMessageSignalResult(
             Msg: msgSignalDto.Adapt<MessageSignalDto>() with {ClientLocalId = request.ClientLocalId},
             Conv: updatedConv.Adapt<ConversationSignalDto>() with {BackOfficeUnreadCount = unreadCount, ClientUnreadCount = clientUnreadCount},
-            InboxUpsert: updatedConv.Adapt<InboxUpsertSignalDto>());
+            InboxUpsert: updatedConv.Adapt<InboxUpsertSignalDto>()),
+            counterpartId);
     }
 }
