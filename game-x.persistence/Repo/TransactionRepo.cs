@@ -86,7 +86,10 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionInternal)
             .Include(x => x.ReviewedBy)
-            .Where(x => x.UserId == userId && x.TransactionInternal != null)
+            .Where(x => 
+                x.UserId == userId 
+                && x.TransactionInternal != null
+                && x.TransactionInternal.SourceType == TransactionSourceType.Payment)
             .AsQueryable();
 
         if (queryBuilder != null)
