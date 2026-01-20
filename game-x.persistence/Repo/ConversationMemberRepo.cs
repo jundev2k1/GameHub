@@ -85,8 +85,13 @@ public class ConversationMemberRepo(GameXContext context): IConversationMemberRe
             .Where(m => m.ConversationId.Equals(convPk))
             .Select(m => new ConvMemberDto
             {
-                UserId = m.UserId, 
-                IsHidden = m.IsHidden
+                UserId = m.UserId,
+                IsHidden = m.IsHidden,
+                UnreadCount = context.Messages
+                    .Count(msg =>
+                        m.ConversationId == msg.ConversationId && 
+                        (m.LastReadMessageId == null || msg.Id > m.LastReadMessageId))
+                
             })
             .ToArrayAsync(ct);
     }
