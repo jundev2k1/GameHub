@@ -247,7 +247,8 @@ public sealed class ConversationService(
         return dto with
         {
             CustomerAvatarUrl = await GetAvatarUrl(conv.CustomerAvatar, ct),
-            LastUserAvatarUrl = await GetAvatarUrl(conv.LastMessage?.SenderAvatar, ct)
+            LastUserAvatarUrl = await GetAvatarUrl(conv.LastMessage?.SenderAvatar, ct),
+            CounterpartAvatarUrl = await GetAvatarUrl(conv.CounterpartAvatar, ct),
         };
     }
 }
