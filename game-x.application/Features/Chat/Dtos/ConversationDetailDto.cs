@@ -23,4 +23,7 @@ public sealed record ConversationDetailDto(
     string LastMessageText,
     MessageKind LastMessageKind,
     bool? IsHidden,
-    int? UnreadCount);
+    int? UnreadCount,
+    string? CounterpartUserId,
+    string? CounterpartDisplayName,
+    string? CounterpartAvatarUrl);
