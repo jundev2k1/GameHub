@@ -32,13 +32,6 @@ public sealed class JoinLiveStreamHandler(
                 "Live stream has been canceled.",
                 new { streamSetting.CancellationReason });
 
-        // Check if the live stream has started
-        if ((streamSetting.AssignedId != userId) && (streamSetting.StartTime > DateTime.UtcNow))
-            throw new ForbiddenException(
-                MessageCode.System.Forbidden,
-                "Live stream has not started yet.",
-                new { streamSetting.StartTime });
-
         // Get the live stream status from cache
         var streamInfo = liveStreamManager.GetLiveStreamStatus(streamSetting.StreamKey)
             ?? throw new NotFoundException("Live stream is not found.");
