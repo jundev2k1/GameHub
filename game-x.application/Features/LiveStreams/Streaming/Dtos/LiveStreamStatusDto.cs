@@ -16,6 +16,7 @@ public sealed class LiveStreamStatusDto
     public int? ThumbnailId { get; set; }
     public string? Thumbnail { get; set; }
     public string StreamKey { get; set; } = string.Empty;
+    public LiveStreamStatus Status { get; set; }
     public bool IsLive { get; set; }
     public DateTime? LiveAt { get; set; }
     public DateTime? OfflineAt { get; set; }

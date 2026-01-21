@@ -115,13 +115,14 @@ public sealed class CreateScheduleHandler(
             Description = streamSetting.Description ?? string.Empty,
             ThumbnailId = streamSetting.ThumbnailId,
             StreamKey = streamSetting.StreamKey,
+            Status = streamSetting.Status,
             LiveAt = streamSetting.StartAt ?? DateTime.UtcNow,
             OfflineAt = streamSetting.EndAt,
             StartTime = streamSetting.StartTime,
             EndTime = streamSetting.EndTime,
             ClientId = null,
             AssignedTo = streamSetting.AssignedTo?.Adapt<UserSummaryInfo>(),
-            Categories = [.. streamSetting.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())]
+            Categories = streamSetting.CategoryMappings.Adapt<LiveStreamCategorySummaryDto[]>()
         };
         if (streamSetting.AssignedTo != null && streamSetting.AssignedTo.Avatar != null)
         {
