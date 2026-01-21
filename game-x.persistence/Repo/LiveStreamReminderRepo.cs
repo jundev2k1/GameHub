@@ -39,7 +39,7 @@ public sealed class LiveStreamReminderRepo(GameXContext dbContext) : ILiveStream
 
     public async Task<LiveStreamReminder[]> GetRemindersForNotificationByStreamKeyAsync(string streamKey, CancellationToken ct = default)
     {
-        LiveStreamStatus[] validStatuses = [LiveStreamStatus.Scheduled, LiveStreamStatus.Cancelled];
+        LiveStreamStatus[] validStatuses = [LiveStreamStatus.Live, LiveStreamStatus.Cancelled];
         return await dbContext.LiveStreamReminders
             .AsNoTracking()
             .Include(lsr => lsr.User)
