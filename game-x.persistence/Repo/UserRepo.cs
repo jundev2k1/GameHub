@@ -128,18 +128,14 @@ public sealed class UserRepo(
     {
         var query = context.Users
             .AsNoTracking()
-            .Include(u => u.Avatar)
-            .Include(u => u.UserRoles)
-            .ThenInclude(ur => ur.Role)
-            .Include(u => u.UserKyc)
-            .Include(u => u.UserBankAccounts)
-            .Where(u => u.Status == UserStatus.Active && !u.UserRoles.Any(ur => ur.Role.Name == AppRoles.Root))
+            .ProjectToType<UserSummaryForAdmin>()
+            .Where(u => u.Status == UserStatus.Active)
             .AsQueryable();
         // Set condition to search with user roles
         if (roles is not null && roles.Length > 0)
-            query = query.Where(u => u.UserRoles.Any(ur => roles.Contains(ur.Role.Name)));
+            query = query.Where(u => u.Roles.Any(r => r != AppRoles.Root && roles.Contains(r)));
         else
-            query = query.Where(u => u.UserRoles.Any(ur => ur.Role.Name != AppRoles.Admin));
+            query = query.Where(u => u.Roles.Any(r => r != AppRoles.Admin && r != AppRoles.Root));
 
         // Search with keyword
         if (keyword.IsNotNullOrEmpty())
@@ -149,13 +145,9 @@ public sealed class UserRepo(
         // Search with kyc or bank account confirmed status
         var isUser = roles != null && roles.Contains(AppRoles.User);
         if (isUser && isKycConfirmed != null)
-            query = query.Where(u => isKycConfirmed == true
-                ? u.UserKyc != null && u.UserKyc.Status == KycStatus.Approved
-                : u.UserKyc == null || u.UserKyc.Status != KycStatus.Approved);
+            query = query.Where(u => u.IsKycConfirmed == isKycConfirmed);
         if (isUser && isBankAccountConfirmed != null)
-            query = query.Where(u => isBankAccountConfirmed == true
-                ? u.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved)
-                : !u.UserBankAccounts.Any(uba => uba.Status == UserBankAccountStatus.Approved));
+            query = query.Where(u => u.IsBankAccountConfirmed == isBankAccountConfirmed);
 
         var users = await query
             .Take(size)
@@ -163,13 +155,12 @@ public sealed class UserRepo(
 
         var mappingTasks = users.Select(async user =>
         {
-            var dto = user.Adapt<UserSummaryForAdmin>();
-            if (user.Avatar is null) return dto;
+            if (!user.AvatarId.HasValue) return user;
 
-            var avatar = await fileManagerCache.GetFileInfo(user.Avatar, ct);
-            if (avatar != null) dto.Avatar = avatar.Url;
+            var avatar = await fileManagerCache.GetFileInfo(user.AvatarId.Value, ct);
+            if (avatar != null) user.Avatar = avatar.Url;
 
-            return dto;
+            return user;
         });
 
         return await Task.WhenAll(mappingTasks);
