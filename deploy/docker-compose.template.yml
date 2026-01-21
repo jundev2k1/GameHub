@@ -99,6 +99,7 @@ services:
       - GameSlotSettings__Host=${GAMESLOT_HOST}
       - GameSlotSettings__Code=${GAMESLOT_PLATFORMCODE}
       - GameSlotSettings__LoginUrl=${GAMESLOT_LOGINURL}
+      - GameSlotSettings__Secret=${GAMESLOT_SECRET}
       - AtgSettings__Host=${ATG_HOST}
       - AtgSettings__XOperator=${ATG_X_OPERATOR}
       - AtgSettings__XOperatorKey=${ATG_X_OPERATOR_KEY}

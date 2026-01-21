@@ -3,4 +3,5 @@
 public static class PartnerName
 {
     public const string Baccarat = "BaccaratPlatform";
+    public const string SasSlot = "OnlineSlot";
 }
