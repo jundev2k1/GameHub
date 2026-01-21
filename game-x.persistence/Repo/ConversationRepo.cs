@@ -14,7 +14,8 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
         IQueryable<Conversation> query, 
         string userId,
         bool? getUnreadCount = null,
-        bool? isBackOffice = null)
+        bool? isBackOffice = null,
+        bool? hasCounterpart = null)
     {
         var baseQuery =
                 query
@@ -29,7 +30,18 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                         .Where(m => !m.IsDeleted)
                         .OrderByDescending(m => m.SentAt)
                         .Select(m => m.Id)
-                        .FirstOrDefault()
+                        .FirstOrDefault(),
+                    Counterpart = hasCounterpart == true && c.Type == ConversationType.Direct
+                        ? c.Members
+                            .Where(x => x.UserId != userId)
+                            .Select(x => new
+                            {
+                                x.User.Id,
+                                x.User.Nickname,
+                                x.User.Avatar
+                            })
+                            .FirstOrDefault()
+                        : null
                 });
         
         return
@@ -65,10 +77,9 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                         SenderActorId = lastMessage.SenderActorId,
                         SenderRole = lastMessage.SenderRole,
                         SenderName = lastMessage.SenderUser != null
-                            ? 
-                            lastMessage.SenderUser.Nickname.IsNotNullOrEmpty()
-                            ? lastMessage.SenderUser.Nickname
-                            : lastMessage.SenderUser.UserName
+                            ? lastMessage.SenderUser.Nickname.IsNotNullOrEmpty()
+                                ? lastMessage.SenderUser.Nickname
+                                : lastMessage.SenderUser.UserName
                             : string.Empty,
                         SenderAvatar = lastMessage.SenderUser != null
                             ? lastMessage.SenderUser.Avatar
@@ -89,7 +100,10 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                                 (cm.LastReadMessageId == null || m.Id > cm.LastReadMessageId)
                             ))
                         ) 
-                    : null
+                    : null,
+                CounterpartUserId = x.Counterpart.Id,
+                CounterpartDisplayName = x.Counterpart.Nickname,
+                CounterpartAvatar = x.Counterpart.Avatar
             };
     }
     
@@ -101,14 +115,18 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
             .Where(c => c.Type == ConversationType.Support
                      && c.Status == ConversationStatus.Open
                      && c.AssignedAgentId == null);
-        return BuildConversationListing(query, userId);
+        return BuildConversationListing(query: query, userId: userId);
     }
     
     public IQueryable<ConversationItemDto> GetSupportConversationsAsync(string userId, CancellationToken ct = default)
     {
         IQueryable<Conversation> query = context.Conversations
             .Where(c => c.Type == ConversationType.Support && c.Status == ConversationStatus.Claimed);
-        return BuildConversationListing(query, userId, true, true);
+        return BuildConversationListing(
+            query: query, 
+            userId: userId, 
+            getUnreadCount: true, 
+            isBackOffice: true);
     }
 
     public IQueryable<ConversationItemDto> GetHiddenConversationsForClientAsync(string userId, CancellationToken ct = default)
@@ -120,7 +138,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 m.UserId == userId &&
                 m.IsHidden == true);
         IQueryable<Conversation> query = context.Conversations.Where(minePredicate);
-        return BuildConversationListing(query, userId);
+        return BuildConversationListing(query: query, userId: userId);
     }
 
     public IQueryable<ConversationItemDto> GetMyConversationsForClientAsync(string userId, ConversationType? type, CancellationToken ct = default)
@@ -134,7 +152,11 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                          m.UserId == userId &&
                          m.IsHidden != true));
         IQueryable<Conversation> query = context.Conversations.Where(minePredicate);
-        return BuildConversationListing(query, userId, true);
+        return BuildConversationListing(
+            query: query, 
+            userId: userId, 
+            getUnreadCount: true,
+            hasCounterpart: true);
     }
 
     public async Task<ConversationItemDto?> GetMyConversationsForGuestAsync(string guestId, CancellationToken ct = default)
@@ -222,11 +244,25 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 x.LastResolvedMessageId == null || m.Id > x.LastResolvedMessageId), ct);
     }
     
-    public async Task<int> CountConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default)
+    public async Task<int> CountSupportConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default)
     {
         return await context.Conversations
             .AsTracking()
             .Where(x => x.CustomerId == userId && x.PublicId == id)
+            .SelectMany(c =>
+                context.ConversationMembers
+                    .Where(m => m.ConversationId == c.Id && m.UserId == userId)
+                    .SelectMany(m =>
+                        c.Messages.Where(msg =>
+                            m.LastReadMessageId == null || msg.Id > m.LastReadMessageId)))
+            .CountAsync(ct);
+    }
+    
+    public async Task<int> CountConvUnreadByUserIdAsync(string userId, Guid id, CancellationToken ct = default)
+    {
+        return await context.Conversations
+            .AsTracking()
+            .Where(x => x.PublicId == id && x.Members.Any(m => m.UserId == userId))
             .SelectMany(c =>
                 context.ConversationMembers
                     .Where(m => m.ConversationId == c.Id && m.UserId == userId)
@@ -318,7 +354,18 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 LastMessage = context.Messages
                     .Where(x => x.ConversationId == c.Id)
                     .OrderByDescending(m => m.SentAt)
-                    .FirstOrDefault()
+                    .FirstOrDefault(),
+                Counterpart = c.Type == ConversationType.Direct
+                    ? c.Members
+                        .Where(x => x.UserId != userId)
+                        .Select(x => new
+                        {
+                            x.User.Id,
+                            x.User.Nickname,
+                            x.User.Avatar
+                        })
+                        .FirstOrDefault()
+                    : null
             })
             .Select(x => new ConversationItemDto
             {
@@ -355,7 +402,10 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                     Text = x.LastMessage.Text,
                     Kind = x.LastMessage.Kind
                 },
-                IsHidden = x.Member != null ? x.Member.IsHidden : false
+                IsHidden = x.Member != null ? x.Member.IsHidden : false,
+                CounterpartUserId = x.Counterpart != null ? x.Counterpart.Id : null,
+                CounterpartDisplayName = x.Counterpart != null ? x.Counterpart.Nickname : null,
+                CounterpartAvatar = x.Counterpart != null ? x.Counterpart.Avatar : null
             })
             .FirstOrDefaultAsync(ct);
         

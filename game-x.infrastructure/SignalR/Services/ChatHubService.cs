@@ -51,6 +51,11 @@ public sealed class ChatHubService(
             await actorHub.Guest(userId).ConversationUpdated(dto);
     }
     
+    public async Task SendTotalUnreadCountAsync(string userId, int totalUnreadCount)
+    {
+        await actorHub.Member(userId).TotalUnreadCount(totalUnreadCount);
+    }
+    
     public async Task SendPublicMessageAsync(CreatedMessageSignalResult res)
     {
         var msgDto = res.Msg;
@@ -112,7 +117,7 @@ public sealed class ChatHubService(
         
         foreach (var member in members)
         {
-            await chatHub.MemberInbox(member.UserId).ConversationUpdated(conv);
+            await chatHub.MemberInbox(member.UserId).ConversationUpdated(conv with {ClientUnreadCount = member.UnreadCount});
             if(member.IsHidden != true)
                 await chatHub.IdleMember(member.UserId).InboxUpsert(upsertedInbox);
         }

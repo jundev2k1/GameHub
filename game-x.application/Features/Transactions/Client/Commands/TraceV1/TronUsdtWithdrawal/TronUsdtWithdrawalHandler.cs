@@ -105,7 +105,8 @@ public sealed class TronUsdtWithdrawalHandler(
         var txInternal = TransactionInternal.Create(
             orderNumber: orderNumber,
             fromAddress: string.Empty,
-            toAddress: request.To);
+            toAddress: request.To,
+            sourceType: TransactionSourceType.Payment);
 
         var tx = Transaction.Create(
             type: TransactionType.Withdrawal,

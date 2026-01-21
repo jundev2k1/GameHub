@@ -96,6 +96,7 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<TransactionTransferDto, TransactionTransferSignalDto>()
             .Map(dest => dest.Network, src => src.Network.ToString().ToCamelCase())
             .Map(dest => dest.Type, src => src.Type.ToString().ToCamelCase())
+            .Map(dest => dest.Status, src => src.Status.ToString().ToCamelCase())
             .Map(dest => dest.SourceType, src => src.SourceType.ToString().ToCamelCase())
             ;
     }

@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.OnClientCountTotalUnread;
 using game_x.application.Events.OnDirectMessageCreated;
 using game_x.application.Events.OnPublicMessageCreated;
 using game_x.application.Events.OnSupportConversationUnread;
@@ -14,6 +15,7 @@ public sealed class SendMessageHandler(
     IUnitOfWork unitOfWork,
     IConversationRepo convRepo,
     IConversationRepo conversationRepo,
+    IConversationMemberRepo convMemberRepo,
     IMessageRepo messageRepo,
     IMessageMentionRepo messageMentionRepo,
     IMessageService messageService,
@@ -61,8 +63,22 @@ public sealed class SendMessageHandler(
             
             conv.LastMessageAt = DateTime.UtcNow;
             
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.SaveChangesAsync(ct);
 
+            if (conv.Type == ConversationType.Direct)
+            {
+                var member = await convMemberRepo.GetByConvIdAndUserIdAsync(conv.PublicId, actorId, ct);
+                if (member != null)
+                {
+                    await convMemberRepo.UpdateAsync(member.Id, m =>
+                    {
+                        m.OnRead(message.Id);
+                    }, ct);
+                }
+            }
+            
+            await unitOfWork.CommitAsync(ct);
+            
             await SendSignalAsync(request, conv, message, ct);
            
             return new SendMessageResult(request.ClientLocalId, request.ConversationId);
@@ -134,8 +150,27 @@ public sealed class SendMessageHandler(
         switch (conv.Type)
         {
             case ConversationType.Direct:
+            {
+                // Count total unread messages when sending friend messages.
+                if (conv.Type is ConversationType.Direct)
+                {
+                    var memberList = await convMemberRepo.GetMembersByConvIdAsync(conv.PublicId, ct);
+                    var counterpartId = memberList
+                        .Where(x => x.IsHidden != true && x.UserId != request.SenderActorId)
+                        .Select(x => x.UserId)
+                        .FirstOrDefault();
+                    if (counterpartId != null)
+                    {
+                        var unreadDto =
+                            await convMemberRepo.GetTotalUnreadByUserIdAsync(counterpartId, ConversationType.Direct, ct);
+                        var totalUnreadCount = unreadDto.FirstOrDefault()?.UnreadCount ?? 0;
+                        await eventDispatcher.Publish(new OnClientCountTotalUnreadEvent(counterpartId, totalUnreadCount), ct);
+                    }
+                }
+                
                 await eventDispatcher.Publish(new OnDirectMessageCreatedEvent(dto), ct);
                 break;
+            }
             case ConversationType.Support:
             {
                 var convUnread = await convRepo.GetSupportConvUnreadAsync(ct);
@@ -159,7 +194,7 @@ public sealed class SendMessageHandler(
             clientUnreadCount = await convRepo.CountConvUnreadByGuestIdAsync(updatedConv.GuestId, updatedConv.ConversationId, ct);
             
         if (updatedConv.CustomerId != null)
-            clientUnreadCount = await convRepo.CountConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct);
+            clientUnreadCount = await convRepo.CountSupportConvUnreadByUserIdAsync(updatedConv.CustomerId, updatedConv.ConversationId, ct);
         
         var unreadCount = await convRepo.CountSupportConvUnreadAsync(updatedConv.ConversationId, ct);
         var msgSignalDto = await messageService.GetMessageDtoAsync(msg.Adapt<MessageDto>(), ct);

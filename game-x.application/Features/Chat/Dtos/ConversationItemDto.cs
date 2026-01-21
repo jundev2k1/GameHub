@@ -19,6 +19,9 @@ public sealed record ConversationItemDto
     public LastMessageItemDto? LastMessage { get; init; }
     public bool? IsHidden { get; init; }
     public int? UnreadCount { get; init; }
+    public string? CounterpartUserId { get; init; }
+    public string? CounterpartDisplayName { get; init; } 
+    public MediaFile? CounterpartAvatar { get; init; }
 };
 
 public sealed record LastMessageItemDto

@@ -31,6 +31,7 @@ public interface IChatClient
     Task MessageCreated(MessageSignalDto dto);
     Task MessageDeleted(DeletedMessageDto dto);
     Task MarkAsRead(ConvUnreadDto dto);
+    Task TotalUnreadCount(int totalUnreadCount);
     Task MessageFailed(MessageFailedSignalDto signalDto);
     /// <summary>Notify that the user received a friend request</summary>
     Task FriendRequest(FriendRequestSignalDto dto);
@@ -410,8 +411,7 @@ public sealed class ChatHub(
             throw;
         }
     }
-    
-    // --- Customer Support - V1 ---
+
     [Obsolete("Use SendMessageByUser instead")]
     [Authorize(Roles = AppRoles.User)]
     public async Task SendSupportMessage(SendSupportMessageCommand cmd)
@@ -464,8 +464,7 @@ public sealed class ChatHub(
                 ConversationId: cmd.ConversationId));
         }
     }
-    
-    // --- Conversations & membership - V2 ---
+
     [Authorize(Roles = AppRoles.User)]
     public async Task SendMessageByMember(SendMessageCommand cmd)
     {

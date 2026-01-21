@@ -44,8 +44,8 @@ public sealed class CreateDepositChainTransactionHandler(
                     x.AdjustAmount(outgoingTx.Amount, true);
                 }, ct);
                 await unitOfWork.SaveChangesAsync(ct);
-                outgoingTx.CompleteTransfer(transferorBalance.TotalAmount);
-                incomingTx.CompleteTransfer(receiverBalance.TotalAmount);
+                outgoingTx.CompleteTransfer(transferorBalance.TotalAmount, incomingTx.Id);
+                incomingTx.CompleteTransfer(receiverBalance.TotalAmount, outgoingTx.Id);
                 
                 await unitOfWork.SaveChangesAsync(ct);
                 await SendSignalsAsync(me, cmd.TargetUserId, outgoingTx.PublicId, incomingTx.PublicId, ct);
@@ -100,9 +100,7 @@ public sealed class CreateDepositChainTransactionHandler(
         async Task IncludeTxInternal(Transaction tx)
         {
             var internalTx = TransactionInternal.Create(
-                transferorId: transferorId,
-                receiverId: receiverId,
-                sourceType: TransactionSourceType.GameX);
+                sourceType: TransactionSourceType.Transfer);
             tx.AddTxInternal(internalTx);
             await transactionRepo.AddAsync(tx, ct);
         }
@@ -127,7 +125,6 @@ public sealed class CreateDepositChainTransactionHandler(
 
         return (outgoingTx, incomingTx);
     }
-
     
     private async Task<UserBalance> GetUserBalanceAsync(string userId, int tokenId, CancellationToken ct)
     {
@@ -144,8 +141,8 @@ public sealed class CreateDepositChainTransactionHandler(
     {
         var updatedTransferTx = await transactionRepo.GetTransferByIdAsync(transferTxId, ct);
         var updatedReceivedTx = await transactionRepo.GetTransferByIdAsync(receivedTxId, ct);
-        await dispatcher.Publish(new OnTransactionTransferredEvent(updatedTransferTx.Adapt<TransactionTransferSignalDto>()), ct);
-        await dispatcher.Publish(new OnTransactionTransferredEvent(updatedReceivedTx.Adapt<TransactionTransferSignalDto>()), ct);
+        await dispatcher.Publish(new OnTransactionTransferredEvent(updatedTransferTx, updatedTransferTx.Adapt<TransactionTransferSignalDto>()), ct);
+        await dispatcher.Publish(new OnTransactionTransferredEvent(updatedReceivedTx, updatedReceivedTx.Adapt<TransactionTransferSignalDto>()), ct);
         await dispatcher.Publish(new OnUserBalanceUpdatedEvent(transferorId), ct);
         await dispatcher.Publish(new OnUserBalanceUpdatedEvent(receiverId), ct);
     }
