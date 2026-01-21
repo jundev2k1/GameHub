@@ -41,13 +41,14 @@ public sealed class LiveStreamManagerCacheService(
                 Description = schedule.Description ?? string.Empty,
                 ThumbnailId = schedule.ThumbnailId,
                 StreamKey = schedule.StreamKey,
+                Status = schedule.Status,
                 LiveAt = schedule.StartAt ?? DateTime.UtcNow,
                 OfflineAt = schedule.EndAt,
                 StartTime = schedule.StartTime,
                 EndTime = schedule.EndTime,
                 ClientId = null,
                 AssignedTo = schedule.AssignedTo?.Adapt<UserSummaryInfo>(),
-                Categories = [.. schedule.CategoryMappings.Select(cm => cm.Adapt<LiveStreamCategorySummaryDto>())]
+                Categories = schedule.CategoryMappings.Adapt<LiveStreamCategorySummaryDto[]>()
             };
             if (schedule.AssignedTo != null && schedule.AssignedTo.Avatar != null)
             {
@@ -92,6 +93,10 @@ public sealed class LiveStreamManagerCacheService(
             throw new ArgumentException("Stream key cannot be null or empty.", streamInfo.StreamKey);
 
         streamInfo.IsLive = true;
+
+        if (streamInfo.Status is LiveStreamStatus.Scheduled)
+            streamInfo.Status = LiveStreamStatus.Live;
+
         Set(cacheKey, streamInfo);
     }
 

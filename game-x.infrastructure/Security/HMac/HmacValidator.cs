@@ -11,6 +11,7 @@ namespace game_x.infrastructure.Security.HMac;
 public sealed class HmacValidator(
     IOptions<HmacSettings> options,
     IOptions<BaccaratHmacSettings> baccaratOptions,
+    IOptions<GameSlotSettings> slotOptions,
     IHmacNonceStore nonceStore,
     IAppLogger<HmacValidator> logger) : IHmacValidator
 {
@@ -35,6 +36,7 @@ public sealed class HmacValidator(
         var secretKey = partnerName switch
         {
             var name when name == PartnerName.Baccarat => baccaratOptions.Value.Secret,
+            var name when name == PartnerName.SasSlot => slotOptions.Value.Secret,
             _ => null
         };
         if (secretKey is null) return false;

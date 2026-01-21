@@ -19,7 +19,8 @@ public sealed class GetActiveStreamsHandler(
             .SelectMany(kvp => kvp.Value)
             .Select(GetSearchItem);
         var allActiveStreams = await Task.WhenAll(streamTasks);
-        var streamList = allActiveStreams.Where(stream => stream is not null);
+        var streamList = allActiveStreams
+            .Where(stream => stream is not null && (stream.Status is LiveStreamStatus.Scheduled or LiveStreamStatus.Live));
 
         // Paginate
         var totalCount = streamList.Count();
