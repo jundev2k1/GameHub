@@ -24,7 +24,9 @@ public class FriendSearchHandler(
                 query,
                 request.Filters,
                 request.Sorts,
-                keyword => user => user.Nickname.Contains(keyword) || user.Email.Contains(keyword)),
+                keyword => user => 
+                    user.Nickname.ToLower().Contains(keyword.ToLower()) || 
+                    user.Email.ToLower().Contains(keyword.ToLower())),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);

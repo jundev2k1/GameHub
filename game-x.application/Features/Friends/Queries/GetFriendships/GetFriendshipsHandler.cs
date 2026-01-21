@@ -26,7 +26,7 @@ public class GetFriendshipsHandler(
                 request.Sorts,
                 keyword =>
                     user =>
-                        (user.Nickname.Contains(keyword))),
+                        (user.Nickname.ToLower().Contains(keyword.ToLower()))),
             request.PageIndex ?? 1,
             request.PageSize ?? 20,
             ct);
