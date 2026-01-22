@@ -60,7 +60,7 @@ public sealed class LoginGameHandler(
 
         var gameEmbeddedLink = ConvertEmbeddedLink(request.GamePlatformId.Value, url);
         var loginToken = GenerateToken(gameInfo.PlatformId, gameInfo.Id);
-        return new LoginGameResult(gameEmbeddedLink, loginToken);
+        return new LoginGameResult(gameEmbeddedLink, loginToken, gameInfo.Note);
     }
 
     private async Task<string?> LoginGameAsync(
