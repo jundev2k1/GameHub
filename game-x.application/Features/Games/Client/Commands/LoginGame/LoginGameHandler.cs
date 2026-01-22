@@ -17,6 +17,7 @@ using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 using System.Web;
 using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
+using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Games.Client.Commands.LoginGame;
 
@@ -35,32 +36,50 @@ public sealed class LoginGameHandler(
     IOptions<GameProviderSettings> gameSettings,
     IOptions<GameSlotSettings> gameSlotSettings,
     IApplicationEventDispatcher eventDispatcher,
-    IOptions<Etl998Settings> settings) : ICommandHandler<LoginGameCommand, LoginGameResult>
+    IOptions<Etl998Settings> settings,
+    ILogger<LoginGameHandler> logger) : ICommandHandler<LoginGameCommand, LoginGameResult>
 {
     public async Task<LoginGameResult> Handle(LoginGameCommand request, CancellationToken ct = default)
     {
-        var userId = userAccessor.GetUserId();
-        var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
+        try
+        {
+            var userId = userAccessor.GetUserId();
+            var targetUser = await userRepo.GetUserByIdAsync(userId, ct);
 
-        // Check: email must be confirmed before requesting password reset
-        if (!targetUser.EmailConfirmed)
-            throw new BadRequestException(MessageCode.User.UserNotConfirmed);
+            // Check: email must be confirmed before requesting password reset
+            if (!targetUser.EmailConfirmed)
+                throw new BadRequestException(MessageCode.User.UserNotConfirmed);
 
-        var gameInfo = gameProviderCache.GameList.FirstOrDefault(gl => gl.GameCode == request.GameCode)
-            ?? throw new BadRequestException($"Game ({request.GameCode}) is not found or disabled.");
+            var gamPlatform = gameProviderCache.PlatformList.FirstOrDefault(x=> x.Id == request.GamePlatformId);
+            if(gamPlatform == null) 
+                throw new BadRequestException($"Game ({request.GamePlatformId}) is not found or disabled.");
+        
+            var gameInfo = gameProviderCache.GameList.FirstOrDefault(gl => gl.GameCode == request.GameCode)
+                           ?? throw new BadRequestException($"Game ({request.GameCode}) is not found or disabled.");
 
-        targetUser = await gamePlatformService.EnsureExternalAccountCreatedAsync(
-            targetUser,
-            request.GamePlatformId!.Value,
-            ct: ct);
+            targetUser = await gamePlatformService.EnsureExternalAccountCreatedAsync(
+                targetUser,
+                request.GamePlatformId!.Value,
+                ct: ct);
 
-        // Login from external API
-        var url = await LoginGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!, request, ct)
-            ?? throw new BadRequestException($"GamePlatformId({request.GamePlatformId.Value}) is not supported.");
+            // Login from external API
+            var url = await LoginGameAsync(request.GamePlatformId.Value, targetUser.UserExtend!, request, ct)
+                      ?? throw new BadRequestException($"GamePlatformId({request.GamePlatformId.Value}) is not supported.");
 
-        var gameEmbeddedLink = ConvertEmbeddedLink(request.GamePlatformId.Value, url);
-        var loginToken = GenerateToken(gameInfo.PlatformId, gameInfo.Id);
-        return new LoginGameResult(gameEmbeddedLink, loginToken, gameInfo.Note);
+            var gameEmbeddedLink = ConvertEmbeddedLink(request.GamePlatformId.Value, url);
+            var loginToken = GenerateToken(gameInfo.PlatformId, gameInfo.Id);
+            return new LoginGameResult(gameEmbeddedLink, loginToken, gamPlatform.Note);
+        }
+        catch (BadRequestException ex)
+        {
+            logger.LogError(ex, ex.Message);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+            throw new BadRequestException(MessageCode.System.SystemError, new { ex.Message });
+        }
     }
 
     private async Task<string?> LoginGameAsync(
