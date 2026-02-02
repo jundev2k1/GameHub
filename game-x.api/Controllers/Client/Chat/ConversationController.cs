@@ -160,7 +160,8 @@ public class ConversationController(
                 SenderUserId = userId,
                 ClientLocalId = formData.ClientLocalId,
                 ReplyToMessageId = formData.ReplyToMessageId,
-                Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList()
+                Attachments = formData.Attachments.Select(FileUpload.FromFormFile).ToList(),
+                Kind = MessageKind.Attachment
             };
             var result = await Mediator.Send(command);
             return ApiResponseFactory.Ok(result);

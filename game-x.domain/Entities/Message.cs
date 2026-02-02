@@ -52,24 +52,21 @@ public sealed class Message: BaseEntity<int>, IAuditable
         int? replyToMessageId = null,
         bool? isMentionAll = null
     )
+    => new()
     {
-        var msg = new Message
-        {
-            Conversation = conv,
-            SenderActorId = senderActorId,
-            SenderUserId = senderUserId,
-            SenderRole = senderRole,
-            Kind = kind,
-            Text = text?.Trim(),
-            SentAt = DateTime.UtcNow,
-            IsTombstone = false,
-            EditCount = 0,
-            CurrentVersion = 1,
-            ReplyToMessageId = replyToMessageId,
-            IsMentionAll = isMentionAll
-        };
-        return msg;
-    }
+        Conversation = conv,
+        SenderActorId = senderActorId,
+        SenderUserId = senderUserId,
+        SenderRole = senderRole,
+        Kind = kind,
+        Text = text?.Trim(),
+        SentAt = DateTime.UtcNow,
+        IsTombstone = false,
+        EditCount = 0,
+        CurrentVersion = 1,
+        ReplyToMessageId = replyToMessageId,
+        IsMentionAll = isMentionAll
+    };
 
     public void Remove()
     {

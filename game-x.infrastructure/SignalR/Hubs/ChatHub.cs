@@ -310,7 +310,8 @@ public sealed class ChatHub(
         try
         {
             var ct = Context.ConnectionAborted;
-            return await convService.EnsureForPair(me, peerUserId, ct);
+            var conv = await convService.EnsureForPair(me, peerUserId, ct);
+            return conv.PublicId;
         }
         catch (Exception ex)
         {
@@ -472,7 +473,12 @@ public sealed class ChatHub(
         {
             var userId = userAccessor.GetUserId();
             var ct = Context.ConnectionAborted;
-            await sender.Send(cmd with {SenderActorId = userId, SenderUserId = userId }, ct);
+            await sender.Send(cmd with
+            {
+                SenderActorId = userId, 
+                SenderUserId = userId,
+                Kind = MessageKind.Text
+            }, ct);
         }
         catch (Exception ex)
         {
@@ -493,7 +499,11 @@ public sealed class ChatHub(
             var guestId = Context.UserIdentifier;
             if (string.IsNullOrWhiteSpace(guestId)) { return; }
             var ct = Context.ConnectionAborted;
-            await sender.Send(cmd with {SenderActorId = guestId}, ct);
+            await sender.Send(cmd with
+            {
+                SenderActorId = guestId,
+                Kind = MessageKind.Text
+            }, ct);
         }
         catch (Exception ex)
         {
@@ -510,7 +520,13 @@ public sealed class ChatHub(
         {
             var userId = userAccessor.GetUserId();
             var ct = Context.ConnectionAborted;
-            await sender.Send(cmd with {IsAgent = true, SenderActorId = userId, SenderUserId = userId}, ct);
+            await sender.Send(cmd with
+            {
+                IsAgent = true, 
+                SenderActorId = userId, 
+                SenderUserId = userId,
+                Kind = MessageKind.Text
+            }, ct);
         }
         catch (Exception ex)
         {

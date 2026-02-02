@@ -59,7 +59,7 @@ public sealed class ConversationService(
         }
     }
     
-    public async Task<Guid> EnsureForPair(string me, string targetedUserId, CancellationToken ct)
+    public async Task<Conversation> EnsureForPair(string me, string targetedUserId, CancellationToken ct)
     {
         if (me == targetedUserId)
             throw new BadRequestException(MessageCode.Chatting.FailToTargetMyself);
@@ -75,7 +75,7 @@ public sealed class ConversationService(
         
         // Find a direct conversation with exactly two members, A and B
         var existedConv = await conversationRepo.FindForPairAsync(me, targetedUserId, ct);
-        if (existedConv != null) return existedConv.PublicId;
+        if (existedConv != null) return existedConv;
 
         // Create new if missing
         var conv = Conversation.Create(ConversationType.Direct);
@@ -86,7 +86,7 @@ public sealed class ConversationService(
             conv.Members.Add(ConversationMember.Create(conv, targetedUserId, RoleInConversation.Member));
         }, ct);
         
-        return conv.PublicId;
+        return conv;
     }
     
     public async Task<Guid> EnsureForSupport(string actorId, string? userId, CancellationToken ct)
