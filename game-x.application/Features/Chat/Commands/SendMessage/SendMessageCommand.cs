@@ -5,15 +5,16 @@ using game_x.application.Features.Chat.Dtos;
 namespace game_x.application.Features.Chat.Commands.SendMessage;
 
 public sealed record SendMessageCommand(
-    [property: JsonIgnore] string SenderActorId, // guest or user
-    [property: JsonIgnore] string? SenderUserId,
-    [property: JsonIgnore] bool? IsAgent,
     Guid ConversationId,
-    string? Text,
-    Guid? ReplyToMessageId,
     string ClientLocalId,
-    IReadOnlyList<FileUpload>? Attachments,
-    MentionRequest? Mention
+    MessageKind Kind,
+    [property: JsonIgnore] string SenderActorId, // guest or user
+    [property: JsonIgnore] string? SenderUserId = null,
+    string? Text = null,
+    Guid? ReplyToMessageId = null,
+    [property: JsonIgnore] bool? IsAgent = null,
+    IReadOnlyList<FileUpload>? Attachments = null,
+    MentionRequest? Mention = null
 ) : IRequest<SendMessageResult>;
 
 public sealed record SendMessageResult(string ClientLocalId, Guid ConversationId);

@@ -253,8 +253,8 @@ public sealed class SasSlotService(
 
     private string Sign<T>(T request) where T : class
     {
-        var GameXPrivateKey = asymmetricKeyCacheService.GameXPrivateKey;
-        var signature = asymmetricCryptoService.Sign(GameXPrivateKey, request);
+        var privateKey = asymmetricKeyCacheService.GameXPrivateKey;
+        var signature = asymmetricCryptoService.Sign(privateKey, request);
         return signature;
     }
 }
