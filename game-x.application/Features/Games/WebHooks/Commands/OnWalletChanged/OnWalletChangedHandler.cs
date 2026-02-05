@@ -1,10 +1,12 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnUserBalanceUpdated;
 
 namespace game_x.application.Features.Games.WebHooks.Commands.OnWalletChanged;
 
 public sealed class OnWalletChangedHandler(
     IUserRepo userRepo,
+    IWalletManagerCacheService walletManagerCache,
     IApplicationEventDispatcher eventDispatcher) : ICommandHandler<OnWalletChangedCommand>
 {
     public async Task<Unit> Handle(OnWalletChangedCommand request, CancellationToken ct = default)
@@ -14,8 +16,14 @@ public sealed class OnWalletChangedHandler(
             var name when name == PartnerName.Baccarat => GameConstants.PLATFORM_ID_GAMEBACCARAT,
             _ => throw new ForbiddenException()
         };
+
         var usrex = await userRepo.GetUserExtendByAccountAsync(platformId, request.Account, ct)
             ?? throw new NotFoundException(nameof(request.Account), request.Account);
+
+        // Anti-spam refresh wallet
+        var now = DateTime.UtcNow;
+        var wallet = await walletManagerCache.GetExternalWalletAsync(usrex.Id, platformId);
+        if ((now - wallet.LastSyncAt).TotalMilliseconds < 250) return Unit.Value;
 
         var @event = new OnUserBalanceUpdatedEvent(usrex.Id, platformId);
         await eventDispatcher.Publish(@event, ct);
