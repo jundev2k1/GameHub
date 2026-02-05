@@ -1,8 +1,11 @@
-﻿using game_x.application.Contract.Infrastructure.Security;
+﻿using System.Globalization;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
+using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.OnTransactionTransferred;
 using game_x.application.Events.OnUserBalanceUpdated;
+using game_x.application.Features.Chat.Commands.SendMessage;
 using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Transactions.Client.Commands.TraceV1.TransferBetweenFriends;
@@ -15,6 +18,8 @@ public sealed class CreateDepositChainTransactionHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     ITransactionRepo transactionRepo,
     IUserBalanceRepo userBalanceRepo,
+    IConversationService convService,
+    ISender sender,
     IApplicationEventDispatcher dispatcher,
     ILogger<CreateDepositChainTransactionHandler> logger) : ICommandHandler<TransferBetweenFriendsCommand, Unit>
 {
@@ -48,6 +53,7 @@ public sealed class CreateDepositChainTransactionHandler(
                 incomingTx.CompleteTransfer(receiverBalance.TotalAmount, outgoingTx.Id);
                 
                 await unitOfWork.SaveChangesAsync(ct);
+                await CreateTransferMessageAsync(me, cmd.TargetUserId, cmd.Amount, ct);
                 await SendSignalsAsync(me, cmd.TargetUserId, outgoingTx.PublicId, incomingTx.PublicId, ct);
             }
             catch(Exception ex)
@@ -130,6 +136,25 @@ public sealed class CreateDepositChainTransactionHandler(
     {
         return await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, tokenId, ct)
             ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+    }
+    
+    private async Task CreateTransferMessageAsync(
+        string me, 
+        string peerUserId,
+        decimal amount,
+        CancellationToken ct)
+    {
+       var conv = await convService.EnsureForPair(me, peerUserId, ct);
+       await sender.Send(new SendMessageCommand
+       (
+           ConversationId: conv.PublicId,
+           IsAgent: false,
+           SenderActorId: me,
+           Text: amount.ToString("F2", CultureInfo.InvariantCulture),
+           ClientLocalId: Guid.NewGuid().ToString(),
+           SenderUserId: peerUserId,
+           Kind: MessageKind.SystemTransfer
+       ), ct);
     }
     
     private async Task SendSignalsAsync(

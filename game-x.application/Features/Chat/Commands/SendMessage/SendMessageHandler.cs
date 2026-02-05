@@ -51,7 +51,7 @@ public sealed class SendMessageHandler(
                 userId: userId,
                 text: request.Text,
                 replyMessageId: request.ReplyToMessageId,
-                hasAttachment: request.Attachments?.Count > 0,
+                kind: request.Kind,
                 isAgent: request.IsAgent,
                 hasAll: request.Mention?.IsAll,
                 ct: ct);
@@ -97,7 +97,7 @@ public sealed class SendMessageHandler(
         string? userId,
         string? text,
         Guid? replyMessageId,
-        bool hasAttachment,
+        MessageKind kind,
         bool? isAgent,
         bool? hasAll,
         CancellationToken ct)
@@ -115,7 +115,7 @@ public sealed class SendMessageHandler(
             senderActorId: actorId,
             senderUserId: userId,
             text: text,
-            kind: hasAttachment ? MessageKind.Attachment : MessageKind.Text,
+            kind: kind,
             senderRole: isAgent == true ? RoleInConversation.Agent : RoleInConversation.Member,
             replyToMessageId: replyMessageIntId,
             isMentionAll: conv.Type == ConversationType.Public ? hasAll : null
