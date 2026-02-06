@@ -17,7 +17,9 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         var query = context.Transactions
             .AsNoTracking()
-            .Where(x => x.TransactionInternal != null)
+            .Where(x => 
+                x.TransactionInternal != null 
+                && x.TransactionInternal.SourceType == TransactionSourceType.Payment)
             .Include(x => x.User)
             .Include(x => x.CryptoToken)
             .Include(x => x.TransactionInternal)

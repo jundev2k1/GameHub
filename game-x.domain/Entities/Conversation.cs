@@ -65,7 +65,7 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
     public void Claim(string agentId)
     {
         Status = ConversationStatus.Claimed;
-        AssignedAgentId =  agentId;
+        AssignedAgentId = agentId;
     }
 
     public void OnBackOfficeRead(int messageId)
