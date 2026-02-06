@@ -16,7 +16,7 @@ namespace game_x.api.Controllers.Client.Chat;
 
 [Authorize(Roles = AppRoles.User)]
 [Route("api/user")]
-public class FriendController : BaseApiController
+public class  FriendController : BaseApiController
 {
     [HttpGet("friendships/{userId}/check")]
     public async Task<IActionResult> FriedCheckAsync(string userId)
