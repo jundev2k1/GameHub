@@ -413,7 +413,6 @@ public sealed class ChatHub(
         }
     }
 
-    [Obsolete("Use SendMessageByUser instead")]
     [Authorize(Roles = AppRoles.User)]
     public async Task SendSupportMessage(SendSupportMessageCommand cmd)
     {
@@ -430,7 +429,6 @@ public sealed class ChatHub(
         }
     }
     
-    [Obsolete("Use SendMessageByGuest instead")]
     public async Task SendSupportMessageByGuest(SendSupportMessageCommand cmd)
     {
         try

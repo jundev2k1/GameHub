@@ -26,7 +26,7 @@ public sealed class SendSupportMessageHandler(
 
         // Each customer has only one conversation with customer support; if none exists, a new one will be created
         var conv = await convRepo.GetSupportConversationAsync(senderActorId, ct);
-        // Only user need join into a group (guest is not allowed)
+        // Only user needs join into a group (guest is not allowed)
         ConversationMember? convMember = null;
         await unitOfWork.BeginTransactionAsync(ct);
         try
