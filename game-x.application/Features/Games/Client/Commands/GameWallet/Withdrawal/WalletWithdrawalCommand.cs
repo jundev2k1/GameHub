@@ -5,6 +5,5 @@ namespace game_x.application.Features.Games.Client.Commands.GameWallet.Withdrawa
 
 public record WalletWithdrawalCommand(
     [property: JsonIgnore] Guid PlatformId,
-    decimal Amount,
     Guid CryptoTokenId,
     string? Note) : ICommand<ListTransactionExternalDto>;

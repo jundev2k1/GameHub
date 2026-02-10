@@ -54,9 +54,7 @@ public sealed class WalletWithdrawalHandler(
         var wallet = await walletManagerCache.GetExternalWalletAsync(
             currentUser.Id,
             request.PlatformId);
-        var actualAmount = request.PlatformId == GameConstants.PLATFORM_ID_SASSLOT
-            ? wallet.Amount
-            : request.Amount;
+        var actualAmount = wallet.Amount;
         if (wallet.Amount < actualAmount)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
