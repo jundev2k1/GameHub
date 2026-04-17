@@ -166,7 +166,7 @@ public sealed class CreateDepositChainTransactionHandler(
     {
         var updatedTransferTx = await transactionRepo.GetTransferByIdAsync(transferTxId, ct);
         var updatedReceivedTx = await transactionRepo.GetTransferByIdAsync(receivedTxId, ct);
-        await dispatcher.Publish(new OnTransactionTransferredEvent(updatedTransferTx, updatedTransferTx.Adapt<TransactionTransferSignalDto>()), ct);
+        await dispatcher.Publish(new OnTransactionTransferredEvent(updatedTransferTx, updatedTransferTx.Adapt<TransactionTransferSignalDto>() with {Amount = - updatedTransferTx.Amount}), ct);
         await dispatcher.Publish(new OnTransactionTransferredEvent(updatedReceivedTx, updatedReceivedTx.Adapt<TransactionTransferSignalDto>()), ct);
         await dispatcher.Publish(new OnUserBalanceUpdatedEvent(transferorId), ct);
         await dispatcher.Publish(new OnUserBalanceUpdatedEvent(receiverId), ct);
