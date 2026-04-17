@@ -19,7 +19,7 @@ public sealed class OnTransactionTransferredHandler(
 
     private async Task SendToMember(TransactionTransferDto txDto, TransactionTransferSignalDto txData, CancellationToken ct)
     {
-        if (txDto.Type == TransactionType.TransferReceived && txDto.ReceiverId != null)
+        if (txDto is {Type: TransactionType.TransferReceived, ReceiverId: not null})
         {
             var notification = Notification.Create(
                 NotificationMessageKey.Transaction_Received,
