@@ -74,6 +74,8 @@ public interface IUserRepo
 
     Task<bool> IsExistNicknameAsync(string nickname, CancellationToken ct = default);
 
+    Task<bool> IsExistedMemberNumberAsync(string memberNumber, CancellationToken ct = default);
+
     Task AddUserAsync(User user, string rawPassword, AppRole role, CancellationToken ct = default);
 
     Task UpdateAsync(string userId, Action<User> updateAction, CancellationToken ct = default);

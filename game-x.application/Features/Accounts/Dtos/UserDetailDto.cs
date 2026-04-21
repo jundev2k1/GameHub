@@ -5,6 +5,7 @@ namespace game_x.application.Features.Accounts.Dtos;
 public class UserDetailDto
 {
     public string UserId { get; set; } = string.Empty;
+    public string MemberNumber { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Nickname { get; set; } = string.Empty;
