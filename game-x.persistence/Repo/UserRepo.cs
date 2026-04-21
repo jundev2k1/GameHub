@@ -140,7 +140,7 @@ public sealed class UserRepo(
         // Search with keyword
         if (keyword.IsNotNullOrEmpty())
             query = query.Where(u => u.Nickname.ToLower().Contains(keyword.ToLower())
-                || (u.Email != null && u.Email.ToLower().Contains(keyword.ToLower())));
+                || u.Email.ToLower().Contains(keyword.ToLower()));
 
         // Search with kyc or bank account confirmed status
         var isUser = roles != null && roles.Contains(AppRoles.User);
@@ -318,6 +318,7 @@ public sealed class UserRepo(
             .Select(u => new UserListItemDto
             {
                 Id = u.Id,
+                MemberNumber = u.MemberNumber,
                 Nickname = u.Nickname,
                 UserName = u.UserName!,
                 Email = u.Email!,
@@ -361,6 +362,7 @@ public sealed class UserRepo(
             .Select(u => new TalentListItemDto
             {
                 Id = u.Id,
+                MemberNumber = u.MemberNumber,
                 Nickname = u.Nickname,
                 UserName = u.UserName!,
                 Email = u.Email!,
@@ -416,6 +418,11 @@ public sealed class UserRepo(
     public async Task<bool> IsExistNicknameAsync(string nickname, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => (u.Nickname.ToLower() == nickname.ToLower()) && !u.IsDeleted, ct);
 
+    public async Task<bool> IsExistedMemberNumberAsync(string memberNumber, CancellationToken ct = default)
+    {
+        return await userManager.Users.AnyAsync(x => x.MemberNumber == memberNumber, ct);
+    }
+    
     public async Task AddUserAsync(User user, string rawPassword, AppRole role, CancellationToken ct = default)
     {
         var userResult = await userManager.CreateAsync(user, rawPassword);

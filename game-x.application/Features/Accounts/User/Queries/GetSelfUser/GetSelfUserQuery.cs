@@ -16,6 +16,7 @@ public record GetSelfUserExternalInfo(
     decimal Amount);
 
 public record GetSelfUserResult(
+    string MemberNumber,
     string UserId,
     string Email,
     string Nickname,
