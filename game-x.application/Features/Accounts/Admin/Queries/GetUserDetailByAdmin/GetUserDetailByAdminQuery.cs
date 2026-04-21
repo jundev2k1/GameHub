@@ -8,6 +8,7 @@ public record GetUserDetailByAdminQuery(string UserId) : IQuery<GetUserDetailByA
 public record GetUserDetailByAdminResult(
     string UserId,
     string Username,
+    string MemberNumber,
     string Email,
     string Nickname,
     string FullName,
