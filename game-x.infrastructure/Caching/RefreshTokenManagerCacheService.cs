@@ -118,6 +118,7 @@ public sealed class RefreshTokenManagerCacheService(
         // Update the token state and revoked time
         RevokeToken(targetToken);
     }
+    
     public void RevokeToken(string userId, Guid id)
     {
         // Check if the user exists in the cache
@@ -128,6 +129,7 @@ public sealed class RefreshTokenManagerCacheService(
         // Update the token state and revoked time
         RevokeToken(targetToken);
     }
+    
     public void RevokeToken(RefreshTokenDto token)
     {
         // Update the token state and revoked time
