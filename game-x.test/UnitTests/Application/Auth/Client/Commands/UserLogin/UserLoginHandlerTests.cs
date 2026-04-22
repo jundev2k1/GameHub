@@ -1,4 +1,5 @@
 using FluentAssertions;
+using game_x.application.Common.Abstractions.Events;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
@@ -19,6 +20,7 @@ public sealed class UserLoginHandlerTests
     private readonly Mock<IJwtTokenGenerator> _jwtTokenGeneratorMock = new();
     private readonly Mock<ITokenService> _tokenServiceMock = new();
     private readonly Mock<IRefreshTokenManagerCacheService> _refreshTokenManagerMock = new();
+    private readonly Mock<IApplicationEventDispatcher> _eventDispatcherMock = new();
     private readonly Mock<IAuthService> _authServiceMock = new();
     private readonly Mock<IUserRepo> _userRepoMock = new();
     private readonly UserLoginHandler _handler;
@@ -30,6 +32,7 @@ public sealed class UserLoginHandlerTests
             jwtTokenGenerator: _jwtTokenGeneratorMock.Object,
             tokenService: _tokenServiceMock.Object,
             refreshTokenManager: _refreshTokenManagerMock.Object,
+            eventDispatcher: _eventDispatcherMock.Object,
             authService: _authServiceMock.Object,
             userRepo: _userRepoMock.Object);
     }
