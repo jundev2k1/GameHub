@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnFriendUnblocked;
+using game_x.application.Events.Friendship.OnFriendUnblocked;
 using game_x.application.Features.Friends.Dtos;
 using Microsoft.Extensions.Logging;
 

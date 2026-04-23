@@ -7,7 +7,7 @@ using game_x.application.Features.Accounts.User.Dtos;
 using game_x.share.Extensions;
 using System.Text.Json;
 
-namespace game_x.application.Events.OnVerifyUpdated;
+namespace game_x.application.Events.Account.OnVerifyUpdated;
 
 public sealed class OnVerifyUpdatedHandler(
     IUnitOfWork unitOfWork,

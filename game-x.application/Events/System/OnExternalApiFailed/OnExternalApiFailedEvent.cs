@@ -1,4 +1,4 @@
-﻿namespace game_x.application.Events.OnRefreshWalletFailed;
+﻿namespace game_x.application.Events.System.OnExternalApiFailed;
 
 public enum ExternalApiAction
 {

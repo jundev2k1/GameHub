@@ -2,7 +2,7 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Friend;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnUnfriend;
+using game_x.application.Events.Friendship.OnUnfriend;
 using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Friends.Commands.Unfriend;

@@ -2,11 +2,11 @@
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnUserBalanceUpdated;
+using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Features.Transactions.Dtos;
 using System.Text.Json;
 
-namespace game_x.application.Events.OnTransactionUpdated;
+namespace game_x.application.Events.Transactions.OnTransactionUpdated;
 
 public sealed class OnTransactionUpdatedHandler(
     IUnitOfWork unitOfWork,

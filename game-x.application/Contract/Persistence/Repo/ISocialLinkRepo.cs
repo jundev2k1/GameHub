@@ -39,4 +39,7 @@ public interface ISocialLinkRepo
     Task<SocialLink> GetByIdAsync(Guid linkId, CancellationToken ct = default);
     Task AddAsync(SocialLink link, CancellationToken ct = default);
     Task<SocialLink> UpdateAsync(Guid publicId, Action<SocialLink> updateAction, CancellationToken ct = default);
+    
+    /// <summary>Get entity and lock row; it prevents race condition, using in transaction.</summary>
+    Task<SocialLink> GetForUpdateAsync(Guid publicId, CancellationToken ct = default);
 }

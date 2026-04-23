@@ -3,8 +3,8 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnTransactionTransferred;
-using game_x.application.Events.OnUserBalanceUpdated;
+using game_x.application.Events.Transactions.OnTransactionTransferred;
+using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Features.Chat.Commands.SendMessage;
 using Microsoft.Extensions.Logging;
 

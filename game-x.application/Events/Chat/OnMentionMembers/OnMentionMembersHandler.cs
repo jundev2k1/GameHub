@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Events.OnMentionMembers;
+namespace game_x.application.Events.Chat.OnMentionMembers;
 
 public sealed class OnMentionMembersHandler(
     IUnitOfWork unitOfWork,

@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Events.OnSupportConversationClaimed;
+namespace game_x.application.Events.Chat.OnSupportConversationClaimed;
 
 public sealed class OnSupportConversationClaimedHandler(
     IUnitOfWork unitOfWork,

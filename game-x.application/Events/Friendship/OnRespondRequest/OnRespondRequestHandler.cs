@@ -4,7 +4,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Events.OnRespondRequest;
+namespace game_x.application.Events.Friendship.OnRespondRequest;
 
 public sealed class OnRespondRequestHandler(
     IUnitOfWork unitOfWork,

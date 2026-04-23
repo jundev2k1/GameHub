@@ -1,7 +1,7 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnLiveStreamDonated;
+using game_x.application.Events.LiveStream.OnLiveStreamDonated;
 using game_x.share.Extensions;
 
 namespace game_x.application.Features.LiveStreams.Streaming.Commands.DonateWithGift;

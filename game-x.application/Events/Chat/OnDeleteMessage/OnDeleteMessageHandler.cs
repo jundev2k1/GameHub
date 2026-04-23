@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Events.OnDeleteMessage;
+namespace game_x.application.Events.Chat.OnDeleteMessage;
 
 public sealed class OnDeleteMessageHandler(
     IUnitOfWork unitOfWork,

@@ -4,7 +4,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Events.OnSendFriendRequest;
+namespace game_x.application.Events.Friendship.OnSendFriendRequest;
 
 public sealed class OnSendFriendRequestHandler(
     IUnitOfWork unitOfWork,

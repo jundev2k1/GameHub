@@ -11,8 +11,8 @@ public sealed record ListedConversationDto(
     string? CounterpartDisplayName,
     string? CounterpartAvatarUrl,
     RoleInConversation? LastSenderRole,
-    DateTime LastMessageAt,
-    Guid LastMessageId,
-    string LastMessageText,
-    MessageKind LastMessageKind,
+    DateTime? LastMessageAt,
+    Guid? LastMessageId,
+    string? LastMessageText,
+    MessageKind? LastMessageKind,
     int? UnreadCount);

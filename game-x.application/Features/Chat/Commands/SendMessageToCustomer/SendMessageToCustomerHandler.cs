@@ -3,8 +3,8 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnSupportConversationUnread;
-using game_x.application.Events.OnSupportMessageCreated;
+using game_x.application.Events.Chat.OnSupportConversationUnread;
+using game_x.application.Events.Chat.OnSupportMessageCreated;
 using game_x.application.Features.Chat.Dtos;
 
 namespace game_x.application.Features.Chat.Commands.SendMessageToCustomer;

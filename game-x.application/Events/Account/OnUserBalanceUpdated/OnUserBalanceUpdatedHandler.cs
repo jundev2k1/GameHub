@@ -4,7 +4,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Accounts.Dtos;
 
-namespace game_x.application.Events.OnUserBalanceUpdated;
+namespace game_x.application.Events.Account.OnUserBalanceUpdated;
 
 public sealed class OnUserBalanceUpdatedHandler(
     IUserRepo userRepo,

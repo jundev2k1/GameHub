@@ -1,6 +1,6 @@
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnDeleteMessage;
+using game_x.application.Events.Chat.OnDeleteMessage;
 using game_x.application.Features.Chat.Dtos;
 
 namespace game_x.application.Features.Chat.Commands.DeleteMessage;

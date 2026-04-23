@@ -1,6 +1,6 @@
 ﻿using game_x.application.Features.LiveStreams.Streaming.Dtos;
 
-namespace game_x.application.Events.OnLiveStreamDonated;
+namespace game_x.application.Events.LiveStream.OnLiveStreamDonated;
 
 public record OnLiveStreamDonatedEvent(
     LiveStreamStatusDto StreamInfo,
