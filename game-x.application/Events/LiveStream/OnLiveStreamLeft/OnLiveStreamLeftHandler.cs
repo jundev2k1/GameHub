@@ -1,7 +1,7 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 
-namespace game_x.application.Events.OnLiveStreamLeft;
+namespace game_x.application.Events.LiveStream.OnLiveStreamLeft;
 
 public sealed class OnLiveStreamLeftHandler(
     ILiveStreamManagerCacheService liveStreamManager,

@@ -3,12 +3,12 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnUserBalanceUpdated;
+using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Features.Transactions.Dtos;
 using game_x.share.Context;
 using System.Text.Json;
 
-namespace game_x.application.Events.OnUxmTransactionCallback;
+namespace game_x.application.Events.Transactions.OnUxmTransactionCallback;
 
 public sealed class OnUxmTransactionCallbackHandler(
     IUnitOfWork unitOfWork,
@@ -81,7 +81,6 @@ public sealed class OnUxmTransactionCallbackHandler(
             await SendToMember(transactionInternal, notification!);
             await SendToAdmin(transactionInternal);
 
-            await clientHubService.SendNotificationToMemberAsync(userId, notification.Adapt<NotificationDto>());
             await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(userId), ct);
         }
         catch (Exception ex)

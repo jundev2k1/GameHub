@@ -2,7 +2,7 @@ using game_x.application.Contract.Infrastructure.ExternalApi.PaymentGateway;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnWithdrawalOrderReviewed;
+using game_x.application.Events.Transactions.OnWithdrawalOrderReviewed;
 using game_x.application.Features.Transactions.Dtos;
 using game_x.application.Features.Transactions.Mapping;
 using game_x.share.ExternalApi.PaymentGateway.Dtos;

@@ -1,6 +1,6 @@
 ﻿using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnGameRegister;
+using game_x.application.Events.Game.OnGameRegister;
 using game_x.share.Extensions;
 
 namespace game_x.application.Features.Games.Services;

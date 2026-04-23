@@ -2,11 +2,11 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnClientCountTotalUnread;
-using game_x.application.Events.OnDirectMessageCreated;
-using game_x.application.Events.OnPublicMessageCreated;
-using game_x.application.Events.OnSupportConversationUnread;
-using game_x.application.Events.OnSupportMessageCreatedV2;
+using game_x.application.Events.Chat.OnClientCountTotalUnread;
+using game_x.application.Events.Chat.OnDirectMessageCreated;
+using game_x.application.Events.Chat.OnPublicMessageCreated;
+using game_x.application.Events.Chat.OnSupportConversationUnread;
+using game_x.application.Events.Chat.OnSupportMessageCreatedV2;
 using game_x.application.Features.Chat.Dtos;
 
 namespace game_x.application.Features.Chat.Commands.SendMessage;

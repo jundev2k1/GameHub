@@ -1,6 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Features.Transactions.Dtos;
 
-namespace game_x.application.Events.OnTransactionTransferred;
+namespace game_x.application.Events.Transactions.OnTransactionTransferred;
 
 public sealed record OnTransactionTransferredEvent(TransactionTransferDto TxDto, TransactionTransferSignalDto SignalDto) : IApplicationEvent;

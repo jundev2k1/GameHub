@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Events.OnSupportMessageCreatedV2;
+namespace game_x.application.Events.Chat.OnSupportMessageCreatedV2;
 
 public sealed class OnSupportMessageCreatedV2Handler(
     IUnitOfWork unitOfWork,

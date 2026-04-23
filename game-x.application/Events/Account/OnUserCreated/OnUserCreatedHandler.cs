@@ -2,7 +2,7 @@
 using game_x.application.Contract.Infrastructure.Services.EmailProcessor;
 using game_x.application.Services.Verification;
 
-namespace game_x.application.Events.OnUserCreated;
+namespace game_x.application.Events.Account.OnUserCreated;
 
 public sealed class OnUserCreatedHandler(IEmailVerificationProcessor emailVerification, ISpamProtectionCacheService spamProtection)
     : IApplicationEventHandler<OnUserCreatedEvent>

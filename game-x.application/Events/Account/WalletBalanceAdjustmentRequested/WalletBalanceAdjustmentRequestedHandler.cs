@@ -2,7 +2,7 @@
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Utils;
 
-namespace game_x.application.Events.WalletBalanceAdjustmentRequested;
+namespace game_x.application.Events.Account.WalletBalanceAdjustmentRequested;
 
 public sealed class WalletBalanceAdjustmentRequestedHandler(
     IUnitOfWork unitOfWork,
@@ -38,8 +38,7 @@ public sealed class WalletBalanceAdjustmentRequestedHandler(
         {
             var currentBalances = await userBalanceRepo.GetBalancesByUserIdAsync(@event.UserId, ct);
             var internalBalance = currentBalances.Sum(ub => ub.Amount);
-
-            var transaction = Transaction.Create(
+            var transaction = domain.Entities.Transaction.Create(
                 @event.UserId,
                 differenceBalance,
                 latestTransaction.CryptoTokenId,

@@ -2,7 +2,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Dtos.Friend;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Events.OnFriendUnblocked;
+namespace game_x.application.Events.Friendship.OnFriendUnblocked;
 
 public sealed class OnFriendUnblockedHandler(
     IUnitOfWork unitOfWork,

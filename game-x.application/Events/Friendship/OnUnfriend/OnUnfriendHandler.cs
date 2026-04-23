@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 
-namespace game_x.application.Events.OnUnfriend;
+namespace game_x.application.Events.Friendship.OnUnfriend;
 
 public sealed class OnUnfriendHandler(
     IUnitOfWork unitOfWork,

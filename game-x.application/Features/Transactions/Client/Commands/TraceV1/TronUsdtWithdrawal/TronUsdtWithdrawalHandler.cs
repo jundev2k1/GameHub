@@ -2,7 +2,7 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.Services.EmailProcessor;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnTransactionInternalCreated;
+using game_x.application.Events.Transactions.OnTransactionInternalCreated;
 using game_x.application.Features.Transactions.Dtos;
 using game_x.application.Services.Verification;
 using game_x.application.Utils;

@@ -39,7 +39,7 @@
     <Folder Include="Events\Game\" />
     <Folder Include="Events\LiveStream\" />
     <Folder Include="Events\System\" />
-    <Folder Include="Events\Transaction\" />
+    <Folder Include="Events\Transactions\" />
     <Folder Include="Features\Auth\Admin\Commands\" />
     <Folder Include="Features\Auth\Guest\Commands\" />
     <Folder Include="Features\Auth\Root\Commands\" />
