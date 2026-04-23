@@ -4,6 +4,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Features.Transactions.Dtos;
+using System.Text.Json;
 
 namespace game_x.application.Events.Transactions.OnTransactionUpdated;
 
@@ -44,11 +45,13 @@ public sealed class OnTransactionUpdatedHandler(
     private async Task<Notification> CreateNotificationAsync(TransactionInternalDto transaction, CancellationToken ct)
     {
         // Create notification for the user whom is own target transaction
+        var metadata = JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>());
         var notification = Notification.Create(
             NotificationMessageKey.Transaction_Cancelled,
             transaction.UserId,
             NotificationType.Transaction,
-            NotificationSeverity.Error);
+            NotificationSeverity.Error,
+            metadata);
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await notificationRepo.AddNotificationAsync(notification, ct);

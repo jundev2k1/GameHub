@@ -54,9 +54,7 @@ public sealed class WalletWithdrawalHandler(
         var wallet = await walletManagerCache.GetExternalWalletAsync(
             currentUser.Id,
             request.PlatformId);
-        var actualAmount = request.PlatformId == GameConstants.PLATFORM_ID_SASSLOT
-            ? wallet.Amount
-            : request.Amount;
+        var actualAmount = wallet.Amount;
         if (wallet.Amount < actualAmount)
             throw new BadRequestException(MessageCode.Accounting.InsufficientBalance);
 
@@ -79,8 +77,6 @@ public sealed class WalletWithdrawalHandler(
                 balance.AdjustAmount(actualAmount, true);
                 balanceAfter = balance.TotalAmount;
             }, ct);
-
-            await unitOfWork.SaveChangesAsync(ct);
 
             // Rollback all processing if the transaction fails at the third party
             if (request.PlatformId == GameConstants.PLATFORM_ID_G598)
@@ -113,17 +109,19 @@ public sealed class WalletWithdrawalHandler(
                     account: currentUser.UserExtend!.AtgUserName,
                     sno: serialNumber,
                     amount: actualAmount);
-
-            var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
-            await eventDispatcher.Publish(@event, ct);
-
-            // Set balance after for transaction
-            var walletRefreshed = await walletManagerCache.GetExternalWalletAsync(
-                currentUser.Id,
-                request.PlatformId);
-            transaction.ConfirmGameTx(actualAmount, balanceAfter!.Value, walletRefreshed.Amount);
-            await transactionRepo.AddAsync(transaction, ct);
         }, ct);
+
+        // Refresh balance before writing transaction
+        var @event = new OnUserBalanceUpdatedEvent(transaction.UserId, targetPlatform.Id);
+        await eventDispatcher.Publish(@event, ct);
+
+        // Set balance after for transaction
+        var walletRefreshed = await walletManagerCache.GetExternalWalletAsync(
+            currentUser.Id,
+            request.PlatformId);
+        transaction.ConfirmGameTx(actualAmount, balanceAfter!.Value, walletRefreshed.Amount);
+        await transactionRepo.AddAsync(transaction, ct);
+        await unitOfWork.SaveChangesAsync(ct);
 
         var result = await transactionRepo.GetExternalByIdAsync(transaction.PublicId, ct);
         return result.Adapt<ListTransactionExternalDto>();

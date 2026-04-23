@@ -49,10 +49,10 @@ public sealed class SendRemindersJob(
         {
             var metadata = new Hashtable
             {
-                { "title", reminder.Schedule.Title },
-                { "startTime", reminder.Schedule.StartTime },
-                { "endTime", reminder.Schedule.EndTime },
-                { "streamId", reminder.Schedule.PublicId },
+                { "Title", reminder.Schedule.Title },
+                { "StartTime", reminder.Schedule.StartTime },
+                { "EndTime", reminder.Schedule.EndTime },
+                { "StreamId", reminder.Schedule.PublicId },
             };
             return JsonSerializer.Serialize(metadata);
         }

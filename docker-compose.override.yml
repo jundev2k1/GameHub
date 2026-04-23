@@ -86,6 +86,7 @@ services:
       - AtgSettings__XOperator=${ATG_X_OPERATOR}
       - AtgSettings__XOperatorKey=${ATG_X_OPERATOR_KEY}
       - AtgSettings__ProviderId=${ATG_PROVIDER_ID}
+      - HookTestSettings__DummySecretKey=${HOOK_TEST__DUMMY_SECRET_KEY}
 
   game-x.seq:
     container_name: game-x.seq

@@ -8,7 +8,7 @@ public sealed class GetUserActiveTokensHandler(
     public Task<GetUserActiveTokensDto[]> Handle(GetUserActiveTokensByAdminQuery request, CancellationToken ct = default)
     {
         var result = refreshTokenManager.GetsByUserId(request.UserId)
-            .Where(rt => !rt.IsRevoked || !rt.IsExpired)
+            .Where(rt => !rt.IsRevoked && !rt.IsExpired)
             .Select(token => token.Adapt<GetUserActiveTokensDto>())
             .ToArray();
         return Task.FromResult(result);
