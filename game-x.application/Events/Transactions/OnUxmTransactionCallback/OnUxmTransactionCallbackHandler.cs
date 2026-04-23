@@ -81,6 +81,7 @@ public sealed class OnUxmTransactionCallbackHandler(
             await SendToMember(transactionInternal, notification!);
             await SendToAdmin(transactionInternal);
 
+            await clientHubService.SendNotificationToMemberAsync(userId, notification.Adapt<NotificationDto>());
             await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(userId), ct);
         }
         catch (Exception ex)
