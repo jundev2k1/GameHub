@@ -54,7 +54,8 @@ public class RespondFriendRequestHandler(
     private async Task<SocialLink> Validate(Guid linkId, CancellationToken ct = default)
     {
         var me = userAccessor.GetUserId();
-        var link = await socialLinkRepo.GetForUpdateAsync(linkId, ct);
+        var link = await socialLinkRepo.GetByIdAsync(linkId, ct);
+        // var link = await socialLinkRepo.GetForUpdateAsync(linkId, ct);
 
         if(link.Kind == SocialLinkKind.Block)
             throw new NotFoundException(MessageCode.Chatting.SocialLinkBlocked);
