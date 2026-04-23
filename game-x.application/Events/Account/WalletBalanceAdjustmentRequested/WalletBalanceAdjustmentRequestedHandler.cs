@@ -2,7 +2,7 @@
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Utils;
 
-namespace game_x.application.Events.WalletBalanceAdjustmentRequested;
+namespace game_x.application.Events.Account.WalletBalanceAdjustmentRequested;
 
 public sealed class WalletBalanceAdjustmentRequestedHandler(
     IUnitOfWork unitOfWork,

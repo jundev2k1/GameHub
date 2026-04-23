@@ -1,5 +1,5 @@
 ﻿using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnUserBalanceUpdated;
+using game_x.application.Events.Account.OnUserBalanceUpdated;
 
 namespace game_x.application.Features.Games.WebHooks.Commands.OnWalletChanged;
 

@@ -5,7 +5,7 @@ using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Transactions.Dtos;
 
-namespace game_x.application.Events.OnTransactionTransferred;
+namespace game_x.application.Events.Transaction.OnTransactionTransferred;
 
 public sealed class OnTransactionTransferredHandler(
     IUnitOfWork unitOfWork,

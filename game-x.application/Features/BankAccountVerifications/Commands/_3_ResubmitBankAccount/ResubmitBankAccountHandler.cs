@@ -3,7 +3,7 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnVerifyCreated;
+using game_x.application.Events.Account.OnVerifyCreated;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.BankAccountVerifications.Dtos;
 

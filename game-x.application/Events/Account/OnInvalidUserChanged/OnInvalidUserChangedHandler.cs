@@ -1,6 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 
-namespace game_x.application.Events.OnInvalidUserChanged;
+namespace game_x.application.Events.Account.OnInvalidUserChanged;
 
 public sealed class OnInvalidUserChangedHandler(IUserCacheService userCache)
     : IApplicationEventHandler<OnInvalidUserChangedEvent>

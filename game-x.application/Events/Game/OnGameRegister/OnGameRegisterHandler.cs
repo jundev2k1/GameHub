@@ -14,7 +14,7 @@ using game_x.share.ExternalApi.GameBaccarat.Dtos.Register;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Register;
 
-namespace game_x.application.Events.OnGameRegister;
+namespace game_x.application.Events.Game.OnGameRegister;
 
 public sealed class OnGameRegisterHandler(
     IUserAccessor userAccessor,

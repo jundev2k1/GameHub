@@ -1,5 +1,5 @@
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Events.OnUxmTransactionCallback;
+using game_x.application.Events.Transaction.OnUxmTransactionCallback;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 

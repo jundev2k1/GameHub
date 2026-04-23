@@ -1,5 +1,5 @@
 ﻿using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnTransactionUpdated;
+using game_x.application.Events.Transaction.OnTransactionUpdated;
 
 namespace game_x.application.Features.Transactions.Admin.Commands.CancelTransaction;
 

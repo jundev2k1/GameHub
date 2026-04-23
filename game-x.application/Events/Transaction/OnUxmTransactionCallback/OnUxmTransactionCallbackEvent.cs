@@ -1,4 +1,4 @@
-namespace game_x.application.Events.OnUxmTransactionCallback;
+namespace game_x.application.Events.Transaction.OnUxmTransactionCallback;
 
 public record OnUxmTransactionCallbackEvent(
     string? ProviderOrderId,

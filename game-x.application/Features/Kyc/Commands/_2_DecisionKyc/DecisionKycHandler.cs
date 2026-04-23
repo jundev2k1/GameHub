@@ -1,6 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnVerifyUpdated;
+using game_x.application.Events.Account.OnVerifyUpdated;
 using game_x.application.Features.Accounts.User.Dtos;
 
 namespace game_x.application.Features.Kyc.Commands._2_DecisionKyc;

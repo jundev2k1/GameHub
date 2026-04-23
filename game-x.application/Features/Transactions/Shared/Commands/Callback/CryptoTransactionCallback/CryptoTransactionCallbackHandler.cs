@@ -1,6 +1,6 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Events.OnUxmTransactionCallback;
+using game_x.application.Events.Transaction.OnUxmTransactionCallback;
 
 namespace game_x.application.Features.Transactions.Shared.Commands.Callback.CryptoTransactionCallback;
 

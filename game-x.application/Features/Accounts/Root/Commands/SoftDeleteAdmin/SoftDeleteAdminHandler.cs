@@ -1,5 +1,5 @@
 ﻿using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnInvalidUserChanged;
+using game_x.application.Events.Account.OnInvalidUserChanged;
 
 namespace game_x.application.Features.Accounts.Root.Commands.SoftDeleteAdmin;
 

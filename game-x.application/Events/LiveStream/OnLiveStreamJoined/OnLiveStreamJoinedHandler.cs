@@ -2,7 +2,7 @@
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
 
-namespace game_x.application.Events.OnLiveStreamJoined;
+namespace game_x.application.Events.LiveStream.OnLiveStreamJoined;
 
 public sealed class OnLiveStreamJoinedHandler(
     ILiveStreamManagerCacheService liveStreamManager,

@@ -2,12 +2,12 @@
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnUserBalanceUpdated;
+using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.application.Utils;
 using System.Text.Json;
 
-namespace game_x.application.Events.OnLiveStreamDonated;
+namespace game_x.application.Events.LiveStream.OnLiveStreamDonated;
 
 public sealed class OnLiveStreamDonatedHandler(
     IUnitOfWork unitOfWork,

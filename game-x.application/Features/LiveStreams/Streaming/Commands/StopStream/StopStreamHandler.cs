@@ -1,5 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Events.OnLiveStreamLeft;
+using game_x.application.Events.LiveStream.OnLiveStreamLeft;
 
 namespace game_x.application.Features.LiveStreams.Streaming.Commands.StopStream;
 

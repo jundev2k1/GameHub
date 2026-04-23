@@ -1,5 +1,5 @@
 ﻿using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnUserCreated;
+using game_x.application.Events.Account.OnUserCreated;
 using UserEntity = game_x.domain.Entities.User;
 
 namespace game_x.application.Features.Auth.Client.Commands.RegisterUser;

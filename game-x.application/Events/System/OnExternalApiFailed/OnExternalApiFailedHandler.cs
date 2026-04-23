@@ -1,5 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.SignalR.Services;
-using game_x.application.Events.OnRefreshWalletFailed;
+using game_x.application.Events.System.OnExternalApiFailed;
 
 namespace game_x.application.Events.OnExternalApiFailed;
 
