@@ -13,7 +13,7 @@ public sealed record SupportConversationDto(
     DateTime LastMessageAt,
     DateTime? LastResolvedAt,
     int? LastResolvedMessageId,
-    Guid LastMessageId,
-    string LastMessageText,
-    MessageKind LastMessageKind,
+    Guid? LastMessageId,
+    string? LastMessageText,
+    MessageKind? LastMessageKind,
     int? UnreadCount);

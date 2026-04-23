@@ -21,7 +21,7 @@ public class ConversationRepo(GameXContext context): IConversationRepo, IReposit
                 query
                 .AsNoTracking()
                 .Where(c =>
-                    c.Type != ConversationType.Public && c.Messages.Any()
+                    c.Type != ConversationType.Public
                 )
                 .Select(c => new
                 {

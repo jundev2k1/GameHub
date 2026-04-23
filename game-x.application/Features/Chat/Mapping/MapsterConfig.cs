@@ -21,10 +21,10 @@ public sealed class MapsterConfig : IRegister
                     : string.Empty
                 : string.Empty)
             .Map(dest => dest.LastUserAvatarUrl, src => string.Empty)
-            .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault() != null ? src.Messages.FirstOrDefault()!.PublicId : Guid.Empty)
-            .Map(dest => dest.LastMessageText, src => 
+            .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault()!.PublicId)
+            .Map(dest => dest.LastMessageText, src =>
                 src.Messages.FirstOrDefault() != null ? src.Messages.FirstOrDefault()!.Kind == MessageKind.Text ? src.Messages.FirstOrDefault()!.Text : "[Attachment]" : null)
-            .Map(dest => dest.LastMessageKind, src => src.Messages.FirstOrDefault() != null ? src.Messages.FirstOrDefault()!.Kind : MessageKind.Text);
+            .Map(dest => dest.LastMessageKind, src => src.Messages.FirstOrDefault()!.Kind);
         
         cfg.NewConfig<ConversationItemDto, ConversationDto>()
             .Map(dest => dest.ConversationId, src => src.Id)
@@ -33,7 +33,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.LastUserId, src => src.LastMessage != null ? src.LastMessage.SenderActorId : null)
             .Map(dest => dest.LastUserName, src => src.LastMessage != null ? src.LastMessage.SenderName : string.Empty)
             .Map(dest => dest.LastUserAvatarUrl, src => string.Empty)
-            .Map(dest => dest.LastMessageId, src => src.LastMessage != null ? src.LastMessage.PublicId : Guid.Empty)
+            .Map(dest => dest.LastMessageId, src => src.LastMessage != null ? src.LastMessage.PublicId : null)
             .Map(dest => dest.LastMessageIndex, src => src.LastMessage!.Id)
             .Map(dest => dest.LastMessageText, src => 
                 src.LastMessage != null ? src.LastMessage.Kind == MessageKind.Text ? src.LastMessage.Text : "[Attachment]" : null)
