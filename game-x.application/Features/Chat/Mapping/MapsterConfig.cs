@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.Chat.Dtos;
+﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+using game_x.application.Features.Chat.Dtos;
 using game_x.share.Extensions;
 
 namespace game_x.application.Features.Chat.Mapping;
@@ -38,6 +39,25 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.LastMessageText, src => 
                 src.LastMessage != null ? src.LastMessage.Kind == MessageKind.Text ? src.LastMessage.Text : "[Attachment]" : null)
             .Map(dest => dest.LastMessageKind, src => src.LastMessage != null ? src.LastMessage.Kind : MessageKind.Text);
+        
+        cfg.NewConfig<Conversation, ConversationSignalDto>()
+            .Map(dest => dest.ConversationId, src => src.PublicId)
+            .Map(dest => dest.CustomerAvatarUrl, src => string.Empty)
+            .Map(dest => dest.LastSenderRole, src => src.Messages.FirstOrDefault() != null ? (RoleInConversation?)src.Messages.FirstOrDefault()!.SenderRole : null)
+            .Map(dest => dest.LastUserId, src => src.Messages.FirstOrDefault() != null ? src.Messages.FirstOrDefault()!.SenderActorId : null)
+            .Map(dest => dest.LastUserName, src => src.Messages.FirstOrDefault() != null 
+                ? src.Messages.FirstOrDefault()!.SenderUser != null
+                    ? 
+                    src.Messages.FirstOrDefault()!.SenderUser!.Nickname.IsNotNullOrEmpty()
+                        ? src.Messages.FirstOrDefault()!.SenderUser!.Nickname
+                        : src.Messages.FirstOrDefault()!.SenderUser!.UserName
+                    : string.Empty
+                : string.Empty)
+            .Map(dest => dest.LastUserAvatarUrl, src => string.Empty)
+            .Map(dest => dest.LastMessageId, src => src.Messages.FirstOrDefault() != null ? (Guid?)src.Messages.FirstOrDefault()!.PublicId : null)
+            .Map(dest => dest.LastMessageText, src =>
+                src.Messages.FirstOrDefault() != null ? src.Messages.FirstOrDefault()!.Kind == MessageKind.Text ? src.Messages.FirstOrDefault()!.Text : "[Attachment]" : null)
+            .Map(dest => dest.LastMessageKind, src => src.Messages.FirstOrDefault() != null ? src.Messages.FirstOrDefault()!.Kind.ToString() : null);
         
         cfg.NewConfig<Message, MessageDto>()
             .Map(dest => dest.ConversationId, src => src.Conversation.PublicId)

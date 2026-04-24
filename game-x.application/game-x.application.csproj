@@ -34,7 +34,6 @@
     <ProjectReference Include="..\game-x.share\game-x.share.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Events\Chat\" />
     <Folder Include="Events\Friendship\" />
     <Folder Include="Events\Game\" />
     <Folder Include="Events\LiveStream\" />
