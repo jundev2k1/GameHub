@@ -10,14 +10,12 @@ namespace game_x.persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // 1. Create sequence (6 digits)
             migrationBuilder.Sql(@"
                 CREATE SEQUENCE IF NOT EXISTS user_member_seq
                 START WITH 100001
                 INCREMENT BY 1;
             ");
-
-            // 2. Add column (nullable trước để backfill)
+            
             migrationBuilder.AddColumn<string>(
                 name: "member_number",
                 table: "users",

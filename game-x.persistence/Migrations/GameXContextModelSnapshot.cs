@@ -3398,8 +3398,10 @@ namespace game_x.persistence.Migrations
 
                     b.Property<string>("MemberNumber")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("text")
-                        .HasColumnName("member_number");
+                        .HasColumnName("member_number")
+                        .HasDefaultValueSql("'User' || nextval('user_member_seq')");
 
                     b.Property<string>("Nickname")
                         .IsRequired()
