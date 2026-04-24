@@ -128,9 +128,14 @@ public sealed class ChatHubService(
         await actorHub.Member(dto.AddresseeUserId!).FriendRequest(dto);
     }
     
-    public async Task SendFriendResponseAsync(FriendResponseSignalDto dto)
+    public async Task SendFriendResponseAsync(FriendResponseSignalDto dto, ConversationSignalDto? conv = null)
     {
         await actorHub.Member(dto.RequesterUserId!).FriendResponse(dto);
+        if (dto.State == SocialLinkState.Accepted && conv != null)
+        {
+            await actorHub.Member(dto.RequesterUserId!).ConversationUpdated(conv with {CustomerAvatarUrl = dto.AddresseeAvatarUrl});
+            await actorHub.Member(dto.AddresseeUserId!).ConversationUpdated(conv with {CustomerAvatarUrl = dto.RequesterAvatarUrl});
+        }
     }
     
     public async Task SendUnfriendAsync(UnfriendSignalDto dto)

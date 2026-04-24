@@ -1,4 +1,5 @@
 using System.Text.Json;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Friend;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
@@ -10,20 +11,18 @@ public sealed class OnRespondRequestHandler(
     IUnitOfWork unitOfWork,
     IChatHubService chatHubService,
     IClientHubService clientHubService,
-    INotificationRepo notificationRepo
-    )
-    : IApplicationEventHandler<OnRespondRequestEvent>
+    INotificationRepo notificationRepo) : IApplicationEventHandler<OnRespondRequestEvent>
 {
     public async Task Handle(OnRespondRequestEvent @event, CancellationToken ct = default)
     {
         var dto = @event.Dto.Adapt<FriendResponseSignalDto>();
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await SendNotificationToRequester(dto, ct);
+            await SendNotificationToRequester(dto, @event.Conv, ct);
         }, ct);
     }
     
-    private async Task SendNotificationToRequester(FriendResponseSignalDto dto, CancellationToken ct)
+    private async Task SendNotificationToRequester(FriendResponseSignalDto dto, ConversationSignalDto conv, CancellationToken ct)
     {
         if (dto.RequesterUserId is not null)
         {
@@ -42,7 +41,7 @@ public sealed class OnRespondRequestHandler(
                     notification.Adapt<NotificationDto>());
             }
             
-            await chatHubService.SendFriendResponseAsync(dto);
+            await chatHubService.SendFriendResponseAsync(dto, conv);
         }
     }
 }
