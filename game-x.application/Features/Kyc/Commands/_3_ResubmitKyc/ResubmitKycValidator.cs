@@ -30,12 +30,12 @@ public sealed class ResubmitKycValidator : AbstractValidator<ResubmitKycCommand>
 
         RuleFor(x => x.FrontImage)
             .Must(BeAValidFileType).WithMessage("Invalid file type.")
-            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 5 MB.")
+            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 10 MB.")
             .When(x => x.FrontImage is not null);
 
         RuleFor(x => x.BackImage)
             .Must(BeAValidFileType).WithMessage("Invalid file type.")
-            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 5 MB.")
+            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 10 MB.")
             .When(x => x.BackImage is not null);
     }
 
@@ -70,7 +70,7 @@ public sealed class ResubmitKycValidator : AbstractValidator<ResubmitKycCommand>
     {
         if (file is null) return true;
 
-        var maxSize = 5 * 1080 * 1080; // 5 MB
+        var maxSize = 10 * 1024 * 1024; // 10 MB
         return file.Length < maxSize;
     }
 }

@@ -38,7 +38,7 @@ public sealed class UpdatePoseCharacterValidator : AbstractValidator<UpdatePoseC
     {
         if (file is null) return true;
 
-        var maxSize = 10 * 1080 * 1080; // 10 MB
+        var maxSize = 10 * 1024 * 1024; // 10 MB
         return file.Length < maxSize;
     }
 }

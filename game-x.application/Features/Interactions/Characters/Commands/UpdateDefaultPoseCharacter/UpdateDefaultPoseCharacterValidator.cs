@@ -21,7 +21,7 @@ public sealed class UpdateDefaultPoseCharacterValidator : AbstractValidator<Upda
 
     private bool BeAValidFileSize(FileUpload file)
     {
-        var maxSize = 10 * 1080 * 1080; // 10 MB
+        var maxSize = 10 * 1024 * 1024; // 10 MB
         return file.Length < maxSize;
     }
 }

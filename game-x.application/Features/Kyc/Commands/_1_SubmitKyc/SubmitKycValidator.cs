@@ -26,11 +26,11 @@ public sealed class SubmitKycValidator : AbstractValidator<SubmitKycCommand>
 
         RuleFor(x => x.FrontImage)
             .Must(BeAValidFileType).WithMessage("Invalid file type.")
-            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 5 MB.");
+            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 10 MB.");
 
         RuleFor(x => x.BackImage)
             .Must(BeAValidFileType).WithMessage("Invalid file type.")
-            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 5 MB.");
+            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 10 MB.");
     }
 
     private bool BeAValidDate(DateTime dob)
@@ -58,7 +58,7 @@ public sealed class SubmitKycValidator : AbstractValidator<SubmitKycCommand>
 
     private bool BeAValidFileSize(FileUpload file)
     {
-        var maxSize = 5 * 1080 * 1080; // 5 MB
+        var maxSize = 10 * 1024 * 1024; // 10 MB
         return file.Length < maxSize;
     }
 }

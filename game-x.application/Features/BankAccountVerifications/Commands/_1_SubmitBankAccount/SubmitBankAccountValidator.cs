@@ -31,7 +31,7 @@ public sealed class SubmitBankAccountValidator : AbstractValidator<SubmitBankAcc
 
         RuleFor(x => x.Image)
             .Must(BeAValidFileType).WithMessage("Invalid file type.")
-            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 5 MB.");
+            .Must(BeAValidFileSize).WithMessage("File upload must be not greater than 10 MB.");
     }
 
     private bool BeAValidFileType(FileUpload file)
@@ -44,7 +44,7 @@ public sealed class SubmitBankAccountValidator : AbstractValidator<SubmitBankAcc
 
     private bool BeAValidFileSize(FileUpload file)
     {
-        var maxSize = 5 * 1080 * 1080; // 5 MB
+        var maxSize = 10 * 1024 * 1024; // 10 MB
         return file.Length < maxSize;
     }
 }

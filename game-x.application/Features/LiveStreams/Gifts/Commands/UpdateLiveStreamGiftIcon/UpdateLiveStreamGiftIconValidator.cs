@@ -11,13 +11,13 @@ public sealed class UpdateLiveStreamGiftIconValidator : AbstractValidator<Update
 
         RuleFor(x => x.FileUpload)
             .NotNull().WithMessage("Icon file is required.")
-            .Must(BeAValidIcon).WithMessage("Icon must be a valid image file (JPEG, PNG, WEBP) and not exceed 5 MB.");
+            .Must(BeAValidIcon).WithMessage("Icon must be a valid image file (JPEG, PNG, WEBP) and not exceed 10 MB.");
     }
 
     private bool BeAValidIcon(FileUpload fileUpload)
     {
         var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-        const long maxFileSize = 5 * 1024 * 1024; // 5 MB
+        const long maxFileSize = 10 * 1024 * 1024; // 10 MB
 
         return fileUpload != null
             && allowedTypes.Contains(fileUpload.ContentType)
