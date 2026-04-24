@@ -6,5 +6,6 @@ public record FriendResponseSignalDto(
     string? AddresseeUserId,
     string? AddresseeNickname,
     string? AddresseeAvatarUrl,
+    string? RequesterNickname,
     string? RequesterAvatarUrl,
     string? RequesterUserId);
