@@ -133,8 +133,16 @@ public sealed class ChatHubService(
         await actorHub.Member(dto.RequesterUserId!).FriendResponse(dto);
         if (dto.State == SocialLinkState.Accepted && conv != null)
         {
-            await actorHub.Member(dto.RequesterUserId!).ConversationUpdated(conv with {CustomerAvatarUrl = dto.AddresseeAvatarUrl});
-            await actorHub.Member(dto.AddresseeUserId!).ConversationUpdated(conv with {CustomerAvatarUrl = dto.RequesterAvatarUrl});
+            await actorHub.Member(dto.RequesterUserId!).ConversationUpdated(conv with
+            {
+                CustomerAvatarUrl = dto.AddresseeAvatarUrl,
+                CustomerDisplayName = dto.AddresseeNickname
+            });
+            await actorHub.Member(dto.AddresseeUserId!).ConversationUpdated(conv with
+            {
+                CustomerAvatarUrl = dto.RequesterAvatarUrl,
+                CustomerDisplayName = dto.RequesterNickname
+            });
         }
     }
     
