@@ -1,7 +1,7 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnRespondRequest;
+using game_x.application.Events.Friendship.OnRespondRequest;
 using game_x.application.Features.Friends.Dtos;
 using Microsoft.Extensions.Logging;
 
@@ -19,30 +19,20 @@ public class RespondFriendRequestHandler(
     public async Task<Unit> Handle(RespondFriendRequestCommand cmd, CancellationToken ct)
     {
         var me = userAccessor.GetUserId();
-        var link = await socialLinkRepo.GetByIdAsync(cmd.LinkPublicId, ct);
-
-        if(link.Kind == SocialLinkKind.Block)
-            throw new NotFoundException(MessageCode.Chatting.SocialLinkBlocked);
-        if(link.Kind != SocialLinkKind.Friendship)
-            throw new NotFoundException(MessageCode.Chatting.SocialLinkNotFound);
-        if (link.State != SocialLinkState.Pending)
-            throw new BadRequestException(MessageCode.Chatting.FriendRequestAlreadyRespond);
-        if (link.AddresseeUserId != me)
-            throw new BadRequestException(MessageCode.Chatting.NotAddressee);
-
-        var existedConv = link.RequesterUserId != null ? await conversationRepo.FindForPairAsync(me, link.RequesterUserId, ct) : null;
         
         await unitOfWork.BeginTransactionAsync(ct);
         try
         {
+            var link = await Validate(cmd.LinkPublicId, ct);
+        
+            var existedConv = link.RequesterUserId != null ? await conversationRepo.FindForPairAsync(me, link.RequesterUserId, ct) : null;
+            
             await socialLinkRepo.UpdateAsync(link.PublicId, x => { x.Respond(cmd.Accept); }, ct);
-            if (existedConv?.Status == ConversationStatus.Closed)
-            {
-                await conversationRepo.UpdateAsync(existedConv.PublicId, x =>
-                {
-                    x.Status = ConversationStatus.Open;
-                }, ct);
-            }
+
+            if (existedConv == null)
+                await CreateConversation(me, link.RequesterUserId!, ct);
+            else if (existedConv.Status == ConversationStatus.Closed)
+                await conversationRepo.UpdateAsync(existedConv.PublicId, x => { x.OnOpen(); }, ct);
             
             await unitOfWork.CommitAsync(ct);
             var updatedLink = await socialLinkRepo.GetByIdAsync(link.PublicId, ct);
@@ -57,7 +47,33 @@ public class RespondFriendRequestHandler(
         {
             logger.LogError(ex, ex.Message);
             await unitOfWork.RollbackAsync(ct);
-            throw new BadRequestException(MessageCode.System.SystemError);
+            throw;
         }
+    }
+
+    private async Task<SocialLink> Validate(Guid linkId, CancellationToken ct = default)
+    {
+        var me = userAccessor.GetUserId();
+        var link = await socialLinkRepo.GetByIdAsync(linkId, ct);
+        // var link = await socialLinkRepo.GetForUpdateAsync(linkId, ct);
+
+        if(link.Kind == SocialLinkKind.Block)
+            throw new NotFoundException(MessageCode.Chatting.SocialLinkBlocked);
+        if(link.Kind != SocialLinkKind.Friendship)
+            throw new NotFoundException(MessageCode.Chatting.SocialLinkNotFound);
+        if (link.State != SocialLinkState.Pending)
+            throw new BadRequestException(MessageCode.Chatting.FriendRequestAlreadyRespond);
+        if (link.AddresseeUserId != me)
+            throw new BadRequestException(MessageCode.Chatting.NotAddressee);
+        
+        return link;
+    }
+
+    private async Task CreateConversation(string me, string targetedUserId, CancellationToken ct = default)
+    {
+        var conv = Conversation.Create(ConversationType.Direct);
+        await conversationRepo.AddAsync(conv, ct);
+        conv.Members.Add(ConversationMember.Create(conv, me, RoleInConversation.Member));
+        conv.Members.Add(ConversationMember.Create(conv, targetedUserId, RoleInConversation.Member));
     }
 }

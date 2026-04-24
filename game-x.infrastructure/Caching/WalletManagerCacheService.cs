@@ -7,7 +7,7 @@ using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnRefreshWalletFailed;
+using game_x.application.Events.System.OnExternalApiFailed;
 using game_x.application.Exceptions;
 using game_x.application.Features.Accounts.User.Dtos;
 using game_x.application.Features.Games.Dtos;

@@ -5,6 +5,7 @@ namespace game_x.domain.Entities;
 
 public class User : IdentityUser, IEntity, IAuditable
 {
+    public string MemberNumber { get; private set; } = null!;
     public string Nickname { get; set; } = string.Empty;
     public string? CountryCode { get; set; }
     public UserStatus Status { get; set; } = UserStatus.Active;

@@ -26,8 +26,8 @@ public sealed record ConversationItemDto
 
 public sealed record LastMessageItemDto
 {
-    public int Id { get; init; }
-    public Guid PublicId { get; init; }
+    public int? Id { get; init; }
+    public Guid? PublicId { get; init; }
     public string? SenderActorId { get; init; }
     public string? SenderName { get; init; } 
     public MediaFile? SenderAvatar { get; init; }

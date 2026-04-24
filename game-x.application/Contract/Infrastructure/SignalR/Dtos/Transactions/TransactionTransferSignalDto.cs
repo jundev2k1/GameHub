@@ -1,6 +1,6 @@
 namespace game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 
-public class TransactionTransferSignalDto
+public sealed record TransactionTransferSignalDto
 {
     public Guid Id { get; set; }
     public string? ReceiverId { get; set; }

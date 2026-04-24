@@ -3,9 +3,9 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnClientCountTotalUnread;
-using game_x.application.Events.OnMarkMessageAsRead;
-using game_x.application.Events.OnSupportConversationUnread;
+using game_x.application.Events.Chat.OnClientCountTotalUnread;
+using game_x.application.Events.Chat.OnMarkMessageAsRead;
+using game_x.application.Events.Chat.OnSupportConversationUnread;
 
 namespace game_x.application.Features.Chat.Commands.MarkMessageAsRead;
 

@@ -12,7 +12,7 @@ public class UserConfig : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(50)
             .HasDefaultValue(string.Empty);
-
+        
         builder.Property(u => u.IsDeleted)
             .IsRequired()
             .HasDefaultValue(false);
@@ -30,6 +30,12 @@ public class UserConfig : IEntityTypeConfiguration<User>
         builder.Property(u => u.Notes)
             .IsRequired()
             .HasDefaultValue(string.Empty);
+        
+        builder.Property(x => x.MemberNumber)
+            .HasDefaultValueSql("'User' || nextval('user_member_seq')")
+            .ValueGeneratedOnAdd();
+        
+        builder.HasIndex(x => x.MemberNumber).IsUnique();
         
         builder.HasOne(uk => uk.Avatar)
             .WithMany()

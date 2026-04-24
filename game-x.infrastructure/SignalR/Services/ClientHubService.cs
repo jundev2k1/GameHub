@@ -41,4 +41,9 @@ public sealed class ClientHubService(ActorHubFacade<ClientHub, IClientHub> actor
     {
         await actorHub.Member(memberId).TransactionTransfer(transaction);
     }
+    
+    public async Task SendRevokeRefreshTokenAsync(string memberId)
+    {
+        await actorHub.Member(memberId).RevokeRefreshToken(memberId);
+    }
 }

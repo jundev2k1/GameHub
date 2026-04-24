@@ -5,7 +5,7 @@ using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
 using game_x.application.Contract.Infrastructure.ExternalApi.SasSlot;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnUserBalanceUpdated;
+using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Features.Games.Services;
 using game_x.application.Features.UserGameSessions.Dtos;
 using game_x.share.Extensions;

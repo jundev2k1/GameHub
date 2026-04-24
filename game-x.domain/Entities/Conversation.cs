@@ -62,6 +62,11 @@ public sealed class Conversation: BaseEntity<int>, IAuditable
         LastMessageAt = DateTime.UtcNow
     };
     
+    public void OnOpen()
+    {
+        Status = ConversationStatus.Open;
+    }
+    
     public void Claim(string agentId)
     {
         Status = ConversationStatus.Claimed;

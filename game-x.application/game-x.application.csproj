@@ -34,6 +34,12 @@
     <ProjectReference Include="..\game-x.share\game-x.share.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Events\Chat\" />
+    <Folder Include="Events\Friendship\" />
+    <Folder Include="Events\Game\" />
+    <Folder Include="Events\LiveStream\" />
+    <Folder Include="Events\System\" />
+    <Folder Include="Events\Transactions\" />
     <Folder Include="Features\Auth\Admin\Commands\" />
     <Folder Include="Features\Auth\Guest\Commands\" />
     <Folder Include="Features\Auth\Root\Commands\" />

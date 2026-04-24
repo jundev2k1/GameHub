@@ -2,8 +2,8 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Events.OnSupportConversationClaimed;
-using game_x.application.Events.OnSupportConversationUnread;
+using game_x.application.Events.Chat.OnSupportConversationClaimed;
+using game_x.application.Events.Chat.OnSupportConversationUnread;
 
 namespace game_x.application.Features.Chat.Commands.ClaimConversationById;
 

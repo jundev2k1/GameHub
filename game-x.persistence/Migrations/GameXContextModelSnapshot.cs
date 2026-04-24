@@ -3396,6 +3396,13 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("lockout_end");
 
+                    b.Property<string>("MemberNumber")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasColumnName("member_number")
+                        .HasDefaultValueSql("'User' || nextval('user_member_seq')");
+
                     b.Property<string>("Nickname")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -3461,6 +3468,10 @@ namespace game_x.persistence.Migrations
 
                     b.HasIndex("AvatarId")
                         .HasDatabaseName("ix_users_avatar_id");
+
+                    b.HasIndex("MemberNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_member_number");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");

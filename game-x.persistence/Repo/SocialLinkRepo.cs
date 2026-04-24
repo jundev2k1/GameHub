@@ -311,5 +311,18 @@ public class SocialLinkRepo(GameXContext context): ISocialLinkRepo, IRepository
         await context.SaveChangesAsync(ct);
         return link;
     }
-
+    
+    public async Task<SocialLink> GetForUpdateAsync(Guid publicId, CancellationToken ct = default)
+    {
+        var link = await context.SocialLinks
+            .FromSqlInterpolated($@"
+        SELECT *, xmin
+        FROM social_links 
+        WHERE public_id = {publicId}
+        FOR UPDATE")
+            .AsTracking()
+            .FirstOrDefaultAsync(ct);
+        
+        return link ?? throw new NotFoundException(MessageCode.Chatting.SocialLinkNotFound);
+    }
 }
