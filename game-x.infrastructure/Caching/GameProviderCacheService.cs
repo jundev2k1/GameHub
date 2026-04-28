@@ -90,7 +90,7 @@ public sealed class GameProviderCacheService(
         }
 
         var cacheKey = $"{_prefixCache}:game:list";
-        Set(cacheKey, gameList.Select(g => g.Adapt<GameInfoDto>()).ToArray());
+        Set(cacheKey, gameList.Adapt<GameInfoDto[]>());
     }
 
     public async Task<string> GetGameThumbnail(GameInfoDto game)

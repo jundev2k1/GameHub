@@ -62,4 +62,10 @@ public sealed class UserAccessor(IHttpContextAccessor httpContextAccessor) : IUs
         if (userAgent.Contains("Macintosh", StringComparison.OrdinalIgnoreCase)) return "MacOS";
         return "Other";
     }
+
+    public string GetLanguage()
+    {
+        var lang = httpContextAccessor?.HttpContext?.Request?.Headers["Language"].FirstOrDefault() ?? string.Empty;
+        return LanguageCode.IsValid(lang) ? lang : string.Empty;
+    }
 }

@@ -1,23 +1,26 @@
 ﻿using game_x.application.Common.Abstractions.Pagination;
 using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Features.Games.Dtos;
 
 namespace game_x.application.Features.Games.Client.Queries.GetGames;
 
 public sealed class GetGamesHandler(
+    IUserAccessor userAccessor,
     IGameProviderCacheService gameProviderCache) : IQueryHandler<GetGamesQuery, PaginationResult<GameItemDto>>
 {
     public async Task<PaginationResult<GameItemDto>> Handle(GetGamesQuery request, CancellationToken ct = default)
     {
+        var language = userAccessor.GetLanguage();
         var searchResult = gameProviderCache.GameList
             .OrderByDescending(g => g.Priority)
-            .Where(GetFilterCondition(request))
+            .Where(GetFilterCondition(request, language))
             .ToArray();
         var totalItems = searchResult.Length;
         var items = searchResult
             .Skip((request.PageIndex - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(MapToListItem)
+            .Select(i => MapToListItem(i, language))
             .ToArray();
         var result = new PaginationResult<GameItemDto>(
             items: await Task.WhenAll(items),
@@ -28,10 +31,10 @@ public sealed class GetGamesHandler(
         return result;
     }
 
-    private static Func<GameInfoDto, bool> GetFilterCondition(GetGamesQuery request)
+    private static Func<GameInfoDto, bool> GetFilterCondition(GetGamesQuery request, string language)
     {
-        return game =>
-            game.IsActive 
+        var searchKey = request.Keyword?.Trim();
+        return game => game.IsActive
             && ((request.Platform == null)
                 || (game.PlatformId == request.Platform))
             && ((request.Categories == null)
@@ -40,17 +43,30 @@ public sealed class GetGamesHandler(
                 || game.GameTypes.Any(t => request.GameTypes.Contains(t.Id)))
             && ((request.GameTags == null)
                 || game.GameTags.Any(t => request.GameTags.Contains(t.Id)))
-            && ((request.Keyword == null)
-                || game.Id.ToString().Equals(request.Keyword.Trim(), StringComparison.InvariantCultureIgnoreCase)
-                || game.Name.Contains(request.Keyword.Trim(), StringComparison.InvariantCultureIgnoreCase));
+            && ((searchKey == null)
+                || game.Id.ToString().Equals(searchKey, StringComparison.InvariantCultureIgnoreCase)
+                || ((game.Translations.Count == 0) || game.Translations.ContainsKey(language)
+                    ? game.Name.Contains(searchKey, StringComparison.InvariantCultureIgnoreCase)
+                    : game.Translations[language].Name.Contains(searchKey, StringComparison.InvariantCultureIgnoreCase)));
     }
 
-    private async Task<GameItemDto> MapToListItem(GameInfoDto game)
+    private async Task<GameItemDto> MapToListItem(GameInfoDto game, string lang)
     {
         if (game.Thumbnail != null)
         {
             var thumbnailUrl = await gameProviderCache.GetGameThumbnail(game);
             game.Thumbnail.Url = thumbnailUrl;
+        }
+
+        if (game.Translations.Count > 0)
+        {
+            var targetLang = game.Translations!.GetValueOrDefault(lang, null);
+            if (targetLang != null)
+            {
+                game.Name = targetLang.Name;
+                game.Description = targetLang.Description;
+                game.Note = targetLang.Notes;
+            }
         }
         var result = new GameItemDto(game);
         return result;

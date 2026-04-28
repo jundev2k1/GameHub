@@ -16,7 +16,9 @@ public interface IUserAccessor
 
     string GetIpAddress();
 
-    public string GetUserAgent();
+    string GetUserAgent();
 
-    public string GetDeviceInfo();
+    string GetDeviceInfo();
+
+    string GetLanguage();
 }

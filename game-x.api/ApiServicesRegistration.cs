@@ -1,4 +1,5 @@
-﻿using game_x.api.Middleware;
+﻿using game_x.api.Common.Filters;
+using game_x.api.Middleware;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -52,6 +53,9 @@ public static class ApiServicesRegistration
     {
         services.AddSwaggerGen(c =>
         {
+            // Add custom header
+            c.OperationFilter<SwaggerHeaderFilter>();
+
             c.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "Game-X API",

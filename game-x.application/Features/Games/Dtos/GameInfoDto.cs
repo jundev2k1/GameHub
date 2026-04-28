@@ -20,7 +20,7 @@ public class GameInfoDto
     public int Priority { get; set; } = 0;
     public bool IsActive { get; set; }
     [JsonIgnore]
-    public GameTranslationInfo[] Translations { get; set; } = [];
+    public Dictionary<string, GameTranslationInfo> Translations { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
