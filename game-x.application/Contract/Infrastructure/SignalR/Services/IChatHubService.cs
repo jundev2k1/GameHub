@@ -16,7 +16,7 @@ public interface IChatHubService
     Task SendSupportMessageV2Async(CreatedMessageSignalResult res);
     Task SendDirectMessageAsync(CreatedMessageSignalResult res, ConvMemberDto[] members);
     Task SendFriendRequestAsync(FriendRequestSignalDto dto);
-    Task SendFriendResponseAsync(FriendResponseSignalDto dto);
+    Task SendFriendResponseAsync(FriendResponseSignalDto dto, ConversationSignalDto? conv = null);
     Task SendUnfriendAsync(UnfriendSignalDto dto);
     Task SendFriendBlockedAsync(FriendBlockedSignalDto dto);
     Task SendFriendUnblockedAsync(FriendBlockedSignalDto dto);
