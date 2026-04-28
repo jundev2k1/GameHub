@@ -45,9 +45,9 @@ public sealed class GetGamesHandler(
                 || game.GameTags.Any(t => request.GameTags.Contains(t.Id)))
             && ((searchKey == null)
                 || game.Id.ToString().Equals(searchKey, StringComparison.InvariantCultureIgnoreCase)
-                || ((game.Translations.Count == 0) || game.Translations.ContainsKey(language)
+                || ((game.GameTranslations.Count == 0) || !game.GameTranslations.TryGetValue(language, out GameTranslationInfo? value)
                     ? game.Name.Contains(searchKey, StringComparison.InvariantCultureIgnoreCase)
-                    : game.Translations[language].Name.Contains(searchKey, StringComparison.InvariantCultureIgnoreCase)));
+                    : value.Name.Contains(searchKey, StringComparison.InvariantCultureIgnoreCase)));
     }
 
     private async Task<GameItemDto> MapToListItem(GameInfoDto game, string lang)
@@ -58,9 +58,9 @@ public sealed class GetGamesHandler(
             game.Thumbnail.Url = thumbnailUrl;
         }
 
-        if (game.Translations.Count > 0)
+        if (game.GameTranslations.Count > 0)
         {
-            var targetLang = game.Translations!.GetValueOrDefault(lang, null);
+            var targetLang = game.GameTranslations!.GetValueOrDefault(lang, null);
             if (targetLang != null)
             {
                 game.Name = targetLang.Name;

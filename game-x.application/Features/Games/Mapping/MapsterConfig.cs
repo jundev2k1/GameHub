@@ -50,7 +50,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
             .Map(dest => dest.PlatformName, src => src.Platform.Name)
             .Map(
-                dest => dest.Translations,
+                dest => dest.GameTranslations,
                 src => src.Translations.ToDictionary(t => t.LanguageCode.Value, t => t.Adapt<GameTranslationInfo>()));
 
         cfg.NewConfig<Game, GetGamesByCriteriaListItem>()

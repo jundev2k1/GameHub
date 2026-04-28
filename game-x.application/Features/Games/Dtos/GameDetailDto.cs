@@ -2,4 +2,5 @@
 
 public sealed class GameDetailDto : GameInfoDto
 {
+    public GameTranslationInfo[] Translations => [.. GameTranslations.Values];
 }
