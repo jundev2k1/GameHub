@@ -10,20 +10,18 @@ public sealed class LanguageCode
 
     public static LanguageCode Of(string value)
     {
-        var upper = value.ToLowerInvariant();
-        if (upper.IsNotNullOrEmpty() && !IsValid(upper))
+        if (value.IsNotNullOrEmpty() && !IsValid(value))
             throw new ArgumentException($"Language Code '{value}' is invalid.");
 
-        return new LanguageCode(upper);
+        return new LanguageCode(value);
     }
 
     public static bool IsValid(string value)
     {
         if (value.IsNullOrEmpty()) return true;
 
-        var upper = value.ToLowerInvariant();
         var isExist = typeof(domain.Constants.LanguageCodeValue).GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Any(f => f.GetValue(null)?.ToString() == upper);
+            .Any(f => f.GetValue(null)?.ToString() == value);
         return isExist;
     }
 

@@ -19,6 +19,8 @@ public class GameInfoDto
     public GameTagInfo[] GameTags { get; set; } = [];
     public int Priority { get; set; } = 0;
     public bool IsActive { get; set; }
+    [JsonIgnore]
+    public GameTranslationInfo[] Translations { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
@@ -66,4 +68,15 @@ public sealed class GameTagInfo
     public string Color { get; set; } = string.Empty;
     public bool IsPrimary { get; set; }
     public int Priority { get; set; }
+}
+
+public sealed class GameTranslationInfo
+{
+    [JsonIgnore]
+    public int LocalId { get; set; }
+    public int GameId { get; set; }
+    public string LanguageCode { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Notes { get; set; } = string.Empty;
 }

@@ -14,6 +14,7 @@ public sealed class MapsterConfig : IRegister
         RegisterGameTagMappings(cfg);
         RegisterGameTransactionMappings(cfg);
         RegisterGameRecommendMappings(cfg);
+        RegisterGameTranslationMappings(cfg);
     }
 
     private static void RegisterGameMappings(TypeAdapterConfig cfg)
@@ -47,7 +48,10 @@ public sealed class MapsterConfig : IRegister
                     .OrderBy(g => g.IsPrimary)
                     .ThenByDescending(g => g.Priority))
             .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
-            .Map(dest => dest.PlatformName, src => src.Platform.Name);
+            .Map(dest => dest.PlatformName, src => src.Platform.Name)
+            .Map(
+                dest => dest.Translations,
+                src => src.Translations);
 
         cfg.NewConfig<Game, GetGamesByCriteriaListItem>()
             .Map(dest => dest.Id, src => src.PublicId)
@@ -147,5 +151,13 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<GameRecommendItem, GameRecommendItemDto>()
             .Map(dest => dest.LocalGameId, src => src.GameId)
             .Map(dest => dest.IsGameActive, src => src.Game.IsActive);
+    }
+
+    private static void RegisterGameTranslationMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GameTranslation, GameTranslationInfo>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.GameId, src => src.GameId)
+            .Map(dest => dest.LanguageCode, src => src.LanguageCode.Value);
     }
 }

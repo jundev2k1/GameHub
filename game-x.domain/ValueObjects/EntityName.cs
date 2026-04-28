@@ -27,6 +27,7 @@ public sealed class EntityName
         nameof(TalentWallet),
         nameof(Transaction),
         nameof(Game),
+        nameof(GameTranslation),
         nameof(GameType),
         nameof(GameCategory),
         nameof(GameTag),

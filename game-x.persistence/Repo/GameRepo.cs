@@ -10,6 +10,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
     public async Task<Game[]> GetAllAsync(CancellationToken ct = default)
     {
         return await context.Games
+            .AsNoTracking()
             .AsSplitQuery()
             .Include(g => g.Platform)
             .Include(g => g.GameCategoryMappings)
@@ -19,6 +20,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .Include(g => g.GameTagMappings)
             .ThenInclude(gtm => gtm.Tag)
             .Include(g => g.Thumbnail)
+            .Include(g => g.Translations)
             .ToArrayAsync(ct);
     }
 
@@ -26,6 +28,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
     {
         return await context.Games
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(g => g.GameCategoryMappings)
             .ThenInclude(gcm => gcm.Category)
             .Include(g => g.GameTypeMappings)
@@ -93,6 +96,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
         CancellationToken ct = default)
     {
         var targetGame = await context.Games
+            .AsSplitQuery()
             .Include(g => g.GameCategoryMappings)
             .ThenInclude(gcm => gcm.Category)
             .Include(g => g.GameTypeMappings)
@@ -104,6 +108,19 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             ?? throw new NotFoundException(nameof(gameId), gameId);
 
         await updateAction.Invoke(targetGame);
+    }
+
+    public async Task UpdateGameTranslationAsync(
+        Guid gameId,
+        Action<Game> updateAction,
+        CancellationToken ct = default)
+    {
+        var targetGame = await context.Games
+            .Include(g => g.Translations)
+            .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
+            ?? throw new NotFoundException(nameof(gameId), gameId);
+
+        updateAction.Invoke(targetGame);
     }
 
     public async Task DeleteAllCategoryMappingsAsync(Guid gameId, CancellationToken ct = default)

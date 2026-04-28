@@ -25,6 +25,11 @@ public interface IGameRepo
         Func<Game, Task> updateAction,
         CancellationToken ct = default);
 
+    Task UpdateGameTranslationAsync(
+        Guid gameId,
+        Action<Game> updateAction,
+        CancellationToken ct = default);
+
     Task DeleteAllCategoryMappingsAsync(Guid gameId, CancellationToken ct = default);
 
     Task DeleteAllTypeMappingsAsync(Guid gameId, CancellationToken ct = default);

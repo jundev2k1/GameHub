@@ -3,6 +3,7 @@ using game_x.application.Common.Files;
 using game_x.application.Common.Filters;
 using game_x.application.Exceptions;
 using game_x.application.Features.Games.Admin.Commands.UpdateGame;
+using game_x.application.Features.Games.Admin.Commands.UpdateGameTranslations;
 using game_x.application.Features.Games.Admin.Queries.GetGameDetail;
 using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
 using game_x.application.Features.Games.Admin.Queries.GetGameTransactionDetail;
@@ -68,9 +69,9 @@ public sealed class GameController : BaseApiController
 
         var command = new UpdateGameCommand(
             gameId,
-            request.Name,
-            request.Description ?? string.Empty,
-            request.Note ?? string.Empty,
+            request.Name.Trim(),
+            request.Description?.Trim() ?? string.Empty,
+            request.Note?.Trim() ?? string.Empty,
             request.Priority,
             request.IsActive,
             request.Thumbnail != null ? FileUpload.FromFormFile(request.Thumbnail) : null,
@@ -78,6 +79,16 @@ public sealed class GameController : BaseApiController
             types,
             tags);
         await Mediator.Send(command);
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost("{gameId}/translations")]
+    public async Task<IActionResult> UpsertGameTranslationsAsync(
+        [FromRoute] Guid gameId,
+        [FromBody] UpdateGameTranslationsCommand command)
+    {
+        await Mediator.Send(command with { GameId = gameId });
         return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
 

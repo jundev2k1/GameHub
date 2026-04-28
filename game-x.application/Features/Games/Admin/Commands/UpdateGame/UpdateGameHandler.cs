@@ -28,9 +28,9 @@ public sealed class UpdateGameHandler(
             await gameRepo.UpdateGameAsync(request.Id, async game =>
             {
                 game.UpdateGame(
-                    name: request.Name.Trim(),
-                    desc: request.Description.Trim(),
-                    note: request.Note.Trim(),
+                    name: request.Name,
+                    desc: request.Description,
+                    note: request.Note,
                     priority: request.Priority,
                     isActive: request.IsActive);
 
