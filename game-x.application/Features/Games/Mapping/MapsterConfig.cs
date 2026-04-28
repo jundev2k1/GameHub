@@ -56,7 +56,19 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<Game, GetGamesByCriteriaListItem>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.PlatformId, src => src.Platform.PublicId)
-            .Map(dest => dest.PlatformName, src => src.Platform.Name);
+            .Map(dest => dest.PlatformName, src => src.Platform.Name)
+            .AfterMapping((src, dest) =>
+            {
+                var lang = MapContext.Current?.Parameters["language"]?.ToString();
+                if (lang is null || src.Translations.Count == 0) return;
+
+                var targetLang = src.Translations.FirstOrDefault(t => t.LanguageCode.Value == lang);
+                if (targetLang is null) return;
+
+                dest.Name = targetLang.Name;
+                dest.Description = targetLang.Description;
+                dest.Note = targetLang.Note;
+            });
     }
 
     private static void RegisterGamePlatformMappings(TypeAdapterConfig cfg)

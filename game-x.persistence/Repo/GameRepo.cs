@@ -55,6 +55,7 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gtm => gtm.Type)
             .Include(g => g.GameTagMappings)
             .ThenInclude(gtm => gtm.Tag)
+            .Include(g => g.Translations)
             .AsQueryable();
 
         if (queryBuilder != null)
