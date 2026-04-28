@@ -2,7 +2,7 @@
 
 public sealed class Game : BaseEntity<int>, IAuditable
 {
-    public Guid PublicId { get; private set; } = Guid.NewGuid();
+    public Guid PublicId { get; private set; } = Guid.CreateVersion7();
     public string GameCode { get; private set; } = string.Empty;
     public string Name { get; private set; } = string.Empty;
     public int PlatformId { get; private set; }
@@ -14,9 +14,10 @@ public sealed class Game : BaseEntity<int>, IAuditable
     public int Priority { get; private set; }
     public bool IsActive { get; private set; } = true;
 
-    public ICollection<GameCategoryMapping> GameCategoryMappings { get; private set; } = default!;
-    public ICollection<GameTypeMapping> GameTypeMappings { get; private set; } = default!;
-    public ICollection<GameTagMapping> GameTagMappings { get; private set; } = default!;
+    public ICollection<GameTranslation> Translations { get; private set; } = [];
+    public ICollection<GameCategoryMapping> GameCategoryMappings { get; private set; } = [];
+    public ICollection<GameTypeMapping> GameTypeMappings { get; private set; } = [];
+    public ICollection<GameTagMapping> GameTagMappings { get; private set; } = [];
 
     public static Game Create(string name, string gameCode, string desc, string note, int priority, int? thumbnailId = null)
     {
@@ -32,6 +33,20 @@ public sealed class Game : BaseEntity<int>, IAuditable
             Priority = priority,
             ThumbnailId = thumbnailId,
         };
+    }
+
+    public void UpsertTranslation(LanguageCode lang, string name, string description, string note)
+    {
+        var existing = Translations.FirstOrDefault(x => x.LanguageCode.Equals(lang));
+
+        if (existing is null)
+        {
+            var newTranslation = GameTranslation.Create(Id, lang, name, description, note);
+            Translations.Add(newTranslation);
+            return;
+        }
+
+        existing.Update(name, description, note);
     }
 
     public void UpdateGame(
