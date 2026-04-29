@@ -49,6 +49,7 @@ public sealed class LiveStreamGiftRepo(
     {
         return await context.LiveStreamGifts
             .AsNoTracking()
+            .AsSplitQuery()
 			.Where(lsg => lsg.IsDeleted == false && lsg.IsActive)
 			.Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
@@ -61,6 +62,7 @@ public sealed class LiveStreamGiftRepo(
     {
         return await context.LiveStreamGifts
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
             .Include(lsg => lsg.GiftPrices)
@@ -73,6 +75,7 @@ public sealed class LiveStreamGiftRepo(
     {
         var target = await context.LiveStreamGifts
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
             .Include(lsg => lsg.GiftPrices)

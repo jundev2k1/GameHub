@@ -2,7 +2,7 @@
 
 public sealed class LiveStreamDonation : BaseEntity<int>
 {
-    public Guid PublicId { get; private set; } = Guid.NewGuid();
+    public Guid PublicId { get; private set; } = Guid.CreateVersion7();
     public int LivestreamScheduleId { get; private set; }
     public LivestreamSchedule LivestreamSchedule { get; private set; } = default!;
     public string DonorId { get; private set; } = string.Empty;
@@ -18,8 +18,7 @@ public sealed class LiveStreamDonation : BaseEntity<int>
         int livestreamScheduleId,
         string donorId,
         string message,
-        decimal amount,
-        int? giftId = null)
+        decimal amount)
     {
         if (string.IsNullOrWhiteSpace(donorId))
             throw new ArgumentException("Donor id is required.", donorId);
@@ -32,8 +31,13 @@ public sealed class LiveStreamDonation : BaseEntity<int>
             DonorId = donorId,
             Message = message,
             Amount = amount,
-            GiftId = giftId,
             DonatedAt = DateTime.UtcNow
         };
+    }
+
+    public void SetGift(LiveStreamGift gift)
+    {
+        GiftId = gift.Id;
+        Gift = gift;
     }
 }

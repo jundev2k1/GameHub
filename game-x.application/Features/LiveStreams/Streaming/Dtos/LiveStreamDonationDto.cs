@@ -9,6 +9,9 @@ public sealed class LiveStreamDonationDto
     public string DonorId { get; set; } = string.Empty;
     public string DonorName { get; set; } = string.Empty;
     public Guid? GiftId { get; set; }
+    [JsonIgnore]
+    public MediaFile? Animation { get; set; }
+    public string? AnimationUrl { get; set; }
     public string? Message { get; set; }
     public decimal Amount { get; set; }
     public DateTime DonatedAt { get; set; }

@@ -62,8 +62,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Type, src => src.Type.ToString().ToCamelCase());
 
         cfg.NewConfig<TransactionTransferSignalDto, TransactionNotificationDto>()
-            .Map(dest => dest.Status, src => src.Status.ToString().ToCamelCase())
-            .Map(dest => dest.Type, src => src.Type.ToString().ToCamelCase());
+            .Map(dest => dest.Status, src => src.Status!.ToCamelCase())
+            .Map(dest => dest.Type, src => src.Type!.ToCamelCase());
 
         cfg.NewConfig<TransactionInternalDto, ClientTransactionDto>()
             .Map(dest => dest.TransactionId, src => src.Id)

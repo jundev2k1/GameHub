@@ -23,6 +23,7 @@ public sealed class OnLiveStreamDonatedHandler(
     IClientHubService clientHub,
     ILiveStreamHubService liveStreamHub,
     IAppSettingCacheService appSettingCache,
+    IFileManagerCacheService fileManagerCache,
     IApplicationEventDispatcher eventDispatcher) : IApplicationEventHandler<OnLiveStreamDonatedEvent>
 {
     public async Task Handle(OnLiveStreamDonatedEvent @event, CancellationToken ct = default)
@@ -144,11 +145,19 @@ public sealed class OnLiveStreamDonatedHandler(
             streamInfo.LocalId,
             donor.Id,
             message,
-            amount,
-            gift?.Id);
+            amount);
+
+        // Map animation image if set
+        if (gift != null) donation.SetGift(gift);
+        var donationDto = donation.Adapt<LiveStreamDonationDto>();
+        if (donationDto.Animation != null)
+        {
+            var url = await fileManagerCache.GetFileUrl(donationDto.Animation, ct);
+            donationDto.AnimationUrl = url;
+        }
 
         await liveStreamDonationRepo.CreateAsync(donation, ct);
-        this.StreamDonation = donation.Adapt<LiveStreamDonationDto>();
+        this.StreamDonation = donationDto;
         this.StreamDonation.DonorName = donor.Nickname;
         this.StreamDonation.LivestreamScheduleId = streamInfo.Id;
         this.StreamDonation.GiftId = gift?.PublicId;
