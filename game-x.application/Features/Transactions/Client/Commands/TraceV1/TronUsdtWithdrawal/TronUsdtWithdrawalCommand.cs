@@ -7,4 +7,5 @@ public record TronUsdtWithdrawalCommand(
     decimal Amount,
     Guid CryptoTokenId,
     string Code,
-    string? Note = null) : ICommand<ListTransactionInternalDto>;
+    string? Note = null,
+    PaymentGatewayProvider Provider = PaymentGatewayProvider.Uxm) : ICommand<ListTransactionInternalDto>;

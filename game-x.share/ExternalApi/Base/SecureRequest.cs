@@ -1,4 +1,4 @@
-﻿namespace game_x.share.ExternalApi.Uxm.Dtos;
+﻿namespace game_x.share.ExternalApi.Base;
 
 public sealed class SecureRequest<T>
 {

@@ -1,28 +1,23 @@
-using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.FastPay;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.Transactions.OnWithdrawalOrderReviewed;
 using game_x.application.Features.Transactions.Dtos;
-using game_x.application.Features.Transactions.Mapping;
-using game_x.share.ExternalApi.Uxm.Dtos;
-using game_x.share.Settings;
-using Microsoft.Extensions.Options;
+using game_x.share.Extensions;
 
 namespace game_x.application.Features.Transactions.Admin.Commands.AdminReviewWithdrawalOrder;
 
 public sealed class AdminReviewWithdrawalOrderHandler(
+    IFastPayService fastPayService,
     IUxmService uxmService,
     IUnitOfWork unitOfWork,
     ITransactionRepo transactionRepo,
     IApplicationEventDispatcher eventDispatcher,
     IUserBalanceRepo userBalanceRepo,
     IUserAccessor userAccessor,
-    IAppLogger<AdminReviewWithdrawalOrderHandler> logger,
-    IOptions<GameXSettings> gameXSettings,
-    IAsymmetricKeyCacheService asymmetricKeyCacheService,
-    IAsymmetricCryptoService asymmetricCryptoService) : ICommandHandler<AdminReviewWithdrawalOrderCommand, ListTransactionInternalDto>
+    IAppLogger<AdminReviewWithdrawalOrderHandler> logger) : ICommandHandler<AdminReviewWithdrawalOrderCommand, ListTransactionInternalDto>
 {
     public async Task<ListTransactionInternalDto> Handle(AdminReviewWithdrawalOrderCommand request, CancellationToken ct = default)
     {
@@ -33,6 +28,9 @@ public sealed class AdminReviewWithdrawalOrderHandler(
 
         if (!tx.Status.Equals(TransactionStatus.Pending))
             throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
+
+        if (tx.TransactionInternal is null)
+            throw new BadRequestException(MessageCode.System.InvalidResourceState);
 
         switch (request.OrderStatus)
         {
@@ -50,7 +48,9 @@ public sealed class AdminReviewWithdrawalOrderHandler(
 
         var newTx = await transactionRepo.GetInternalByIdAsync(tx.PublicId, ct);
         var txNotification = newTx.Adapt<TransactionInternalDto>();
-        await eventDispatcher.Publish(new OnWithdrawalOrderReviewedEvent(txNotification), ct);
+
+        var orderReviewedEvent = new OnWithdrawalOrderReviewedEvent(txNotification);
+        await eventDispatcher.Publish(orderReviewedEvent, ct);
 
         return newTx.Adapt<ListTransactionInternalDto>();
     }
@@ -63,7 +63,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
             await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
             {
                 tx.Review(true, userAccessor.GetUserId());
-                ex = await SendUxmWithdrawalOrderAsync(tx, ct);
+                ex = await HandleWithdrawalAsync(tx, ct);
             }, ct);
         }, ct);
 
@@ -82,28 +82,33 @@ public sealed class AdminReviewWithdrawalOrderHandler(
         }, ct);
     }
 
-    private async Task<Exception?> SendUxmWithdrawalOrderAsync(Transaction tx, CancellationToken ct)
+    private async Task<Exception?> HandleWithdrawalAsync(Transaction tx, CancellationToken ct)
     {
         try
         {
-            var gameXPrivateKey = asymmetricKeyCacheService.GameXPrivateKey;
-            var merchantNumber = gameXSettings.Value.MerchantNumber;
-
-            // Create UXM request data
-            var requestData = tx.ToUxmWithdrawalOrderRequest(merchantNumber);
-            var uxmRequest = new SecureRequest<UxmWithdrawalOrderRequest>
+            switch (tx.TransactionInternal!.ProviderId)
             {
-                Data = requestData,
-                Signature = asymmetricCryptoService.Sign(gameXPrivateKey, requestData)
-            };
-            var result = await uxmService.CreateWithdrawalOrderAsync(uxmRequest);
+                case PaymentGatewayProvider.Uxm:
+                    // Handle with UXM request
+                    await uxmService.WithdrawalAsync(
+                        tx.Amount,
+                        (tx.TransactionInternal?.OrderNumber).ToStringOrEmpty(),
+                        (tx.TransactionInternal?.ToAddress).ToStringOrEmpty(),
+                        tx.Note.ToStringOrEmpty());
+                    break;
 
-            // Verify UXM signature
-            var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
-            var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
-            if (!isValid)
-                throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
+                case PaymentGatewayProvider.FastPay:
+                    // Handle with Fast Pay request
+                    await fastPayService.WithdrawalAsync(
+                        tx.Amount,
+                        (tx.TransactionInternal?.OrderNumber).ToStringOrEmpty(),
+                        (tx.TransactionInternal?.ToAddress).ToStringOrEmpty(),
+                        tx.Note.ToStringOrEmpty());
+                    break;
 
+                default:
+                    break;
+            }
             return null;
         }
         catch (Exception ex)

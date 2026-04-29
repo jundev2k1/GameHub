@@ -1,6 +1,6 @@
-﻿namespace game_x.share.ExternalApi.Uxm.Dtos;
+﻿namespace game_x.share.ExternalApi.FastPay.Dtos.ApiRequests.Deposit;
 
-public record UxmDepositOrderRequest(
+public record FastPayDepositRequest(
     string MerchantNumber,
     decimal Amount,
     string OrderNumber,

@@ -1,30 +1,67 @@
-﻿using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
-using game_x.share.Extensions;
+using game_x.share.ExternalApi.Base;
 using game_x.share.ExternalApi.Uxm.Dtos;
+using game_x.share.ExternalApi.Uxm.Dtos.ApiRequests.Deposit;
+using game_x.share.ExternalApi.Uxm.Dtos.ApiRequests.Withdrawal;
+using game_x.share.ExternalApi.Uxm.Enums;
 using game_x.share.Helper;
 using Refit;
 
 namespace game_x.infrastructure.ExternalApi.Uxm;
 
-public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : IUxmService
+public sealed class UxmService(
+    IAppLogger<UxmService> logger,
+    IUxmApi uxmApi,
+    IAsymmetricKeyCacheService asymmetricKeyCache,
+    IAppSettingCacheService appSettingCache,
+    IAsymmetricCryptoService asymmetricCrypto) : IUxmService
 {
-    public async Task<SecureResponse<UxmWithdrawalOrderResponseData>> CreateWithdrawalOrderAsync(
-      SecureRequest<UxmWithdrawalOrderRequest> data)
+    private static readonly int[] InsufficientErrorCodes =
+    [
+        (int)UxmErrorCode.InsufficientMerchantBalance,
+        (int)UxmErrorCode.InsufficientWalletBalance
+    ];
+
+    public async Task<UxmWithdrawalResponse> WithdrawalAsync(
+        decimal amount,
+        string orderNumber,
+        string to,
+        string? remark)
     {
+        var payload = new UxmWithdrawalRequest(
+            appSettingCache.UxmMerchantNumber,
+            amount,
+            orderNumber,
+            to,
+            remark);
+        logger.LogInformation($@"
+            Send withdrawal request to UXM:
+            MerchantNumber={payload.MerchantNumber},
+            To = {payload.To},
+            Amount = {payload.Amount},
+            OrderNumber = {payload.OrderNumber}");
+
         try
         {
-            logger.LogInformation("Send withdrawal request to UXM: MerchantNumber={MerchantNumber}, To = {To}, Amount = {Amount}, OrderNumber = {OtcOrderNumber}", 
-                data.Data.MerchantNumber, 
-                data.Data.To,
-                data.Data.Amount, 
-                data.Data.OrderNumber);
-     
-            var response = await uxmApi.CreateProxyWithdrawalOrderAsync(data);
+            var request = new SecureRequest<UxmWithdrawalRequest>
+            {
+                Data = payload,
+                Signature = asymmetricCrypto.Sign(asymmetricKeyCache.GameXPrivateKey, payload)
+            };
+
+            var response = await uxmApi.WithdrawalAsync(request);
             var content = ValidateApiResponse(response);
-            logger.LogInformation("Withdrawal request successful，OrderUid: {OrderUid}", content.Data.OrderUid!);
-            return content;
+
+            // Verify UXM signature
+            var isValid = asymmetricCrypto.VerifySignature(asymmetricKeyCache.UxmPublicKey, content.Data, content.Signature);
+            if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
+
+            logger.LogInformation("Withdrawal request successful，OrderUid: {OrderUid}", content.Data.OrderUid);
+            return content.Data;
         }
         catch (Exception ex)
         {
@@ -33,21 +70,41 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
         }
     }
 
-    public async Task<SecureResponse<UxmDepositOrderResponseData>> CreateDepositOrderAsync(
-        SecureRequest<UxmDepositOrderRequest> data)
+    public async Task<UxmDepositResponse> DepositAsync(
+        decimal amount,
+        string orderNumber,
+        string userId,
+        string remark)
     {
+        var payload = new UxmDepositRequest(
+            appSettingCache.UxmMerchantNumber,
+            amount,
+            orderNumber,
+            userId,
+            remark);
+        logger.LogInformation($@"
+            Send deposit request to UXM:
+            MerchantNumber={payload.MerchantNumber},
+            UserId={payload.UserId},
+            Amount = {payload.Amount},
+            OrderNumber = {payload.OrderNumber}");
+
         try
         {
-            logger.LogInformation("Send deposit request to UXM: MerchantNumber={MerchantNumber}, UserId={UserId}, Amount = {Amount}, OrderNumber = {OtcOrderNumber}", 
-                data.Data.MerchantNumber, 
-                data.Data.UserId, 
-                data.Data.Amount, 
-                data.Data.OrderNumber);
-
-            var response = await uxmApi.CreateProxyDepositOrderAsync(data);
+            var request = new SecureRequest<UxmDepositRequest>
+            {
+                Data = payload,
+                Signature = asymmetricCrypto.Sign(asymmetricKeyCache.GameXPrivateKey, payload)
+            };
+            var response = await uxmApi.DepositAsync(request);
             var content = ValidateApiResponse(response);
+
+            // Verify UXM signature
+            var isValid = asymmetricCrypto.VerifySignature(asymmetricKeyCache.UxmPublicKey, content.Data, content.Signature);
+            if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
+
             logger.LogInformation("Deposit request successful，OrderUid: {OrderUid}", content.Data.OrderUid);
-            return content;
+            return content.Data;
         }
         catch (Exception ex)
         {
@@ -58,42 +115,33 @@ public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : 
 
     private SecureResponse<T> ValidateApiResponse<T>(ApiResponse<SecureResponse<T>> response)
     {
-        var content = response.Content;
-        if (!response.IsSuccessStatusCode || content == null)
-        {
-            var apiEx = response.Error;
-            logger.LogError(
-                apiEx ?? new Exception(),
-                "UXM failed. Status={Status}, Reason={Reason}, ErrorMessage={ErrorMessage}, ErrorContent={ErrorContent}",
-                response.StatusCode,
-                apiEx?.ReasonPhrase ?? response.ReasonPhrase ?? string.Empty,
-                apiEx?.Message ?? string.Empty,
-                apiEx?.Content ?? string.Empty);
-                
-            ValidateUxmErrors(response);
-            throw new ExternalServiceException("UXM failed");
-        }
-        return content;
+        // Check if request was successfully
+        if (response.IsSuccessStatusCode && response.Content != null)
+            return response.Content;
+
+        // Handle logging and throwing error
+        var apiEx = response.Error;
+        logger.LogError(
+            apiEx ?? new ExternalServiceException("UXM failed") as Exception,
+            "UXM failed. Status={Status}, Reason={Reason}, ErrorMessage={ErrorMessage}, ErrorContent={ErrorContent}",
+            response.StatusCode,
+            apiEx?.ReasonPhrase ?? response.ReasonPhrase ?? string.Empty,
+            apiEx?.Message ?? string.Empty,
+            apiEx?.Content ?? string.Empty);
+
+        // Wrapping and throwing UXM exception
+        throw GetUxmErrors(response);
     }
 
-    private void ValidateUxmErrors<T>(ApiResponse<SecureResponse<T>> response)
+    private static Exception GetUxmErrors<T>(ApiResponse<SecureResponse<T>> response)
     {
-        if (response.Error == null) return;
-        var errorContent = JsonHelper.ConvertJson<UxmErrorResponse>(response.Error.Content ?? "{}");
-        if(new []
-           {
-               UxmErrorCode.InsufficientMerchantBalance, 
-               UxmErrorCode.InsufficientWalletBalance
-           }.Contains((UxmErrorCode)errorContent.ErrorCode))
-            throw new BadRequestException(MessageCode.Accounting.InsufficientBalance, new {message = response.Error.Content});
-    }
-}
+        var errorContent = JsonHelper.ConvertJson<UxmErrorResponse>(response.Error?.Content ?? "{}");
 
-public sealed class UxmErrorResponse
-{
-    public string? Type { get; init; }
-    public string? Title { get; init; }
-    public int Status { get; init; }
-    public object? Errors { get; init; }
-    public int ErrorCode { get; init; }
+        // Check if this is insuficient balance error
+        if (InsufficientErrorCodes.Contains(errorContent.ErrorCode))
+            return new BadRequestException(MessageCode.Accounting.InsufficientBalance, new { message = response.Error?.Content });
+
+        // Fallback
+        return new ExternalServiceException("UXM failed");
+    }
 }

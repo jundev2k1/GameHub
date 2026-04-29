@@ -233,6 +233,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
     {
         return await context.Transactions
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(t => t.User)
                 .ThenInclude(u => u.UserBalances)
             .Include(t => t.CryptoToken)

@@ -1,13 +1,20 @@
-﻿using game_x.share.ExternalApi.Uxm.Dtos;
-
+﻿using game_x.share.ExternalApi.Base;
+using game_x.share.ExternalApi.Uxm.Dtos.ApiRequests.Deposit;
+using game_x.share.ExternalApi.Uxm.Dtos.ApiRequests.Withdrawal;
 
 namespace game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 
 public interface IUxmService
 {
-    Task<SecureResponse<UxmDepositOrderResponseData>> CreateDepositOrderAsync(
-        SecureRequest<UxmDepositOrderRequest> data);
+    Task<UxmDepositResponse> DepositAsync(
+        decimal amount,
+        string orderNumber,
+        string userId,
+        string remark);
 
-    Task<SecureResponse<UxmWithdrawalOrderResponseData>>  CreateWithdrawalOrderAsync(
-        SecureRequest<UxmWithdrawalOrderRequest> data);
+    Task<UxmWithdrawalResponse> WithdrawalAsync(
+        decimal amount,
+        string orderNumber,
+        string to,
+        string? remark);
 }

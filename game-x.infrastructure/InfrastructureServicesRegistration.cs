@@ -56,6 +56,8 @@ using System.Text.Json.Serialization;
 using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
 using game_x.infrastructure.ExternalApi.Atg;
 using game_x.infrastructure.SignalR.Facade;
+using game_x.application.Contract.Infrastructure.ExternalApi.FastPay;
+using game_x.infrastructure.ExternalApi.FastPay;
 
 namespace game_x.infrastructure;
 
@@ -100,6 +102,7 @@ public static class InfrastructureServicesRegistration
         // Add external services
         services.AddScoped<IEmailService, EngageLabEmailService>();
         services.AddScoped<IUxmService, UxmService>();
+        services.AddScoped<IFastPayService, FastPayService>();
         services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
         services.AddScoped<IGameProviderService, GameProviderService>();
         services.AddScoped<IGameBaccaratService, GameBaccaratService>();

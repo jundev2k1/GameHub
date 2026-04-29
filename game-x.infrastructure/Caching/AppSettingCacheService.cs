@@ -30,4 +30,10 @@ public sealed class AppSettingCacheService(
 
     public decimal TalentCommissionRate => decimal.Parse(
         Datasource.FirstOrDefault(i => i.Key == AppSettingConstant.KEY_TALENT_COMMISSION_RATE)?.Value ?? "0");
+
+    public string UxmMerchantNumber =>
+        Datasource.FirstOrDefault(i => i.Key == AppSettingConstant.KEY_UXM_MERCHANT_NUMBER)?.Value ?? string.Empty;
+
+    public string FastPayMerchantNumber =>
+        Datasource.FirstOrDefault(i => i.Key == AppSettingConstant.KEY_FASTPAY_MERCHANT_NUMBER)?.Value ?? string.Empty;
 }

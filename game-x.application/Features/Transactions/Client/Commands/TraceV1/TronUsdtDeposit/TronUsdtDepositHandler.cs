@@ -1,68 +1,55 @@
-﻿using game_x.application.Contract.Infrastructure.Caching;
+﻿using game_x.application.Contract.Infrastructure.ExternalApi.FastPay;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Features.Transactions.Dtos;
-using game_x.application.Features.Transactions.Mapping;
 using game_x.application.Utils;
-using game_x.share.ExternalApi.Uxm.Dtos;
-using game_x.share.Settings;
-using Microsoft.Extensions.Options;
+using game_x.share.Extensions;
 
 namespace game_x.application.Features.Transactions.Client.Commands.TraceV1.TronUsdtDeposit;
 
 public sealed class CreateDepositChainTransactionHandler(
     IUxmService uxmService,
+    IFastPayService fastPayService,
     IUnitOfWork unitOfWork,
     IUserAccessor userAccessor,
     ICryptoTokenRepo cryptoTokenRepo,
-    ITransactionRepo transactionRepo,
-    IAsymmetricCryptoService asymmetricCryptoService,
-    IAsymmetricKeyCacheService asymmetricKeyCacheService,
-    IOptions<GameXSettings> gameXSettings
-) : ICommandHandler<TronUsdtDepositCommand, DepositChainTransactionResponseDto>
+    ITransactionRepo transactionRepo) : ICommandHandler<TronUsdtDepositCommand, DepositChainTransactionResponseDto>
 {
     public async Task<DepositChainTransactionResponseDto> Handle(TronUsdtDepositCommand request, CancellationToken ct)
     {
-        await unitOfWork.BeginTransactionAsync(ct);
-        try
+        // Local variables
+        var amount = 0M;
+        var to = string.Empty;
+        var orderUid = string.Empty;
+        var txId = Guid.Empty;
+
+        // Handle depositing and updating GameX transaction
+        await unitOfWork.WithTransactionAsync(async () =>
         {
             var userId = userAccessor.GetUserId();
-            var tx = await CreateTransaction(request, userId, ct);
+            var tx = await CreateTransactionAsync(request, userId, ct);
+            txId = tx.PublicId;
 
-            var uxmRequest = CreateUxmRequest(tx);
-            var result = await uxmService.CreateDepositOrderAsync(uxmRequest);
-
-            // Verify UXM signature
-            var uxmPublicKey = asymmetricKeyCacheService.UxmPublicKey;
-            var isValid = asymmetricCryptoService.VerifySignature(uxmPublicKey, result.Data, result.Signature);
-            if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
-
+            (amount, to, orderUid) = await HandleDepositAsync(request.Provider, userId, tx);
             tx.UpdateProviderResponse(
                 null,
-                amount: result.Data.Amount,
-                providerOrderId: result.Data.OrderUid,
-                to: result.Data.To);
+                amount: amount,
+                providerOrderId: orderUid,
+                to: to);
+        }, ct);
 
-            await unitOfWork.CommitAsync(ct);
-
-            var updatedTransaction = await transactionRepo.GetInternalByIdAsync(tx.PublicId, ct);
-
-            return new DepositChainTransactionResponseDto
-            {
-                Amount = result.Data.Amount,
-                To = result.Data.To,
-                Transaction = updatedTransaction.Adapt<ListTransactionInternalDto>(),
-            };
-        }
-        catch
+        // Return new transaction state
+        var updatedTransaction = await transactionRepo.GetInternalByIdAsync(txId, ct);
+        return new DepositChainTransactionResponseDto
         {
-            await unitOfWork.RollbackAsync(ct);
-            throw;
-        }
+            Amount = amount,
+            To = to,
+            Transaction = updatedTransaction.Adapt<ListTransactionInternalDto>(),
+        };
     }
 
-    private async Task<Transaction> CreateTransaction(
+    private async Task<Transaction> CreateTransactionAsync(
         TronUsdtDepositCommand request,
         string userId,
         CancellationToken ct)
@@ -71,9 +58,9 @@ public sealed class CreateDepositChainTransactionHandler(
         if (token.Status != CryptoTokenStatus.Active)
             throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
 
-        var orderNumber = OrderNoGenerator.Otc();
         var txInternal = TransactionInternal.Create(
-            orderNumber: orderNumber,
+            orderNumber: OrderNoGenerator.Otc(),
+            providerId: request.Provider,
             sourceType: TransactionSourceType.Payment);
 
         var tx = Transaction.Create(
@@ -89,17 +76,31 @@ public sealed class CreateDepositChainTransactionHandler(
         return tx;
     }
 
-    private SecureRequest<UxmDepositOrderRequest> CreateUxmRequest(Transaction tx)
+    private async Task<(decimal Amount, string To, string OrderUid)> HandleDepositAsync(
+        PaymentGatewayProvider provider,
+        string userId,
+        Transaction transaction)
     {
-        var merchantNumber = gameXSettings.Value.MerchantNumber;
-        var gameXPrivateKey = asymmetricKeyCacheService.GameXPrivateKey;
-
-        var requestData = tx.ToUxmDepositOrderRequest(merchantNumber);
-
-        return new SecureRequest<UxmDepositOrderRequest>
+        switch (provider)
         {
-            Data = requestData,
-            Signature = asymmetricCryptoService.Sign(gameXPrivateKey, requestData)
-        };
+            case PaymentGatewayProvider.Uxm:
+                var uxmRes = await uxmService.DepositAsync(
+                    transaction.Amount,
+                    (transaction.TransactionInternal?.OrderNumber).ToStringOrEmpty(),
+                    userId,
+                    transaction.Note.ToStringOrEmpty());
+                return (uxmRes.Amount, uxmRes.To, uxmRes.OrderUid);
+
+            case PaymentGatewayProvider.FastPay:
+                var fastPayRes = await fastPayService.DepositAsync(
+                    transaction.Amount,
+                    (transaction.TransactionInternal?.OrderNumber).ToStringOrEmpty(),
+                    userId,
+                    transaction.Note.ToStringOrEmpty());
+                return (fastPayRes.Amount, fastPayRes.To, fastPayRes.OrderUid);
+
+            default:
+                throw new NotSupportedException();
+        }
     }
 }

@@ -1,6 +1,6 @@
 using game_x.share.Attributes;
 
-namespace game_x.domain.Enum;
+namespace game_x.share.ExternalApi.Uxm.Enums;
 
 public enum UxmErrorCode
 {

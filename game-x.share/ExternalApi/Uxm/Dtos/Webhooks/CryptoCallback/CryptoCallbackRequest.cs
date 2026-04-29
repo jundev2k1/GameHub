@@ -1,4 +1,4 @@
-﻿namespace game_x.share.ExternalApi.Uxm.Dtos;
+﻿namespace game_x.share.ExternalApi.Uxm.Dtos.Webhooks.CryptoCallback;
 
 public record CryptoCallbackRequest(
     string? OrderUid,

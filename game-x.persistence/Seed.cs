@@ -59,6 +59,8 @@ public static class Seed
         {
             AppSetting.Create(AppSettingConstant.KEY_CLIENT_PAGE_URL, string.Empty, string.Empty, true),
             AppSetting.Create(AppSettingConstant.KEY_TALENT_COMMISSION_RATE, "70", string.Empty, true),
+            AppSetting.Create(AppSettingConstant.KEY_UXM_MERCHANT_NUMBER, string.Empty, string.Empty, true),
+            AppSetting.Create(AppSettingConstant.KEY_FASTPAY_MERCHANT_NUMBER, string.Empty, string.Empty, true),
         };
 
         foreach (var setting in settings)
@@ -170,6 +172,12 @@ public static class Seed
                 AsymmetricType.ECDSA,
                 "----- BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEm1PhAmoUuAmQANNJFJov1Dra6kXt\r\nMM7OcxKGd0qtCZgNT375AasOYAKqxlhGZHX8ohfIF+Pa1bfbysSujYKGRw==\r\n-----END PUBLIC KEY-----",
                 "Uxm 公鑰"),
+            AsymmetricKey.Create(
+                AsymmetricKeyNames.FastPay,
+                AsymmetricKeyType.Public,
+                AsymmetricType.ECDSA,
+                "-----BEGIN PUBLIC KEY-----\r\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdWB7ib7rd4ofhNF14mzPuONY/RGX\r\nnYyH0X+tvA3CxLosHg7RXf3dA++DImP7vJMA4mGXFtuK5G4TRgCP4/wE6Q==\r\n-----END PUBLIC KEY---—",
+                "Fastpay 公鑰"),
             AsymmetricKey.Create(
                 AsymmetricKeyNames.Slot,
                 AsymmetricKeyType.Public,

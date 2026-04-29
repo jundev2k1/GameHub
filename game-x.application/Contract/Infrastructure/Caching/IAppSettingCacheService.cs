@@ -14,4 +14,7 @@ public interface IAppSettingCacheService
 
     string ClientPageUrl { get; }
     decimal TalentCommissionRate { get; }
+
+    string UxmMerchantNumber { get; }
+    string FastPayMerchantNumber { get; }
 }
