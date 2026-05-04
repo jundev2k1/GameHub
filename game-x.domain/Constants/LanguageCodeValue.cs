@@ -8,4 +8,6 @@ public static class LanguageCodeValue
     public const string Chinese = "zh-CN";
     public const string Indian = "hi-IN";
     public const string Indonesian = "id-ID";
+    public const string Japanese = "ja-JP";
+    public const string Korean = "ko-KR";
 }
