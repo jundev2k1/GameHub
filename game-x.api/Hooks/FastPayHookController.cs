@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace game_x.api.Hooks;
 
-[Route("/hooks/fastpay")]
+[Route("api/webhooks/fastpay")]
 public sealed class FastPayHookController(IAppLogger<FastPayHookController> logger) : BaseApiController
 {
     [HttpPost("deposit-success")]
