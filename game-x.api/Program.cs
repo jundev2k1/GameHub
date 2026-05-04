@@ -66,6 +66,9 @@ try
 
     var appSettingCache = serviceProvider.GetRequiredService<IAppSettingCacheService>();
     appSettingCache.RefreshCache();
+
+    var asymmetricKeyCache = serviceProvider.GetRequiredService<IAsymmetricKeyCacheService>();
+    await asymmetricKeyCache.RefreshAsync();
 }
 catch (Exception ex)
 {

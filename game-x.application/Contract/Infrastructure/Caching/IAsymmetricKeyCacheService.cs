@@ -2,7 +2,7 @@ namespace game_x.application.Contract.Infrastructure.Caching;
 
 public interface IAsymmetricKeyCacheService
 {
-    void Refresh();
+    Task RefreshAsync();
 
     string GameXPrivateKey { get; }
 

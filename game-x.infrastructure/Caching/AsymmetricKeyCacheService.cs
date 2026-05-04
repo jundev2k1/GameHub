@@ -12,11 +12,11 @@ public sealed class AsymmetricKeyCacheService(
     private const string CacheKey = "asymmetricKey:list";
     private Dictionary<string, string>? DataSource => Get<Dictionary<string, string>?>(CacheKey);
 
-    public void Refresh()
+    public async Task RefreshAsync()
     {
-        var keys = context.AsymmetricKeys
+        var keys = await context.AsymmetricKeys
             .AsNoTracking()
-            .ToDictionary(
+            .ToDictionaryAsync(
                 ak => BuildCacheKey(ak.Name, ak.KeyType, ak.Algorithm),
                 ak => ak.KeyValue);
         Set(CacheKey, keys);
@@ -31,7 +31,7 @@ public sealed class AsymmetricKeyCacheService(
     private string GetKey(string name, AsymmetricKeyType keyType, string algorithm)
     {
         if (DataSource is null)
-            Refresh();
+            return string.Empty;
 
         var key = BuildCacheKey(name, keyType, algorithm);
         if (DataSource?.TryGetValue(key, out var value) == true)
