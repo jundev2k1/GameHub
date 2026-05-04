@@ -236,6 +236,17 @@ public static class InfrastructureServicesRegistration
             })
             .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
 
+        // Fast Pay API
+        services.AddRefitClient<IFastPayApi>()
+            .ConfigureHttpClient(c =>
+            {
+                var baseUrl = configuration["FastPaySettings:Host"]
+                    ?? throw new InvalidOperationException("FastPaySettings:Host is not configured");
+                c.BaseAddress = new Uri(baseUrl);
+                c.Timeout = TimeSpan.FromSeconds(5);
+            })
+            .AddPolicyHandler((sp, _) => sp.GetRequiredService<IHttpPolicyService>().GetRetryPolicy());
+
         // Payment Gateway API
         services.AddRefitClient<IPaymentGatewayApi>()
             .ConfigureHttpClient(c =>

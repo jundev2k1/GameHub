@@ -54,6 +54,7 @@ services:
       - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
       - UxmSettings__Host=${UXM_HOST}
       - UxmSettings__TransactionExpireTimeSeconds=${UXM_TRANSACTION_EXPIRE_TIME_SECONDS}
+      - FastPaySettings__Host=${FASTPAY_HOST}
       - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
       - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}
       - GameProviderSettings__AesKey=${GAMEPROVIDER_AESKEY}
