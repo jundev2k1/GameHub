@@ -1,6 +1,8 @@
 ﻿using game_x.api.Controllers;
 using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Features.Transactions.Webhooks.FastPay.Commands.FastPayDepositSuccess;
 using game_x.share.ExternalApi.Base;
+using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.DepositSuccess;
 using System.Text.Json;
 
 namespace game_x.api.Hooks;
@@ -9,14 +11,12 @@ namespace game_x.api.Hooks;
 public sealed class FastPayHookController(IAppLogger<FastPayHookController> logger) : BaseApiController
 {
     [HttpPost("deposit-success")]
-    public async Task<IActionResult> DepositSuccessAsync([FromBody] JsonElement rawJson)
+    public async Task<IActionResult> DepositSuccessAsync([FromBody] SecureRequest<DepositSucessCallbackRequest> request, CancellationToken ct = default)
     {
         logger.LogInformation("===== FastPay web hook: Deposit Sucess =====");
 
-        string jsonString = rawJson.GetRawText();
-        logger.LogInformation(jsonString);
-
-        await Task.CompletedTask;
+        var command = new FastPayDepositSuccessCommand(request.Data, request.Signature);
+        await Mediator.Send(command, ct);
         return ApiResponseFactory.NoContent();
     }
 

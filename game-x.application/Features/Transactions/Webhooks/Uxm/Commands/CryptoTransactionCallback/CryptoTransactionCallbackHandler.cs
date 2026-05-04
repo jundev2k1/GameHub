@@ -2,15 +2,14 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Events.Transactions.OnUxmTransactionCallback;
 
-namespace game_x.application.Features.Transactions.Shared.Commands.Callback.CryptoTransactionCallback;
+namespace game_x.application.Features.Transactions.Webhooks.Uxm.Commands.CryptoTransactionCallback;
 
 public sealed class CryptoTransactionCallbackHandler(
     IAsymmetricCryptoService asymmetricCryptoService,
     IAsymmetricKeyCacheService asymmetricKeyCacheService,
-    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<CryptoTransactionCallbackCommand, Unit>
+    IApplicationEventDispatcher eventDispatcher) : ICommandHandler<CryptoTransactionCallbackCommand>
 {
-    public async Task<Unit> Handle(CryptoTransactionCallbackCommand request,
-        CancellationToken ct = default)
+    public async Task<Unit> Handle(CryptoTransactionCallbackCommand request, CancellationToken ct = default)
     {
         var (requestData, signature) = request;
 

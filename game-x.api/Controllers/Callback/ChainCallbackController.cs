@@ -1,8 +1,8 @@
-﻿using game_x.application.Features.Transactions.Shared.Commands.Callback.CryptoTransactionCallback;
-using game_x.application.Features.Transactions.Shared.Commands.Callback.PaymentGatewayCallback;
-using PaymentGatewayCallbackRequest = game_x.share.ExternalApi.PaymentGateway.Dtos.PaymentGatewayCallbackRequest;
+﻿using game_x.application.Features.Transactions.Shared.Commands.Callback.PaymentGatewayCallback;
+using game_x.application.Features.Transactions.Webhooks.Uxm.Commands.CryptoTransactionCallback;
 using game_x.share.ExternalApi.Base;
 using game_x.share.ExternalApi.Uxm.Dtos.Webhooks.CryptoCallback;
+using PaymentGatewayCallbackRequest = game_x.share.ExternalApi.PaymentGateway.Dtos.PaymentGatewayCallbackRequest;
 
 namespace game_x.api.Controllers.Callback;
 
