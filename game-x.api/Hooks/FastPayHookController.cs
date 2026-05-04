@@ -11,7 +11,17 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
     [HttpPost("deposit-success")]
     public async Task<IActionResult> DepositSuccessAsync(SecureRequest<string> command)
     {
-        logger.LogInformation("===== FastPay web hook =====");
+        logger.LogInformation("===== FastPay web hook: Deposit Sucess =====");
+        logger.LogInformation(JsonSerializer.Serialize(command));
+
+        await Task.CompletedTask;
+        return ApiResponseFactory.NoContent();
+    }
+
+    [HttpPost("deposit-failed")]
+    public async Task<IActionResult> DepositFailedAsync(SecureRequest<string> command)
+    {
+        logger.LogInformation("===== FastPay web hook: Deposit Failed =====");
         logger.LogInformation(JsonSerializer.Serialize(command));
 
         await Task.CompletedTask;
