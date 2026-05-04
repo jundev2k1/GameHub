@@ -9,20 +9,24 @@ namespace game_x.api.Hooks;
 public sealed class FastPayHookController(IAppLogger<FastPayHookController> logger) : BaseApiController
 {
     [HttpPost("deposit-success")]
-    public async Task<IActionResult> DepositSuccessAsync(SecureRequest<string> command)
+    public async Task<IActionResult> DepositSuccessAsync([FromBody] JsonElement rawJson)
     {
         logger.LogInformation("===== FastPay web hook: Deposit Sucess =====");
-        logger.LogInformation(JsonSerializer.Serialize(command));
+
+        string jsonString = rawJson.GetRawText();
+        logger.LogInformation(jsonString);
 
         await Task.CompletedTask;
         return ApiResponseFactory.NoContent();
     }
 
     [HttpPost("deposit-failed")]
-    public async Task<IActionResult> DepositFailedAsync(SecureRequest<string> command)
+    public async Task<IActionResult> DepositFailedAsync([FromBody] JsonElement rawJson)
     {
         logger.LogInformation("===== FastPay web hook: Deposit Failed =====");
-        logger.LogInformation(JsonSerializer.Serialize(command));
+
+        string jsonString = rawJson.GetRawText();
+        logger.LogInformation(jsonString);
 
         await Task.CompletedTask;
         return ApiResponseFactory.NoContent();
