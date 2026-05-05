@@ -40,14 +40,16 @@ public sealed class CryptoTokenRepo(GameXContext context) : ICryptoTokenRepo, IR
 
     public async Task<CryptoToken> GetByIdAsync(Guid cryptoTokenId, CancellationToken ct = default)
     {
-        return await context.CryptoTokens.AsNoTracking()
+        return await context.CryptoTokens
+            .AsNoTracking()
             .FirstOrDefaultAsync(t => t.PublicId == cryptoTokenId, ct)
                ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
     }
 
     public async Task<CryptoToken?> GetBySymbolAsync(string symbol, CancellationToken ct = default)
     {
-        return await context.CryptoTokens.AsNoTracking()
+        return await context.CryptoTokens
+            .AsNoTracking()
             .FirstOrDefaultAsync(t => t.Symbol == symbol, ct);
     }
 }

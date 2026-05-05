@@ -19,6 +19,7 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
     public async Task<UserBalance?> GetByUserIdAndTokenIdAsync(string userId, int cryptoTokenId, CancellationToken ct = default)
     {
         return await context.UserBalances
+            .AsNoTracking()
             .Include(x => x.CryptoToken)
             .FirstOrDefaultAsync(x => x.UserId == userId && x.CryptoTokenId == cryptoTokenId, ct);
     }
@@ -26,6 +27,7 @@ public sealed class UserBalanceRepo(GameXContext context) : IUserBalanceRepo, IR
     public async Task<UserBalance> GetByUserIdAndTokenIdAsync(string userId, Guid cryptoTokenId, CancellationToken ct = default)
     {
         return await context.UserBalances
+            .AsNoTracking()
             .Include(x => x.CryptoToken)
             .FirstOrDefaultAsync(x => x.UserId == userId && x.CryptoToken.PublicId == cryptoTokenId, ct)
             ?? throw new NotFoundException(nameof(cryptoTokenId), cryptoTokenId);
