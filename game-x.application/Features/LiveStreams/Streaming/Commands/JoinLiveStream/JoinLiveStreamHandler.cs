@@ -50,7 +50,7 @@ public sealed class JoinLiveStreamHandler(
         // Check if the stream is live
         var isInterrupted = !streamInfo.IsLive
             && streamInfo.OfflineAt.HasValue
-            && (DateTime.UtcNow - streamInfo.OfflineAt.Value).TotalMinutes < 8;
+            && (DateTime.UtcNow - streamInfo.OfflineAt.Value).TotalMinutes > 8;
         if (isInterrupted)
             throw new ForbiddenException(
                 MessageCode.System.Forbidden,
