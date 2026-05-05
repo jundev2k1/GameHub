@@ -33,17 +33,19 @@ public sealed class OnLiveStreamDonatedHandler(
         {
             await CreateTransactionAsync(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
             await CreateDonationAsync(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
-            await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift);
-            await CreateNotificationForDonor(@event.UserId, this.StreamDonation!, ct);
-            await CreateNotificationForStreamer(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
+            await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
+            await CreateNotificationForDonorAsync(@event.UserId, this.StreamDonation!, ct);
+            await CreateNotificationForStreamerAsync(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
 
             // Decrease user balance
-            await userBalanceRepo.UpdateAsync(@event.UserBalanceId, ub => { ub.AdjustAmount(@event.Amount, false); }, ct);
+            await userBalanceRepo.UpdateAsync(@event.UserBalanceId, ub =>
+            {
+                ub.AdjustAmount(@event.Amount, false);
+            }, ct);
 
+            // Increase talent balance
             decimal commissionRate = appSettingCache.TalentCommissionRate;
             decimal talentAmount = (@event.Amount / 100) * commissionRate;
-            decimal systemAmount = (@event.Amount / 100) * (100 - commissionRate);
-            // Increase talent balance
             await talentWalletRepo.UpdateAsync(@event.StreamInfo.AssignedTo!.Id, talentWallet =>
             {
                 var balanceAfter = talentWallet.Balance + talentAmount;
@@ -57,7 +59,9 @@ public sealed class OnLiveStreamDonatedHandler(
                     this.StreamDonation!.Id);
                 talentWallet.AddTransaction(tx);
             }, ct);
+
             // Increase system balance
+            decimal systemAmount = (@event.Amount / 100) * (100 - commissionRate);
             await systemWalletRepo.UpdateAsync(SystemWalletType.LiveStreamDonation, wallet =>
             {
                 var newBalance = wallet.Balance + systemAmount;
@@ -131,6 +135,7 @@ public sealed class OnLiveStreamDonatedHandler(
         transaction.Confirm(amount, balanceAfter);
 
         await transactionRepo.AddAsync(transaction, ct);
+        await unitOfWork.SaveChangesAsync(ct);
     }
 
     private async Task CreateDonationAsync(
@@ -157,6 +162,7 @@ public sealed class OnLiveStreamDonatedHandler(
         }
 
         await liveStreamDonationRepo.CreateAsync(donation, ct);
+        await unitOfWork.SaveChangesAsync(ct);
         this.StreamDonation = donationDto;
         this.StreamDonation.DonorName = donor.Nickname;
         this.StreamDonation.LivestreamScheduleId = streamInfo.Id;
@@ -168,7 +174,8 @@ public sealed class OnLiveStreamDonatedHandler(
         decimal amount,
         User donor,
         string message,
-        LiveStreamGift? gift = null)
+        LiveStreamGift? gift = null,
+        CancellationToken ct = default)
     {
         string? giftSnapshot = null;
         if (gift != null)
@@ -181,14 +188,15 @@ public sealed class OnLiveStreamDonatedHandler(
         }
 
         var chatMessage = LiveStreamChatMessage.Create(
-            Guid.NewGuid(),
+            Guid.CreateVersion7(),
             streamInfo.LocalId,
             donor.Id,
             message.Trim(),
             LiveStreamChatMessageType.Donation,
             amount,
             giftSnapshot);
-        await liveStreamChatRepo.CreateAsync(chatMessage);
+        await liveStreamChatRepo.CreateAsync(chatMessage, ct);
+        await unitOfWork.SaveChangesAsync(ct);
 
         this.ChatMessage = new LiveStreamChatMessageDto()
         {
@@ -207,7 +215,7 @@ public sealed class OnLiveStreamDonatedHandler(
         };
     }
 
-    private async Task CreateNotificationForDonor(
+    private async Task CreateNotificationForDonorAsync(
         string userId,
         LiveStreamDonationDto donationDto,
         CancellationToken ct = default)
@@ -222,7 +230,7 @@ public sealed class OnLiveStreamDonatedHandler(
         this.DonorNotification = notification.Adapt<NotificationDto>();
     }
 
-    private async Task CreateNotificationForStreamer(
+    private async Task CreateNotificationForStreamerAsync(
         string streamerId,
         LiveStreamDonationDto donationDto,
         CancellationToken ct = default)
@@ -234,6 +242,8 @@ public sealed class OnLiveStreamDonatedHandler(
             NotificationSeverity.Info,
             JsonSerializer.Serialize(donationDto));
         await notificationRepo.AddNotificationAsync(notification, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+
         this.TalentNotification = notification.Adapt<NotificationDto>();
     }
 
