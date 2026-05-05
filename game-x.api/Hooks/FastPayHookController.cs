@@ -13,7 +13,7 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
     [HttpPost("deposit-success")]
     public async Task<IActionResult> DepositSuccessAsync([FromBody] SecureRequest<DepositSucessCallbackRequest> request, CancellationToken ct = default)
     {
-        logger.LogInformation("===== FastPay web hook: Deposit Sucess =====");
+        logger.LogInformation("===== FastPay web hook: Deposit Success =====");
 
         var command = new FastPayDepositSuccessCommand(request.Data, request.Signature);
         await Mediator.Send(command, ct);
@@ -28,6 +28,27 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
         string jsonString = rawJson.GetRawText();
         logger.LogInformation(jsonString);
 
+        await Task.CompletedTask;
+        return ApiResponseFactory.NoContent();
+    }
+
+    [HttpPost("withdraw-success")]
+    public async Task<IActionResult> WithdrawalSuccessAsync([FromBody] SecureRequest<DepositSucessCallbackRequest> request, CancellationToken ct = default)
+    {
+        logger.LogInformation("===== FastPay web hook: Withdrawal Success =====");
+
+        var command = new FastPayDepositSuccessCommand(request.Data, request.Signature);
+        await Mediator.Send(command, ct);
+        return ApiResponseFactory.NoContent();
+    }
+
+    [HttpPost("withdraw-failed")]
+    public async Task<IActionResult> WithdrawalFailedAsync([FromBody] JsonElement rawJson, CancellationToken ct = default)
+    {
+        logger.LogInformation("===== FastPay web hook: Withdrawal Failed =====");
+
+        string jsonString = rawJson.GetRawText();
+        logger.LogInformation(jsonString);
         await Task.CompletedTask;
         return ApiResponseFactory.NoContent();
     }
