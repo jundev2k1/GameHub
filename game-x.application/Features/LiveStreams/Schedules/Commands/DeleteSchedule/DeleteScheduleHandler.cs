@@ -1,10 +1,12 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
 
 namespace game_x.application.Features.LiveStreams.Schedules.Commands.DeleteSchedule;
 
 public sealed class DeleteScheduleHandler(
     IUnitOfWork unitOfWork,
-    ILiveStreamRepo liveStreamRepo) : ICommandHandler<DeleteScheduleCommand>
+    ILiveStreamRepo liveStreamRepo,
+    ILiveStreamManagerCacheService liveStreamManagerCache) : ICommandHandler<DeleteScheduleCommand>
 {
     public async Task<Unit> Handle(DeleteScheduleCommand request, CancellationToken ct = default)
     {
@@ -17,6 +19,9 @@ public sealed class DeleteScheduleHandler(
 
         await liveStreamRepo.DeleteAsync(request.Id, ct);
         await unitOfWork.SaveChangesAsync(ct);
+
+        // Remove target live stream from cache
+        liveStreamManagerCache.RemoveLiveStream(targetSetting.StreamKey);
 
         return Unit.Value;
     }
