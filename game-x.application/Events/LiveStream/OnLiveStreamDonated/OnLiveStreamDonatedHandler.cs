@@ -31,8 +31,8 @@ public sealed class OnLiveStreamDonatedHandler(
         var donorInfo = await userRepo.GetUserByIdAsync(@event.UserId, ct);
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await CreateTransaction(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
-            await CreateDonation(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
+            await CreateTransactionAsync(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
+            await CreateDonationAsync(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
             await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift);
             await CreateNotificationForDonor(@event.UserId, this.StreamDonation!, ct);
             await CreateNotificationForStreamer(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
@@ -104,7 +104,7 @@ public sealed class OnLiveStreamDonatedHandler(
         }
     }
 
-    private async Task CreateTransaction(
+    private async Task CreateTransactionAsync(
         decimal amount,
         string userId,
         decimal feeAmount,
@@ -133,7 +133,7 @@ public sealed class OnLiveStreamDonatedHandler(
         await transactionRepo.AddAsync(transaction, ct);
     }
 
-    private async Task CreateDonation(
+    private async Task CreateDonationAsync(
         LiveStreamStatusDto streamInfo,
         decimal amount,
         User donor,

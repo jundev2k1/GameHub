@@ -75,6 +75,8 @@ public sealed class TalentWalletRepo(GameXContext dbContext) : ITalentWalletRepo
     public async Task UpdateAsync(string userId, Action<TalentWallet> updateAction, CancellationToken ct = default)
     {
         var target = await dbContext.TalentWallets
+            .AsSplitQuery()
+            .Include(tw => tw.Transactions)
             .FirstOrDefaultAsync(tw => tw.Id == userId, ct)
             ?? throw new NotFoundException(nameof(userId), userId);
 

@@ -51,7 +51,9 @@ public sealed class SystemWalletRepo(GameXContext dbContext) : ISystemWalletRepo
 
     public async Task UpdateAsync(SystemWalletType type, Action<SystemWallet> updateAction, CancellationToken ct = default)
     {
-        var targetWallet = await dbContext.SystemWallets.FirstOrDefaultAsync(sw => sw.Type == type, ct)
+        var targetWallet = await dbContext.SystemWallets
+            .Include(sw => sw.Transactions)
+            .FirstOrDefaultAsync(sw => sw.Type == type, ct)
             ?? throw new NotFoundException(nameof(type), type.ToString());
 
         updateAction.Invoke(targetWallet);
