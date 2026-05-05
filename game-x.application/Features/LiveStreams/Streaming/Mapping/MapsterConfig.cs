@@ -18,6 +18,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.DonorId, src => src.DonorId)
             .Map(dest => dest.DonorName, src => src.Donor.Nickname)
             .Map(dest => dest.GiftId, src => src.Gift != null ? src.Gift.PublicId : (Guid?)null)
-            .Map(dest => dest.Animation, src => src.Gift != null ? src.Gift.Animation : null);
+            .Map(dest => dest.Animation, src => src.Gift != null ? src.Gift.Animation : null)
+            .Map(dest => dest.AnimationDuration, src => src.Gift != null ? src.Gift.AnimationDuration : null);
     }
 }

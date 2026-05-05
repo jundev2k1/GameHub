@@ -12,6 +12,7 @@ public sealed class LiveStreamDonationDto
     [JsonIgnore]
     public MediaFile? Animation { get; set; }
     public string? AnimationUrl { get; set; }
+    public int? AnimationDuration { get; set; }
     public string? Message { get; set; }
     public decimal Amount { get; set; }
     public DateTime DonatedAt { get; set; }
