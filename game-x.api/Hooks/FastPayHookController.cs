@@ -2,7 +2,7 @@
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Features.Transactions.Webhooks.FastPay.Commands.FastPayDepositSuccess;
 using game_x.share.ExternalApi.Base;
-using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.DepositSuccess;
+using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.TransactionCompleted;
 using System.Text.Json;
 
 namespace game_x.api.Hooks;
@@ -11,7 +11,7 @@ namespace game_x.api.Hooks;
 public sealed class FastPayHookController(IAppLogger<FastPayHookController> logger) : BaseApiController
 {
     [HttpPost("deposit-success")]
-    public async Task<IActionResult> DepositSuccessAsync([FromBody] SecureRequest<DepositSucessCallbackRequest> request, CancellationToken ct = default)
+    public async Task<IActionResult> DepositSuccessAsync([FromBody] SecureRequest<TransactionCompletedRequest> request, CancellationToken ct = default)
     {
         logger.LogInformation("===== FastPay web hook: Deposit Success =====");
 
@@ -33,7 +33,7 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
     }
 
     [HttpPost("withdraw-success")]
-    public async Task<IActionResult> WithdrawalSuccessAsync([FromBody] SecureRequest<DepositSucessCallbackRequest> request, CancellationToken ct = default)
+    public async Task<IActionResult> WithdrawalSuccessAsync([FromBody] SecureRequest<TransactionCompletedRequest> request, CancellationToken ct = default)
     {
         logger.LogInformation("===== FastPay web hook: Withdrawal Success =====");
 
