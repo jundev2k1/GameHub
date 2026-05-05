@@ -10,6 +10,7 @@ public record JoinLiveStreamResult(
     string? Thumbnail,
     string StreamKey,
     DateTime LiveAt,
+    bool IsLive,
     string TalentId,
     string TalentName,
     string? TalentAvatar,

@@ -72,6 +72,7 @@ public sealed class JoinLiveStreamHandler(
             Thumbnail: streamInfo.Thumbnail,
             StreamKey: streamInfo.StreamKey,
             LiveAt: streamInfo.LiveAt ?? DateTime.UtcNow,
+            IsLive: streamInfo.IsLive,
             TalentId: streamInfo.AssignedTo?.Id ?? string.Empty,
             TalentName: streamInfo.AssignedTo?.Nickname ?? string.Empty,
             TalentAvatar: await fileManagerCache.GetFileUrl(streamInfo.AssignedTo?.AvatarId, ct),
