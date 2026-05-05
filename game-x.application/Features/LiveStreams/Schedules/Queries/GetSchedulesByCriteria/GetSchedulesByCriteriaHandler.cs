@@ -28,28 +28,26 @@ public sealed class GetSchedulesByCriteriaHandler(
             request.PageIndex,
             request.PageSize,
             ct);
-        Task<(Guid Id, string? Thumbnail, string? AssignedAvatar)>[] avatarTasks = [.. searchResult.Items.Select(async item =>
-        {
-            // Get thumbnail
-            string? thumbnail = null;
-            if (item.Thumbnail != null)
-            {
-                var thumbnailInfo = await fileManagerCache.GetFileInfo(item.Thumbnail);
-                thumbnail = thumbnailInfo?.Url;
-            }
-
-            // Get assigned talent avatar
-            string? avatar = null;
-            if (item.AssignedTo != null && item.AssignedTo.Avatar != null)
-            {
-                var avatarInfo = await fileManagerCache.GetFileInfo(item.AssignedTo.Avatar);
-                avatar = avatarInfo?.Url;
-            }
-
-            return (item.PublicId, thumbnail, avatar);
-        })];
+        var avatarTasks = searchResult.Items
+            .Select(async item => await GetImageUrlAsync(item, ct))
+            .ToArray();
         var avatars = await Task.WhenAll(avatarTasks);
         var result = searchResult.ToSearchResult(avatars);
         return result;
+    }
+
+    private async Task<(Guid Id, string? Thumbnail, string? AssignedAvatar)> GetImageUrlAsync(LivestreamSchedule schedule, CancellationToken ct)
+    {
+        // Get thumbnail
+        string? thumbnail = null;
+        if (schedule.Thumbnail != null)
+            thumbnail = await fileManagerCache.GetFileUrl(schedule.Thumbnail, ct);
+
+        // Get assigned talent avatar
+        string? avatar = null;
+        if (schedule.AssignedTo != null && schedule.AssignedTo.Avatar != null)
+            avatar = await fileManagerCache.GetFileUrl(schedule.AssignedTo.Avatar, ct);
+
+        return (schedule.PublicId, thumbnail, avatar);
     }
 }

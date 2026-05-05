@@ -15,6 +15,7 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
     {
         var query = context.LiveStreamSchedules
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(ls => ls.CategoryMappings)
             .ThenInclude(lsm => lsm.Category)
             .Include(ls => ls.Thumbnail)
@@ -45,9 +46,11 @@ public sealed class LiveStreamRepo(GameXContext context) : ILiveStreamRepo, IRep
         LiveStreamStatus[] activeStatus = [LiveStreamStatus.Scheduled, LiveStreamStatus.Live];
         return await context.LiveStreamSchedules
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(ls => ls.CategoryMappings)
             .Include(ls => ls.Thumbnail)
             .Include(ls => ls.AssignedTo)
+            .ThenInclude(u => u != null ? u.Avatar : null)
             .Where(ls => activeStatus.Contains(ls.Status) && ls.AssignedId != null)
             .ToArrayAsync(ct);
     }

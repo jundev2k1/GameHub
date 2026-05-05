@@ -2,7 +2,7 @@
 
 public sealed class LivestreamSchedule : BaseEntity<int>, IAuditable
 {
-    public Guid PublicId { get; private set; } = Guid.NewGuid();
+    public Guid PublicId { get; private set; } = Guid.CreateVersion7();
     public string Title { get; private set; } = string.Empty;
     public int? ThumbnailId { get; private set; }
     public MediaFile? Thumbnail { get; private set; }
