@@ -173,13 +173,14 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
                 GamePlatformId = tx.TransactionExternal != null ? tx.TransactionExternal.GamePlatform.PublicId : null,
                 GamePlatformName = tx.TransactionExternal != null ? tx.TransactionExternal.GamePlatform.Name : null,
                 SourceType = tx.TransactionInternal != null ? tx.TransactionInternal.SourceType : null,
+                Provider = tx.TransactionInternal != null ? tx.TransactionInternal.ProviderId : null,
                 WalletSourceType = tx.TransactionInternal != null ? WalletSourceType.Internal : WalletSourceType.External,
                 From = tx.TransactionInternal != null 
                     ? tx.TransactionInternal.SourceType == TransactionSourceType.Payment
                         ? tx.TransactionInternal.FromAddress
                         : tx.Type == TransactionType.TransferSent
-                         ? tx.User.Nickname
-                         : tx.TransactionInternal.Reference != null ? tx.TransactionInternal.Reference.User.Nickname : null
+                            ? tx.User.Nickname
+                            : tx.TransactionInternal.Reference != null ? tx.TransactionInternal.Reference.User.Nickname : null
                     : null,
                 To = tx.TransactionInternal != null 
                     ? tx.TransactionInternal.SourceType == TransactionSourceType.Payment

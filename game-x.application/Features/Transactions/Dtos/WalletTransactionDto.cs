@@ -22,6 +22,7 @@ public sealed class WalletTransactionDto
     public NetworkType Network { get; set; }
     public TransactionType Type { get; set; }
     public TransactionSourceType? SourceType { get; set; }
+    public PaymentGatewayProvider? Provider { get; set; }
     public WalletSourceType WalletSourceType { get; set; }
     public TransactionStatus Status { get; set; }
     public string? From { get; set; }
