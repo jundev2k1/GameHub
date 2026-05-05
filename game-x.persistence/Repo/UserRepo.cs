@@ -26,6 +26,8 @@ public sealed class UserRepo(
     public async Task<User> GetUserByIdAsync(string userId, CancellationToken ct = default)
     {
         var targetUser = await context.Users
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(u => u.UserKyc)
             .Include(u => u.UserBankAccounts)
             .ThenInclude(ba => ba.FiatCurrency)
