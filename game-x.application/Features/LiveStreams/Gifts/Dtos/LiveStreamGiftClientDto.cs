@@ -12,6 +12,7 @@ public class LiveStreamGiftClientDto
     [JsonIgnore]
     public int? AnimationId { get; set; } = default!;
     public string? AnimationUrl { get; set; }
+    public int? AnimationDuration { get; set; }
 	public int Priority { get; set; }
 	public LiveStreamGiftPriceClientDto[] GiftPrices { get; set; } = [];
 }

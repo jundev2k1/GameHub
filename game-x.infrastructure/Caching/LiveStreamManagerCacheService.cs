@@ -409,9 +409,7 @@ public sealed class LiveStreamManagerCacheService(
     public async Task RefreshGiftCacheAsync(CancellationToken ct = default)
     {
         var gifts = await liveStreamGiftRepo.GetAllActivesAsync(ct);
-        var giftDtos = gifts
-            .Select(g => g.Adapt<LiveStreamGiftClientDto>())
-            .ToArray();
+        var giftDtos = gifts.Adapt<LiveStreamGiftClientDto[]>();
         var cacheKey = $"{LiveStreamPrefix}gifts:active";
         Set(cacheKey, giftDtos);
     }

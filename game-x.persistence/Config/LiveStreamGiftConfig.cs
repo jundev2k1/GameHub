@@ -44,6 +44,9 @@ public sealed class LiveStreamGiftConfig : IEntityTypeConfiguration<LiveStreamGi
         builder.Property(g => g.AnimationId)
             .IsRequired(false);
 
+        builder.Property(g => g.AnimationDuration)
+            .IsRequired(false);
+
         builder.HasOne(g => g.Icon)
             .WithMany()
             .HasForeignKey(g => g.IconId)

@@ -18,7 +18,7 @@ public sealed class UpdateLiveStreamGiftAnimationHandler(
         // Validate and update thumbnail
         await liveStreamGiftRepo.UpdateAsync(request.Id, async gift =>
         {
-            await UploadNewAnimation(gift, request.FileUpload, ct);
+            await UploadNewAnimation(gift, request.FileUpload, request.Duration, ct);
             await unitOfWork.SaveChangesAsync(ct);
         }, ct);
 
@@ -31,8 +31,15 @@ public sealed class UpdateLiveStreamGiftAnimationHandler(
         return new UpdateLiveStreamGiftAnimationResult(animation!.FileName, animation.Url);
     }
 
-    private async Task UploadNewAnimation(LiveStreamGift gift, FileUpload file, CancellationToken ct = default)
+    private async Task UploadNewAnimation(LiveStreamGift gift, FileUpload? file, int duration, CancellationToken ct = default)
     {
+        // Only update duration if file is not provided
+        if (file is null)
+        {
+            gift.UpdateAnimationDuration(duration);
+            return;
+        }
+
         // Remove old thumbnail
         if (gift.AnimationId.HasValue)
             await mediaFileRepo.RemoveAsync(gift.AnimationId.Value, ct);
@@ -45,7 +52,7 @@ public sealed class UpdateLiveStreamGiftAnimationHandler(
             file.FileName,
             MimeType.Of(file.ContentType),
             (int)file.Length);
-        gift.UpdateAnimation(newFile);
+        gift.UpdateAnimation(newFile, duration);
 
         // Upload to MinIO
         await storageService.UploadFileAsync(

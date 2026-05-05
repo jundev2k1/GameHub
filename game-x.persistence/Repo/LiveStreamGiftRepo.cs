@@ -50,8 +50,8 @@ public sealed class LiveStreamGiftRepo(
         return await context.LiveStreamGifts
             .AsNoTracking()
             .AsSplitQuery()
-			.Where(lsg => lsg.IsDeleted == false && lsg.IsActive)
-			.Include(lsg => lsg.Icon)
+            .Where(lsg => lsg.IsDeleted == false && lsg.IsActive)
+            .Include(lsg => lsg.Icon)
             .Include(lsg => lsg.Animation)
             .Include(lsg => lsg.GiftPrices)
             .ThenInclude(gp => gp.CryptoToken)

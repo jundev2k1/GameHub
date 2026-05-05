@@ -11,16 +11,18 @@ public sealed class UpdateLiveStreamGiftAnimationValidator : AbstractValidator<U
 
         RuleFor(x => x.FileUpload)
             .NotNull().WithMessage("Animation file is required.")
-            .Must(BeAValidIcon).WithMessage("Invalid animation file. Allowed types are JPEG, PNG, WEBP and max size is 10MB.");
+            .Must(BeAValidIcon).WithMessage("Invalid animation file. Allowed types are JPEG, PNG, WEBP and max size is 10MB.")
+            .When(x => x.FileUpload != null);
     }
 
-    private bool BeAValidIcon(FileUpload fileUpload)
+    private bool BeAValidIcon(FileUpload? fileUpload)
     {
+        if (fileUpload is null) return true;
+
         var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/gif" };
         const long maxFileSize = 10 * 1024 * 1024; // 10 MB
 
-        return fileUpload != null
-            && allowedTypes.Contains(fileUpload.ContentType)
+        return allowedTypes.Contains(fileUpload.ContentType)
             && fileUpload.Length <= maxFileSize;
     }
 }
