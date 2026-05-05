@@ -11,4 +11,6 @@ public interface ICryptoTokenRepo
     Task<CryptoToken[]> GetByIdsAsync(Guid[] ids, CancellationToken ct = default);
 
     Task<CryptoToken> GetByIdAsync(Guid cryptoTokenId, CancellationToken ct = default);
+
+    Task<CryptoToken> GetByIdWithTrackingAsync(int cryptoTokenId, CancellationToken ct = default);
 }

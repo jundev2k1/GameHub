@@ -20,6 +20,7 @@ public sealed class OnLiveStreamDonatedHandler(
     ILiveStreamChatRepo liveStreamChatRepo,
     ILiveStreamDonationRepo liveStreamDonationRepo,
     ILiveStreamManagerCacheService liveStreamManager,
+    ICryptoTokenRepo cryptoTokenRepo,
     IClientHubService clientHub,
     ILiveStreamHubService liveStreamHub,
     IAppSettingCacheService appSettingCache,
@@ -115,6 +116,7 @@ public sealed class OnLiveStreamDonatedHandler(
         int tokenId,
         CancellationToken ct = default)
     {
+        var token = await cryptoTokenRepo.GetByIdWithTrackingAsync(tokenId, ct);
         var transaction = Transaction.Create(
             type: TransactionType.TransferSent,
             userId: userId,
@@ -122,6 +124,8 @@ public sealed class OnLiveStreamDonatedHandler(
             fee: feeAmount,
             cryptoTokenId: tokenId,
             note: "Livestream donations.");
+        transaction.UpdateCryptoToken(token);
+
         var orderNumber = OrderNoGenerator.Otc();
         var lastedBalanceAfter = await transactionRepo.GetLatestBalanceAfterAsync(transaction.UserId, ct);
         var transactionInternal = TransactionInternal.Create(

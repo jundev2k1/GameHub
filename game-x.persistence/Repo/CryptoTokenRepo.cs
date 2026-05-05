@@ -52,4 +52,12 @@ public sealed class CryptoTokenRepo(GameXContext context) : ICryptoTokenRepo, IR
             .AsNoTracking()
             .FirstOrDefaultAsync(t => t.Symbol == symbol, ct);
     }
+
+    public async Task<CryptoToken> GetByIdWithTrackingAsync(int cryptoTokenId, CancellationToken ct = default)
+    {
+        return await context.CryptoTokens
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == cryptoTokenId, ct)
+               ?? throw new BadRequestException(MessageCode.Crypto.CryptoTokenNotFound);
+    }
 }
