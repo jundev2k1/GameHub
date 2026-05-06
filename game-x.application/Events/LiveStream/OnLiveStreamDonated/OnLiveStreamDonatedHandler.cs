@@ -1,18 +1,15 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.application.Utils;
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace game_x.application.Events.LiveStream.OnLiveStreamDonated;
 
 public sealed class OnLiveStreamDonatedHandler(
-    IAppLogger<OnLiveStreamDonatedHandler> logger,
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IUserBalanceRepo userBalanceRepo,
@@ -23,7 +20,6 @@ public sealed class OnLiveStreamDonatedHandler(
     ILiveStreamChatRepo liveStreamChatRepo,
     ILiveStreamDonationRepo liveStreamDonationRepo,
     ILiveStreamManagerCacheService liveStreamManager,
-    ICryptoTokenRepo cryptoTokenRepo,
     IClientHubService clientHub,
     ILiveStreamHubService liveStreamHub,
     IAppSettingCacheService appSettingCache,
@@ -32,11 +28,8 @@ public sealed class OnLiveStreamDonatedHandler(
 {
     public async Task Handle(OnLiveStreamDonatedEvent @event, CancellationToken ct = default)
     {
-        logger.LogInformation($"Donation event: {JsonSerializer.Serialize(@event)}");
         var donorInfo = await userRepo.GetUserByIdAsync(@event.UserId, ct);
-        logger.LogInformation($"Donor: {JsonSerializer.Serialize(donorInfo)}");
 
-        unitOfWork.ClearChangeTracking();
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await CreateTransactionAsync(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
@@ -124,8 +117,6 @@ public sealed class OnLiveStreamDonatedHandler(
         int tokenId,
         CancellationToken ct = default)
     {
-        var token = await cryptoTokenRepo.GetByIdWithTrackingAsync(tokenId, ct);
-        logger.LogInformation($"Target token: {JsonSerializer.Serialize(token)}");
         var transaction = Transaction.Create(
             type: TransactionType.TransferSent,
             userId: userId,
@@ -133,7 +124,6 @@ public sealed class OnLiveStreamDonatedHandler(
             fee: feeAmount,
             cryptoTokenId: tokenId,
             note: "Livestream donations.");
-        transaction.UpdateCryptoToken(token);
 
         var orderNumber = OrderNoGenerator.Otc();
         var lastedBalanceAfter = await transactionRepo.GetLatestBalanceAfterAsync(transaction.UserId, ct);
@@ -147,10 +137,7 @@ public sealed class OnLiveStreamDonatedHandler(
         var balanceAfter = lastedBalanceAfter - amount;
         transaction.Confirm(amount, balanceAfter);
 
-        logger.LogInformation($"New Transaction: {JsonSerializer.Serialize(transaction)}");
-
         await transactionRepo.AddAsync(transaction, ct);
-        await unitOfWork.SaveChangesAsync(ct);
     }
 
     private async Task CreateDonationAsync(
@@ -168,7 +155,7 @@ public sealed class OnLiveStreamDonatedHandler(
             amount);
 
         // Map animation image if set
-        if (gift != null) donation.SetGift(gift);
+        if (gift != null) donation.SetGift(gift.Id);
         var donationDto = donation.Adapt<LiveStreamDonationDto>();
         if (donationDto.Animation != null)
         {
@@ -176,11 +163,7 @@ public sealed class OnLiveStreamDonatedHandler(
             donationDto.AnimationUrl = url;
         }
 
-        logger.LogInformation($"Donation entity: {JsonSerializer.Serialize(donation)}");
-        logger.LogInformation($"Donation DTO: {JsonSerializer.Serialize(donationDto)}");
-
         await liveStreamDonationRepo.CreateAsync(donation, ct);
-        await unitOfWork.SaveChangesAsync(ct);
         this.StreamDonation = donationDto;
         this.StreamDonation.DonorName = donor.Nickname;
         this.StreamDonation.LivestreamScheduleId = streamInfo.Id;

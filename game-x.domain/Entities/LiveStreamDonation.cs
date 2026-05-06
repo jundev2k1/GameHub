@@ -35,9 +35,8 @@ public sealed class LiveStreamDonation : BaseEntity<int>
         };
     }
 
-    public void SetGift(LiveStreamGift gift)
+    public void SetGift(int giftId)
     {
-        GiftId = gift.Id;
-        Gift = gift;
+        GiftId = giftId;
     }
 }

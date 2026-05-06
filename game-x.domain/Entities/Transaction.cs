@@ -76,12 +76,6 @@ public class Transaction : BaseEntity<int>, IAuditable
         set => Meta = JsonSerializer.Serialize(value, JsonOptions.NoEscape);
     }
 
-    public void UpdateCryptoToken(CryptoToken token)
-    {
-        CryptoToken = token;
-        CryptoTokenId = token.Id;
-    }
-
     public void UpdateMeta(Action<TransactionMeta> updater)
     {
         var meta = MetaObject;
