@@ -155,12 +155,12 @@ public sealed class OnLiveStreamDonatedHandler(
             amount);
 
         // Map animation image if set
-        if (gift != null) donation.SetGift(gift.Id);
         var donationDto = donation.Adapt<LiveStreamDonationDto>();
-        if (donationDto.Animation != null)
+        if (gift != null)
         {
-            var url = await fileManagerCache.GetFileUrl(donationDto.Animation, ct);
-            donationDto.AnimationUrl = url;
+            donation.SetGift(gift.Id);
+            donationDto.AnimationUrl = await fileManagerCache.GetFileUrl(donationDto.Animation, ct);
+            donationDto.AnimationDuration = gift.AnimationDuration;
         }
 
         await liveStreamDonationRepo.CreateAsync(donation, ct);
