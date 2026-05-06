@@ -159,7 +159,7 @@ public sealed class OnLiveStreamDonatedHandler(
         if (gift != null)
         {
             donation.SetGift(gift.Id);
-            donationDto.AnimationUrl = await fileManagerCache.GetFileUrl(donationDto.Animation, ct);
+            donationDto.AnimationUrl = await fileManagerCache.GetFileUrl(donation.Gift?.Animation, ct);
             donationDto.AnimationDuration = gift.AnimationDuration;
         }
 
