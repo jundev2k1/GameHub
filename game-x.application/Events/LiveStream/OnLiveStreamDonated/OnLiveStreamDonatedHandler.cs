@@ -1,15 +1,18 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Features.LiveStreams.Streaming.Dtos;
 using game_x.application.Utils;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace game_x.application.Events.LiveStream.OnLiveStreamDonated;
 
 public sealed class OnLiveStreamDonatedHandler(
+    IAppLogger<OnLiveStreamDonatedHandler> logger,
     IUnitOfWork unitOfWork,
     IUserRepo userRepo,
     IUserBalanceRepo userBalanceRepo,
@@ -29,7 +32,9 @@ public sealed class OnLiveStreamDonatedHandler(
 {
     public async Task Handle(OnLiveStreamDonatedEvent @event, CancellationToken ct = default)
     {
+        logger.LogInformation($"Donation event: {JsonSerializer.Serialize(@event)}");
         var donorInfo = await userRepo.GetUserByIdAsync(@event.UserId, ct);
+        logger.LogInformation($"Donor: {JsonSerializer.Serialize(donorInfo)}");
 
         unitOfWork.ClearChangeTracking();
         await unitOfWork.WithTransactionAsync(async () =>
@@ -120,6 +125,7 @@ public sealed class OnLiveStreamDonatedHandler(
         CancellationToken ct = default)
     {
         var token = await cryptoTokenRepo.GetByIdWithTrackingAsync(tokenId, ct);
+        logger.LogInformation($"Target token: {JsonSerializer.Serialize(token)}");
         var transaction = Transaction.Create(
             type: TransactionType.TransferSent,
             userId: userId,
@@ -140,6 +146,8 @@ public sealed class OnLiveStreamDonatedHandler(
 
         var balanceAfter = lastedBalanceAfter - amount;
         transaction.Confirm(amount, balanceAfter);
+
+        logger.LogInformation($"New Transaction: {JsonSerializer.Serialize(transaction)}");
 
         await transactionRepo.AddAsync(transaction, ct);
         await unitOfWork.SaveChangesAsync(ct);
@@ -167,6 +175,9 @@ public sealed class OnLiveStreamDonatedHandler(
             var url = await fileManagerCache.GetFileUrl(donationDto.Animation, ct);
             donationDto.AnimationUrl = url;
         }
+
+        logger.LogInformation($"Donation entity: {JsonSerializer.Serialize(donation)}");
+        logger.LogInformation($"Donation DTO: {JsonSerializer.Serialize(donationDto)}");
 
         await liveStreamDonationRepo.CreateAsync(donation, ct);
         await unitOfWork.SaveChangesAsync(ct);
