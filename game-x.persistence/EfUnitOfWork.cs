@@ -62,6 +62,11 @@ public sealed class EfUnitOfWork(GameXContext dbContext) : IUnitOfWork
         }
     }
 
+    public void ClearChangeTracking()
+    {
+        dbContext.ChangeTracker.Clear();
+    }
+
     public void SetIsDisableTimeStamps(bool isDisable = false)
     {
         dbContext.IsDisableTimestamps = isDisable;

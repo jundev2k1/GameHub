@@ -12,5 +12,7 @@ public interface IUnitOfWork
 
     Task WithTransactionAsync(Func<Task> action, CancellationToken ct = default);
 
+    void ClearChangeTracking();
+
     void SetIsDisableTimeStamps(bool isDisable = false);
 }

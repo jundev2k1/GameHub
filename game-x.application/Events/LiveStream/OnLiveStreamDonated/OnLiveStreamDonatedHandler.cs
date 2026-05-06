@@ -30,6 +30,8 @@ public sealed class OnLiveStreamDonatedHandler(
     public async Task Handle(OnLiveStreamDonatedEvent @event, CancellationToken ct = default)
     {
         var donorInfo = await userRepo.GetUserByIdAsync(@event.UserId, ct);
+
+        unitOfWork.ClearChangeTracking();
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await CreateTransactionAsync(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
@@ -37,6 +39,7 @@ public sealed class OnLiveStreamDonatedHandler(
             await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
             await CreateNotificationForDonorAsync(@event.UserId, this.StreamDonation!, ct);
             await CreateNotificationForStreamerAsync(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
+            await unitOfWork.SaveChangesAsync(ct);
 
             // Decrease user balance
             await userBalanceRepo.UpdateAsync(@event.UserBalanceId, ub =>
@@ -246,7 +249,6 @@ public sealed class OnLiveStreamDonatedHandler(
             NotificationSeverity.Info,
             JsonSerializer.Serialize(donationDto));
         await notificationRepo.AddNotificationAsync(notification, ct);
-        await unitOfWork.SaveChangesAsync(ct);
 
         this.TalentNotification = notification.Adapt<NotificationDto>();
     }
