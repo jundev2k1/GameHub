@@ -23,6 +23,18 @@ public sealed class UserRepo(
         return [.. result];
     }
 
+    public async Task<User> GetUserByIdWithTrackingAsync(string userId, CancellationToken ct = default)
+    {
+        var targetUser = await context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+
+        var (isActive, errorCode) = targetUser.CheckValidUser();
+        if (!isActive) throw new BadRequestException(errorCode!);
+
+        return targetUser;
+    }
+
     public async Task<User> GetUserByIdAsync(string userId, CancellationToken ct = default)
     {
         var targetUser = await context.Users
