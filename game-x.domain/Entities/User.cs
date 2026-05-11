@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Text.RegularExpressions;
+using game_x.domain.Entities.Missions;
 
 namespace game_x.domain.Entities;
 
@@ -28,6 +29,12 @@ public class User : IdentityUser, IEntity, IAuditable
     public ICollection<SocialLink> ReceivedRequests { get; set; } = [];
     public ICollection<SocialLink> BlocksByMe { get; set; } = [];
     public ICollection<SocialLink> BlocksToMe { get; set; } = [];
+    public ICollection<UserEvent> UserEvents { get; set; } = [];
+    public ICollection<UserMission> UserMissions { get; set; } = [];
+    public ICollection<Inventory> Inventories { get; set; } = [];
+    public ICollection<ShareLink> ShareLinks { get; set; } = [];
+    public ICollection<UserReward> UserRewards { get; set; } = [];
+    public ICollection<Execution> Executions { get; set; } = [];
 
     public static User Create(
         string userName,

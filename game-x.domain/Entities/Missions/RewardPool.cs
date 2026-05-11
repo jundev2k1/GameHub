@@ -1,0 +1,77 @@
+using System.ComponentModel.DataAnnotations;
+using game_x.domain.Enum.Missions;
+using game_x.domain.ValueObjects.Missions;
+
+namespace game_x.domain.Entities.Missions;
+
+/// <summary>
+/// Reward engine configuration. Defines playable reward systems.
+/// Why needed: reusable configurable reward engine.
+/// </summary>
+public sealed class RewardPool : BaseEntity<int>, IAuditable
+{
+    #region Identities
+    public Guid PublicId { get; private set; } = Guid.CreateVersion7();
+    
+    /// <summary>Example: MAIN_ROULETTE, SUMMER_EVENT_2026, VIP_GACHA, NEW_USER_WHEEL.</summary>
+    [MaxLength(128)]
+    public string Code { get; private set; } = string.Empty;
+    #endregion
+    
+    #region Properties
+    public RewardPoolType Type { get; private set; } = RewardPoolType.Roulette;
+      
+    [MaxLength(2048)]
+    public string Title { get; private set; } = string.Empty;
+    
+    [MaxLength(4096)]
+    public string? Description { get; private set; }
+    
+    public bool IsActive { get; private set; } = true;
+    
+    public RewardPoolConfigData? Config { get; private set; }
+    
+    public DateTime? DeletedAt { get; private set; }
+    
+    public DateTime? StartAt { get; init; }
+    
+    public DateTime? EndAt { get; init; }
+    #endregion
+    
+    #region Relationships
+    public ICollection<RewardItem> RewardItems { get; private set; } = [];
+    
+    public ICollection<Mission> Missions { get; private set; } = [];
+    
+    public ICollection<Execution> Executions { get; private set; } = [];
+    #endregion
+
+    #region Initializations
+    private RewardPool() { }
+
+    public static RewardPool Create(
+        RewardPoolType type,
+        string code,
+        string title,
+        string? description = null,
+        RewardPoolConfigData? config = null)
+    {
+        return new()
+        {
+            Type = type,
+            Code = code,
+            Title = title,
+            Description = description,
+            Config = config
+        };
+    }
+    #endregion
+
+    #region Behaviors
+    public void Activate() => IsActive = true;
+
+    public void Deactivate() => IsActive = false;
+
+    public void SoftDelete() => DeletedAt = DateTime.UtcNow;
+    #endregion
+}

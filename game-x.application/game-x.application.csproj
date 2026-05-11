@@ -42,5 +42,6 @@
     <Folder Include="Features\Auth\Admin\Commands\" />
     <Folder Include="Features\Auth\Guest\Commands\" />
     <Folder Include="Features\Auth\Root\Commands\" />
+    <Folder Include="Features\Missions\" />
   </ItemGroup>
 </Project>

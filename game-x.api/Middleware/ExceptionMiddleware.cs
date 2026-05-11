@@ -154,7 +154,7 @@ public sealed class ExceptionMiddleware(RequestDelegate next, IAppLogger<Excepti
                 MessageCode.System.SystemError,
                 MessageCode.System.SystemError.ToMessage()!,
                 JsonSerializer.Serialize(ex.StackTrace),
-                null
+                new { ex.Message }
             )
         };
     }

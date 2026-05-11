@@ -8,4 +8,5 @@ public enum TransactionType
     TransferSent = 3,
     TransferReceived = 4,
     BalanceAdjustment = 5,
+    Reward = 6
 }
