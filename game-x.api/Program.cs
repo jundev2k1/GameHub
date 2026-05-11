@@ -7,6 +7,7 @@ using game_x.domain.Entities;
 using game_x.infrastructure;
 using game_x.infrastructure.BackgroundJobs.Scheduling;
 using game_x.persistence;
+using game_x.persistence.Seeds;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -47,8 +48,9 @@ try
 
     var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
     var asymmetricCryptoService = serviceProvider.GetRequiredService<IAsymmetricCryptoService>();
-    await Seed.SeedData(asymmetricCryptoService, userManager, context);
 
+    await SeedRunner.RunAsync(context, userManager, asymmetricCryptoService);
+    
     var gameProviderCache = serviceProvider.GetRequiredService<IGameProviderCacheService>();
     await gameProviderCache.RefreshGamePlatformList();
     await gameProviderCache.RefreshGameCategoryList();
