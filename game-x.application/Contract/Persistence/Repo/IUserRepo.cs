@@ -10,6 +10,8 @@ public interface IUserRepo
 
     Task<User> GetUserByIdAsync(string userId, CancellationToken ct = default);
 
+    Task<User> GetUserByIdWithTrackingAsync(string userId, CancellationToken ct = default);
+
     Task<User> GetUserByEmailAsync(string email, CancellationToken ct = default);
 
     Task<User[]> GetAdminUsers(CancellationToken ct = default);

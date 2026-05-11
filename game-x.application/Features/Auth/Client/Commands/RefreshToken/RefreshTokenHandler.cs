@@ -22,7 +22,7 @@ public sealed class RefreshTokenHandler(
         var isValid = IsValidToken(tokenInfo, currentRefreshToken);
         if (!isValid) throw new BadRequestException(MessageCode.System.InvalidOrMissingToken);
 
-        var (accessToken, refreshToken) = await CreateToken(currentRefreshToken);
+        var (accessToken, refreshToken) = await CreateTokenAsync(currentRefreshToken);
         return new RefreshTokenResult(accessToken, refreshToken);
     }
 
@@ -47,9 +47,9 @@ public sealed class RefreshTokenHandler(
         return true;
     }
 
-    private async Task<(string AccessToken, string RefreshToken)> CreateToken(RefreshTokenDto oldRefreshToken)
+    private async Task<(string AccessToken, string RefreshToken)> CreateTokenAsync(RefreshTokenDto oldRefreshToken)
     {
-        var targetUser = await userRepo.GetUserByIdAsync(oldRefreshToken.UserId);
+        var targetUser = await userRepo.GetUserByIdWithTrackingAsync(oldRefreshToken.UserId);
         var newAccessToken = await tokenGenerator.GenerateToken(targetUser);
         var newRefreshToken = tokenService.GenerateRefreshToken(targetUser.Id);
 
