@@ -1,8 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Events.Transactions.OnUxmTransactionCallback;
-using System.Text.Json;
+using game_x.application.Events.Transactions.OnConfirmTransaction;
 
 namespace game_x.application.Features.Transactions.Webhooks.FastPay.Commands.FastPayDepositSuccess;
 
@@ -22,7 +20,7 @@ public sealed class FastPayDepositSuccessHandler(
             signature);
         if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
 
-        var @event = new OnUxmTransactionCallbackEvent(
+        var @event = new OnConfirmTransactionEvent(
             ProviderOrderId: requestData.OrderUid,
             Hash: requestData.Hash,
             OrderNumber: requestData.OrderNumber,

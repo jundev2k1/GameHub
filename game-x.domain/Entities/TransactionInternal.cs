@@ -82,6 +82,14 @@ public class TransactionInternal : BaseEntity<int>
         ToAddress = to ?? ToAddress;
         ConfirmedAt = confirmedAt ?? ConfirmedAt;
     }
+
+    public void UpdateFailedInfo(
+        string? orderUid,
+        string? orderNumber)
+    {
+        OrderUid = orderUid;
+        OrderNumber = orderNumber;
+    }
     
     public void UpdateReferenceId(int referenceId) {
         ReferenceId = referenceId;

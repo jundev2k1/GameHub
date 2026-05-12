@@ -1,5 +1,3 @@
-using game_x.share.ExternalApi.FastPay.Enums;
-
 namespace game_x.share.ExternalApi.FastPay.Dtos.Webhooks.TransactionCompleted;
 
 public record TransactionCompletedRequest(

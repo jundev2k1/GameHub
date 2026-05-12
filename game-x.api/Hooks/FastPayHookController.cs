@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Features.Transactions.Webhooks.FastPay.Commands.FastPayDepositSuccess;
 using game_x.share.ExternalApi.Base;
 using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.TransactionCompleted;
+using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.TransactionFailed;
 using System.Text.Json;
 
 namespace game_x.api.Hooks;
@@ -43,12 +44,11 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
     }
 
     [HttpPost("withdraw-failed")]
-    public async Task<IActionResult> WithdrawalFailedAsync([FromBody] JsonElement rawJson, CancellationToken ct = default)
+    public async Task<IActionResult> WithdrawalFailedAsync([FromBody] SecureRequest<TransactionFailedRequest> request, CancellationToken ct = default)
     {
         logger.LogInformation("===== FastPay web hook: Withdrawal Failed =====");
 
-        string jsonString = rawJson.GetRawText();
-        logger.LogInformation(jsonString);
+        logger.LogInformation(JsonSerializer.Serialize(request));
         await Task.CompletedTask;
         return ApiResponseFactory.NoContent();
     }
