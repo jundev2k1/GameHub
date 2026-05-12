@@ -1,6 +1,7 @@
 ﻿using game_x.api.Controllers;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Features.Transactions.Webhooks.FastPay.Commands.FastPayDepositSuccess;
+using game_x.application.Features.Transactions.Webhooks.FastPay.Commands.FastPayWithdrawalFailed;
 using game_x.share.ExternalApi.Base;
 using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.TransactionCompleted;
 using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.TransactionFailed;
@@ -49,7 +50,9 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
         logger.LogInformation("===== FastPay web hook: Withdrawal Failed =====");
 
         logger.LogInformation(JsonSerializer.Serialize(request));
-        await Task.CompletedTask;
+
+        var command = new FastPayWithdrawalFailedCommand(request.Data, request.Signature);
+        await Mediator.Send(command, ct);
         return ApiResponseFactory.NoContent();
     }
 }
