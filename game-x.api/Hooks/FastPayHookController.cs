@@ -23,12 +23,14 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
     }
 
     [HttpPost("deposit-failed")]
-    public async Task<IActionResult> DepositFailedAsync([FromBody] JsonElement rawJson)
+    public async Task<IActionResult> DepositFailedAsync([FromBody] SecureRequest<TransactionFailedRequest> request, CancellationToken ct = default)
     {
         logger.LogInformation("===== FastPay web hook: Deposit Failed =====");
 
-        string jsonString = rawJson.GetRawText();
-        logger.LogInformation(jsonString);
+        logger.LogInformation(JsonSerializer.Serialize(request));
+
+        var command = new FastPayWithdrawalFailedCommand(request.Data, request.Signature);
+        await Mediator.Send(command, ct);
 
         await Task.CompletedTask;
         return ApiResponseFactory.NoContent();
