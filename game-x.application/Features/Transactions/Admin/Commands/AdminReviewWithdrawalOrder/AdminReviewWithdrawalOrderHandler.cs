@@ -1,6 +1,5 @@
 using game_x.application.Contract.Infrastructure.ExternalApi.FastPay;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
-using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Events.Transactions.OnWithdrawalOrderReviewed;
@@ -16,8 +15,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
     ITransactionRepo transactionRepo,
     IApplicationEventDispatcher eventDispatcher,
     IUserBalanceRepo userBalanceRepo,
-    IUserAccessor userAccessor,
-    IAppLogger<AdminReviewWithdrawalOrderHandler> logger) : ICommandHandler<AdminReviewWithdrawalOrderCommand, ListTransactionInternalDto>
+    IUserAccessor userAccessor) : ICommandHandler<AdminReviewWithdrawalOrderCommand, ListTransactionInternalDto>
 {
     public async Task<ListTransactionInternalDto> Handle(AdminReviewWithdrawalOrderCommand request, CancellationToken ct = default)
     {
@@ -46,6 +44,7 @@ public sealed class AdminReviewWithdrawalOrderHandler(
                 throw new BadRequestException(MessageCode.System.InvalidParameters);
         }
 
+        // Retrieve target transaction with the latest information
         var newTx = await transactionRepo.GetInternalByIdAsync(tx.PublicId, ct);
         var txNotification = newTx.Adapt<TransactionInternalDto>();
 
@@ -57,83 +56,61 @@ public sealed class AdminReviewWithdrawalOrderHandler(
 
     private async Task HandleApproveTransactionAsync(Transaction transaction, CancellationToken ct)
     {
-        Exception? ex = null;
         await unitOfWork.WithTransactionAsync(async () =>
         {
             await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
             {
+                // Mark the transaction as approved
                 tx.Review(true, userAccessor.GetUserId());
-                ex = await HandleWithdrawalAsync(tx, ct);
+
+                // Handling withdrawals from external systems
+                await HandleWithdrawalAsync(tx, ct);
             }, ct);
         }, ct);
-
-        if (ex != null) throw ex;
     }
 
     private async Task HandleRejectTransactionAsync(Transaction transaction, CancellationToken ct)
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await transactionRepo.UpdateAsync(transaction.PublicId, tx =>
+            await transactionRepo.UpdateAsync(transaction.PublicId, async tx =>
             {
+                // Mark as rejected
                 tx.Review(false, userAccessor.GetUserId());
-            }, ct);
-            await TryRefundFrozenBalanceAsync(transaction, ct);
-        }, ct);
-    }
 
-    private async Task<Exception?> HandleWithdrawalAsync(Transaction tx, CancellationToken ct)
-    {
-        try
-        {
-            switch (tx.TransactionInternal!.ProviderId)
-            {
-                case PaymentGatewayProvider.Uxm:
-                    // Handle with UXM request
-                    await uxmService.WithdrawalAsync(
-                        tx.Amount,
-                        (tx.TransactionInternal?.OrderNumber).ToStringOrEmpty(),
-                        (tx.TransactionInternal?.ToAddress).ToStringOrEmpty(),
-                        tx.Note.ToStringOrEmpty());
-                    break;
-
-                case PaymentGatewayProvider.FastPay:
-                    // Handle with Fast Pay request
-                    await fastPayService.WithdrawalAsync(
-                        tx.Amount,
-                        (tx.TransactionInternal?.OrderNumber).ToStringOrEmpty(),
-                        (tx.TransactionInternal?.ToAddress).ToStringOrEmpty(),
-                        tx.Note.ToStringOrEmpty());
-                    break;
-
-                default:
-                    break;
-            }
-            return null;
-        }
-        catch (Exception ex)
-        {
-            await unitOfWork.WithTransactionAsync(async () =>
-            {
-                await transactionRepo.UpdateAsync(tx.PublicId, transaction =>
+                // Handle unlock the amount of transaction
+                await userBalanceRepo.UpdateByTokenIdAsync(tx.UserId, tx.CryptoTokenId, balance =>
                 {
-                    transaction.UpdateStatus(TransactionStatus.Failed);
-                    transaction.UpdateMeta(m => m.ErrorMessage = ex.Message);
+                    balance.Unfreeze(tx.TotalAmount);
                 }, ct);
-                await TryRefundFrozenBalanceAsync(tx, ct);
             }, ct);
-
-            logger.LogError(ex, ex.Message);
-            return ex;
-        }
+        }, ct);
     }
 
-    private async Task TryRefundFrozenBalanceAsync(Transaction tx, CancellationToken ct)
+    private async Task HandleWithdrawalAsync(Transaction tx, CancellationToken ct)
     {
-        await userBalanceRepo.UpdateByTokenIdAsync(tx.UserId, tx.CryptoTokenId, balance =>
+        switch (tx.TransactionInternal!.ProviderId)
         {
-            var refundAmount = tx.TotalAmount;
-            balance.Unfreeze(refundAmount);
-        }, ct);
+            case PaymentGatewayProvider.Uxm:
+                // Handle with UXM request
+                await uxmService.WithdrawalAsync(
+                    tx.Amount,
+                    (tx.TransactionInternal?.OrderNumber).ToStringOrEmpty(),
+                    (tx.TransactionInternal?.ToAddress).ToStringOrEmpty(),
+                    tx.Note.ToStringOrEmpty());
+                break;
+
+            case PaymentGatewayProvider.FastPay:
+                // Handle with Fast Pay request
+                await fastPayService.WithdrawalAsync(
+                    tx.Amount,
+                    (tx.TransactionInternal?.OrderNumber).ToStringOrEmpty(),
+                    (tx.TransactionInternal?.ToAddress).ToStringOrEmpty(),
+                    tx.Note.ToStringOrEmpty());
+                break;
+
+            default:
+                break;
+        }
     }
 }
