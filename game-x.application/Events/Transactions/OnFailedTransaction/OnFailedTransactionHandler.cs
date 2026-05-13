@@ -29,12 +29,16 @@ public sealed class OnFailedTransactionHandler(
                     MessageCode.Transaction.TradeNotFound,
                     $"Transaction with order number '{@event.OrderNumber}' not found.");
 
+            logger.LogInformation(JsonSerializer.Serialize(transaction));
+
             // Anti-spam request if the Transaction has already been updated
             if (transaction.Status is TransactionStatus.Completed or TransactionStatus.Failed)
                 throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
 
             var balance = transaction.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId)
                 ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+
+            logger.LogInformation(JsonSerializer.Serialize(balance));
 
             var userId = transaction.UserId;
             NotificationDto? notification = null;
@@ -45,6 +49,7 @@ public sealed class OnFailedTransactionHandler(
                     case TransactionType.Withdrawal:
                         balance.AdjustAmount(@event.Amount, true);
                         balance.FinalizeFrozen(@event.Amount);
+                        logger.LogInformation("After updating: " + JsonSerializer.Serialize(balance));
                         break;
 
                     default:
@@ -61,6 +66,7 @@ public sealed class OnFailedTransactionHandler(
                         @event.FailureCode,
                         @event.FailureMessage,
                         @event.FailedAt);
+                    logger.LogInformation("Transaction updating: " + JsonSerializer.Serialize(order));
                 }, ct);
                 // Ensure the audit log records the order status updated by the external API
                 using (AuditSourceContext.Use(AuditSource.External))
@@ -69,10 +75,12 @@ public sealed class OnFailedTransactionHandler(
                 }
                 var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
                 notification = await SendNotificationAsync(newTx.Adapt<TransactionInternalDto>(), ct);
+                logger.LogInformation("Notification: " + JsonSerializer.Serialize(notification));
             }, ct);
 
             var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
             var transactionInternal = newTx.Adapt<TransactionInternalDto>();
+            logger.LogInformation("Transaction after updating: " + JsonSerializer.Serialize(transactionInternal));
             await SendToMember(transactionInternal, notification!);
             await SendToAdmin(transactionInternal);
 
