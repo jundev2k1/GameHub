@@ -184,7 +184,7 @@ public class Transaction : BaseEntity<int>, IAuditable
         string failedAt)
     {
         var failedAtResult = DateTime.TryParse(failedAt, out var result)
-            ? result
+            ? DateTime.SpecifyKind(result, DateTimeKind.Utc)
             : DateTime.UtcNow;
 
         Status = TransactionStatus.Failed;

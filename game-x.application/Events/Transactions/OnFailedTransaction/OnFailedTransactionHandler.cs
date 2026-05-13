@@ -24,32 +24,27 @@ public sealed class OnFailedTransactionHandler(
     {
         try
         {
-            var transaction = await transactionRepo.GetByOrderNumberAsync(@event.OrderNumber ?? string.Empty, ct)
+            var targetTransaction = await transactionRepo.GetByOrderNumberAsync(@event.OrderNumber ?? string.Empty, ct)
                 ?? throw new NotFoundException(
                     MessageCode.Transaction.TradeNotFound,
                     $"Transaction with order number '{@event.OrderNumber}' not found.");
 
-            logger.LogInformation(JsonSerializer.Serialize(transaction));
-
             // Anti-spam request if the Transaction has already been updated
-            if (transaction.Status is TransactionStatus.Completed or TransactionStatus.Failed)
+            if (targetTransaction.Status is TransactionStatus.Completed or TransactionStatus.Failed)
                 throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
 
-            var balance = transaction.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId)
+            var balance = targetTransaction.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == targetTransaction.CryptoTokenId)
                 ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
-            logger.LogInformation(JsonSerializer.Serialize(balance));
-
-            var userId = transaction.UserId;
+            var userId = targetTransaction.UserId;
             NotificationDto? notification = null;
             await unitOfWork.WithTransactionAsync(async () =>
             {
-                switch (transaction.Type)
+                switch (targetTransaction.Type)
                 {
                     case TransactionType.Withdrawal:
                         balance.AdjustAmount(@event.Amount, true);
                         balance.FinalizeFrozen(@event.Amount);
-                        logger.LogInformation("After updating: " + JsonSerializer.Serialize(balance));
                         break;
 
                     default:
@@ -57,30 +52,27 @@ public sealed class OnFailedTransactionHandler(
                 }
                 await userBalanceRepo.PutUpdateAsync(balance, ct);
 
-                await transactionRepo.UpdateAsync(transaction.PublicId, order =>
+                await transactionRepo.UpdateAsync(targetTransaction.PublicId, transaction =>
                 {
-                    order.MarkAsFailed(
+                    transaction.MarkAsFailed(
                         @event.OrderUid,
                         @event.OrderNumber,
                         @event.FailureCategory,
                         @event.FailureCode,
                         @event.FailureMessage,
                         @event.FailedAt);
-                    logger.LogInformation("Transaction updating: " + JsonSerializer.Serialize(order));
                 }, ct);
                 // Ensure the audit log records the order status updated by the external API
                 using (AuditSourceContext.Use(AuditSource.External))
                 {
                     await unitOfWork.SaveChangesAsync(ct);
                 }
-                var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
+                var newTx = await transactionRepo.GetInternalByIdAsync(targetTransaction.PublicId, ct);
                 notification = await SendNotificationAsync(newTx.Adapt<TransactionInternalDto>(), ct);
-                logger.LogInformation("Notification: " + JsonSerializer.Serialize(notification));
             }, ct);
 
-            var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
+            var newTx = await transactionRepo.GetInternalByIdAsync(targetTransaction.PublicId, ct);
             var transactionInternal = newTx.Adapt<TransactionInternalDto>();
-            logger.LogInformation("Transaction after updating: " + JsonSerializer.Serialize(transactionInternal));
             await SendToMember(transactionInternal, notification!);
             await SendToAdmin(transactionInternal);
 
