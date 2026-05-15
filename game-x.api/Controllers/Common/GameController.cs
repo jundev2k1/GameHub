@@ -2,6 +2,7 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Features.Games.Admin.Queries.GetCurrentGameRecommends;
 using game_x.application.Features.Games.Client.Queries.GetGames;
+using game_x.application.Features.Games.Common.Queries.GetActiveCategories;
 using System.Reflection;
 
 namespace game_x.api.Controllers.Common;
@@ -48,18 +49,11 @@ public sealed class GameController(IGameProviderCacheService gameProviderCache) 
     }
 
     [HttpGet("categories")]
-    public async Task<IActionResult> GetCategoryListAsync()
+    public async Task<IActionResult> GetCategoryListAsync(CancellationToken ct = default)
     {
-        var result = gameProviderCache.CategoryList
-            .OrderByDescending(cate => cate.Priority)
-            .Select(cate => new
-            {
-                cate.Id,
-                cate.Name,
-                cate.Description
-            })
-            .ToArray();
-        return await Task.FromResult(ApiResponseFactory.Ok(result));
+        var query = new GetActiveCategoriesQuery();
+        var result = await Mediator.Send(query, ct);
+        return ApiResponseFactory.Ok(result);
     }
 
     [HttpGet("types")]
