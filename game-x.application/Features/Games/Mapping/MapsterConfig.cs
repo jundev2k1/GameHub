@@ -93,7 +93,8 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<GameCategoryMapping, GameCategoryInfo>()
             .Map(dest => dest.LocalId, src => src.Category.Id)
             .Map(dest => dest.Id, src => src.Category.PublicId)
-            .Map(dest => dest.Name, src => src.Category.Name);
+            .Map(dest => dest.Name, src => src.Category.Name)
+            .Map(dest => dest.Description, src => src.Category.Description);
     }
 
     private static void RegisterGameTypeMappings(TypeAdapterConfig cfg)
@@ -106,7 +107,8 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<GameTypeMapping, GameTypeInfo>()
             .Map(dest => dest.LocalId, src => src.Type.Id)
             .Map(dest => dest.Id, src => src.Type.PublicId)
-            .Map(dest => dest.Name, src => src.Type.Name);
+            .Map(dest => dest.Name, src => src.Type.Name)
+            .Map(dest => dest.Description, src => src.Type.Description);
     }
 
     private static void RegisterGameTagMappings(TypeAdapterConfig cfg)
@@ -123,7 +125,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Id, src => src.Tag.PublicId)
             .Map(dest => dest.Name, src => src.Tag.Name)
             .Map(dest => dest.Icon, src => src.Tag.Icon.Value)
-            .Map(dest => dest.Color, src => src.Tag.Color.Value);
+            .Map(dest => dest.Color, src => src.Tag.Color.Value)
+            .Map(dest => dest.Description, src => src.Tag.Description);
     }
 
     private static void RegisterGameTransactionMappings(TypeAdapterConfig cfg)
