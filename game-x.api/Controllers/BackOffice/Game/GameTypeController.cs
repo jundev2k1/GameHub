@@ -3,6 +3,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Admin.Commands.CreateGameType;
 using game_x.application.Features.Games.Admin.Commands.DeleteGameType;
 using game_x.application.Features.Games.Admin.Commands.UpdateGameType;
+using game_x.application.Features.Games.Admin.Commands.UpdateGameTypeTranslations;
 using game_x.application.Features.Games.Admin.Queries.GetGameTypeDetail;
 using game_x.application.Features.Games.Admin.Queries.GetTypeByCriteria;
 
@@ -33,6 +34,16 @@ public sealed class GameTypeController : BaseApiController
         var query = new GetGameTypeDetailQuery(id);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost("{typeId:guid}/translations")]
+    public async Task<IActionResult> UpsertGameTranslationsAsync(
+        [FromRoute] Guid typeId,
+        [FromBody] UpdateGameTypeTranslationsCommand command)
+    {
+        await Mediator.Send(command with { GameTypeId = typeId });
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
 
     [Authorize(Roles = AppRoles.Admin)]
