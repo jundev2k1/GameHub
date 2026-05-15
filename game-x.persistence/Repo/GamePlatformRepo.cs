@@ -9,7 +9,10 @@ public sealed class GamePlatformRepo(GameXContext context)
 {
     public async Task<GamePlatform[]> GetAllAsync(CancellationToken ct = default)
     {
-        return await context.GamePlatforms.ToArrayAsync(ct);
+        return await context.GamePlatforms
+            .AsNoTracking()
+            .Include(gp => gp.Translations)
+            .ToArrayAsync(ct);
     }
 
     public async Task UpdateAsync(Guid id, Func<GamePlatform, Task> updateAction, CancellationToken ct = default)
@@ -19,5 +22,18 @@ public sealed class GamePlatformRepo(GameXContext context)
             ?? throw new NotFoundException(nameof(id), id);
 
         await updateAction.Invoke(targetPlatform);
+    }
+
+    public async Task UpdateTranslationAsync(
+        Guid gameId,
+        Action<GamePlatform> updateAction,
+        CancellationToken ct = default)
+    {
+        var targetGame = await context.GamePlatforms
+            .Include(g => g.Translations)
+            .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
+            ?? throw new NotFoundException(nameof(gameId), gameId);
+
+        updateAction.Invoke(targetGame);
     }
 }
