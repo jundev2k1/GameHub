@@ -23,7 +23,7 @@ public sealed class UpdateGameTranslationsHandler(
             }, ct);
         }, ct);
 
-        await gameProviderCache.RefreshGameList();
+        await gameProviderCache.RefreshGameListAsync(ct);
 
         return Unit.Value;
     }

@@ -21,8 +21,8 @@ public sealed class UpdateGameCategoryHandler(
         }, ct);
 
         // Refresh cache data after database updated
-        await gameProviderCache.RefreshGameCategoryList();
-        await gameProviderCache.RefreshGameList();
+        await gameProviderCache.RefreshGameCategoryListAsync(ct);
+        await gameProviderCache.RefreshGameListAsync(ct);
 
         return Unit.Value;
     }

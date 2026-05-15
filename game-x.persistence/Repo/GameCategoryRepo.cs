@@ -9,7 +9,10 @@ public sealed class GameCategoryRepo(GameXContext context)
 {
     public async Task<GameCategory[]> GetAllAsync(CancellationToken ct = default)
     {
-        return await context.GameCategories.AsNoTracking().ToArrayAsync(ct);
+        return await context.GameCategories
+            .AsNoTracking()
+            .Include(c => c.Translations)
+            .ToArrayAsync(ct);
     }
 
     public async Task AddAsync(GameCategory category, CancellationToken ct = default)

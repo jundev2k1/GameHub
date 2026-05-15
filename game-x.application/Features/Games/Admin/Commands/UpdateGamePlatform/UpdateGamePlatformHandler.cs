@@ -22,8 +22,8 @@ public sealed class UpdateGamePlatformHandler(
         }, ct);
 
         // Refresh cache data after database updated
-        await gameProviderCache.RefreshGamePlatformList();
-        await gameProviderCache.RefreshGameList();
+        await gameProviderCache.RefreshGamePlatformListAsync();
+        await gameProviderCache.RefreshGameListAsync();
 
         return Unit.Value;
     }

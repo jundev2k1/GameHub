@@ -33,7 +33,7 @@ public sealed class GetCurrentGameRecommendsHandler(
         if (!gameList.TryGetValue(item.LocalGameId, out var gameInfo)) return null;
         if (gameInfo.Thumbnail != null)
         {
-            var thumbnailUrl = await gameProviderCache.GetGameThumbnail(gameInfo);
+            var thumbnailUrl = await gameProviderCache.GetGameThumbnailAsync(gameInfo);
             gameInfo.Thumbnail.Url = thumbnailUrl;
         }
         if (gameInfo.GameTranslations.Count > 0)

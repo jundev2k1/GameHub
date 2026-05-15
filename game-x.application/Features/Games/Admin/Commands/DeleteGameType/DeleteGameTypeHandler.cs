@@ -14,8 +14,8 @@ public sealed class DeleteGameTypeHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         // Refresh cache data after database updated
-        await gameProviderCache.RefreshGameTypeList();
-        await gameProviderCache.RefreshGameList();
+        await gameProviderCache.RefreshGameTypeListAsync(ct);
+        await gameProviderCache.RefreshGameListAsync(ct);
 
         return Unit.Value;
     }

@@ -52,12 +52,12 @@ try
     await SeedRunner.RunAsync(context, userManager, asymmetricCryptoService);
     
     var gameProviderCache = serviceProvider.GetRequiredService<IGameProviderCacheService>();
-    await gameProviderCache.RefreshGamePlatformList();
-    await gameProviderCache.RefreshGameCategoryList();
-    await gameProviderCache.RefreshGameTypeList();
-    await gameProviderCache.RefreshGameTagList();
-    await gameProviderCache.RefreshGameRecommendList();
-    await gameProviderCache.RefreshGameList();
+    await gameProviderCache.RefreshGamePlatformListAsync();
+    await gameProviderCache.RefreshGameCategoryListAsync();
+    await gameProviderCache.RefreshGameTypeListAsync();
+    await gameProviderCache.RefreshGameTagListAsync();
+    await gameProviderCache.RefreshGameRecommendListAsync();
+    await gameProviderCache.RefreshGameListAsync();
 
     var refreshTokenManager = serviceProvider.GetRequiredService<IRefreshTokenManagerCacheService>();
     refreshTokenManager.InitRefreshTokens();

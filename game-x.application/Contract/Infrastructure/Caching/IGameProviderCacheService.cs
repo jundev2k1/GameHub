@@ -12,19 +12,19 @@ public interface IGameProviderCacheService
 
     void SetIsLoggedIn(string account, bool isLoggedIn);
 
-    Task RefreshGamePlatformList();
+    Task RefreshGamePlatformListAsync(CancellationToken ct = default);
 
-    Task RefreshGameCategoryList();
+    Task RefreshGameCategoryListAsync(CancellationToken ct = default);
 
-    Task RefreshGameTypeList();
+    Task RefreshGameTypeListAsync(CancellationToken ct = default);
 
-    Task RefreshGameTagList();
+    Task RefreshGameTagListAsync(CancellationToken ct = default);
 
-    Task RefreshGameRecommendList();
+    Task RefreshGameRecommendListAsync(CancellationToken ct = default);
 
-    Task RefreshGameList();
+    Task RefreshGameListAsync(CancellationToken ct = default);
 
-    Task<string> GetGameThumbnail(GameInfoDto game);
+    Task<string> GetGameThumbnailAsync(GameInfoDto game);
 
     (string? token, DateTime? expiredTime) GetProviderToken(Guid platformId);
 

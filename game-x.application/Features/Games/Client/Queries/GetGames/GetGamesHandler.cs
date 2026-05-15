@@ -54,7 +54,7 @@ public sealed class GetGamesHandler(
     {
         if (game.Thumbnail != null)
         {
-            var thumbnailUrl = await gameProviderCache.GetGameThumbnail(game);
+            var thumbnailUrl = await gameProviderCache.GetGameThumbnailAsync(game);
             game.Thumbnail.Url = thumbnailUrl;
         }
 

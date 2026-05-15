@@ -8,7 +8,10 @@ public sealed class GameTagRepo(GameXContext context) : IGameTagRepo, IRepositor
 {
     public async Task<GameTag[]> GetAllAsync(CancellationToken ct = default)
     {
-        return await context.GameTags.AsNoTracking().ToArrayAsync(ct);
+        return await context.GameTags
+            .AsNoTracking()
+            .Include(gt => gt.Translations)
+            .ToArrayAsync(ct);
     }
 
     public async Task AddAsync(GameTag entity, CancellationToken ct = default)

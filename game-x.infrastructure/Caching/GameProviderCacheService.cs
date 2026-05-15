@@ -43,44 +43,44 @@ public sealed class GameProviderCacheService(
         Set($"{_prefixCache}:{account}:is-logged-in", isLoggedIn);
     }
 
-    public async Task RefreshGamePlatformList()
+    public async Task RefreshGamePlatformListAsync(CancellationToken ct = default)
     {
         var cacheKey = $"{_prefixCache}:platform:list";
-        var gamePlatformList = await gamePlatformRepo.GetAllAsync();
+        var gamePlatformList = await gamePlatformRepo.GetAllAsync(ct);
         Set(cacheKey, gamePlatformList.Select(g => g.Adapt<GamePlatformDto>()).ToArray());
     }
 
-    public async Task RefreshGameCategoryList()
+    public async Task RefreshGameCategoryListAsync(CancellationToken ct = default)
     {
         var cacheKey = $"{_prefixCache}:category:list";
-        var gameCategoryList = await gameCategoryRepo.GetAllAsync();
+        var gameCategoryList = await gameCategoryRepo.GetAllAsync(ct);
         Set(cacheKey, gameCategoryList.Select(g => g.Adapt<GameCategoryDto>()).ToArray());
     }
 
-    public async Task RefreshGameTypeList()
+    public async Task RefreshGameTypeListAsync(CancellationToken ct = default)
     {
         var cacheKey = $"{_prefixCache}:game-type:list";
-        var gameTypeList = await gameTypeRepo.GetAllAsync();
+        var gameTypeList = await gameTypeRepo.GetAllAsync(ct);
         Set(cacheKey, gameTypeList.Select(g => g.Adapt<GameTypeDto>()).ToArray());
     }
 
-    public async Task RefreshGameTagList()
+    public async Task RefreshGameTagListAsync(CancellationToken ct = default)
     {
         var cacheKey = $"{_prefixCache}:game-tag:list";
-        var gameTagList = await gameTagRepo.GetAllAsync();
+        var gameTagList = await gameTagRepo.GetAllAsync(ct);
         Set(cacheKey, gameTagList.Select(g => g.Adapt<GameTagDto>()).ToArray());
     }
 
-    public async Task RefreshGameRecommendList()
+    public async Task RefreshGameRecommendListAsync(CancellationToken ct = default)
     {
         var cacheKey = $"{_prefixCache}:game-recommend:list";
-        var dto = await gameRecommendRepo.GetAllAsync();
+        var dto = await gameRecommendRepo.GetAllAsync(ct);
         Set(cacheKey, dto);
     }
 
-    public async Task RefreshGameList()
+    public async Task RefreshGameListAsync(CancellationToken ct = default)
     {
-        var gameList = await gameRepo.GetAllAsync();
+        var gameList = await gameRepo.GetAllAsync(ct);
 
         // Clear all game thumbnail caches
         foreach (var game in gameList)
@@ -93,7 +93,7 @@ public sealed class GameProviderCacheService(
         Set(cacheKey, gameList.Adapt<GameInfoDto[]>());
     }
 
-    public async Task<string> GetGameThumbnail(GameInfoDto game)
+    public async Task<string> GetGameThumbnailAsync(GameInfoDto game)
     {
         // No thumbnail
         if (game.Thumbnail is null) return string.Empty;

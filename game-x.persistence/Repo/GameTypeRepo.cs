@@ -9,7 +9,10 @@ public sealed class GameTypeRepo(GameXContext context)
 {
     public async Task<GameType[]> GetAllAsync(CancellationToken ct = default)
     {
-        return await context.GameTypes.AsNoTracking().ToArrayAsync(ct);
+        return await context.GameTypes
+            .AsNoTracking()
+            .Include(gt => gt.Translations)
+            .ToArrayAsync(ct);
     }
 
     public async Task AddAsync(GameType gameType, CancellationToken ct = default)

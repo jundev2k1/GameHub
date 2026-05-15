@@ -41,8 +41,8 @@ public sealed class UpdateGameHandler(
         }, ct);
 
         // Refresh cache
-        await gameProviderCache.RefreshGameList();
-        await gameProviderCache.RefreshGameRecommendList();
+        await gameProviderCache.RefreshGameListAsync(ct);
+        await gameProviderCache.RefreshGameRecommendListAsync(ct);
         
         return Unit.Value;
     }
