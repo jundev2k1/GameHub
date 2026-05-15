@@ -1,5 +1,6 @@
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Rewards;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Features.Accounts.User.Dtos;
 
@@ -14,4 +15,5 @@ public interface IClientHubService
     Task NotifyWalletSynchronizationFailedAsync(string userId, Guid platformId);
     Task SendTransactionTransferAsync(string memberId, TransactionTransferSignalDto transaction);
     Task SendRevokeRefreshTokenAsync(string memberId);
+    Task SendInventoryAsync(string memberId, UserInventorySignalDto[] dto);
 }

@@ -1,6 +1,7 @@
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Rewards;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
 using game_x.application.Features.Accounts.User.Dtos;
@@ -45,5 +46,10 @@ public sealed class ClientHubService(ActorHubFacade<ClientHub, IClientHub> actor
     public async Task SendRevokeRefreshTokenAsync(string memberId)
     {
         await actorHub.Member(memberId).RevokeRefreshToken(memberId);
+    }
+    
+    public async Task SendInventoryAsync(string memberId, UserInventorySignalDto[] dto)
+    {
+        await actorHub.Member(memberId).InventoryUpdated(dto);
     }
 }

@@ -33,6 +33,9 @@ public sealed class ObjectName
     public static ObjectName InteractionCharacter(Guid characterId, string fileName)
         => Of($"characters/{characterId:N}/poses/{fileName}");
 
+    public static ObjectName CatalogItem(Guid catalogItemId, string fileName)
+        => Of($"catalog_items/{catalogItemId:N}/icons/{fileName}");
+    
     public static ObjectName Of(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -56,7 +59,8 @@ public sealed class ObjectName
         "avatar",
         "schedules",
         "gifts",
-        "characters"];
+        "characters",
+        "catalog_items"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>

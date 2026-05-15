@@ -1,3 +1,5 @@
+using game_x.application.Features.Rewards.Dtos;
+
 namespace game_x.application.Features.Accounts.User.Queries.GetSelfUser;
 
 public record GetSelfUserQuery : IQuery<GetSelfUserResult>;
@@ -26,4 +28,5 @@ public record GetSelfUserResult(
     bool IsKycConfirmed,
     bool IsBankConfirmed,
     string[] Roles,
+    UserInventoryDto[] Inventories,
     string? AvatarUrl = null);

@@ -1,4 +1,4 @@
-using game_x.domain.Enum.Missions;
+using game_x.domain.Enum.Rewards;
 
 namespace game_x.domain.ValueObjects.Missions;
 
@@ -7,7 +7,7 @@ public sealed class RewardPoolConfigData
     #region Basic
     public string Theme { get; init; } = "default";
 
-    public string AnimationType { get; init; } = nameof(RewardPoolType.Roulette);
+    public RewardPoolType AnimationType { get; init; } = RewardPoolType.Roulette;
 
     public int SpinDurationMs { get; init; } = 3000;
 
@@ -19,8 +19,10 @@ public sealed class RewardPoolConfigData
     /// Inventory item required to spin.
     /// Example: ticket, free_spin
     /// </summary>
-    public string RequiredItemType { get; init; } = nameof(InventoryItemCategory.Ticket);
+    public CatalogItemCategory RequiredItemType { get; init; } = CatalogItemCategory.Ticket;
 
+    public Guid? RequiredCatalogItemId { get; init; }
+    
     /// <summary>How many items required per spin.</summary>
     public int RequiredItemAmount { get; init; } = 1;
 

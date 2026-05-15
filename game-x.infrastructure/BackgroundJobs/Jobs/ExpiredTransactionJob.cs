@@ -6,12 +6,12 @@ using Microsoft.Extensions.Options;
 
 namespace game_x.infrastructure.BackgroundJobs.Jobs;
 
-public sealed class ExpiredTransactionJobJob(
+public sealed class ExpiredTransactionJob(
     IUnitOfWork unitOfWork,
     ITransactionRepo transactionRepo,
     IOptions<RecurringJobSettings> jobOptions,
     IOptions<UxmSettings> uxmSettings,
-    IAppLogger<ExpiredTransactionJobJob> logger) : IRecurringJob
+    IAppLogger<ExpiredTransactionJob> logger) : IRecurringJob
 {
     public string JobId => "expired-transaction";
     public string CronExpression => jobOptions.Value.ExpiredTransactionJob;
