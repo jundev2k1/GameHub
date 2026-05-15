@@ -1,6 +1,6 @@
 ﻿namespace game_x.domain.Entities;
 
-public sealed class GamePlatform : BaseEntity<int>
+public sealed class GamePlatform : BaseEntity<int>, IAuditable
 {
     public Guid PublicId { get; private set; } = Guid.CreateVersion7();
     public string Name { get; private set; } = string.Empty;
