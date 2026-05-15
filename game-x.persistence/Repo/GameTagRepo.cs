@@ -30,6 +30,19 @@ public sealed class GameTagRepo(GameXContext context) : IGameTagRepo, IRepositor
         await updateAction(targetTag);
     }
 
+    public async Task UpdateTranslationAsync(
+        Guid gameId,
+        Action<GameTag> updateAction,
+        CancellationToken ct = default)
+    {
+        var targetGame = await context.GameTags
+            .Include(g => g.Translations)
+            .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
+            ?? throw new NotFoundException(nameof(gameId), gameId);
+
+        updateAction.Invoke(targetGame);
+    }
+
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
     {
         var targetTag = await context.GameTags

@@ -8,5 +8,10 @@ public interface IGameTagRepo
 
     Task UpdateAsync(Guid id, Func<GameTag, Task> updateAction, CancellationToken ct = default);
 
+    Task UpdateTranslationAsync(
+        Guid gameId,
+        Action<GameTag> updateAction,
+        CancellationToken ct = default);
+
     Task DeleteAsync(Guid id, CancellationToken ct = default);
 }
