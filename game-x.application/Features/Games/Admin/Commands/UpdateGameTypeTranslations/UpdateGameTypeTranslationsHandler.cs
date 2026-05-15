@@ -12,10 +12,10 @@ public sealed class UpdateGameTypeTranslationsHandler(
     {
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await gameTypeRepo.UpdateTranslationAsync(request.GameTypeId, game =>
+            await gameTypeRepo.UpdateTranslationAsync(request.GameTypeId, type =>
             {
                 foreach (var translation in request.Translations)
-                    game.UpsertTranslation(
+                    type.UpsertTranslation(
                         LanguageCode.Of(translation.LanguageCode),
                         translation.Name.Trim(),
                         translation.Description.Trim(),
