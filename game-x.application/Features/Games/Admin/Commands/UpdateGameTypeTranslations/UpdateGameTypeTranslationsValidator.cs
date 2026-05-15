@@ -15,13 +15,13 @@ public sealed class UpdateGameTypeTranslationsValidator : AbstractValidator<Upda
             });
 
         RuleForEach(x => x.Translations)
-            .SetValidator(new GameTranslationValidator());
+            .SetValidator(new GameTypeTranslationValidator());
     }
 }
 
-public class GameTranslationValidator : AbstractValidator<GameTypeTranslationItem>
+public class GameTypeTranslationValidator : AbstractValidator<GameTypeTranslationItem>
 {
-    public GameTranslationValidator()
+    public GameTypeTranslationValidator()
     {
         RuleFor(x => x.LanguageCode)
             .NotEmpty().WithMessage("Language code is required")

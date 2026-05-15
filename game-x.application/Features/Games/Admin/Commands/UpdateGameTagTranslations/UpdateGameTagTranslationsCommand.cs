@@ -4,9 +4,9 @@ namespace game_x.application.Features.Games.Admin.Commands.UpdateGameTagTranslat
 
 public record UpdateGameTagTranslationsCommand(
     [property: JsonIgnore] Guid GameTagId,
-    GameTypeTranslationItem[] Translations) : ICommand;
+    GameTagTranslationItem[] Translations) : ICommand;
 
-public record GameTypeTranslationItem(
+public record GameTagTranslationItem(
     string LanguageCode,
     string Name,
     string Description,
