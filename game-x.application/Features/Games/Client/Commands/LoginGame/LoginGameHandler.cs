@@ -161,18 +161,6 @@ public sealed class LoginGameHandler(
             return $"{domain}{uri.PathAndQuery}";
         }
 
-        if (gamePlatformId == GameConstants.PLATFORM_ID_SASSLOT)
-        {
-            var loginUrl = gameSlotSettings.Value.LoginUrl;
-            if (loginUrl.IsNullOrWhiteSpace()) return url;
-
-            var uri = new Uri(url);
-            var queryParams = HttpUtility.ParseQueryString(uri.Query);
-            var ticket = queryParams.Get("ticket");
-
-            return $"{loginUrl}?ticket={ticket}";
-        }
-
         // Fallback
         return url;
     }
