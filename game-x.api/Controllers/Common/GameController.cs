@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Features.Games.Admin.Queries.GetCurrentGameRecommends;
 using game_x.application.Features.Games.Client.Queries.GetGames;
 using game_x.application.Features.Games.Common.Queries.GetActiveCategories;
+using game_x.application.Features.Games.Common.Queries.GetActivePlatforms;
 using System.Reflection;
 
 namespace game_x.api.Controllers.Common;
@@ -34,18 +35,11 @@ public sealed class GameController(IGameProviderCacheService gameProviderCache) 
     }
 
     [HttpGet("platforms")]
-    public async Task<IActionResult> GetPlatformListAsync()
+    public async Task<IActionResult> GetPlatformListAsync(CancellationToken ct = default)
     {
-        var result = gameProviderCache.PlatformList
-            .OrderByDescending(platform => platform.Priority)
-            .Select(platform => new
-            {
-                platform.Id,
-                platform.Name,
-                platform.Description
-            })
-            .ToArray();
-        return await Task.FromResult(ApiResponseFactory.Ok(result));
+        var query = new GetActivePlatformsQuery();
+        var result = await Mediator.Send(query, ct);
+        return ApiResponseFactory.Ok(result);
     }
 
     [HttpGet("categories")]
