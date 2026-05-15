@@ -43,7 +43,7 @@ public sealed class GetCurrentGameRecommendsHandler(
             {
                 gameInfo.Name = targetLang.Name;
                 gameInfo.Description = targetLang.Description;
-                gameInfo.Note = targetLang.Notes;
+                gameInfo.Note = targetLang.Note;
             }
         }
         var result = new GameRecommendListItemDto(gameInfo, item);

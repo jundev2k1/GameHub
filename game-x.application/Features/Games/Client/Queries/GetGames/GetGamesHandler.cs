@@ -65,7 +65,7 @@ public sealed class GetGamesHandler(
             {
                 game.Name = targetLang.Name;
                 game.Description = targetLang.Description;
-                game.Note = targetLang.Notes;
+                game.Note = targetLang.Note;
             }
         }
         var result = new GameItemDto(game);

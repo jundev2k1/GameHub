@@ -14,7 +14,11 @@ public sealed class MapsterConfig : IRegister
         RegisterGameTagMappings(cfg);
         RegisterGameTransactionMappings(cfg);
         RegisterGameRecommendMappings(cfg);
+        RegisterPlatformTranslationMappings(cfg);
         RegisterGameTranslationMappings(cfg);
+        RegisterCategoryTranslationMappings(cfg);
+        RegisterTypeTranslationMappings(cfg);
+        RegisterTagTranslationMappings(cfg);
     }
 
     private static void RegisterGameMappings(TypeAdapterConfig cfg)
@@ -75,14 +79,16 @@ public sealed class MapsterConfig : IRegister
     {
         cfg.NewConfig<GamePlatform, GamePlatformDto>()
             .Map(dest => dest.LocalId, src => src.Id)
-            .Map(dest => dest.Id, src => src.PublicId);
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.PlatformTranslations, src => src.Translations.ToDictionary(t => t.LanguageCode.Value, t => t.Adapt<GamePlatformTranslationInfo>()));
     }
 
     private static void RegisterGameCategoryMappings(TypeAdapterConfig cfg)
     {
         cfg.NewConfig<GameCategory, GameCategoryDto>()
             .Map(dest => dest.LocalId, src => src.Id)
-            .Map(dest => dest.Id, src => src.PublicId);
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.CategoryTranslations, src => src.Translations.ToDictionary(t => t.LanguageCode.Value, t => t.Adapt<GameCategoryTranslationInfo>()));
 
         cfg.NewConfig<GameCategoryMapping, GameCategoryInfo>()
             .Map(dest => dest.LocalId, src => src.Category.Id)
@@ -94,7 +100,8 @@ public sealed class MapsterConfig : IRegister
     {
         cfg.NewConfig<GameType, GameTypeDto>()
             .Map(dest => dest.LocalId, src => src.Id)
-            .Map(dest => dest.Id, src => src.PublicId);
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.TypeTranslations, src => src.Translations.ToDictionary(t => t.LanguageCode.Value, t => t.Adapt<GameTypeTranslationInfo>()));
 
         cfg.NewConfig<GameTypeMapping, GameTypeInfo>()
             .Map(dest => dest.LocalId, src => src.Type.Id)
@@ -108,7 +115,8 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.LocalId, src => src.Id)
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.Icon, src => src.Icon.Value)
-            .Map(dest => dest.Color, src => src.Color.Value);
+            .Map(dest => dest.Color, src => src.Color.Value)
+            .Map(dest => dest.TagTranslations, src => src.Translations.ToDictionary(t => t.LanguageCode.Value, t => t.Adapt<GameTagTranslationInfo>()));
 
         cfg.NewConfig<GameTagMapping, GameTagInfo>()
             .Map(dest => dest.LocalId, src => src.Tag.Id)
@@ -165,11 +173,43 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.IsGameActive, src => src.Game.IsActive);
     }
 
+    private static void RegisterPlatformTranslationMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GamePlatformTranslation, GamePlatformTranslationInfo>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.PlatformId, src => src.PlatformId)
+            .Map(dest => dest.LanguageCode, src => src.LanguageCode.Value);
+    }
+
     private static void RegisterGameTranslationMappings(TypeAdapterConfig cfg)
     {
         cfg.NewConfig<GameTranslation, GameTranslationInfo>()
             .Map(dest => dest.LocalId, src => src.Id)
             .Map(dest => dest.GameId, src => src.GameId)
+            .Map(dest => dest.LanguageCode, src => src.LanguageCode.Value);
+    }
+
+    private static void RegisterCategoryTranslationMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GameCategoryTranslation, GameCategoryTranslationInfo>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.CategoryId, src => src.CategoryId)
+            .Map(dest => dest.LanguageCode, src => src.LanguageCode.Value);
+    }
+
+    private static void RegisterTypeTranslationMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GameTypeTranslation, GameTypeTranslationInfo>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.TypeId, src => src.TypeId)
+            .Map(dest => dest.LanguageCode, src => src.LanguageCode.Value);
+    }
+
+    private static void RegisterTagTranslationMappings(TypeAdapterConfig cfg)
+    {
+        cfg.NewConfig<GameTagTranslation, GameTagTranslationInfo>()
+            .Map(dest => dest.LocalId, src => src.Id)
+            .Map(dest => dest.TagId, src => src.TagId)
             .Map(dest => dest.LanguageCode, src => src.LanguageCode.Value);
     }
 }
