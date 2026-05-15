@@ -29,6 +29,19 @@ public sealed class GameCategoryRepo(GameXContext context)
         await updateAction.Invoke(targetCategory);
     }
 
+    public async Task UpdateTranslationAsync(
+        Guid gameId,
+        Action<GameCategory> updateAction,
+        CancellationToken ct = default)
+    {
+        var targetGame = await context.GameCategories
+            .Include(g => g.Translations)
+            .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
+            ?? throw new NotFoundException(nameof(gameId), gameId);
+
+        updateAction.Invoke(targetGame);
+    }
+
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
     {
         var targetCategory = await context.GameCategories

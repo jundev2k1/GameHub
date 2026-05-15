@@ -3,6 +3,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Admin.Commands.CreateGameCategory;
 using game_x.application.Features.Games.Admin.Commands.DeleteGameCategory;
 using game_x.application.Features.Games.Admin.Commands.UpdateGameCategory;
+using game_x.application.Features.Games.Admin.Commands.UpdateGameCategoryTranslations;
 using game_x.application.Features.Games.Admin.Queries.GetCategoriesByCriteria;
 using game_x.application.Features.Games.Admin.Queries.GetGameCategoryDetail;
 
@@ -33,6 +34,16 @@ public sealed class GameCategoryController : BaseApiController
         var query = new GetGameCategoryDetailQuery(id);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost("{cateId:guid}/translations")]
+    public async Task<IActionResult> UpsertGameTranslationsAsync(
+        [FromRoute] Guid cateId,
+        [FromBody] UpdateGameCategoryTranslationsCommand command)
+    {
+        await Mediator.Send(command with { GameCateId = cateId });
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
 
     [Authorize(Roles = AppRoles.Admin)]
