@@ -19,7 +19,7 @@ public sealed class CreateGameTypeHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         // Refresh cache data after database updated
-        await gameProviderCache.RefreshGameTypeList();
+        await gameProviderCache.RefreshGameTypeListAsync(ct);
 
         return Unit.Value;
     }

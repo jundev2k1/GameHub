@@ -1,5 +1,5 @@
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Events.Transactions.OnUxmTransactionCallback;
+using game_x.application.Events.Transactions.OnConfirmTransaction;
 using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 
@@ -20,7 +20,7 @@ public sealed class PaymentGatewayCallbackHandler(
         bool isValid = asymmetricCryptoService.PaymentGatewayVerifySignature(secretKey, requestData, signature);
         if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
         
-        await eventDispatcher.Publish(new OnUxmTransactionCallbackEvent(
+        await eventDispatcher.Publish(new OnConfirmTransactionEvent(
             ProviderOrderId: requestData.ProviderOrderId,
             Hash: requestData.TransactionHash,
             OrderNumber: requestData.MerchantOrderId,

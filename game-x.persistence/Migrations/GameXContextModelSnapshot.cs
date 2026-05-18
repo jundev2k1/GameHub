@@ -815,6 +815,65 @@ namespace game_x.persistence.Migrations
                     b.ToTable("game_category_mappings", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.GameCategoryTranslation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("category_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("language_code");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("note");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_category_translations");
+
+                    b.HasIndex("CategoryId", "LanguageCode")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_category_translations_category_id_language_code");
+
+                    b.ToTable("game_category_translations", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GamePlatform", b =>
                 {
                     b.Property<int>("Id")
@@ -933,6 +992,65 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_game_platform_balances_user_id_platform_id");
 
                     b.ToTable("game_platform_balances", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GamePlatformTranslation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("language_code");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("note");
+
+                    b.Property<int>("PlatformId")
+                        .HasColumnType("integer")
+                        .HasColumnName("platform_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_platform_translations");
+
+                    b.HasIndex("PlatformId", "LanguageCode")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_platform_translations_platform_id_language_code");
+
+                    b.ToTable("game_platform_translations", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.GameRecommend", b =>
@@ -1160,6 +1278,65 @@ namespace game_x.persistence.Migrations
                     b.ToTable("game_tag_mappings", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.GameTagTranslation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("language_code");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("note");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer")
+                        .HasColumnName("tag_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_tag_translations");
+
+                    b.HasIndex("TagId", "LanguageCode")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_tag_translations_tag_id_language_code");
+
+                    b.ToTable("game_tag_translations", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GameTranslation", b =>
                 {
                     b.Property<int>("Id")
@@ -1325,6 +1502,65 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_game_type_mappings_type_id");
 
                     b.ToTable("game_type_mappings", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameTypeTranslation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("language_code");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("note");
+
+                    b.Property<int>("TypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("type_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_type_translations");
+
+                    b.HasIndex("TypeId", "LanguageCode")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_type_translations_type_id_language_code");
+
+                    b.ToTable("game_type_translations", (string)null);
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.InteractionCharacter", b =>
@@ -5445,6 +5681,18 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Game");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.GameCategoryTranslation", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.GameCategory", "Category")
+                        .WithMany("Translations")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_category_translations_game_categories_category_id");
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GamePlatformBalance", b =>
                 {
                     b.HasOne("game_x.domain.Entities.GamePlatform", "Platform")
@@ -5453,6 +5701,18 @@ namespace game_x.persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_game_platform_balances_game_platforms_platform_id");
+
+                    b.Navigation("Platform");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GamePlatformTranslation", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.GamePlatform", "Platform")
+                        .WithMany("Translations")
+                        .HasForeignKey("PlatformId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_platform_translations_game_platforms_platform_id");
 
                     b.Navigation("Platform");
                 });
@@ -5510,6 +5770,18 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Tag");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.GameTagTranslation", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.GameTag", "Tag")
+                        .WithMany("Translations")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_tag_translations_game_tags_tag_id");
+
+                    b.Navigation("Tag");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.GameTranslation", b =>
                 {
                     b.HasOne("game_x.domain.Entities.Game", "Game")
@@ -5539,6 +5811,18 @@ namespace game_x.persistence.Migrations
                         .HasConstraintName("fk_game_type_mappings_game_types_type_id");
 
                     b.Navigation("Game");
+
+                    b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.GameTypeTranslation", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.GameType", "Type")
+                        .WithMany("Translations")
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_type_translations_game_types_type_id");
 
                     b.Navigation("Type");
                 });
@@ -6530,6 +6814,8 @@ namespace game_x.persistence.Migrations
             modelBuilder.Entity("game_x.domain.Entities.GameCategory", b =>
                 {
                     b.Navigation("GameCategoryMappings");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.GamePlatform", b =>
@@ -6539,6 +6825,8 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Games");
 
                     b.Navigation("TransactionExternals");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.GameRecommend", b =>
@@ -6549,11 +6837,15 @@ namespace game_x.persistence.Migrations
             modelBuilder.Entity("game_x.domain.Entities.GameTag", b =>
                 {
                     b.Navigation("GameTagMappings");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.GameType", b =>
                 {
                     b.Navigation("GameTypeMappings");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.InteractionCharacter", b =>

@@ -1,13 +1,10 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
-using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Events.Transactions.OnUxmTransactionCallback;
-using System.Text.Json;
+using game_x.application.Events.Transactions.OnConfirmTransaction;
 
 namespace game_x.application.Features.Transactions.Webhooks.FastPay.Commands.FastPayWithdrawalSuccess;
 
 public sealed class FastPayWithdrawalSuccessHandler(
-    IAppLogger<FastPayWithdrawalSuccessHandler> logger,
     IAsymmetricCryptoService asymmetricCryptoService,
     IAsymmetricKeyCacheService asymmetricKeyCacheService,
     IApplicationEventDispatcher eventDispatcher) : ICommandHandler<FastPayWithdrawalSuccessCommand>
@@ -16,9 +13,6 @@ public sealed class FastPayWithdrawalSuccessHandler(
     {
         var (requestData, signature) = request;
 
-        logger.LogInformation($"Fast Pay Key: {asymmetricKeyCacheService.FastPayPublicKey}");
-        logger.LogInformation($"Signature: {request.Signature}");
-        logger.LogInformation($"Payload: {JsonSerializer.Serialize(request.Data)}");
         // Verify UXM signature
         var isValid = asymmetricCryptoService.VerifySignature(
             asymmetricKeyCacheService.FastPayPublicKey,
@@ -26,7 +20,7 @@ public sealed class FastPayWithdrawalSuccessHandler(
             signature);
         if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
 
-        var @event = new OnUxmTransactionCallbackEvent(
+        var @event = new OnConfirmTransactionEvent(
             ProviderOrderId: requestData.OrderUid,
             Hash: requestData.Hash,
             OrderNumber: requestData.OrderNumber,

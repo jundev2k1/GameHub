@@ -13,6 +13,8 @@ public class GameTagDto
     public string Color { get; set; } = string.Empty;
     public string Note { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
+    [JsonIgnore]
+    public Dictionary<string, GameTagTranslationInfo> TagTranslations { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

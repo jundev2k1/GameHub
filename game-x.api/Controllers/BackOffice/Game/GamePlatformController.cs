@@ -1,5 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Features.Games.Admin.Commands.UpdateGamePlatform;
+using game_x.application.Features.Games.Admin.Commands.UpdateGamePlatformTranslations;
 using game_x.application.Features.Games.Admin.Queries.GetGamePlatformDetail;
 
 namespace game_x.api.Controllers.BackOffice.Game;
@@ -42,5 +43,15 @@ public sealed class GamePlatformController(
     {
         await Mediator.Send(command with { Id = id });
         return ApiResponseFactory.NoContent(MessageCode.System.Updated);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost("{platformId:guid}/translations")]
+    public async Task<IActionResult> UpsertGameTranslationsAsync(
+        [FromRoute] Guid platformId,
+        [FromBody] UpdateGamePlatformTranslationsCommand command)
+    {
+        await Mediator.Send(command with { GamePlatformId = platformId });
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
 }

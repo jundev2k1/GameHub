@@ -3,6 +3,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Features.Games.Admin.Commands.CreateGameTag;
 using game_x.application.Features.Games.Admin.Commands.DeleteGameTag;
 using game_x.application.Features.Games.Admin.Commands.UpdateGameTag;
+using game_x.application.Features.Games.Admin.Commands.UpdateGameTagTranslations;
 using game_x.application.Features.Games.Admin.Queries.GetGameTagDetail;
 using game_x.application.Features.Games.Admin.Queries.GetGameTagsByCriteria;
 
@@ -33,6 +34,16 @@ public sealed class GameTagController : BaseApiController
         var query = new GetGameTagDetailQuery(id);
         var result = await Mediator.Send(query);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost("{tagId:guid}/translations")]
+    public async Task<IActionResult> UpsertGameTranslationsAsync(
+        [FromRoute] Guid tagId,
+        [FromBody] UpdateGameTagTranslationsCommand command)
+    {
+        await Mediator.Send(command with { GameTagId = tagId });
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
 
     [Authorize(Roles = AppRoles.Admin)]

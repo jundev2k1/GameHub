@@ -12,6 +12,8 @@ public class GameCategoryDto
     public string Note { get; set; } = string.Empty;
     public int Priority { get; set; }
     public bool IsActive { get; set; } = true;
+    [JsonIgnore]
+    public Dictionary<string, GameCategoryTranslationInfo> CategoryTranslations { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

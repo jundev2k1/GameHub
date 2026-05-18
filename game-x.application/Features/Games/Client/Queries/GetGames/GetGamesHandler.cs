@@ -52,12 +52,21 @@ public sealed class GetGamesHandler(
 
     private async Task<GameItemDto> MapToListItem(GameInfoDto game, string lang)
     {
+        // Map thumbnail
         if (game.Thumbnail != null)
         {
-            var thumbnailUrl = await gameProviderCache.GetGameThumbnail(game);
+            var thumbnailUrl = await gameProviderCache.GetGameThumbnailAsync(game);
             game.Thumbnail.Url = thumbnailUrl;
         }
 
+        // Map game platform translation
+        var targetPlatform = gameProviderCache.PlatformList.FirstOrDefault(c => c.LocalId == game.LocalId);
+        if (targetPlatform != null && targetPlatform.PlatformTranslations.TryGetValue(lang, out var platformTranslation))
+        {
+            game.PlatformName = platformTranslation.Name;
+        }
+
+        // Map game translation
         if (game.GameTranslations.Count > 0)
         {
             var targetLang = game.GameTranslations!.GetValueOrDefault(lang, null);
@@ -65,9 +74,52 @@ public sealed class GetGamesHandler(
             {
                 game.Name = targetLang.Name;
                 game.Description = targetLang.Description;
-                game.Note = targetLang.Notes;
+                game.Note = targetLang.Note;
             }
         }
+
+        // Map game category translations
+        if (game.Categories.Length > 0)
+        {
+            foreach (var category in game.Categories)
+            {
+                var targetCategory = gameProviderCache.CategoryList.FirstOrDefault(c => c.LocalId == category.LocalId);
+                if (targetCategory != null && targetCategory.CategoryTranslations.TryGetValue(lang, out var translation))
+                {
+                    category.Name = translation.Name;
+                    category.Description = translation.Description;
+                }
+            }
+        }
+
+        // Map game type translations
+        if (game.GameTypes.Length > 0)
+        {
+            foreach (var type in game.GameTypes)
+            {
+                var targetType = gameProviderCache.GameTypeList.FirstOrDefault(c => c.LocalId == type.LocalId);
+                if (targetType != null && targetType.TypeTranslations.TryGetValue(lang, out var translation))
+                {
+                    type.Name = translation.Name;
+                    type.Description = translation.Description;
+                }
+            }
+        }
+
+        // Map game tag translations
+        if (game.GameTags.Length > 0)
+        {
+            foreach (var tag in game.GameTags)
+            {
+                var targetTag = gameProviderCache.GameTagList.FirstOrDefault(c => c.LocalId == tag.LocalId);
+                if (targetTag != null && targetTag.TagTranslations.TryGetValue(lang, out var translation))
+                {
+                    tag.Name = translation.Name;
+                    tag.Description = translation.Description;
+                }
+            }
+        }
+
         var result = new GameItemDto(game);
         return result;
     }

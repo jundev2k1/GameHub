@@ -9,7 +9,10 @@ public sealed class GameCategoryRepo(GameXContext context)
 {
     public async Task<GameCategory[]> GetAllAsync(CancellationToken ct = default)
     {
-        return await context.GameCategories.AsNoTracking().ToArrayAsync(ct);
+        return await context.GameCategories
+            .AsNoTracking()
+            .Include(c => c.Translations)
+            .ToArrayAsync(ct);
     }
 
     public async Task AddAsync(GameCategory category, CancellationToken ct = default)
@@ -24,6 +27,19 @@ public sealed class GameCategoryRepo(GameXContext context)
             ?? throw new NotFoundException(nameof(id), id);
 
         await updateAction.Invoke(targetCategory);
+    }
+
+    public async Task UpdateTranslationAsync(
+        Guid gameId,
+        Action<GameCategory> updateAction,
+        CancellationToken ct = default)
+    {
+        var targetGame = await context.GameCategories
+            .Include(g => g.Translations)
+            .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
+            ?? throw new NotFoundException(nameof(gameId), gameId);
+
+        updateAction.Invoke(targetGame);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)

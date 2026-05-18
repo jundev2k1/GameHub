@@ -20,7 +20,7 @@ public sealed class CreateGameTagHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         // Refresh cache data after database updated
-        await gameProviderCache.RefreshGameTagList();
+        await gameProviderCache.RefreshGameTagListAsync(ct);
 
         return Unit.Value;
     }

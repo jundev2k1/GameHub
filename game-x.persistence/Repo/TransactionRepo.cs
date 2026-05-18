@@ -9,6 +9,8 @@ namespace game_x.persistence.Repo;
 
 public class TransactionRepo(GameXContext context) : ITransactionRepo, IRepository
 {
+    private readonly static TransactionSourceType[] TransactionInternalSourceTypes = [TransactionSourceType.Payment, TransactionSourceType.Refund];
+
     public async Task<PaginationResult<Transaction>> GetInternalTransactionsAsync(
         Func<IQueryable<Transaction>, IQueryable<Transaction>>? queryBuilder = null,
         int page = 1,
@@ -92,7 +94,7 @@ public class TransactionRepo(GameXContext context) : ITransactionRepo, IReposito
             .Where(x => 
                 x.UserId == userId 
                 && x.TransactionInternal != null
-                && x.TransactionInternal.SourceType == TransactionSourceType.Payment)
+                && TransactionInternalSourceTypes.Contains(x.TransactionInternal.SourceType))
             .AsQueryable();
 
         if (queryBuilder != null)

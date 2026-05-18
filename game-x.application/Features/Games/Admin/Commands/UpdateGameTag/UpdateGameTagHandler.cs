@@ -22,8 +22,8 @@ public sealed class UpdateGameTagHandler(
         }, ct);
 
         // Refresh cache data after database updated
-        await gameProviderCache.RefreshGameTagList();
-        await gameProviderCache.RefreshGameList();
+        await gameProviderCache.RefreshGameTagListAsync(ct);
+        await gameProviderCache.RefreshGameListAsync(ct);
 
         return Unit.Value;
     }

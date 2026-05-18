@@ -61,7 +61,7 @@ public sealed class UpdateGameRecommendHandler(
         }, ct);
 
         // Refresh cache data after the database updated
-        await gameProviderCache.RefreshGameRecommendList();
+        await gameProviderCache.RefreshGameRecommendListAsync(ct);
 
         return Unit.Value;
     }

@@ -1,13 +1,15 @@
 ﻿using game_x.api.Dtos;
-using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Features.Games.Admin.Queries.GetCurrentGameRecommends;
 using game_x.application.Features.Games.Client.Queries.GetGames;
+using game_x.application.Features.Games.Common.Queries.GetActiveCategories;
+using game_x.application.Features.Games.Common.Queries.GetActivePlatforms;
+using game_x.application.Features.Games.Common.Queries.GetActiveTypes;
 using System.Reflection;
 
 namespace game_x.api.Controllers.Common;
 
 [Route("/api/game")]
-public sealed class GameController(IGameProviderCacheService gameProviderCache) : BaseApiController
+public sealed class GameController : BaseApiController
 {
     [HttpGet("list")]
     public async Task<IActionResult> GetGameListAsync([AsParameters] GetGamesRequest request)
@@ -33,48 +35,27 @@ public sealed class GameController(IGameProviderCacheService gameProviderCache) 
     }
 
     [HttpGet("platforms")]
-    public async Task<IActionResult> GetPlatformListAsync()
+    public async Task<IActionResult> GetPlatformListAsync(CancellationToken ct = default)
     {
-        var result = gameProviderCache.PlatformList
-            .OrderByDescending(platform => platform.Priority)
-            .Select(platform => new
-            {
-                platform.Id,
-                platform.Name,
-                platform.Description
-            })
-            .ToArray();
-        return await Task.FromResult(ApiResponseFactory.Ok(result));
+        var query = new GetActivePlatformsQuery();
+        var result = await Mediator.Send(query, ct);
+        return ApiResponseFactory.Ok(result);
     }
 
     [HttpGet("categories")]
-    public async Task<IActionResult> GetCategoryListAsync()
+    public async Task<IActionResult> GetCategoryListAsync(CancellationToken ct = default)
     {
-        var result = gameProviderCache.CategoryList
-            .OrderByDescending(cate => cate.Priority)
-            .Select(cate => new
-            {
-                cate.Id,
-                cate.Name,
-                cate.Description
-            })
-            .ToArray();
-        return await Task.FromResult(ApiResponseFactory.Ok(result));
+        var query = new GetActiveCategoriesQuery();
+        var result = await Mediator.Send(query, ct);
+        return ApiResponseFactory.Ok(result);
     }
 
     [HttpGet("types")]
-    public async Task<IActionResult> GetGameTypeListAsync()
+    public async Task<IActionResult> GetGameTypeListAsync(CancellationToken ct = default)
     {
-        var result = gameProviderCache.GameTypeList
-            .OrderByDescending(type => type.Priority)
-            .Select(type => new
-            {
-                type.Id,
-                type.Name,
-                type.Description
-            })
-            .ToArray();
-        return await Task.FromResult(ApiResponseFactory.Ok(result));
+        var query = new GetActiveTypesQuery();
+        var result = await Mediator.Send(query, ct);
+        return ApiResponseFactory.Ok(result);
     }
 
     [HttpGet("tags/icons")]

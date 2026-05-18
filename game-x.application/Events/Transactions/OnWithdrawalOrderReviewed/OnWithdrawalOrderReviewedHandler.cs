@@ -20,15 +20,18 @@ public sealed class OnWithdrawalOrderReviewedHandler(
     IAdminHubService adminHubService,
     ICsAdminHubService csAdminHubService,
     IApplicationEventDispatcher eventDispatcher,
-    IAppLogger<User> logger) : IApplicationEventHandler<OnWithdrawalOrderReviewedEvent>
+    IAppLogger<OnWithdrawalOrderReviewedHandler> logger) : IApplicationEventHandler<OnWithdrawalOrderReviewedEvent>
 {
     public async Task Handle(OnWithdrawalOrderReviewedEvent @event, CancellationToken ct = default)
     {
         var targetTransaction = @event.Transaction;
-        await unitOfWork.WithTransactionAsync(async () => { await SendToMember(targetTransaction, ct); }, ct);
+        await unitOfWork.WithTransactionAsync(async () =>
+        {
+            await SendToMemberAsync(targetTransaction, ct);
+        }, ct);
     }
 
-    private async Task SendToMember(TransactionInternalDto transaction, CancellationToken ct)
+    private async Task SendToMemberAsync(TransactionInternalDto transaction, CancellationToken ct)
     {
         try
         {
@@ -43,7 +46,7 @@ public sealed class OnWithdrawalOrderReviewedHandler(
             await clientHubService.SendNotificationToMemberAsync(
                 transaction.UserId,
                 notification.Adapt<NotificationDto>());
-            
+
             await clientHubService.SendTransactionToMemberAsync(
                 transaction.UserId,
                 transaction.Adapt<ClientTransactionDto>());
@@ -63,6 +66,7 @@ public sealed class OnWithdrawalOrderReviewedHandler(
         catch (Exception ex)
         {
             logger.LogError($"Failed to envoke signals to members", ex.Message);
+            await unitOfWork.RollbackAsync(ct);
         }
     }
 }

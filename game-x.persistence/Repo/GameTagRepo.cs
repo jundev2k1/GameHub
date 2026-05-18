@@ -8,7 +8,10 @@ public sealed class GameTagRepo(GameXContext context) : IGameTagRepo, IRepositor
 {
     public async Task<GameTag[]> GetAllAsync(CancellationToken ct = default)
     {
-        return await context.GameTags.AsNoTracking().ToArrayAsync(ct);
+        return await context.GameTags
+            .AsNoTracking()
+            .Include(gt => gt.Translations)
+            .ToArrayAsync(ct);
     }
 
     public async Task AddAsync(GameTag entity, CancellationToken ct = default)
@@ -25,6 +28,19 @@ public sealed class GameTagRepo(GameXContext context) : IGameTagRepo, IRepositor
             ?? throw new NotFoundException(nameof(id), id);
 
         await updateAction(targetTag);
+    }
+
+    public async Task UpdateTranslationAsync(
+        Guid gameId,
+        Action<GameTag> updateAction,
+        CancellationToken ct = default)
+    {
+        var targetGame = await context.GameTags
+            .Include(g => g.Translations)
+            .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
+            ?? throw new NotFoundException(nameof(gameId), gameId);
+
+        updateAction.Invoke(targetGame);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)

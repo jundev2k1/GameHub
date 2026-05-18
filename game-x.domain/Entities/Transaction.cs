@@ -174,6 +174,32 @@ public class Transaction : BaseEntity<int>, IAuditable
         CompletedAt = DateTime.UtcNow;
         TransactionInternal?.UpdateReferenceId(referenceId);
     }
+
+    public void MarkAsFailed(
+        string? orderUid,
+        string? orderNumber,
+        string failureCategory,
+        string failureCode,
+        string failureMessage,
+        string failedAt)
+    {
+        var failedAtResult = DateTime.TryParse(failedAt, out var result)
+            ? DateTime.SpecifyKind(result, DateTimeKind.Utc)
+            : DateTime.UtcNow;
+
+        Status = TransactionStatus.Failed;
+        CompletedAt = failedAtResult;
+
+        var metadata = new Dictionary<string, string>()
+        {
+            { "failureCategory", failureCategory },
+            { "failureCode", failureCode },
+            { "failureMessage", failureMessage },
+            { "failedAt", failedAt },
+        };
+        Meta = JsonSerializer.Serialize(metadata);
+        TransactionInternal?.UpdateFailedInfo(orderUid, orderNumber);
+    }
 }
 
 public class TransactionMeta

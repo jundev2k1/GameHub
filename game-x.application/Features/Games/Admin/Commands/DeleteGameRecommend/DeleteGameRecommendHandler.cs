@@ -14,7 +14,7 @@ public sealed class DeleteGameRecommendHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         // Refresh cache data after database updated
-        await gameProviderCache.RefreshGameRecommendList();
+        await gameProviderCache.RefreshGameRecommendListAsync(ct);
 
         return Unit.Value;
     }

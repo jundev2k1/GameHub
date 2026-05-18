@@ -1,4 +1,4 @@
-using game_x.application.Contract.Infrastructure.Logger;
+﻿using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
@@ -8,9 +8,9 @@ using game_x.application.Features.Transactions.Dtos;
 using game_x.share.Context;
 using System.Text.Json;
 
-namespace game_x.application.Events.Transactions.OnUxmTransactionCallback;
+namespace game_x.application.Events.Transactions.OnFailedTransaction;
 
-public sealed class OnUxmTransactionCallbackHandler(
+public sealed class OnFailedTransactionHandler(
     IUnitOfWork unitOfWork,
     IClientHubService clientHubService,
     ITransactionRepo transactionRepo,
@@ -18,37 +18,33 @@ public sealed class OnUxmTransactionCallbackHandler(
     INotificationRepo notificationRepo,
     IAdminHubService adminHubService,
     IApplicationEventDispatcher eventDispatcher,
-    IAppLogger<OnUxmTransactionCallbackHandler> logger) : IApplicationEventHandler<OnUxmTransactionCallbackEvent>
+    IAppLogger<OnFailedTransactionHandler> logger) : IApplicationEventHandler<OnFailedTransactionEvent>
 {
-    public async Task Handle(OnUxmTransactionCallbackEvent @event, CancellationToken ct = default)
+    public async Task Handle(OnFailedTransactionEvent @event, CancellationToken ct = default)
     {
         try
         {
-            var transaction = await transactionRepo.GetByOrderNumberAsync(@event.OrderNumber ?? string.Empty, ct)
+            var targetTransaction = await transactionRepo.GetByOrderNumberAsync(@event.OrderNumber ?? string.Empty, ct)
                 ?? throw new NotFoundException(
                     MessageCode.Transaction.TradeNotFound,
                     $"Transaction with order number '{@event.OrderNumber}' not found.");
 
             // Anti-spam request if the Transaction has already been updated
-            if (transaction.Status == TransactionStatus.Completed)
+            if (targetTransaction.Status is TransactionStatus.Completed or TransactionStatus.Failed)
                 throw new BadRequestException(MessageCode.System.InvalidCurrentStatus);
 
-            var balance = transaction.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == transaction.CryptoTokenId)
+            var balance = targetTransaction.User.UserBalances.FirstOrDefault(b => b.CryptoTokenId == targetTransaction.CryptoTokenId)
                 ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
 
-            var userId = transaction.UserId;
+            var userId = targetTransaction.UserId;
             NotificationDto? notification = null;
             await unitOfWork.WithTransactionAsync(async () =>
             {
-                switch (transaction.Type)
+                switch (targetTransaction.Type)
                 {
-                    case TransactionType.Deposit:
-                        balance.AdjustAmount(@event.ActualAmount, true);
-                        break;
-
                     case TransactionType.Withdrawal:
-                        var amount = @event.ActualAmount + (transaction.Fee ?? 0);
-                        balance.FinalizeFrozen(amount);
+                        balance.AdjustAmount(@event.Amount, true);
+                        balance.FinalizeFrozen(@event.Amount);
                         break;
 
                     default:
@@ -56,27 +52,26 @@ public sealed class OnUxmTransactionCallbackHandler(
                 }
                 await userBalanceRepo.PutUpdateAsync(balance, ct);
 
-                await transactionRepo.UpdateAsync(transaction.PublicId, order =>
+                await transactionRepo.UpdateAsync(targetTransaction.PublicId, transaction =>
                 {
-                    order.UpdateStatus(TransactionStatus.Completed);
-                    order.UpdateProviderResponse(
-                        balanceAfter: balance.TotalAmount,
-                        actualAmount: @event.ActualAmount,
-                        providerOrderId: @event.ProviderOrderId,
-                        hash: @event.Hash,
-                        confirmedAt: @event.ConfirmedAt,
-                        completedAt: DateTime.UtcNow);
+                    transaction.MarkAsFailed(
+                        @event.OrderUid,
+                        @event.OrderNumber,
+                        @event.FailureCategory,
+                        @event.FailureCode,
+                        @event.FailureMessage,
+                        @event.FailedAt);
                 }, ct);
                 // Ensure the audit log records the order status updated by the external API
                 using (AuditSourceContext.Use(AuditSource.External))
                 {
                     await unitOfWork.SaveChangesAsync(ct);
                 }
-                var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
+                var newTx = await transactionRepo.GetInternalByIdAsync(targetTransaction.PublicId, ct);
                 notification = await SendNotificationAsync(newTx.Adapt<TransactionInternalDto>(), ct);
             }, ct);
 
-            var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
+            var newTx = await transactionRepo.GetInternalByIdAsync(targetTransaction.PublicId, ct);
             var transactionInternal = newTx.Adapt<TransactionInternalDto>();
             await SendToMember(transactionInternal, notification!);
             await SendToAdmin(transactionInternal);
@@ -92,10 +87,10 @@ public sealed class OnUxmTransactionCallbackHandler(
     private async Task<NotificationDto> SendNotificationAsync(TransactionInternalDto transaction, CancellationToken ct)
     {
         var notification = Notification.Create(
-            NotificationMessageKey.Transaction_Completed,
+            NotificationMessageKey.Transaction_Failed,
             transaction.UserId,
             NotificationType.Transaction,
-            NotificationSeverity.Success,
+            NotificationSeverity.Error,
             JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
         await notificationRepo.AddNotificationAsync(notification, ct);
         return notification.Adapt<NotificationDto>();

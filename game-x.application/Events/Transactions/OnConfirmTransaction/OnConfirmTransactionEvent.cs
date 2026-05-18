@@ -1,6 +1,6 @@
-namespace game_x.application.Events.Transactions.OnUxmTransactionCallback;
+namespace game_x.application.Events.Transactions.OnConfirmTransaction;
 
-public record OnUxmTransactionCallbackEvent(
+public record OnConfirmTransactionEvent(
     string? ProviderOrderId,
     string? OrderNumber,
     string? Hash,

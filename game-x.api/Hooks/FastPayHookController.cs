@@ -1,8 +1,10 @@
 ﻿using game_x.api.Controllers;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Features.Transactions.Webhooks.FastPay.Commands.FastPayDepositSuccess;
+using game_x.application.Features.Transactions.Webhooks.FastPay.Commands.FastPayWithdrawalFailed;
 using game_x.share.ExternalApi.Base;
 using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.TransactionCompleted;
+using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.TransactionFailed;
 using System.Text.Json;
 
 namespace game_x.api.Hooks;
@@ -21,14 +23,11 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
     }
 
     [HttpPost("deposit-failed")]
-    public async Task<IActionResult> DepositFailedAsync([FromBody] JsonElement rawJson)
+    public async Task<IActionResult> DepositFailedAsync([FromBody] SecureRequest<TransactionFailedRequest> request, CancellationToken ct = default)
     {
-        logger.LogInformation("===== FastPay web hook: Deposit Failed =====");
+        var command = new FastPayWithdrawalFailedCommand(request.Data, request.Signature);
+        await Mediator.Send(command, ct);
 
-        string jsonString = rawJson.GetRawText();
-        logger.LogInformation(jsonString);
-
-        await Task.CompletedTask;
         return ApiResponseFactory.NoContent();
     }
 
@@ -43,13 +42,11 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
     }
 
     [HttpPost("withdraw-failed")]
-    public async Task<IActionResult> WithdrawalFailedAsync([FromBody] JsonElement rawJson, CancellationToken ct = default)
+    public async Task<IActionResult> WithdrawalFailedAsync([FromBody] SecureRequest<TransactionFailedRequest> request, CancellationToken ct = default)
     {
-        logger.LogInformation("===== FastPay web hook: Withdrawal Failed =====");
+        var command = new FastPayWithdrawalFailedCommand(request.Data, request.Signature);
+        await Mediator.Send(command, ct);
 
-        string jsonString = rawJson.GetRawText();
-        logger.LogInformation(jsonString);
-        await Task.CompletedTask;
         return ApiResponseFactory.NoContent();
     }
 }

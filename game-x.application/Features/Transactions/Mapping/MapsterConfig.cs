@@ -16,6 +16,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.CryptoTokenId, src => src.CryptoToken.PublicId)
             .Map(dest => dest.OrderUid, src => src.TransactionInternal != null ? src.TransactionInternal.OrderUid : null)
             .Map(dest => dest.OrderNumber, src => src.TransactionInternal != null ? src.TransactionInternal.OrderNumber : null)
+            .Map(dest => dest.Provider, src => src.TransactionInternal != null ? src.TransactionInternal.ProviderId : null)
             .Map(dest => dest.Symbol, src => src.CryptoToken.Symbol)
             .Map(dest => dest.Network, src => src.CryptoToken.Network)
             .Map(dest => dest.ConfirmedAt, src => src.TransactionInternal != null ? src.TransactionInternal.ConfirmedAt : null)
