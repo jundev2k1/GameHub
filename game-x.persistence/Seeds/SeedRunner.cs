@@ -29,6 +29,7 @@ public static class SeedRunner
         
         await new ConversationSeeder().SeedAsync(context);
         
+        await new RewardPoolSeeder().SeedAsync(context);
         await context.SaveChangesAsync();
     }
 }

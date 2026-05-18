@@ -1,34 +1,78 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 using System.Text.RegularExpressions;
+using game_x.domain.Entities.Rewards;
 
 namespace game_x.domain.Entities;
 
 public class User : IdentityUser, IEntity, IAuditable
 {
-    public string MemberNumber { get; private set; } = null!;
-    public string Nickname { get; set; } = string.Empty;
-    public string? CountryCode { get; set; }
-    public UserStatus Status { get; set; } = UserStatus.Active;
-    public bool IsDeleted { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    #region Indetities
     public int? AvatarId { get; set; }
+
+    #endregion
+
+    #region Properties
+    public string MemberNumber { get; private set; } = null!;
+    
+    public string Nickname { get; set; } = string.Empty;
+    
+    public string? CountryCode { get; set; }
+    
+    public UserStatus Status { get; set; } = UserStatus.Active;
+    
+    public bool IsDeleted { get; set; }
+    
+    public DateTime CreatedAt { get; set; }
+    
+    public DateTime UpdatedAt { get; set; }
+    
+    [MaxLength(4096)]
+    public string Notes { get; private set; } = string.Empty;
+    #endregion
+
+    #region Relationships
     public MediaFile? Avatar { get; set; }
-    public string Notes { get; set; } = string.Empty;
+    
     public ICollection<Transaction> Transactions { get; set; } = [];
 
     /// <summary>The user's balance in all currencies in the system.</summary>
     public ICollection<UserBalance> UserBalances { get; set; } = [];
+    
     public UserExtend? UserExtend { get; set; }
+    
     public UserKyc? UserKyc { get; set; }
+    
     public TalentWallet? TalentWallet { get; set; }
+    
     public ICollection<UserRole> UserRoles { get; set; } = [];
+    
     public ICollection<UserBankAccount> UserBankAccounts { get; set; } = [];
+    
     public ICollection<SocialLink> RequestedLinks { get; set; } = [];
+    
     public ICollection<SocialLink> ReceivedRequests { get; set; } = [];
+    
     public ICollection<SocialLink> BlocksByMe { get; set; } = [];
+    
     public ICollection<SocialLink> BlocksToMe { get; set; } = [];
+    
+    public IReadOnlyCollection<UserEvent> UserEvents { get; init; } = [];
+    
+    public IReadOnlyCollection<UserMission> UserMissions { get; init; } = [];
+    
+    public IReadOnlyCollection<UserInventory> Inventories { get; init; } = [];
+    
+    public IReadOnlyCollection<ShareLink> ShareLinks { get; init; } = [];
+    
+    public IReadOnlyCollection<UserReward> UserRewards { get; init; } = [];
+    
+    public IReadOnlyCollection<Execution> Executions { get; init; } = [];
+    
+    public IReadOnlyCollection<UserMissionClaim> UserMissionClaims { get; init; } = [];
+    #endregion
 
+    #region Intitializations
     public static User Create(
         string userName,
         string email,
@@ -57,7 +101,9 @@ public class User : IdentityUser, IEntity, IAuditable
             Notes = notes,
         };
     }
-
+    #endregion
+    
+    #region Behaviors
     public static bool IsEmail(string email)
     {
         if (email.IsNullOrWhiteSpace())
@@ -137,4 +183,5 @@ public class User : IdentityUser, IEntity, IAuditable
     {
         TalentWallet = wallet;
     }
+    #endregion
 }

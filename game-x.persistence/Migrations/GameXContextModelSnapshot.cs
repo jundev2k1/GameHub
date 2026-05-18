@@ -2883,6 +2883,1195 @@ namespace game_x.persistence.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.CatalogItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Ticket")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)")
+                        .HasColumnName("description");
+
+                    b.Property<int?>("IconId")
+                        .HasColumnType("integer")
+                        .HasColumnName("icon_id");
+
+                    b.Property<int>("IconType")
+                        .HasColumnType("integer")
+                        .HasColumnName("icon_type");
+
+                    b.Property<string>("IconValue")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("icon_value");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<decimal?>("MonetaryValue")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("monetary_value");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_catalog_items");
+
+                    b.HasIndex("Category")
+                        .HasDatabaseName("ix_catalog_items_category");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_catalog_items_code")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("IconId")
+                        .HasDatabaseName("ix_catalog_items_icon_id");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("ix_catalog_items_active");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_catalog_items_public_id");
+
+                    b.ToTable("catalog_items", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.Execution", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("error_message");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<int?>("MissionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("mission_id");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("ResultMetadata")
+                        .HasMaxLength(4096)
+                        .HasColumnType("jsonb")
+                        .HasColumnName("result_metadata");
+
+                    b.Property<int?>("RewardPoolId")
+                        .HasColumnType("integer")
+                        .HasColumnName("reward_pool_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_executions");
+
+                    b.HasIndex("IdempotencyKey")
+                        .HasDatabaseName("ix_executions_idempotency");
+
+                    b.HasIndex("MissionId")
+                        .HasDatabaseName("ix_executions_mission");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_executions_public_id");
+
+                    b.HasIndex("RewardPoolId")
+                        .HasDatabaseName("ix_executions_reward_pool");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_executions_status");
+
+                    b.HasIndex("UserId", "Type")
+                        .HasDatabaseName("ix_executions_user_type");
+
+                    b.ToTable("executions", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.IdempotencyKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("action_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("ExpiredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expired_at");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("key");
+
+                    b.Property<string>("ResponseMetadata")
+                        .HasMaxLength(4096)
+                        .HasColumnType("jsonb")
+                        .HasColumnName("response_metadata");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_idempotency_keys");
+
+                    b.HasIndex("ExpiredAt")
+                        .HasDatabaseName("ix_idempotency_keys_expired");
+
+                    b.HasIndex("Key")
+                        .IsUnique()
+                        .HasDatabaseName("ux_idempotency_keys_key");
+
+                    b.HasIndex("UserId", "ActionType")
+                        .HasDatabaseName("ix_idempotency_keys_user_action");
+
+                    b.ToTable("idempotency_keys", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.Mission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("ConfigData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("config");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)")
+                        .HasColumnName("description");
+
+                    b.Property<DateTime?>("EndAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_at");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("ResetType")
+                        .HasColumnType("text")
+                        .HasColumnName("reset_type");
+
+                    b.Property<DateTime?>("StartAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_at");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_missions");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_missions_code")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_missions_public_id");
+
+                    b.HasIndex("StartAt", "EndAt")
+                        .HasDatabaseName("ix_missions_date_range");
+
+                    b.HasIndex("Type", "IsActive")
+                        .HasDatabaseName("ix_missions_type_active");
+
+                    b.ToTable("missions", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.MissionReward", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<DateTime?>("EndAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_at");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsClaimable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_claimable");
+
+                    b.Property<int>("MissionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("mission_id");
+
+                    b.Property<int?>("MissionRewardId")
+                        .HasColumnType("integer")
+                        .HasColumnName("mission_reward_id");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<decimal>("RequiredProgress")
+                        .HasColumnType("numeric")
+                        .HasColumnName("required_progress");
+
+                    b.Property<int>("RewardDefinitionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("reward_definition_id");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("integer")
+                        .HasColumnName("sequence");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<DateTime?>("StartAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_at");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_mission_rewards");
+
+                    b.HasIndex("MissionRewardId")
+                        .HasDatabaseName("ix_mission_rewards_mission_reward_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_mission_rewards_public_id");
+
+                    b.HasIndex("RewardDefinitionId")
+                        .HasDatabaseName("ix_mission_rewards_reward_definition_id");
+
+                    b.HasIndex("MissionId", "RequiredProgress")
+                        .HasDatabaseName("ix_mission_rewards_mission_progress")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("MissionId", "Sequence")
+                        .HasDatabaseName("ix_mission_rewards_mission_sequence")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("MissionId", "SortOrder")
+                        .HasDatabaseName("ix_mission_rewards_sort_order")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("mission_rewards", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.RewardDefinition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("Amount")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<int?>("CatalogItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("catalog_item_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Metadata")
+                        .HasMaxLength(4096)
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasDefaultValue("None")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_reward_definitions");
+
+                    b.HasIndex("CatalogItemId")
+                        .HasDatabaseName("ix_reward_definitions_catalog_item")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_reward_definitions_code")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_reward_definitions_public_id");
+
+                    b.HasIndex("Type")
+                        .HasDatabaseName("ix_reward_definitions_type")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("reward_definitions", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.RewardPool", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Config")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("config");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)")
+                        .HasColumnName("description");
+
+                    b.Property<DateTime?>("EndAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_at");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("sort_order");
+
+                    b.Property<DateTime?>("StartAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_at");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasDefaultValue("")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasDefaultValue("Roulette")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_reward_pools");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_reward_pools_code");
+
+                    b.HasIndex("StartAt", "EndAt")
+                        .HasDatabaseName("ix_reward_items_date_range");
+
+                    b.HasIndex("Type", "IsActive")
+                        .HasDatabaseName("ix_reward_pools_type_active");
+
+                    b.ToTable("reward_pools", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.RewardPoolItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("EndAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_at");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<int>("RewardDefinitionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("reward_definition_id");
+
+                    b.Property<int>("RewardPoolId")
+                        .HasColumnType("integer")
+                        .HasColumnName("reward_pool_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<DateTime?>("StartAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_at");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Weight")
+                        .HasColumnType("integer")
+                        .HasColumnName("weight");
+
+                    b.HasKey("Id")
+                        .HasName("pk_reward_pool_items");
+
+                    b.HasIndex("RewardDefinitionId")
+                        .HasDatabaseName("ix_reward_pool_items_reward_definition_id");
+
+                    b.HasIndex("RewardPoolId")
+                        .HasDatabaseName("ix_reward_pool_items_pool");
+
+                    b.HasIndex("RewardPoolId", "SortOrder")
+                        .HasDatabaseName("ix_reward_pool_items_sort_order")
+                        .HasFilter("is_active = true");
+
+                    b.HasIndex("RewardPoolId", "Weight")
+                        .HasDatabaseName("ix_reward_pool_items_pool_weight")
+                        .HasFilter("is_active = true");
+
+                    b.HasIndex("StartAt", "EndAt")
+                        .HasDatabaseName("ix_reward_pool_items_active_range")
+                        .HasFilter("is_active = true");
+
+                    b.ToTable("reward_pool_items", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.ShareLink", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClickCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("click_count");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("ExpiredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expired_at");
+
+                    b.Property<int>("MissionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("mission_id");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_share_links");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_share_links_code");
+
+                    b.HasIndex("ExpiredAt")
+                        .HasDatabaseName("ix_share_links_expired");
+
+                    b.HasIndex("MissionId")
+                        .HasDatabaseName("ix_share_links_mission_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_share_links_public_id");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_share_links_status");
+
+                    b.HasIndex("UserId", "MissionId")
+                        .HasDatabaseName("ix_share_links_user_mission");
+
+                    b.ToTable("share_links", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Metadata")
+                        .HasMaxLength(4096)
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<int?>("RefId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ref_id");
+
+                    b.Property<int?>("RefType")
+                        .HasColumnType("integer")
+                        .HasColumnName("ref_type");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.Property<decimal?>("Value")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_events");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_user_events_public_id");
+
+                    b.HasIndex("RefType", "RefId")
+                        .HasDatabaseName("ix_user_events_ref");
+
+                    b.HasIndex("Type", "CreatedAt")
+                        .HasDatabaseName("ix_user_events_type_created");
+
+                    b.HasIndex("UserId", "Type", "CreatedAt")
+                        .HasDatabaseName("ix_user_events_user_type_created");
+
+                    b.ToTable("user_events", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserInventory", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("CatalogItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("catalog_item_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Quantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("quantity");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("UserId", "CatalogItemId")
+                        .HasName("pk_user_inventories");
+
+                    b.HasIndex("CatalogItemId")
+                        .HasDatabaseName("ix_inventories_item");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_inventories_user");
+
+                    b.HasIndex("UserId", "CatalogItemId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_inventories_user_item");
+
+                    b.ToTable("user_inventories", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserMission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ClaimedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("claimed_at");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("MissionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("mission_id");
+
+                    b.Property<int>("Progress")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("progress");
+
+                    b.Property<DateTime?>("ResetAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reset_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("InProgress")
+                        .HasColumnName("status");
+
+                    b.Property<int>("Streak")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("streak");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_missions");
+
+                    b.HasIndex("MissionId", "Status")
+                        .HasDatabaseName("ix_user_missions_mission_status");
+
+                    b.HasIndex("UserId", "MissionId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_missions_user_id_mission_id");
+
+                    b.HasIndex("UserId", "Status")
+                        .HasDatabaseName("ix_user_missions_user_status");
+
+                    b.ToTable("user_missions", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserMissionClaim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AvailableAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("available_at");
+
+                    b.Property<DateTime?>("ClaimedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("claimed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("ExecutionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("execution_id");
+
+                    b.Property<DateTime?>("ExpiredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expired_at");
+
+                    b.Property<int>("MissionRewardId")
+                        .HasColumnType("integer")
+                        .HasColumnName("mission_reward_id");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("UserMissionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_mission_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_mission_claims");
+
+                    b.HasIndex("ExecutionId")
+                        .HasDatabaseName("ix_user_mission_claims_execution");
+
+                    b.HasIndex("MissionRewardId")
+                        .HasDatabaseName("ix_user_mission_claims_mission_reward_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_user_mission_claims_public_id");
+
+                    b.HasIndex("UserMissionId")
+                        .HasDatabaseName("ix_user_mission_claims_user_mission");
+
+                    b.HasIndex("UserId", "MissionRewardId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_user_mission_claims_user_reward");
+
+                    b.ToTable("user_mission_claims", (string)null);
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserReward", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("amount");
+
+                    b.Property<int?>("CatalogItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("catalog_item_id");
+
+                    b.Property<DateTime?>("ClaimedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("claimed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("ExecutionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("execution_id");
+
+                    b.Property<DateTime?>("ExpiredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expired_at");
+
+                    b.Property<DateTime>("GrantedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("granted_at");
+
+                    b.Property<string>("Metadata")
+                        .HasMaxLength(4096)
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<int?>("RewardDefinitionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("reward_definition_id");
+
+                    b.Property<int?>("RewardPoolItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("reward_pool_item_id");
+
+                    b.Property<string>("RewardType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasDefaultValue("None")
+                        .HasColumnName("reward_type");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasDefaultValue("Granted")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("title");
+
+                    b.Property<int?>("TransactionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("transaction_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_rewards");
+
+                    b.HasIndex("CatalogItemId")
+                        .HasDatabaseName("ix_user_rewards_catalog_item");
+
+                    b.HasIndex("ExecutionId")
+                        .HasDatabaseName("ix_user_rewards_execution");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_user_rewards_public_id");
+
+                    b.HasIndex("RewardDefinitionId")
+                        .HasDatabaseName("ix_user_rewards_definition");
+
+                    b.HasIndex("RewardPoolItemId")
+                        .HasDatabaseName("ix_user_rewards_pool_item");
+
+                    b.HasIndex("TransactionId")
+                        .HasDatabaseName("ix_user_rewards_transaction");
+
+                    b.HasIndex("Status", "ExpiredAt")
+                        .HasDatabaseName("ix_user_rewards_status_expired");
+
+                    b.HasIndex("UserId", "Status")
+                        .HasDatabaseName("ix_user_rewards_user_status");
+
+                    b.ToTable("user_rewards", (string)null);
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.Role", b =>
                 {
                     b.Property<string>("Id")
@@ -3723,7 +4912,8 @@ namespace game_x.persistence.Migrations
                     b.Property<string>("Notes")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)")
                         .HasDefaultValue("")
                         .HasColumnName("notes");
 
@@ -4973,6 +6163,282 @@ namespace game_x.persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.CatalogItem", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.MediaFile", "Icon")
+                        .WithMany()
+                        .HasForeignKey("IconId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_catalog_items_media_files_icon_id");
+
+                    b.Navigation("Icon");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.Execution", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Rewards.Mission", "Mission")
+                        .WithMany()
+                        .HasForeignKey("MissionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_executions_missions_mission_id");
+
+                    b.HasOne("game_x.domain.Entities.Rewards.RewardPool", "RewardPool")
+                        .WithMany("Executions")
+                        .HasForeignKey("RewardPoolId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_executions_reward_pools_reward_pool_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("Executions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_executions_user_user_id");
+
+                    b.Navigation("Mission");
+
+                    b.Navigation("RewardPool");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.IdempotencyKey", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_idempotency_keys_user_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.MissionReward", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Rewards.Mission", "Mission")
+                        .WithMany("MissionRewards")
+                        .HasForeignKey("MissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_mission_rewards_missions_mission_id");
+
+                    b.HasOne("game_x.domain.Entities.Rewards.MissionReward", null)
+                        .WithMany("MissionRewards")
+                        .HasForeignKey("MissionRewardId")
+                        .HasConstraintName("fk_mission_rewards_mission_rewards_mission_reward_id");
+
+                    b.HasOne("game_x.domain.Entities.Rewards.RewardDefinition", "RewardDefinition")
+                        .WithMany("MissionRewards")
+                        .HasForeignKey("RewardDefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_mission_rewards_reward_definitions_reward_definition_id");
+
+                    b.Navigation("Mission");
+
+                    b.Navigation("RewardDefinition");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.RewardDefinition", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Rewards.CatalogItem", "CatalogItem")
+                        .WithMany("RewardDefinitions")
+                        .HasForeignKey("CatalogItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_reward_definitions_catalog_items_catalog_item_id");
+
+                    b.Navigation("CatalogItem");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.RewardPoolItem", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Rewards.RewardDefinition", "RewardDefinition")
+                        .WithMany("RewardPoolItems")
+                        .HasForeignKey("RewardDefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_reward_pool_items_reward_definitions_reward_definition_id");
+
+                    b.HasOne("game_x.domain.Entities.Rewards.RewardPool", "RewardPool")
+                        .WithMany("RewardPoolItems")
+                        .HasForeignKey("RewardPoolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_reward_pool_items_reward_pools_reward_pool_id");
+
+                    b.Navigation("RewardDefinition");
+
+                    b.Navigation("RewardPool");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.ShareLink", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Rewards.Mission", "Mission")
+                        .WithMany()
+                        .HasForeignKey("MissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_share_links_missions_mission_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("ShareLinks")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_share_links_user_user_id");
+
+                    b.Navigation("Mission");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserEvent", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("UserEvents")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_events_user_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserInventory", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Rewards.CatalogItem", "Item")
+                        .WithMany()
+                        .HasForeignKey("CatalogItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_inventories_catalog_items_catalog_item_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("Inventories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_inventories_user_user_id");
+
+                    b.Navigation("Item");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserMission", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Rewards.Mission", "Mission")
+                        .WithMany("UserMissions")
+                        .HasForeignKey("MissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_missions_missions_mission_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("UserMissions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_missions_user_user_id");
+
+                    b.Navigation("Mission");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserMissionClaim", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Rewards.Execution", "Execution")
+                        .WithMany()
+                        .HasForeignKey("ExecutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_mission_claims_executions_execution_id");
+
+                    b.HasOne("game_x.domain.Entities.Rewards.MissionReward", "MissionReward")
+                        .WithMany("UserMissionClaims")
+                        .HasForeignKey("MissionRewardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_mission_claims_mission_rewards_mission_reward_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("UserMissionClaims")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_mission_claims_user_user_id");
+
+                    b.HasOne("game_x.domain.Entities.Rewards.UserMission", "UserMission")
+                        .WithMany("Claims")
+                        .HasForeignKey("UserMissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_mission_claims_user_missions_user_mission_id");
+
+                    b.Navigation("Execution");
+
+                    b.Navigation("MissionReward");
+
+                    b.Navigation("User");
+
+                    b.Navigation("UserMission");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserReward", b =>
+                {
+                    b.HasOne("game_x.domain.Entities.Rewards.CatalogItem", "CatalogItem")
+                        .WithMany()
+                        .HasForeignKey("CatalogItemId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_user_rewards_catalog_items_catalog_item_id");
+
+                    b.HasOne("game_x.domain.Entities.Rewards.Execution", "Execution")
+                        .WithMany("UserRewards")
+                        .HasForeignKey("ExecutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_rewards_executions_execution_id");
+
+                    b.HasOne("game_x.domain.Entities.Rewards.RewardDefinition", "RewardDefinition")
+                        .WithMany("UserRewards")
+                        .HasForeignKey("RewardDefinitionId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_user_rewards_reward_definitions_reward_definition_id");
+
+                    b.HasOne("game_x.domain.Entities.Rewards.RewardPoolItem", "RewardPoolItem")
+                        .WithMany("UserRewards")
+                        .HasForeignKey("RewardPoolItemId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_user_rewards_reward_pool_items_reward_pool_item_id");
+
+                    b.HasOne("game_x.domain.Entities.Transaction", "Transaction")
+                        .WithMany()
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_user_rewards_transactions_transaction_id");
+
+                    b.HasOne("game_x.domain.Entities.User", "User")
+                        .WithMany("UserRewards")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_rewards_user_user_id");
+
+                    b.Navigation("CatalogItem");
+
+                    b.Navigation("Execution");
+
+                    b.Navigation("RewardDefinition");
+
+                    b.Navigation("RewardPoolItem");
+
+                    b.Navigation("Transaction");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.S2SClientSetting", b =>
                 {
                     b.HasOne("game_x.domain.Entities.S2SClient", "Client")
@@ -5416,6 +6882,56 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Mentions");
                 });
 
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.CatalogItem", b =>
+                {
+                    b.Navigation("RewardDefinitions");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.Execution", b =>
+                {
+                    b.Navigation("UserRewards");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.Mission", b =>
+                {
+                    b.Navigation("MissionRewards");
+
+                    b.Navigation("UserMissions");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.MissionReward", b =>
+                {
+                    b.Navigation("MissionRewards");
+
+                    b.Navigation("UserMissionClaims");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.RewardDefinition", b =>
+                {
+                    b.Navigation("MissionRewards");
+
+                    b.Navigation("RewardPoolItems");
+
+                    b.Navigation("UserRewards");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.RewardPool", b =>
+                {
+                    b.Navigation("Executions");
+
+                    b.Navigation("RewardPoolItems");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.RewardPoolItem", b =>
+                {
+                    b.Navigation("UserRewards");
+                });
+
+            modelBuilder.Entity("game_x.domain.Entities.Rewards.UserMission", b =>
+                {
+                    b.Navigation("Claims");
+                });
+
             modelBuilder.Entity("game_x.domain.Entities.Role", b =>
                 {
                     b.Navigation("UserRoles");
@@ -5459,9 +6975,15 @@ namespace game_x.persistence.Migrations
 
                     b.Navigation("BlocksToMe");
 
+                    b.Navigation("Executions");
+
+                    b.Navigation("Inventories");
+
                     b.Navigation("ReceivedRequests");
 
                     b.Navigation("RequestedLinks");
+
+                    b.Navigation("ShareLinks");
 
                     b.Navigation("TalentWallet");
 
@@ -5471,9 +6993,17 @@ namespace game_x.persistence.Migrations
 
                     b.Navigation("UserBankAccounts");
 
+                    b.Navigation("UserEvents");
+
                     b.Navigation("UserExtend");
 
                     b.Navigation("UserKyc");
+
+                    b.Navigation("UserMissionClaims");
+
+                    b.Navigation("UserMissions");
+
+                    b.Navigation("UserRewards");
 
                     b.Navigation("UserRoles");
                 });

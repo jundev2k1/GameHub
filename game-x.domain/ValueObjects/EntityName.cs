@@ -1,4 +1,5 @@
 ﻿using game_x.domain.Entities;
+using game_x.domain.Entities.Rewards;
 
 namespace game_x.domain.ValueObjects;
 
@@ -55,6 +56,12 @@ public sealed class EntityName
         nameof(InteractionCharacterPose),
         nameof(InteractionRule),
         nameof(InteractionRuleMessage),
+        nameof(CatalogItem),
+        nameof(Mission),
+        nameof(RewardPoolItem),
+        nameof(RewardPool),
+        nameof(UserReward),
+        nameof(RewardDefinition),
     ];
 
     public override bool Equals(object? obj) =>

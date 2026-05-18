@@ -378,4 +378,30 @@ public static class MessageCode
         IsNotMember = 10516,
         #endregion
     }
+    
+    public enum Reward
+    {
+        #region ■ Message group: Error
+        [EnumMetadata("Mission not found.")]
+        MissionNotFound = 10600,
+        [EnumMetadata("Code is already existed.")]
+        CodeIsAlreadyExisted = 10601,
+        [EnumMetadata("Catalog item not found.")]
+        CatalogNotFound = 10602,
+        [EnumMetadata("Reward Pool not found.")]
+        RewardPoolNotFound = 10603,
+        [EnumMetadata("Reward pool is inactive.")]
+        RewardPoolInactive = 10604,
+        [EnumMetadata("Reward Pool Item not found.")]
+        RewardPoolItemNotFound = 10605,
+        [EnumMetadata("Reward Pool Item not found.")]
+        RewardPoolItemInactive = 10606,
+        [EnumMetadata("Reward Definition not found.")]
+        RewardDefinitionNotFound = 10607,
+        [EnumMetadata("Catalog Item Type is required in the Reward Pool.")]
+        ItemRequiredInPool = 10608,
+        [EnumMetadata("Item is insufficient.")]
+        ItemInsufficient = 10609,
+        #endregion
+    }
 }

@@ -1,4 +1,5 @@
-﻿using game_x.persistence.Extensions;
+﻿using game_x.domain.Entities.Rewards;
+using game_x.persistence.Extensions;
 using game_x.persistence.Interceptors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -68,6 +69,20 @@ public sealed class GameXContext(
     public DbSet<InteractionCharacterPose> InteractionCharacterPoses { get; set; }
     public DbSet<UserGameSession> UserGameSessions { get; set; }
     public DbSet<UserGameSessionConnection> UserGameSessionConnections { get; set; }
+    public DbSet<CatalogItem> CatalogItems { get; set; }
+    public DbSet<RewardDefinition> RewardDefinitions { get; set; }
+    public DbSet<RewardPool> RewardPools { get; set; }
+    public DbSet<RewardPoolItem> RewardPoolItems { get; set; }
+    public DbSet<Mission> Missions { get; set; }
+    public DbSet<MissionReward> MissionRewards { get; set; }
+    public DbSet<UserMission> UserMissions { get; set; }
+    public DbSet<UserMissionClaim> UserMissionClaims { get; set; }
+    public DbSet<UserReward> UserRewards { get; set; }
+    public DbSet<UserInventory> UserInventories { get; set; }
+    public DbSet<Execution> Executions { get; set; }
+    public DbSet<IdempotencyKey> IdempotencyKeys { get; set; }
+    public DbSet<ShareLink> ShareLinks { get; set; }
+    public DbSet<UserEvent> UserEvents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

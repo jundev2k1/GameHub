@@ -12,6 +12,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Rewards;
 using game_x.infrastructure.SignalR.Groups;
 
 namespace game_x.infrastructure.SignalR.Hubs;
@@ -37,6 +38,7 @@ public interface IClientHub
     /// <summary>Notify when member transfer or received money between friends.</summary>
     Task TransactionTransfer(TransactionTransferSignalDto orderInfo);
     Task RevokeRefreshToken(string userId);
+    Task InventoryUpdated(UserInventorySignalDto[] dto);
 }
 
 [Authorize(Roles = $"{AppRoles.Talent},{AppRoles.User}")]
