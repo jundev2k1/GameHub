@@ -24,6 +24,7 @@ public sealed class GamePlatform : BaseEntity<int>, IAuditable
             Description = desc,
             Note = note,
             Priority = priority,
+            IsActive = true,
         };
     }
 
