@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.NavigationItems.Admin.Commands.DeleteNavigationItem;
+﻿using game_x.application.Features.NavigationItems.Admin.Commands.CreateNavigationItem;
+using game_x.application.Features.NavigationItems.Admin.Commands.DeleteNavigationItem;
 using game_x.application.Features.NavigationItems.Admin.Queries.GetAllNavigationItems;
 
 namespace game_x.api.Controllers.BackOffice.Navigations;
@@ -12,6 +13,14 @@ public sealed class NavigationController : BaseApiController
     {
         var result = await Mediator.Send(new GetAllNavigationItemsQuery(), ct);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost]
+    public async Task<IActionResult> CreateItemAsync(CreateNavigationItemCommand command, CancellationToken ct = default)
+    {
+        await Mediator.Send(command, ct);
+        return ApiResponseFactory.NoContent();
     }
 
     [Authorize(Roles = AppRoles.Admin)]
