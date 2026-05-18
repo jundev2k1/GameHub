@@ -10,4 +10,8 @@ public interface IRewardPoolItemRepo
     Task<RewardPoolItem> GetDetailByIdAsync(Guid id, CancellationToken ct = default);
     
     Task AddAsync(RewardPoolItem entity, CancellationToken ct = default);
+
+    Task UpdateAsync(Guid id, Action<RewardPoolItem> updateAction, CancellationToken ct = default);
+    
+    Task RemoveAsync(Guid id, CancellationToken ct = default);
 }

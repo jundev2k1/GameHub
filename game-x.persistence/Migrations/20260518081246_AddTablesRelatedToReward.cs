@@ -381,7 +381,6 @@ namespace game_x.persistence.Migrations
                     is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
                     start_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     end_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -676,19 +675,18 @@ namespace game_x.persistence.Migrations
                 name: "ix_reward_pool_items_active_range",
                 table: "reward_pool_items",
                 columns: new[] { "start_at", "end_at" },
-                filter: "deleted_at IS NULL AND is_active = true");
+                filter: "is_active = true");
 
             migrationBuilder.CreateIndex(
                 name: "ix_reward_pool_items_pool",
                 table: "reward_pool_items",
-                column: "reward_pool_id",
-                filter: "deleted_at IS NULL");
+                column: "reward_pool_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_reward_pool_items_pool_weight",
                 table: "reward_pool_items",
                 columns: new[] { "reward_pool_id", "weight" },
-                filter: "deleted_at IS NULL AND is_active = true");
+                filter: "is_active = true");
 
             migrationBuilder.CreateIndex(
                 name: "ix_reward_pool_items_reward_definition_id",
@@ -699,14 +697,7 @@ namespace game_x.persistence.Migrations
                 name: "ix_reward_pool_items_sort_order",
                 table: "reward_pool_items",
                 columns: new[] { "reward_pool_id", "sort_order" },
-                filter: "deleted_at IS NULL AND is_active = true");
-
-            migrationBuilder.CreateIndex(
-                name: "ux_reward_pool_items_pool_reward_definition",
-                table: "reward_pool_items",
-                columns: new[] { "reward_pool_id", "reward_definition_id" },
-                unique: true,
-                filter: "deleted_at IS NULL");
+                filter: "is_active = true");
 
             migrationBuilder.CreateIndex(
                 name: "ix_reward_items_date_range",

@@ -7,19 +7,20 @@ public sealed class RewardPoolDto
 {
     public Guid Id { get; set; }
     
-    public string Code { get; private set; } = string.Empty;
+    public string Code { get; set; } = string.Empty;
     
     public RewardPoolType Type { get; set; }
     
-    public string Title { get; private set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
     
-    public string? Description { get; private set; }
+    public string? Description { get; set; }
     
-    public bool IsActive { get; private set; }
+    public bool IsActive { get; set; }
+    public int SortOrder { get; set; }
     
-    public RewardPoolConfigData Config { get; private set; } = RewardPoolConfigData.Default();
+    public RewardPoolConfigData Config { get; set; } = RewardPoolConfigData.Default();
     
-    public DateTime? StartAt { get; private set; }
+    public DateTime? StartAt { get; set; }
 
-    public DateTime? EndAt { get; private set; }
+    public DateTime? EndAt { get; set; }
 }

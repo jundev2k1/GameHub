@@ -39,8 +39,8 @@ public sealed class CreateRewardPoolItemHandler(
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Failed to create mission.");
-                throw new BadRequestException("Failed to create mission.", e);
+                logger.LogError(e, "Failed to create pool item.");
+                throw new BadRequestException("Failed to create pool item.", e);
             }
         }, ct);
         

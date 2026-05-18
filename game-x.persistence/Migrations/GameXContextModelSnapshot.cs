@@ -3291,10 +3291,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deleted_at");
-
                     b.Property<DateTime?>("EndAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_at");
@@ -3342,25 +3338,19 @@ namespace game_x.persistence.Migrations
                         .HasDatabaseName("ix_reward_pool_items_reward_definition_id");
 
                     b.HasIndex("RewardPoolId")
-                        .HasDatabaseName("ix_reward_pool_items_pool")
-                        .HasFilter("deleted_at IS NULL");
-
-                    b.HasIndex("RewardPoolId", "RewardDefinitionId")
-                        .IsUnique()
-                        .HasDatabaseName("ux_reward_pool_items_pool_reward_definition")
-                        .HasFilter("deleted_at IS NULL");
+                        .HasDatabaseName("ix_reward_pool_items_pool");
 
                     b.HasIndex("RewardPoolId", "SortOrder")
                         .HasDatabaseName("ix_reward_pool_items_sort_order")
-                        .HasFilter("deleted_at IS NULL AND is_active = true");
+                        .HasFilter("is_active = true");
 
                     b.HasIndex("RewardPoolId", "Weight")
                         .HasDatabaseName("ix_reward_pool_items_pool_weight")
-                        .HasFilter("deleted_at IS NULL AND is_active = true");
+                        .HasFilter("is_active = true");
 
                     b.HasIndex("StartAt", "EndAt")
                         .HasDatabaseName("ix_reward_pool_items_active_range")
-                        .HasFilter("deleted_at IS NULL AND is_active = true");
+                        .HasFilter("is_active = true");
 
                     b.ToTable("reward_pool_items", (string)null);
                 });

@@ -12,4 +12,8 @@ public interface IRewardDefinitionRepo
     Task<RewardDefinition> GetDetailByIdAsync(Guid id, CancellationToken ct = default);
     
     Task AddAsync(RewardDefinition entity, CancellationToken ct = default);
+    
+    Task UpdateAsync(Guid id, Action<RewardDefinition> updateAction, CancellationToken ct = default);
+
+    Task RemoveAsync(Guid id, CancellationToken ct = default);
 }

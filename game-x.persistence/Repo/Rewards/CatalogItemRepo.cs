@@ -58,4 +58,13 @@ public sealed class CatalogItemRepo(
     {
         await dbContext.CatalogItems.AddAsync(entity, ct);
     }
+    
+    public async Task UpdateAsync(Guid id, Action<CatalogItem> updateAction, CancellationToken ct = default)
+    {
+        var entity = await dbContext.CatalogItems
+                         .FirstOrDefaultAsync(c => c.PublicId == id, ct)
+                     ?? throw new NotFoundException(MessageCode.Reward.CatalogNotFound);
+
+        updateAction.Invoke(entity);
+    }
 }

@@ -35,9 +35,9 @@ public sealed class RewardPool : BaseEntity<int>, IAuditable
     
     public DateTime? DeletedAt { get; private set; }
     
-    public DateTime? StartAt { get; init; }
+    public DateTime? StartAt { get; private set; }
     
-    public DateTime? EndAt { get; init; }
+    public DateTime? EndAt { get; private set; }
     #endregion
     
     #region Relationships
@@ -71,9 +71,27 @@ public sealed class RewardPool : BaseEntity<int>, IAuditable
     #endregion
 
     #region Behaviors
-    public void Activate() => IsActive = true;
 
-    public void Deactivate() => IsActive = false;
+    public void OnUpdate(
+        string? code = null,
+        string? title = null,
+        string? description = null,
+        RewardPoolType? type = null,
+        bool? isActive = null,
+        int? sortOrder = null,
+        DateTime? startAt = null,
+        DateTime? endAt = null,
+        RewardPoolConfigData? config = null)
+    {
+        Code = code ?? Code;
+        Title = title ?? Title;
+        Type = type ?? Type;
+        IsActive = isActive ?? IsActive;
+        SortOrder = sortOrder ?? SortOrder;
+        StartAt = startAt ?? StartAt;
+        EndAt = endAt ?? EndAt;
+        Config = config ?? Config;
+    }
 
     public void SoftDelete() => DeletedAt = DateTime.UtcNow;
     #endregion

@@ -14,4 +14,6 @@ public interface ICatalogItemRepo
     Task<CatalogItem> GetByCodeAsync(string code, CancellationToken ct = default);
     
     Task AddAsync(CatalogItem entity, CancellationToken ct = default);
+
+    Task UpdateAsync(Guid id, Action<CatalogItem> updateAction, CancellationToken ct = default);
 }

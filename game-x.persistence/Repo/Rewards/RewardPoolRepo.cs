@@ -14,6 +14,8 @@ public sealed class RewardPoolRepo(GameXContext dbContext) : IRewardPoolRepo, IR
     {
         return await dbContext.RewardPools
             .AsNoTracking()
+            .OrderByDescending(x => x.SortOrder)
+            .ThenByDescending(x => x.CreatedAt)
             .ProjectToType<RewardPoolDto>()
             .ToArrayAsync(ct);
     }
@@ -24,5 +26,20 @@ public sealed class RewardPoolRepo(GameXContext dbContext) : IRewardPoolRepo, IR
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.PublicId == id, ct)
             ?? throw new BadRequestException(MessageCode.Reward.RewardPoolNotFound);
+    }
+    
+    public async Task<bool> CheckExistedCodeAsync(string code, CancellationToken ct = default)
+    {
+        return await dbContext.RewardPools
+            .AnyAsync(x => x.Code == code, ct);
+    }
+    
+    public async Task UpdateAsync(Guid id, Action<RewardPool> updateAction, CancellationToken ct = default)
+    {
+        var entity = await dbContext.RewardPools
+                     .FirstOrDefaultAsync(c => c.PublicId == id, ct)
+                 ?? throw new NotFoundException(MessageCode.Reward.RewardPoolNotFound);
+
+        updateAction.Invoke(entity);
     }
 }

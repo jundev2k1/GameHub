@@ -92,7 +92,7 @@ public sealed class CatalogItem: BaseEntity<int>, IAuditable
         Icon = icon;
     }
     
-    public void SoftRemove()
+    public void SoftDelete()
     {
         DeletedAt = DateTime.UtcNow;
     }

@@ -1,5 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching.Rewards;
 using game_x.application.Features.Rewards.Commands.CreateCatalogItem;
+using game_x.application.Features.Rewards.Commands.RemoveCatalogItem;
 
 namespace game_x.api.Controllers.BackOffice.Rewards;
 
@@ -18,6 +19,13 @@ public sealed class CatalogItemController(ICatalogItemCacheService service) : Ba
     public async Task<IActionResult> CreateAsync([FromForm] CreateCatalogItemCommand cmd, CancellationToken ct = default)
     {
         var result = await Mediator.Send(cmd, ct);
+        return ApiResponseFactory.Created(result);
+    }
+    
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> RemoveItemAsync(Guid id, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new RemoveCatalogItemCommand(id), ct);
         return ApiResponseFactory.Created(result);
     }
 }

@@ -46,6 +46,7 @@ public sealed class RewardDefinitionRepo(
     public async Task<RewardDefinition> GetDetailByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await dbContext.RewardDefinitions
+            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.PublicId == id, ct)
             ?? throw new BadRequestException(MessageCode.Reward.RewardDefinitionNotFound);
     }
@@ -53,5 +54,25 @@ public sealed class RewardDefinitionRepo(
     public async Task AddAsync(RewardDefinition entity, CancellationToken ct = default)
     {
         await dbContext.RewardDefinitions.AddAsync(entity, ct);
+    }
+    
+    public async Task UpdateAsync(Guid id, Action<RewardDefinition> updateAction, CancellationToken ct = default)
+    {
+        var entity = await dbContext.RewardDefinitions
+                     .FirstOrDefaultAsync(c => c.PublicId == id, ct)
+                 ?? throw new NotFoundException(MessageCode.Reward.RewardDefinitionNotFound);
+
+        updateAction.Invoke(entity);
+    }
+    
+    public async Task RemoveAsync(Guid id, CancellationToken ct = default)
+    {
+        var entity = await dbContext.RewardDefinitions
+            .FirstOrDefaultAsync(x => x.PublicId == id, ct);
+
+        if (entity is null)
+            throw new NotFoundException(MessageCode.Reward.RewardDefinitionNotFound);
+
+        dbContext.RewardDefinitions.Remove(entity);
     }
 }

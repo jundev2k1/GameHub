@@ -122,7 +122,10 @@ public sealed class SpinRewardHandler(
             throw new BadRequestException(MessageCode.Reward.ItemRequiredInPool);
 
         var catalogItems = await catalogItemCache.GetAll(ct);
-        var requiredCatalogItem = catalogItems?.FirstOrDefault(ci => ci.Category == rewardPool.Config.RequiredItemType);
+
+        var requiredCatalogItem = rewardPool.Config.RequiredCatalogItemId != null 
+            ? catalogItems?.FirstOrDefault(x => x.Id == rewardPool.Config.RequiredCatalogItemId)
+            : catalogItems?.FirstOrDefault(ci => ci.Category == rewardPool.Config.RequiredItemType);
         
         if (requiredCatalogItem == null)
             throw new BadRequestException(MessageCode.Reward.ItemRequiredInPool);

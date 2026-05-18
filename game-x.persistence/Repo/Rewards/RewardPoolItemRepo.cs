@@ -24,6 +24,7 @@ public sealed class RewardPoolItemRepo(GameXContext dbContext) : IRewardPoolItem
     {
         return await dbContext.RewardPoolItems
             .AsNoTracking()
+            .Include(x => x.RewardPool)
             .Include(x => x.RewardDefinition)
             .FirstOrDefaultAsync(x => x.PublicId == id, ct)
             ?? throw new BadRequestException(MessageCode.Reward.RewardPoolItemNotFound);
@@ -32,5 +33,25 @@ public sealed class RewardPoolItemRepo(GameXContext dbContext) : IRewardPoolItem
     public async Task AddAsync(RewardPoolItem entity, CancellationToken ct = default)
     {
         await dbContext.RewardPoolItems.AddAsync(entity, ct);
+    }
+    
+    public async Task UpdateAsync(Guid id, Action<RewardPoolItem> updateAction, CancellationToken ct = default)
+    {
+        var entity = await dbContext.RewardPoolItems
+                         .FirstOrDefaultAsync(c => c.PublicId == id, ct)
+                     ?? throw new NotFoundException(MessageCode.Reward.RewardPoolItemNotFound);
+
+        updateAction.Invoke(entity);
+    }
+    
+    public async Task RemoveAsync(Guid id, CancellationToken ct = default)
+    {
+        var entity = await dbContext.RewardPoolItems
+            .FirstOrDefaultAsync(x => x.PublicId == id, ct);
+
+        if (entity is null)
+            throw new NotFoundException(MessageCode.Reward.RewardPoolItemNotFound);
+
+        dbContext.RewardPoolItems.Remove(entity);
     }
 }
