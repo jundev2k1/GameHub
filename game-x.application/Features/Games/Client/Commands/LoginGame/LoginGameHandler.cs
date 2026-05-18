@@ -1,4 +1,5 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameBaccarat;
 using game_x.application.Contract.Infrastructure.ExternalApi.GameProvider;
 using game_x.application.Contract.Infrastructure.ExternalApi.IEtl998;
@@ -14,10 +15,8 @@ using game_x.share.ExternalApi.GameBaccarat.Dtos.Login;
 using game_x.share.ExternalApi.GameProvider.Dtos.Login;
 using game_x.share.Helper;
 using game_x.share.Settings;
-using Microsoft.Extensions.Options;
-using System.Web;
-using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace game_x.application.Features.Games.Client.Commands.LoginGame;
 
@@ -34,7 +33,6 @@ public sealed class LoginGameHandler(
     IEtl998Service etl998Service,
     IAtgService atgService,
     IOptions<GameProviderSettings> gameSettings,
-    IOptions<GameSlotSettings> gameSlotSettings,
     IApplicationEventDispatcher eventDispatcher,
     IOptions<Etl998Settings> settings,
     ILogger<LoginGameHandler> logger) : ICommandHandler<LoginGameCommand, LoginGameResult>

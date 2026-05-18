@@ -1,5 +1,4 @@
 ﻿using game_x.api.Dtos;
-using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Features.Games.Admin.Queries.GetCurrentGameRecommends;
 using game_x.application.Features.Games.Client.Queries.GetGames;
 using game_x.application.Features.Games.Common.Queries.GetActiveCategories;
@@ -10,7 +9,7 @@ using System.Reflection;
 namespace game_x.api.Controllers.Common;
 
 [Route("/api/game")]
-public sealed class GameController(IGameProviderCacheService gameProviderCache) : BaseApiController
+public sealed class GameController : BaseApiController
 {
     [HttpGet("list")]
     public async Task<IActionResult> GetGameListAsync([AsParameters] GetGamesRequest request)
