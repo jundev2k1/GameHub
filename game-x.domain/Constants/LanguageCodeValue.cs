@@ -10,4 +10,5 @@ public static class LanguageCodeValue
     public const string Indonesian = "id-ID";
     public const string Japanese = "ja-JP";
     public const string Korean = "ko-KR";
+    public const string Thai = "th_TH";
 }
