@@ -41,6 +41,9 @@ public sealed class NavigationItemConfig : IEntityTypeConfiguration<NavigationIt
             .HasMaxLength(2000)
             .HasDefaultValue(string.Empty);
 
+        builder.Property(ni => ni.IconId)
+            .IsRequired(false);
+
         builder.Property(ni => ni.Priority)
             .IsRequired()
             .HasDefaultValue(0);
@@ -50,13 +53,18 @@ public sealed class NavigationItemConfig : IEntityTypeConfiguration<NavigationIt
             .HasConversion<short>()
             .HasDefaultValue(true);
 
-        builder.HasIndex(ni => ni.PublicId).IsUnique();
-
-        builder.HasIndex(ni => ni.Slug);
+        builder.HasOne(ni => ni.Icon)
+            .WithMany()
+            .HasForeignKey(ni => ni.IconId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasMany(ni => ni.Translations)
             .WithOne(t => t.NavigationItem)
             .HasForeignKey(t => t.NavigationItemId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(ni => ni.PublicId).IsUnique();
+
+        builder.HasIndex(ni => ni.Slug);
     }
 }

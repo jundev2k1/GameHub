@@ -6,24 +6,30 @@ namespace game_x.application.Features.NavigationItems.Common.Queries.GetActiveNa
 
 public sealed class GetActiveNavigationItemsHandler(
     IUserAccessor userAccessor,
-    INavigationCacheService navigationCache) : IQueryHandler<GetActiveNavigationItemsQuery, NavigationItemDto[]>
+    INavigationCacheService navigationCache,
+    IFileManagerCacheService fileManagerCache) : IQueryHandler<GetActiveNavigationItemsQuery, NavigationItemDto[]>
 {
     public async Task<NavigationItemDto[]> Handle(GetActiveNavigationItemsQuery request, CancellationToken ct = default)
     {
         var lang = userAccessor.GetLanguage();
-        var items = MapToResult(navigationCache.NavigationItems, lang).ToArray();
-        return await Task.FromResult(items);
+        var items = await MapToResultAsync(navigationCache.NavigationItems, lang);
+        return items;
     }
 
-    private static IEnumerable<NavigationItemDto> MapToResult(NavigationItemDto[] items, string language)
+    private async Task<NavigationItemDto[]> MapToResultAsync(NavigationItemDto[] items, string language)
     {
         foreach (var item in items)
         {
+            // Map icon URL
+            item.IconUrl = await fileManagerCache.GetFileUrl(item.Icon);
+
+            // Map translation
             if (item.NavigationTranslations.TryGetValue(language, out NavigationItemTranslationInfo? translation))
             {
                 item.Title = translation.Title;
-                yield return item;
             }
         }
+
+        return items;
     }
 }

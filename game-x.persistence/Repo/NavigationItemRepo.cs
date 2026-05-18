@@ -11,6 +11,7 @@ public sealed class NavigationItemRepo(GameXContext dbContext) : INavigationItem
         return await dbContext.NavigationItems
             .AsNoTracking()
             .AsSplitQuery()
+            .Include(i => i.Icon)
             .Include(i => i.Translations)
             .ToArrayAsync(ct);
     }

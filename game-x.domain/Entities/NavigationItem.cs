@@ -8,6 +8,8 @@ public sealed class NavigationItem : BaseEntity<int>, IAuditable
     public NavigationTargetType TargetType { get; private set; }
     public int? TargetId { get; private set; }
     public string CustomUrl { get; private set; } = string.Empty;
+    public int? IconId { get; private set; }
+    public MediaFile? Icon { get; private set; }
     public int Priority { get; private set; }
     public bool IsActive { get; private set; } = true;
 
@@ -19,8 +21,7 @@ public sealed class NavigationItem : BaseEntity<int>, IAuditable
         NavigationTargetType targetType,
         int? targetId,
         string customUrl,
-        int priority,
-        Guid? publicId = null)
+        int priority)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title, nameof(title));
         ArgumentException.ThrowIfNullOrWhiteSpace(slug, nameof(slug));
@@ -33,7 +34,7 @@ public sealed class NavigationItem : BaseEntity<int>, IAuditable
 
         return new NavigationItem
         {
-            PublicId = publicId ?? Guid.CreateVersion7(),
+            PublicId = Guid.CreateVersion7(),
             Title = title,
             Slug = slug.ToLowerInvariant().Trim(),
             TargetType = targetType,
