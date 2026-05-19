@@ -9,7 +9,11 @@ public class NavigationItemDto
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
-    public string Note { get; set; } = string.Empty;
+    public NavigationTargetType TargetType { get; set; }
+    [JsonIgnore]
+    public int? TargetLocalId { get; set; }
+    public Guid? TargetId { get; set; }
+    public string CustomUrl { get; set; } = string.Empty;
     [JsonIgnore]
     public MediaFile? Icon { get; set; }
     public string? IconUrl { get; set; }

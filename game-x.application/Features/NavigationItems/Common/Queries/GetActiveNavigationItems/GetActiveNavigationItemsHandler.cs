@@ -7,27 +7,26 @@ namespace game_x.application.Features.NavigationItems.Common.Queries.GetActiveNa
 public sealed class GetActiveNavigationItemsHandler(
     IUserAccessor userAccessor,
     INavigationCacheService navigationCache,
-    IFileManagerCacheService fileManagerCache) : IQueryHandler<GetActiveNavigationItemsQuery, NavigationItemDto[]>
+    IFileManagerCacheService fileManagerCache,
+    IGameProviderCacheService gameProviderCache) : IQueryHandler<GetActiveNavigationItemsQuery, NavigationItemDto[]>
 {
     public async Task<NavigationItemDto[]> Handle(GetActiveNavigationItemsQuery request, CancellationToken ct = default)
     {
         var lang = userAccessor.GetLanguage();
-        var items = await MapToResultAsync(navigationCache.NavigationItems, lang);
-        return items;
-    }
+        var cateDic = gameProviderCache.CategoryList
+            .ToDictionary(cate => cate.LocalId, cate => cate);
 
-    private async Task<NavigationItemDto[]> MapToResultAsync(NavigationItemDto[] items, string language)
-    {
+        var items = navigationCache.NavigationItems;
         foreach (var item in items)
         {
-            // Map icon URL
-            item.IconUrl = await fileManagerCache.GetFileUrl(item.Icon);
-
-            // Map translation
-            if (item.NavigationTranslations.TryGetValue(language, out NavigationItemTranslationInfo? translation))
-            {
+            if (item.NavigationTranslations.TryGetValue(lang, out var translation))
                 item.Title = translation.Title;
-            }
+
+            if (item.TargetLocalId.HasValue && cateDic.TryGetValue(item.TargetLocalId.Value, out var cate))
+                item.TargetId = cate.Id;
+
+            if (item.Icon is not null)
+                item.IconUrl = await fileManagerCache.GetFileUrl(item.Icon, ct);
         }
 
         return items;
