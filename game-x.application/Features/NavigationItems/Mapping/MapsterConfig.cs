@@ -18,7 +18,7 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.TargetLocalId, src => src.TargetId)
             .Map(dest => dest.TargetId, src => (Guid?)null)
-            .Map(dest => dest.NavigationTranslations, src => src.Translations.ToDictionary(t => t.LanguageCode.Value, t => t.Adapt<GamePlatformTranslationInfo>()));
+            .Map(dest => dest.NavigationTranslations, src => src.Translations.ToDictionary(t => t.LanguageCode.Value, t => t.Adapt<NavigationItemTranslationInfo>()));
 
         cfg.NewConfig<NavigationItem, NavigationItemDetailDto>()
             .Inherits<NavigationItem, NavigationItemDto>();
