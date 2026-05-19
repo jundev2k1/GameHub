@@ -9,7 +9,7 @@ public sealed class CreateNavigationItemValidator : AbstractValidator<CreateNavi
             .MaximumLength(255).WithMessage($"{nameof(CreateNavigationItemCommand.Title)} must be less than 255 characters.");
 
         RuleFor(x => x.Slug)
-            .NotEmpty()
+            .NotNull()
             .When(x => x.TargetType != NavigationTargetType.ExternalLink)
             .WithMessage($"{nameof(CreateNavigationItemCommand.Slug)} is required when link is internal.")
             .MaximumLength(255)
@@ -24,7 +24,7 @@ public sealed class CreateNavigationItemValidator : AbstractValidator<CreateNavi
             .WithMessage($"{nameof(CreateNavigationItemCommand.TargetId)} is required for Category or Page target types.");
 
         RuleFor(x => x.CustomUrl)
-            .NotEmpty()
+            .NotNull()
             .When(x => x.TargetType == NavigationTargetType.ExternalLink)
             .WithMessage($"{nameof(CreateNavigationItemCommand.CustomUrl)} is required for External Link target type.")
             .Must(Link => Uri.TryCreate(Link, UriKind.Absolute, out _))
