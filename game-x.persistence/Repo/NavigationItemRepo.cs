@@ -16,6 +16,17 @@ public sealed class NavigationItemRepo(GameXContext dbContext) : INavigationItem
             .ToArrayAsync(ct);
     }
 
+    public async Task<NavigationItem> GetAsync(Guid id, CancellationToken ct = default)
+    {
+        return await dbContext.NavigationItems
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(i => i.Icon)
+            .Include(i => i.Translations)
+            .FirstOrDefaultAsync(i => i.PublicId == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+    }
+
     public async Task CreateAsync(NavigationItem item, CancellationToken ct = default)
     {
         await dbContext.NavigationItems.AddAsync(item, ct);

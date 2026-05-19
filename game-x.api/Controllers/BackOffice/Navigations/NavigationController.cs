@@ -6,6 +6,7 @@ using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigatio
 using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigationItemStatus;
 using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigationItemTranslations;
 using game_x.application.Features.NavigationItems.Admin.Queries.GetAllNavigationItems;
+using game_x.application.Features.NavigationItems.Admin.Queries.GetNavigationItemDetail;
 
 namespace game_x.api.Controllers.BackOffice.Navigations;
 
@@ -17,6 +18,14 @@ public sealed class NavigationController : BaseApiController
     public async Task<IActionResult> GetAllNavigationItemListAsync(CancellationToken ct = default)
     {
         var result = await Mediator.Send(new GetAllNavigationItemsQuery(), ct);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetNavigationItemAsync(Guid id, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new GetNavigationItemDetailQuery(id), ct);
         return ApiResponseFactory.Ok(result);
     }
 

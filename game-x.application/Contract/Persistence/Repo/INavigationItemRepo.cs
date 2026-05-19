@@ -4,6 +4,8 @@ public interface INavigationItemRepo
 {
     Task<NavigationItem[]> GetAllAsync(CancellationToken ct = default);
 
+    Task<NavigationItem> GetAsync(Guid id, CancellationToken ct = default);
+
     Task CreateAsync(NavigationItem item, CancellationToken ct = default);
 
     Task UpdateAsync(
