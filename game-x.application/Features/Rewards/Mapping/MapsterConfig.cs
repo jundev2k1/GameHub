@@ -11,6 +11,9 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<Mission, MissionDto>()
             .Map(dest => dest.Id, src => src.PublicId);
         
+        cfg.NewConfig<Mission, ListedMissionDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
+        
         cfg.NewConfig<CatalogItem, CatalogItemDto>()
             .Map(dest => dest.Id, src => src.PublicId);
         
@@ -48,5 +51,20 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Category, src => src.Item!.Category)
             .Map(dest => dest.IconType, src => src.Item!.IconType)
             .Map(dest => dest.IconValue, src => src.Item!.IconValue);
+        
+        cfg.NewConfig<MissionReward, MissionRewardDto>()
+            .Map(dest => dest.Id, src => src.PublicId)
+            .Map(dest => dest.RewardDefinitionId, src => src.RewardDefinition != null ? (Guid?)src.RewardDefinition.PublicId : null)
+            .Map(dest => dest.ItemId, src => src.RewardDefinition != null && src.RewardDefinition.CatalogItem != null ? 
+                (Guid?)src.RewardDefinition.CatalogItem.PublicId : null)
+            .Map(dest => dest.RewardType, src => src.RewardDefinition != null ? (RewardItemType?)src.RewardDefinition.Type : null)
+            .Map(dest => dest.ItemName, src => src.RewardDefinition != null && src.RewardDefinition.CatalogItem != null 
+                ? src.RewardDefinition.CatalogItem.Name : null)
+            .Map(dest => dest.ItemIconType, src => src.RewardDefinition != null && src.RewardDefinition.CatalogItem != null 
+                ? (CatalogItemIconType?)src.RewardDefinition.CatalogItem.IconType : null)
+            .Map(dest => dest.ItemIconValue, src => src.RewardDefinition != null && src.RewardDefinition.CatalogItem != null 
+                ? src.RewardDefinition.CatalogItem.IconValue : null)
+            .Map(dest => dest.ItemIcon, src => src.RewardDefinition != null && src.RewardDefinition.CatalogItem != null 
+                ? src.RewardDefinition.CatalogItem.Icon : null);
     }
 }

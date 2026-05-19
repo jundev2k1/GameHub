@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace game_x.persistence.Config.Rewards;
 
-public sealed class InventoryItemDefinitionConfig : IEntityTypeConfiguration<CatalogItem>
+public sealed class CatalogItemConfig : IEntityTypeConfiguration<CatalogItem>
 {
     public void Configure(EntityTypeBuilder<CatalogItem> b)
     {
@@ -87,7 +87,7 @@ public sealed class InventoryItemDefinitionConfig : IEntityTypeConfiguration<Cat
             .HasDatabaseName("ix_catalog_items_active");
         #endregion
 
-        #region Relationship
+        #region Relationships
         b.HasOne(x => x.Icon)
             .WithMany()
             .HasForeignKey(x => x.IconId)

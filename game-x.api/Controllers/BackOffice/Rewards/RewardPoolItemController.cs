@@ -1,5 +1,5 @@
-using game_x.application.Features.Rewards.Commands.RemoveRewardPoolItem;
-using game_x.application.Features.Rewards.Commands.UpdateRewardPoolItem;
+using game_x.application.Features.Rewards.Commands.RewardPoolItems.Remove;
+using game_x.application.Features.Rewards.Commands.RewardPoolItems.Update;
 
 namespace game_x.api.Controllers.BackOffice.Rewards;
 

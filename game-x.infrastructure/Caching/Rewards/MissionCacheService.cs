@@ -9,15 +9,21 @@ public sealed class MissionCacheService(
     IMemoryCache cache,
     IMissionRepo repo) : CacheService(cache), IMissionCacheService
 {
-    private MissionDto[]? Datasource => Get<MissionDto[]>($"{RewardCacheKey.Mission}:list");
+    private ListedMissionDto[]? Datasource => Get<ListedMissionDto[]>($"{RewardCacheKey.Mission}:list");
 
     public async Task RefreshCache(CancellationToken ct = default)
     {
         var data = await repo.GetListAsync(ct);
         Set($"{RewardCacheKey.Mission}:list", data);
     }
+    
+    public async Task RefreshCache(Guid id, CancellationToken ct = default)
+    {
+        var data = await repo.GetDetailAsync(id, ct);
+        Set($"{RewardCacheKey.Mission}:{id}:detail", data);
+    }
 
-    public async Task<MissionDto[]?> GetAll(CancellationToken ct = default)
+    public async Task<ListedMissionDto[]?> GetAll(CancellationToken ct = default)
     {
         if (Datasource == null) await RefreshCache(ct);
         return Datasource;
@@ -25,7 +31,9 @@ public sealed class MissionCacheService(
 
     public async Task<MissionDto?> GetDetail(Guid id, CancellationToken ct = default)
     {
-        if (Datasource == null) await RefreshCache(ct);
-        return Datasource?.FirstOrDefault(x => x.Id == id);
+        string key = $"{RewardCacheKey.Mission}:{id}:detail";
+        var mission = Get<MissionDto>(key);
+        if (mission == null) await RefreshCache(id, ct);
+        return Get<MissionDto>(key);
     }
 }

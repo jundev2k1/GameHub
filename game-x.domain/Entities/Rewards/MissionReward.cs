@@ -62,6 +62,7 @@ public sealed class MissionReward : BaseEntity<int>, IAuditable
     public RewardDefinition? RewardDefinition { get; init; }
     
     private readonly List<MissionReward> _missionRewards = new();
+    
     private readonly List<UserMissionClaim> _userMissionClaim = new();
     
     public IReadOnlyCollection<MissionReward> MissionRewards => _missionRewards;

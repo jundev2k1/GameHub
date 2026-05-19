@@ -93,10 +93,26 @@ public sealed class RewardDefinition : BaseEntity<int>, IAuditable
     {
         CatalogItem = entity;
     }
-    
-    public void Activate() => IsActive = true;
 
-    public void Deactivate() => IsActive = false;
+    public void OnUpdate(
+        string? code = null,
+        int? catalogItemId = null,
+        string? title = null,
+        string? description = null,
+        RewardItemType? type = null,
+        bool? isActive = null,
+        decimal? amount = null,
+        string? metadata = null)
+    {
+        Code = code ?? Code;
+        CatalogItemId = catalogItemId ?? CatalogItemId;
+        Title = title ?? Title;
+        Type = type ?? Type;
+        Description = description ?? Description;
+        IsActive = isActive ?? IsActive;
+        Amount = amount ?? Amount;
+        Metadata = metadata ?? Metadata;
+    }
 
     public void SoftDelete() => DeletedAt = DateTime.UtcNow;
     #endregion

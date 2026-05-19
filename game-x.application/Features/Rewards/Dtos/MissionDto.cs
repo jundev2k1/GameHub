@@ -7,23 +7,22 @@ public sealed class MissionDto
 {
     public Guid Id { get; set; }
     
-    public string Code { get; private set; } = string.Empty;
+    public string Code { get; set; } = string.Empty;
     
     public MissionType Type { get; set; }
     
-    public string Title { get; private set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
     
-    public string? Description { get; private set; }
+    public string? Description { get; set; }
     
-    public MissionResetType? ResetType { get; private set; }
+    public MissionResetType? ResetType { get; set; }
     
-    public bool IsActive { get; private set; }
+    public bool IsActive { get; set; }
     
-    public MissionConfigData ConfigData { get; private set; } = MissionConfigData.Default();
+    public MissionConfigData ConfigData { get; set; } = MissionConfigData.Default();
+    public IReadOnlyCollection<MissionRewardDto> MissionRewards { get; set; } = [];
     
-    public DateTime? StartAt { get; private set; }
+    public DateTime? StartAt { get; set; }
 
-    public DateTime? EndAt { get; private set; }
-    
-    public DateTime? DeletedAt { get; private set; }
+    public DateTime? EndAt { get; set; }
 }

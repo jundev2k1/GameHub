@@ -92,6 +92,28 @@ public sealed class CatalogItem: BaseEntity<int>, IAuditable
         Icon = icon;
     }
     
+    public void OnUpdate(
+        string? code = null,
+        string? name = null,
+        string? description = null,
+        CatalogItemCategory? category = null,
+        decimal? monetaryValue = null,
+        CatalogItemIconType? iconType = null,
+        string? iconValue = null,
+        bool? isActive = null,
+        int? sortOrder = null)
+    {
+        Code = code ?? Code;
+        Name = name ?? Name;
+        Description = description ?? Description;
+        Category = category ?? Category;
+        MonetaryValue = monetaryValue ?? MonetaryValue;
+        IsActive = isActive ?? IsActive;
+        SortOrder = sortOrder ?? SortOrder;
+        IconType = iconType ?? IconType;
+        IconValue = iconValue ?? IconValue;
+    }
+    
     public void SoftDelete()
     {
         DeletedAt = DateTime.UtcNow;

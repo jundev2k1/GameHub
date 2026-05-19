@@ -1,6 +1,6 @@
 using game_x.application.Contract.Infrastructure.Caching.Rewards;
-using game_x.application.Features.Rewards.Commands.CreateRewardPoolItem;
-using game_x.application.Features.Rewards.Commands.UpdateRewardPool;
+using game_x.application.Features.Rewards.Commands.RewardPoolItems.Create;
+using game_x.application.Features.Rewards.Commands.RewardPools.Update;
 
 namespace game_x.api.Controllers.BackOffice.Rewards;
 

@@ -9,6 +9,7 @@ public enum MissionType
     DailyLogin,
     /// <summary>Deposit requirement mission.</summary>
     Deposit,
+    DepositAccumulation,
     /// <summary>Social sharing mission.</summary>
     Share,
     /// <summary>Future extensibility.</summary>
