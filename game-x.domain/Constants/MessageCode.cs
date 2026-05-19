@@ -402,6 +402,12 @@ public static class MessageCode
         ItemRequiredInPool = 10608,
         [EnumMetadata("Item is insufficient.")]
         ItemInsufficient = 10609,
+        [EnumMetadata("Catalog Item not found.")]
+        CatalogItemInactive = 10610,
+        [EnumMetadata("Reward Definition not found.")]
+        RewardDefinitionInactive = 10611,
+        [EnumMetadata("Reward Definition not found.")]
+        MissionInactive = 10612,
         #endregion
     }
 }

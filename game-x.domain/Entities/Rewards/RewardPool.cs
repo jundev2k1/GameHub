@@ -86,6 +86,7 @@ public sealed class RewardPool : BaseEntity<int>, IAuditable
         Code = code ?? Code;
         Title = title ?? Title;
         Type = type ?? Type;
+        Description = description ?? Description;
         IsActive = isActive ?? IsActive;
         SortOrder = sortOrder ?? SortOrder;
         StartAt = startAt ?? StartAt;

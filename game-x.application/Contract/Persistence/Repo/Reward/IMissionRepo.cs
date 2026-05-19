@@ -5,9 +5,11 @@ namespace game_x.application.Contract.Persistence.Repo.Reward;
 
 public interface IMissionRepo
 {
-    Task<MissionDto[]> GetListAsync(CancellationToken ct = default);
+    Task<ListedMissionDto[]> GetListAsync(CancellationToken ct = default);
     
     Task<MissionDto> GetDetailAsync(Guid id, CancellationToken ct = default);
+    
+    Task<Mission> GetByIdAsync(Guid id, CancellationToken ct = default);
     
     Task AddAsync(Mission entity, CancellationToken ct = default);
 }

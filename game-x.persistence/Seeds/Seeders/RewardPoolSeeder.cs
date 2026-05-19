@@ -86,26 +86,6 @@ public sealed class RewardPoolSeeder : ISeeder
                 {
                     ["tier"] = "vip"
                 }
-            }),
-        RewardPool.Create(
-            type: RewardPoolType.Scratch,
-            code: RewardPoolCode.ReferralScratch,
-            title: "Referral Scratch",
-            description: "Referral bonus scratch reward.",
-            config: new RewardPoolConfigData
-            {
-                Theme = "referral",
-                AnimationType = RewardPoolType.Scratch,
-
-                AutoClaimReward = true,
-                RewardExpireMinutes = 4320,
-
-                ShowWinningEffect = true,
-
-                Metadata = new()
-                {
-                    ["source"] = "referral_campaign"
-                }
             })
     ];
     

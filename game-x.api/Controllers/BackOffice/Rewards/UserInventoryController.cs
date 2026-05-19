@@ -1,4 +1,4 @@
-﻿using game_x.application.Features.Rewards.Commands.AddUserCatalogItem;
+﻿using game_x.application.Features.Rewards.Commands.CatalogItems.AddToUserInventory;
 
 namespace game_x.api.Controllers.BackOffice.Rewards;
 
@@ -7,7 +7,7 @@ namespace game_x.api.Controllers.BackOffice.Rewards;
 public sealed class UserInventoryController : BaseApiController
 {
     [HttpPost("{userId}")]
-    public async Task<IActionResult> CreateAsync(string userId, AddUserCatalogItemCommand cmd, CancellationToken ct = default)
+    public async Task<IActionResult> CreateAsync(string userId, AddItemToUserInventoryCommand cmd, CancellationToken ct = default)
     {
         var result = await Mediator.Send(cmd with { UserId = userId }, ct);
         return ApiResponseFactory.Created(result);

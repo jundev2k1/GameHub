@@ -9,7 +9,7 @@ public interface IRewardDefinitionRepo
     
     Task<bool> CheckExistedCodeAsync(string code, CancellationToken ct = default);
     
-    Task<RewardDefinition> GetDetailByIdAsync(Guid id, CancellationToken ct = default);
+    Task<RewardDefinition> GetByIdAsync(Guid id, CancellationToken ct = default);
     
     Task AddAsync(RewardDefinition entity, CancellationToken ct = default);
     

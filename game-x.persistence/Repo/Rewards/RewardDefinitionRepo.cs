@@ -43,7 +43,7 @@ public sealed class RewardDefinitionRepo(
             .AnyAsync(x => x.Code == code, ct);
     }
     
-    public async Task<RewardDefinition> GetDetailByIdAsync(Guid id, CancellationToken ct = default)
+    public async Task<RewardDefinition> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await dbContext.RewardDefinitions
             .AsNoTracking()
