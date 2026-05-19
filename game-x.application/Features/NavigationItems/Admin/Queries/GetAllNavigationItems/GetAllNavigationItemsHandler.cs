@@ -18,7 +18,9 @@ public sealed class GetAllNavigationItemsHandler(
             .ToDictionary(cate => cate.LocalId, cate => cate);
 
         var items = await navigationItemRepo.GetAllAsync(ct);
-        var result = items.Adapt<NavigationItemDto[]>();
+        var result = items
+            .OrderByDescending(i => i.Priority)
+            .Adapt<NavigationItemDto[]>();
         foreach (var item in result)
         {
             if (item.TargetLocalId.HasValue && cateDic.TryGetValue(item.TargetLocalId.Value, out var cate))

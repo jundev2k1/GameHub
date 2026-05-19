@@ -16,7 +16,9 @@ public sealed class GetActiveNavigationItemsHandler(
         var cateDic = gameProviderCache.CategoryList
             .ToDictionary(cate => cate.LocalId, cate => cate);
 
-        var items = navigationCache.NavigationItems;
+        var items = navigationCache.NavigationItems
+            .OrderByDescending(i => i.Priority)
+            .ToArray();
         foreach (var item in items)
         {
             if (item.NavigationTranslations.TryGetValue(lang, out var translation))
