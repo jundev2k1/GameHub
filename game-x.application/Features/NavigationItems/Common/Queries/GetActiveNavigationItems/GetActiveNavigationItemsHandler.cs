@@ -17,6 +17,7 @@ public sealed class GetActiveNavigationItemsHandler(
             .ToDictionary(cate => cate.LocalId, cate => cate);
 
         var items = navigationCache.NavigationItems
+            .Where(i => i.IsActive)
             .OrderByDescending(i => i.Priority)
             .ToArray();
         foreach (var item in items)
