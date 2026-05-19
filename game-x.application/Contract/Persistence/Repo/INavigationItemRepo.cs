@@ -12,5 +12,10 @@ public interface INavigationItemRepo
         Func<IQueryable<NavigationItem>, IQueryable<NavigationItem>>? preUpdateAction = null,
         CancellationToken ct = default);
 
+    Task UpdateTranslationAsync(
+        Guid id,
+        Action<NavigationItem> updateAction,
+        CancellationToken ct = default);
+
     Task DeleteAsync(Guid id, CancellationToken ct = default);
 }

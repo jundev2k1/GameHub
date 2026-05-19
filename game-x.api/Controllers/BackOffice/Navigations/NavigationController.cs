@@ -4,6 +4,7 @@ using game_x.application.Features.NavigationItems.Admin.Commands.DeleteNavigatio
 using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigationItem;
 using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigationItemIcon;
 using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigationItemStatus;
+using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigationItemTranslations;
 using game_x.application.Features.NavigationItems.Admin.Queries.GetAllNavigationItems;
 
 namespace game_x.api.Controllers.BackOffice.Navigations;
@@ -48,6 +49,16 @@ public sealed class NavigationController : BaseApiController
     {
         var result = await Mediator.Send(command with { Id = id }, ct);
         return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost("{id:guid}/translations")]
+    public async Task<IActionResult> UpsertGameTranslationsAsync(
+        [FromRoute] Guid id,
+        [FromBody] UpdateNavigationItemTranslationsCommand command)
+    {
+        await Mediator.Send(command with { Id = id });
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
     }
 
     [Authorize(Roles = AppRoles.Admin)]

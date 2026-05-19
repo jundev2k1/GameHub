@@ -39,6 +39,19 @@ public sealed class NavigationItemRepo(GameXContext dbContext) : INavigationItem
         updateAction?.Invoke(target);
     }
 
+    public async Task UpdateTranslationAsync(
+        Guid id,
+        Action<NavigationItem> updateAction,
+        CancellationToken ct = default)
+    {
+        var targetNavigationItem = await dbContext.NavigationItems
+            .Include(g => g.Translations)
+            .FirstOrDefaultAsync(g => g.PublicId == id, ct)
+            ?? throw new NotFoundException(nameof(id), id);
+
+        updateAction.Invoke(targetNavigationItem);
+    }
+
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
     {
         var target = await dbContext.NavigationItems
