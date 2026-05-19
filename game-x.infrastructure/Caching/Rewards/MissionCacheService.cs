@@ -1,4 +1,5 @@
-﻿using game_x.application.Contract.Infrastructure.Caching.Rewards;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.Caching.Rewards;
 using game_x.application.Contract.Persistence.Repo.Reward;
 using game_x.application.Features.Rewards.Dtos;
 using Microsoft.Extensions.Caching.Memory;
@@ -7,7 +8,8 @@ namespace game_x.infrastructure.Caching.Rewards;
 
 public sealed class MissionCacheService(
     IMemoryCache cache,
-    IMissionRepo repo) : CacheService(cache), IMissionCacheService
+    IMissionRepo repo,
+    IFileManagerCacheService storage) : CacheService(cache), IMissionCacheService
 {
     private ListedMissionDto[]? Datasource => Get<ListedMissionDto[]>($"{RewardCacheKey.Mission}:list");
 
@@ -20,7 +22,20 @@ public sealed class MissionCacheService(
     public async Task RefreshCache(Guid id, CancellationToken ct = default)
     {
         var data = await repo.GetDetailAsync(id, ct);
-        Set($"{RewardCacheKey.Mission}:{id}:detail", data);
+        var missionRewards = await Task.WhenAll(
+            data.MissionRewards.Select(async item =>
+            {
+                var dto = item.Adapt<CachedMissionRewardDto>();
+                dto.ItemIconUrl = item.ItemIcon is null
+                    ? null
+                    : await storage.GetFileUrl(item.ItemIcon, ct);
+
+                return dto;
+            }));
+
+        var missionDto = data.Adapt<CachedMissionDto>();
+        missionDto.MissionRewards = missionRewards;
+        Set($"{RewardCacheKey.Mission}:{id}:detail", missionDto);
     }
 
     public async Task<ListedMissionDto[]?> GetAll(CancellationToken ct = default)
@@ -29,11 +44,11 @@ public sealed class MissionCacheService(
         return Datasource;
     }
 
-    public async Task<MissionDto?> GetDetail(Guid id, CancellationToken ct = default)
+    public async Task<CachedMissionDto?> GetDetail(Guid id, CancellationToken ct = default)
     {
         string key = $"{RewardCacheKey.Mission}:{id}:detail";
-        var mission = Get<MissionDto>(key);
+        var mission = Get<CachedMissionDto>(key);
         if (mission == null) await RefreshCache(id, ct);
-        return Get<MissionDto>(key);
+        return Get<CachedMissionDto>(key);
     }
 }

@@ -2,7 +2,7 @@ using game_x.domain.Enum.Rewards;
 
 namespace game_x.application.Features.Rewards.Dtos;
 
-public sealed class MissionRewardDto
+public sealed class CachedMissionRewardDto
 {
     public Guid Id { get; set; }
     
@@ -38,5 +38,5 @@ public sealed class MissionRewardDto
     
     public string? ItemIconValue { get; set; }
     
-    public MediaFile? ItemIcon { get; set; }
+    public string? ItemIconUrl { get; set; }
 }

@@ -32,7 +32,7 @@ public sealed class MissionReward : BaseEntity<int>, IAuditable
     public int SortOrder { get; private set; }
 
     /// <summary>
-    /// Required progress to unlock this reward.
+    /// Required progress to unlock this reward. Trigger progress
     ///
     /// Examples:
     /// Login mission: 1,2,3,4...

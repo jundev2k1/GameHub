@@ -65,7 +65,7 @@ public sealed class CreateCatalogItemHandler(
         await fileStorage.UploadFileAsync(file.Content, BucketName.CatalogItem, objectName, MimeType.Of(file.ContentType), ct);
         
         return MediaFile.Create(
-            bucketName: BucketName.User,
+            bucketName: BucketName.CatalogItem,
             objectName: objectName,
             fileName: file.FileName,
             mimeType: MimeType.Of(file.ContentType),
