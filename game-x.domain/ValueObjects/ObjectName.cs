@@ -35,6 +35,9 @@ public sealed class ObjectName
 
     public static ObjectName CatalogItem(Guid catalogItemId, string fileName)
         => Of($"catalog_items/{catalogItemId:N}/icons/{fileName}");
+
+    public static ObjectName NavigationItem(Guid id, string fileName)
+        => Of($"navigations/{id:N}/icons/{fileName}");
     
     public static ObjectName Of(string value)
     {
@@ -60,7 +63,8 @@ public sealed class ObjectName
         "schedules",
         "gifts",
         "characters",
-        "catalog_items"];
+        "catalog_items",
+        "navigations"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>

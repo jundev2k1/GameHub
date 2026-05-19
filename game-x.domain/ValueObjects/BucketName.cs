@@ -12,6 +12,7 @@ public sealed class BucketName
     public static BucketName LiveStream => Of("live-stream");
     public static BucketName Interaction => Of("interaction");
     public static BucketName CatalogItem => Of("catalog-item");
+    public static BucketName Navigation => Of("navigation");
 
     public static BucketName Of(string value)
     {
@@ -23,7 +24,7 @@ public sealed class BucketName
         return new BucketName(value);
     }
 
-    private static readonly string[] ValidValues = ["user", "chat", "game", "live-stream", "interaction", "catalog-item"];
+    private static readonly string[] ValidValues = ["user", "chat", "game", "live-stream", "interaction", "catalog-item", "navigation"];
 
     public override bool Equals(object? obj) =>
         (obj != null) && (obj is BucketName type) && (Value == type.Value);

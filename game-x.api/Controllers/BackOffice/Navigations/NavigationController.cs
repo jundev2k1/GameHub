@@ -1,5 +1,7 @@
-﻿using game_x.application.Features.NavigationItems.Admin.Commands.CreateNavigationItem;
+﻿using game_x.application.Common.Files;
+using game_x.application.Features.NavigationItems.Admin.Commands.CreateNavigationItem;
 using game_x.application.Features.NavigationItems.Admin.Commands.DeleteNavigationItem;
+using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigationItemIcon;
 using game_x.application.Features.NavigationItems.Admin.Queries.GetAllNavigationItems;
 
 namespace game_x.api.Controllers.BackOffice.Navigations;
@@ -21,6 +23,18 @@ public sealed class NavigationController : BaseApiController
     {
         await Mediator.Send(command, ct);
         return ApiResponseFactory.NoContent();
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost("{id:guid}/icon")]
+    public async Task<IActionResult> UploadNavigationIconAsync(
+        Guid id,
+        IFormFile icon,
+        CancellationToken ct = default)
+    {
+        var command = new UpdateNavigationItemIconCommand(id, FileUpload.FromFormFile(icon));
+        var url = await Mediator.Send(command, ct);
+        return ApiResponseFactory.Ok(url);
     }
 
     [Authorize(Roles = AppRoles.Admin)]

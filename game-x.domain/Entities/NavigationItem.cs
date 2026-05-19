@@ -75,6 +75,12 @@ public sealed class NavigationItem : BaseEntity<int>, IAuditable
         IsActive = isActive;
     }
 
+    public void UploadIcon(MediaFile file)
+    {
+        IconId = file.Id;
+        Icon = file;
+    }
+
     public void UpsertTranslation(LanguageCode lang, string title)
     {
         var existing = Translations.FirstOrDefault(x => x.LanguageCode.Equals(lang));
