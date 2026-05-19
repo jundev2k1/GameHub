@@ -83,6 +83,7 @@ public sealed class GameXContext(
     public DbSet<IdempotencyKey> IdempotencyKeys { get; set; }
     public DbSet<ShareLink> ShareLinks { get; set; }
     public DbSet<UserEvent> UserEvents { get; set; }
+    public DbSet<NavigationItem> NavigationItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

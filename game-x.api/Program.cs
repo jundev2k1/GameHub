@@ -71,6 +71,9 @@ try
 
     var asymmetricKeyCache = serviceProvider.GetRequiredService<IAsymmetricKeyCacheService>();
     await asymmetricKeyCache.RefreshAsync();
+
+    var navigationCache = serviceProvider.GetRequiredService<INavigationCacheService>();
+    await navigationCache.RefreshNavigationItemsAsync();
 }
 catch (Exception ex)
 {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20260518110946_Add_NavigationItemTranslation_Schema")]
+    partial class Add_NavigationItemTranslation_Schema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2718,10 +2721,6 @@ namespace game_x.persistence.Migrations
                         .HasDefaultValue("")
                         .HasColumnName("custom_url");
 
-                    b.Property<int?>("IconId")
-                        .HasColumnType("integer")
-                        .HasColumnName("icon_id");
-
                     b.Property<short>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("smallint")
@@ -2770,9 +2769,6 @@ namespace game_x.persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_navigation_items");
-
-                    b.HasIndex("IconId")
-                        .HasDatabaseName("ix_navigation_items_icon_id");
 
                     b.HasIndex("PublicId")
                         .IsUnique()
@@ -6279,17 +6275,6 @@ namespace game_x.persistence.Migrations
                     b.Navigation("Message");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("game_x.domain.Entities.NavigationItem", b =>
-                {
-                    b.HasOne("game_x.domain.Entities.MediaFile", "Icon")
-                        .WithMany()
-                        .HasForeignKey("IconId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_navigation_items_media_files_icon_id");
-
-                    b.Navigation("Icon");
                 });
 
             modelBuilder.Entity("game_x.domain.Entities.NavigationItemTranslation", b =>

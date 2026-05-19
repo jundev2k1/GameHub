@@ -1,4 +1,4 @@
-﻿using game_x.domain.Entities;
+using game_x.domain.Entities;
 using game_x.domain.Entities.Rewards;
 
 namespace game_x.domain.ValueObjects;
@@ -62,7 +62,11 @@ public sealed class EntityName
         nameof(RewardPool),
         nameof(UserReward),
         nameof(RewardDefinition),
-        nameof(MissionReward)
+<<<<<<< game-x.domain/ValueObjects/EntityName.cs
+        nameof(MissionReward),
+        nameof(NavigationItem),
+        nameof(NavigationItemTranslation),
+>>>>>>> game-x.domain/ValueObjects/EntityName.cs
     ];
 
     public override bool Equals(object? obj) =>
