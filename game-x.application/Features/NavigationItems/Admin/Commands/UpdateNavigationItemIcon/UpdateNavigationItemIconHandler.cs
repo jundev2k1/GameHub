@@ -10,7 +10,8 @@ public sealed class UpdateNavigationItemIconHandler(
     IUnitOfWork unitOfWork,
     INavigationItemRepo navigationItemRepo,
     IFileStorageService fileStorage,
-    IFileManagerCacheService fileManagerCache) : ICommandHandler<UpdateNavigationItemIconCommand, string>
+    IFileManagerCacheService fileManagerCache,
+    INavigationCacheService navigationCache) : ICommandHandler<UpdateNavigationItemIconCommand, string>
 {
     public async Task<string> Handle(UpdateNavigationItemIconCommand request, CancellationToken ct = default)
     {
@@ -27,6 +28,9 @@ public sealed class UpdateNavigationItemIconHandler(
 
         // Refresh cache
         await fileManagerCache.RefreshImage(file!, ct: ct);
+
+        // Refreshing navigation items cache
+        await navigationCache.RefreshNavigationItemsAsync(ct);
 
         // Get url
         var avatarUrl = await fileManagerCache.GetFileUrl(file, ct);

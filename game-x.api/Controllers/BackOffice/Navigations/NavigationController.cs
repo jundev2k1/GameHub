@@ -3,6 +3,7 @@ using game_x.application.Features.NavigationItems.Admin.Commands.CreateNavigatio
 using game_x.application.Features.NavigationItems.Admin.Commands.DeleteNavigationItem;
 using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigationItem;
 using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigationItemIcon;
+using game_x.application.Features.NavigationItems.Admin.Commands.UpdateNavigationItemStatus;
 using game_x.application.Features.NavigationItems.Admin.Queries.GetAllNavigationItems;
 
 namespace game_x.api.Controllers.BackOffice.Navigations;
@@ -43,6 +44,17 @@ public sealed class NavigationController : BaseApiController
     public async Task<IActionResult> UpdateNavigationAsync(
         Guid id,
         UpdateNavigationItemCommand command,
+        CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(command with { Id = id }, ct);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPatch("{id:guid}/status")]
+    public async Task<IActionResult> UpdateStatusNavigationAsync(
+        Guid id,
+        UpdateNavigationItemStatusCommand command,
         CancellationToken ct = default)
     {
         var result = await Mediator.Send(command with { Id = id }, ct);

@@ -81,6 +81,11 @@ public sealed class NavigationItem : BaseEntity<int>, IAuditable
         Icon = file;
     }
 
+    public void UpdateStatus(bool isActive)
+    {
+        IsActive = isActive;
+    }
+
     public void UpsertTranslation(LanguageCode lang, string title)
     {
         var existing = Translations.FirstOrDefault(x => x.LanguageCode.Equals(lang));
