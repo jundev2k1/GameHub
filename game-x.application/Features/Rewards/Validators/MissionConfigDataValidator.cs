@@ -13,15 +13,6 @@ public sealed class MissionConfigDataValidator : AbstractValidator<MissionConfig
         RuleFor(x => x.ProgressMode)
             .IsInEnum()
             .WithMessage("ProgressMode is invalid.");
-
-        RuleFor(x => x.AllowedUserEvents)
-            .NotNull()
-            .NotEmpty()
-            .WithMessage("At least one allowed user event is required.");
-
-        RuleForEach(x => x.AllowedUserEvents)
-            .IsInEnum()
-            .WithMessage("One or more AllowedUserEvents are invalid.");
         
         RuleFor(x => x.MinimumValue)
             .GreaterThanOrEqualTo(0)

@@ -4,6 +4,7 @@ using game_x.domain.Enum.Rewards;
 using game_x.domain.ValueObjects.Missions;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace game_x.persistence.Config.Rewards;
 
@@ -32,6 +33,17 @@ public sealed class RewardConfigConfig : IEntityTypeConfiguration<RewardPool>
             .HasMaxLength(64)
             .HasDefaultValue(RewardPoolType.Roulette);
 
+        b.Property(x => x.TriggerEvents)
+            .HasColumnName("trigger_events")
+            .HasColumnType("text[]")
+            .HasConversion(
+                new ValueConverter<UserEventType[], string[]>(
+                    v => v.Select(e => e.ToString()).ToArray(),
+                    v => v.Select(Enum.Parse<UserEventType>).ToArray()
+                )
+            )
+            .IsRequired();
+        
         b.Property(x => x.Code)
             .HasColumnName("code")
             .IsRequired()

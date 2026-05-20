@@ -31,6 +31,8 @@ public sealed class RewardPool : BaseEntity<int>, IAuditable
     
     public int SortOrder { get; private set; }
     
+    public UserEventType[] TriggerEvents { get; private set; } = [];
+    
     public RewardPoolConfigData? Config { get; private set; }
     
     public DateTime? DeletedAt { get; private set; }
@@ -54,6 +56,7 @@ public sealed class RewardPool : BaseEntity<int>, IAuditable
 
     public static RewardPool Create(
         RewardPoolType type,
+        UserEventType[] triggerEvents,
         string code,
         string title,
         string? description = null,
@@ -63,6 +66,7 @@ public sealed class RewardPool : BaseEntity<int>, IAuditable
         {
             Type = type,
             Code = code,
+            TriggerEvents = triggerEvents,
             Title = title,
             Description = description,
             Config = config

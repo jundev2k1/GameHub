@@ -19,6 +19,8 @@ public sealed class CachedMissionDto
     
     public bool IsActive { get; set; }
     
+    public UserEventType[] TriggerEvents { get; set; } = [];
+    
     public MissionConfigData ConfigData { get; set; } = MissionConfigData.Default();
     
     public DateTime? StartAt { get; set; }

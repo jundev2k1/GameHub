@@ -57,7 +57,7 @@ public class User : IdentityUser, IEntity, IAuditable
     
     public ICollection<SocialLink> BlocksToMe { get; set; } = [];
     
-    public IReadOnlyCollection<UserEvent> UserEvents { get; init; } = [];
+    public IReadOnlyCollection<UserEvent> UserEvents { get; init; } = new List<UserEvent>();
     
     public IReadOnlyCollection<UserMission> UserMissions { get; init; } = [];
     
@@ -69,7 +69,7 @@ public class User : IdentityUser, IEntity, IAuditable
     
     public IReadOnlyCollection<Execution> Executions { get; init; } = [];
     
-    public IReadOnlyCollection<UserMissionClaim> UserMissionClaims { get; init; } = [];
+    public IReadOnlyCollection<UserMissionClaim> UserMissionClaims { get; init; } = new List<UserMissionClaim>();
     #endregion
 
     #region Intitializations
