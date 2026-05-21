@@ -7,7 +7,7 @@ namespace game_x.infrastructure.BackgroundJobs.Jobs;
 
 public sealed class StreamViewRefresherJob(
     ILiveStreamManagerCacheService liveStreamManager,
-    ILiveStreamHubService liveStreamSevice) : IRecurringJob
+    ILiveStreamHubService liveStreamService) : IRecurringJob
 {
     public string JobId => "stream-viewer-refresher";
     public string? CronExpression => null;
@@ -23,10 +23,10 @@ public sealed class StreamViewRefresherJob(
         {
             // Refresh view count for each live stream room
             var viewCount = liveStreamManager.GetViewerCount(streamKey);
-            await liveStreamSevice.RefreshViewCount(streamKey, viewCount);
+            await liveStreamService.RefreshViewCount(streamKey, viewCount);
         }
 
-        // Clean up caches
+        // Cleanup caches
         liveStreamManager.CleanViewerChangeList();
 
         // Callback job after JobRunAfterSeconds seconds

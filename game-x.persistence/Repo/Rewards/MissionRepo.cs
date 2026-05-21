@@ -4,6 +4,7 @@ using game_x.application.Exceptions;
 using game_x.application.Features.Rewards.Dtos;
 using game_x.domain.Constants;
 using game_x.domain.Entities.Rewards;
+using game_x.domain.Enum.Rewards;
 using Mapster;
 
 namespace game_x.persistence.Repo.Rewards;
@@ -35,6 +36,7 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                 ConfigData = m.ConfigData,
                 StartAt = m.StartAt,
                 EndAt = m.EndAt,
+                TriggerEvents = m.TriggerEvents,
                 MissionRewards = m.MissionRewards.Select(mr => new MissionRewardDto
                 {
                     Id = mr.PublicId,
@@ -78,8 +80,42 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                ?? throw new NotFoundException(MessageCode.Reward.MissionNotFound);
     }
     
+    public async Task<bool> CheckExistedCodeAsync(string code, CancellationToken ct = default)
+    {
+        return await dbContext.Missions
+            .AnyAsync(x => x.Code == code, ct);
+    }
+    
+    public async Task<IReadOnlyCollection<Mission>> GetTriggeredByEventAsync(
+        UserEventType eventType,
+        CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+
+        var missions = await dbContext.Missions
+            .AsNoTracking()
+            .Where(x =>
+                x.IsActive &&
+                (x.StartAt == null || x.StartAt <= now) &&
+                (x.EndAt == null || x.EndAt >= now))
+            .ToListAsync(ct);
+
+        return missions
+            .Where(x => x.TriggerEvents.Contains(eventType))
+            .ToList();
+    }
+    
     public async Task AddAsync(Mission entity, CancellationToken ct = default)
     {
         await dbContext.Missions.AddAsync(entity, ct);
+    }
+    
+    public async Task UpdateAsync(Guid id, Action<Mission> updateAction, CancellationToken ct = default)
+    {
+        var entity = await dbContext.Missions
+                         .FirstOrDefaultAsync(c => c.PublicId == id, ct)
+                     ?? throw new NotFoundException(MessageCode.Reward.RewardPoolNotFound);
+
+        updateAction.Invoke(entity);
     }
 }

@@ -28,6 +28,7 @@ public sealed class UserEventConfig : IEntityTypeConfiguration<UserEvent>
 
         b.Property(x => x.Type)
             .HasColumnName("type")
+            .HasConversion<string>()
             .IsRequired();
 
         b.Property(x => x.Value)

@@ -10,6 +10,7 @@ public sealed record CreateMissionCommand: ICommand<Unit>
     public string Title { get; init; } = string.Empty;
     public string? Description { get; init; }
     public MissionResetType? ResetType { get; init; }
+    public UserEventType[] TriggerEvents { get; init; } = [];
     public MissionConfigData ConfigData { get; init; } = MissionConfigData.Default();
     public DateTime? StartAt { get; init; }
     public DateTime? EndAt { get; init; }

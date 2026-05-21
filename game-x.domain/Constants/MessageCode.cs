@@ -408,6 +408,10 @@ public static class MessageCode
         RewardDefinitionInactive = 10611,
         [EnumMetadata("Reward Definition not found.")]
         MissionInactive = 10612,
+        [EnumMetadata("User Event not found.")]
+        UserEventNotFound = 10613,
+        [EnumMetadata("Reward Pool Item is invalid.")]
+        RewardPoolItemInvalid = 10614,
         #endregion
     }
 }

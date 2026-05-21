@@ -50,14 +50,14 @@ public sealed class UserMissionClaim : BaseEntity<int>, IAuditable
 
     public static UserMissionClaim Create(
         string userId,
-        int userMissionId,
+        UserMission userMission,
         int missionRewardId,
         DateTime? availableAt = null)
     {
         return new()
         {
             UserId = userId,
-            UserMissionId = userMissionId,
+            UserMission = userMission,
             MissionRewardId = missionRewardId,
             Status = UserMissionClaimStatus.Available,
             AvailableAt = availableAt ?? DateTime.UtcNow

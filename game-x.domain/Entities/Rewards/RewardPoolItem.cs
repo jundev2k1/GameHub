@@ -35,7 +35,7 @@ public sealed class RewardPoolItem : BaseEntity<int>, IAuditable
     public RewardDefinition? RewardDefinition { get; init; }
     
     private readonly List<UserReward> _userRewards = new();
-    public IReadOnlyCollection<UserReward> UserRewards => _userRewards;
+    public ICollection<UserReward> UserRewards => _userRewards;
     #endregion
 
     #region Initializations

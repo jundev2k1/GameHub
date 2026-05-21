@@ -2,6 +2,7 @@
 using game_x.application.Exceptions;
 using game_x.application.Features.Rewards.Commands.MissionRewards.Create;
 using game_x.application.Features.Rewards.Commands.Missions.Create;
+using game_x.application.Features.Rewards.Commands.Missions.Update;
 
 namespace game_x.api.Controllers.BackOffice.Rewards;
 
@@ -23,6 +24,13 @@ public sealed class MissionController(IMissionCacheService cache) : BaseApiContr
         if (result == null)
             throw new NotFoundException(MessageCode.Reward.MissionNotFound);
         return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpPatch("{id:guid}")]
+    public async Task<IActionResult> UpdateAsync(Guid id, UpdateMissionCommand cmd, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(cmd with {Id = id}, ct);
+        return ApiResponseFactory.Created(result);
     }
     
     [HttpPost]

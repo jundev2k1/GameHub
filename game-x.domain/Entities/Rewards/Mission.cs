@@ -30,6 +30,8 @@ public sealed class Mission : BaseEntity<int>, IAuditable
     
     public bool IsActive { get; private set; } = true;
     
+    public UserEventType[] TriggerEvents { get; private set; } = [];
+    
     public MissionConfigData ConfigData { get; private set; } = MissionConfigData.Default();
     
     public DateTime? StartAt { get; private set; }
@@ -42,9 +44,9 @@ public sealed class Mission : BaseEntity<int>, IAuditable
     #region Relationships
     private readonly List<MissionReward> _missionReward = new();
     private readonly List<UserMission> _userMissions = new();
-    public IReadOnlyCollection<MissionReward> MissionRewards => _missionReward;
+    public ICollection<MissionReward> MissionRewards => _missionReward;
 
-    public IReadOnlyCollection<UserMission> UserMissions => _userMissions;
+    public ICollection<UserMission> UserMissions => _userMissions;
     #endregion
 
     #region Initializations
@@ -54,6 +56,7 @@ public sealed class Mission : BaseEntity<int>, IAuditable
         string code,
         MissionType type,
         string title,
+        UserEventType[] triggerEvents,
         MissionConfigData configData,
         string? description = null,
         MissionResetType? resetType = null,
@@ -66,6 +69,7 @@ public sealed class Mission : BaseEntity<int>, IAuditable
             Type = type,
             Title = title,
             Description = description,
+            TriggerEvents = triggerEvents,
             ConfigData = configData,
             ResetType = resetType,
             StartAt = startAt,
@@ -76,9 +80,29 @@ public sealed class Mission : BaseEntity<int>, IAuditable
     #endregion
 
     #region Behaviors
-    public void Activate() => IsActive = true;
-
-    public void Deactivate() => IsActive = false;
+    public void OnUpdate(
+        string? code = null,
+        string? title = null,
+        string? description = null,
+        MissionType? type = null,
+        MissionResetType? resetType = null,
+        UserEventType[]? triggerEvents = null,
+        bool? isActive = null,
+        DateTime? startAt = null,
+        DateTime? endAt = null,
+        MissionConfigData? config = null)
+    {
+        Code = code ?? Code;
+        Title = title ?? Title;
+        Type = type ?? Type;
+        ResetType = resetType ?? ResetType;
+        TriggerEvents = triggerEvents ?? TriggerEvents;
+        Description = description ?? Description;
+        IsActive = isActive ?? IsActive;
+        StartAt = startAt ?? StartAt;
+        EndAt = endAt ?? EndAt;
+        ConfigData = config ?? ConfigData;
+    }
 
     public void SoftDelete() => DeletedAt = DateTime.UtcNow;
     #endregion

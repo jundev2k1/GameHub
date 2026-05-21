@@ -45,6 +45,10 @@ public sealed class UserMissionConfig : IEntityTypeConfiguration<UserMission>
         b.Property(x => x.ResetAt)
             .HasColumnName("reset_at")
             .HasColumnType("timestamp with time zone");
+        
+        b.Property(x => x.LastProgressAt)
+            .HasColumnName("last_progress_at")
+            .HasColumnType("timestamp with time zone");
         #endregion
 
         #region Indexes

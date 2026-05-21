@@ -6,10 +6,10 @@ namespace game_x.domain.Enum.Rewards;
 public enum CatalogItemCategory
 {
     /// <summary>Wallet-like virtual currency.</summary>
-    Currency,
+    Currency = 1,
     /// <summary>Entry token for reward participation.</summary>
-    Ticket,
-    FreeSpin,
+    Ticket = 2,
+    FreeSpin = 3,
     /// <summary>Livestream gift item.</summary>
-    Gift
+    Gift = 4
 }

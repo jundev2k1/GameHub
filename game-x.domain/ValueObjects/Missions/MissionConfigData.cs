@@ -34,13 +34,6 @@ public sealed class MissionConfigData
 
     #endregion
 
-    #region Event Matching
-
-    /// <summary>Which user events can progress this mission?</summary>
-    public List<UserEventType> AllowedUserEvents { get; init; } = [];
-
-    #endregion
-
     #region Value Rules
 
     /// <summary>

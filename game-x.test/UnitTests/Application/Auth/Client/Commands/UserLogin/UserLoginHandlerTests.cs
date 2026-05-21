@@ -1,9 +1,11 @@
 using FluentAssertions;
 using game_x.application.Common.Abstractions.Events;
+using game_x.application.Contract.Infrastructure.BackgroundJobs.Dispatchers;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Identity;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Contract.Persistence.Repo.Reward;
 using game_x.application.Exceptions;
 using game_x.application.Features.Auth.Client.Commands.UserLogin;
 using game_x.domain.Constants;
@@ -16,25 +18,31 @@ namespace Test.UnitTests.Application.Auth.Client.Commands.UserLogin;
 
 public sealed class UserLoginHandlerTests
 {
+    private readonly Mock<IUnitOfWork> _unitOfWork = new();
     private readonly Mock<IUserAccessor> _userAccessorMock = new();
     private readonly Mock<IJwtTokenGenerator> _jwtTokenGeneratorMock = new();
     private readonly Mock<ITokenService> _tokenServiceMock = new();
     private readonly Mock<IRefreshTokenManagerCacheService> _refreshTokenManagerMock = new();
     private readonly Mock<IApplicationEventDispatcher> _eventDispatcherMock = new();
+    private readonly Mock<IUserEventJobDispatcher> _userEventDispatcherMock = new();
     private readonly Mock<IAuthService> _authServiceMock = new();
     private readonly Mock<IUserRepo> _userRepoMock = new();
+    private readonly Mock<IUserEventRepo> _userEventRepoMock = new();
     private readonly UserLoginHandler _handler;
 
     public UserLoginHandlerTests()
     {
         _handler = new UserLoginHandler(
+            unitOfWork: _unitOfWork.Object,
             userAccessor: _userAccessorMock.Object,
             jwtTokenGenerator: _jwtTokenGeneratorMock.Object,
             tokenService: _tokenServiceMock.Object,
             refreshTokenManager: _refreshTokenManagerMock.Object,
             eventDispatcher: _eventDispatcherMock.Object,
+            userEventDispatcher: _userEventDispatcherMock.Object,
             authService: _authServiceMock.Object,
-            userRepo: _userRepoMock.Object);
+            userRepo: _userRepoMock.Object,
+            userEventRepo: _userEventRepoMock.Object);
     }
 
     [Fact]

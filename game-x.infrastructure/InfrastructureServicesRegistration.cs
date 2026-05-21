@@ -53,10 +53,12 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using game_x.application.Contract.Infrastructure.BackgroundJobs.Dispatchers;
 using game_x.application.Contract.Infrastructure.ExternalApi.Atg;
 using game_x.infrastructure.ExternalApi.Atg;
 using game_x.infrastructure.SignalR.Facade;
 using game_x.application.Contract.Infrastructure.ExternalApi.FastPay;
+using game_x.infrastructure.BackgroundJobs.Dispatchers;
 using game_x.infrastructure.ExternalApi.FastPay;
 
 namespace game_x.infrastructure;
@@ -94,6 +96,7 @@ public static class InfrastructureServicesRegistration
 
         // Eventing
         services.AddScoped<IApplicationEventDispatcher, ApplicationEventDispatcher>();
+        services.AddScoped<IUserEventJobDispatcher, UserEventJobDispatcher>();
 
         // Builders
         services.AddScoped(typeof(ICriteriaBuilder<>), typeof(CriteriaBuilder<>));

@@ -21,6 +21,7 @@ public sealed class CreateMissionHandler(
             title: request.Title,
             description: request.Description,
             resetType: request.ResetType,
+            triggerEvents: request.TriggerEvents,
             configData: request.ConfigData,
             startAt: request.StartAt,
             endAt: request.EndAt

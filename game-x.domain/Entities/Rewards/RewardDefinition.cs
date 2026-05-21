@@ -53,9 +53,9 @@ public sealed class RewardDefinition : BaseEntity<int>, IAuditable
     private readonly List<MissionReward> _missionRewards = new();
     private readonly List<UserReward> _userRewards = new();
 
-    public IReadOnlyCollection<RewardPoolItem> RewardPoolItems => _rewardPoolItems;
-    public IReadOnlyCollection<MissionReward> MissionRewards => _missionRewards;
-    public IReadOnlyCollection<UserReward> UserRewards => _userRewards;
+    public ICollection<RewardPoolItem> RewardPoolItems => _rewardPoolItems;
+    public ICollection<MissionReward> MissionRewards => _missionRewards;
+    public ICollection<UserReward> UserRewards => _userRewards;
     #endregion
 
     #region Initializations
