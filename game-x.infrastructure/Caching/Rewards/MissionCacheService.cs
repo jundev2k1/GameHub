@@ -51,4 +51,9 @@ public sealed class MissionCacheService(
         if (mission == null) await RefreshCache(id, ct);
         return Get<CachedMissionDto>(key);
     }
+
+    public void RemoveGetDetail(Guid id)
+    {
+        Remove($"{RewardCacheKey.Mission}:{id}:detail");
+    }
 }
