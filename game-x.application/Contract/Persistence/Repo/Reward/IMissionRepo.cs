@@ -9,6 +9,8 @@ public interface IMissionRepo
     Task<ListedMissionDto[]> GetListAsync(CancellationToken ct = default);
     
     Task<MissionDto> GetDetailAsync(Guid id, CancellationToken ct = default);
+
+    Task<MissionDto> GetDetailByUserAsync(string userId, Guid missionId, CancellationToken ct = default);
     
     Task<Mission> GetByIdAsync(Guid id, CancellationToken ct = default);
 

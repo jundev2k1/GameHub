@@ -40,7 +40,7 @@ public sealed class UserMissionClaim : BaseEntity<int>, IAuditable
 
     public MissionReward? MissionReward { get; init; }
 
-    public Execution? Execution { get; init; }
+    public Execution? Execution { get; private set; }
 
     #endregion
 
@@ -68,13 +68,13 @@ public sealed class UserMissionClaim : BaseEntity<int>, IAuditable
 
     #region Behaviors
 
-    public void Claim(int executionId)
+    public void Claim(Execution execution)
     {
         if (Status != UserMissionClaimStatus.Available)
             throw new InvalidOperationException("Reward is not claimable.");
 
         Status = UserMissionClaimStatus.Claimed;
-        ExecutionId = executionId;
+        Execution = execution;
         ClaimedAt = DateTime.UtcNow;
     }
 

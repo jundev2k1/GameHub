@@ -10,7 +10,7 @@ public enum ExecutionType
     /// <summary>Mission progress update.</summary>
     MissionProgress,
     /// <summary>Mission reward claim.</summary>
-    MissionClaim,
+    MissionRewardClaim,
     /// <summary>Reward distribution execution.</summary>
     RewardGrant,
     /// <summary>Social share validation.</summary>

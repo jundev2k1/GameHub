@@ -91,6 +91,7 @@ public sealed class RewardPoolExecuteHandler(
                 response = new RewardPoolExecuteResponse
                 {
                     ExecutionId = execution.PublicId,
+                    RewardId = poolItem.RewardDefinition!.PublicId,
                     RewardCode = poolItem.RewardDefinition!.Code,
                     RewardTitle = poolItem.RewardDefinition.Title,
                     RewardType = poolItem.RewardDefinition.Type,
