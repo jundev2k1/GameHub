@@ -6,7 +6,6 @@ using game_x.application.Features.Rewards.Dtos;
 using game_x.domain.Constants;
 using game_x.domain.Entities.Rewards;
 using Mapster;
-using Microsoft.EntityFrameworkCore.Query;
 
 namespace game_x.persistence.Repo.Rewards;
 
@@ -49,42 +48,13 @@ public sealed class RewardPoolItemRepo(GameXContext dbContext) : IRewardPoolItem
             .ToListAsync(ct);
     }
     
-    public async Task AddAsync(RewardPoolItem entity, CancellationToken ct = default)
+    public async Task AddRangeAsync(IEnumerable<RewardPoolItem> items, CancellationToken ct = default)
     {
-        await dbContext.RewardPoolItems.AddAsync(entity, ct);
-    }
-    
-    public async Task UpdateAsync(Guid id, Action<RewardPoolItem> updateAction, CancellationToken ct = default)
-    {
-        var entity = await dbContext.RewardPoolItems
-                         .FirstOrDefaultAsync(c => c.PublicId == id, ct)
-                     ?? throw new NotFoundException(MessageCode.Reward.RewardPoolItemNotFound);
-
-        updateAction.Invoke(entity);
-    }
-    
-    public async Task RemoveAsync(Guid id, CancellationToken ct = default)
-    {
-        var entity = await dbContext.RewardPoolItems
-            .FirstOrDefaultAsync(x => x.PublicId == id, ct);
-
-        if (entity is null)
-            throw new NotFoundException(MessageCode.Reward.RewardPoolItemNotFound);
-
-        dbContext.RewardPoolItems.Remove(entity);
+        await dbContext.RewardPoolItems.AddRangeAsync(items, ct);
     }
     
     public async Task BulkDeleteAsync(Expression<Func<RewardPoolItem, bool>> predicate, CancellationToken ct = default)
     {
         await dbContext.RewardPoolItems.Where(predicate).ExecuteDeleteAsync(ct);
-    }
-
-    public async Task BulkUpdateAsync(
-        Expression<Func<RewardPoolItem, bool>> predicate, 
-        Expression<Func<SetPropertyCalls<RewardPoolItem>, 
-        SetPropertyCalls<RewardPoolItem>>> setPropertyCalls,
-        CancellationToken ct = default)
-    {
-        await dbContext.RewardPoolItems.Where(predicate).ExecuteUpdateAsync(setPropertyCalls, ct);
     }
 }
