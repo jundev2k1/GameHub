@@ -418,6 +418,14 @@ public static class MessageCode
         MissionRewardNotFound = 10615,
         [EnumMetadata("Mission Reward is invalid.")]
         MissionRewardInvalid = 10616,
+        [EnumMetadata("Mission claim not found.")]
+        MissionClaimNotFound = 10617,
+        [EnumMetadata("Mission claim is invalid.")]
+        MissionClaimInvalid = 10618,
+        [EnumMetadata("Mission claim unavailable.")]
+        MissionClaimUnavailable = 10618,
+        [EnumMetadata("Unsupported reward definition type.")]
+        RewardDefinitionUnsupportedType = 10619,
         #endregion
     }
 }

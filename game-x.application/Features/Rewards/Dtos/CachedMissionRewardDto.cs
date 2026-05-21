@@ -14,6 +14,8 @@ public sealed class CachedMissionRewardDto
     
     public bool IsClaimable { get; set; }
     
+    public Guid? ClaimId { get; set; }
+    
     public bool IsActive { get; set; }
     
     public DateTime? StartAt { get; set; }

@@ -5,17 +5,12 @@ using game_x.domain.Enum.Rewards;
 namespace game_x.application.Features.Rewards.Strategies.Missions;
 
 public sealed class DailyLoginMissionStrategy(
-    IMissionRewardRepo missionRewardRepo,
-    IUserMissionClaimRepo userMissionClaimRepo)
-    : IMissionProgressStrategy
+    IMissionRewardRepo missionRewardRepo, 
+    IUserMissionClaimRepo userMissionClaimRepo) : IMissionProgressStrategy
 {
     public MissionType SupportedType => MissionType.DailyLogin;
 
-    public async Task ProcessAsync(
-        Mission mission,
-        UserMission userMission,
-        UserEvent userEvent,
-        CancellationToken ct = default)
+    public async Task ProcessAsync(Mission mission, UserMission userMission, UserEvent userEvent, CancellationToken ct = default)
     {
         var config = mission.ConfigData;
         var today = DateTime.UtcNow.Date;
@@ -40,10 +35,11 @@ public sealed class DailyLoginMissionStrategy(
         
         var rewards = await missionRewardRepo.GetByMissionIdAsync(mission.Id, ct);
 
-        var unlocked = rewards
-            .Where(x => x.Sequence == userMission.Progress);
+        var unlockedRewards = rewards
+            .Where(x => x.Sequence == userMission.Progress)
+            .ToArray();
 
-        foreach (var reward in unlocked)
+        foreach (var reward in unlockedRewards)
         {
             var exists = await userMissionClaimRepo.CheckExistAsync(userEvent.UserId, reward.Id, ct);
             if (exists) continue;

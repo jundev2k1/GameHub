@@ -13,8 +13,10 @@ public sealed class UserMission : BaseEntity<int>
     #endregion
     
     #region Properties
+    /// <summary>overall progress toward completion.</summary>
     public int Progress { get; private set; }
 
+    /// <summary>Used for consecutive missions.</summary>
     public int Streak { get; private set; }
     
     public UserMissionStatus Status { get; private set; }
@@ -34,7 +36,7 @@ public sealed class UserMission : BaseEntity<int>
     public Mission? Mission { get; init; }
     
     private readonly List<UserMissionClaim> _userMissionClaim = new();
-    public IReadOnlyCollection<UserMissionClaim> Claims => _userMissionClaim;
+    public ICollection<UserMissionClaim> Claims => _userMissionClaim;
     #endregion
 
     #region Initializations

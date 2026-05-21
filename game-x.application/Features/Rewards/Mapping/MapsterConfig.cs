@@ -30,6 +30,7 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<RewardPoolItem, RewardPoolItemDto>()
             .Map(dest => dest.Id, src => src.PublicId)
             .Map(dest => dest.RewardDefinitionId, src => src.RewardDefinition != null ? (Guid?)src.RewardDefinition.PublicId : null)
+            .Map(dest => dest.RewardDefinitionCode, src => src.RewardDefinition != null ? src.RewardDefinition.Code : null)
             .Map(dest => dest.Amount, src => src.RewardDefinition != null ? src.RewardDefinition.Amount : null)
             .Map(dest => dest.Title, src => src.RewardDefinition != null ? src.RewardDefinition.Title : null)
             .Map(dest => dest.Description, src => src.RewardDefinition != null ? src.RewardDefinition.Description : null)
