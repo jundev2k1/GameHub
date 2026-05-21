@@ -166,11 +166,15 @@ public class ConversationController(
             var result = await Mediator.Send(command);
             return ApiResponseFactory.Ok(result);
         }
-        catch
+        catch(Exception e)
         {
             return ApiResponseFactory.BadRequest(
                 code: MessageCode.Chatting.FailToSendMessage,
-                errorDetail: new {formData.ClientLocalId});
+                errorDetail: new
+                {
+                    formData.ClientLocalId,
+                    e.Message,
+                });
         }
     }
 }

@@ -57,19 +57,19 @@ public class User : IdentityUser, IEntity, IAuditable
     
     public ICollection<SocialLink> BlocksToMe { get; set; } = [];
     
-    public IReadOnlyCollection<UserEvent> UserEvents { get; init; } = new List<UserEvent>();
+    public IReadOnlyCollection<UserEvent> UserEvents { get; private set; } = new List<UserEvent>();
     
-    public IReadOnlyCollection<UserMission> UserMissions { get; init; } = [];
+    public IReadOnlyCollection<UserMission> UserMissions { get; private set; } = new List<UserMission>();
     
-    public IReadOnlyCollection<UserInventory> Inventories { get; init; } = [];
+    public IReadOnlyCollection<UserInventory> Inventories { get; private set; } = new List<UserInventory>();
     
-    public IReadOnlyCollection<ShareLink> ShareLinks { get; init; } = [];
+    public IReadOnlyCollection<ShareLink> ShareLinks { get; private set; } = new List<ShareLink>();
     
-    public IReadOnlyCollection<UserReward> UserRewards { get; init; } = [];
+    public IReadOnlyCollection<UserReward> UserRewards { get; private set; } = new List<UserReward>();
     
-    public IReadOnlyCollection<Execution> Executions { get; init; } = [];
+    public IReadOnlyCollection<Execution> Executions { get; private set; } = new List<Execution>();
     
-    public IReadOnlyCollection<UserMissionClaim> UserMissionClaims { get; init; } = new List<UserMissionClaim>();
+    public IReadOnlyCollection<UserMissionClaim> UserMissionClaims { get; private set; } = new List<UserMissionClaim>();
     #endregion
 
     #region Intitializations

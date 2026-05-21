@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo.Reward;
 using game_x.application.Exceptions;
@@ -5,6 +6,7 @@ using game_x.application.Features.Rewards.Dtos;
 using game_x.domain.Constants;
 using game_x.domain.Entities.Rewards;
 using Mapster;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace game_x.persistence.Repo.Rewards;
 
@@ -30,6 +32,23 @@ public sealed class RewardPoolItemRepo(GameXContext dbContext) : IRewardPoolItem
             ?? throw new BadRequestException(MessageCode.Reward.RewardPoolItemNotFound);
     }
     
+    public async Task<IReadOnlyCollection<RewardPoolItem>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
+    {
+        return await dbContext.RewardPoolItems
+            .AsNoTracking()
+            .Include(x => x.RewardPool)
+            .Where(x => ids.Contains(x.PublicId))
+            .ToListAsync(ct);
+    }
+    
+    public async Task<ICollection<RewardPoolItem>> GetByIdsForUpdateAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
+    {
+        return await dbContext.RewardPoolItems
+            .Include(x => x.RewardPool)
+            .Where(x => ids.Contains(x.PublicId))
+            .ToListAsync(ct);
+    }
+    
     public async Task AddAsync(RewardPoolItem entity, CancellationToken ct = default)
     {
         await dbContext.RewardPoolItems.AddAsync(entity, ct);
@@ -53,5 +72,19 @@ public sealed class RewardPoolItemRepo(GameXContext dbContext) : IRewardPoolItem
             throw new NotFoundException(MessageCode.Reward.RewardPoolItemNotFound);
 
         dbContext.RewardPoolItems.Remove(entity);
+    }
+    
+    public async Task BulkDeleteAsync(Expression<Func<RewardPoolItem, bool>> predicate, CancellationToken ct = default)
+    {
+        await dbContext.RewardPoolItems.Where(predicate).ExecuteDeleteAsync(ct);
+    }
+
+    public async Task BulkUpdateAsync(
+        Expression<Func<RewardPoolItem, bool>> predicate, 
+        Expression<Func<SetPropertyCalls<RewardPoolItem>, 
+        SetPropertyCalls<RewardPoolItem>>> setPropertyCalls,
+        CancellationToken ct = default)
+    {
+        await dbContext.RewardPoolItems.Where(predicate).ExecuteUpdateAsync(setPropertyCalls, ct);
     }
 }

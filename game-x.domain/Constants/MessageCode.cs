@@ -410,6 +410,8 @@ public static class MessageCode
         MissionInactive = 10612,
         [EnumMetadata("User Event not found.")]
         UserEventNotFound = 10613,
+        [EnumMetadata("Reward Pool Item is invalid.")]
+        RewardPoolItemInvalid = 10614,
         #endregion
     }
 }

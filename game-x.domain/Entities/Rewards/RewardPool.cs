@@ -46,9 +46,9 @@ public sealed class RewardPool : BaseEntity<int>, IAuditable
     private readonly List<RewardPoolItem> _rewardPoolItems = new();
     private readonly List<Execution> _execution = new();
     
-    public IReadOnlyCollection<RewardPoolItem> RewardPoolItems => _rewardPoolItems;
+    public ICollection<RewardPoolItem> RewardPoolItems => _rewardPoolItems;
     
-    public IReadOnlyCollection<Execution> Executions => _execution;
+    public ICollection<Execution> Executions => _execution;
     #endregion
 
     #region Initializations

@@ -44,9 +44,9 @@ public sealed class Mission : BaseEntity<int>, IAuditable
     #region Relationships
     private readonly List<MissionReward> _missionReward = new();
     private readonly List<UserMission> _userMissions = new();
-    public IReadOnlyCollection<MissionReward> MissionRewards => _missionReward;
+    public ICollection<MissionReward> MissionRewards => _missionReward;
 
-    public IReadOnlyCollection<UserMission> UserMissions => _userMissions;
+    public ICollection<UserMission> UserMissions => _userMissions;
     #endregion
 
     #region Initializations

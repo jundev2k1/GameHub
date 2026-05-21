@@ -1,4 +1,6 @@
 using game_x.application.Contract.Infrastructure.Caching.Rewards;
+using game_x.application.Features.Rewards.Commands.RewardPoolItems.BulkDelete;
+using game_x.application.Features.Rewards.Commands.RewardPoolItems.BulkUpdate;
 using game_x.application.Features.Rewards.Commands.RewardPoolItems.Create;
 using game_x.application.Features.Rewards.Commands.RewardPools.Update;
 
@@ -36,5 +38,20 @@ public sealed class RewardPoolController(
     {
         var result = await Mediator.Send(cmd with {Id = id}, ct);
         return ApiResponseFactory.Created(result);
+    }
+    
+    [HttpPatch("{id:guid}/items")]
+    public async Task<IActionResult> UpdateItemsAsync(Guid id, BulkUpdateRewardPoolItemCommand cmd, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(cmd with {RewardPoolId = id}, ct);
+        return ApiResponseFactory.Created(result);
+    }
+    
+    [HttpDelete("{id:guid}/items")]
+    public async Task<IActionResult> BulkDeleteItemsAsync(Guid id, BulkDeleteRewardPoolItemCommand cmd,
+        CancellationToken ct = default)
+    {
+        await Mediator.Send(cmd with { RewardPoolId = id }, ct);
+        return ApiResponseFactory.NoContent();
     }
 }

@@ -80,14 +80,13 @@ public sealed class SendMessageHandler(
             await unitOfWork.CommitAsync(ct);
             
             await SendSignalAsync(request, conv, message, ct);
-           
             return new SendMessageResult(request.ClientLocalId, request.ConversationId);
         }
         catch(Exception ex)
         {
             await unitOfWork.RollbackAsync(ct);
             logger.LogError("Failed to create the message: {Ex}", ex);
-            throw new BadRequestException(MessageCode.System.SystemError);
+            throw;
         }
     }
     

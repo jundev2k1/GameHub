@@ -38,8 +38,6 @@ public sealed class UserMission : BaseEntity<int>
     #endregion
 
     #region Initializations
-    private UserMission() { }
-
     public static UserMission Create(string userId, int missionId)
     {
         return new()
