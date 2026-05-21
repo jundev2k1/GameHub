@@ -8,6 +8,8 @@ public interface IRewardDefinitionRepo
     Task<RewardDefinitionDto[]> GetListAsync(CancellationToken ct = default);
     
     Task<bool> CheckExistedCodeAsync(string code, CancellationToken ct = default);
+
+    Task<bool> ExistsByCatalogItemIdAsync(int catalogItemId, CancellationToken ct = default);
     
     Task<RewardDefinition> GetByIdAsync(Guid id, CancellationToken ct = default);
     

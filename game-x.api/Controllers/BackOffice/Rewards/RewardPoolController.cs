@@ -1,7 +1,5 @@
 using game_x.application.Contract.Infrastructure.Caching.Rewards;
-using game_x.application.Features.Rewards.Commands.RewardPoolItems.BulkCreate;
-using game_x.application.Features.Rewards.Commands.RewardPoolItems.BulkDelete;
-using game_x.application.Features.Rewards.Commands.RewardPoolItems.BulkUpdate;
+using game_x.application.Features.Rewards.Commands.RewardPools.SyncItems;
 using game_x.application.Features.Rewards.Commands.RewardPools.Update;
 
 namespace game_x.api.Controllers.BackOffice.Rewards;
@@ -33,23 +31,8 @@ public sealed class RewardPoolController(
         return ApiResponseFactory.Created(result);
     }
     
-    [HttpPost("{id:guid}/items")]
-    public async Task<IActionResult> CreateItemsAsync(Guid id, BulkCreateRewardPoolItemCommand cmd, CancellationToken ct = default)
-    {
-        var result = await Mediator.Send(cmd with {RewardPoolId = id}, ct);
-        return ApiResponseFactory.Created(result);
-    }
-    
-    [HttpPatch("{id:guid}/items")]
-    public async Task<IActionResult> UpdateItemsAsync(Guid id, BulkUpdateRewardPoolItemCommand cmd, CancellationToken ct = default)
-    {
-        var result = await Mediator.Send(cmd with {RewardPoolId = id}, ct);
-        return ApiResponseFactory.Created(result);
-    }
-    
-    [HttpDelete("{id:guid}/items")]
-    public async Task<IActionResult> BulkDeleteItemsAsync(Guid id, BulkDeleteRewardPoolItemCommand cmd,
-        CancellationToken ct = default)
+    [HttpPut("{id:guid}/items")]
+    public async Task<IActionResult> SyncItemsAsync(Guid id, SyncRewardPoolItemCommand cmd, CancellationToken ct = default)
     {
         await Mediator.Send(cmd with { RewardPoolId = id }, ct);
         return ApiResponseFactory.NoContent();

@@ -19,4 +19,6 @@ public interface IMissionRepo
     Task AddAsync(Mission entity, CancellationToken ct = default);
 
     Task UpdateAsync(Guid id, Action<Mission> updateAction, CancellationToken ct = default);
+    
+    Task RemoveAsync(Guid id, CancellationToken ct = default);
 }

@@ -13,6 +13,8 @@ public interface IRewardPoolItemRepo
     Task<IReadOnlyCollection<RewardPoolItem>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default);
     
     Task<ICollection<RewardPoolItem>> GetByIdsForUpdateAsync(IEnumerable<Guid> ids, CancellationToken ct = default);
+
+    public Task<bool> ExistsByRewardIdAsync(int rewardId, CancellationToken ct = default);
     
     Task AddRangeAsync(IEnumerable<RewardPoolItem> items, CancellationToken ct = default);
     

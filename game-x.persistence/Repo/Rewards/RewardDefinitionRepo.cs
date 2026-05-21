@@ -43,6 +43,12 @@ public sealed class RewardDefinitionRepo(
             .AnyAsync(x => x.Code == code, ct);
     }
     
+    public Task<bool> ExistsByCatalogItemIdAsync(int catalogItemId, CancellationToken ct = default)
+    {
+        return dbContext.RewardDefinitions
+            .AnyAsync(x => x.CatalogItemId == catalogItemId, ct);
+    }
+    
     public async Task<RewardDefinition> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await dbContext.RewardDefinitions

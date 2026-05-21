@@ -48,6 +48,12 @@ public sealed class RewardPoolItemRepo(GameXContext dbContext) : IRewardPoolItem
             .ToListAsync(ct);
     }
     
+    public Task<bool> ExistsByRewardIdAsync(int rewardId, CancellationToken ct = default)
+    {
+        return dbContext.RewardPoolItems
+            .AnyAsync(x => x.RewardDefinitionId == rewardId, ct);
+    }
+    
     public async Task AddRangeAsync(IEnumerable<RewardPoolItem> items, CancellationToken ct = default)
     {
         await dbContext.RewardPoolItems.AddRangeAsync(items, ct);

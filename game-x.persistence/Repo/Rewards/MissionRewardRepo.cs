@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using game_x.application.Common.Abstractions;
 using game_x.application.Contract.Persistence.Repo.Reward;
 using game_x.domain.Entities.Rewards;
@@ -14,8 +15,26 @@ public sealed class MissionRewardRepo(GameXContext dbContext) : IMissionRewardRe
             .ToListAsync(ct);
     }
     
-    public async Task AddAsync(MissionReward entity, CancellationToken ct = default)
+    public async Task<ICollection<MissionReward>> GetByIdsForUpdateAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
     {
-        await dbContext.MissionRewards.AddAsync(entity, ct);
+        return await dbContext.MissionRewards
+            .Where(x => ids.Contains(x.PublicId))
+            .ToListAsync(ct);
+    }
+    
+    public Task<bool> ExistsByRewardIdAsync(int rewardId, CancellationToken ct = default)
+    {
+        return dbContext.MissionRewards
+            .AnyAsync(x => x.RewardDefinitionId == rewardId, ct);
+    }
+    
+    public async Task AddRangeAsync(IEnumerable<MissionReward> items, CancellationToken ct = default)
+    {
+        await dbContext.MissionRewards.AddRangeAsync(items, ct);
+    }
+    
+    public async Task BulkDeleteAsync(Expression<Func<MissionReward, bool>> predicate, CancellationToken ct = default)
+    {
+        await dbContext.MissionRewards.Where(predicate).ExecuteDeleteAsync(ct);
     }
 }

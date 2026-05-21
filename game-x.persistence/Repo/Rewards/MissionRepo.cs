@@ -118,4 +118,13 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
 
         updateAction.Invoke(entity);
     }
+
+    public async Task RemoveAsync(Guid id, CancellationToken ct = default)
+    {
+        var mission = await dbContext.Missions.FirstOrDefaultAsync(x => x.PublicId == id, ct);
+        if (mission is null)
+            throw new NotFoundException(MessageCode.Reward.MissionNotFound);
+        
+        dbContext.Missions.Remove(mission);
+    }
 }
