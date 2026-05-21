@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20260518140523_Add_NavigationItemIcon_column")]
+    partial class Add_NavigationItemIcon_column
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3326,11 +3329,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("title");
 
-                    b.Property<string[]>("TriggerEvents")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("trigger_events");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text")
@@ -3621,11 +3619,6 @@ namespace game_x.persistence.Migrations
                         .HasDefaultValue("")
                         .HasColumnName("title");
 
-                    b.Property<string[]>("TriggerEvents")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("trigger_events");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -3848,9 +3841,8 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("ref_type");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
                         .HasColumnName("type");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -3953,10 +3945,6 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<DateTime?>("LastProgressAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_progress_at");
-
                     b.Property<int>("MissionId")
                         .HasColumnType("integer")
                         .HasColumnName("mission_id");
@@ -4031,7 +4019,7 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<int?>("ExecutionId")
+                    b.Property<int>("ExecutionId")
                         .HasColumnType("integer")
                         .HasColumnName("execution_id");
 
@@ -6521,6 +6509,7 @@ namespace game_x.persistence.Migrations
                         .WithMany()
                         .HasForeignKey("ExecutionId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
                         .HasConstraintName("fk_user_mission_claims_executions_execution_id");
 
                     b.HasOne("game_x.domain.Entities.Rewards.MissionReward", "MissionReward")

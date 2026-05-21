@@ -63,7 +63,9 @@ public sealed class EntityName
         nameof(UserReward),
         nameof(RewardDefinition),
         nameof(MissionReward),
-        nameof(UserMissionClaim)
+        nameof(UserMissionClaim),
+        nameof(NavigationItem),
+        nameof(NavigationItemTranslation)
     ];
 
     public override bool Equals(object? obj) =>
