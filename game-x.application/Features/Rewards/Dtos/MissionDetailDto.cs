@@ -3,7 +3,7 @@ using game_x.domain.ValueObjects.Missions;
 
 namespace game_x.application.Features.Rewards.Dtos;
 
-public sealed class CachedMissionDto
+public sealed class MissionDetailDto
 {
     public Guid Id { get; set; }
     
@@ -27,5 +27,5 @@ public sealed class CachedMissionDto
     
     public DateTime? EndAt { get; set; }
 
-    public IReadOnlyCollection<CachedMissionRewardDto> MissionRewards { get; set; } = [];
+    public IReadOnlyCollection<MissionRewardDetailDto> MissionRewards { get; set; } = [];
 }
