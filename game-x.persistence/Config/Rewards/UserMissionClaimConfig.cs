@@ -38,6 +38,11 @@ public sealed class UserMissionClaimConfig : IEntityTypeConfiguration<UserMissio
         b.Property(x => x.ExecutionId)
             .HasColumnName("execution_id")
             .IsRequired(false);
+        
+        b.Property(x => x.Status)
+            .HasColumnName("status")
+            .HasConversion<string>()
+            .IsRequired();
 
         #endregion
 

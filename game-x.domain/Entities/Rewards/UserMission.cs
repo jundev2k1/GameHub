@@ -19,6 +19,8 @@ public sealed class UserMission : BaseEntity<int>
     /// <summary>Used for consecutive missions.</summary>
     public int Streak { get; private set; }
     
+    public int CycleNumber { get; private set; }
+    
     public UserMissionStatus Status { get; private set; }
     
     public DateTime? CompletedAt { get; private set; }
@@ -48,7 +50,8 @@ public sealed class UserMission : BaseEntity<int>
             MissionId = missionId,
             Progress = 0,
             Streak = 0,
-            Status = UserMissionStatus.InProgress
+            Status = UserMissionStatus.InProgress,
+            CycleNumber = 1
         };
     }
     #endregion
@@ -81,8 +84,9 @@ public sealed class UserMission : BaseEntity<int>
         CompletedAt = null;
         ClaimedAt = null;
         ResetAt = DateTime.UtcNow;
+        CycleNumber++;
     }
-
+    
     public void Complete()
     {
         if (Status == UserMissionStatus.Completed) return;

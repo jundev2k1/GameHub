@@ -22,6 +22,8 @@ public sealed class UserMissionClaim : BaseEntity<int>, IAuditable
 
     #region Properties
 
+    public int CycleNumber { get; private set; }
+    
     public UserMissionClaimStatus Status { get; private set; }
 
     public DateTime AvailableAt { get; private set; }
@@ -52,6 +54,7 @@ public sealed class UserMissionClaim : BaseEntity<int>, IAuditable
         string userId,
         UserMission userMission,
         int missionRewardId,
+        int cycleNumber,
         DateTime? availableAt = null)
     {
         return new()
@@ -59,6 +62,7 @@ public sealed class UserMissionClaim : BaseEntity<int>, IAuditable
             UserId = userId,
             UserMission = userMission,
             MissionRewardId = missionRewardId,
+            CycleNumber = cycleNumber,
             Status = UserMissionClaimStatus.Available,
             AvailableAt = availableAt ?? DateTime.UtcNow
         };

@@ -10,11 +10,11 @@ public interface IMissionRepo
     
     Task<MissionDto> GetDetailAsync(Guid id, CancellationToken ct = default);
 
-    Task<MissionDto> GetDetailByUserAsync(string userId, Guid missionId, CancellationToken ct = default);
+    Task<UserMissionDto> GetDetailByUserAsync(string userId, Guid missionId, CancellationToken ct = default);
     
     Task<Mission> GetByIdAsync(Guid id, CancellationToken ct = default);
 
-    Task<bool> CheckExistedCodeAsync(string code, CancellationToken ct = default);
+    Task<bool> CodeExistsAsync(string code, CancellationToken ct = default);
     
     Task<IReadOnlyCollection<Mission>> GetTriggeredByEventAsync(UserEventType eventType, CancellationToken ct = default);
     
