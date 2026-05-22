@@ -26,7 +26,7 @@ public sealed class MissionProcessor(
         var strategy = strategies.FirstOrDefault(x => x.SupportedType == mission.Type);
         if (strategy is null) throw new InvalidOperationException($"No strategy for mission {mission.Type}");
 
-        var userMission = await userMissionRepo.GetByUserAndMissionAsync(userEvent.UserId, mission.Id, ct);
+        var userMission = await userMissionRepo.GetTrackedByUserAndMissionAsync(userEvent.UserId, mission.Id, ct);
         if (userMission is null)
         {
             userMission = UserMission.Create(userEvent.UserId, mission.Id);

@@ -27,4 +27,6 @@ public sealed class MissionDto
     public DateTime? StartAt { get; set; }
 
     public DateTime? EndAt { get; set; }
+    
+    public DateTime? LastProgressAt { get; set; }
 }

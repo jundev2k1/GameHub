@@ -13,6 +13,10 @@ public sealed class UserMissionConfig : IEntityTypeConfiguration<UserMission>
         b.HasKey(x => x.Id);
 
         #region Properties
+        b.Property(x => x.Id)
+            .HasColumnName("id")
+            .ValueGeneratedOnAdd();
+        
         b.Property(x => x.UserId)
             .HasColumnName("user_id")
             .HasMaxLength(36);

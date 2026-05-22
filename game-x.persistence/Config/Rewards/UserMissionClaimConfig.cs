@@ -47,7 +47,6 @@ public sealed class UserMissionClaimConfig : IEntityTypeConfiguration<UserMissio
             .IsUnique()
             .HasDatabaseName("ux_user_mission_claims_public_id");
 
-        // prevent duplicate claim
         b.HasIndex(x => new { x.UserId, x.MissionRewardId })
             .IsUnique()
             .HasDatabaseName("ux_user_mission_claims_user_reward");

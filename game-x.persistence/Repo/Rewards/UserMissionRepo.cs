@@ -6,10 +6,9 @@ namespace game_x.persistence.Repo.Rewards;
 
 public sealed class UserMissionRepo(GameXContext dbContext) : IUserMissionRepo, IRepository
 {
-    public async Task<UserMission?> GetByUserAndMissionAsync(string userId, int missionId, CancellationToken ct = default)
+    public async Task<UserMission?> GetTrackedByUserAndMissionAsync(string userId, int missionId, CancellationToken ct = default)
     {
         return await dbContext.UserMissions
-            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.UserId ==  userId && x.MissionId == missionId, ct);
     }
     

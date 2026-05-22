@@ -89,6 +89,10 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                 StartAt = m.StartAt,
                 EndAt = m.EndAt,
                 TriggerEvents = m.TriggerEvents,
+                LastProgressAt = m.UserMissions
+                    .Where(x => x.UserId == userId)
+                    .Select(x => x.LastProgressAt)
+                    .FirstOrDefault(),
                 MissionRewards = m.MissionRewards.Select(mr => new MissionRewardDto
                 {
                     Id = mr.PublicId,
@@ -114,9 +118,9 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                     ItemIcon = mr.RewardDefinition != null && mr.RewardDefinition.CatalogItem != null 
                         ? mr.RewardDefinition.CatalogItem.Icon : null,
                     
-                    ClaimId =  mr.UserMissionClaims
+                    ClaimId = mr.UserMissionClaims
                         .Where(x => x.UserId == userId)
-                        .Select(x => x.PublicId)
+                        .Select(x => (Guid?)x.PublicId)
                         .FirstOrDefault()
                     
                 }).ToArray()

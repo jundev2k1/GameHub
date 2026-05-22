@@ -1,17 +1,12 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching.Rewards;
-using game_x.application.Contract.Infrastructure.Security;
-using game_x.application.Contract.Persistence.Repo.Reward;
-using game_x.application.Exceptions;
 using game_x.application.Features.Rewards.Commands.Missions.Claim;
+using game_x.application.Features.Rewards.Queries.Missions.GetByUser;
 
 namespace game_x.api.Controllers.Client.Rewards;
 
 [Authorize(Roles = AppRoles.User)]
 [Route("/api/user/missions")]
-public sealed class MissionController(
-    IUserAccessor userAccessor,
-    IMissionCacheService cache,
-    IMissionRepo missionRepo) : BaseApiController
+public sealed class MissionController(IMissionCacheService cache) : BaseApiController
 {
     [HttpGet]
     public async Task<IActionResult> GetListAsync(CancellationToken ct = default)
@@ -23,10 +18,7 @@ public sealed class MissionController(
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetDetailAsync(Guid id, CancellationToken ct = default)
     {
-        string userId = userAccessor.GetUserId();
-        var result = await missionRepo.GetDetailByUserAsync(userId, id, ct);
-        if (result == null)
-            throw new NotFoundException(MessageCode.Reward.MissionNotFound);
+        var result = await Mediator.Send(new GetMissionDetailByUserQuery(id), ct);
         return ApiResponseFactory.Ok(result);
     }
     

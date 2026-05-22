@@ -25,7 +25,7 @@ public sealed class MissionCacheService(
         var missionRewards = await Task.WhenAll(
             data.MissionRewards.Select(async item =>
             {
-                var dto = item.Adapt<CachedMissionRewardDto>();
+                var dto = item.Adapt<MissionRewardDetailDto>();
                 dto.ItemIconUrl = item.ItemIcon is null
                     ? null
                     : await storage.GetFileUrl(item.ItemIcon, ct);
@@ -33,23 +33,23 @@ public sealed class MissionCacheService(
                 return dto;
             }));
 
-        var missionDto = data.Adapt<CachedMissionDto>();
+        var missionDto = data.Adapt<MissionDetailDto>();
         missionDto.MissionRewards = missionRewards;
         Set($"{RewardCacheKey.Mission}:{id}:detail", missionDto);
     }
-
+    
     public async Task<ListedMissionDto[]?> GetAll(CancellationToken ct = default)
     {
         if (Datasource == null) await RefreshCache(ct);
         return Datasource;
     }
 
-    public async Task<CachedMissionDto?> GetDetail(Guid id, CancellationToken ct = default)
+    public async Task<MissionDetailDto?> GetDetail(Guid id, CancellationToken ct = default)
     {
         string key = $"{RewardCacheKey.Mission}:{id}:detail";
-        var mission = Get<CachedMissionDto>(key);
+        var mission = Get<MissionDetailDto>(key);
         if (mission == null) await RefreshCache(id, ct);
-        return Get<CachedMissionDto>(key);
+        return Get<MissionDetailDto>(key);
     }
 
     public void RemoveGetDetail(Guid id)
