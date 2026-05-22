@@ -6,8 +6,6 @@ public sealed record RewardPoolExecuteCommand(Guid RewardPoolPublicId) : IComman
 
 public sealed class RewardPoolExecuteResponse
 {
-    public Guid ExecutionId { get; init; }
-
     public Guid RewardId { get; init; }
     
     public string RewardCode { get; init; } = string.Empty;

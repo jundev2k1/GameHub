@@ -1,5 +1,4 @@
 using game_x.domain.Entities.Rewards;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace game_x.persistence.Config.Rewards;

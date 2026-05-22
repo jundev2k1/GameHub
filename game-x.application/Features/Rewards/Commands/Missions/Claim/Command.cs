@@ -10,8 +10,8 @@ public sealed record ClaimMissionRewardCommand(
 
 public sealed record ClaimMissionRewardResponse
 {
-    public Guid? ExecutionId { get; init; }
-    public Guid? UserRewardId { get; init; }
+    public Guid? RewardId { get; init; }
+    public string? RewardCode { get; init; }
     public string? RewardTitle { get; init; }
     public decimal? Amount { get; init; }
     public RewardItemType? RewardType { get; init; }

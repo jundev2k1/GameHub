@@ -119,7 +119,7 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                         ? mr.RewardDefinition.CatalogItem.Icon : null,
                     
                     ClaimId = mr.UserMissionClaims
-                        .Where(x => x.UserId == userId)
+                        .Where(x => x.UserId == userId && x.Status == UserMissionClaimStatus.Available)
                         .Select(x => (Guid?)x.PublicId)
                         .FirstOrDefault()
                     
