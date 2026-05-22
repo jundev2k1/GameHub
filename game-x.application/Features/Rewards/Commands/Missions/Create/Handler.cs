@@ -48,7 +48,7 @@ public sealed class CreateMissionHandler(
     
     private async Task Validate(CreateMissionCommand cmd, CancellationToken ct = default)
     {
-        bool isExisted = await repo.CheckExistedCodeAsync(cmd.Code, ct);
+        bool isExisted = await repo.CodeExistsAsync(cmd.Code, ct);
         if (isExisted)
             throw new BadRequestException(MessageCode.Reward.CodeIsAlreadyExisted);
     }

@@ -71,12 +71,12 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
             return mission;
     }
     
-    public async Task<MissionDto> GetDetailByUserAsync(string userId, Guid missionId, CancellationToken ct = default)
+    public async Task<UserMissionDto> GetDetailByUserAsync(string userId, Guid missionId, CancellationToken ct = default)
     {
         var mission = await dbContext.Missions
             .AsNoTracking()
             .Where(m => m.PublicId == missionId)
-            .Select(m => new MissionDto
+            .Select(m => new UserMissionDto
             {
                 Id = m.PublicId,
                 Code = m.Code,
@@ -86,23 +86,14 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                 ResetType = m.ResetType,
                 IsActive = m.IsActive,
                 ConfigData = m.ConfigData,
-                StartAt = m.StartAt,
-                EndAt = m.EndAt,
-                TriggerEvents = m.TriggerEvents,
                 LastProgressAt = m.UserMissions
                     .Where(x => x.UserId == userId)
                     .Select(x => x.LastProgressAt)
                     .FirstOrDefault(),
-                MissionRewards = m.MissionRewards.Select(mr => new MissionRewardDto
+                MissionRewards = m.MissionRewards.Select(mr => new UserMissionRewardDto
                 {
                     Id = mr.PublicId,
-                    Sequence = mr.Sequence,
-                    SortOrder = mr.SortOrder,
-                    RequiredProgress = mr.RequiredProgress,
-                    IsClaimable = mr.IsClaimable,
                     IsActive = mr.IsActive,
-                    StartAt = mr.StartAt,
-                    EndAt = mr.EndAt,
                     
                     RewardDefinitionId = mr.RewardDefinition != null ? mr.RewardDefinition.PublicId : Guid.Empty,
                     Amount = mr.RewardDefinition != null ? mr.RewardDefinition.Amount : null,
@@ -121,7 +112,13 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                     ClaimId = mr.UserMissionClaims
                         .Where(x => x.UserId == userId && x.Status == UserMissionClaimStatus.Available)
                         .Select(x => (Guid?)x.PublicId)
-                        .FirstOrDefault()
+                        .FirstOrDefault(),
+                    
+                    IsClaimed = mr.UserMissionClaims
+                        .Any(c => 
+                            c.UserId == userId &&
+                            c.CycleNumber == m.UserMissions.FirstOrDefault(um => um.UserId == userId)!.CycleNumber &&
+                            c.Status == UserMissionClaimStatus.Claimed)
                     
                 }).ToArray()
             })
@@ -142,10 +139,9 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                ?? throw new NotFoundException(MessageCode.Reward.MissionNotFound);
     }
     
-    public async Task<bool> CheckExistedCodeAsync(string code, CancellationToken ct = default)
+    public async Task<bool> CodeExistsAsync(string code, CancellationToken ct = default)
     {
-        return await dbContext.Missions
-            .AnyAsync(x => x.Code == code, ct);
+        return await dbContext.Missions.AnyAsync(x => x.Code == code, ct);
     }
     
     public async Task<IReadOnlyCollection<Mission>> GetTriggeredByEventAsync(

@@ -11,7 +11,6 @@ namespace game_x.application.Features.Rewards.Commands.Missions.Claim;
 public sealed class ClaimMissionRewardHandler(
     IUnitOfWork unitOfWork,
     IUserAccessor userAccessor,
-    IMissionRepo missionRepo,
     IUserMissionClaimRepo userMissionClaimRepo,
     IExecutionRepo executionRepo,
     IUserRewardRepo userRewardRepo,
@@ -22,42 +21,35 @@ public sealed class ClaimMissionRewardHandler(
     // IIdempotencyKeyRepo idempotencyRepo
 ) : ICommandHandler<ClaimMissionRewardCommand, ClaimMissionRewardResponse>
 {
-    public async Task<ClaimMissionRewardResponse> Handle(ClaimMissionRewardCommand cmd, CancellationToken ct)
+    public async Task<ClaimMissionRewardResponse> Handle(
+        ClaimMissionRewardCommand cmd,
+        CancellationToken ct)
     {
         var userId = userAccessor.GetUserId();
-        var (mission, reward, claim) = await Validate(userId, cmd, ct);
-        ClaimMissionRewardResponse response = new();
+
+        var claim = await ValidateAsync(userId, cmd.ClaimId, ct);
+
+        var reward = claim.MissionReward!.RewardDefinition!;
+        var userMission = claim.UserMission!;
+        var mission = userMission.Mission!;
+
+        ClaimMissionRewardResponse response = null!;
+
         await unitOfWork.WithTransactionAsync(async () =>
-        {                               
-            // // 1. Idempotency
-            // if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
-            // {
-            // var existing = await idempotencyRepo.GetAsync(userId, request.IdempotencyKey, ct);
-            //
-            //     if (existing is not null &&
-            //         !existing.IsExpired() &&
-            //         !string.IsNullOrWhiteSpace(existing.ResponseMetadata))
-            //     {
-            //         return JsonSerializer.Deserialize<ClaimMissionRewardResponse>(
-            //             existing.ResponseMetadata)!;
-            //     }
-            // }
-            
-            // 4. Create execution
+        {
             var execution = Execution.Create(
                 userId: userId,
                 type: ExecutionType.MissionRewardClaim,
                 missionId: mission.Id
                 // idempotencyKey: cmd.IdempotencyKey
                 );
+
             await executionRepo.AddAsync(execution, ct);
 
             try
             {
-                // 5. Grant reward
                 await GrantRewardAsync(userId, reward, ct);
 
-                // 6. Create ledger
                 var userReward = UserReward.Create(
                     userId: userId,
                     execution: execution,
@@ -66,43 +58,36 @@ public sealed class ClaimMissionRewardHandler(
                     rewardType: reward.Type,
                     amount: reward.Amount ?? 0,
                     title: reward.Title,
-                    catalogItemId: reward.CatalogItemId
-                );
+                    catalogItemId: reward.CatalogItemId);
 
                 await userRewardRepo.AddAsync(userReward, ct);
 
-                // 7. mark claim
                 claim.Claim(execution);
 
                 execution.MarkSuccess();
 
-                await unitOfWork.CommitAsync(ct);
-                await userInventoryCache.RefreshCache(userId, ct);
+                var hasPendingClaims = await userMissionClaimRepo.HasPendingClaimsAsync(userMission.Id, userMission.CycleNumber, ct);
+                if (!hasPendingClaims && userMission.Status == UserMissionStatus.Completed)
+                {
+                    await userMissionClaimRepo.ExpireUnclaimedAsync(userMission.Id, userMission.CycleNumber, ct);
+                    userMission.ResetProgress();
+                }
 
+                await unitOfWork.CommitAsync(ct);
+
+                await userInventoryCache.RefreshCache(userId, ct);
                 var inventories = await userInventoryCache.GetAll(userId, ct);
                 await dispatcher.Publish(new OnUserInventoryUpdatedEvent(userId, inventories ?? []), ct);
-                
+
                 response = new ClaimMissionRewardResponse
                 {
                     RewardId = reward.PublicId,
                     RewardCode = reward.Code,
                     RewardTitle = reward.Title,
                     Amount = reward.Amount ?? 0,
-                    RewardType = reward.Type
+                    RewardType = reward.Type,
+                    CycleCompleted = userMission is {Status: UserMissionStatus.InProgress, Progress: 0}
                 };
-                    
-                // 8. save idempotency response
-                // if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
-                // {
-                //     var key = IdempotencyKey.Create(
-                //         key: request.IdempotencyKey,
-                //         userId: userId,
-                //         actionType: IdempotencyActionType.MissionClaim,
-                //         responseMetadata: JsonSerializer.Serialize(response),
-                //         expiredAt: DateTime.UtcNow.AddHours(24));
-                //
-                //     await idempotencyRepo.AddAsync(key, ct);
-                // }
             }
             catch (Exception ex)
             {
@@ -110,63 +95,73 @@ public sealed class ClaimMissionRewardHandler(
                 throw;
             }
         }, ct);
-        
+
         return response;
     }
 
-    private async Task<(Mission mission, RewardDefinition reward, UserMissionClaim claim)> 
-        Validate(string userId, ClaimMissionRewardCommand request, CancellationToken ct = default)
+    private async Task<UserMissionClaim> ValidateAsync(string userId, Guid claimId, CancellationToken ct)
     {
-        var mission = await missionRepo.GetByIdAsync(request.MissionId, ct);
-        
-        var claim = await userMissionClaimRepo.GetTrackedByIdAsync(request.ClaimId, ct);
-        if (claim.MissionReward is null)
-            throw new NotFoundException(MessageCode.Reward.MissionRewardNotFound);
-            
-        if (claim.UserId != userId || claim.MissionReward?.MissionId != mission.Id)
+        var claim = await userMissionClaimRepo.GetTrackedByIdAsync(claimId, ct);
+
+        if (claim is null)
+            throw new NotFoundException(MessageCode.Reward.MissionClaimNotFound);
+
+        if (claim.UserId != userId)
             throw new NotFoundException(MessageCode.Reward.MissionClaimInvalid);
 
         if (claim.Status != UserMissionClaimStatus.Available)
             throw new BadRequestException(MessageCode.Reward.MissionClaimUnavailable);
-        
-        var rewardDefinition = claim.MissionReward.RewardDefinition;
-        if (rewardDefinition is null)
+
+        if (claim.MissionReward is null)
+            throw new NotFoundException(MessageCode.Reward.MissionRewardNotFound);
+
+        if (claim.UserMission is null)
+            throw new NotFoundException(MessageCode.Reward.UserMissionNotFound);
+
+        if (claim.UserMission.Mission is null)
+            throw new NotFoundException(MessageCode.Reward.MissionNotFound);
+
+        if (claim.MissionReward.RewardDefinition is null)
             throw new NotFoundException(MessageCode.Reward.RewardDefinitionNotFound);
-        
-        if (!rewardDefinition.CatalogItemId.HasValue) 
+
+        if (!claim.MissionReward.RewardDefinition.CatalogItemId.HasValue) 
             throw new BadRequestException(MessageCode.Reward.CatalogNotFound);
         
-        return (mission, rewardDefinition, claim);
+        return claim;
     }
-    
-    private async Task GrantRewardAsync(string userId, RewardDefinition reward, CancellationToken ct = default)
+
+    private async Task GrantRewardAsync(string userId, RewardDefinition reward, CancellationToken ct)
     {
         switch (reward.Type)
         {
-            // case RewardItemType.Currency:
-            // {
-            //     await walletService.CreditAsync(
-            //         userId,
-            //         reward.Amount,
-            //         ct);
-            //
-            //     break;
-            // }
-
             case RewardItemType.CatalogItem:
             {
-                if (!reward.CatalogItemId.HasValue) throw new BadRequestException(MessageCode.Reward.CatalogNotFound);
+                var amount = (int)(reward.Amount ?? 0);
+                if (amount <= 0)
+                    throw new BadRequestException(MessageCode.Reward.RewardDefinitionAmountInvalid);
 
-                var inventory = await inventoryRepo.GetDetailAsync(userId, reward.CatalogItemId.Value, ct);
+                var inventory = await inventoryRepo.GetDetailAsync(userId, reward.CatalogItemId!.Value, ct);
                 if (inventory is null)
                 {
-                    inventory = UserInventory.Create(userId, reward.CatalogItemId.Value, (int?)reward.Amount ?? 0);
+                    inventory = UserInventory.Create(userId, reward.CatalogItemId.Value, amount);
                     await inventoryRepo.AddAsync(inventory, ct);
                 }
                 else
-                    inventory.Add((int?)reward.Amount ?? 0);
+                    inventory.Add(amount);
                 break;
             }
+
+            /*
+            case RewardItemType.Currency:
+            {
+                await walletService.CreditAsync(
+                    userId,
+                    reward.Amount ?? 0,
+                    ct);
+                break;
+            }
+            */
+
             default:
                 throw new BadRequestException(MessageCode.Reward.RewardDefinitionUnsupportedType);
         }
