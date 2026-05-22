@@ -27,5 +27,7 @@ public sealed class MissionDetailDto
     
     public DateTime? EndAt { get; set; }
 
+    public DateTime? LastProgressAt { get; set; }
+    
     public IReadOnlyCollection<MissionRewardDetailDto> MissionRewards { get; set; } = [];
 }
