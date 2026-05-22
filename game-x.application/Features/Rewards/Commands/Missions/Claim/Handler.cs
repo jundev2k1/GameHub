@@ -1,6 +1,8 @@
+using game_x.application.Contract.Infrastructure.Caching.Rewards;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Contract.Persistence.Repo.Reward;
+using game_x.application.Events.Rewards.OnUserInventoryUpdated;
 using game_x.domain.Entities.Rewards;
 using game_x.domain.Enum.Rewards;
 
@@ -13,7 +15,9 @@ public sealed class ClaimMissionRewardHandler(
     IUserMissionClaimRepo userMissionClaimRepo,
     IExecutionRepo executionRepo,
     IUserRewardRepo userRewardRepo,
-    IUserInventoryRepo inventoryRepo
+    IUserInventoryRepo inventoryRepo,
+    IUserInventoryCacheService userInventoryCache,
+    IApplicationEventDispatcher dispatcher
     // IWalletService walletService,
     // IIdempotencyKeyRepo idempotencyRepo
 ) : ICommandHandler<ClaimMissionRewardCommand, ClaimMissionRewardResponse>
@@ -24,15 +28,11 @@ public sealed class ClaimMissionRewardHandler(
         var (mission, reward, claim) = await Validate(userId, cmd, ct);
         ClaimMissionRewardResponse response = new();
         await unitOfWork.WithTransactionAsync(async () =>
-        {
+        {                               
             // // 1. Idempotency
             // if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
             // {
-            //     var existing =
-            //         await idempotencyRepo.GetAsync(
-            //             userId,
-            //             request.IdempotencyKey,
-            //             ct);
+            // var existing = await idempotencyRepo.GetAsync(userId, request.IdempotencyKey, ct);
             //
             //     if (existing is not null &&
             //         !existing.IsExpired() &&
@@ -60,7 +60,7 @@ public sealed class ClaimMissionRewardHandler(
                 // 6. Create ledger
                 var userReward = UserReward.Create(
                     userId: userId,
-                    executionId: execution.Id,
+                    execution: execution,
                     rewardDefinitionId: reward.Id,
                     rewardPoolItemId: null,
                     rewardType: reward.Type,
@@ -77,11 +77,15 @@ public sealed class ClaimMissionRewardHandler(
                 execution.MarkSuccess();
 
                 await unitOfWork.CommitAsync(ct);
+                await userInventoryCache.RefreshCache(userId, ct);
+
+                var inventories = await userInventoryCache.GetAll(userId, ct);
+                await dispatcher.Publish(new OnUserInventoryUpdatedEvent(userId, inventories ?? []), ct);
                 
                 response = new ClaimMissionRewardResponse
                 {
-                    ExecutionId = execution.PublicId,
-                    UserRewardId = userReward.PublicId,
+                    RewardId = reward.PublicId,
+                    RewardCode = reward.Code,
                     RewardTitle = reward.Title,
                     Amount = reward.Amount ?? 0,
                     RewardType = reward.Type
@@ -115,7 +119,7 @@ public sealed class ClaimMissionRewardHandler(
     {
         var mission = await missionRepo.GetByIdAsync(request.MissionId, ct);
         
-        var claim = await userMissionClaimRepo.GetByIdAsync(request.ClaimId, ct);
+        var claim = await userMissionClaimRepo.GetTrackedByIdAsync(request.ClaimId, ct);
         if (claim.MissionReward is null)
             throw new NotFoundException(MessageCode.Reward.MissionRewardNotFound);
             
@@ -161,10 +165,8 @@ public sealed class ClaimMissionRewardHandler(
                 }
                 else
                     inventory.Add((int?)reward.Amount ?? 0);
-
                 break;
             }
-
             default:
                 throw new BadRequestException(MessageCode.Reward.RewardDefinitionUnsupportedType);
         }

@@ -87,7 +87,7 @@ public sealed class UserReward : BaseEntity<int>, IAuditable
 
     public static UserReward Create(
         string userId,
-        int executionId,
+        Execution execution,
         RewardItemType rewardType,
         decimal amount,
         int? rewardDefinitionId = null,
@@ -101,7 +101,7 @@ public sealed class UserReward : BaseEntity<int>, IAuditable
         return new()
         {
             UserId = userId,
-            ExecutionId = executionId,
+            Execution = execution,
             RewardDefinitionId = rewardDefinitionId,
             RewardPoolItemId = rewardPoolItemId,
             CatalogItemId = catalogItemId,

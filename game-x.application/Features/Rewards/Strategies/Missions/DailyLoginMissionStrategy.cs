@@ -41,7 +41,7 @@ public sealed class DailyLoginMissionStrategy(
 
         foreach (var reward in unlockedRewards)
         {
-            var exists = await userMissionClaimRepo.CheckExistAsync(userEvent.UserId, reward.Id, ct);
+            var exists = await userMissionClaimRepo.ExistsAsync(userEvent.UserId, reward.Id, ct);
             if (exists) continue;
   
             var claim = UserMissionClaim.Create(
