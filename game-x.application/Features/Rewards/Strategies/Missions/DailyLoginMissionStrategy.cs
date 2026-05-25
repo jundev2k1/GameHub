@@ -27,17 +27,17 @@ public sealed class DailyLoginMissionStrategy(
 
         if (userMission.HasProgressToday(today) || userMission.InvalidTime(today)) return;
 
-        if (config.RequireConsecutiveProgress && userMission.IsMissedRequiredDay(today))
+        // Expire all previous rewards
+        await userMissionClaimRepo.ExpireUnclaimedAsync(userMission.Id, userMission.CycleNumber, ct);
+        
+        if (config.RequireConsecutiveProgress && 
+            (userMission.IsMissedRequiredDay(today) || userMission.Progress >= config.RequiredProgress))
         {
-            await userMissionClaimRepo.ExpireUnclaimedAsync(userMission.Id, userMission.CycleNumber, ct);
             userMission.ResetProgress();
         }
-
+        
         var consecutive = userMission.LastProgressAt?.Date == today.AddDays(-1);
         userMission.AddProgress(today, consecutive);
-
-        if (userMission.Progress >= config.RequiredProgress)
-            userMission.Complete();
 
         var rewards = await missionRewardRepo.GetByMissionIdAsync(mission.Id, ct);
         var unlockedRewards = rewards
