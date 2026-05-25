@@ -3,12 +3,18 @@ using game_x.api.Middleware;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using game_x.api.Common.Time;
+using game_x.application.Common.Abstractions.Time;
+using game_x.infrastructure.Common.Time;
 
 namespace game_x.api;
 
 public static class ApiServicesRegistration
 {
-    public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddApiServices(
+        this IServiceCollection services, 
+        IConfiguration config,
+        IWebHostEnvironment environment)
     {
         services.AddHealthChecks();
 
@@ -16,7 +22,7 @@ public static class ApiServicesRegistration
         var corsOrigins = originsString?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         if (corsOrigins is null || corsOrigins.Length == 0)
-            throw new InvalidOperationException("CorsSettings:AllowedOrigins 環境變數未設定或格式錯誤");
+            throw new InvalidOperationException("CorsSettings:AllowedOrigins Environment variables not set or formatted incorrectly.");
 
         services.AddCors(options =>
         {
@@ -33,6 +39,7 @@ public static class ApiServicesRegistration
         services.AddEndpointsApiExplorer();
         services.AddDataProtection();
         services.AddSwaggerServices();
+        services.AddTimeProvider(environment);
 
         // Add controllers,
         // Configure to automatically convert an Enum int type to a string type for API request/response
@@ -93,6 +100,15 @@ public static class ApiServicesRegistration
             });
         });
 
+        return services;
+    }
+
+    public static IServiceCollection AddTimeProvider(this IServiceCollection services, IWebHostEnvironment environment)
+    {
+        if (environment.IsDevelopment())
+            services.AddScoped<IDateTimeProvider, RequestDateTimeProvider>();
+        else
+            services.AddScoped<IDateTimeProvider, DateTimeProvider>();
         return services;
     }
 }

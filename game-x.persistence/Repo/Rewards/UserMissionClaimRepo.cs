@@ -10,14 +10,14 @@ namespace game_x.persistence.Repo.Rewards;
 public sealed class UserMissionClaimRepo(GameXContext dbContext) : IUserMissionClaimRepo, IRepository
 {
     public async Task<bool> ExistsAsync(
-        string userId, 
+        int userMissionId, 
         int missionRewardId, 
         int cycleNumber, 
         CancellationToken ct = default)
     {
         return await dbContext.UserMissionClaims
             .AnyAsync(x => 
-                x.UserId == userId && 
+                x.UserMissionId == userMissionId && 
                 x.MissionRewardId == missionRewardId && 
                 x.CycleNumber == cycleNumber &&
                 x.Status != UserMissionClaimStatus.Expired, ct);

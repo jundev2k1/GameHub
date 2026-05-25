@@ -52,9 +52,9 @@ public sealed class UserMissionClaimConfig : IEntityTypeConfiguration<UserMissio
             .IsUnique()
             .HasDatabaseName("ux_user_mission_claims_public_id");
 
-        b.HasIndex(x => new { x.UserId, x.MissionRewardId })
+        b.HasIndex(x => new { x.UserId, x.MissionRewardId, x.CycleNumber })
             .IsUnique()
-            .HasDatabaseName("ux_user_mission_claims_user_reward");
+            .HasDatabaseName("ux_user_mission_claims_user_reward_cycle_number");
 
         b.HasIndex(x => x.UserMissionId)
             .HasDatabaseName("ix_user_mission_claims_user_mission");

@@ -25,7 +25,7 @@ public sealed class UserEventRepo(GameXContext dbContext) : IUserEventRepo, IRep
         var entity = await dbContext.UserEvents
                          .FirstOrDefaultAsync(c => c.PublicId == id, ct)
                      ?? throw new NotFoundException(MessageCode.Reward.UserEventNotFound);
-
+            
         updateAction.Invoke(entity);
     }
 }

@@ -1,3 +1,4 @@
+using game_x.application.Common.Abstractions.Time;
 using game_x.application.Contract.Infrastructure.BackgroundJobs.Dispatchers;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
@@ -13,7 +14,8 @@ public sealed class DailyCheckInHandler(
     IUserAccessor userAccessor,
     IUserEventJobDispatcher userEventDispatcher,
     IUserEventRepo userEventRepo,
-    ILogger<DailyCheckInHandler> logger
+    ILogger<DailyCheckInHandler> logger,
+    IDateTimeProvider clock
 ) : ICommandHandler<DailyCheckInCommand, Unit>
 {
     public async Task<Unit> Handle(DailyCheckInCommand cmd, CancellationToken ct = default)
@@ -24,7 +26,13 @@ public sealed class DailyCheckInHandler(
             try
             {
                 var id = Guid.CreateVersion7();
-                var userEvent = UserEvent.Create(userId: userId, type: UserEventType.DailyLogin, id: id);
+                var userEvent = UserEvent.Create(
+                    userId: userId, 
+                    type: UserEventType.DailyLogin, 
+                    id: id,
+                    createdAt: DateTime.SpecifyKind(clock.UtcNow, DateTimeKind.Utc),
+                    updatedAt: DateTime.SpecifyKind(clock.UtcNow, DateTimeKind.Utc));
+                    
                 await userEventRepo.AddAsync(userEvent, ct);
                 await unitOfWork.CommitAsync(ct);
                 userEventDispatcher.EnqueueProcess(id);

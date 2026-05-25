@@ -58,6 +58,8 @@ public sealed class UserMission : BaseEntity<int>
 
     #region Behaviors
     public bool HasProgressToday(DateTime today) => LastProgressAt?.Date == today.Date;
+    
+    public bool InvalidTime(DateTime today) => LastProgressAt?.Date != null && today < LastProgressAt?.Date;
 
     public bool IsMissedRequiredDay(DateTime today)
         => LastProgressAt.HasValue &&
