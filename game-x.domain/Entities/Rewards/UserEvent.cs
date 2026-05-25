@@ -40,7 +40,9 @@ public sealed class UserEvent : BaseEntity<int>
         decimal? value = null,
         UserEventRefType? refType = null,
         int? refId = null,
-        string? metadata = null)
+        string? metadata = null,
+        DateTime? createdAt = null,
+        DateTime? updatedAt = null)
     {
         return new()
         {
@@ -50,7 +52,9 @@ public sealed class UserEvent : BaseEntity<int>
             Value = value,
             RefType = refType,
             RefId = refId,
-            Metadata = metadata
+            Metadata = metadata,
+            CreatedAt = createdAt ?? DateTime.UtcNow,
+            UpdatedAt = updatedAt ?? DateTime.UtcNow
         };
     }
     #endregion

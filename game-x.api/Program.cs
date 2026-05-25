@@ -27,7 +27,7 @@ builder.Host.UseSerilog((context, _, loggerConfig) =>
 
 // Add services to the container.
 builder.Services
-    .AddApiServices(builder.Configuration)
+    .AddApiServices(builder.Configuration, builder.Environment)
     .AddApplicationServices()
     .AddPersistenceServices(builder.Configuration)
     .AddInfrastructureServices(builder.Configuration);
