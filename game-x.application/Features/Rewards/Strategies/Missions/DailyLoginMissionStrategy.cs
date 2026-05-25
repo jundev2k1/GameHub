@@ -23,9 +23,9 @@ public sealed class DailyLoginMissionStrategy(
         CancellationToken ct = default)
     {
         var config = mission.ConfigData;
-        var today = DateTime.UtcNow.Date;
+        var today = userEvent.CreatedAt.Date;
 
-        if (userMission.HasProgressToday(today)) return;
+        if (userMission.HasProgressToday(today) || userMission.InvalidTime(today)) return;
 
         if (config.RequireConsecutiveProgress && userMission.IsMissedRequiredDay(today))
         {
@@ -48,9 +48,9 @@ public sealed class DailyLoginMissionStrategy(
         {
             var exists =
                 await userMissionClaimRepo.ExistsAsync(
-                    userEvent.UserId,
-                    reward.Id,
-                    userMission.CycleNumber,
+                    userMissionId: userMission.Id,
+                    missionRewardId: reward.Id,
+                    cycleNumber: userMission.CycleNumber,
                     ct);
 
             if (exists) continue;
