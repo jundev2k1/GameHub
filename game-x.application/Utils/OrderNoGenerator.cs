@@ -11,8 +11,6 @@ public static class OrderNoGenerator
     public static string Otc()
         => $"OTC-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{RandomString(6)}";
 
-
-
     /// <summary>
     ///     Generates a random uppercase alphanumeric string of a specified length (excluding easily confused characters)
     /// </summary>

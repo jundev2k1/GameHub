@@ -22,7 +22,10 @@ public sealed class OnTransactionInternalCreatedHandler(
         IEnumerable<Notification> notifications = [];
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            await SendUpdateWalletToMember(targetTransaction.UserId, ct);
+            if (targetTransaction.Status is TransactionStatus.Completed)
+                await SendUpdateWalletToMember(targetTransaction.UserId, ct);
+
+            // Create user and admin notifications
             notifications = await CreateAdminNotifications(targetTransaction, ct);
             await notificationRepo.AddRangeNotificationsAsync(notifications, ct);
         }, ct);

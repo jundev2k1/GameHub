@@ -14,36 +14,25 @@ public sealed class CreateTransactionHandler(
 {
     public async Task<Unit> Handle(CreateTransactionCommand request, CancellationToken ct = default)
     {
-        var isDeposit = request.Type == TransactionType.Deposit;
-
         var userBalance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(request.UserId, request.CryptoTokenId, ct);
-        if (!isDeposit && (userBalance.Amount - request.Amount < 0))
+        var isWithdrawal = request.Type is TransactionTypeRequest.Withdrawal;
+        if (isWithdrawal && (userBalance.Amount - request.Amount < 0))
             throw new InsufficientBalanceException(userBalance.Amount, request.Amount);
 
         Transaction? transaction = null;
         await unitOfWork.WithTransactionAsync(async () =>
         {
-            var balanceAfter = 0M;
-            await userBalanceRepo.UpdateByTokenIdAsync(request.UserId, userBalance.CryptoTokenId, balance =>
+            switch (request.Type)
             {
-                balance.AdjustAmount(request.Amount, isDeposit);
-                balanceAfter = balance.TotalAmount;
-            }, ct);
-                
-            var sno = OrderNoGenerator.Otc();
-            var internalTx = TransactionInternal.Create(
-                orderNumber: sno, 
-                providerOrderId: request.OrderUId,
-                sourceType: TransactionSourceType.Refund);
-            transaction = Transaction.Create(
-                userId: request.UserId,
-                amount: request.Amount,
-                cryptoTokenId: userBalance.CryptoTokenId,
-                type: request.Type,
-                note: request.Message);
-            transaction.AddTxInternal(internalTx);
-            transaction.Confirm(request.Amount, balanceAfter);
-            await transactionRepo.AddAsync(transaction, ct);
+                case TransactionTypeRequest.Deposit:
+                case TransactionTypeRequest.Withdrawal:
+                    transaction = await HandleUxmTransactionAsync(request, userBalance.CryptoTokenId, ct);
+                    break;
+
+                case TransactionTypeRequest.FastPayDeposit:
+                    transaction = await HandleFastPayTransactionAsync(request, userBalance.CryptoTokenId, ct);
+                    break;
+            }
         }, ct);
 
         var @event = new OnTransactionInternalCreatedEvent(transaction.Adapt<TransactionInternalDto>());
@@ -51,4 +40,55 @@ public sealed class CreateTransactionHandler(
 
         return Unit.Value;
     }
+
+    private async Task<Transaction> HandleUxmTransactionAsync(CreateTransactionCommand request, int cryptoTokenId, CancellationToken ct)
+    {
+        var balanceAfter = 0M;
+        await userBalanceRepo.UpdateByTokenIdAsync(request.UserId, cryptoTokenId, balance =>
+        {
+            balance.AdjustAmount(request.Amount, request.Type == TransactionTypeRequest.Deposit);
+            balanceAfter = balance.TotalAmount;
+        }, ct);
+
+        var internalTx = TransactionInternal.Create(
+            orderNumber: OrderNoGenerator.Otc(),
+            providerOrderId: request.OrderUId,
+            providerId: PaymentGatewayProvider.Uxm,
+            sourceType: TransactionSourceType.Refund);
+        var transaction = Transaction.Create(
+            userId: request.UserId,
+            amount: request.Amount,
+            cryptoTokenId: cryptoTokenId,
+            type: GetTransactionType(request.Type),
+            note: request.Message.Trim());
+        transaction.AddTxInternal(internalTx);
+        transaction.Confirm(request.Amount, balanceAfter);
+        await transactionRepo.AddAsync(transaction, ct);
+        return transaction;
+    }
+
+    private async Task<Transaction> HandleFastPayTransactionAsync(CreateTransactionCommand request, int cryptoTokenId, CancellationToken ct)
+    {
+        var internalTx = TransactionInternal.Create(
+            orderNumber: OrderNoGenerator.Otc(),
+            providerOrderId: null,
+            providerId: PaymentGatewayProvider.FastPay,
+            sourceType: TransactionSourceType.Refund);
+        var transaction = Transaction.Create(
+            userId: request.UserId,
+            amount: request.Amount,
+            cryptoTokenId: cryptoTokenId,
+            type: GetTransactionType(request.Type),
+            note: request.Message.Trim());
+        transaction.AddTxInternal(internalTx);
+        await transactionRepo.AddAsync(transaction, ct);
+        return transaction;
+    }
+
+    private static TransactionType GetTransactionType(TransactionTypeRequest type) => type switch
+    {
+        TransactionTypeRequest.Deposit or TransactionTypeRequest.FastPayDeposit => TransactionType.Deposit,
+        TransactionTypeRequest.Withdrawal => TransactionType.Withdrawal,
+        _ => throw new BadRequestException(),
+    };
 }

@@ -5,8 +5,7 @@ public sealed class CreateTransactionValidator : AbstractValidator<CreateTransac
     public CreateTransactionValidator()
     {
         RuleFor(x => x.Type)
-            .IsInEnum().WithMessage("Invalid transaction type.")
-            .Must(type => type is TransactionType.Deposit or TransactionType.Withdrawal).WithMessage("Transaction type just allow deposit or withdrawal.");
+            .IsInEnum().WithMessage("Invalid transaction type.");
 
         RuleFor(x => x.UserId)
             .NotEmpty().WithMessage("UserId is required.");

@@ -133,7 +133,7 @@ public class Transaction : BaseEntity<int>, IAuditable
         Status = TransactionStatus.Completed;
         GameBalanceAfter = null;
         
-        if (TransactionInternal != null) TransactionInternal.Confirm();
+        TransactionInternal?.Confirm();
     }
 
     public void ConfirmGameTx(decimal actualAmount, decimal balanceAfter, decimal gameBalanceAfter)
