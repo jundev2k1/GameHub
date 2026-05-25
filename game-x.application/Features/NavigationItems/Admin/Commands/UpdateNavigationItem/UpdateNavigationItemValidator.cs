@@ -20,8 +20,8 @@ public sealed class UpdateNavigationItemValidator : AbstractValidator<UpdateNavi
 
         RuleFor(x => x.TargetId)
             .NotEmpty()
-            .When(x => x.TargetType == NavigationTargetType.Category || x.TargetType == NavigationTargetType.Page)
-            .WithMessage($"{nameof(UpdateNavigationItemCommand.TargetId)} is required for Category or Page target types.");
+            .When(x => x.TargetType == NavigationTargetType.Category)
+            .WithMessage($"{nameof(UpdateNavigationItemCommand.TargetId)} is required for Category target types.");
 
         RuleFor(x => x.CustomUrl)
             .NotNull()
