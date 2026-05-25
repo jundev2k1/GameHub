@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.Caching.Rewards;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Contract.Persistence.Repo.Reward;
+using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Events.Rewards.OnUserInventoryUpdated;
 using game_x.application.Features.Rewards.Dtos;
 using game_x.domain.Entities.Rewards;
@@ -18,6 +19,9 @@ public sealed class RewardPoolExecuteHandler(
     IExecutionRepo executionRepo,
     IUserRewardRepo userRewardRepo,
     IUserInventoryRepo userInventoryRepo,
+    ICryptoTokenRepo cryptoTokenRepo,
+    ITransactionRepo transactionRepo,
+    IUserBalanceRepo userBalanceRepo,
     IRewardPoolItemCacheService itemCache,
     IUserInventoryCacheService userInventoryCache,
     ICatalogItemCacheService catalogItemCache,
@@ -57,10 +61,22 @@ public sealed class RewardPoolExecuteHandler(
                 );
                 await executionRepo.AddAsync(execution, ct);
 
-                int? transactionId = null;
+                Transaction? transaction = null;
 
-                // if (selectedItem.RewardType == RewardItemType.Balance)
-                //     transactionId = await HandleBalanceReward(userId, selectedItem, ct);
+                switch (selectedItem.RewardType)
+                {
+                    case RewardItemType.Balance:
+                    {
+                        if(selectedItem.Amount > 0)
+                            transaction = await HandleBalanceReward(userId, selectedItem.Amount.Value, ct);
+                        break;
+                    }
+                    case RewardItemType.CatalogItem:
+                    {
+                        await UpdateInventory(userId, poolItem, increasedItem, ct);
+                        break;
+                    }
+                }
 
                 var userReward = UserReward.Create(
                     userId: userId,
@@ -70,21 +86,30 @@ public sealed class RewardPoolExecuteHandler(
                     rewardType: poolItem.RewardDefinition?.Type ?? RewardItemType.None,
                     title: poolItem.RewardDefinition?.Title,
                     amount: poolItem.RewardDefinition?.Amount ?? 0,
-                    transactionId: transactionId
+                    transaction: transaction
                 );
                 
                 await userRewardRepo.AddAsync(userReward, ct);
    
                 execution.MarkSuccess();
 
-                await UpdateInventory(userId, poolItem, increasedItem, ct);
-
                 await unitOfWork.CommitAsync(ct);
 
-                await userInventoryCache.RefreshCache(userId, ct);
-
-                var inventories = await userInventoryCache.GetAll(userId, ct);
-                await dispatcher.Publish(new OnUserInventoryUpdatedEvent(userId, inventories ?? []), ct);
+                switch (selectedItem.RewardType)
+                {
+                    case RewardItemType.Balance:
+                    {
+                        await dispatcher.Publish(new OnUserBalanceUpdatedEvent(userId), ct);
+                        break;
+                    }
+                    case RewardItemType.CatalogItem:
+                    {
+                        await userInventoryCache.RefreshCache(userId, ct);
+                        var inventories = await userInventoryCache.GetAll(userId, ct);
+                        await dispatcher.Publish(new OnUserInventoryUpdatedEvent(userId, inventories ?? []), ct);
+                        break;
+                    }
+                }
                 
                 response = new RewardPoolExecuteResponse
                 {
@@ -166,20 +191,28 @@ public sealed class RewardPoolExecuteHandler(
             }
     }
     
-    // private async Task<int> HandleBalanceReward(string userId, RewardPoolItemDto selectedItem, CancellationToken ct = default)
-    // {
-    //     var balance = await balanceRepo.GetForUpdateAsync(userId, ct);
-    //
-    //     balance.Credit(selectedItem.Amount ?? 0);
-    //
-    //     var transaction = Transaction.CreateRewardCredit(
-    //         userId,
-    //         selectedItem.RewardDefinition.Amount
-    //     );
-    //
-    //     await transactionRepo.AddAsync(transaction, ct);
-    //     await unitOfWork.SaveChangesAsync(ct);
-    //
-    //     return transaction.Id;
-    // }
+    private async Task<Transaction> HandleBalanceReward(string userId, decimal amount, CancellationToken ct)
+    {
+        var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct);
+        if (token == null || token.Status != CryptoTokenStatus.Active)
+            throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
+        
+        var balance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
+                      ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+        
+        var tx = Transaction.Create(
+            type: TransactionType.Reward,
+            userId: userId,
+            amount: amount,
+            cryptoTokenId: token.Id);
+        
+        var internalTx = TransactionInternal.Create(
+            sourceType: TransactionSourceType.Reward);
+        tx.AddTxInternal(internalTx);
+        await transactionRepo.AddAsync(tx, ct);
+        await userBalanceRepo.UpdateAsync(balance.PublicId, x => { x.AdjustAmount(amount, true); }, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+        tx.Confirm(amount, balance.Amount);
+        return tx;
+    }
 }
