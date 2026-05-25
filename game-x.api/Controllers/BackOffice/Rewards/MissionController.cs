@@ -1,7 +1,9 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching.Rewards;
 using game_x.application.Exceptions;
-using game_x.application.Features.Rewards.Commands.MissionRewards.Create;
 using game_x.application.Features.Rewards.Commands.Missions.Create;
+using game_x.application.Features.Rewards.Commands.Missions.Remove;
+using game_x.application.Features.Rewards.Commands.Missions.SyncItems;
+using game_x.application.Features.Rewards.Commands.Missions.Update;
 
 namespace game_x.api.Controllers.BackOffice.Rewards;
 
@@ -32,8 +34,22 @@ public sealed class MissionController(IMissionCacheService cache) : BaseApiContr
         return ApiResponseFactory.Created(result);
     }
     
-    [HttpPost("{missionId:guid}/rewards")]
-    public async Task<IActionResult> AddRewardAsync(Guid missionId, CreateMissionRewardCommand cmd, CancellationToken ct = default)
+    [HttpPatch("{id:guid}")]
+    public async Task<IActionResult> UpdateAsync(Guid id, UpdateMissionCommand cmd, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(cmd with {Id = id}, ct);
+        return ApiResponseFactory.Created(result);
+    }
+    
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> RemoveAsync(Guid id, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new RemoveMissionCommand(id), ct);
+        return ApiResponseFactory.Created(result);
+    }
+    
+    [HttpPut("{missionId:guid}/rewards")]
+    public async Task<IActionResult> UpdateRewardAsync(Guid missionId, SyncMissionRewardCommand cmd, CancellationToken ct = default)
     {
         var result = await Mediator.Send(cmd with { MissionId = missionId }, ct);
         return ApiResponseFactory.Created(result);

@@ -36,6 +36,7 @@ public sealed class UserEvent : BaseEntity<int>
     public static UserEvent Create(
         string userId,
         UserEventType type,
+        Guid? id = null,
         decimal? value = null,
         UserEventRefType? refType = null,
         int? refId = null,
@@ -43,6 +44,7 @@ public sealed class UserEvent : BaseEntity<int>
     {
         return new()
         {
+            PublicId = id ?? Guid.CreateVersion7(),
             UserId = userId,
             Type = type,
             Value = value,

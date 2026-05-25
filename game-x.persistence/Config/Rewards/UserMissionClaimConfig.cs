@@ -37,6 +37,11 @@ public sealed class UserMissionClaimConfig : IEntityTypeConfiguration<UserMissio
 
         b.Property(x => x.ExecutionId)
             .HasColumnName("execution_id")
+            .IsRequired(false);
+        
+        b.Property(x => x.Status)
+            .HasColumnName("status")
+            .HasConversion<string>()
             .IsRequired();
 
         #endregion
@@ -47,7 +52,6 @@ public sealed class UserMissionClaimConfig : IEntityTypeConfiguration<UserMissio
             .IsUnique()
             .HasDatabaseName("ux_user_mission_claims_public_id");
 
-        // prevent duplicate claim
         b.HasIndex(x => new { x.UserId, x.MissionRewardId })
             .IsUnique()
             .HasDatabaseName("ux_user_mission_claims_user_reward");

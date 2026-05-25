@@ -14,6 +14,7 @@ public sealed class RewardPoolSeeder : ISeeder
             code: RewardPoolCode.MainRoulette,
             title: "Main Roulette",
             description: "Default roulette reward pool.",
+            triggerEvents: [],
             config: new RewardPoolConfigData
             {
                 Theme = "casino_gold",
@@ -47,6 +48,7 @@ public sealed class RewardPoolSeeder : ISeeder
             code: RewardPoolCode.NewUserScratch,
             title: "New User Scratch",
             description: "Scratch reward for first-time users.",
+            triggerEvents: [],
             config: new RewardPoolConfigData
             {
                 Theme = "new_user",
@@ -68,6 +70,7 @@ public sealed class RewardPoolSeeder : ISeeder
             code: RewardPoolCode.VipGacha,
             title: "VIP Gacha",
             description: "VIP premium random draw.",
+            triggerEvents: [],
             config: new RewardPoolConfigData
             {
                 Theme = "vip_gold",

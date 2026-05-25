@@ -88,6 +88,8 @@ public static class MessageCode
         /// <summary>The specified time range overlaps with an existing item.</summary>
         [EnumMetadata("The selected time period overlaps with an existing item. Please choose a different time range.")]
         TimeOverlap = 10026,
+        [EnumMetadata("The item cannot be deleted because it is currently being used by other records.")]
+        EntityInUse = 10027,
         #endregion
 
         #region ■ Message group: Success
@@ -408,6 +410,26 @@ public static class MessageCode
         RewardDefinitionInactive = 10611,
         [EnumMetadata("Reward Definition not found.")]
         MissionInactive = 10612,
+        [EnumMetadata("User Event not found.")]
+        UserEventNotFound = 10613,
+        [EnumMetadata("Reward Pool Item is invalid.")]
+        RewardPoolItemInvalid = 10614,
+        [EnumMetadata("Mission Reward not found.")]
+        MissionRewardNotFound = 10615,
+        [EnumMetadata("Mission Reward is invalid.")]
+        MissionRewardInvalid = 10616,
+        [EnumMetadata("Mission claim not found.")]
+        MissionClaimNotFound = 10617,
+        [EnumMetadata("Mission claim is invalid.")]
+        MissionClaimInvalid = 10618,
+        [EnumMetadata("Mission claim unavailable.")]
+        MissionClaimUnavailable = 10618,
+        [EnumMetadata("Unsupported reward definition type.")]
+        RewardDefinitionUnsupportedType = 10619,
+        [EnumMetadata("User mission not found.")]
+        UserMissionNotFound = 10620,
+        [EnumMetadata("Reward definition amount is invalid.")]
+        RewardDefinitionAmountInvalid = 10621,
         #endregion
     }
 }

@@ -13,9 +13,13 @@ public sealed class UserMission : BaseEntity<int>
     #endregion
     
     #region Properties
+    /// <summary>overall progress toward completion.</summary>
     public int Progress { get; private set; }
 
+    /// <summary>Used for consecutive missions.</summary>
     public int Streak { get; private set; }
+    
+    public int CycleNumber { get; private set; }
     
     public UserMissionStatus Status { get; private set; }
     
@@ -24,6 +28,8 @@ public sealed class UserMission : BaseEntity<int>
     public DateTime? ClaimedAt { get; private set; }
 
     public DateTime? ResetAt { get; private set; }
+    
+    public DateTime? LastProgressAt { get; private set; }
     #endregion
     
     #region Relationships
@@ -32,12 +38,10 @@ public sealed class UserMission : BaseEntity<int>
     public Mission? Mission { get; init; }
     
     private readonly List<UserMissionClaim> _userMissionClaim = new();
-    public IReadOnlyCollection<UserMissionClaim> Claims => _userMissionClaim;
+    public ICollection<UserMissionClaim> Claims => _userMissionClaim;
     #endregion
 
     #region Initializations
-    private UserMission() { }
-
     public static UserMission Create(string userId, int missionId)
     {
         return new()
@@ -46,37 +50,56 @@ public sealed class UserMission : BaseEntity<int>
             MissionId = missionId,
             Progress = 0,
             Streak = 0,
-            Status = UserMissionStatus.InProgress
+            Status = UserMissionStatus.InProgress,
+            CycleNumber = 1
         };
     }
     #endregion
 
     #region Behaviors
-    public void AddProgress(int amount = 1)
+    public bool HasProgressToday(DateTime today) => LastProgressAt?.Date == today.Date;
+
+    public bool IsMissedRequiredDay(DateTime today)
+        => LastProgressAt.HasValue &&
+           LastProgressAt.Value.Date < today.AddDays(-1).Date;
+
+    public void AddProgress(DateTime at, bool consecutive)
     {
-        if (Status.Equals(UserMissionStatus.Completed)) return;
-        Progress += amount;
+        if (Status == UserMissionStatus.Completed || Status == UserMissionStatus.Claimed)
+            return;
+
+        Progress++;
+
+        if (consecutive) Streak++;
+        else Streak = 1;
+
+        LastProgressAt = at;
     }
 
+    public void ResetProgress()
+    {
+        Progress = 0;
+        Streak = 0;
+        Status = UserMissionStatus.InProgress;
+        CompletedAt = null;
+        ClaimedAt = null;
+        ResetAt = DateTime.UtcNow;
+        CycleNumber++;
+    }
+    
     public void Complete()
     {
+        if (Status == UserMissionStatus.Completed) return;
+
         Status = UserMissionStatus.Completed;
         CompletedAt = DateTime.UtcNow;
     }
 
     public void Claim()
     {
+        if (Status != UserMissionStatus.Completed) return;
         Status = UserMissionStatus.Claimed;
         ClaimedAt = DateTime.UtcNow;
-    }
-
-    public void Reset()
-    {
-        Progress = 0;
-        Status = UserMissionStatus.InProgress;
-        CompletedAt = null;
-        ClaimedAt = null;
-        ResetAt = DateTime.UtcNow;
     }
     #endregion
 }

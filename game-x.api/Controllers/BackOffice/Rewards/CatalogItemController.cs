@@ -1,6 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching.Rewards;
 using game_x.application.Features.Rewards.Commands.CatalogItems.Create;
-using game_x.application.Features.Rewards.Commands.CatalogItems.Create.Remove;
+using game_x.application.Features.Rewards.Commands.CatalogItems.Remove;
 using game_x.application.Features.Rewards.Commands.CatalogItems.Update;
 
 namespace game_x.api.Controllers.BackOffice.Rewards;

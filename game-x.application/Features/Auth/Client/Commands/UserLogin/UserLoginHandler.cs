@@ -37,7 +37,7 @@ public sealed class UserLoginHandler(
         CreateRefreshToken(loginUser.Id, refreshToken, tokenInfo.JwtId);
 
         var loggedUser = await userRepo.GetUserDetailAsync(loginUser.Id, ct);
-     
+
         return new UserLoginResult(
             Email: loggedUser.Email,
             UserId: loggedUser.UserId,

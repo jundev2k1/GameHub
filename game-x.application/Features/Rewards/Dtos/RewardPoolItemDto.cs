@@ -17,6 +17,7 @@ public sealed class RewardPoolItemDto
     public DateTime? EndAt { get; private set; }
    
     public Guid RewardDefinitionId { get; set; }
+    public string RewardDefinitionCode { get; set; } = string.Empty;
     
     public decimal? Amount { get; set; }
     

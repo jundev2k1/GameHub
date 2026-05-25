@@ -4,6 +4,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
+using game_x.application.Features.Accounts.User.Commands.DailyCheckIn;
 using game_x.application.Features.Accounts.User.Commands.RevokeAllOtherToken;
 using game_x.application.Features.Accounts.User.Commands.RevokeToken;
 using game_x.application.Features.Accounts.User.Commands.UploadAvatar;
@@ -141,6 +142,13 @@ public sealed class UserController(
     public async Task<IActionResult> CreateTransferAsync(TransferBetweenFriendsCommand command, CancellationToken ct = default)
     {
         var result = await Mediator.Send(command, ct);
+        return ApiResponseFactory.Ok(result);
+    }
+    
+    [HttpPost("daily-checkin")]
+    public async Task<IActionResult> DailyCheckInAsync(CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new DailyCheckInCommand(), ct);
         return ApiResponseFactory.Ok(result);
     }
 }

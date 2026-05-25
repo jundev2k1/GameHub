@@ -51,10 +51,12 @@ public sealed class CatalogItem: BaseEntity<int>, IAuditable
     public MediaFile? Icon { get; private set; }
     
     private readonly List<RewardDefinition> _rewardDefinitions = [];
-    public IReadOnlyCollection<RewardDefinition> RewardDefinitions => _rewardDefinitions;
+    public ICollection<RewardDefinition> RewardDefinitions => _rewardDefinitions;
     #endregion                                                                                                   
     
     #region Initializations
+    private CatalogItem() { }
+    
     public static CatalogItem Create(
         string code,
         string name,

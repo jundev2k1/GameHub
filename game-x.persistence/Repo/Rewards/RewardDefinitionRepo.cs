@@ -43,12 +43,26 @@ public sealed class RewardDefinitionRepo(
             .AnyAsync(x => x.Code == code, ct);
     }
     
+    public Task<bool> ExistsByCatalogItemIdAsync(int catalogItemId, CancellationToken ct = default)
+    {
+        return dbContext.RewardDefinitions
+            .AnyAsync(x => x.CatalogItemId == catalogItemId, ct);
+    }
+    
     public async Task<RewardDefinition> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await dbContext.RewardDefinitions
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.PublicId == id, ct)
             ?? throw new BadRequestException(MessageCode.Reward.RewardDefinitionNotFound);
+    }
+    
+    public async Task<IReadOnlyCollection<RewardDefinition>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
+    {
+        return await dbContext.RewardDefinitions
+            .AsNoTracking()
+            .Where(x => ids.Contains(x.PublicId))
+            .ToListAsync(ct);
     }
     
     public async Task AddAsync(RewardDefinition entity, CancellationToken ct = default)

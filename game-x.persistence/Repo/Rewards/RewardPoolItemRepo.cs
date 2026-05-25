@@ -1,4 +1,6 @@
+using System.Linq.Expressions;
 using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo.Reward;
 using game_x.application.Exceptions;
 using game_x.application.Features.Rewards.Dtos;
@@ -8,16 +10,31 @@ using Mapster;
 
 namespace game_x.persistence.Repo.Rewards;
 
-public sealed class RewardPoolItemRepo(GameXContext dbContext) : IRewardPoolItemRepo, IRepository
+public sealed class RewardPoolItemRepo(
+    GameXContext dbContext,
+    IFileManagerCacheService storage) : IRewardPoolItemRepo, IRepository
 {
     public async Task<RewardPoolItemDto[]> GetListAsync(int poolId, CancellationToken ct = default)
     {
-        return await dbContext.RewardPoolItems
+        var items = await dbContext.RewardPoolItems
             .AsNoTracking()
             .OrderByDescending(x => x.SortOrder)
+            .Include(x => x.RewardDefinition)
+                .ThenInclude(x => x!.CatalogItem)
+                    .ThenInclude(x => x.Icon)
             .Where(x => x.RewardPoolId == poolId)
-            .ProjectToType<RewardPoolItemDto>()
             .ToArrayAsync(ct);
+        
+        return await Task.WhenAll(
+            items.Select(async item =>
+            {
+                var dto = item.Adapt<RewardPoolItemDto>();
+                dto.ItemIconUrl = item.RewardDefinition?.CatalogItem?.Icon is null
+                    ? null
+                    : await storage.GetFileUrl(item.RewardDefinition.CatalogItem.Icon, ct);
+
+                return dto;
+            }));
     }
     
     public async Task<RewardPoolItem> GetDetailByIdAsync(Guid id, CancellationToken ct = default)
@@ -30,28 +47,36 @@ public sealed class RewardPoolItemRepo(GameXContext dbContext) : IRewardPoolItem
             ?? throw new BadRequestException(MessageCode.Reward.RewardPoolItemNotFound);
     }
     
-    public async Task AddAsync(RewardPoolItem entity, CancellationToken ct = default)
+    public async Task<IReadOnlyCollection<RewardPoolItem>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
     {
-        await dbContext.RewardPoolItems.AddAsync(entity, ct);
+        return await dbContext.RewardPoolItems
+            .AsNoTracking()
+            .Include(x => x.RewardPool)
+            .Where(x => ids.Contains(x.PublicId))
+            .ToListAsync(ct);
     }
     
-    public async Task UpdateAsync(Guid id, Action<RewardPoolItem> updateAction, CancellationToken ct = default)
+    public async Task<ICollection<RewardPoolItem>> GetByIdsForUpdateAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
     {
-        var entity = await dbContext.RewardPoolItems
-                         .FirstOrDefaultAsync(c => c.PublicId == id, ct)
-                     ?? throw new NotFoundException(MessageCode.Reward.RewardPoolItemNotFound);
-
-        updateAction.Invoke(entity);
+        return await dbContext.RewardPoolItems
+            .Include(x => x.RewardPool)
+            .Where(x => ids.Contains(x.PublicId))
+            .ToListAsync(ct);
     }
     
-    public async Task RemoveAsync(Guid id, CancellationToken ct = default)
+    public Task<bool> ExistsByRewardIdAsync(int rewardId, CancellationToken ct = default)
     {
-        var entity = await dbContext.RewardPoolItems
-            .FirstOrDefaultAsync(x => x.PublicId == id, ct);
-
-        if (entity is null)
-            throw new NotFoundException(MessageCode.Reward.RewardPoolItemNotFound);
-
-        dbContext.RewardPoolItems.Remove(entity);
+        return dbContext.RewardPoolItems
+            .AnyAsync(x => x.RewardDefinitionId == rewardId, ct);
+    }
+    
+    public async Task AddRangeAsync(IEnumerable<RewardPoolItem> items, CancellationToken ct = default)
+    {
+        await dbContext.RewardPoolItems.AddRangeAsync(items, ct);
+    }
+    
+    public async Task BulkDeleteAsync(Expression<Func<RewardPoolItem, bool>> predicate, CancellationToken ct = default)
+    {
+        await dbContext.RewardPoolItems.Where(predicate).ExecuteDeleteAsync(ct);
     }
 }

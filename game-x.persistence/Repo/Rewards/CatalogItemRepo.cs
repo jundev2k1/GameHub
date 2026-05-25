@@ -40,6 +40,12 @@ public sealed class CatalogItemRepo(
             .AnyAsync(x => x.Code == code, ct);
     }
 
+    public Task<bool> ExistsByCatalogItemIdAsync(int catalogItemId, CancellationToken ct = default)
+    {
+        return dbContext.RewardDefinitions
+            .AnyAsync(x => x.CatalogItemId == catalogItemId, ct);
+    }
+    
     public async Task<CatalogItem> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await dbContext.CatalogItems
@@ -66,5 +72,14 @@ public sealed class CatalogItemRepo(
                      ?? throw new NotFoundException(MessageCode.Reward.CatalogNotFound);
 
         updateAction.Invoke(entity);
+    }
+    
+    public async Task RemoveAsync(Guid id, CancellationToken ct = default)
+    {
+        var entity = await dbContext.CatalogItems.FirstOrDefaultAsync(x => x.PublicId == id, ct);
+        if (entity is null)
+            throw new NotFoundException(MessageCode.Reward.CatalogNotFound);
+        
+        dbContext.CatalogItems.Remove(entity);
     }
 }

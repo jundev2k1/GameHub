@@ -65,9 +65,9 @@ public sealed class MissionReward : BaseEntity<int>, IAuditable
     
     private readonly List<UserMissionClaim> _userMissionClaim = new();
     
-    public IReadOnlyCollection<MissionReward> MissionRewards => _missionRewards;
+    public ICollection<MissionReward> MissionRewards => _missionRewards;
     
-    public IReadOnlyCollection<UserMissionClaim> UserMissionClaims => _userMissionClaim;
+    public ICollection<UserMissionClaim> UserMissionClaims => _userMissionClaim;
     #endregion
 
     #region Initializations
@@ -105,9 +105,25 @@ public sealed class MissionReward : BaseEntity<int>, IAuditable
     #endregion
 
     #region Behaviors
-    public void Activate() => IsActive = true;
-
-    public void Deactivate() => IsActive = false;
+    public void OnUpdate(
+        int? rewardDefinitionId = null,
+        int? sequence = null,
+        bool? isActive = null,
+        int? sortOrder = null,
+        int? requiredProgress = null,
+        bool? isClaimable = null,
+        DateTime? startAt = null,
+        DateTime? endAt = null)
+    {
+        RewardDefinitionId = rewardDefinitionId ?? RewardDefinitionId;
+        Sequence = sequence ?? Sequence;
+        IsActive = isActive ?? IsActive;
+        SortOrder = sortOrder ?? SortOrder;
+        RequiredProgress = requiredProgress ?? RequiredProgress;
+        IsClaimable = isClaimable ?? IsClaimable;
+        StartAt = startAt ?? StartAt;
+        EndAt = endAt ?? EndAt;
+    }
 
     public void SoftDelete() => DeletedAt = DateTime.UtcNow;
     #endregion

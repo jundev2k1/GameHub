@@ -25,7 +25,7 @@ public sealed class RewardPoolConfigData
     
     /// <summary>How many items required per spin.</summary>
     public int RequiredItemAmount { get; init; } = 1;
-
+    
     /// <summary>
     /// Maximum spins allowed per user per day.
     /// 0 = unlimited.

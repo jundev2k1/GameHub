@@ -14,6 +14,15 @@ public sealed class CreateMissionValidator : AbstractValidator<CreateMissionComm
             .IsInEnum()
             .WithMessage("Type is invalid.");
         
+        RuleFor(x => x.TriggerEvents)
+            .NotNull()
+            .NotEmpty()
+            .WithMessage("At least one trigger user event is required.");
+
+        RuleForEach(x => x.TriggerEvents)
+            .IsInEnum()
+            .WithMessage("One or more TriggerEvents are invalid.");
+        
         RuleFor(x => x.Title)
             .NotEmpty()
             .WithMessage("Title is required.");

@@ -13,6 +13,10 @@ public sealed class UserMissionConfig : IEntityTypeConfiguration<UserMission>
         b.HasKey(x => x.Id);
 
         #region Properties
+        b.Property(x => x.Id)
+            .HasColumnName("id")
+            .ValueGeneratedOnAdd();
+        
         b.Property(x => x.UserId)
             .HasColumnName("user_id")
             .HasMaxLength(36);
@@ -44,6 +48,10 @@ public sealed class UserMissionConfig : IEntityTypeConfiguration<UserMission>
 
         b.Property(x => x.ResetAt)
             .HasColumnName("reset_at")
+            .HasColumnType("timestamp with time zone");
+        
+        b.Property(x => x.LastProgressAt)
+            .HasColumnName("last_progress_at")
             .HasColumnType("timestamp with time zone");
         #endregion
 

@@ -44,7 +44,7 @@ public sealed class Execution : BaseEntity<int>
     public Mission? Mission { get; init; }
 
     private readonly List<UserReward> _userRewards = new();
-    public IReadOnlyCollection<UserReward> UserRewards => _userRewards;
+    public ICollection<UserReward> UserRewards => _userRewards;
     #endregion
 
     #region Initializations

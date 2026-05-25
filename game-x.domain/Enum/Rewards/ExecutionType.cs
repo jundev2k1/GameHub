@@ -1,9 +1,8 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System.Text.Json.Serialization;
 
 namespace game_x.domain.Enum.Rewards;
 
-[JsonConverter(typeof(StringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ExecutionType
 {
     /// <summary>Lucky wheel / gacha / scratch execution.</summary>
@@ -11,7 +10,7 @@ public enum ExecutionType
     /// <summary>Mission progress update.</summary>
     MissionProgress,
     /// <summary>Mission reward claim.</summary>
-    MissionClaim,
+    MissionRewardClaim,
     /// <summary>Reward distribution execution.</summary>
     RewardGrant,
     /// <summary>Social share validation.</summary>

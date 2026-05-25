@@ -40,7 +40,13 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
                 ConversationId = convId,
                 SenderActorId = m.SenderActorId,
                 SenderRole = m.SenderRole,
-                SenderUser = m.SenderUser,
+                SenderUser = m.SenderUser != null ? new UserSummaryDto
+                {
+                    Id = m.SenderUser.Id,
+                    Nickname = m.SenderUser.Nickname,
+                    Avatar = m.SenderUser.Avatar,
+                    
+                } : null,
                 Kind = m.Kind,
                 Text = m.Text,
                 ReplyToMessageId = m.ReplyToMessage!.PublicId,
@@ -179,7 +185,7 @@ public class MessageRepo(GameXContext context): IMessageRepo, IRepository
             .Include(x => x.SenderUser)
                 .ThenInclude(x => x!.Avatar)
             .Include(x => x.Attachments)
-                .ThenInclude(x => x!.MediaFile)
+                .ThenInclude(x => x.MediaFile)
             .Include(x => x.Mentions)
             .Include(x => x.ReplyToMessage)
             .Where(m => m.PublicId == id)

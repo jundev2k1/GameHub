@@ -3326,6 +3326,11 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("title");
 
+                    b.Property<string[]>("TriggerEvents")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("trigger_events");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text")
@@ -3616,6 +3621,11 @@ namespace game_x.persistence.Migrations
                         .HasDefaultValue("")
                         .HasColumnName("title");
 
+                    b.Property<string[]>("TriggerEvents")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("trigger_events");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -3838,8 +3848,9 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("ref_type");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("type");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -3942,6 +3953,14 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<int>("CycleNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("cycle_number");
+
+                    b.Property<DateTime?>("LastProgressAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_progress_at");
+
                     b.Property<int>("MissionId")
                         .HasColumnType("integer")
                         .HasColumnName("mission_id");
@@ -4016,7 +4035,11 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<int>("ExecutionId")
+                    b.Property<int>("CycleNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("cycle_number");
+
+                    b.Property<int?>("ExecutionId")
                         .HasColumnType("integer")
                         .HasColumnName("execution_id");
 
@@ -4034,8 +4057,9 @@ namespace game_x.persistence.Migrations
                         .HasColumnName("public_id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("status");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -6506,7 +6530,6 @@ namespace game_x.persistence.Migrations
                         .WithMany()
                         .HasForeignKey("ExecutionId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_user_mission_claims_executions_execution_id");
 
                     b.HasOne("game_x.domain.Entities.Rewards.MissionReward", "MissionReward")

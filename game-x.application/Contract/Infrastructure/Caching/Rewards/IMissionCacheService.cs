@@ -10,5 +10,7 @@ public interface IMissionCacheService
 
     Task<ListedMissionDto[]?> GetAll(CancellationToken ct = default);
 
-    Task<CachedMissionDto?> GetDetail(Guid id, CancellationToken ct = default);
+    Task<UserMissionDetailDto?> GetDetail(Guid id, CancellationToken ct = default);
+    
+    void RemoveGetDetail(Guid id);
 }

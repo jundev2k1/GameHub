@@ -5,6 +5,8 @@ using game_x.application.Services.Notification;
 using game_x.application.Services.Verification;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using game_x.application.Features.Rewards.Processors;
+using game_x.application.Features.Rewards.Strategies.Missions;
 
 namespace game_x.application;
 
@@ -26,6 +28,20 @@ public static class ApplicationServiceRegistration
 
         services.AddScoped<IVerificationCodeService, MemoryVerificationCodeService>();
         services.AddScoped<IEmailVerificationProcessor, EmailVerificationService>();
+        
+        services.AddScoped<IMissionProcessor, MissionProcessor>();
+
+        services.AddMissionProgressStrategy();
+        return services;
+    }
+    
+    private static IServiceCollection AddMissionProgressStrategy(this IServiceCollection services)
+    {
+        services.Scan(scan => scan
+            .FromAssemblyOf<IMissionProgressStrategy>()
+            .AddClasses(c => c.AssignableTo<IMissionProgressStrategy>())
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
         return services;
     }

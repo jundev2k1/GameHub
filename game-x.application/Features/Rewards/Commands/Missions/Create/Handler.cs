@@ -13,17 +13,19 @@ public sealed class CreateMissionHandler(
     ILogger<CreateMissionHandler> logger
     ) : ICommandHandler<CreateMissionCommand, Unit>
 {
-    public async Task<Unit> Handle(CreateMissionCommand request, CancellationToken ct = default)
+    public async Task<Unit> Handle(CreateMissionCommand cmd, CancellationToken ct = default)
     {
+        await Validate(cmd, ct);
         var mission = Mission.Create(
-            code: request.Code,
-            type: request.Type,
-            title: request.Title,
-            description: request.Description,
-            resetType: request.ResetType,
-            configData: request.ConfigData,
-            startAt: request.StartAt,
-            endAt: request.EndAt
+            code: cmd.Code,
+            type: cmd.Type,
+            title: cmd.Title,
+            description: cmd.Description,
+            resetType: cmd.ResetType,
+            triggerEvents: cmd.TriggerEvents,
+            configData: cmd.ConfigData,
+            startAt: cmd.StartAt,
+            endAt: cmd.EndAt
         );
 
         await unitOfWork.WithTransactionAsync(async () =>
@@ -42,5 +44,12 @@ public sealed class CreateMissionHandler(
         }, ct);
         
         return Unit.Value;
+    }
+    
+    private async Task Validate(CreateMissionCommand cmd, CancellationToken ct = default)
+    {
+        bool isExisted = await repo.CodeExistsAsync(cmd.Code, ct);
+        if (isExisted)
+            throw new BadRequestException(MessageCode.Reward.CodeIsAlreadyExisted);
     }
 }

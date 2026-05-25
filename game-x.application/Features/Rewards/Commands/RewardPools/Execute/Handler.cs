@@ -55,9 +55,7 @@ public sealed class RewardPoolExecuteHandler(
                     type: ExecutionType.Spin,
                     rewardPoolId: rewardPool.Id
                 );
-
                 await executionRepo.AddAsync(execution, ct);
-                await unitOfWork.SaveChangesAsync(ct);
 
                 int? transactionId = null;
 
@@ -66,7 +64,7 @@ public sealed class RewardPoolExecuteHandler(
 
                 var userReward = UserReward.Create(
                     userId: userId,
-                    executionId: execution.Id,
+                    execution: execution,
                     rewardPoolItemId: poolItem.Id,
                     rewardDefinitionId: poolItem.RewardDefinitionId,
                     rewardType: poolItem.RewardDefinition?.Type ?? RewardItemType.None,
@@ -90,7 +88,7 @@ public sealed class RewardPoolExecuteHandler(
                 
                 response = new RewardPoolExecuteResponse
                 {
-                    ExecutionId = execution.PublicId,
+                    RewardId = poolItem.RewardDefinition!.PublicId,
                     RewardCode = poolItem.RewardDefinition!.Code,
                     RewardTitle = poolItem.RewardDefinition.Title,
                     RewardType = poolItem.RewardDefinition.Type,

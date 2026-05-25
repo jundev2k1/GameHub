@@ -7,7 +7,7 @@ public class MessageDto
     public Guid PublicId { get; set; }
     public Guid ConversationId { get; set; }
     public string SenderActorId { get; set; } = null!;
-    public User? SenderUser { get; set; }
+    public UserSummaryDto? SenderUser { get; set; }
     public MessageKind Kind { get; set; }
     public RoleInConversation SenderRole { get; set; }
     public string? Text { get; set; }
@@ -21,6 +21,13 @@ public class MessageDto
     public int CurrentVersion { get; set; }
     public List<MessageAttachmentDto> Attachments { get; set; } = new();
 };
+
+public class UserSummaryDto
+{
+    public string Id { get; set; } = null!;
+    public string Nickname { get; set; } = string.Empty;
+    public MediaFile? Avatar { get; set; }
+}
 
 public class MessageAttachmentDto
 {
