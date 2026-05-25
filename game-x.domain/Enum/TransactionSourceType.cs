@@ -6,4 +6,5 @@ public enum TransactionSourceType
     Payment = 1,
     Transfer = 2,
     Refund = 3,
+    Reward = 4,
 }
