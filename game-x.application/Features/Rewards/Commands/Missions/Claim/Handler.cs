@@ -65,14 +65,7 @@ public sealed class ClaimMissionRewardHandler(
                 claim.Claim(execution);
 
                 execution.MarkSuccess();
-
-                var hasPendingClaims = await userMissionClaimRepo.HasPendingClaimsAsync(userMission.Id, userMission.CycleNumber, ct);
-                if (!hasPendingClaims && userMission.Status == UserMissionStatus.Completed)
-                {
-                    await userMissionClaimRepo.ExpireUnclaimedAsync(userMission.Id, userMission.CycleNumber, ct);
-                    userMission.ResetProgress();
-                }
-
+                
                 await unitOfWork.CommitAsync(ct);
 
                 await userInventoryCache.RefreshCache(userId, ct);

@@ -12,6 +12,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
+using game_x.application.Common.Abstractions.Events;
+using game_x.application.Events.Rewards.OnDailyCheckIn;
 using game_x.application.Features.Rewards.Dtos;
 using game_x.infrastructure.SignalR.Groups;
 
@@ -35,7 +37,7 @@ public interface IClientHub
     Task OnReceiveLiveStreamingShortcuts(LiveStreamShortcutInfo[] streamInfo);
 
     Task NotifyWalletSynchronizationFailed(Guid platformId);
-    /// <summary>Notify when member transfer or received money between friends.</summary>
+    /// <summary>Notify when member transfers or received money between friends.</summary>
     Task TransactionTransfer(TransactionTransferSignalDto orderInfo);
     Task RevokeRefreshToken(string userId);
     Task InventoryUpdated(UserInventoryDto[] dto);
@@ -46,6 +48,7 @@ public sealed class ClientHub(
     ISender sender,
     IFileManagerCacheService fileManagerCache,
     ILiveStreamManagerCacheService liveStreamManager,
+    IApplicationEventDispatcher dispatcher,
     IAppLogger<ClientHub> logger) : Hub<IClientHub>
 {
     public const string Path = "/hubs/client-service";
@@ -58,6 +61,8 @@ public sealed class ClientHub(
 
         await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Member(userId!));
         await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Broadcast(AppRoles.User));
+        
+        await dispatcher.Publish(new OnDailyCheckInEvent());
         await base.OnConnectedAsync();
 
         // Send live-streaming shortcuts to live-streaming talent

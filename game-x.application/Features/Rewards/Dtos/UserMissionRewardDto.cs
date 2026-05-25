@@ -8,7 +8,7 @@ public sealed class UserMissionRewardDto
     
     public Guid? ClaimId { get; set; }
     
-    public bool IsClaimed { get; set; } = false;
+    public bool IsClaimed { get; set; }
     
     public bool IsActive { get; set; }
    
