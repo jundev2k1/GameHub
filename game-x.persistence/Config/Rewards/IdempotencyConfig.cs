@@ -32,8 +32,14 @@ public sealed class IdempotencyKeyConfig : IEntityTypeConfiguration<IdempotencyK
             .HasMaxLength(64)
             .IsRequired();
 
-        b.Property(x => x.ResponseMetadata)
-            .HasColumnName("response_metadata")
+        b.Property(x => x.Status)
+            .HasColumnName("status")
+            .HasConversion<string>()
+            .HasMaxLength(64)
+            .IsRequired();
+
+        b.Property(x => x.ResponsePayload)
+            .HasColumnName("response_payload")
             .HasColumnType("jsonb")
             .IsRequired(false);
 
@@ -44,9 +50,9 @@ public sealed class IdempotencyKeyConfig : IEntityTypeConfiguration<IdempotencyK
         #endregion
 
         #region Indexes
-        b.HasIndex(x => x.Key)
+        b.HasIndex(x => new {x.Key, x.UserId, x.ActionType})
             .IsUnique()
-            .HasDatabaseName("ux_idempotency_keys_key");
+            .HasDatabaseName("ux_idempotency_keys_key_user_id_key_action_type");
 
         b.HasIndex(x => new { x.UserId, x.ActionType })
             .HasDatabaseName("ix_idempotency_keys_user_action");

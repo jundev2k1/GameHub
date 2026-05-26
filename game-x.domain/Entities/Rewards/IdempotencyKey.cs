@@ -19,9 +19,10 @@ public sealed class IdempotencyKey : BaseEntity<int>
 
     #region Properties
     public IdempotencyActionType ActionType { get; private set; }
-
+    
+    public IdempotencyStatus Status { get; private set; }
     [MaxLength(4096)]
-    public string? ResponseMetadata { get; private set; }
+    public string? ResponsePayload { get; private set; }
     
     public DateTime? ExpiredAt { get; private set; }
     #endregion
@@ -37,7 +38,7 @@ public sealed class IdempotencyKey : BaseEntity<int>
         string key,
         string userId,
         IdempotencyActionType actionType,
-        string? responseMetadata = null,
+        string? responsePayload = null,
         DateTime? expiredAt = null)
     {
         return new()
@@ -45,21 +46,33 @@ public sealed class IdempotencyKey : BaseEntity<int>
             Key = key,
             UserId = userId,
             ActionType = actionType,
-            ResponseMetadata = responseMetadata,
+            Status = IdempotencyStatus.Processing,
+            ResponsePayload = responsePayload,
             ExpiredAt = expiredAt
         };
     }
     #endregion
 
     #region Behaviors
+    
     public bool IsExpired()
     {
         return ExpiredAt.HasValue && ExpiredAt.Value <= DateTime.UtcNow;
     }
 
-    public void SetResponse(string responseMetadata)
+    public void SetResponse(string responsePayload)
     {
-        ResponseMetadata = responseMetadata;
+        ResponsePayload = responsePayload;
+    }
+    
+    public void MarkCompleted()
+    {
+        Status = IdempotencyStatus.Completed;
+    }
+    
+    public void MarkFailed()
+    {
+        Status = IdempotencyStatus.Failed;
     }
     #endregion
 }
