@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using game_x.domain.Shared;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -9,7 +10,7 @@ public static class JsonSignatureNormalizer
     public static byte[] ComputeHashToByte(object data)
     {
         var normalizedData = NormalizeAndSerialize(data);
-        var jsonString = JsonSerializer.Serialize(normalizedData);
+        var jsonString = JsonSerializer.Serialize(normalizedData, JsonOptions.NoEscape);
         var inputStringByte = Encoding.UTF8.GetBytes(jsonString);
         var hashBytes = SHA256.HashData(inputStringByte);
         return hashBytes;
@@ -32,7 +33,7 @@ public static class JsonSignatureNormalizer
 
         return camelAndSorted;
     }
-    
+
     private static string ToCamelCase(string input)
     {
         if (string.IsNullOrEmpty(input) || input.Length < 2) return input;
@@ -41,7 +42,8 @@ public static class JsonSignatureNormalizer
 
     private static Dictionary<string, object?> ConvertToDictionary(object obj)
     {
-        return obj.GetType().GetProperties()
-            .ToDictionary(p => p.Name, p => p.GetValue(obj));
+        return obj is string val
+            ? JsonSerializer.Deserialize<Dictionary<string, object?>>(val) ?? []
+            : obj.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(obj));
     }
 }

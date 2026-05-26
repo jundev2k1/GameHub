@@ -11,12 +11,12 @@ public sealed class FastPayDepositSuccessHandler(
 {
     public async Task<Unit> Handle(FastPayDepositSuccessCommand request, CancellationToken ct = default)
     {
-        var (requestData, signature, rawRequest) = request;
+        var (requestData, signature) = request;
 
         // Verify UXM signature
         var isValid = asymmetricCryptoService.VerifySignature(
             asymmetricKeyCacheService.FastPayPublicKey,
-            rawRequest,
+            requestData,
             signature);
         if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
 
