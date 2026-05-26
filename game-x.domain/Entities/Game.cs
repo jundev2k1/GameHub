@@ -18,6 +18,7 @@ public sealed class Game : BaseEntity<int>, IAuditable
     public ICollection<GameCategoryMapping> GameCategoryMappings { get; private set; } = [];
     public ICollection<GameTypeMapping> GameTypeMappings { get; private set; } = [];
     public ICollection<GameTagMapping> GameTagMappings { get; private set; } = [];
+    public ICollection<GameMedia> GameMedias { get; private set; } = [];
 
     public static Game Create(string name, string gameCode, string desc, string note, int priority, int? thumbnailId = null)
     {
