@@ -4,4 +4,5 @@ namespace game_x.application.Features.Transactions.Webhooks.FastPay.Commands.Fas
 
 public record FastPayDepositSuccessCommand(
     TransactionCompletedRequest Data,
-    string Signature) : ICommand;
+    string Signature,
+    string RawRequest) : ICommand;
