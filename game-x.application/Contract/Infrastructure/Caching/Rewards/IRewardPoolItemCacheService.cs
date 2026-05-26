@@ -6,5 +6,6 @@ public interface IRewardPoolItemCacheService
 {
     Task RefreshCache(Guid poolId, CancellationToken ct = default);
 
-    Task<RewardPoolItemDto[]?> GetAll(Guid poolId, CancellationToken ct = default);
+    Task<RewardPoolItemDto[]?> GetAllByAdmin(Guid poolId, CancellationToken ct = default);
+    Task<RewardPoolItemUserDto[]?> GetAllByUser(Guid poolId, CancellationToken ct = default);
 }

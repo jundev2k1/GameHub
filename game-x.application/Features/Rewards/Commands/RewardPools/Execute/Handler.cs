@@ -1,3 +1,4 @@
+using System.Text.Json;
 using game_x.application.Contract.Infrastructure.Caching.Rewards;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
@@ -7,6 +8,7 @@ using game_x.application.Events.Rewards.OnUserInventoryUpdated;
 using game_x.application.Features.Rewards.Dtos;
 using game_x.domain.Entities.Rewards;
 using game_x.domain.Enum.Rewards;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace game_x.application.Features.Rewards.Commands.RewardPools.Execute;
@@ -22,6 +24,7 @@ public sealed class RewardPoolExecuteHandler(
     ICryptoTokenRepo cryptoTokenRepo,
     ITransactionRepo transactionRepo,
     IUserBalanceRepo userBalanceRepo,
+    IIdempotencyKeyRepo idempotencyRepo,
     IRewardPoolItemCacheService itemCache,
     IUserInventoryCacheService userInventoryCache,
     ICatalogItemCacheService catalogItemCache,
@@ -29,12 +32,16 @@ public sealed class RewardPoolExecuteHandler(
     ILogger<RewardPoolExecuteHandler> logger
 ) : ICommandHandler<RewardPoolExecuteCommand, RewardPoolExecuteResponse>
 {
-    public async Task<RewardPoolExecuteResponse> Handle(
-        RewardPoolExecuteCommand request,
-        CancellationToken ct = default)
+    private static readonly TimeSpan IdempotencyTtl = TimeSpan.FromHours(24);
+    public async Task<RewardPoolExecuteResponse> Handle(RewardPoolExecuteCommand cmd, CancellationToken ct = default)
     {
         var userId = userAccessor.GetUserId();
-        var (rewardPool, rewardItems) = await Validate(userId, request, ct);
+        
+        var (idem, data) = await HandleIdempotencyAsync(userId, cmd, ct);
+        
+        if (data != null) return data;
+        
+        var (rewardPool, rewardItems) = await Validate(userId, cmd, ct);
         
         var selectedItem = SelectReward(rewardItems ?? []);
 
@@ -93,24 +100,8 @@ public sealed class RewardPoolExecuteHandler(
    
                 execution.MarkSuccess();
 
-                await unitOfWork.CommitAsync(ct);
+                await unitOfWork.SaveChangesAsync(ct);
 
-                switch (selectedItem.RewardType)
-                {
-                    case RewardItemType.Balance:
-                    {
-                        await dispatcher.Publish(new OnUserBalanceUpdatedEvent(userId), ct);
-                        break;
-                    }
-                    case RewardItemType.CatalogItem:
-                    {
-                        await userInventoryCache.RefreshCache(userId, ct);
-                        var inventories = await userInventoryCache.GetAll(userId, ct);
-                        await dispatcher.Publish(new OnUserInventoryUpdatedEvent(userId, inventories ?? []), ct);
-                        break;
-                    }
-                }
-                
                 response = new RewardPoolExecuteResponse
                 {
                     RewardId = poolItem.RewardDefinition!.PublicId,
@@ -119,15 +110,121 @@ public sealed class RewardPoolExecuteHandler(
                     RewardType = poolItem.RewardDefinition.Type,
                     Amount = poolItem.RewardDefinition?.Amount
                 };
+                
+                idem.SetResponse(JsonSerializer.Serialize(response));
+                idem.MarkCompleted();
             }
-            catch (Exception e)
+            catch (DbUpdateException ex) 
+                // when (IsUniqueConstraint(ex))
             {
-                logger.LogError(e, "Failed to spin reward.");
-                throw new BadRequestException("Failed to spin reward.", e);
+                logger.LogWarning(ex, "Duplicate idempotency insert.");
+
+                var existing = await idempotencyRepo.GetForUpdateAsync(
+                    cmd.IdempotencyKey,
+                    userId,
+                    IdempotencyActionType.Spin,
+                    ct);
+
+                if (existing?.Status == IdempotencyStatus.Completed && !string.IsNullOrWhiteSpace(existing.ResponsePayload))
+                {
+                    response = JsonSerializer.Deserialize<RewardPoolExecuteResponse>(existing.ResponsePayload)!;
+                }
+
+                throw new BadRequestException(MessageCode.Reward.ExecuteInProcess);
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    idem.MarkFailed();
+                    await unitOfWork.SaveChangesAsync(ct);
+                }
+                catch (Exception markEx)
+                {
+                    logger.LogError(markEx, "Failed marking idempotency failed.");
+                }
+
+                logger.LogError(ex, "Failed to spin reward.");
+                throw;
             }
         }, ct);
 
+        switch (selectedItem.RewardType)
+        {
+            case RewardItemType.Balance:
+            {
+                await dispatcher.Publish(new OnUserBalanceUpdatedEvent(userId), ct);
+                break;
+            }
+            case RewardItemType.CatalogItem:
+            {
+                await userInventoryCache.RefreshCache(userId, ct);
+                var inventories = await userInventoryCache.GetAll(userId, ct);
+                await dispatcher.Publish(new OnUserInventoryUpdatedEvent(userId, inventories ?? []), ct);
+                break;
+            }
+        }
+        
         return response;
+    }
+
+    private async Task<(IdempotencyKey idem, RewardPoolExecuteResponse? response)> HandleIdempotencyAsync(
+        string userId,
+        RewardPoolExecuteCommand cmd,
+        CancellationToken ct)
+    {
+        RewardPoolExecuteResponse? response = null;
+        
+        var existing = await idempotencyRepo.GetForUpdateAsync(
+            cmd.IdempotencyKey,
+            userId,
+            IdempotencyActionType.Spin,
+            ct);
+
+        if (existing is not null)
+        {
+            if (existing.IsExpired())
+            {
+                await idempotencyRepo.RemoveAsync(cmd.IdempotencyKey, userId, IdempotencyActionType.Spin, ct);
+                existing = null;
+            }
+        }
+
+        if (existing is not null)
+        {
+            switch (existing.Status)
+            {
+                case IdempotencyStatus.Processing:
+                    throw new BadRequestException(MessageCode.Reward.ExecuteInProcess);
+
+                case IdempotencyStatus.Completed:
+                {
+                    if (string.IsNullOrWhiteSpace(existing.ResponsePayload))
+                        throw new BadRequestException("Completed idempotency record missing payload.");
+
+                    response = JsonSerializer.Deserialize<RewardPoolExecuteResponse>(
+                        existing.ResponsePayload)!;
+                    break;
+                }
+
+                case IdempotencyStatus.Failed:
+                    throw new BadRequestException("Previous request failed. Retry with a new key.");
+            }
+            
+            return (existing, response);
+        }
+        
+        var record = IdempotencyKey.Create(
+            cmd.IdempotencyKey,
+            userId,
+            IdempotencyActionType.Spin,
+            expiredAt: DateTime.UtcNow.Add(IdempotencyTtl)
+        );
+
+        await idempotencyRepo.AddAsync(record, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+
+        return (record, null);
     }
 
     private async Task<(RewardPool rewardPool, RewardPoolItemDto[]? rewardItems)> 
@@ -137,7 +234,7 @@ public sealed class RewardPoolExecuteHandler(
         if (rewardPool is null) throw new NotFoundException(MessageCode.Reward.RewardPoolNotFound);
         if (!rewardPool.IsActive) throw new BadRequestException(MessageCode.Reward.RewardPoolInactive);
 
-        var rewardItems = await itemCache.GetAll(rewardPool.PublicId, ct);
+        var rewardItems = await itemCache.GetAllByAdmin(rewardPool.PublicId, ct);
         if (rewardItems == null || rewardItems.Length == 0)
             throw new BadRequestException("No reward items available.");
 

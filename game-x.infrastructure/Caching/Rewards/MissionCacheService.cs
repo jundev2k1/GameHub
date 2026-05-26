@@ -11,12 +11,16 @@ public sealed class MissionCacheService(
     IMissionRepo repo,
     IFileManagerCacheService storage) : CacheService(cache), IMissionCacheService
 {
-    private ListedMissionDto[]? Datasource => Get<ListedMissionDto[]>($"{RewardCacheKey.Mission}:list");
-
+    private string ListByAdminKey => $"{RewardCacheKey.Mission}:admin-list";
+    private string ListByUserKey => $"{RewardCacheKey.Mission}:user-list";
+    private string DetailByAdminKey(Guid id) => $"{RewardCacheKey.Mission}:{id}:admin-detail";
+    
     public async Task RefreshCache(CancellationToken ct = default)
     {
-        var data = await repo.GetListAsync(ct);
-        Set($"{RewardCacheKey.Mission}:list", data);
+        var dataByAdmin = await repo.GetAllByAdminAsync(ct);
+        var dataByUser = await repo.GetAllByUserAsync(ct);
+        Set(ListByAdminKey, dataByAdmin);
+        Set(ListByUserKey, dataByUser);
     }
     
     public async Task RefreshCache(Guid id, CancellationToken ct = default)
@@ -25,7 +29,7 @@ public sealed class MissionCacheService(
         var missionRewards = await Task.WhenAll(
             data.MissionRewards.Select(async item =>
             {
-                var dto = item.Adapt<UserMissionRewardDetailDto>();
+                var dto = item.Adapt<MissionRewardAdminDto>();
                 dto.ItemIconUrl = item.ItemIcon is null
                     ? null
                     : await storage.GetFileUrl(item.ItemIcon, ct);
@@ -33,27 +37,35 @@ public sealed class MissionCacheService(
                 return dto;
             }));
 
-        var missionDto = data.Adapt<UserMissionDetailDto>();
+        var missionDto = data.Adapt<MissionAdminDto>();
         missionDto.MissionRewards = missionRewards;
-        Set($"{RewardCacheKey.Mission}:{id}:detail", missionDto);
+        Set(DetailByAdminKey(id), missionDto);
     }
     
-    public async Task<ListedMissionDto[]?> GetAll(CancellationToken ct = default)
+    public async Task<MissionListedAdminDto[]?> GetAllByAdmin(CancellationToken ct = default)
     {
-        if (Datasource == null) await RefreshCache(ct);
-        return Datasource;
+        var data = Get<MissionListedAdminDto[]>(ListByAdminKey);
+        if (data == null) await RefreshCache(ct);
+        return Get<MissionListedAdminDto[]>(ListByAdminKey);
+    }
+    
+    public async Task<MissionListedUserDto[]?> GetAllByUser(CancellationToken ct = default)
+    {
+        var data = Get<MissionListedUserDto[]>(ListByUserKey);
+        if (data == null) await RefreshCache(ct);
+        return Get<MissionListedUserDto[]>(ListByUserKey);
     }
 
-    public async Task<UserMissionDetailDto?> GetDetail(Guid id, CancellationToken ct = default)
+    public async Task<MissionAdminDto?> GetDetailByAdmin(Guid id, CancellationToken ct = default)
     {
-        string key = $"{RewardCacheKey.Mission}:{id}:detail";
-        var mission = Get<UserMissionDetailDto>(key);
+        string key = DetailByAdminKey(id);
+        var mission = Get<MissionAdminDto>(key);
         if (mission == null) await RefreshCache(id, ct);
-        return Get<UserMissionDetailDto>(key);
+        return Get<MissionAdminDto>(key);
     }
 
-    public void RemoveGetDetail(Guid id)
+    public void RemoveGetDetailByAdmin(Guid id)
     {
-        Remove($"{RewardCacheKey.Mission}:{id}:detail");
+        Remove(DetailByAdminKey(id));
     }
 }

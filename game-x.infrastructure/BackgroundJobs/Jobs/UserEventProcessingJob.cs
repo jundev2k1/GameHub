@@ -23,14 +23,13 @@ public sealed class UserEventProcessingJob(
             return;
         }
         
-        var missionsTask = missionRepo.GetTriggeredByEventAsync(userEvent.Type, ct);
-        await Task.WhenAll(missionsTask);
-        
+        var missionsTask = await missionRepo.GetTriggeredByEventAsync(userEvent.Type, ct);
+     
         await unitOfWork.WithTransactionAsync(async () =>
         {
             try
             {
-                foreach (var mission in missionsTask.Result)
+                foreach (var mission in missionsTask)
                     await missionProcessor.ProcessAsync(mission, userEvent, ct);
 
                 logger.LogInformation("Processed UserEvent {UserEventId}", userEventId);

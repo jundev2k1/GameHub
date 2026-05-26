@@ -40,11 +40,6 @@ public sealed class MissionRewardConfig : IEntityTypeConfiguration<MissionReward
         b.Property(x => x.RequiredProgress)
             .HasColumnName("required_progress")
             .IsRequired();
-
-        b.Property(x => x.IsClaimable)
-            .HasColumnName("is_claimable")
-            .IsRequired()
-            .HasDefaultValue(true);
         
         b.Property(x => x.IsActive)
             .HasColumnName("is_active")

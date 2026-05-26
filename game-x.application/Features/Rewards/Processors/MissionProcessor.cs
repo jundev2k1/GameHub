@@ -23,7 +23,7 @@ public sealed class MissionProcessor(
     {
         if (!mission.IsActive) return;
 
-        var strategy = strategies.FirstOrDefault(x => x.SupportedType == mission.Type);
+        var strategy = strategies.FirstOrDefault(x => x.SupportedType == userEvent.Type);
         if (strategy is null) throw new InvalidOperationException($"No strategy for mission {mission.Type}");
 
         var userMission = await userMissionRepo.GetTrackedByUserAndMissionAsync(userEvent.UserId, mission.Id, ct);

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using game_x.persistence;
@@ -12,9 +13,11 @@ using game_x.persistence;
 namespace game_x.persistence.Migrations
 {
     [DbContext(typeof(GameXContext))]
-    partial class GameXContextModelSnapshot : ModelSnapshot
+    [Migration("20260526041709_RemoveMissionRewardClaimable")]
+    partial class RemoveMissionRewardClaimable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3232,16 +3235,10 @@ namespace game_x.persistence.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("key");
 
-                    b.Property<string>("ResponsePayload")
+                    b.Property<string>("ResponseMetadata")
                         .HasMaxLength(4096)
                         .HasColumnType("jsonb")
-                        .HasColumnName("response_payload");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("status");
+                        .HasColumnName("response_metadata");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -3259,12 +3256,12 @@ namespace game_x.persistence.Migrations
                     b.HasIndex("ExpiredAt")
                         .HasDatabaseName("ix_idempotency_keys_expired");
 
+                    b.HasIndex("Key")
+                        .IsUnique()
+                        .HasDatabaseName("ux_idempotency_keys_key");
+
                     b.HasIndex("UserId", "ActionType")
                         .HasDatabaseName("ix_idempotency_keys_user_action");
-
-                    b.HasIndex("Key", "UserId", "ActionType")
-                        .IsUnique()
-                        .HasDatabaseName("ux_idempotency_keys_key_user_id_key_action_type");
 
                     b.ToTable("idempotency_keys", (string)null);
                 });

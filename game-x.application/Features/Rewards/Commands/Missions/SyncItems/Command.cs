@@ -20,7 +20,6 @@ public sealed record CreateMissionRewardItem
     public int Sequence { get; init; }
     public int SortOrder { get; init; }
     public decimal RequiredProgress { get; init; }
-    public bool IsClaimable { get; init; }
     public DateTime? StartAt { get; init; }
     public DateTime? EndAt { get; init; }
 }
@@ -33,7 +32,6 @@ public sealed record UpdateMissionRewardItem
     public int SortOrder { get; init; }
     public bool IsActive { get; init; }
     public int RequiredProgress { get; init; }
-    public bool IsClaimable { get; init; }
     public DateTime? StartAt { get; init; }
     public DateTime? EndAt { get; init; }
 }
