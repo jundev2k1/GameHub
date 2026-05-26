@@ -52,11 +52,25 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
     }
 
     [HttpPost("withdraw-success")]
-    public async Task<IActionResult> WithdrawalSuccessAsync([FromBody] SecureRequest<TransactionCompletedRequest> request, CancellationToken ct = default)
+    public async Task<IActionResult> WithdrawalSuccessAsync(CancellationToken ct = default)
     {
         logger.LogInformation("===== FastPay web hook: Withdrawal Success =====");
 
-        var command = new FastPayDepositSuccessCommand(request.Data, request.Signature);
+        Request.EnableBuffering();
+        using var reader = new StreamReader(
+            Request.Body,
+            Encoding.UTF8,
+            leaveOpen: true);
+        var rawBody = await reader.ReadToEndAsync(ct);
+
+        Request.Body.Position = 0;
+
+        logger.LogInformation("Raw Body: {Body}", rawBody);
+
+        var request = JsonSerializer.Deserialize<SecureRequest<TransactionCompletedRequest>>(rawBody)
+            ?? throw new BadRequestException("Invalid request body");
+
+        var command = new FastPayDepositSuccessCommand(request.Data, request.Signature, request);
         await Mediator.Send(command, ct);
         return ApiResponseFactory.NoContent();
     }
