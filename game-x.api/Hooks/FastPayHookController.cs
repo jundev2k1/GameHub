@@ -70,7 +70,7 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
         var request = JsonSerializer.Deserialize<SecureRequest<TransactionCompletedRequest>>(rawBody)
             ?? throw new BadRequestException("Invalid request body");
 
-        var command = new FastPayDepositSuccessCommand(request.Data, request.Signature, request);
+        var command = new FastPayDepositSuccessCommand(request.Data, request.Signature, rawBody);
         await Mediator.Send(command, ct);
         return ApiResponseFactory.NoContent();
     }
