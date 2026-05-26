@@ -14,14 +14,14 @@ public sealed class MissionController(IMissionCacheService cache) : BaseApiContr
     [HttpGet]
     public async Task<IActionResult> GetListAsync(CancellationToken ct = default)
     {
-        var result = await cache.GetAll(ct);
+        var result = await cache.GetAllByAdmin(ct);
         return ApiResponseFactory.Ok(result);
     }
     
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetDetailAsync(Guid id, CancellationToken ct = default)
     {
-        var result = await cache.GetDetail(id, ct);
+        var result = await cache.GetDetailByAdmin(id, ct);
         if (result == null)
             throw new NotFoundException(MessageCode.Reward.MissionNotFound);
         return ApiResponseFactory.Ok(result);

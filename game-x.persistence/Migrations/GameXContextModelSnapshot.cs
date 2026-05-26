@@ -3388,12 +3388,6 @@ namespace game_x.persistence.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("is_active");
 
-                    b.Property<bool>("IsClaimable")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_claimable");
-
                     b.Property<int>("MissionId")
                         .HasColumnType("integer")
                         .HasColumnName("mission_id");

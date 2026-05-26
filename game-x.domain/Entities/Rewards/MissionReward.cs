@@ -41,12 +41,6 @@ public sealed class MissionReward : BaseEntity<int>, IAuditable
     /// </summary>
     public decimal RequiredProgress { get; private set; }
 
-    /// <summary>
-    /// Allow manual claiming.
-    /// false = auto grant.
-    /// </summary>
-    public bool IsClaimable { get; private set; } = true;
-
     public bool IsActive { get; private set; } = true;
 
     public DateTime? StartAt { get; private set; }
@@ -79,7 +73,6 @@ public sealed class MissionReward : BaseEntity<int>, IAuditable
         int sequence,
         int sortOrder,
         decimal requiredProgress,
-        bool? isClaimable = null,
         DateTime? startAt = null,
         DateTime? endAt = null)
     {
@@ -96,7 +89,6 @@ public sealed class MissionReward : BaseEntity<int>, IAuditable
             Sequence = sequence,
             SortOrder = sortOrder,
             RequiredProgress = requiredProgress,
-            IsClaimable = isClaimable ?? true,
             StartAt = startAt,
             EndAt = endAt,
             IsActive = true
@@ -120,7 +112,6 @@ public sealed class MissionReward : BaseEntity<int>, IAuditable
         IsActive = isActive ?? IsActive;
         SortOrder = sortOrder ?? SortOrder;
         RequiredProgress = requiredProgress ?? RequiredProgress;
-        IsClaimable = isClaimable ?? IsClaimable;
         StartAt = startAt ?? StartAt;
         EndAt = endAt ?? EndAt;
     }

@@ -1,9 +1,8 @@
 using game_x.domain.Enum.Rewards;
-using game_x.domain.ValueObjects.Missions;
 
 namespace game_x.application.Features.Rewards.Dtos;
 
-public sealed class UserMissionDetailDto
+public sealed class MissionListedAdminDto
 {
     public Guid Id { get; set; }
     
@@ -19,9 +18,7 @@ public sealed class UserMissionDetailDto
     
     public bool IsActive { get; set; }
     
-    public MissionConfigData ConfigData { get; set; } = MissionConfigData.Default();
+    public DateTime? StartAt { get; set; }
 
-    public DateTime? LastProgressAt { get; set; }
-    
-    public IReadOnlyCollection<UserMissionRewardDetailDto> MissionRewards { get; set; } = [];
+    public DateTime? EndAt { get; set; }
 }

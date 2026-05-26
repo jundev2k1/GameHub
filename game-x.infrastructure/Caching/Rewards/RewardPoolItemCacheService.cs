@@ -10,19 +10,33 @@ public sealed class RewardPoolItemCacheService(
     IRewardPoolRepo poolRepo,
     IRewardPoolItemRepo itemRepo) : CacheService(cache), IRewardPoolItemCacheService
 {
-    private string GetKey(Guid poolId) => $"{RewardCacheKey.RewardPool}/{poolId}/{RewardCacheKey.RewardPoolItem}";
-    private RewardPoolItemDto[]? Datasource(Guid poolId) => Get<RewardPoolItemDto[]>($"{GetKey(poolId)}:list");
+    private string ListByAdminKey(Guid poolId) => $"{RewardCacheKey.RewardPool}/{poolId}/{RewardCacheKey.RewardPoolItem}:admin-list";
+    private string ListByUserKey(Guid poolId) => $"{RewardCacheKey.RewardPool}/{poolId}/{RewardCacheKey.RewardPoolItem}:user-list";
     
     public async Task RefreshCache(Guid poolId, CancellationToken ct = default)
     {
         var pool = await poolRepo.GetDetailByIdAsync(poolId, ct);
-        var data = await itemRepo.GetListAsync(pool.Id, ct);
-        Set($"{GetKey(poolId)}:list", data);
+        var dataAdmin = await itemRepo.GetAllByAdminAsync(pool.Id, ct);
+        var dataUser = await itemRepo.GetAllByUserAsync(pool.Id, ct);
+        var dataUserDto = dataUser
+            .Select(x => x.Adapt<RewardPoolItemUserDto>())
+            .ToArray();
+        Set(ListByAdminKey(poolId), dataAdmin);
+        Set(ListByUserKey(poolId), dataUserDto);
     }
 
-    public async Task<RewardPoolItemDto[]?> GetAll(Guid poolId, CancellationToken ct = default)
+    public async Task<RewardPoolItemDto[]?> GetAllByAdmin(Guid poolId, CancellationToken ct = default)
     {
-        if (Datasource(poolId) == null) await RefreshCache(poolId, ct);
-        return Datasource(poolId);
+        var data = Get<RewardPoolItemDto[]>(ListByAdminKey(poolId));
+        if (data == null) await RefreshCache(poolId, ct);
+        return Get<RewardPoolItemDto[]>(ListByAdminKey(poolId));
+    }
+
+    public async Task<RewardPoolItemUserDto[]?> GetAllByUser(Guid poolId, CancellationToken ct = default)
+    {
+        var data = Get<RewardPoolItemUserDto[]>(ListByUserKey(poolId));
+        if (data == null) await RefreshCache(poolId, ct);
+        var newTest = Get<RewardPoolItemUserDto[]>(ListByUserKey(poolId));
+        return newTest;
     }
 }

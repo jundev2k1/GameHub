@@ -2,15 +2,13 @@ using game_x.domain.Enum.Rewards;
 
 namespace game_x.application.Features.Rewards.Dtos;
 
-public sealed class UserMissionRewardDetailDto
+public sealed class MissionRewardUserDto
 {
     public Guid Id { get; set; }
     
     public Guid? ClaimId { get; set; }
 
     public bool IsClaimed { get; set; } = false;
-    
-    public bool IsActive { get; set; }
    
     public Guid RewardDefinitionId { get; set; }
     

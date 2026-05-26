@@ -2,7 +2,8 @@ using game_x.domain.Enum.Rewards;
 
 namespace game_x.application.Features.Rewards.Commands.RewardPools.Execute;
 
-public sealed record RewardPoolExecuteCommand(Guid RewardPoolPublicId) : ICommand<RewardPoolExecuteResponse>;
+public sealed record RewardPoolExecuteCommand(
+    Guid RewardPoolPublicId) : ICommand<RewardPoolExecuteResponse>;
 
 public sealed class RewardPoolExecuteResponse
 {

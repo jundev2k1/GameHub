@@ -60,7 +60,6 @@ public sealed class SyncMissionRewardCommandHandler(
                 sequence: dto.Sequence,
                 sortOrder: dto.SortOrder,
                 requiredProgress: dto.RequiredProgress,
-                isClaimable: dto.IsClaimable,
                 isActive: dto.IsActive,
                 startAt: dto.StartAt,
                 endAt: dto.EndAt);
@@ -85,7 +84,6 @@ public sealed class SyncMissionRewardCommandHandler(
                     sequence: dto.Sequence,
                     sortOrder: dto.SortOrder,
                     requiredProgress: dto.RequiredProgress,
-                    isClaimable: dto.IsClaimable,
                     startAt: dto.StartAt,
                     endAt: dto.EndAt);
             })

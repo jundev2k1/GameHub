@@ -2,15 +2,17 @@ using game_x.domain.Enum.Rewards;
 
 namespace game_x.application.Features.Rewards.Dtos;
 
-public sealed class UserMissionRewardDto
+public sealed class MissionRewardAdminDto
 {
     public Guid Id { get; set; }
     
-    public Guid? ClaimId { get; set; }
-    
-    public bool IsClaimed { get; set; }
-    
     public bool IsActive { get; set; }
+    
+    public int Sequence { get; set; }
+    
+    public int SortOrder { get; set; }
+    
+    public decimal RequiredProgress { get; set; }
    
     public Guid RewardDefinitionId { get; set; }
     
@@ -30,5 +32,5 @@ public sealed class UserMissionRewardDto
     
     public string? ItemIconValue { get; set; }
     
-    public MediaFile? ItemIcon { get; set; }
+    public string? ItemIconUrl { get; set; }
 }

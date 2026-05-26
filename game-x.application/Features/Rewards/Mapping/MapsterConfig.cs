@@ -11,7 +11,10 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<Mission, MissionDto>()
             .Map(dest => dest.Id, src => src.PublicId);
         
-        cfg.NewConfig<Mission, ListedMissionDto>()
+        cfg.NewConfig<Mission, MissionListedAdminDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
+        
+        cfg.NewConfig<Mission, MissionListedUserDto>()
             .Map(dest => dest.Id, src => src.PublicId);
         
         cfg.NewConfig<CatalogItem, CatalogItemDto>()

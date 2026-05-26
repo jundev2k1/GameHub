@@ -14,7 +14,7 @@ public sealed class DailyLoginMissionStrategy(
     IUserMissionClaimRepo userMissionClaimRepo)
     : IMissionProgressStrategy
 {
-    public MissionType SupportedType => MissionType.DailyLogin;
+    public UserEventType SupportedType => UserEventType.DailyLogin;
 
     public async Task ProcessAsync(
         Mission mission,

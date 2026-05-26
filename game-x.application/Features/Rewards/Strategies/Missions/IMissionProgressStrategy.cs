@@ -5,7 +5,7 @@ namespace game_x.application.Features.Rewards.Strategies.Missions;
 
 public interface IMissionProgressStrategy
 {
-    MissionType SupportedType { get; }
+    UserEventType SupportedType { get; }
 
     Task ProcessAsync(Mission mission, UserMission userMission, UserEvent userEvent, CancellationToken ct = default);
 }

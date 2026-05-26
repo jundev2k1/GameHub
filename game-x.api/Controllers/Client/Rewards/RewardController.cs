@@ -19,7 +19,7 @@ public sealed class RewardController(
     [HttpGet("{id:guid}/items")]
     public async Task<IActionResult> GetRewardListAsync(Guid id, CancellationToken ct = default)
     {
-        var result = await itemService.GetAll(id, ct);
+        var result = await itemService.GetAllByUser(id, ct);
         return ApiResponseFactory.Ok(result ?? []);
     }
     

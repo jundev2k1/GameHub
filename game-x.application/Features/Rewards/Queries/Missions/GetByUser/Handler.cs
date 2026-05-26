@@ -8,16 +8,16 @@ namespace game_x.application.Features.Rewards.Queries.Missions.GetByUser;
 public sealed class GetMissionDetailByUserHandler(
     IUserAccessor userAccessor,
     IMissionRepo repo,
-    IFileManagerCacheService storage) : IQueryHandler<GetMissionDetailByUserQuery, UserMissionDetailDto>
+    IFileManagerCacheService storage) : IQueryHandler<GetMissionDetailByUserQuery, MissionUserDto>
 {
-    public async Task<UserMissionDetailDto> Handle(GetMissionDetailByUserQuery request, CancellationToken ct = default)
+    public async Task<MissionUserDto> Handle(GetMissionDetailByUserQuery request, CancellationToken ct = default)
     {
         string userId = userAccessor.GetUserId();
         var data = await repo.GetDetailByUserAsync(userId, request.Id, ct);
         var missionRewards = await Task.WhenAll(
             data.MissionRewards.Select(async item =>
             {
-                var dto = item.Adapt<UserMissionRewardDetailDto>();
+                var dto = item.Adapt<MissionRewardUserDto>();
                 dto.ItemIconUrl = item.ItemIcon is null
                     ? null
                     : await storage.GetFileUrl(item.ItemIcon, ct);
@@ -25,7 +25,7 @@ public sealed class GetMissionDetailByUserHandler(
                 return dto;
             }));
 
-        var missionDto = data.Adapt<UserMissionDetailDto>();
+        var missionDto = data.Adapt<MissionUserDto>();
         missionDto.MissionRewards = missionRewards;
         return missionDto;
     }

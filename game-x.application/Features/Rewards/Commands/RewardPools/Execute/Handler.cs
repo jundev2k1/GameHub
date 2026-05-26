@@ -137,7 +137,7 @@ public sealed class RewardPoolExecuteHandler(
         if (rewardPool is null) throw new NotFoundException(MessageCode.Reward.RewardPoolNotFound);
         if (!rewardPool.IsActive) throw new BadRequestException(MessageCode.Reward.RewardPoolInactive);
 
-        var rewardItems = await itemCache.GetAll(rewardPool.PublicId, ct);
+        var rewardItems = await itemCache.GetAllByAdmin(rewardPool.PublicId, ct);
         if (rewardItems == null || rewardItems.Length == 0)
             throw new BadRequestException("No reward items available.");
 
