@@ -19,9 +19,8 @@ public sealed class MissionDto
     
     public bool IsActive { get; set; }
     
-    public UserEventType[] TriggerEvents { get; set; } = [];
-    
     public MissionConfigData ConfigData { get; set; } = MissionConfigData.Default();
+    
     public IReadOnlyCollection<MissionRewardDto> MissionRewards { get; set; } = [];
     
     public DateTime? StartAt { get; set; }

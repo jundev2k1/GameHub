@@ -1,9 +1,11 @@
 using FluentAssertions;
+using game_x.application.Contract.Infrastructure.BackgroundJobs.Dispatchers;
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.ExternalApi.FastPay;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Contract.Persistence.Repo.Reward;
 using game_x.application.Exceptions;
 using game_x.application.Features.Transactions.Client.Commands.TraceV1.TronUsdtDeposit;
 using game_x.domain.Constants;
@@ -21,6 +23,7 @@ public sealed class TronUsdtDepositHandlerTests
     private readonly Mock<IUxmService> _uxmServiceMock = new();
     private readonly Mock<IFastPayService> _fastPayServiceMock = new();
     private readonly Mock<ITransactionRepo> _transactionRepoMock = new();
+    private readonly Mock<IUserEventRepo> _userEventRepoMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     private readonly Mock<IAsymmetricCryptoService> _asymmetricCryptoServiceMock = new();
     private readonly Mock<IUserAccessor> _userAccessorMock = new();
@@ -28,6 +31,7 @@ public sealed class TronUsdtDepositHandlerTests
     private readonly Mock<IConfigurationSection> _configurationSectionMock = new();
     private readonly Mock<IAsymmetricKeyCacheService> _asymmetricKeyCacheServiceMock = new();
     private readonly Mock<ICryptoTokenRepo> _cryptoTokenRepoMock = new();
+    private readonly Mock<IUserEventJobDispatcher> _userEventJobDispatcherMock = new();
     private readonly CreateDepositChainTransactionHandler _handler;
 
     public TronUsdtDepositHandlerTests()
@@ -40,7 +44,9 @@ public sealed class TronUsdtDepositHandlerTests
             unitOfWork: _unitOfWorkMock.Object,
             userAccessor: _userAccessorMock.Object,
             cryptoTokenRepo: _cryptoTokenRepoMock.Object,
-            transactionRepo: _transactionRepoMock.Object
+            userEventRepo: _userEventRepoMock.Object,
+            transactionRepo: _transactionRepoMock.Object,
+            userEventDispatcher: _userEventJobDispatcherMock.Object
         );
     }
 

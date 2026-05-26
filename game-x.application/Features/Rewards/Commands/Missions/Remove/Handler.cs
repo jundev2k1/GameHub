@@ -21,7 +21,7 @@ public sealed class RemoveMissionHandler(
                 await repo.RemoveAsync(cmd.Id, ct);
                 await unitOfWork.CommitAsync(ct);
                 await cache.RefreshCache(ct);
-                cache.RemoveGetDetail(cmd.Id);
+                cache.RemoveGetDetailByAdmin(cmd.Id);
             }
             catch (Exception e)
             {

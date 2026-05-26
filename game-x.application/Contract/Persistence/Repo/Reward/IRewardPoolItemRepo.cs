@@ -6,7 +6,9 @@ namespace game_x.application.Contract.Persistence.Repo.Reward;
 
 public interface IRewardPoolItemRepo
 {
-    Task<RewardPoolItemDto[]> GetListAsync(int poolId, CancellationToken ct = default);
+    Task<RewardPoolItemDto[]> GetAllByAdminAsync(int poolId, CancellationToken ct = default);
+    
+    Task<RewardPoolItemDto[]> GetAllByUserAsync(int poolId, CancellationToken ct = default);
     
     Task<RewardPoolItem> GetDetailByIdAsync(Guid id, CancellationToken ct = default);
     

@@ -2,7 +2,7 @@ using game_x.domain.Enum.Rewards;
 
 namespace game_x.application.Features.Rewards.Dtos;
 
-public sealed class ListedMissionDto
+public sealed class MissionUserDto
 {
     public Guid Id { get; set; }
     
@@ -16,9 +16,7 @@ public sealed class ListedMissionDto
     
     public MissionResetType? ResetType { get; set; }
     
-    public bool IsActive { get; set; }
+    public IReadOnlyCollection<MissionRewardUserDto> MissionRewards { get; set; } = [];
     
-    public DateTime? StartAt { get; set; }
-
-    public DateTime? EndAt { get; set; }
+    public DateTime? LastProgressAt { get; set; }
 }

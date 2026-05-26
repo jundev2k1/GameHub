@@ -11,11 +11,20 @@ namespace game_x.persistence.Repo.Rewards;
 
 public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IRepository
 {
-    public async Task<ListedMissionDto[]> GetListAsync(CancellationToken ct = default)
+    public async Task<MissionListedAdminDto[]> GetAllByAdminAsync(CancellationToken ct = default)
     {
         return await dbContext.Missions
             .AsNoTracking()
-            .ProjectToType<ListedMissionDto>()
+            .ProjectToType<MissionListedAdminDto>()
+            .ToArrayAsync(ct);
+    }
+    
+    public async Task<MissionListedUserDto[]> GetAllByUserAsync(CancellationToken ct = default)
+    {
+        return await dbContext.Missions
+            .AsNoTracking()
+            .Where(x => x.IsActive)
+            .ProjectToType<MissionListedUserDto>()
             .ToArrayAsync(ct);
     }
     
@@ -36,14 +45,12 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                 ConfigData = m.ConfigData,
                 StartAt = m.StartAt,
                 EndAt = m.EndAt,
-                TriggerEvents = m.TriggerEvents,
                 MissionRewards = m.MissionRewards.Select(mr => new MissionRewardDto
                 {
                     Id = mr.PublicId,
                     Sequence = mr.Sequence,
                     SortOrder = mr.SortOrder,
                     RequiredProgress = mr.RequiredProgress,
-                    IsClaimable = mr.IsClaimable,
                     IsActive = mr.IsActive,
                     StartAt = mr.StartAt,
                     EndAt = mr.EndAt,
@@ -71,12 +78,12 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
             return mission;
     }
     
-    public async Task<UserMissionDto> GetDetailByUserAsync(string userId, Guid missionId, CancellationToken ct = default)
+    public async Task<MissionDto> GetDetailByUserAsync(string userId, Guid missionId, CancellationToken ct = default)
     {
         var mission = await dbContext.Missions
             .AsNoTracking()
-            .Where(m => m.PublicId == missionId)
-            .Select(m => new UserMissionDto
+            .Where(m => m.PublicId == missionId && m.IsActive)
+            .Select(m => new MissionDto
             {
                 Id = m.PublicId,
                 Code = m.Code,
@@ -85,12 +92,13 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                 Description = m.Description,
                 ResetType = m.ResetType,
                 IsActive = m.IsActive,
-                ConfigData = m.ConfigData,
                 LastProgressAt = m.UserMissions
                     .Where(x => x.UserId == userId)
                     .Select(x => x.LastProgressAt)
                     .FirstOrDefault(),
-                MissionRewards = m.MissionRewards.Select(mr => new UserMissionRewardDto
+                MissionRewards = m.MissionRewards
+                    .Where(x => x.IsActive)
+                    .Select(mr => new MissionRewardDto
                 {
                     Id = mr.PublicId,
                     IsActive = mr.IsActive,

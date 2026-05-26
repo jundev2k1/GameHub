@@ -14,14 +14,38 @@ public sealed class RewardPoolItemRepo(
     GameXContext dbContext,
     IFileManagerCacheService storage) : IRewardPoolItemRepo, IRepository
 {
-    public async Task<RewardPoolItemDto[]> GetListAsync(int poolId, CancellationToken ct = default)
+    public async Task<RewardPoolItemDto[]> GetAllByAdminAsync(int poolId, CancellationToken ct = default)
     {
         var items = await dbContext.RewardPoolItems
             .AsNoTracking()
             .OrderByDescending(x => x.SortOrder)
             .Include(x => x.RewardDefinition)
                 .ThenInclude(x => x!.CatalogItem)
-                    .ThenInclude(x => x.Icon)
+                    .ThenInclude(x => x!.Icon)
+            .Where(x => x.RewardPoolId == poolId)
+            .ToArrayAsync(ct);
+        
+        return await Task.WhenAll(
+            items.Select(async item =>
+            {
+                var dto = item.Adapt<RewardPoolItemDto>();
+                dto.ItemIconUrl = item.RewardDefinition?.CatalogItem?.Icon is null
+                    ? null
+                    : await storage.GetFileUrl(item.RewardDefinition.CatalogItem.Icon, ct);
+
+                return dto;
+            }));
+    }
+    
+    public async Task<RewardPoolItemDto[]> GetAllByUserAsync(int poolId, CancellationToken ct = default)
+    {
+        var items = await dbContext.RewardPoolItems
+            .AsNoTracking()
+            .Where(x => x.IsActive)
+            .OrderByDescending(x => x.SortOrder)
+            .Include(x => x.RewardDefinition)
+                .ThenInclude(x => x!.CatalogItem)
+                    .ThenInclude(x => x!.Icon)
             .Where(x => x.RewardPoolId == poolId)
             .ToArrayAsync(ct);
         

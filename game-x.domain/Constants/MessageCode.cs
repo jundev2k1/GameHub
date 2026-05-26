@@ -430,6 +430,8 @@ public static class MessageCode
         UserMissionNotFound = 10620,
         [EnumMetadata("Reward definition amount is invalid.")]
         RewardDefinitionAmountInvalid = 10621,
+        [EnumMetadata("Execute already in progress.")]
+        ExecuteInProcess = 10622,
         #endregion
     }
 }

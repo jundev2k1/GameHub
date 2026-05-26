@@ -3,7 +3,7 @@ using game_x.domain.ValueObjects.Missions;
 
 namespace game_x.application.Features.Rewards.Dtos;
 
-public sealed class UserMissionDto
+public sealed class MissionAdminDto
 {
     public Guid Id { get; set; }
     
@@ -20,8 +20,11 @@ public sealed class UserMissionDto
     public bool IsActive { get; set; }
     
     public MissionConfigData ConfigData { get; set; } = MissionConfigData.Default();
+    public IReadOnlyCollection<MissionRewardAdminDto> MissionRewards { get; set; } = [];
     
-    public IReadOnlyCollection<UserMissionRewardDto> MissionRewards { get; set; } = [];
+    public DateTime? StartAt { get; set; }
+
+    public DateTime? EndAt { get; set; }
     
     public DateTime? LastProgressAt { get; set; }
 }

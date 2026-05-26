@@ -11,8 +11,8 @@ public sealed class MissionController(IMissionCacheService cache) : BaseApiContr
     [HttpGet("missions")]
     public async Task<IActionResult> GetListAsync(CancellationToken ct = default)
     {
-        var result = await cache.GetAll(ct);
-        return ApiResponseFactory.Ok(result);
+        var result = await cache.GetAllByUser(ct);
+        return ApiResponseFactory.Ok(result ?? []);
     }
     
     [HttpGet("missions/{id:guid}")]
