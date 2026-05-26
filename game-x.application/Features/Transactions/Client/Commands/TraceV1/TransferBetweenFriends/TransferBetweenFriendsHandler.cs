@@ -51,9 +51,9 @@ public sealed class CreateDepositChainTransactionHandler(
                 await unitOfWork.SaveChangesAsync(ct);
                 outgoingTx.CompleteTransfer(transferorBalance.TotalAmount, incomingTx.Id);
                 incomingTx.CompleteTransfer(receiverBalance.TotalAmount, outgoingTx.Id);
-                
-                await unitOfWork.SaveChangesAsync(ct);
                 await CreateTransferMessageAsync(me, cmd.TargetUserId, cmd.Amount, ct);
+                
+                await unitOfWork.CommitAsync(ct);
                 await SendSignalsAsync(me, cmd.TargetUserId, outgoingTx.PublicId, incomingTx.PublicId, ct);
             }
             catch(Exception ex)

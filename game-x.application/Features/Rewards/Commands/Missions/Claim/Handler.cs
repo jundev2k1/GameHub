@@ -2,6 +2,7 @@ using game_x.application.Contract.Infrastructure.Caching.Rewards;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Contract.Persistence.Repo.Reward;
+using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Events.Rewards.OnUserInventoryUpdated;
 using game_x.domain.Entities.Rewards;
 using game_x.domain.Enum.Rewards;
@@ -15,6 +16,9 @@ public sealed class ClaimMissionRewardHandler(
     IExecutionRepo executionRepo,
     IUserRewardRepo userRewardRepo,
     IUserInventoryRepo inventoryRepo,
+    ICryptoTokenRepo cryptoTokenRepo,
+    ITransactionRepo transactionRepo,
+    IUserBalanceRepo userBalanceRepo,
     IUserInventoryCacheService userInventoryCache,
     IApplicationEventDispatcher dispatcher
     // IWalletService walletService,
@@ -65,14 +69,7 @@ public sealed class ClaimMissionRewardHandler(
                 claim.Claim(execution);
 
                 execution.MarkSuccess();
-
-                var hasPendingClaims = await userMissionClaimRepo.HasPendingClaimsAsync(userMission.Id, userMission.CycleNumber, ct);
-                if (!hasPendingClaims && userMission.Status == UserMissionStatus.Completed)
-                {
-                    await userMissionClaimRepo.ExpireUnclaimedAsync(userMission.Id, userMission.CycleNumber, ct);
-                    userMission.ResetProgress();
-                }
-
+                
                 await unitOfWork.CommitAsync(ct);
 
                 await userInventoryCache.RefreshCache(userId, ct);
@@ -150,20 +147,41 @@ public sealed class ClaimMissionRewardHandler(
                     inventory.Add(amount);
                 break;
             }
-
-            /*
-            case RewardItemType.Currency:
+            
+            case RewardItemType.Balance:
             {
-                await walletService.CreditAsync(
-                    userId,
-                    reward.Amount ?? 0,
-                    ct);
+                if (reward.Amount > 0)
+                    await HandleTransactionAsync(userId, reward.Amount.Value, ct);
                 break;
             }
-            */
 
             default:
                 throw new BadRequestException(MessageCode.Reward.RewardDefinitionUnsupportedType);
         }
+    }
+
+    private async Task HandleTransactionAsync(string userId, decimal amount, CancellationToken ct)
+    {
+        var token = await cryptoTokenRepo.GetBySymbolAndNetworkAsync(CryptoTokenSymbol.Usdt, NetworkType.Tron, ct);
+        if (token == null || token.Status != CryptoTokenStatus.Active)
+            throw new BadRequestException(MessageCode.Crypto.CryptoTokenUnsupported);
+        
+        var balance = await userBalanceRepo.GetByUserIdAndTokenIdAsync(userId, token.Id, ct)
+            ?? throw new BadRequestException(MessageCode.Accounting.BalanceNotFound);
+        
+        var tx = Transaction.Create(
+            type: TransactionType.Reward,
+            userId: userId,
+            amount: amount,
+            cryptoTokenId: token.Id);
+        
+        var internalTx = TransactionInternal.Create(
+            sourceType: TransactionSourceType.Reward);
+        tx.AddTxInternal(internalTx);
+        await transactionRepo.AddAsync(tx, ct);
+        
+        await userBalanceRepo.UpdateAsync(balance.PublicId, x => { x.AdjustAmount(amount, true); }, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+        await dispatcher.Publish(new OnUserBalanceUpdatedEvent(userId), ct);
     }
 }

@@ -51,16 +51,6 @@ public sealed class UserMissionClaimRepo(GameXContext dbContext) : IUserMissionC
             ?? throw new NotFoundException(MessageCode.Reward.MissionClaimNotFound);
     }
     
-    public async Task<bool> HasPendingClaimsAsync(int userMissionId, int cycleNumber, CancellationToken ct = default)
-    {
-        return await dbContext.UserMissionClaims
-            .AnyAsync(x =>
-                    x.UserMissionId == userMissionId &&
-                    x.CycleNumber == cycleNumber &&
-                    x.Status == UserMissionClaimStatus.Available,
-                ct);
-    }
-    
     public async Task AddAsync(UserMissionClaim entity, CancellationToken ct = default)
     {
         await dbContext.UserMissionClaims.AddAsync(entity, ct);

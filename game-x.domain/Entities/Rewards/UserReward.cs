@@ -75,7 +75,7 @@ public sealed class UserReward : BaseEntity<int>, IAuditable
 
     public RewardPoolItem? RewardPoolItem { get; init; }
 
-    public Transaction? Transaction { get; init; }
+    public Transaction? Transaction { get; private set; }
 
     public CatalogItem? CatalogItem { get; init; }
 
@@ -93,7 +93,7 @@ public sealed class UserReward : BaseEntity<int>, IAuditable
         int? rewardDefinitionId = null,
         int? rewardPoolItemId = null,
         int? catalogItemId = null,
-        int? transactionId = null,
+        Transaction? transaction = null,
         string? title = null,
         string? metadata = null,
         DateTime? expiredAt = null)
@@ -105,7 +105,7 @@ public sealed class UserReward : BaseEntity<int>, IAuditable
             RewardDefinitionId = rewardDefinitionId,
             RewardPoolItemId = rewardPoolItemId,
             CatalogItemId = catalogItemId,
-            TransactionId = transactionId,
+            Transaction = transaction,
             RewardType = rewardType,
             Amount = amount,
             Title = title,

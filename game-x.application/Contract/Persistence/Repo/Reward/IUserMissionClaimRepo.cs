@@ -14,7 +14,5 @@ public interface IUserMissionClaimRepo
     
     Task<UserMissionClaim> GetTrackedByIdAsync(Guid id, CancellationToken ct = default);
     
-    Task<bool> HasPendingClaimsAsync(int userMissionId, int cycleNumber, CancellationToken ct = default);
-    
     Task AddAsync(UserMissionClaim entity, CancellationToken ct = default);
 }
