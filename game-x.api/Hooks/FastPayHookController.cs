@@ -5,7 +5,7 @@ using game_x.application.Features.Transactions.Webhooks.FastPay.Commands.FastPay
 using game_x.share.ExternalApi.Base;
 using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.TransactionCompleted;
 using game_x.share.ExternalApi.FastPay.Dtos.Webhooks.TransactionFailed;
-using System.Text;
+using System.Text.Json;
 
 namespace game_x.api.Hooks;
 
@@ -15,23 +15,10 @@ public sealed class FastPayHookController(IAppLogger<FastPayHookController> logg
     [HttpPost("deposit-success")]
     public async Task<IActionResult> DepositSuccessAsync([FromBody] SecureRequest<TransactionCompletedRequest> request, CancellationToken ct = default)
     {
-        try
-        {
-            Request.EnableBuffering();
-            Request.Body.Position = 0;
-
-            using var reader = new StreamReader(Request.Body, Encoding.UTF8, leaveOpen: true);
-            var rawJson = await reader.ReadToEndAsync(ct);
-            logger.LogInformation("Raw Request Body: {RawJson}", rawJson);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Cannot read raw body.");
-        }
-
         logger.LogInformation("===== FastPay web hook: Deposit Success =====");
 
         var command = new FastPayDepositSuccessCommand(request.Data, request.Signature);
+        logger.LogInformation(JsonSerializer.Serialize(command));
         await Mediator.Send(command, ct);
         return ApiResponseFactory.NoContent();
     }
