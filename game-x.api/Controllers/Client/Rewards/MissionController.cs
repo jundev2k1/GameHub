@@ -1,24 +1,27 @@
-﻿using game_x.application.Contract.Infrastructure.Caching.Rewards;
-using game_x.application.Features.Rewards.Commands.Missions.Claim;
-using game_x.application.Features.Rewards.Queries.Missions.GetByUser;
+﻿using game_x.application.Features.Rewards.Commands.Missions.Claim;
+using game_x.application.Features.Rewards.Queries.Missions.GetDetailForUser;
+using game_x.application.Features.Rewards.Queries.Missions.GetListForUser;
+using game_x.domain.Enum.Rewards;
 
 namespace game_x.api.Controllers.Client.Rewards;
 
 [Authorize(Roles = AppRoles.User)]
 [Route("/api/user")]
-public sealed class MissionController(IMissionCacheService cache) : BaseApiController
+public sealed class MissionController : BaseApiController
 {
     [HttpGet("missions")]
-    public async Task<IActionResult> GetListAsync(CancellationToken ct = default)
+    public async Task<IActionResult> GetListAsync(
+        [FromQuery(Name = "type")] MissionType? type, 
+        CancellationToken ct = default)
     {
-        var result = await cache.GetAllByUser(ct);
-        return ApiResponseFactory.Ok(result ?? []);
+        var result = await Mediator.Send(new GetMissionListForUserQuery(type), ct);
+        return ApiResponseFactory.Ok(result);
     }
     
     [HttpGet("missions/{id:guid}")]
     public async Task<IActionResult> GetDetailAsync(Guid id, CancellationToken ct = default)
     {
-        var result = await Mediator.Send(new GetMissionDetailByUserQuery(id), ct);
+        var result = await Mediator.Send(new GetMissionDetailForUserQuery(id), ct);
         return ApiResponseFactory.Ok(result);
     }
     

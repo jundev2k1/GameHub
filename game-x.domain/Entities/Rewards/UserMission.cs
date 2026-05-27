@@ -65,12 +65,12 @@ public sealed class UserMission : BaseEntity<int>
         => LastProgressAt.HasValue &&
            LastProgressAt.Value.Date < today.AddDays(-1).Date;
 
-    public void AddProgress(DateTime at, bool consecutive)
+    public void AddProgress(int value, DateTime at, bool consecutive)
     {
         if (Status == UserMissionStatus.Completed || Status == UserMissionStatus.Claimed)
             return;
 
-        Progress++;
+        Progress += value;
 
         if (consecutive) Streak++;
         else Streak = 1;

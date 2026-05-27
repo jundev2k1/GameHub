@@ -3,17 +3,17 @@ using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo.Reward;
 using game_x.application.Features.Rewards.Dtos;
 
-namespace game_x.application.Features.Rewards.Queries.Missions.GetByUser;
+namespace game_x.application.Features.Rewards.Queries.Missions.GetDetailForUser;
 
-public sealed class GetMissionDetailByUserHandler(
+public sealed class GetMissionDetailForUserHandler(
     IUserAccessor userAccessor,
     IMissionRepo repo,
-    IFileManagerCacheService storage) : IQueryHandler<GetMissionDetailByUserQuery, MissionUserDto>
+    IFileManagerCacheService storage) : IQueryHandler<GetMissionDetailForUserQuery, MissionUserDto>
 {
-    public async Task<MissionUserDto> Handle(GetMissionDetailByUserQuery request, CancellationToken ct = default)
+    public async Task<MissionUserDto> Handle(GetMissionDetailForUserQuery request, CancellationToken ct = default)
     {
         string userId = userAccessor.GetUserId();
-        var data = await repo.GetDetailByUserAsync(userId, request.Id, ct);
+        var data = await repo.GetDetailForUserAsync(userId, request.Id, ct);
         var missionRewards = await Task.WhenAll(
             data.MissionRewards.Select(async item =>
             {
