@@ -16,11 +16,8 @@ public sealed class UpdateLiveStreamGiftIconValidator : AbstractValidator<Update
 
     private bool BeAValidIcon(FileUpload fileUpload)
     {
-        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-        const long maxFileSize = 10 * 1024 * 1024; // 10 MB
-
         return fileUpload != null
-            && allowedTypes.Contains(fileUpload.ContentType)
-            && fileUpload.Length <= maxFileSize;
+            && FileUpload.ImageMimeTypes.Contains(fileUpload.ContentType)
+            && fileUpload.Length <= FileUpload.ImageMaxSize;
     }
 }

@@ -19,10 +19,7 @@ public sealed class UpdateLiveStreamGiftAnimationValidator : AbstractValidator<U
     {
         if (fileUpload is null) return true;
 
-        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/gif" };
-        const long maxFileSize = 10 * 1024 * 1024; // 10 MB
-
-        return allowedTypes.Contains(fileUpload.ContentType)
-            && fileUpload.Length <= maxFileSize;
+        return FileUpload.ImageMimeTypes.Contains(fileUpload.ContentType)
+            && fileUpload.Length <= FileUpload.ImageMaxSize;
     }
 }

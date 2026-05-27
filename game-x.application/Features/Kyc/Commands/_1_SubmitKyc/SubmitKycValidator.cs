@@ -48,17 +48,18 @@ public sealed class SubmitKycValidator : AbstractValidator<SubmitKycCommand>
         return age >= 16 && age <= 120;
     }
 
-    private bool BeAValidFileType(FileUpload file)
+    private static bool BeAValidFileType(FileUpload? file)
     {
-        var validExtensions = new[] { ".jpg", ".jpeg", ".png" };
-        var validMimeTypes = new[] { "image/jpeg", "image/png" };
-        return validExtensions.Contains(file.Extension)
-            && validMimeTypes.Contains(file.ContentType);
+        if (file is null) return true;
+
+        return FileUpload.ImageExtensions.Contains(file.Extension)
+            && FileUpload.ImageMimeTypes.Contains(file.ContentType);
     }
 
-    private bool BeAValidFileSize(FileUpload file)
+    private static bool BeAValidFileSize(FileUpload? file)
     {
-        var maxSize = 10 * 1024 * 1024; // 10 MB
-        return file.Length < maxSize;
+        if (file is null) return true;
+
+        return file.Length < FileUpload.ImageMaxSize;
     }
 }
