@@ -23,7 +23,7 @@ public sealed class GameMediaConfig : IEntityTypeConfiguration<GameMedia>
             .IsRequired();
 
         builder.Property(x => x.FileId)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(x => x.Type)
             .IsRequired()

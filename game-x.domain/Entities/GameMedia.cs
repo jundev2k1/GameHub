@@ -7,16 +7,17 @@ public sealed class GameMedia : BaseEntity<int>
     public Game Game { get; private set; } = default!;
     public GameMediaType Type { get; private set; }
     public GameMediaCategory Category { get; private set; }
-    public int FileId { get; private set; }
-    public MediaFile File { get; private set; } = default!;
-    public string? Title { get; private set; }
+    public int? FileId { get; private set; }
+    public MediaFile? File { get; private set; } = default!;
+    public string Title { get; private set; } = string.Empty;
     public string? Note { get; private set; }
     public int Priority { get; private set; }
     public bool IsActive { get; private set; }
 
     public static GameMedia Create(
         int gameId,
-        int fileId,
+        Guid? code,
+        int? fileId,
         GameMediaType type,
         GameMediaCategory category,
         string title,
@@ -25,7 +26,7 @@ public sealed class GameMedia : BaseEntity<int>
     {
         return new GameMedia
         {
-            PublicId = Guid.CreateVersion7(),
+            PublicId = code ?? Guid.CreateVersion7(),
             GameId = gameId,
             FileId = fileId,
             Type = type,
@@ -35,5 +36,24 @@ public sealed class GameMedia : BaseEntity<int>
             Priority = priority,
             IsActive = true,
         };
+    }
+
+    public void UpdateMediaInfo(
+        GameMediaType type,
+        GameMediaCategory category,
+        string title,
+        string? note,
+        int priority)
+    {
+        Type = type;
+        Category = category;
+        Title = title;
+        Note = note;
+        Priority = priority;
+    }
+
+    public void UpdateFile(int? fileId)
+    {
+        FileId = fileId;
     }
 }
