@@ -115,7 +115,7 @@ public sealed class UxmService(
 
     private SecureResponse<T> ValidateApiResponse<T>(ApiResponse<SecureResponse<T>> response)
     {
-        // Check if request was successfully
+        // Check if the request was successful
         if (response.IsSuccessStatusCode && response.Content != null)
             return response.Content;
 
@@ -137,7 +137,7 @@ public sealed class UxmService(
     {
         var errorContent = JsonHelper.ConvertJson<UxmErrorResponse>(response.Error?.Content ?? "{}");
 
-        // Check if this is insuficient balance error
+        // Check if this is an insufficient balance error
         if (InsufficientErrorCodes.Contains(errorContent.ErrorCode))
             return new BadRequestException(MessageCode.Accounting.InsufficientBalance, new { message = response.Error?.Content });
 

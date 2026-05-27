@@ -7,6 +7,10 @@ using game_x.application.Events.Account.OnUserBalanceUpdated;
 using game_x.application.Features.Transactions.Dtos;
 using game_x.share.Context;
 using System.Text.Json;
+using game_x.application.Contract.Infrastructure.BackgroundJobs.Dispatchers;
+using game_x.application.Contract.Persistence.Repo.Reward;
+using game_x.domain.Entities.Rewards;
+using game_x.domain.Enum.Rewards;
 
 namespace game_x.application.Events.Transactions.OnConfirmTransaction;
 
@@ -18,6 +22,8 @@ public sealed class OnConfirmTransactionHandler(
     INotificationRepo notificationRepo,
     IAdminHubService adminHubService,
     IApplicationEventDispatcher eventDispatcher,
+    IUserEventJobDispatcher userEventDispatcher,
+    IUserEventRepo userEventRepo,
     IAppLogger<OnConfirmTransactionHandler> logger) : IApplicationEventHandler<OnConfirmTransactionEvent>
 {
     public async Task Handle(OnConfirmTransactionEvent @event, CancellationToken ct = default)
@@ -38,13 +44,23 @@ public sealed class OnConfirmTransactionHandler(
 
             var userId = transaction.UserId;
             NotificationDto? notification = null;
+            var userEventId = Guid.CreateVersion7();
             await unitOfWork.WithTransactionAsync(async () =>
             {
                 switch (transaction.Type)
                 {
                     case TransactionType.Deposit:
+                    {
                         balance.AdjustAmount(@event.ActualAmount, true);
+                        var userEvent = UserEvent.Create(
+                            userId: userId, 
+                            type: UserEventType.DepositCompleted, 
+                            id: userEventId,
+                            value: @event.ActualAmount);
+                    
+                        await userEventRepo.AddAsync(userEvent, ct);
                         break;
+                    }
 
                     case TransactionType.Withdrawal:
                         var amount = @event.ActualAmount + (transaction.Fee ?? 0);
@@ -67,12 +83,17 @@ public sealed class OnConfirmTransactionHandler(
                         confirmedAt: @event.ConfirmedAt,
                         completedAt: DateTime.UtcNow);
                 }, ct);
+                
                 // Ensure the audit log records the order status updated by the external API
                 using (AuditSourceContext.Use(AuditSource.External))
                 {
                     await unitOfWork.SaveChangesAsync(ct);
                 }
                 var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
+                
+                if(transaction.Type ==  TransactionType.Deposit)
+                    userEventDispatcher.EnqueueProcess(userEventId);
+                
                 notification = await SendNotificationAsync(newTx.Adapt<TransactionInternalDto>(), ct);
             }, ct);
 

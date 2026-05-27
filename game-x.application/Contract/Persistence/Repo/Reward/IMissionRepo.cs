@@ -6,13 +6,13 @@ namespace game_x.application.Contract.Persistence.Repo.Reward;
 
 public interface IMissionRepo
 {
-    Task<MissionListedAdminDto[]> GetAllByAdminAsync(CancellationToken ct = default);
+    Task<MissionListedAdminDto[]> GetAllForAdminAsync(CancellationToken ct = default);
     
-    Task<MissionListedUserDto[]> GetAllByUserAsync(CancellationToken ct = default);
+    Task<MissionListedUserDto[]> GetAllForUserAsync(CancellationToken ct = default);
     
-    Task<MissionDto> GetDetailAsync(Guid id, CancellationToken ct = default);
+    Task<MissionDto> GetDetailForAdminAsync(Guid id, CancellationToken ct = default);
 
-    Task<MissionDto> GetDetailByUserAsync(string userId, Guid missionId, CancellationToken ct = default);
+    Task<MissionDto> GetDetailForUserAsync(string userId, Guid missionId, CancellationToken ct = default);
     
     Task<Mission> GetByIdAsync(Guid id, CancellationToken ct = default);
 

@@ -22,11 +22,11 @@ public sealed class MissionRewardDto
 
     public DateTime? EndAt { get; set; }
    
-    public Guid RewardDefinitionId { get; set; }
+    public Guid? RewardDefinitionId { get; set; }
     
     public decimal? Amount { get; set; }
     
-    public string Title { get; set; } = string.Empty;
+    public string? Title { get; set; }
     
     public string? Description { get; set; }
     
