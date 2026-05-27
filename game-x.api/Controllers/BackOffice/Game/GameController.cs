@@ -122,8 +122,8 @@ public sealed class GameController : BaseApiController
             contentType,
             contentLength);
         var command = new UploadGameMediaSourceCommand(gameId, mediaId, upload);
-        await Mediator.Send(command, ct);
-        return ApiResponseFactory.Accepted();
+        var result = await Mediator.Send(command, ct);
+        return ApiResponseFactory.Ok(result);
     }
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
