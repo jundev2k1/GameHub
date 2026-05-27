@@ -13,7 +13,7 @@ public sealed class GetMissionDetailByUserHandler(
     public async Task<MissionUserDto> Handle(GetMissionDetailByUserQuery request, CancellationToken ct = default)
     {
         string userId = userAccessor.GetUserId();
-        var data = await repo.GetDetailByUserAsync(userId, request.Id, ct);
+        var data = await repo.GetDetailForUserAsync(userId, request.Id, ct);
         var missionRewards = await Task.WhenAll(
             data.MissionRewards.Select(async item =>
             {

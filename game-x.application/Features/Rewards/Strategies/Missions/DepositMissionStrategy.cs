@@ -16,46 +16,46 @@ public sealed class DepositMissionStrategy(
         UserEvent userEvent,
         CancellationToken ct = default)
     {
-        var config = mission.ConfigData;
         var today = userEvent.CreatedAt.Date;
-
-        if (userMission.HasProgressToday(today) || userMission.InvalidTime(today)) return;
-
-        // Expire all previous rewards
-        await userMissionClaimRepo.ExpireUnclaimedAsync(userMission.Id, userMission.CycleNumber, ct);
+        if (userMission.Status != UserMissionStatus.InProgress) return;
         
-        if (config.RequireConsecutiveProgress && 
-            (userMission.IsMissedRequiredDay(today) || userMission.Progress >= config.RequiredProgress))
+        var config = mission.ConfigData;
+        
+        if (userEvent.Value >= config.MinimumValue)
         {
-            userMission.ResetProgress();
+            var value = config.ProgressMode == MissionProgressMode.Count ? 1 : userEvent.Value ?? 0;
+            userMission.AddProgress((int)value, today, false);
         }
-        
-        var consecutive = userMission.LastProgressAt?.Date == today.AddDays(-1);
-        userMission.AddProgress(today, consecutive);
 
-        var rewards = await missionRewardRepo.GetByMissionIdAsync(mission.Id, ct);
-        var unlockedRewards = rewards
-            .Where(x => x.Sequence == userMission.Progress)
-            .ToArray();
-
-        foreach (var reward in unlockedRewards)
+        if (userMission.Progress >= config.RequiredProgress)
         {
-            var exists =
-                await userMissionClaimRepo.ExistsAsync(
-                    userMissionId: userMission.Id,
+            var rewards = await missionRewardRepo.GetByMissionIdAsync(mission.Id, ct);
+            var unlockedRewards = rewards
+                .Where(x => userMission.Progress >= x.RequiredProgress)
+                .ToArray();
+
+            foreach (var reward in unlockedRewards)
+            {
+                var exists =
+                    await userMissionClaimRepo.ExistsAsync(
+                        userMissionId: userMission.Id,
+                        missionRewardId: reward.Id,
+                        cycleNumber: userMission.CycleNumber,
+                        ct);
+
+                if (exists) continue;
+
+                var claim = UserMissionClaim.Create(
+                    userId: userEvent.UserId,
+                    userMission: userMission,
                     missionRewardId: reward.Id,
-                    cycleNumber: userMission.CycleNumber,
-                    ct);
+                    cycleNumber: userMission.CycleNumber);
 
-            if (exists) continue;
-
-            var claim = UserMissionClaim.Create(
-                userId: userEvent.UserId,
-                userMission: userMission,
-                missionRewardId: reward.Id,
-                cycleNumber: userMission.CycleNumber);
-
-            await userMissionClaimRepo.AddAsync(claim, ct);
+                await userMissionClaimRepo.AddAsync(claim, ct);
+            }
+            
+            if(mission.ResetType == MissionResetType.Never)
+                userMission.Complete();
         }
     }
 }

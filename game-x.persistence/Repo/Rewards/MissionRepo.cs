@@ -11,7 +11,7 @@ namespace game_x.persistence.Repo.Rewards;
 
 public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IRepository
 {
-    public async Task<MissionListedAdminDto[]> GetAllByAdminAsync(CancellationToken ct = default)
+    public async Task<MissionListedAdminDto[]> GetAllForAdminAsync(CancellationToken ct = default)
     {
         return await dbContext.Missions
             .AsNoTracking()
@@ -19,7 +19,7 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
             .ToArrayAsync(ct);
     }
     
-    public async Task<MissionListedUserDto[]> GetAllByUserAsync(CancellationToken ct = default)
+    public async Task<MissionListedUserDto[]> GetAllForUserAsync(CancellationToken ct = default)
     {
         return await dbContext.Missions
             .AsNoTracking()
@@ -28,7 +28,7 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
             .ToArrayAsync(ct);
     }
     
-    public async Task<MissionDto> GetDetailAsync(Guid id, CancellationToken ct = default)
+    public async Task<MissionDto> GetDetailForAdminAsync(Guid id, CancellationToken ct = default)
     {
         var mission = await dbContext.Missions
             .AsNoTracking()
@@ -45,29 +45,33 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
                 ConfigData = m.ConfigData,
                 StartAt = m.StartAt,
                 EndAt = m.EndAt,
-                MissionRewards = m.MissionRewards.Select(mr => new MissionRewardDto
+                MissionRewards = m.MissionRewards
+                    .Select(mr => new
+                    {
+                        Reward = mr,
+                        Definition = mr.RewardDefinition,
+                        Catalog = mr.RewardDefinition != null ? mr.RewardDefinition.CatalogItem : null,
+                    })
+                    .Select(mr => new MissionRewardDto
                 {
-                    Id = mr.PublicId,
-                    Sequence = mr.Sequence,
-                    SortOrder = mr.SortOrder,
-                    RequiredProgress = mr.RequiredProgress,
-                    IsActive = mr.IsActive,
-                    StartAt = mr.StartAt,
-                    EndAt = mr.EndAt,
+                    Id = mr.Reward.PublicId,
+                    Sequence = mr.Reward.Sequence,
+                    SortOrder = mr.Reward.SortOrder,
+                    RequiredProgress = mr.Reward.RequiredProgress,
+                    IsActive = mr.Reward.IsActive,
+                    StartAt = mr.Reward.StartAt,
+                    EndAt = mr.Reward.EndAt,
                     
-                    RewardDefinitionId = mr.RewardDefinition != null ? mr.RewardDefinition.PublicId : Guid.Empty,
-                    Amount = mr.RewardDefinition != null ? mr.RewardDefinition.Amount : null,
-                    Title = mr.RewardDefinition != null ? mr.RewardDefinition.Title : String.Empty,
-                    Description = mr.RewardDefinition != null ? mr.RewardDefinition.Description : null,
-                    ItemId = mr.RewardDefinition != null && mr.RewardDefinition.CatalogItem != null
-                        ? mr.RewardDefinition.CatalogItem.PublicId : null,
-                    ItemName = mr.RewardDefinition != null && mr.RewardDefinition.CatalogItem != null
-                        ? mr.RewardDefinition.CatalogItem.Name : null,
-                    RewardType = mr.RewardDefinition != null ? mr.RewardDefinition.Type : null,
-                    ItemIconType = mr.RewardDefinition != null && mr.RewardDefinition.CatalogItem != null 
-                        ? mr.RewardDefinition.CatalogItem.IconType : null,
-                    ItemIcon = mr.RewardDefinition != null && mr.RewardDefinition.CatalogItem != null 
-                        ? mr.RewardDefinition.CatalogItem.Icon : null
+                    RewardDefinitionId = mr.Definition!.PublicId,
+                    Amount = mr.Definition.Amount,
+                    Title = mr.Definition.Title,
+                    Description = mr.Definition.Description,
+                    RewardType = mr.Definition.Type,
+                    
+                    ItemId = mr.Catalog!.PublicId,
+                    ItemName = mr.Catalog.Name,
+                    ItemIconType = mr.Catalog.IconType,
+                    ItemIcon = mr.Catalog.Icon
                 }).ToArray()
             })
             .FirstOrDefaultAsync(ct);
@@ -78,56 +82,59 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
             return mission;
     }
     
-    public async Task<MissionDto> GetDetailByUserAsync(string userId, Guid missionId, CancellationToken ct = default)
+    public async Task<MissionDto> GetDetailForUserAsync(string userId, Guid missionId, CancellationToken ct = default)
     {
         var mission = await dbContext.Missions
             .AsNoTracking()
             .Where(m => m.PublicId == missionId && m.IsActive)
-            .Select(m => new MissionDto
+            .SelectMany(
+                m => m.UserMissions.Where(um => um.UserId == userId),
+                (m, um) => new { Mission = m, UserMission = um }
+            )
+            .Select(x => new MissionDto
             {
-                Id = m.PublicId,
-                Code = m.Code,
-                Type = m.Type,
-                Title = m.Title,
-                Description = m.Description,
-                ResetType = m.ResetType,
-                IsActive = m.IsActive,
-                LastProgressAt = m.UserMissions
-                    .Where(x => x.UserId == userId)
-                    .Select(x => x.LastProgressAt)
-                    .FirstOrDefault(),
-                MissionRewards = m.MissionRewards
-                    .Where(x => x.IsActive)
-                    .Select(mr => new MissionRewardDto
+                Id = x.Mission.PublicId,
+                Code = x.Mission.Code,
+                Type = x.Mission.Type,
+                Title = x.Mission.Title,
+                Description = x.Mission.Description,
+                ResetType = x.Mission.ResetType,
+                IsActive = x.Mission.IsActive,
+                Progress = x.UserMission.Progress,
+                Streak = x.UserMission.Streak,
+                Status = x.UserMission.Status,
+                LastProgressAt = x.UserMission.LastProgressAt,
+                ConfigData = x.Mission.ConfigData,
+                MissionRewards = x.Mission.MissionRewards
+                    .Where(mr => mr.IsActive)
+                    .Select(mr => new
+                    {
+                        Reward = mr,
+                        Definition = mr.RewardDefinition,
+                        Catalog = mr.RewardDefinition != null ? mr.RewardDefinition.CatalogItem : null,
+                        Claim = mr.UserMissionClaims
+                            .FirstOrDefault(uc => 
+                                uc.UserId == userId && 
+                                uc.CycleNumber == x.UserMission.CycleNumber)
+                    })
+                    .Select(r => new MissionRewardDto
                 {
-                    Id = mr.PublicId,
-                    IsActive = mr.IsActive,
+                    Id = r.Reward.PublicId,
+                    IsActive = r.Reward.IsActive,
                     
-                    RewardDefinitionId = mr.RewardDefinition != null ? mr.RewardDefinition.PublicId : Guid.Empty,
-                    Amount = mr.RewardDefinition != null ? mr.RewardDefinition.Amount : null,
-                    Title = mr.RewardDefinition != null ? mr.RewardDefinition.Title : String.Empty,
-                    Description = mr.RewardDefinition != null ? mr.RewardDefinition.Description : null,
-                    ItemId = mr.RewardDefinition != null && mr.RewardDefinition.CatalogItem != null
-                        ? mr.RewardDefinition.CatalogItem.PublicId : null,
-                    ItemName = mr.RewardDefinition != null && mr.RewardDefinition.CatalogItem != null
-                        ? mr.RewardDefinition.CatalogItem.Name : null,
-                    RewardType = mr.RewardDefinition != null ? mr.RewardDefinition.Type : null,
-                    ItemIconType = mr.RewardDefinition != null && mr.RewardDefinition.CatalogItem != null 
-                        ? mr.RewardDefinition.CatalogItem.IconType : null,
-                    ItemIcon = mr.RewardDefinition != null && mr.RewardDefinition.CatalogItem != null 
-                        ? mr.RewardDefinition.CatalogItem.Icon : null,
+                    RewardDefinitionId = r.Definition!.PublicId,
+                    Amount = r.Definition.Amount,
+                    Title = r.Definition.Title,
+                    Description = r.Definition.Description,
+                    RewardType = r.Definition.Type,
                     
-                    ClaimId = mr.UserMissionClaims
-                        .Where(x => x.UserId == userId && x.Status == UserMissionClaimStatus.Available)
-                        .Select(x => (Guid?)x.PublicId)
-                        .FirstOrDefault(),
+                    ItemId = r.Catalog!.PublicId,
+                    ItemName = r.Catalog.Name,
+                    ItemIconType = r.Catalog.IconType,
+                    ItemIcon = r.Catalog.Icon,
                     
-                    IsClaimed = mr.UserMissionClaims
-                        .Any(c => 
-                            c.UserId == userId &&
-                            c.CycleNumber == m.UserMissions.FirstOrDefault(um => um.UserId == userId)!.CycleNumber &&
-                            c.Status == UserMissionClaimStatus.Claimed)
-                    
+                    ClaimId = r.Claim != null && r.Claim.Status == UserMissionClaimStatus.Available ? r.Claim.PublicId : null,
+                    IsClaimed = r.Claim != null && r.Claim.Status == UserMissionClaimStatus.Claimed
                 }).ToArray()
             })
             .FirstOrDefaultAsync(ct);

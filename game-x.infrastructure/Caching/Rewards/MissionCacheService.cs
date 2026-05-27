@@ -17,15 +17,15 @@ public sealed class MissionCacheService(
     
     public async Task RefreshCache(CancellationToken ct = default)
     {
-        var dataByAdmin = await repo.GetAllByAdminAsync(ct);
-        var dataByUser = await repo.GetAllByUserAsync(ct);
+        var dataByAdmin = await repo.GetAllForAdminAsync(ct);
+        var dataByUser = await repo.GetAllForUserAsync(ct);
         Set(ListByAdminKey, dataByAdmin);
         Set(ListByUserKey, dataByUser);
     }
     
     public async Task RefreshCache(Guid id, CancellationToken ct = default)
     {
-        var data = await repo.GetDetailAsync(id, ct);
+        var data = await repo.GetDetailForAdminAsync(id, ct);
         var missionRewards = await Task.WhenAll(
             data.MissionRewards.Select(async item =>
             {

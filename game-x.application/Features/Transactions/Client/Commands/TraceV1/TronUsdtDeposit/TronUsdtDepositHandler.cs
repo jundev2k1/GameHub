@@ -1,13 +1,9 @@
-﻿using game_x.application.Contract.Infrastructure.BackgroundJobs.Dispatchers;
-using game_x.application.Contract.Infrastructure.ExternalApi.FastPay;
+﻿using game_x.application.Contract.Infrastructure.ExternalApi.FastPay;
 using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
-using game_x.application.Contract.Persistence.Repo.Reward;
 using game_x.application.Features.Transactions.Dtos;
 using game_x.application.Utils;
-using game_x.domain.Entities.Rewards;
-using game_x.domain.Enum.Rewards;
 using game_x.share.Extensions;
 
 namespace game_x.application.Features.Transactions.Client.Commands.TraceV1.TronUsdtDeposit;
@@ -18,8 +14,6 @@ public sealed class CreateDepositChainTransactionHandler(
     IUnitOfWork unitOfWork,
     IUserAccessor userAccessor,
     ICryptoTokenRepo cryptoTokenRepo,
-    IUserEventJobDispatcher userEventDispatcher,
-    IUserEventRepo userEventRepo,
     ITransactionRepo transactionRepo) : ICommandHandler<TronUsdtDepositCommand, DepositChainTransactionResponseDto>
 {
     public async Task<DepositChainTransactionResponseDto> Handle(TronUsdtDepositCommand request, CancellationToken ct)
@@ -43,16 +37,6 @@ public sealed class CreateDepositChainTransactionHandler(
                 amount: amount,
                 providerOrderId: orderUid,
                 to: to);
-            
-            var userEventId = Guid.CreateVersion7();
-            var userEvent = UserEvent.Create(
-                userId: userId, 
-                type: UserEventType.DepositCompleted, 
-                id: userEventId);
-                    
-            await userEventRepo.AddAsync(userEvent, ct);
-            await unitOfWork.CommitAsync(ct);
-            userEventDispatcher.EnqueueProcess(userEventId);
         }, ct);
 
         // Return new transaction state
