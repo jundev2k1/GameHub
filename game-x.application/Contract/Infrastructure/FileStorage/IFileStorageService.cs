@@ -12,6 +12,18 @@ public interface IFileStorageService
         ObjectName objectName,
         MimeType mimeType,
         CancellationToken ct = default);
+    /// <summary>
+    /// Uploads a file stream to the specified bucket and object path
+    /// with explicit file size.
+    /// Recommended for Request.Body and non-seekable streams.
+    /// </summary>
+    Task UploadFileAsync(
+        Stream fileStream,
+        long fileSize,
+        BucketName bucketName,
+        ObjectName objectName,
+        MimeType mimeType,
+        CancellationToken ct = default);
 
     /// <summary>
     /// Retrieves a file stream from the specified bucket and object path.

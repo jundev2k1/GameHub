@@ -55,9 +55,9 @@ public sealed class FileUpload
         };
     }
 
-    public static FileUpload FromStream(Stream stream, string fileName, string contentType, int contentLength)
+    public static FileUpload FromStream(Stream stream, string fileName, string contentType, long contentLength)
     {
-        if (stream == null || stream.Length == 0)
+        if (stream == null)
             throw new ArgumentException("Stream is empty.");
 
         if (contentLength <= 0)
@@ -70,6 +70,7 @@ public sealed class FileUpload
         {
             Content = stream,
             FileName = fileName,
+            Extension = Path.GetExtension(fileName),
             ContentType = contentType,
             Length = contentLength
         };

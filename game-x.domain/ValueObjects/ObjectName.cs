@@ -22,6 +22,8 @@ public sealed class ObjectName
         => Of($"user-bank-account/{userId:N}/{fileName}");
     public static ObjectName GameResource(Guid gameId, string fileName)
         => Of($"games/{gameId:N}/thumbnail/{fileName}");
+    public static ObjectName GameMedia(Guid gameId, Guid id, string fileName)
+        => Of($"games/{gameId:N}/media/{id:N}/{fileName}");
     public static ObjectName LiveStreamThumbnail(Guid scheduleId, string fileName)
         => Of($"schedules/{scheduleId:N}/thumbnail/{fileName}");
 
@@ -53,7 +55,7 @@ public sealed class ObjectName
     }
 
     // Constants
-    private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+    private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".mp4", ".mkv", ".avi", ".mov"];
     private static readonly string[] ValidPrefixValues = [
         "user-kyc",
         "user-bank-account",

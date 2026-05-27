@@ -4,6 +4,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Exceptions;
 using game_x.application.Features.Games.Admin.Commands.UpdateGame;
 using game_x.application.Features.Games.Admin.Commands.UpdateGameTranslations;
+using game_x.application.Features.Games.Admin.Commands.UploadGameMediaSource;
 using game_x.application.Features.Games.Admin.Commands.UpsertGameMedias;
 using game_x.application.Features.Games.Admin.Queries.GetGameDetail;
 using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
@@ -101,6 +102,28 @@ public sealed class GameController : BaseApiController
     {
         await Mediator.Send(command with { Id = gameId });
         return ApiResponseFactory.NoContent();
+    }
+
+    [HttpPut("games/{gameId:guid}/medias/{mediaId:guid}/video/source")]
+    public async Task<IActionResult> UploadMediaSourceAsync(
+        [FromRoute] Guid gameId,
+        [FromRoute] Guid mediaId,
+        CancellationToken ct = default)
+    {
+        var fileName = Request.Headers["X-File-Name"].ToStringOrEmpty();
+        if (fileName.IsNullOrWhiteSpace())
+            throw new BadRequestException("Missing X-File-Name header.");
+
+        var contentLength = Request.ContentLength ?? 0;
+        var contentType = Request.ContentType ?? "application/octet-stream";
+        var upload = FileUpload.FromStream(
+            Request.Body,
+            fileName,
+            contentType,
+            contentLength);
+        var command = new UploadGameMediaSourceCommand(gameId, mediaId, upload);
+        await Mediator.Send(command, ct);
+        return ApiResponseFactory.Accepted();
     }
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]

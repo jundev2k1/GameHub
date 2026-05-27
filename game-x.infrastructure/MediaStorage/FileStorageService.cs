@@ -28,21 +28,57 @@ public sealed class FileStorageService(
         MimeType mimeType,
         CancellationToken ct = default)
     {
+        if (!fileStream.CanSeek)
+        {
+            throw new InvalidOperationException(
+                "Stream length cannot be determined automatically. " +
+                "Use UploadFileAsync overload with explicit file size.");
+        }
+
+        await UploadFileAsync(
+            fileStream,
+            fileStream.Length,
+            bucketName,
+            objectName,
+            mimeType,
+            ct);
+    }
+    /// <summary>
+    /// Uploads a file stream to the specified bucket and object path
+    /// with explicit file size.
+    /// Recommended for Request.Body and non-seekable streams.
+    /// </summary>
+    public async Task UploadFileAsync(
+        Stream fileStream,
+        long fileSize,
+        BucketName bucketName,
+        ObjectName objectName,
+        MimeType mimeType,
+        CancellationToken ct = default)
+    {
         try
         {
-            await EnsureBucketExistsAsync(bucketName, ct);
+            await EnsureBucketExistsAsync(
+                bucketName,
+                ct);
 
             var putObjectArgs = new PutObjectArgs()
                 .WithBucket(bucketName.Value)
                 .WithObject(objectName.Value)
                 .WithStreamData(fileStream)
-                .WithContentType(mimeType.Value)
-                .WithObjectSize(fileStream.Length);
-            await client.PutObjectAsync(putObjectArgs, ct);
+                .WithObjectSize(fileSize)
+                .WithContentType(mimeType.Value);
+
+            await client.PutObjectAsync(
+                putObjectArgs,
+                ct);
         }
         catch (Exception ex)
         {
-            logger.LogError("UploadFileAsync failed: {Message}", ex.Message);
+            logger.LogError(
+                ex,
+                "UploadFileAsync failed");
+
             throw;
         }
     }
