@@ -28,6 +28,84 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
             .ToArrayAsync(ct);
     }
     
+    public async Task<MissionDto[]> GetAllForUserAsync(string userId, MissionType? type, CancellationToken ct = default)
+    {
+        return await dbContext.Missions
+            .AsNoTracking()
+            .Where(x => x.IsActive && (type == null || x.Type == type))
+            .Select(m => new
+            {
+                Mission = m,
+                UserMission = m.UserMissions
+                    .FirstOrDefault(um => um.UserId == userId)
+            })
+            .Select((x => new MissionDto
+            {
+                Id = x.Mission.PublicId,
+                Code = x.Mission.Code,
+                Type = x.Mission.Type,
+                Title = x.Mission.Title,
+                Description = x.Mission.Description,
+                ResetType = x.Mission.ResetType,
+                ConfigData = x.Mission.ConfigData,
+                
+                Progress = x.UserMission!.Progress,
+                Streak = x.UserMission.Streak,
+                Status = x.UserMission.Status,
+                LastProgressAt = x.UserMission.LastProgressAt,
+                
+                MissionRewards = x.Mission.MissionRewards
+                .Where(mr => mr.IsActive)
+                .Select(mr => new
+                {
+                    Reward = mr,
+                    Definition = mr.RewardDefinition,
+                    Catalog = mr.RewardDefinition != null
+                        ? mr.RewardDefinition.CatalogItem
+                        : null,
+
+                    Claim = x.UserMission == null
+                        ? null
+                        : mr.UserMissionClaims.FirstOrDefault(uc =>
+                            uc.UserId == userId && 
+                            uc.CycleNumber == x.UserMission.CycleNumber)
+                })
+                .Select(r => new MissionRewardDto
+                {
+                    Id = r.Reward.PublicId,
+                    IsActive = r.Reward.IsActive,
+
+                    RewardDefinitionId = r.Definition!.PublicId,
+                    Amount = r.Definition.Amount,
+                    Title = r.Definition.Title,
+                    Description = r.Definition.Description,
+                    RewardType = r.Definition.Type,
+
+                    ItemId = r.Catalog!.PublicId,
+                    ItemName = r.Catalog.Name,
+                    ItemIconType = r.Catalog.IconType,
+                    ItemIcon = r.Catalog.Icon,
+
+                    ClaimId = r.Reward.UserMissionClaims
+                        .Where(uc =>
+                            uc.UserId == userId &&
+                            x.UserMission != null &&
+                            uc.CycleNumber == x.UserMission.CycleNumber &&
+                            uc.Status == UserMissionClaimStatus.Available)
+                        .Select(uc => (Guid?)uc.PublicId)
+                        .FirstOrDefault(),
+
+                    IsClaimed = r.Reward.UserMissionClaims.Any(uc =>
+                        uc.UserId == userId &&
+                        x.UserMission != null &&
+                        uc.CycleNumber == x.UserMission.CycleNumber &&
+                        uc.Status == UserMissionClaimStatus.Claimed)
+                })
+                .ToArray()
+            }))
+            .ToArrayAsync(ct);
+    }
+    
     public async Task<MissionDto> GetDetailForAdminAsync(Guid id, CancellationToken ct = default)
     {
         var mission = await dbContext.Missions
@@ -82,68 +160,93 @@ public sealed class MissionRepo(GameXContext dbContext) : IMissionRepo, IReposit
             return mission;
     }
     
-    public async Task<MissionDto> GetDetailForUserAsync(string userId, Guid missionId, CancellationToken ct = default)
-    {
-        var mission = await dbContext.Missions
-            .AsNoTracking()
-            .Where(m => m.PublicId == missionId && m.IsActive)
-            .SelectMany(
-                m => m.UserMissions.Where(um => um.UserId == userId),
-                (m, um) => new { Mission = m, UserMission = um }
-            )
-            .Select(x => new MissionDto
-            {
-                Id = x.Mission.PublicId,
-                Code = x.Mission.Code,
-                Type = x.Mission.Type,
-                Title = x.Mission.Title,
-                Description = x.Mission.Description,
-                ResetType = x.Mission.ResetType,
-                IsActive = x.Mission.IsActive,
-                Progress = x.UserMission.Progress,
-                Streak = x.UserMission.Streak,
-                Status = x.UserMission.Status,
-                LastProgressAt = x.UserMission.LastProgressAt,
-                ConfigData = x.Mission.ConfigData,
-                MissionRewards = x.Mission.MissionRewards
-                    .Where(mr => mr.IsActive)
-                    .Select(mr => new
-                    {
-                        Reward = mr,
-                        Definition = mr.RewardDefinition,
-                        Catalog = mr.RewardDefinition != null ? mr.RewardDefinition.CatalogItem : null,
-                        Claim = mr.UserMissionClaims
-                            .FirstOrDefault(uc => 
-                                uc.UserId == userId && 
-                                uc.CycleNumber == x.UserMission.CycleNumber)
-                    })
-                    .Select(r => new MissionRewardDto
+    public async Task<MissionDto> GetDetailForUserAsync(
+    string userId,
+    Guid missionId,
+    CancellationToken ct = default)
+{
+    var mission = await dbContext.Missions
+        .AsNoTracking()
+        .Where(m => m.PublicId == missionId && m.IsActive)
+        .Select(m => new
+        {
+            Mission = m,
+            UserMission = m.UserMissions
+                .FirstOrDefault(um => um.UserId == userId)
+        })
+        .Select(x => new MissionDto
+        {
+            Id = x.Mission.PublicId,
+            Code = x.Mission.Code,
+            Type = x.Mission.Type,
+            Title = x.Mission.Title,
+            Description = x.Mission.Description,
+            ResetType = x.Mission.ResetType,
+            IsActive = x.Mission.IsActive,
+
+            Progress = x.UserMission!.Progress,
+            Streak = x.UserMission.Streak,
+            Status = x.UserMission.Status,
+            LastProgressAt = x.UserMission.LastProgressAt,
+
+            ConfigData = x.Mission.ConfigData,
+
+            MissionRewards = x.Mission.MissionRewards
+                .Where(mr => mr.IsActive)
+                .Select(mr => new
+                {
+                    Reward = mr,
+                    Definition = mr.RewardDefinition,
+                    Catalog = mr.RewardDefinition != null
+                        ? mr.RewardDefinition.CatalogItem
+                        : null,
+
+                    Claim = x.UserMission == null
+                        ? null
+                        : mr.UserMissionClaims.FirstOrDefault(uc =>
+                            uc.UserId == userId && 
+                            uc.CycleNumber == x.UserMission.CycleNumber)
+                })
+                .Select(r => new MissionRewardDto
                 {
                     Id = r.Reward.PublicId,
                     IsActive = r.Reward.IsActive,
-                    
+
                     RewardDefinitionId = r.Definition!.PublicId,
                     Amount = r.Definition.Amount,
                     Title = r.Definition.Title,
                     Description = r.Definition.Description,
                     RewardType = r.Definition.Type,
-                    
+
                     ItemId = r.Catalog!.PublicId,
                     ItemName = r.Catalog.Name,
                     ItemIconType = r.Catalog.IconType,
                     ItemIcon = r.Catalog.Icon,
-                    
-                    ClaimId = r.Claim != null && r.Claim.Status == UserMissionClaimStatus.Available ? r.Claim.PublicId : null,
-                    IsClaimed = r.Claim != null && r.Claim.Status == UserMissionClaimStatus.Claimed
-                }).ToArray()
-            })
-            .FirstOrDefaultAsync(ct);
-            
-            if(mission == null)
-            throw new NotFoundException(MessageCode.Reward.MissionNotFound);
-    
-            return mission;
-    }
+
+                    ClaimId = r.Reward.UserMissionClaims
+                        .Where(uc =>
+                            uc.UserId == userId &&
+                            x.UserMission != null &&
+                            uc.CycleNumber == x.UserMission.CycleNumber &&
+                            uc.Status == UserMissionClaimStatus.Available)
+                        .Select(uc => (Guid?)uc.PublicId)
+                        .FirstOrDefault(),
+
+                    IsClaimed = r.Reward.UserMissionClaims.Any(uc =>
+                        uc.UserId == userId &&
+                        x.UserMission != null &&
+                        uc.CycleNumber == x.UserMission.CycleNumber &&
+                        uc.Status == UserMissionClaimStatus.Claimed)
+                })
+                .ToArray()
+        })
+        .FirstOrDefaultAsync(ct);
+
+    if (mission == null)
+        throw new NotFoundException(MessageCode.Reward.MissionNotFound);
+
+    return mission;
+}
     
     public async Task<Mission> GetByIdAsync(Guid id, CancellationToken ct = default)
     {

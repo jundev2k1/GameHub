@@ -10,6 +10,8 @@ public interface IMissionRepo
     
     Task<MissionListedUserDto[]> GetAllForUserAsync(CancellationToken ct = default);
     
+    Task<MissionDto[]> GetAllForUserAsync(string userId, MissionType? type, CancellationToken ct = default);
+    
     Task<MissionDto> GetDetailForAdminAsync(Guid id, CancellationToken ct = default);
 
     Task<MissionDto> GetDetailForUserAsync(string userId, Guid missionId, CancellationToken ct = default);
