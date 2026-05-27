@@ -4,6 +4,7 @@ using game_x.application.Common.Filters;
 using game_x.application.Exceptions;
 using game_x.application.Features.Games.Admin.Commands.UpdateGame;
 using game_x.application.Features.Games.Admin.Commands.UpdateGameTranslations;
+using game_x.application.Features.Games.Admin.Commands.UpsertGameMedias;
 using game_x.application.Features.Games.Admin.Queries.GetGameDetail;
 using game_x.application.Features.Games.Admin.Queries.GetGamesByCriteria;
 using game_x.application.Features.Games.Admin.Queries.GetGameTransactionDetail;
@@ -90,6 +91,16 @@ public sealed class GameController : BaseApiController
     {
         await Mediator.Send(command with { GameId = gameId });
         return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost("{gameId}/medias")]
+    public async Task<IActionResult> UpsertGameMediasAsync(
+        [FromRoute] Guid gameId,
+        [FromBody] UpsertGameMediasCommand command)
+    {
+        await Mediator.Send(command with { Id = gameId });
+        return ApiResponseFactory.NoContent();
     }
 
     [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]

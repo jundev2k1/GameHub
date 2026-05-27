@@ -50,6 +50,32 @@ public sealed class Game : BaseEntity<int>, IAuditable
         existing.Update(name, description, note);
     }
 
+    public void UpsertMediaFiles(IEnumerable<GameMedia> medias)
+    {
+        foreach (var media in medias)
+        {
+            if (media.GameId != Id)
+                throw new ArgumentException("GameID does not match the current entity.");
+
+            var existing = GameMedias.FirstOrDefault(m => m.PublicId == media.PublicId);
+            if (existing is null)
+            {
+                GameMedias.Add(media);
+                continue;
+            }
+            else
+            {
+                existing.UpdateMediaInfo(
+                    media.Type,
+                    media.Category,
+                    media.Title,
+                    media.Note,
+                    media.Priority);
+                existing.UpdateFile(media.FileId);
+            }
+        }
+    }
+
     public void UpdateGame(
         string name,
         string desc,
