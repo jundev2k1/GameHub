@@ -22,6 +22,7 @@ public interface IGameRepo
 
     Task UpdateGameAsync(
         Guid gameId,
+        Func<IQueryable<Game>, IQueryable<Game>>? preUpdateAction,
         Func<Game, Task> updateAction,
         CancellationToken ct = default);
 

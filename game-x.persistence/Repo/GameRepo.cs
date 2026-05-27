@@ -93,18 +93,17 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
 
     public async Task UpdateGameAsync(
         Guid gameId,
+        Func<IQueryable<Game>, IQueryable<Game>>? preUpdateAction,
         Func<Game, Task> updateAction,
         CancellationToken ct = default)
     {
-        var targetGame = await context.Games
+        var query = context.Games
             .AsSplitQuery()
-            .Include(g => g.GameCategoryMappings)
-            .ThenInclude(gcm => gcm.Category)
-            .Include(g => g.GameTypeMappings)
-            .ThenInclude(gtm => gtm.Type)
-            .Include(g => g.GameTagMappings)
-            .ThenInclude(gtm => gtm.Tag)
-            .Include(g => g.Thumbnail)
+            .AsQueryable();
+        if (preUpdateAction != null)
+            query = preUpdateAction(query);
+
+        var targetGame = await query
             .FirstOrDefaultAsync(g => g.PublicId == gameId, ct)
             ?? throw new NotFoundException(nameof(gameId), gameId);
 

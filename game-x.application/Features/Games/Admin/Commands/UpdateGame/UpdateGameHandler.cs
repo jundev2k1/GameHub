@@ -3,6 +3,7 @@ using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.share.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace game_x.application.Features.Games.Admin.Commands.UpdateGame;
 
@@ -25,19 +26,22 @@ public sealed class UpdateGameHandler(
             await InsertMappingsAsync(request, ct);
 
             // Execute update game
-            await gameRepo.UpdateGameAsync(request.Id, async game =>
-            {
-                game.UpdateGame(
-                    name: request.Name,
-                    desc: request.Description,
-                    note: request.Note,
-                    priority: request.Priority,
-                    isActive: request.IsActive);
+            await gameRepo.UpdateGameAsync(
+                request.Id,
+                query => query.Include(g => g.Thumbnail),
+                async game =>
+                {
+                    game.UpdateGame(
+                        name: request.Name,
+                        desc: request.Description,
+                        note: request.Note,
+                        priority: request.Priority,
+                        isActive: request.IsActive);
 
-                // Handle upload if new thumbnail is provided
-                if (request.Thumbnail != null)
-                    await HandleUploadNewThumbnail(game, request.Thumbnail, ct);
-            }, ct);
+                    // Handle upload if new thumbnail is provided
+                    if (request.Thumbnail != null)
+                        await HandleUploadNewThumbnail(game, request.Thumbnail, ct);
+                }, ct);
         }, ct);
 
         // Refresh cache
