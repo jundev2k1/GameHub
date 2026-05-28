@@ -11,6 +11,7 @@ public sealed class GameMediaRepo(GameXContext dbContext) : IGameMediaRepo, IRep
         return await dbContext.GameMedias
             .AsNoTracking()
             .Include(gm => gm.Game)
+            .Include(gm => gm.File)
             .Where(gm => gm.Game.PublicId == gameId)
             .ToArrayAsync(ct);
     }
@@ -20,6 +21,7 @@ public sealed class GameMediaRepo(GameXContext dbContext) : IGameMediaRepo, IRep
         return await dbContext.GameMedias
             .AsNoTracking()
             .Include(gm => gm.Game)
+            .Include(gm => gm.File)
             .FirstOrDefaultAsync(gm => gm.PublicId == id, ct)
             ?? throw new NotFoundException(nameof(id), id);
     }
