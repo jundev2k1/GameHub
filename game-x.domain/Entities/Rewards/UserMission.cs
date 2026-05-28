@@ -65,7 +65,7 @@ public sealed class UserMission : BaseEntity<int>
         => LastProgressAt.HasValue &&
            LastProgressAt.Value.Date < today.AddDays(-1).Date;
 
-    public void AddProgress(int value, DateTime at, bool consecutive)
+    public void OnAddProgress(int value, DateTime at, bool consecutive)
     {
         if (Status == UserMissionStatus.Completed || Status == UserMissionStatus.Claimed)
             return;
@@ -78,7 +78,7 @@ public sealed class UserMission : BaseEntity<int>
         LastProgressAt = at;
     }
 
-    public void ResetProgress()
+    public void OnResetProgress()
     {
         Progress = 0;
         Streak = 0;
@@ -89,7 +89,7 @@ public sealed class UserMission : BaseEntity<int>
         CycleNumber++;
     }
     
-    public void Complete()
+    public void OnComplete()
     {
         if (Status == UserMissionStatus.Completed) return;
 
@@ -97,7 +97,7 @@ public sealed class UserMission : BaseEntity<int>
         CompletedAt = DateTime.UtcNow;
     }
 
-    public void Claim()
+    public void OnClaim()
     {
         if (Status != UserMissionStatus.Completed) return;
         Status = UserMissionStatus.Claimed;
