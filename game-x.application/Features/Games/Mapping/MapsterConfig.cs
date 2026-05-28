@@ -31,13 +31,11 @@ public sealed class MapsterConfig : IRegister
         cfg.NewConfig<GameMedia, GameMediaInfo>()
             .Map(dest => dest.LocalId, src => src.Id)
             .Map(dest => dest.Id, src => src.PublicId)
-            .Map(dest => dest.LocalFileId, src => src.FileId)
             .Map(dest => dest.Type, src => src.Type)
             .Map(dest => dest.Category, src => src.Category)
             .Map(dest => dest.Title, src => src.Title)
             .Map(dest => dest.Priority, src => src.Priority)
-            .Map(dest => dest.BucketName, src => src.File != null ? src.File.BucketName.Value : null)
-            .Map(dest => dest.ObjectName, src => src.File != null ? src.File.ObjectName.Value : null);
+            .Map(dest => dest.File, src => src.File);
 
         cfg.NewConfig<Game, GameInfoDto>()
             .Map(dest => dest.LocalId, src => src.Id)

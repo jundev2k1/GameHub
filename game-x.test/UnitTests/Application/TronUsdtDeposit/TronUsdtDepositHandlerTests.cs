@@ -44,9 +44,7 @@ public sealed class TronUsdtDepositHandlerTests
             unitOfWork: _unitOfWorkMock.Object,
             userAccessor: _userAccessorMock.Object,
             cryptoTokenRepo: _cryptoTokenRepoMock.Object,
-            userEventRepo: _userEventRepoMock.Object,
-            transactionRepo: _transactionRepoMock.Object,
-            userEventDispatcher: _userEventJobDispatcherMock.Object
+            transactionRepo: _transactionRepoMock.Object
         );
     }
 

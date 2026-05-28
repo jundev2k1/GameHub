@@ -43,20 +43,16 @@ public sealed class GameMediaInfo
 {
     [JsonIgnore]
     public int LocalId { get; set; }
-    [JsonIgnore]
-    public int? LocalFileId { get; set; }
     public Guid Id { get; set; }
     public GameMediaType Type { get; set; }
     public GameMediaCategory Category { get; set; }
-    public string FileName { get; set; } = string.Empty;
+    public string FileName => File?.FileName ?? string.Empty;
     public string? Url { get; set; } = string.Empty;
-    public string Metadata { get; set; } = string.Empty;
+    public string Metadata => File?.Metadata ?? "{}";
     public string Title { get; set; } = string.Empty;
     public int Priority { get; set; }
     [JsonIgnore]
-    public string? BucketName { get; set; } = string.Empty;
-    [JsonIgnore]
-    public string? ObjectName { get; set; } = string.Empty;
+    public MediaFile? File { get; set; }
 }
 
 public sealed class GameCategoryInfo

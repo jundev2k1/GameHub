@@ -17,6 +17,9 @@ public sealed class GetGameDetailHandler(
         if (result.Thumbnail != null)
             result.Thumbnail.Url = await fileManagerCache.GetFileUrl(result.Thumbnail.LocalId!, ct);
 
+        foreach (var mediaItem in result.GameMediaItems)
+            mediaItem.Url = await fileManagerCache.GetFileUrl(mediaItem.File, ct);
+
         return result;
     }
 }
