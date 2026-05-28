@@ -155,11 +155,41 @@ public sealed class GameProviderCacheService(
             BucketName.Of(game.Thumbnail.BucketName),
             ObjectName.Of(game.Thumbnail.ObjectName),
             TimeSpan.FromHours(8));
-        Set(cacheKey, thumbnailUrl!, new MemoryCacheEntryOptions
+        Set(cacheKey, url, new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(8)
         });
         return url;
+    }
+
+    public async Task<GameMediaInfo[]> GetGameMediasAsync(GameInfoDto game)
+    {
+        foreach (var mediaItem in game.GameMediaItems)
+        {
+            // No media file set
+            if (mediaItem.File is null) continue;
+
+            // Get media item from cache
+            var cacheKey = $"{_prefixCache}:game:{game.Id}:media:{mediaItem.Id}";
+            var mediaUrl = Get<string>(cacheKey);
+            if (mediaUrl.IsNotNullOrEmpty())
+            {
+                mediaItem.Url = mediaUrl;
+                continue;
+            }
+
+            // Generate new media item url and cache it
+            var newUrl = await fileStorage.GenerateDownloadUrlAsync(
+                mediaItem.File.BucketName,
+                mediaItem.File.ObjectName,
+                TimeSpan.FromHours(8));
+            Set(cacheKey, newUrl!, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(8)
+            });
+            mediaItem.Url = mediaUrl;
+        }
+        return game.GameMediaItems;
     }
 
     public (string? token, DateTime? expiredTime) GetProviderToken(Guid platformId)

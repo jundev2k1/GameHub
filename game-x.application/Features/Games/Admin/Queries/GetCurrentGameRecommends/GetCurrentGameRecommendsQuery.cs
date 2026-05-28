@@ -2,4 +2,4 @@
 
 namespace game_x.application.Features.Games.Admin.Queries.GetCurrentGameRecommends;
 
-public record GetCurrentGameRecommendsQuery : IQuery<GameRecommendListItemDto[]>;
+public record GetCurrentGameRecommendsQuery(RecommendationType Type) : IQuery<GameRecommendListItemDto[]>;

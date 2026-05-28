@@ -30,6 +30,13 @@ public sealed class GetGameRecommendDetailHandler(
             var thumbnailUrl = await gameProviderCache.GetGameThumbnailAsync(gameInfo);
             gameInfo.Thumbnail.Url = thumbnailUrl;
         }
+
+        if (gameInfo.GameMediaItems.Length > 0)
+        {
+            var mediaItems = await gameProviderCache.GetGameMediasAsync(gameInfo);
+            gameInfo.GameMediaItems = mediaItems;
+        }
+
         var result = new GameRecommendListItemDto(gameInfo, item);
         return result;
     }
@@ -42,6 +49,7 @@ public sealed class GetGameRecommendDetailHandler(
             Name = dto.Name,
             Description = dto.Description,
             BannerId = dto.BannerId,
+            Type = dto.Type,
             Status = dto.Status,
             StartDate = dto.StartDate,
             EndDate = dto.EndDate,

@@ -27,9 +27,9 @@ public sealed class GameController : BaseApiController
     }
 
     [HttpGet("recommendations")]
-    public async Task<IActionResult> GetGameRecommendationsAsync(CancellationToken ct)
+    public async Task<IActionResult> GetGameRecommendationsAsync(RecommendationType? type, CancellationToken ct)
     {
-        var query = new GetCurrentGameRecommendsQuery();
+        var query = new GetCurrentGameRecommendsQuery(type ?? RecommendationType.Trending);
         var response = await Mediator.Send(query, ct);
         return ApiResponseFactory.Ok(response);
     }

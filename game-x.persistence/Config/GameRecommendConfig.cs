@@ -36,6 +36,11 @@ public class GameRecommendConfig : IEntityTypeConfiguration<GameRecommend>
             .HasForeignKey(gr => gr.BannerId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        builder.Property(gr => gr.Type)
+            .IsRequired()
+            .HasConversion<short>()
+            .HasDefaultValue(RecommendationType.Trending);
+
         builder.Property(gr => gr.Status)
             .IsRequired()
             .HasConversion<short>()
@@ -49,6 +54,10 @@ public class GameRecommendConfig : IEntityTypeConfiguration<GameRecommend>
 
         builder.HasIndex(gr => gr.PublicId)
             .IsUnique();
+
+        builder.HasIndex(gr => gr.Type);
+
+        builder.HasIndex(gr => new { gr.StartDate, gr.EndDate });
 
         builder.HasMany(gr => gr.Items)
             .WithOne(gri => gri.GameRecommend)

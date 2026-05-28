@@ -13,7 +13,9 @@ public sealed class GetCurrentGameRecommendsHandler(
         var lang = userAccessor.GetLanguage();
         var dateTime = DateTime.UtcNow;
         var data = gameProviderCache.GameRecommendList
-            .FirstOrDefault(r => ((r.StartDate ?? DateTime.MinValue) <= dateTime) && ((r.EndDate ?? DateTime.MaxValue) >= dateTime));
+            .FirstOrDefault(r => (r.Type == request.Type)
+                && ((r.StartDate ?? DateTime.MinValue) <= dateTime)
+                && ((r.EndDate ?? DateTime.MaxValue) >= dateTime));
         if (data is null) return [];
 
         var gameList = gameProviderCache.GameList
@@ -98,6 +100,13 @@ public sealed class GetCurrentGameRecommendsHandler(
                     tag.Description = translation.Description;
                 }
             }
+        }
+
+        // Map game media
+        if (gameInfo.GameMediaItems.Length > 0)
+        {
+            var mediaItems = await gameProviderCache.GetGameMediasAsync(gameInfo);
+            gameInfo.GameMediaItems = mediaItems;
         }
 
         var result = new GameRecommendListItemDto(gameInfo, item);

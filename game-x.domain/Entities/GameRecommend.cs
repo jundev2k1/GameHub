@@ -2,12 +2,13 @@
 
 public sealed class GameRecommend : BaseEntity<int>, IAuditable
 {
-    public Guid PublicId { get; private set; } = Guid.NewGuid();
+    public Guid PublicId { get; private set; } = Guid.CreateVersion7();
     public string Name { get; private set; } = default!;
     public string? Description { get; private set; }
     public int? BannerId { get; private set; }
     public MediaFile? Banner { get; private set; }
 
+    public RecommendationType Type { get; private set; }
     public PublishStatus Status { get; private set; } = PublishStatus.Draft;
     public DateTime? StartDate { get; private set; }
     public DateTime? EndDate { get; private set; }
@@ -17,6 +18,7 @@ public sealed class GameRecommend : BaseEntity<int>, IAuditable
     public static GameRecommend Create(
         string name,
         string? description = null,
+        RecommendationType type = RecommendationType.Trending,
         PublishStatus status = PublishStatus.Draft,
         DateTime? startDate = null,
         DateTime? endDate = null)
@@ -28,6 +30,7 @@ public sealed class GameRecommend : BaseEntity<int>, IAuditable
         {
             Name = name,
             Description = description,
+            Type = type,
             Status = status,
             StartDate = startDate,
             EndDate = endDate

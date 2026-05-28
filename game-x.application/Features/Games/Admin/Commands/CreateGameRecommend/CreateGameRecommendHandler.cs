@@ -1,5 +1,6 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
+using game_x.share.Extensions;
 
 namespace game_x.application.Features.Games.Admin.Commands.CreateGameRecommend;
 
@@ -13,6 +14,7 @@ public sealed class CreateGameRecommendHandler(
         var gameRecommend = GameRecommend.Create(
             request.Name,
             request.Description,
+            request.Type,
             request.Status,
             request.StartDate,
             request.EndDate);
@@ -25,6 +27,7 @@ public sealed class CreateGameRecommendHandler(
             new
             {
                 id = overlapItem.PublicId,
+                type = overlapItem.Type.ToCamelCase(),
                 startDate = overlapItem.StartDate ?? DateTime.MinValue,
                 endDate = overlapItem.EndDate ?? DateTime.MaxValue,
             });

@@ -54,9 +54,11 @@ public sealed class GameRecommendRepo(GameXContext context) : IGameRecommendRepo
         var maxDate = DateTime.MaxValue;
         return await context.GameRecommends
             .AsNoTracking()
-            .FirstOrDefaultAsync(gr => gr.PublicId != recommend.PublicId
-                && (recommend.StartDate ?? minDate) < (gr.EndDate ?? maxDate)
-                && (recommend.EndDate ?? maxDate) > (gr.StartDate ?? minDate),
+            .FirstOrDefaultAsync(
+                gr => gr.PublicId != recommend.PublicId
+                    && (recommend.Type == gr.Type)
+                    && (recommend.StartDate ?? minDate) < (gr.EndDate ?? maxDate)
+                    && (recommend.EndDate ?? maxDate) > (gr.StartDate ?? minDate),
                 ct);
     }
 

@@ -3,6 +3,7 @@
 public record CreateGameRecommendCommand(
     string Name,
     string Description,
+    RecommendationType Type,
     PublishStatus Status,
     DateTime? StartDate,
     DateTime? EndDate,

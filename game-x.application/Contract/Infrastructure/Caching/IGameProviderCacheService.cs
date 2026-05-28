@@ -28,6 +28,8 @@ public interface IGameProviderCacheService
 
     Task<string> GetGameThumbnailAsync(GameInfoDto game);
 
+    Task<GameMediaInfo[]> GetGameMediasAsync(GameInfoDto game);
+
     (string? token, DateTime? expiredTime) GetProviderToken(Guid platformId);
 
     void SetProviderToken(Guid platformId, string token, DateTime expiredTime);

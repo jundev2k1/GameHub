@@ -10,6 +10,7 @@ public class GameRecommendDto
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int? BannerId { get; set; }
+    public RecommendationType Type { get; set; }
     public PublishStatus Status { get; set; } = PublishStatus.Draft;
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
@@ -27,10 +28,23 @@ public sealed class GameRecommendItemDto
     [JsonIgnore]
     public bool IsActive { get; set; } = true;
     public bool IsGameActive { get; set; } = true;
+    public GameRecommendMediaItemDto[] MediaItems { get; set; } = [];
     [JsonIgnore]
     public DateTime CreatedAt { get; set; }
     [JsonIgnore]
     public DateTime? UpdatedAt { get; set; }
+}
+
+public sealed class GameRecommendMediaItemDto
+{
+    public GameMediaType Type { get; set; }
+    public GameMediaCategory Category { get; set; }
+    public string FileName => File?.FileName ?? string.Empty;
+    public string? Url { get; set; } = string.Empty;
+    public string Metadata => File?.Metadata ?? "{}";
+    public string Title { get; set; } = string.Empty;
+    [JsonIgnore]
+    public MediaFile? File { get; set; }
 }
 
 public record GameRecommendListItemDto : GameItemDto

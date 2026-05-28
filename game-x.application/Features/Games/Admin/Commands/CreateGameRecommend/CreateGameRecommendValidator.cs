@@ -11,6 +11,9 @@ public sealed class CreateGameRecommendValidator : AbstractValidator<CreateGameR
         RuleFor(x => x.Description)
             .MaximumLength(4000).WithMessage($"{nameof(CreateGameRecommendCommand.Description)} must be less than 4000 characters.");
 
+        RuleFor(x => x.Type)
+            .IsInEnum().WithMessage($"{nameof(CreateGameRecommendCommand.Type)} is invalid.");
+
         RuleFor(x => x.Status)
             .IsInEnum().WithMessage($"{nameof(CreateGameRecommendCommand.Status)} is invalid.");
 
