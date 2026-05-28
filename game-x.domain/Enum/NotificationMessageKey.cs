@@ -45,5 +45,8 @@ public enum NotificationMessageKey : short
     LiveStream_DonationReceived = 906,
     LiveStream_Started = 907,
 
+    // Enum group key: Reward
+    Misssion_Deposit_Completed = 1000,
+    
     // Enum group key: ...
 }

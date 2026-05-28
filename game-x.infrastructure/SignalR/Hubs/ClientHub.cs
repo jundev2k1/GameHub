@@ -57,12 +57,13 @@ public sealed class ClientHub(
     {
         var userId = Context.UserIdentifier;
         if (userId.IsNotNullOrEmpty())
+        {
             logger.LogInformation($"User connected ({nameof(ClientHub)}): {userId}");
+            await dispatcher.Publish(new OnDailyCheckInEvent(userId!));
+        }
 
         await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Member(userId!));
         await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Broadcast(AppRoles.User));
-        
-        await dispatcher.Publish(new OnDailyCheckInEvent());
         await base.OnConnectedAsync();
 
         // Send live-streaming shortcuts to live-streaming talent

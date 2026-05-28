@@ -20,8 +20,7 @@ public sealed class ShareLink : BaseEntity<int>
 
     /// <summary>
     /// Public share token.
-    /// Example:
-    /// abc123xyz
+    /// Example: abc123xyz
     /// </summary>
     [MaxLength(128)]
     public string Code { get; private set; } = string.Empty;
