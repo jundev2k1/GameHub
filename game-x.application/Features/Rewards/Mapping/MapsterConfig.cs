@@ -1,4 +1,5 @@
-﻿using game_x.application.Features.Rewards.Dtos;
+﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos.Rewards;
+using game_x.application.Features.Rewards.Dtos;
 using game_x.domain.Entities.Rewards;
 using game_x.domain.Enum.Rewards;
 
@@ -15,6 +16,9 @@ public sealed class MapsterConfig : IRegister
             .Map(dest => dest.Id, src => src.PublicId);
         
         cfg.NewConfig<Mission, MissionListedUserDto>()
+            .Map(dest => dest.Id, src => src.PublicId);
+        
+        cfg.NewConfig<Mission, MissionSignalDto>()
             .Map(dest => dest.Id, src => src.PublicId);
         
         cfg.NewConfig<CatalogItem, CatalogItemDto>()

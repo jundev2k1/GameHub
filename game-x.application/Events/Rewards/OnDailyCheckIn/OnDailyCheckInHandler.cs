@@ -1,5 +1,4 @@
 using game_x.application.Contract.Infrastructure.BackgroundJobs.Dispatchers;
-using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Contract.Persistence.Repo.Reward;
 using game_x.application.Features.Accounts.User.Commands.DailyCheckIn;
@@ -11,21 +10,19 @@ namespace game_x.application.Events.Rewards.OnDailyCheckIn;
 
 public sealed class OnDailyCheckInHandler(
     IUnitOfWork unitOfWork,
-    IUserAccessor userAccessor,
     IUserEventJobDispatcher userEventDispatcher,
     IUserEventRepo userEventRepo,
     ILogger<DailyCheckInHandler> logger) : IApplicationEventHandler<OnDailyCheckInEvent>
 {
     public async Task Handle(OnDailyCheckInEvent @event, CancellationToken ct = default)
     {
-        string userId = userAccessor.GetUserId();
         await unitOfWork.WithTransactionAsync(async () =>
         {
             try
             {
                 var id = Guid.CreateVersion7();
                 var userEvent = UserEvent.Create(
-                    userId: userId, 
+                    userId: @event.UserId, 
                     type: UserEventType.DailyLogin, 
                     id: id);
                     

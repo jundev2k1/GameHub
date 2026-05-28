@@ -27,10 +27,9 @@ public sealed class OnTransactionTransferredHandler(
                 NotificationType.Transaction,
                 NotificationSeverity.Success,
                 JsonSerializer.Serialize(txData));
-            await unitOfWork.WithTransactionAsync(async () =>
-            {
-                await notificationRepo.AddNotificationAsync(notification, ct);
-            }, ct);
+
+            await notificationRepo.AddNotificationAsync(notification, ct);
+            await unitOfWork.CommitAsync(ct);
             await clientHubService.SendNotificationToMemberAsync(txDto.ReceiverId, notification.Adapt<NotificationDto>());
         }
         

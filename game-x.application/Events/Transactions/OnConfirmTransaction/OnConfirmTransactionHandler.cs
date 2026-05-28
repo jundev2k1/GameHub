@@ -89,6 +89,7 @@ public sealed class OnConfirmTransactionHandler(
                 {
                     await unitOfWork.SaveChangesAsync(ct);
                 }
+                await unitOfWork.CommitAsync(ct);
                 var newTx = await transactionRepo.GetInternalByIdAsync(transaction.PublicId, ct);
                 
                 if(transaction.Type ==  TransactionType.Deposit)

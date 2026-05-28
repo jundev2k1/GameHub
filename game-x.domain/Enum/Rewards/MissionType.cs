@@ -11,7 +11,5 @@ public enum MissionType
     Deposit,
     DepositAccumulation,
     /// <summary>Social sharing mission.</summary>
-    Share,
-    /// <summary>Future extensibility.</summary>
-    Spin
+    Share
 }
