@@ -24,7 +24,7 @@ public sealed class DepositMissionStrategy(
         if (userEvent.Value >= config.MinimumValue)
         {
             var value = config.ProgressMode == MissionProgressMode.Count ? 1 : userEvent.Value ?? 0;
-            userMission.AddProgress((int)value, today, false);
+            userMission.OnAddProgress((int)value, today, false);
         }
 
         if (userMission.Progress >= config.RequiredProgress)
@@ -55,7 +55,7 @@ public sealed class DepositMissionStrategy(
             }
             
             if(mission.ResetType == MissionResetType.Never)
-                userMission.Complete();
+                userMission.OnComplete();
         }
     }
 }

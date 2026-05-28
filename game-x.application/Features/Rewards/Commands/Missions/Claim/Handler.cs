@@ -62,6 +62,9 @@ public sealed class ClaimMissionRewardHandler(
 
                 execution.MarkSuccess();
                 
+                if(mission.Type != MissionType.DailyLogin)
+                    userMission.OnClaim();
+                    
                 await unitOfWork.CommitAsync(ct);
 
                 await userInventoryCache.RefreshCache(userId, ct);

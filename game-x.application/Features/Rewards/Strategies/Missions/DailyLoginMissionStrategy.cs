@@ -33,11 +33,11 @@ public sealed class DailyLoginMissionStrategy(
         if (config.RequireConsecutiveProgress && 
             (userMission.IsMissedRequiredDay(today) || userMission.Progress >= config.RequiredProgress))
         {
-            userMission.ResetProgress();
+            userMission.OnResetProgress();
         }
         
         var consecutive = userMission.LastProgressAt?.Date == today.AddDays(-1);
-        userMission.AddProgress(1, today, consecutive);
+        userMission.OnAddProgress(1, today, consecutive);
 
         var rewards = await missionRewardRepo.GetByMissionIdAsync(mission.Id, ct);
         var unlockedRewards = rewards
