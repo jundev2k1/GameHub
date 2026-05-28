@@ -6,6 +6,8 @@ public record GameTypeItemDto(Guid Id, string Name, bool IsPrimary);
 
 public record GameTagItemDto(Guid Id, string Name, string Icon, string Color, bool IsPrimary);
 
+public record GameMediaItemDto(GameMediaType Type, GameMediaCategory Category, string FileName, string? Url, string Metadata, string Title);
+
 public record GameItemDto(
     Guid Id,
     string GameCode,
@@ -16,7 +18,8 @@ public record GameItemDto(
     string? GameThumbnailUrl,
     GameCategoryItemDto[] Categories,
     GameTypeItemDto[] GameTypes,
-    GameTagItemDto[] Tags)
+    GameTagItemDto[] Tags,
+    GameMediaItemDto[] MediaItems)
 {
     public GameItemDto(GameInfoDto game)
         : this(
@@ -27,6 +30,7 @@ public record GameItemDto(
             game.PlatformId,
             game.PlatformName,
             game.Thumbnail?.Url,
+            [],
             [],
             [],
             [])
@@ -45,5 +49,9 @@ public record GameItemDto(
             .OrderByDescending(tag => tag.IsPrimary)
             .ThenByDescending(tag => tag.Priority)
             .Select(tag => new GameTagItemDto(tag.Id, tag.Name, tag.Icon, tag.Color, tag.IsPrimary))];
+
+        MediaItems = [.. game.GameMediaItems
+            .OrderByDescending(m => m.Priority)
+            .Select(m => new GameMediaItemDto(m.Type, m.Category, m.FileName, m.Url, m.Metadata, m.Title))];
     }
 }

@@ -120,6 +120,13 @@ public sealed class GetGamesHandler(
             }
         }
 
+        // Map game media items
+        if (game.GameMediaItems.Length > 0)
+        {
+            var mediaItems = await gameProviderCache.GetGameMediasAsync(game);
+            game.GameMediaItems = mediaItems;
+        }
+
         var result = new GameItemDto(game);
         return result;
     }
