@@ -2,10 +2,7 @@ using game_x.domain.Enum.Rewards;
 
 namespace game_x.application.Features.Rewards.Commands.Missions.Claim;
 
-public sealed record ClaimMissionRewardCommand(
-    Guid ClaimId
-    // string? IdempotencyKey
-) : ICommand<ClaimMissionRewardResponse>;
+public sealed record ClaimMissionRewardCommand(Guid ClaimId ) : ICommand<ClaimMissionRewardResponse>;
 
 public sealed record ClaimMissionRewardResponse
 {

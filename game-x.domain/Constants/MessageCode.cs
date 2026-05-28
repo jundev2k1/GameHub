@@ -432,6 +432,8 @@ public static class MessageCode
         RewardDefinitionAmountInvalid = 10621,
         [EnumMetadata("Execute already in progress.")]
         ExecuteInProcess = 10622,
+        [EnumMetadata("Mission type is invalid.")]
+        MissionTypeInvalid = 10623,
         #endregion
     }
 }

@@ -13,4 +13,5 @@ public enum NotificationType : short
     UserBalance = 8,
     SocialLink = 9,
     LiveStream = 10,
+    Mission = 11,
 }
