@@ -21,6 +21,8 @@ public sealed class GameRepo(GameXContext context) : IGameRepo, IRepository
             .ThenInclude(gtm => gtm.Tag)
             .Include(g => g.Thumbnail)
             .Include(g => g.Translations)
+            .Include(g => g.GameMedias)
+            .ThenInclude(gm => gm.File)
             .ToArrayAsync(ct);
     }
 

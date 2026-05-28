@@ -21,6 +21,7 @@ public class GameInfoDto
     public bool IsActive { get; set; }
     [JsonIgnore]
     public Dictionary<string, GameTranslationInfo> GameTranslations { get; set; } = [];
+    public GameMediaInfo[] GameMediaItems { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
@@ -36,6 +37,26 @@ public sealed class ThumbnailInfo
     public string BucketName { get; set; } = string.Empty;
     [JsonIgnore]
     public string ObjectName { get; set; } = string.Empty;
+}
+
+public sealed class GameMediaInfo
+{
+    [JsonIgnore]
+    public int LocalId { get; set; }
+    [JsonIgnore]
+    public int? LocalFileId { get; set; }
+    public Guid Id { get; set; }
+    public GameMediaType Type { get; set; }
+    public GameMediaCategory Category { get; set; }
+    public string FileName { get; set; } = string.Empty;
+    public string? Url { get; set; } = string.Empty;
+    public string Metadata { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public int Priority { get; set; }
+    [JsonIgnore]
+    public string? BucketName { get; set; } = string.Empty;
+    [JsonIgnore]
+    public string? ObjectName { get; set; } = string.Empty;
 }
 
 public sealed class GameCategoryInfo

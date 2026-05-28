@@ -16,8 +16,8 @@ public sealed class GameProviderCacheService(
     IGameTagRepo gameTagRepo,
     IGameRecommendRepo gameRecommendRepo,
     IGameRepo gameRepo,
-    IFileStorageService fileStorage)
-    : CacheService(cache), IGameProviderCacheService
+    IGameMediaRepo gameMediaRepo,
+    IFileStorageService fileStorage) : CacheService(cache), IGameProviderCacheService
 {
     private readonly string _prefixCache = "external:game-provider";
 
@@ -87,10 +87,57 @@ public sealed class GameProviderCacheService(
         {
             var cacheThumbnailKey = $"{_prefixCache}:game:{game.PublicId}:thumbnail";
             Remove(cacheThumbnailKey);
+
+            foreach (var media in game.GameMedias)
+            {
+                var mediaCache = $"{_prefixCache}:game:{game.PublicId}:medias:{media.PublicId}";
+                Remove(mediaCache);
+            }
         }
 
         var cacheKey = $"{_prefixCache}:game:list";
         Set(cacheKey, gameList.Adapt<GameInfoDto[]>());
+    }
+
+    public async Task RefreshSpecifyGameMediaAsync(Guid gameId, Guid? mediaId, CancellationToken ct = default)
+    {
+        var cacheKey = $"{_prefixCache}:game:list";
+        var list = Get<GameInfoDto[]>(cacheKey);
+        if (list is null)
+        {
+            await RefreshGameListAsync(ct);
+            return;
+        }
+
+        var targetGame = list.FirstOrDefault(g => g.Id == gameId);
+        if (targetGame is null)
+        {
+            await RefreshGameListAsync(ct);
+            return;
+        }
+
+        if (mediaId.HasValue)
+        {
+            var newMedia = await gameMediaRepo.GetAsync(mediaId.Value, ct);
+            var cacheMedia = targetGame.GameMediaItems.FirstOrDefault(m => m.Id == mediaId.Value);
+            if (cacheMedia != null)
+            {
+                newMedia.Adapt(cacheMedia);
+            }
+            else
+            {
+                targetGame.GameMediaItems = [.. targetGame.GameMediaItems, newMedia.Adapt<GameMediaInfo>()];
+            }
+
+            Array.Sort(targetGame.GameMediaItems, (a, b) => b.Priority.CompareTo(a.Priority));
+        }
+        else
+        {
+            var newMediaItems = await gameMediaRepo.GetsByGameIdAsync(gameId, ct);
+            targetGame.GameMediaItems = newMediaItems.Adapt<GameMediaInfo[]>();
+        }
+
+        Set(cacheKey, list);
     }
 
     public async Task<string> GetGameThumbnailAsync(GameInfoDto game)

@@ -12,7 +12,8 @@ public sealed class UploadGameMediaSourceHandler(
     IGameMediaRepo gameMediaRepo,
     IMediaFileRepo mediaFileRepo,
     IFileStorageService fileStorage,
-    IFileManagerCacheService fileManagerCache) : ICommandHandler<UploadGameMediaSourceCommand, UploadGameMediaSourceResult>
+    IFileManagerCacheService fileManagerCache,
+    IGameProviderCacheService gameProviderCache) : ICommandHandler<UploadGameMediaSourceCommand, UploadGameMediaSourceResult>
 {
     public async Task<UploadGameMediaSourceResult> Handle(UploadGameMediaSourceCommand request, CancellationToken ct = default)
     {
@@ -32,7 +33,7 @@ public sealed class UploadGameMediaSourceHandler(
             await PersistChangesAsync(targetMedia, uploadedVideo, ct);
 
             // Refresh cache
-            await RefreshCachesAsync(uploadedVideo, ct);
+            await RefreshCachesAsync(request.GameId, request.MediaId, uploadedVideo, ct);
         }
         catch (Exception ex)
         {
@@ -131,9 +132,12 @@ public sealed class UploadGameMediaSourceHandler(
         await fileStorage.DeleteFileAsync(this.FileDeleted.BucketName, this.FileDeleted.ObjectName, ct);
     }
 
-    private async Task RefreshCachesAsync(MediaFile file, CancellationToken ct)
+    private async Task RefreshCachesAsync(Guid gameId, Guid gameMediaId, MediaFile file, CancellationToken ct)
     {
         await fileManagerCache.RefreshImage(file, ct: ct);
+
+        // Handle refresh game media from in-memory cache
+        await gameProviderCache.RefreshSpecifyGameMediaAsync(gameId, gameMediaId, ct);
     }
 
     private MediaFile? FileDeleted { get; set; }

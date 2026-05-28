@@ -1,11 +1,13 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Persistence.Repo;
 using Microsoft.EntityFrameworkCore;
 
 namespace game_x.application.Features.Games.Admin.Commands.UpsertGameMedias;
 
 public sealed class UpsertGameMediasHandler(
     IUnitOfWork unitOfWork,
-    IGameRepo gameRepo) : ICommandHandler<UpsertGameMediasCommand>
+    IGameRepo gameRepo,
+    IGameProviderCacheService gameProviderCache) : ICommandHandler<UpsertGameMediasCommand>
 {
     public async Task<Unit> Handle(UpsertGameMediasCommand request, CancellationToken ct = default)
     {
@@ -29,6 +31,9 @@ public sealed class UpsertGameMediasHandler(
                     await Task.CompletedTask;
                 }, ct);
         }, ct);
+
+        // Handle refresh game media from in-memory cache
+        await gameProviderCache.RefreshSpecifyGameMediaAsync(request.Id, null, ct);
 
         return Unit.Value;
     }

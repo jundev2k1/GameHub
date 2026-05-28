@@ -24,6 +24,8 @@ public interface IGameProviderCacheService
 
     Task RefreshGameListAsync(CancellationToken ct = default);
 
+    Task RefreshSpecifyGameMediaAsync(Guid gameId, Guid? mediaId, CancellationToken ct = default);
+
     Task<string> GetGameThumbnailAsync(GameInfoDto game);
 
     (string? token, DateTime? expiredTime) GetProviderToken(Guid platformId);
