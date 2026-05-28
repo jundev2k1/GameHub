@@ -18,6 +18,7 @@ public sealed class GameRecommendRepo(GameXContext context) : IGameRecommendRepo
                 Name = gr.Name,
                 Description = gr.Description ?? string.Empty,
                 BannerId = gr.BannerId,
+                Type = gr.Type,
                 Status = gr.Status,
                 StartDate = gr.StartDate,
                 EndDate = gr.EndDate,
