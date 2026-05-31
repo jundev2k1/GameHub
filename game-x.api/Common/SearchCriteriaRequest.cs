@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿namespace game_x.api.Common;
 
-namespace game_x.api.Common;
-
-public sealed class SearchCriteriaRequest
+public class SearchCriteriaRequest
 {
     [FromQuery(Name = "search")]
     public string? Keyword { get; set; }

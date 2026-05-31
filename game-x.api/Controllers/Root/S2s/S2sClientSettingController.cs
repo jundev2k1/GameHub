@@ -1,0 +1,190 @@
+﻿using game_x.application.Features.S2s.Commands.CreateCredentitalSetting;
+using game_x.application.Features.S2s.Commands.CreateS2sClientSetting;
+using game_x.application.Features.S2s.Commands.RevokeCredentialSetting;
+using game_x.application.Features.S2s.Commands.RotateCredentialSetting;
+using game_x.application.Features.S2s.Commands.SwitchS2sClientSettingStatus;
+using game_x.application.Features.S2s.Commands.UpdateS2sClientSetting;
+using game_x.application.Features.S2s.Queries.GetSettingDetail;
+
+namespace game_x.api.Controllers.Root.S2s;
+
+[Authorize(Roles = AppRoles.Root)]
+[Route("api/root/s2s/clients")]
+public sealed class S2sClientSettingController : BaseApiController
+{
+    /// <summary>
+    /// Retrieves detailed information of an S2S client setting
+    /// </summary>
+    /// <remarks>
+    /// This API returns the complete detail of a platform-specific setting for a third-party Server-to-Server (S2S) client
+    /// <br />
+    /// The response includes:
+    /// <list type="number">
+    ///   <item>
+    ///     <description>
+    ///       Parent S2S client information (third-party identity and metadata)
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <description>
+    ///       Target setting information identified by the app code
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <description>
+    ///       All associated credentials, integration keys
+    ///       and related configuration materials required for server-to-server authentication
+    ///     </description>
+    ///   </item>
+    /// </list>
+    /// <br />
+    /// A setting represents an integration configuration for a specific platform
+    /// or channel, such as web, mobile app, or device
+    /// </remarks>
+    /// <param name="appCode">The application code identifying the platform-specific S2S client setting whose details will be retrieved</param>
+    /// <returns>Returns HTTP 200 (OK) with the S2S client setting detail, including parent client information and all associated credentials</returns>
+    [HttpGet("{clientId}/settings/{appCode}")]
+    public async Task<IActionResult> GetSettingDetailAsync(string clientId, string appCode)
+    {
+        var query = new GetSettingDetailQuery(clientId, appCode);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    /// <summary>
+    /// Creates a new setting for a third-party Server-to-Server (S2S) client
+    /// </summary>
+    /// <remarks>
+    /// This API creates and associates a configuration setting for a third-party S2S client
+    /// A setting represents an integration key and configuration
+    /// for a specific platform or channel, such as web, mobile app, or device
+    /// <br />
+    /// Each S2S client may have multiple settings, one per supported platform,
+    /// enabling secure server-to-server communication across different environments
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client to which the will be added</param>
+    /// <param name="command">The request payload containing platform-specific keys and configuration details for the S2S client</param>
+    /// <returns>Returns HTTP 201 (Created) when the S2S client setting is successfully created</returns>
+    [HttpPost("{clientId}/settings")]
+    public async Task<IActionResult> CreateSettingAsync(string clientId, CreateS2sClientSettingCommand command)
+    {
+        await Mediator.Send(command with { ClientId = clientId });
+        return ApiResponseFactory.Created();
+    }
+
+    /// <summary>
+    /// Updates a setting of a third-party Server-to-Server (S2S) client
+    /// </summary>
+    /// <remarks>
+    /// This API updates an existing S2S client setting that represents an integration
+    /// key and configuration for a specific platform or channel (such as web, mobile
+    /// app, or device)
+    /// <br/>
+    /// The setting is identified by the provided app code and is associated with
+    /// the specified third-party S2S client.
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client that owns the setting</param>
+    /// <param name="appCode">The application code identifying the platform-specific setting to be updated</param>
+    /// <param name="command">The request payload containing the updated integration key and configuration details</param>
+    /// <returns>Returns HTTP 200 when the S2S client setting is successfully updated</returns>
+    [HttpPut("{clientId}/settings/{appCode}")]
+    public async Task<IActionResult> UpdateSettingAsync(string clientId, string appCode, UpdateS2sClientSettingCommand command)
+    {
+        await Mediator.Send(command with { ClientId = clientId, AppCode = appCode });
+        return ApiResponseFactory.NoContent();
+    }
+
+    /// <summary>
+    /// Switches the status of an S2S client setting
+    /// </summary>
+    /// <remarks>
+    /// This API toggles the status of a platform-specific setting of a third-party
+    /// Server-to-Server (S2S) client. A setting represents an integration key and
+    /// configuration for a specific platform or channel (such as web, mobile app, or device)
+    /// <br />
+    /// When the setting is inactive, all server-to-server authentication requests
+    /// using the associated integration key will be rejected
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client that owns the setting</param>
+    /// <param name="appCode">The application code identifying the platform-specific setting whose status will be switched</param>
+    /// <returns>Returns HTTP 200 when the S2S client setting status is successfully updated</returns>
+    [HttpPatch("{clientId}/settings/{appCode}/status")]
+    public async Task<IActionResult> SwitchS2sClientSettingStatusAsync(string clientId, string appCode)
+    {
+        var command = new SwitchS2sClientSettingStatusCommand(clientId, appCode);
+        await Mediator.Send(command with { ClientId = clientId, AppCode = appCode });
+        return ApiResponseFactory.NoContent();
+    }
+
+    /// <summary>
+    /// Creates a new credential for an S2S client platform setting.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint creates an integration credential (such as an API key or secret)
+    /// for a specific platform configuration of a third-party Server-to-Server (S2S) client.
+    /// <br />
+    /// The credential is associated with the specified client and platform and can be used
+    /// for server-to-server authentication requests, subject to the activation status
+    /// of the corresponding setting.
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client</param>
+    /// <param name="appCode">The application code identifying the platform-specific setting</param>
+    /// <param name="command">The credential creation request payload</param>
+    /// <returns>Returns 201 when the credential is successfully created</returns>
+    [HttpPost("{clientId}/settings/{appCode}/credentials")]
+    public async Task<IActionResult> CreateCredentialAsync(string clientId, string appCode, CreateCredentitalSettingCommand command)
+    {
+        await Mediator.Send(command with { ClientId = clientId, AppCode = appCode });
+        return ApiResponseFactory.Created();
+    }
+
+    /// <summary>
+    /// Rotates an existing S2S credential
+    /// </summary>
+    /// <remarks>
+    /// This endpoint performs a credential rotation for a specific platform setting
+    /// of a third-party Server-to-Server (S2S) client.
+    /// <br />
+    /// Credential rotation generates a new integration key while invalidating
+    /// the previous key, allowing clients to update secrets without service interruption.
+    /// <br />
+    /// After rotation, all server-to-server authentication requests must use
+    /// the newly generated credential.
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client</param>
+    /// <param name="appCode">The application code identifying the platform-specific setting</param>
+    /// <param name="keyId">The unique identifier of the credential to be rotated</param>
+    /// <returns>Returns 204 No Content when the credential is successfully rotated</returns>
+    [HttpPatch("{clientId}/settings/{appCode}/credentials/{keyId}/actions/rotate")]
+    public async Task<IActionResult> RotateCredentialAsync(string clientId, string appCode, string keyId)
+    {
+        var command = new RotateCredentialSettingCommand(clientId, appCode, keyId);
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
+    /// <summary>
+    /// Revokes an existing S2S credential
+    /// </summary>
+    /// <remarks>
+    /// This endpoint permanently revokes a credential associated with a specific
+    /// platform setting of a third-party Server-to-Server (S2S) client.
+    /// <br />
+    /// Once revoked, the credential can no longer be used for any server-to-server
+    /// authentication requests, and access using this key will be rejected immediately.
+    /// <br />
+    /// This action is irreversible and should be used when a credential is compromised
+    /// or no longer required.
+    /// </remarks>
+    /// <param name="clientId">The unique identifier of the third-party S2S client</param>
+    /// <param name="appCode">The application code identifying the platform-specific setting</param>
+    /// <param name="keyId">The unique identifier of the credential to be revoked</param>
+    /// <returns>Returns 204 No Content when the credential is successfully revoked</returns>
+    [HttpPatch("{clientId}/settings/{appCode}/credentials/{keyId}/actions/revoke")]
+    public async Task<IActionResult> RevokeCredentialAsync(string clientId, string appCode, string keyId)
+    {
+        var command = new RevokeCredentialSettingCommand(clientId, appCode, keyId);
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+}

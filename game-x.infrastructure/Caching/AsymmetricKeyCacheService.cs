@@ -1,6 +1,5 @@
 using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Exceptions;
-using game_x.domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -11,35 +10,36 @@ public sealed class AsymmetricKeyCacheService(
     IMemoryCache cache) : CacheService(cache), IAsymmetricKeyCacheService
 {
     private const string CacheKey = "asymmetricKey:list";
+    private Dictionary<string, string>? DataSource => Get<Dictionary<string, string>?>(CacheKey);
 
-    public void Refresh()
+    public async Task RefreshAsync()
     {
-        var keys = context.AsymmetricKey
+        var keys = await context.AsymmetricKeys
             .AsNoTracking()
-            .ToDictionary(
-                x => BuildCacheKey(x.Name, x.KeyType, x.Algorithm),
-                x => x.KeyValue);
+            .ToDictionaryAsync(
+                ak => BuildCacheKey(ak.Name, ak.KeyType, ak.Algorithm),
+                ak => ak.KeyValue);
         Set(CacheKey, keys);
     }
 
-    public string GalaxyPrivateKey => GetKey(AsymmetricKeyNames.GalaxyPay, KeyType.Private, AsymmetricType.ECDSA);
-    public string GalaxyPublicKey  => GetKey(AsymmetricKeyNames.GalaxyPay, KeyType.Public,  AsymmetricType.ECDSA);
-    public string UxmPublicKey  => GetKey(AsymmetricKeyNames.Uxm, KeyType.Public,  AsymmetricType.ECDSA);
+    public string GameXPrivateKey => GetKey(AsymmetricKeyNames.GameX, AsymmetricKeyType.Private, AsymmetricType.ECDSA);
+    public string GameXPublicKey  => GetKey(AsymmetricKeyNames.GameX, AsymmetricKeyType.Public,  AsymmetricType.ECDSA);
+    public string UxmPublicKey  => GetKey(AsymmetricKeyNames.Uxm, AsymmetricKeyType.Public,  AsymmetricType.ECDSA);
+    public string FastPayPublicKey => GetKey(AsymmetricKeyNames.FastPay, AsymmetricKeyType.Public,  AsymmetricType.ECDSA);
+    public string SlotPublicKey => GetKey(AsymmetricKeyNames.Slot, AsymmetricKeyType.Public,  AsymmetricType.ECDSA);
 
-    private Dictionary<string, string>? AsymmetricKeys => Get<Dictionary<string, string>?>(CacheKey);
-
-    private string GetKey(string name, KeyType keyType, string algorithm)
+    private string GetKey(string name, AsymmetricKeyType keyType, string algorithm)
     {
-        if (AsymmetricKeys is null)
-            Refresh();
+        if (DataSource is null)
+            return string.Empty;
 
         var key = BuildCacheKey(name, keyType, algorithm);
-        if (AsymmetricKeys?.TryGetValue(key, out var value) == true)
+        if (DataSource?.TryGetValue(key, out var value) == true)
             return value;
 
         throw new NotFoundException($"Asymmetric key not found: {key}");
     }
 
-    private static string BuildCacheKey(string name, KeyType keyType, string algorithm)
+    private static string BuildCacheKey(string name, AsymmetricKeyType keyType, string algorithm)
         => $"{name}_{keyType}_{algorithm}";
 }

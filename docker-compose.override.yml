@@ -1,7 +1,104 @@
 services:
-  game-x.api:
+  game-x.db:
+    container_name: game-x.db
+    restart: always
+    expose:
+      - "5432"
+    networks:
+      - dls-gamex
+    volumes:
+      - db-data:/var/lib/postgresql/data/
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=gamex_db
+
+  game-x.api:
+    container_name: game-x.api
     ports:
-      - "8080"
+      - 8010:8080
+    networks:
+      - dls-gamex
+    depends_on:
+      - game-x.db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+      - ConnectionStrings__HangfireConnection=${HANGFIREDB_CONNECTION_STRING}
+      - HangfireSettings__Key=${HANGFIRE_KEY}
+      - JwtSettings__DurationInMinutes=${JWT_EXPIRED_MINUTES}
+      - JwtSettings__Key=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__Provider=${JWT_PROVIDER}
+      - JwtSettings__Version=${JWT_VERSION}
+      - RefreshTokenSettings__DurationInMinutes=${REFRESHTOKEN_EXPIRED_MINUTES}
+      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
+      - UxmSettings__Host=${UXM_HOST}
+      - UxmSettings__TransactionExpireTimeSeconds=${UXM_TRANSACTION_EXPIRE_TIME_SECONDS}
+      - FastPaySettings__Host=${FASTPAY_HOST}
+      - GameProviderSettings__Host=${GAMEPROVIDER_HOST}
+      - GameProviderSettings__ApiToken=${GAMEPROVIDER_APITOKEN}
+      - GameProviderSettings__AesKey=${GAMEPROVIDER_AESKEY}
+      - GameProviderSettings__Iv=${GAMEPROVIDER_IV}
+      - GameProviderSettings__RevertProxyUrl=${GAMEPROVIDER_REVERTPROXYURL}
+      - BaccaratHmacSettings__Host=${GAMEBACCARAT_HOST}
+      - BaccaratHmacSettings__ClientId=${GAMEBACCARAT_CLIENT_ID}
+      - BaccaratHmacSettings__AppId=${GAMEBACCARAT_APP_ID}
+      - BaccaratHmacSettings__Secret=${GAMEBACCARAT_SECRET}
+      - BaccaratHmacSettings__AllowedTimestampSkewSeconds=${GAMEBACCARAT_ALLOWEDTIMESTAMPSKEWSECONDS}
+      - MinioSettings__InternalEndpoint=${Minio_InternalEndpoint}
+      - MinioSettings__PublicEndpoint=${Minio_PublicEndpoint}
+      - MinioSettings__AccessKey=${Minio_AccessKey}
+      - MinioSettings__SecretKey=${Minio_SecretKey}
+      - MinioSettings__UseSslPublic=${Minio_UseSslPublic}
+      - MinioSettings__UseSslInternal=${Minio_UseSslInternal}
+      - SrsSettings__Host=${Srs_Host}
+      - SrsSettings__StreamServer=${Srs_StreamServer}
+      - SrsSettings__ClientUrl=${Srs_ClientUrl}
+      - SrsSettings__VHost=${Srs_VHost}
+      - RecurringJobSettings__SyncRefreshTokenJob=${RecurringJob_SyncRefreshTokenJob}
+      - RecurringJobSettings__ExpiredTokenCleanupJob=${RecurringJob_ExpiredTokenCleanupJob}
+      - RecurringJobSettings__StreamTimeoutCheckerJob=${RecurringJob_StreamTimeoutCheckerJob}
+      - RecurringJobSettings__GameSessionTimeoutCheckerJob=${RecurringJob_GameSessionTimeoutCheckerJob}
+      - RecurringJobSettings__ExpiredTransactionJob=${RecurringJob_ExpiredTransactionJob}
+      - EngageLabSettings__BaseUrl=${EngageLab_BaseUrl}
+      - EngageLabSettings__ApiUser=${EngageLab_ApiUser}
+      - EngageLabSettings__ApiKey=${EngageLab_ApiKey}
+      - EngageLabSettings__From=${EngageLab_From}
+      - SpamProtectionSettings__MaxVerifyAttempts=${SpamProtection_MaxVerifyAttempts}
+      - SpamProtectionSettings__VerifyLockMinutes=${SpamProtection_VerifyLockMinutes}
+      - SpamProtectionSettings__VerifySlidingMinutes=${SpamProtection_VerifySlidingMinutes}
+      - SpamProtectionSettings__VerifyEmailCooldownSeconds=${SpamProtection_VerifyEmailCooldownSeconds}
+      - GameXSettings__MerchantNumber=${GAME_X_MERCHANT_NUMBER}
+      - GameXSettings__PaymentGatewaySecretKey=${GAME_X_PAYMENT_GATEWAY_SECRET_KEY}
+      - GameXSettings__PaymentGatewayApiKey=${GAME_X_PAYMENT_GATEWAY_API_KEY}
+      - GameXSettings__AesKey=${GAME_X_AESKEY}
+      - PaymentGatewaySettings__Host=${PAYMENT_GATEWAY_HOST}
+      - Etl998Settings__Host=${ETL998_HOST}
+      - Etl998Settings__AgentId=${ETL998_AGENT_ID}
+      - Etl998Settings__Md5Key=${ETL998_MD5_KEY}
+      - Etl998Settings__DesKey=${ETL998_DES_KEY}
+      - GameSlotSettings__Host=${GAMESLOT_HOST}
+      - GameSlotSettings__Code=${GAMESLOT_PLATFORMCODE}
+      - GameSlotSettings__LoginUrl=${GAMESLOT_LOGINURL}
+      - GameSlotSettings__Secret=${GAMESLOT_SECRET}
+      - AtgSettings__Host=${ATG_HOST}
+      - AtgSettings__XOperator=${ATG_X_OPERATOR}
+      - AtgSettings__XOperatorKey=${ATG_X_OPERATOR_KEY}
+      - AtgSettings__ProviderId=${ATG_PROVIDER_ID}
+      - HookTestSettings__DummySecretKey=${HOOK_TEST__DUMMY_SECRET_KEY}
+
+  game-x.seq:
+    container_name: game-x.seq
+    restart: always
+    ports:
+      - "8102:80"
+    networks:
+      - dls-gamex
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINUSERNAME=admin
+      - SEQ_FIRSTRUN_ADMINPASSWORD=admin1234
+    volumes:
+      - seq-data:/data

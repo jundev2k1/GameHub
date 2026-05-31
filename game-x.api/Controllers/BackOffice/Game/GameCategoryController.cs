@@ -1,0 +1,72 @@
+﻿using game_x.api.Common;
+using game_x.application.Common.Filters;
+using game_x.application.Features.Games.Admin.Commands.CreateGameCategory;
+using game_x.application.Features.Games.Admin.Commands.DeleteGameCategory;
+using game_x.application.Features.Games.Admin.Commands.UpdateGameCategory;
+using game_x.application.Features.Games.Admin.Commands.UpdateGameCategoryTranslations;
+using game_x.application.Features.Games.Admin.Queries.GetCategoriesByCriteria;
+using game_x.application.Features.Games.Admin.Queries.GetGameCategoryDetail;
+
+namespace game_x.api.Controllers.BackOffice.Game;
+
+[Route("api/back-office/game-categories")]
+public sealed class GameCategoryController : BaseApiController
+{
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet]
+    public async Task<IActionResult> GetGameCategoryListAsync([AsParameters] SearchCriteriaRequest parameters)
+    {
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var sorts = QueryConverter.ToSorts(parameters.Sorts);
+        var query = new GetCategoriesByCriteriaQuery(
+            filters,
+            sorts,
+            parameters.PageNumber ?? 1,
+            parameters.PageSize ?? 20);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetGameCategoryDetailAsync(Guid id)
+    {
+        var query = new GetGameCategoryDetailQuery(id);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost("{cateId:guid}/translations")]
+    public async Task<IActionResult> UpsertGameTranslationsAsync(
+        [FromRoute] Guid cateId,
+        [FromBody] UpdateGameCategoryTranslationsCommand command)
+    {
+        await Mediator.Send(command with { GameCateId = cateId });
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPost]
+    public async Task<IActionResult> CreateGameCategoryAsync(CreateGameCategoryCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Created);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateGameCategoryAsync(Guid id, UpdateGameCategoryCommand command)
+    {
+        await Mediator.Send(command with { Id = id });
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Updated);
+    }
+
+    [Authorize(Roles = AppRoles.Admin)]
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteGameCategoryAsync(Guid id)
+    {
+        await Mediator.Send(new DeleteGameCategoryCommand(id));
+        return ApiResponseFactory.NoContent(code: MessageCode.System.Deleted);
+    }
+}

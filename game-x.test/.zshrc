@@ -1,0 +1,1 @@
+alias dotnet-test="./dotnet-test.sh"

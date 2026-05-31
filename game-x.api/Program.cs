@@ -1,15 +1,13 @@
 using game_x.api;
-using game_x.api.Middleware;
 using game_x.application;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Infrastructure.Logger;
 using game_x.application.Contract.Infrastructure.Security;
-using game_x.domain.Identity;
+using game_x.domain.Entities;
 using game_x.infrastructure;
 using game_x.infrastructure.BackgroundJobs.Scheduling;
-using game_x.infrastructure.SignalR.Hubs;
 using game_x.persistence;
-using game_x.share.Settings;
-using Microsoft.AspNetCore.Authorization;
+using game_x.persistence.Seeds;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -17,7 +15,7 @@ using Serilog.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, services, loggerConfig) =>
+builder.Host.UseSerilog((context, _, loggerConfig) =>
 {
     loggerConfig
         .Filter.ByExcluding(Matching.WithProperty<string>("RequestPath", p => p.Contains("/healthz")))
@@ -27,70 +25,55 @@ builder.Host.UseSerilog((context, services, loggerConfig) =>
         .WriteTo.Console();
 });
 
-// Env
-builder.Services.Configure<EngageLabSettings>(builder.Configuration.GetSection("EngageLabSettings"));
-
 // Add services to the container.
-builder.Services.AddApiServices(builder.Configuration);
-builder.Services.AddSwaggerServices();
-builder.Services.AddApplicationServices();
-builder.Services.AddPersistenceServices(builder.Configuration);
-builder.Services.AddInfrastructureServicesServices(builder.Configuration);
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
-builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthGateMiddleware>();
+builder.Services
+    .AddApiServices(builder.Configuration, builder.Environment)
+    .AddApplicationServices()
+    .AddPersistenceServices(builder.Configuration)
+    .AddInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Game X");
-        options.RoutePrefix = string.Empty;
-    });
-}
-
-// Middlwware
-app.UseMiddleware<ExceptionMiddleware>();
-app.UseMiddleware<AuditSourceMiddleware>();
-
-// cores
-app.UseCors("AllowSpecificOrigin");
-
-// healthz
-app.MapHealthChecks("/healthz");
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.UseSerilogRequestLogging();
-
-// SignalR hub
-app.MapHub<AdminHub>(AdminHub.Path);
-app.MapHub<StoreHub>(StoreHub.Path);
-app.MapHub<ClientHub>(ClientHub.Path);
+app.UseApplicationPipeline();
 
 using var scope = app.Services.CreateScope();
 var serviceProvider = scope.ServiceProvider;
 
-// Hang fire
-HangfireRecurringJobRegistration.RegisterRecurringJobs(serviceProvider);
-
+// Seed data
 try
 {
     var context = serviceProvider.GetRequiredService<GameXContext>();
-
     await context.Database.MigrateAsync();
 
-    var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+    var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
     var asymmetricCryptoService = serviceProvider.GetRequiredService<IAsymmetricCryptoService>();
-    await Seed.SeedData(asymmetricCryptoService, userManager, context);
+
+    await SeedRunner.RunAsync(context, userManager, asymmetricCryptoService);
+    
+    var gameProviderCache = serviceProvider.GetRequiredService<IGameProviderCacheService>();
+    await gameProviderCache.RefreshGamePlatformListAsync();
+    await gameProviderCache.RefreshGameCategoryListAsync();
+    await gameProviderCache.RefreshGameTypeListAsync();
+    await gameProviderCache.RefreshGameTagListAsync();
+    await gameProviderCache.RefreshGameRecommendListAsync();
+    await gameProviderCache.RefreshGameListAsync();
+
+    var refreshTokenManager = serviceProvider.GetRequiredService<IRefreshTokenManagerCacheService>();
+    refreshTokenManager.InitRefreshTokens();
+
+    var liveStreamManager = serviceProvider.GetRequiredService<ILiveStreamManagerCacheService>();
+    await liveStreamManager.RefreshGiftCacheAsync();
+    await liveStreamManager.InitLiveStreamsAsync();
+
+    var appSettingCache = serviceProvider.GetRequiredService<IAppSettingCacheService>();
+    appSettingCache.RefreshCache();
+
+    var asymmetricKeyCache = serviceProvider.GetRequiredService<IAsymmetricKeyCacheService>();
+    await asymmetricKeyCache.RefreshAsync();
+
+    var navigationCache = serviceProvider.GetRequiredService<INavigationCacheService>();
+    await navigationCache.RefreshNavigationItemsAsync();
 }
 catch (Exception ex)
 {
@@ -98,5 +81,8 @@ catch (Exception ex)
     logger.LogError("An error occurred during migration", ex);
     throw;
 }
+
+// Hang fire
+HangfireRecurringJobRegistration.RegisterRecurringJobs(serviceProvider);
 
 app.Run();

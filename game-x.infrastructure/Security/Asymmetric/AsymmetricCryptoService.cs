@@ -3,6 +3,9 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
 using System.Security.Cryptography;
+using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace game_x.infrastructure.Security.Asymmetric;
 
@@ -18,12 +21,12 @@ public class AsymmetricCryptoService : IAsymmetricCryptoService
         return (publicKeyPem, privateKeyPem);
     }
 
-    private string ExportPublicKeyToPem(ECDsa ecdsa)
+    private static string ExportPublicKeyToPem(ECDsa ecdsa)
     {
         return ecdsa.ExportSubjectPublicKeyInfoPem();
     }
 
-    private string ExportPrivateKeyToPem(ECDsa ecdsa)
+    private static string ExportPrivateKeyToPem(ECDsa ecdsa)
     {
         return ecdsa.ExportPkcs8PrivateKeyPem();
     }
@@ -66,5 +69,52 @@ public class AsymmetricCryptoService : IAsymmetricCryptoService
         verifier.BlockUpdate(hash, 0, hash.Length);
 
         return verifier.VerifySignature(signature);
+    }
+
+    public string PaymentGatewaySign(string apiKey, object data)
+    {
+        var jsonPayload = JsonConvert.SerializeObject(data, new JsonSerializerSettings
+        {
+            ContractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            },
+            NullValueHandling = NullValueHandling.Ignore,
+            Formatting = Formatting.None
+        });
+
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(apiKey));
+        var signatureBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(jsonPayload));
+        return Convert.ToBase64String(signatureBytes);
+    }
+
+    public bool PaymentGatewayVerifySignature(string apiKey, object data, string receivedSignature)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(receivedSignature))
+            return false;
+
+        var jsonPayload = JsonConvert.SerializeObject(data, new JsonSerializerSettings
+        {
+            ContractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            },
+            NullValueHandling = NullValueHandling.Ignore,
+            Formatting = Formatting.None
+        });
+
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(apiKey));
+        var expectedBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(jsonPayload));
+
+        byte[] receivedBytes;
+        try
+        {
+            receivedBytes = Convert.FromBase64String(receivedSignature);
+        }
+        catch
+        {
+            return false;
+        }
+        return CryptographicOperations.FixedTimeEquals(expectedBytes, receivedBytes);
     }
 }

@@ -1,9 +1,10 @@
-﻿using game_x.application.Contract.Persistence.Repo;
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
 
 namespace game_x.persistence.Repo;
 
-public sealed class MediaFileRepo(GameXContext context) : IMediaFileRepo
+public sealed class MediaFileRepo(GameXContext context) : IMediaFileRepo, IRepository
 {
     public async Task<MediaFile> FindAsync(int id, CancellationToken ct = default)
     {
@@ -11,18 +12,6 @@ public sealed class MediaFileRepo(GameXContext context) : IMediaFileRepo
             .AsNoTracking()
             .FirstOrDefaultAsync(mf => mf.Id == id, ct)
             ?? throw new NotFoundException("Media file not found.");
-    }
-
-    public async Task<MediaFile> FindPassportAsync(string userId, CancellationToken ct = default)
-    {
-        return await context.MediaFiles
-            .AsNoTracking()
-            .Join(context.UserPassport.Where(up => up.AppUserId == userId),
-                mf => mf.Id,
-                up => up.PassportImageId,
-                (file, user) => file)
-            .FirstOrDefaultAsync(ct)
-            ?? throw new NotFoundException("Passport not found.");
     }
 
     public async Task<bool> IsExistAsync(int id, CancellationToken ct = default)

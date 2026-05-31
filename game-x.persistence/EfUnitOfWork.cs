@@ -33,8 +33,8 @@ public sealed class EfUnitOfWork(GameXContext dbContext) : IUnitOfWork
         await _tx.CommitAsync(ct);
         await _tx.DisposeAsync();
         _tx = null;
+        dbContext.IsDisableTimestamps = false;
     }
-
 
     public async Task RollbackAsync(CancellationToken ct = default)
     {
@@ -44,6 +44,7 @@ public sealed class EfUnitOfWork(GameXContext dbContext) : IUnitOfWork
         await _tx.DisposeAsync();
         _tx = null;
         dbContext.ChangeTracker.Clear();
+        dbContext.IsDisableTimestamps = false;
     }
 
     public async Task WithTransactionAsync(Func<Task> action, CancellationToken ct = default)
@@ -59,5 +60,15 @@ public sealed class EfUnitOfWork(GameXContext dbContext) : IUnitOfWork
             await RollbackAsync(ct);
             throw;
         }
+    }
+
+    public void ClearChangeTracking()
+    {
+        dbContext.ChangeTracker.Clear();
+    }
+
+    public void SetIsDisableTimeStamps(bool isDisable = false)
+    {
+        dbContext.IsDisableTimestamps = isDisable;
     }
 }

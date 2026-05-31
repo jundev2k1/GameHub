@@ -4,6 +4,6 @@ public enum NotificationSeverity : short
 {
     Info = 0,
     Success = 1,
-    Warning = 1,
-    Error = 2,
+    Warning = 2,
+    Error = 3,
 }

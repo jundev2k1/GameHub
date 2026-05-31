@@ -1,16 +1,15 @@
-using game_x.application.Common;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using game_x.application.Features.FiatCurrencies.Queries.GetFiatCurrencies;
 
 namespace game_x.api.Controllers.Common;
 
-[Authorize(Roles = $"{AppRoles.Root}, {AppRoles.Admin},{AppRoles.Staff},{AppRoles.User}")]
+[Authorize(Roles = $"{AppRoles.Root}, {AppRoles.Admin},{AppRoles.Cs},{AppRoles.User}")]
 [Route("api/common")]
-public class CurrencyCodeController : BaseApiController
+public sealed class CurrencyCodeController : BaseApiController
 {
     [HttpGet("currency-codes")]
-    public IActionResult GetCurrencyCode()
+    public async Task<IActionResult> GetCurrencyCodeAsync()
     {
-        return ApiResponseFactory.Ok(CurrencyCodeProvider.All());
+        var result = await Mediator.Send(new GetFiatCurrenciesQuery());
+        return ApiResponseFactory.Ok(result);
     }
 }

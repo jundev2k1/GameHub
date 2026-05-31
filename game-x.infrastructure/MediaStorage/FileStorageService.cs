@@ -1,7 +1,7 @@
 ﻿using game_x.application.Contract.Infrastructure.FileStorage;
 using game_x.application.Contract.Infrastructure.Logger;
-using game_x.share.Settings;
 using game_x.share.Extensions;
+using game_x.share.Settings;
 using Microsoft.Extensions.Options;
 using Minio;
 using Minio.DataModel;
@@ -28,21 +28,57 @@ public sealed class FileStorageService(
         MimeType mimeType,
         CancellationToken ct = default)
     {
+        if (!fileStream.CanSeek)
+        {
+            throw new InvalidOperationException(
+                "Stream length cannot be determined automatically. " +
+                "Use UploadFileAsync overload with explicit file size.");
+        }
+
+        await UploadFileAsync(
+            fileStream,
+            fileStream.Length,
+            bucketName,
+            objectName,
+            mimeType,
+            ct);
+    }
+    /// <summary>
+    /// Uploads a file stream to the specified bucket and object path
+    /// with explicit file size.
+    /// Recommended for Request.Body and non-seekable streams.
+    /// </summary>
+    public async Task UploadFileAsync(
+        Stream fileStream,
+        long fileSize,
+        BucketName bucketName,
+        ObjectName objectName,
+        MimeType mimeType,
+        CancellationToken ct = default)
+    {
         try
         {
-            await EnsureBucketExistsAsync(bucketName, ct);
+            await EnsureBucketExistsAsync(
+                bucketName,
+                ct);
 
             var putObjectArgs = new PutObjectArgs()
                 .WithBucket(bucketName.Value)
                 .WithObject(objectName.Value)
                 .WithStreamData(fileStream)
-                .WithContentType(mimeType.Value)
-                .WithObjectSize(fileStream.Length);
-            await client.PutObjectAsync(putObjectArgs, ct);
+                .WithObjectSize(fileSize)
+                .WithContentType(mimeType.Value);
+
+            await client.PutObjectAsync(
+                putObjectArgs,
+                ct);
         }
         catch (Exception ex)
         {
-            logger.LogError("UploadFileAsync failed: {Message}", ex.Message);
+            logger.LogError(
+                ex,
+                "UploadFileAsync failed");
+
             throw;
         }
     }
@@ -91,7 +127,7 @@ public sealed class FileStorageService(
         var deleteFiles = await GetAllFileNamesAsync(bucketName, prefix, ct);
         if (deleteFiles.Length == 0) return;
 
-        // Batch delete to avoid exceeding API limits
+        // Batch deletes it to avoid exceeding API limits
         foreach (var groupFiles in deleteFiles.Chunk(DefaultChunkSize))
         {
             var deleteObjects = groupFiles
@@ -109,7 +145,7 @@ public sealed class FileStorageService(
     public async Task<string> GenerateDownloadUrlAsync(
         BucketName bucketName,
         ObjectName objectName,
-        TimeSpan expiry,
+        TimeSpan? expiry = null,
         CancellationToken ct = default)
     {
         var urlClient = CreatePublicClient();
@@ -117,7 +153,7 @@ public sealed class FileStorageService(
         var args = new PresignedGetObjectArgs()
             .WithBucket(bucketName.Value)
             .WithObject(objectName.Value)
-            .WithExpiry((int)expiry.TotalSeconds);
+            .WithExpiry((int)(expiry ?? TimeSpan.FromMinutes(300)).TotalSeconds);
         var result = await urlClient.PresignedGetObjectAsync(args);
         return result;
     }
@@ -214,5 +250,64 @@ public sealed class FileStorageService(
         if (isExist) return;
 
         await client.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName.Value), ct);
+    }
+    
+    public async Task<PresignedUploadTicket> CreatePresignedPutAsync(
+        BucketName bucket,
+        ObjectName objectName,
+        MimeType mimeType,
+        int sizeBytes,
+        TimeSpan expiry,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            await EnsureBucketExistsAsync(bucket, ct);
+
+            // MinIO has a maximum limit of ~7 days
+            var seconds = (int)Math.Clamp(expiry.TotalSeconds, 1, 7 * 24 * 3600);
+
+            var args = new PresignedPutObjectArgs()
+                .WithBucket(bucket.Value)
+                .WithObject(objectName.Value)
+                .WithExpiry(seconds);
+
+            var url = await client.PresignedPutObjectAsync(args).ConfigureAwait(false);
+
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = mimeType.Value
+            };
+
+            return new PresignedUploadTicket(url, headers);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("CreatePresignedPutAsync failed: {Message}", ex.Message);
+            throw;
+        }
+    }
+
+    public async Task<StoredObjectInfo?> HeadObjectAsync(
+        BucketName bucketName,
+        ObjectName objectName,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var stat = await client.StatObjectAsync(new StatObjectArgs()
+                .WithBucket(bucketName.Value)
+                .WithObject(objectName.Value), ct).ConfigureAwait(false);
+
+            return new StoredObjectInfo(
+                ContentType: stat.ContentType ?? "application/octet-stream",
+                ContentLength: stat.Size,
+                ETag: stat.ETag
+            );
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 }

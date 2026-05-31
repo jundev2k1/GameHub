@@ -1,6 +1,0 @@
-@galaxy_pay.api_HostAddress = http://localhost:5112
-
-GET {{galaxy_pay.api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

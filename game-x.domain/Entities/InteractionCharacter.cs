@@ -1,0 +1,57 @@
+﻿namespace game_x.domain.Entities;
+
+public sealed class InteractionCharacter : BaseEntity<int>, IAuditable
+{
+    public Guid PublicId { get; private set; } = Guid.NewGuid();
+    public string Name { get; private set; } = string.Empty;
+    public string Description { get; private set; } = string.Empty;
+    public string Notes { get; private set; } = string.Empty;
+
+    public int DefaultPoseId { get; private set; }
+    public MediaFile DefaultPose { get; private set; } = default!;
+
+    public ICollection<InteractionCharacterPose> Poses { get; private set; } = [];
+
+    public static InteractionCharacter Create(
+        string name,
+        string desc,
+        string notes)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+
+        return new InteractionCharacter
+        {
+            Name = name.Trim(),
+            Description = desc.Trim(),
+            Notes = notes.Trim(),
+        };
+    }
+
+    public void Update(
+        string? name = null,
+        string? desc = null,
+        string? notes = null)
+    {
+        if (name is not null)
+            Name = name.Trim();
+
+        if (desc is not null)
+            Description = desc.Trim();
+
+        if (notes is not null)
+            Notes = notes.Trim();
+    }
+
+    public void SetDefaultPose(MediaFile defaultPose)
+    {
+        DefaultPose = defaultPose;
+    }
+
+    public void AddPose(InteractionCharacterPose pose)
+    {
+        if (Poses.Any(x => x.PublicId == pose.PublicId))
+            throw new ArgumentException($"Pose Id ({pose.PublicId}) already exists.");
+
+        Poses.Add(pose);
+    }
+}

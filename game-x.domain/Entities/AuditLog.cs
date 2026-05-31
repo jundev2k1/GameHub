@@ -6,8 +6,8 @@ public sealed class AuditLog : BaseEntity<int>
     public EntityName EntityName { get; private set; } = default!;
     public string EntityId { get; private set; } = string.Empty;
     public AuditAction Action { get; private set; }
-    public string? ChangedByUserId { get; private set; }
-    public AppUser? ChangedBy { get; private set; } = default!;
+    public string? ChangedById { get; private set; }
+    public User? ChangedBy { get; private set; } = default!;
     public AuditSource Source { get; private set; } = default!;
     public string? Changes { get; private set; }
     public string? SnapshotBefore { get; private set; }
@@ -36,7 +36,7 @@ public sealed class AuditLog : BaseEntity<int>
             EntityName = entityName,
             EntityId = entityId,
             Action = action,
-            ChangedByUserId = changedByUserId,
+            ChangedById = changedByUserId,
             Source = source,
             Changes = changes,
             SnapshotBefore = snapshotBefore,

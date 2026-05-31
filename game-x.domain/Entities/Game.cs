@@ -1,0 +1,171 @@
+﻿namespace game_x.domain.Entities;
+
+public sealed class Game : BaseEntity<int>, IAuditable
+{
+    public Guid PublicId { get; private set; } = Guid.CreateVersion7();
+    public string GameCode { get; private set; } = string.Empty;
+    public string Name { get; private set; } = string.Empty;
+    public int PlatformId { get; private set; }
+    public GamePlatform Platform { get; private set; } = default!;
+    public string Description { get; private set; } = string.Empty;
+    public string Note { get; private set; } = string.Empty;
+    public int? ThumbnailId { get; private set; }
+    public MediaFile? Thumbnail { get; private set; }
+    public int Priority { get; private set; }
+    public bool IsActive { get; private set; } = true;
+
+    public ICollection<GameTranslation> Translations { get; private set; } = [];
+    public ICollection<GameCategoryMapping> GameCategoryMappings { get; private set; } = [];
+    public ICollection<GameTypeMapping> GameTypeMappings { get; private set; } = [];
+    public ICollection<GameTagMapping> GameTagMappings { get; private set; } = [];
+    public ICollection<GameMedia> GameMedias { get; private set; } = [];
+
+    public static Game Create(string name, string gameCode, string desc, string note, int priority, int? thumbnailId = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        ArgumentException.ThrowIfNullOrWhiteSpace(gameCode, nameof(gameCode));
+
+        return new Game
+        {
+            GameCode = gameCode,
+            Name = name,
+            Description = desc,
+            Note = note,
+            Priority = priority,
+            ThumbnailId = thumbnailId,
+        };
+    }
+
+    public void UpsertTranslation(LanguageCode lang, string name, string description, string note)
+    {
+        var existing = Translations.FirstOrDefault(x => x.LanguageCode.Equals(lang));
+
+        if (existing is null)
+        {
+            var newTranslation = GameTranslation.Create(Id, lang, name, description, note);
+            Translations.Add(newTranslation);
+            return;
+        }
+
+        existing.Update(name, description, note);
+    }
+
+    public void UpsertMediaFiles(IEnumerable<GameMedia> medias)
+    {
+        foreach (var media in medias)
+        {
+            if (media.GameId != Id)
+                throw new ArgumentException("GameID does not match the current entity.");
+
+            var existing = GameMedias.FirstOrDefault(m => m.PublicId == media.PublicId);
+            if (existing is null)
+            {
+                GameMedias.Add(media);
+                continue;
+            }
+            else
+            {
+                existing.UpdateMediaInfo(
+                    media.Type,
+                    media.Category,
+                    media.Title,
+                    media.Note,
+                    media.Priority);
+                existing.UpdateFile(media.FileId);
+            }
+        }
+    }
+
+    public void UpdateGame(
+        string name,
+        string desc,
+        string note,
+        int priority,
+        bool isActive)
+    {
+        if (priority < 0)
+            throw new ArgumentException("Priority must be greater than or equal to 0.", nameof(priority));
+
+        Name = name;
+        Description = desc;
+        Note = note;
+        Priority = priority;
+        IsActive = isActive;
+    }
+
+    public void UpdateThumbnail(MediaFile thumbnail)
+    {
+        Thumbnail = thumbnail;
+    }
+
+    public void UpdatePlatform(GamePlatform platform)
+    {
+        ArgumentNullException.ThrowIfNull(platform, nameof(platform));
+
+        Platform = platform;
+        PlatformId = platform.Id;
+    }
+
+    public void AddCategory(GameCategory category)
+    {
+        ArgumentNullException.ThrowIfNull(category, nameof(category));
+
+        GameCategoryMappings ??= [];
+        if (GameCategoryMappings.Any(c => c.Category.PublicId == category.PublicId))
+            throw new InvalidOperationException($"Category with PublicId {category.PublicId} already exists in the game.");
+
+        var gameCategoryMapping = GameCategoryMapping.Create(Id, category.Id);
+        var hasPrimary = GameCategoryMappings.Any(c => c.IsPrimary);
+        if (!hasPrimary)
+            gameCategoryMapping.SetPrimary(true);
+
+        GameCategoryMappings.Add(gameCategoryMapping);
+    }
+
+    public void AddType(GameType type)
+    {
+        ArgumentNullException.ThrowIfNull(type, nameof(type));
+
+        GameTypeMappings ??= [];
+        if (GameTypeMappings.Any(t => t.Type.PublicId == type.PublicId))
+            throw new InvalidOperationException($"Type with PublicId {type.PublicId} already exists in the game.");
+
+        var gameTypeMapping = GameTypeMapping.Create(Id, type.Id);
+        var hasPrimary = GameTypeMappings.Any(c => c.IsPrimary);
+        if (!hasPrimary)
+            gameTypeMapping.SetPrimary(true);
+
+        GameTypeMappings.Add(gameTypeMapping);
+    }
+
+    public void AddTag(GameTag tag, bool isPrimary, int priority)
+    {
+        ArgumentNullException.ThrowIfNull(tag, nameof(tag));
+
+        GameTagMappings ??= [];
+        if (GameTagMappings.Any(t => t.Tag.PublicId == tag.PublicId))
+            throw new ArgumentException($"Tag {tag.Name} already exists in the game.");
+
+        GameTagMappings.Add(GameTagMapping.Create(Id, tag.Id, isPrimary, priority));
+    }
+
+    public void SetPrimaryTag(Guid tagId)
+    {
+        if (GameTagMappings.Any(t => t.Tag.PublicId == tagId))
+            throw new ArgumentException($"Tag with PublicId {tagId} does not exist in the game.");
+
+        foreach (var m in GameTagMappings!)
+        {
+            m.SetPrimary(m.Tag.PublicId == tagId);
+        }
+    }
+
+    public void RemoveTag(GameTag tag)
+    {
+        var mapping = GameTagMappings?.FirstOrDefault(t => t.Tag.PublicId == tag.PublicId);
+        if (mapping is not null)
+        {
+            GameTagMappings!.Remove(mapping);
+        }
+    }
+}

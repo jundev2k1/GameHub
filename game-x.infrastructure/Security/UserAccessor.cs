@@ -1,22 +1,35 @@
-﻿using game_x.application.Contract.Infrastructure.Security;
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Exceptions;
 using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace game_x.infrastructure.Security;
 
-public class UserAccessor(IHttpContextAccessor httpContextAccessor)
-    : IUserAccessor
+public sealed class UserAccessor(IHttpContextAccessor httpContextAccessor) : IUserAccessor, IServices
 {
+    public bool IsLoggedIn()
+    {
+        return httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
+    }
+
     public string GetUserId()
     {
         return httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException("No user found");
+            ?? throw new UnauthorizedException("No user found");
+    }
+
+    public string GetJwtId()
+    {
+        return httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Jti)
+            ?? throw new UnauthorizedException("No active user context");
     }
 
     public ClaimsPrincipal GetClaimsPrincipal()
     {
         return httpContextAccessor.HttpContext?.User
-            ?? throw new UnauthorizedAccessException("No active user context");
+            ?? throw new UnauthorizedException("No active user context");
     }
 
     public AppRole GetRoles()
@@ -26,5 +39,33 @@ public class UserAccessor(IHttpContextAccessor httpContextAccessor)
             .Select(r => r.Value)
             .ToList() ?? [];
         return AppRole.Of(roles);
+    }
+
+    public string GetIpAddress()
+    {
+        var ip = httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+        if (string.IsNullOrWhiteSpace(ip))
+            ip = httpContextAccessor.HttpContext?.Request?.Headers["X-Forwarded-For"].FirstOrDefault();
+        return ip ?? "unknown";
+    }
+
+    public string GetUserAgent()
+    {
+        return httpContextAccessor.HttpContext?.Request?.Headers.UserAgent.ToString() ?? "unknown";
+    }
+
+    public string GetDeviceInfo()
+    {
+        var userAgent = GetUserAgent();
+        if (userAgent.Contains("Mobile", StringComparison.OrdinalIgnoreCase)) return "Mobile";
+        if (userAgent.Contains("Windows", StringComparison.OrdinalIgnoreCase)) return "Windows PC";
+        if (userAgent.Contains("Macintosh", StringComparison.OrdinalIgnoreCase)) return "MacOS";
+        return "Other";
+    }
+
+    public string GetLanguage()
+    {
+        var lang = httpContextAccessor?.HttpContext?.Request?.Headers["Language"].FirstOrDefault() ?? string.Empty;
+        return LanguageCode.IsValid(lang) ? lang : string.Empty;
     }
 }

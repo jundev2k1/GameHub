@@ -8,6 +8,10 @@ public enum NotificationType : short
     Announcement = 3,
     Order = 4,
     User = 5,
-    Staff = 6,
-    Counter = 7,
+    Transaction = 6,
+    UserLedger = 7,
+    UserBalance = 8,
+    SocialLink = 9,
+    LiveStream = 10,
+    Mission = 11,
 }

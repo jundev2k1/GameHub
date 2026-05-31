@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "env", "env", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,9 +12,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A356077C-4AED-4FD2-8895-80866CA8D905}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gitlab", "gitlab", "{C7065D6C-E93D-4382-BB22-D62A7B575C29}"
-	ProjectSection(SolutionItems) = preProject
-		.gitlab-ci.yml = .gitlab-ci.yml
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{83C18B8C-86A1-4F8E-AFAE-6AC48EC51DC1}"
 EndProject
@@ -40,9 +37,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "game-x.share", "game-x.shar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{24FBDE9B-2DEA-43FA-9D60-F20C492D8E5F}"
 	ProjectSection(SolutionItems) = preProject
+		.gitlab-ci.yml = .gitlab-ci.yml
 		deploy\docker-compose.template.yml = deploy\docker-compose.template.yml
+		deploy_gamex.sh.template = deploy_gamex.sh.template
 		deploy\env.template = deploy\env.template
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D37ACD3F-D923-4611-A692-AD3C1DE10413}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "game-x.test", "game-x.test\game-x.test.csproj", "{A205C702-F2FE-41FE-86A8-5A7C8ACE272C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +81,10 @@ Global
 		{C5F61B51-8BAF-4C07-8691-581F304BD1C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5F61B51-8BAF-4C07-8691-581F304BD1C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5F61B51-8BAF-4C07-8691-581F304BD1C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A205C702-F2FE-41FE-86A8-5A7C8ACE272C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A205C702-F2FE-41FE-86A8-5A7C8ACE272C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A205C702-F2FE-41FE-86A8-5A7C8ACE272C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A205C702-F2FE-41FE-86A8-5A7C8ACE272C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,6 +101,7 @@ Global
 		{D8EF173B-FB3F-44C6-BED0-01B5EA2AE3A4} = {A356077C-4AED-4FD2-8895-80866CA8D905}
 		{C5F61B51-8BAF-4C07-8691-581F304BD1C6} = {D8EF173B-FB3F-44C6-BED0-01B5EA2AE3A4}
 		{24FBDE9B-2DEA-43FA-9D60-F20C492D8E5F} = {C7065D6C-E93D-4382-BB22-D62A7B575C29}
+		{A205C702-F2FE-41FE-86A8-5A7C8ACE272C} = {D37ACD3F-D923-4611-A692-AD3C1DE10413}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {34AA7853-1B29-4FA6-84EA-B074FFE47D17}

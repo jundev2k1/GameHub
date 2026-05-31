@@ -14,6 +14,14 @@ public static class StringExtension
     public static string ToStringOrEmpty(this object? input)
         => input?.ToString() ?? string.Empty;
 
+    public static string ToCamelCase(this object s)
+    {
+        var rawString = s.ToStringOrEmpty();
+        if (string.IsNullOrEmpty(rawString) || !char.IsUpper(rawString[0]))
+            return rawString;
+        return char.ToLower(rawString[0]) + rawString.Substring(1);
+    }
+
     public static string JoinToString(this IEnumerable<string> input, string separater = ",")
         => string.Join(separater, input);
     public static string JoinToString<T>(this IEnumerable<T> input, Func<T, string> callback, string separater)

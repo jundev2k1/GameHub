@@ -1,54 +1,32 @@
+using game_x.application.Common.Abstractions;
+using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Contract.Infrastructure.Caching;
 using game_x.application.Contract.Persistence.Repo;
 using game_x.application.Exceptions;
-using game_x.application.Features.AccountManagement.Dtos;
+using game_x.application.Features.Accounts.Dtos;
+using game_x.application.Features.Accounts.User.Dtos;
 using game_x.domain.Constants;
-using game_x.domain.Enum;
 using game_x.share.Extensions;
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 
 namespace game_x.persistence.Repo;
 
-public sealed class UserRepo(GameXContext context, UserManager<AppUser> userManager) : IUserRepo
+public sealed class UserRepo(
+    GameXContext context,
+    UserManager<User> userManager,
+    IFileManagerCacheService fileManagerCache) : IUserRepo, IRepository
 {
-    public async Task<UserStatisticsDto> GetUserStatisticsAsync(CancellationToken ct = default)
-    {
-        var userRoleId = await context.Roles
-            .Where(r => r.Name == AppRoles.User)
-            .Select(r => r.Id)
-            .FirstOrDefaultAsync(ct);
-
-        var userIds = await context.UserRoles
-            .Where(ur => ur.RoleId == userRoleId)
-            .Select(ur => ur.UserId)
-            .ToListAsync(ct);
-
-        var query = context.AppUser
-            .AsNoTracking()
-            .Where(u => userIds.Contains(u.Id));
-
-        var totalUsers = await query.CountAsync(ct);
-        var activeUsers = await query.CountAsync(u => u.Status == AppUserStatus.Active, ct);
-        var inactiveUsers = await query.CountAsync(u => u.Status == AppUserStatus.Inactive, ct);
-        var newUsers = await query.CountAsync(u => u.IsNew, ct);
-
-        return new UserStatisticsDto
-        {
-            AllUser = totalUsers,
-            ActiveUser = activeUsers,
-            InactiveUser = inactiveUsers,
-            NewUser = newUsers
-        };
-    }
-
-    public async Task<AppUser[]> GetUserByRole(string roleName, CancellationToken ct = default)
+    public async Task<User[]> GetUserByRole(string roleName, CancellationToken ct = default)
     {
         var result = await userManager.GetUsersInRoleAsync(roleName);
         return [.. result];
     }
 
-    public async Task<AppUser> GetUserByIdAsync(string userId, CancellationToken ct = default)
+    public async Task<User> GetUserByIdWithTrackingAsync(string userId, CancellationToken ct = default)
     {
-        var targetUser = await userManager.FindByIdAsync(userId)
+        var targetUser = await context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
         var (isActive, errorCode) = targetUser.CheckValidUser();
@@ -57,7 +35,28 @@ public sealed class UserRepo(GameXContext context, UserManager<AppUser> userMana
         return targetUser;
     }
 
-    public async Task<AppUser> GetUserByEmailAsync(string email, CancellationToken ct = default)
+    public async Task<User> GetUserByIdAsync(string userId, CancellationToken ct = default)
+    {
+        var targetUser = await context.Users
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(u => u.UserKyc)
+            .Include(u => u.UserBankAccounts)
+            .ThenInclude(ba => ba.FiatCurrency)
+            .Include(u => u.UserExtend)
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .Include(u => u.Avatar)
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+
+        var (isActive, errorCode) = targetUser.CheckValidUser();
+        if (!isActive) throw new BadRequestException(errorCode!);
+
+        return targetUser;
+    }
+
+    public async Task<User> GetUserByEmailAsync(string email, CancellationToken ct = default)
     {
         var targetUser = await userManager.FindByEmailAsync(email)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
@@ -68,48 +67,433 @@ public sealed class UserRepo(GameXContext context, UserManager<AppUser> userMana
         return targetUser;
     }
 
-    public async Task<AppUser[]> GetAdminUsers(CancellationToken ct = default)
+    public async Task<User[]> GetAdminUsers(CancellationToken ct = default)
     {
         var users = await userManager.GetUsersInRoleAsync(AppRoles.Admin);
         return [.. users];
     }
 
+    public async Task<User> GetAdminById(string userId, CancellationToken ct = default)
+    {
+        return await context.AppUsers
+            .AsNoTracking()
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.Id == userId && u.Status == UserStatus.Active, ct)
+            ?? throw new NotFoundException(nameof(userId), userId);
+    }
+
+    public async Task<PaginationResult<User>> GetCsAdminByCriteria(
+        Func<IQueryable<User>, IQueryable<User>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.AppUsers
+            .AsNoTracking()
+            .Where(u => u.UserRoles.Any(x => x.Role.Name == AppRoles.Cs))
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var totalPageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
+        var result = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToArrayAsync(ct);
+
+        return new PaginationResult<User>(
+            result,
+            totalCount,
+            totalPageCount,
+            page,
+            pageSize);
+    }
+
+    public async Task<UserDetailDto> GetUserDetailAsync(string userId, CancellationToken ct = default)
+    {
+        var result = await context.Users
+            .AsNoTracking()
+            .Include(u => u.UserBalances)
+            .ThenInclude(ub => ub.CryptoToken)
+            .Where(u => u.Id == userId && !u.IsDeleted)
+            .ProjectToType<UserDetailDto>()
+            .FirstOrDefaultAsync(ct)
+            ?? throw new NotFoundException(nameof(userId), userId);
+
+        if (result.AvatarId.HasValue)
+        {
+            var avatar = await fileManagerCache.GetFileInfo(result.AvatarId.Value, ct);
+            result.AvatarUrl = avatar?.Url;
+        }
+
+        return result;
+    }
+
+    public async Task<UserSummaryForAdmin[]> GetUserWithSuggestionsAsync(
+        string keyword,
+        bool? isKycConfirmed,
+        bool? isBankAccountConfirmed,
+        int size = 10,
+        string[]? roles = null,
+        CancellationToken ct = default)
+    {
+        var query = context.Users
+            .AsNoTracking()
+            .ProjectToType<UserSummaryForAdmin>()
+            .Where(u => u.Status == UserStatus.Active)
+            .AsQueryable();
+        // Set condition to search with user roles
+        if (roles is not null && roles.Length > 0)
+            query = query.Where(u => u.Roles.Any(r => r != AppRoles.Root && roles.Contains(r)));
+        else
+            query = query.Where(u => u.Roles.Any(r => r != AppRoles.Admin && r != AppRoles.Root));
+
+        // Search with keyword
+        if (keyword.IsNotNullOrEmpty())
+            query = query.Where(u => u.Nickname.ToLower().Contains(keyword.ToLower())
+                || u.Email.ToLower().Contains(keyword.ToLower()));
+
+        // Search with kyc or bank account confirmed status
+        var isUser = roles != null && roles.Contains(AppRoles.User);
+        if (isUser && isKycConfirmed != null)
+            query = query.Where(u => u.IsKycConfirmed == isKycConfirmed);
+        if (isUser && isBankAccountConfirmed != null)
+            query = query.Where(u => u.IsBankAccountConfirmed == isBankAccountConfirmed);
+
+        var users = await query
+            .Take(size)
+            .ToArrayAsync(ct);
+
+        var mappingTasks = users.Select(async user =>
+        {
+            if (!user.AvatarId.HasValue) return user;
+
+            var avatar = await fileManagerCache.GetFileInfo(user.AvatarId.Value, ct);
+            if (avatar != null) user.Avatar = avatar.Url;
+
+            return user;
+        });
+
+        return await Task.WhenAll(mappingTasks);
+    }
+
+    public async Task<UserExtend> GetUserExtendAsync(string userId, CancellationToken ct = default)
+    {
+        return await context.UserExtends
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ue => ue.Id == userId && !ue.User.IsDeleted, ct)
+            ?? throw new NotFoundException(nameof(userId), userId);
+    }
+
+    public async Task<PaginationResult<UserKyc>> GetUserKycByCriteria(
+        Func<IQueryable<UserKyc>, IQueryable<UserKyc>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.UserKycs
+            .AsNoTracking()
+            .Include(uk => uk.User)
+            .Include(uk => uk.ReviewedBy)
+            .Include(uk => uk.FrontImage)
+            .Include(uk => uk.BackImage)
+            .Where(uk => !uk.User.IsDeleted)
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var totalPageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
+
+        var result = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToArrayAsync(ct);
+        return new PaginationResult<UserKyc>(
+            items: result,
+            totalItems: totalCount,
+            totalPages: totalPageCount,
+            pageIndex: page,
+            pageSize: pageSize);
+    }
+
+    public async Task<UserKyc> GetKycProfileAsync(string userId, CancellationToken ct = default)
+    {
+        return await context.UserKycs
+            .AsNoTracking()
+            .Include(uk => uk.User)
+            .Include(uk => uk.ReviewedBy)
+            .Include(uk => uk.FrontImage)
+            .Include(uk => uk.BackImage)
+            .FirstOrDefaultAsync(u => u.UserId == userId && !u.User.IsDeleted, ct)
+            ?? throw new BadRequestException(MessageCode.User.KycInvalid);
+    }
+
+    public async Task<PaginationResult<UserBankAccount>> GetUserBankAccountByCriteria(
+        Func<IQueryable<UserBankAccount>, IQueryable<UserBankAccount>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = context.UserBankAccounts
+            .AsNoTracking()
+            .Include(uba => uba.User)
+            .Include(uba => uba.FiatCurrency)
+            .Include(uba => uba.ReviewedBy)
+            .Where(uba => !uba.User.IsDeleted)
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var totalPageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
+        var result = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToArrayAsync(ct);
+
+        return new PaginationResult<UserBankAccount>(
+            items: result,
+            totalItems: totalCount,
+            totalPages: totalPageCount,
+            pageIndex: page,
+            pageSize: pageSize);
+    }
+
+    public async Task<(KycStatus Status, string? RejectionReason)> GetKycStatusAsync(string userId, CancellationToken ct = default)
+    {
+        var profile = await context.UserKycs
+            .AsNoTracking()
+            .Where(u => u.UserId == userId && !u.User.IsDeleted)
+            .Select(u => Tuple.Create(u.Status, u.RejectionReason))
+            .FirstOrDefaultAsync(ct);
+        return profile != null
+            ? (profile.Item1, profile.Item2)
+            : (KycStatus.NotSubmitted, null);
+    }
+
+    public async Task<VerificationStatusDto[]> GetVerificationStatusList(string userId, CancellationToken ct = default)
+    {
+        var user = await context.Users
+            .AsNoTracking()
+            .Include(u => u.UserKyc)
+            .Include(u => u.UserBankAccounts)
+            .ThenInclude(uba => uba.FiatCurrency)
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+        var supportedCurrencies = await context.FiatCurrencies
+            .AsNoTracking()
+            .Where(fc => fc.IsActive)
+            .ToListAsync(ct);
+
+        var kycStatus = user.UserKyc != null
+            ? user.UserKyc.Adapt<VerificationStatusDto>()
+            : new VerificationStatusDto
+            {
+                Type = VerificationStatusType.Kyc,
+                IsVerified = false,
+            };
+
+        var bankAccountStatuses = supportedCurrencies
+            .GroupJoin(
+                user.UserBankAccounts,
+                fc => fc.Id,
+                uba => uba.FiatCurrency.Id,
+                (fc, ubas) =>
+                {
+                    var uba = ubas.FirstOrDefault();
+                    if (uba != null) return uba.Adapt<VerificationStatusDto>();
+
+                    var defaultValue = new VerificationStatusDto
+                    {
+                        CurrencyCode = fc.Code.Value,
+                        Type = VerificationStatusType.BankAccount,
+                        IsVerified = false,
+                    };
+                    return defaultValue;
+                })
+            .ToArray();
+        return [kycStatus, .. bankAccountStatuses];
+    }
+    public async Task<PaginationResult<UserListItemDto>> GetUserByCriteriaAsync(
+        Func<IQueryable<UserListItemDto>, IQueryable<UserListItemDto>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = userManager.Users
+            .AsNoTracking()
+            .Where(u => !u.IsDeleted && u.UserRoles.Any(ur => ur.Role.NormalizedName == AppRoles.User.ToUpper()))
+            .Select(u => new UserListItemDto
+            {
+                Id = u.Id,
+                MemberNumber = u.MemberNumber,
+                Nickname = u.Nickname,
+                UserName = u.UserName!,
+                Email = u.Email!,
+                Status = u.Status,
+                CountryCode = u.CountryCode,
+                EmailConfirmed = u.EmailConfirmed,
+                Balance = u.UserBalances.Sum(ub => ub.Amount),
+                FrozenBalance = u.UserBalances.Sum(ub => ub.FrozenAmount),
+                GamePoint = context.GamePlatformBalances.Where(gpb => gpb.UserId == u.Id).Sum(gpb => gpb.AvailableBalance),
+                LockedGamePoint = context.GamePlatformBalances.Where(gpb => gpb.UserId == u.Id).Sum(gpb => gpb.LockedBalance),
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt
+            })
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<UserListItemDto>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
+    public async Task<PaginationResult<TalentListItemDto>> GetTalentByCriteriaAsync(
+        Func<IQueryable<TalentListItemDto>, IQueryable<TalentListItemDto>>? queryBuilder = null,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var query = userManager.Users
+            .AsNoTracking()
+            .Where(u => !u.IsDeleted && u.UserRoles.Any(ur => ur.Role.NormalizedName == AppRoles.Talent.ToUpper()))
+            .Select(u => new TalentListItemDto
+            {
+                Id = u.Id,
+                MemberNumber = u.MemberNumber,
+                Nickname = u.Nickname,
+                UserName = u.UserName!,
+                Email = u.Email!,
+                Status = u.Status,
+                CountryCode = u.CountryCode,
+                EmailConfirmed = u.EmailConfirmed,
+                Balance = u.TalentWallet != null ? u.TalentWallet.Balance : 0,
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt
+            })
+            .AsQueryable();
+
+        if (queryBuilder != null)
+            query = queryBuilder(query);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new PaginationResult<TalentListItemDto>(
+            items,
+            totalCount,
+            (int)Math.Ceiling((decimal)totalCount / pageSize),
+            page,
+            pageSize);
+    }
+
+    public async Task<UserExtend?> GetUserExtendByAccountAsync(Guid platformId, string account, CancellationToken ct = default)
+    {
+        if (platformId == GameConstants.PLATFORM_ID_GAMEBACCARAT)
+            return await context.UserExtends.AsNoTracking().FirstOrDefaultAsync(usrex => usrex.GameBaccaratAccount == account, ct);
+
+        if (platformId == GameConstants.PLATFORM_ID_G598)
+            return await context.UserExtends.AsNoTracking().FirstOrDefaultAsync(usrex => usrex.GameProviderAccount == account, ct);
+
+        return null;
+    }
+
+    public async Task<bool> IsExistUserIdAsync(string userId, CancellationToken ct = default)
+        => await userManager.Users.AnyAsync(u => u.Id == userId && !u.IsDeleted, ct);
+
     public async Task<bool> IsExistEmailAsync(string email, CancellationToken ct = default)
-        => await userManager.Users.AnyAsync(u => u.Email == email && !u.IsDeleted, ct);
+        => await userManager.Users.AnyAsync(u => u.Email != null && u.Email.ToLower() == email.ToLower() && !u.IsDeleted, ct);
+
+    public async Task<bool> IsExistUsernameAsync(string username, CancellationToken ct = default)
+        => await userManager.Users.AnyAsync(u => u.UserName != null && u.UserName.ToLower() == username.ToLower() && !u.IsDeleted, ct);
 
     public async Task<bool> IsExistPhoneNumberAsync(string phoneNumber, CancellationToken ct = default)
         => await userManager.Users.AnyAsync(u => u.PhoneNumber == phoneNumber && !u.IsDeleted, ct);
 
-    public async Task AddUserAsync(AppUser user, string rawPassword, AppRole role, CancellationToken ct = default)
+    public async Task<bool> IsExistNicknameAsync(string nickname, CancellationToken ct = default)
+        => await userManager.Users.AnyAsync(u => (u.Nickname.ToLower() == nickname.ToLower()) && !u.IsDeleted, ct);
+
+    public async Task<bool> IsExistedMemberNumberAsync(string memberNumber, CancellationToken ct = default)
+    {
+        return await userManager.Users.AnyAsync(x => x.MemberNumber == memberNumber, ct);
+    }
+    
+    public async Task AddUserAsync(User user, string rawPassword, AppRole role, CancellationToken ct = default)
     {
         var userResult = await userManager.CreateAsync(user, rawPassword);
         if (!userResult.Succeeded)
         {
-            var errors = userResult.Errors
-                .Select(e => e.Description)
-                .JoinToString(", ");
-            throw new BadRequestException($"Failed to add user: {errors}");
+            var userError = userResult.Errors.Select(e => e.Description).JoinToString(", ");
+            throw new BadRequestException($"Failed to add user: {userError}");
         }
 
-        foreach (var roleName in role.Items)
-        {
-            var roleResult = await userManager.AddToRoleAsync(user, roleName);
-            if (!roleResult.Succeeded)
-            {
-                var errors = roleResult.Errors
-                    .Select(e => e.Description)
-                    .JoinToString(", ");
-                throw new BadRequestException($"Failed to add user to role '{roleName}': {errors}");
-            }
-        }
+        var roleResult = await userManager.AddToRolesAsync(user, role.Items);
+        if (roleResult.Succeeded) return;
+
+        // Rollback and throw the error
+        await userManager.DeleteAsync(user);
+        var roleError = roleResult.Errors.Select(e => e.Description).JoinToString(", ");
+        throw new BadRequestException($"Failed to add user to role: {roleError}");
     }
 
-    public async Task UpdateAsync(string userId, Action<AppUser> updateAction, CancellationToken ct = default)
+    public async Task UpdateAsync(string userId, Action<User> updateAction, CancellationToken ct = default)
     {
-        var targetUser = await context.AppUser
+        var targetUser = await context.AppUsers
+            .Include(u => u.UserKyc)
+            .Include(u => u.UserExtend)
+            .Include(u => u.UserBankAccounts)
+            .ThenInclude(uba => uba.FiatCurrency)
             .FirstOrDefaultAsync(user => user.Id == userId, ct)
             ?? throw new NotFoundException(MessageCode.User.UserNotFound);
 
-        updateAction?.Invoke(targetUser);
+        updateAction.Invoke(targetUser);
+    }
+
+    public async Task UpdateByEmailAsync(string email, Action<User> updateAction, CancellationToken ct = default)
+    {
+        var targetUser = await userManager.FindByEmailAsync(email)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+
+        updateAction.Invoke(targetUser);
+    }
+
+    public async Task UpdateKycAsync(string userId, Action<UserKyc> updateAction, CancellationToken ct = default)
+    {
+        var targetKyc = await context.UserKycs
+            .Include(uk => uk.FrontImage)
+            .Include(uk => uk.BackImage)
+            .FirstOrDefaultAsync(uk => uk.UserId == userId && !uk.User.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+
+        updateAction.Invoke(targetKyc);
+    }
+
+    public async Task UpdateUserExtendAsync(string userId, Func<UserExtend, Task> updateAction, CancellationToken ct = default)
+    {
+        var targetKyc = await context.UserExtends
+            .Include(usrex => usrex.User)
+            .FirstOrDefaultAsync(usrex => usrex.Id == userId && !usrex.User.IsDeleted, ct)
+            ?? throw new NotFoundException(MessageCode.User.UserNotFound);
+
+        await updateAction.Invoke(targetKyc);
     }
 }

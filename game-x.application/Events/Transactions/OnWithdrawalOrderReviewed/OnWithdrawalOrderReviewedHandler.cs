@@ -1,0 +1,72 @@
+using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Services.Statistics.Admin;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
+using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.Account.OnUserBalanceUpdated;
+using game_x.application.Features.Transactions.Dtos;
+using game_x.share.Extensions;
+using System.Text.Json;
+
+namespace game_x.application.Events.Transactions.OnWithdrawalOrderReviewed;
+
+public sealed class OnWithdrawalOrderReviewedHandler(
+    IUnitOfWork unitOfWork,
+    INotificationRepo notificationRepo,
+    IAdminStatistics adminStatistics,
+    IClientHubService clientHubService,
+    IAdminHubService adminHubService,
+    ICsAdminHubService csAdminHubService,
+    IApplicationEventDispatcher eventDispatcher,
+    IAppLogger<OnWithdrawalOrderReviewedHandler> logger) : IApplicationEventHandler<OnWithdrawalOrderReviewedEvent>
+{
+    public async Task Handle(OnWithdrawalOrderReviewedEvent @event, CancellationToken ct = default)
+    {
+        var targetTransaction = @event.Transaction;
+        await unitOfWork.WithTransactionAsync(async () =>
+        {
+            await SendToMemberAsync(targetTransaction, ct);
+        }, ct);
+    }
+
+    private async Task SendToMemberAsync(TransactionInternalDto transaction, CancellationToken ct)
+    {
+        try
+        {
+            var notification = Notification.Create(
+                NotificationMessageKey.Transaction_Reviewed,
+                transaction.UserId,
+                NotificationType.Transaction,
+                NotificationSeverity.Success,
+                JsonSerializer.Serialize(transaction.Adapt<TransactionNotificationDto>()));
+            await notificationRepo.AddNotificationAsync(notification, ct);
+
+            await clientHubService.SendNotificationToMemberAsync(
+                transaction.UserId,
+                notification.Adapt<NotificationDto>());
+
+            await clientHubService.SendTransactionToMemberAsync(
+                transaction.UserId,
+                transaction.Adapt<ClientTransactionDto>());
+
+            var (withdrawalCount, _, _) = await adminStatistics.GetUnderReviewStatisticsAsync(ct);
+            var orderReviewedDto = new AdminOrderReviewedDto
+            {
+                Id = transaction.Id,
+                Status = transaction.Status.ToCamelCase(),
+                UnderReviewCount = withdrawalCount,
+            };
+            await adminHubService.NotifyOrderTxReviewedToAdminAsync(orderReviewedDto);
+            await csAdminHubService.NotifyOrderTxReviewedToOneAsync(orderReviewedDto);
+
+            await eventDispatcher.Publish(new OnUserBalanceUpdatedEvent(transaction.UserId), ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to envoke signals to members", ex.Message);
+            await unitOfWork.RollbackAsync(ct);
+        }
+    }
+}

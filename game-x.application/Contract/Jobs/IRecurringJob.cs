@@ -3,7 +3,7 @@
 public interface IRecurringJob
 {
     string JobId { get; }
-    string CronExpression { get; }
+    string? CronExpression { get; }
     bool IsInit { get; }
 
     Task ExecuteAsync(CancellationToken cancellationToken);

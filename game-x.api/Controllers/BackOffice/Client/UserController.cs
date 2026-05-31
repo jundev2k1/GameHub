@@ -1,0 +1,119 @@
+using game_x.api.Common;
+using game_x.api.Dtos;
+using game_x.application.Common.Filters;
+using game_x.application.Features.Accounts.Admin.Queries.GetAllActiveTokensByAdmin;
+using game_x.application.Features.Accounts.Admin.Queries.GetUserCriteriaByAdmin;
+using game_x.application.Features.Accounts.Admin.Queries.GetUserDetailByAdmin;
+using game_x.application.Features.Accounts.User.Commands.RevokeToken;
+using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountByCriteria;
+using game_x.application.Features.BankAccountVerifications.Queries.GetBankAccountDetail;
+using game_x.application.Features.Kyc.Queries.GetKycByCriteria;
+using game_x.application.Features.Kyc.Queries.GetKycProfile;
+
+namespace game_x.api.Controllers.BackOffice.Client;
+
+[Route("api/back-office/users")]
+public sealed class UserController : BaseApiController
+{
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("{userId}")]
+    public async Task<IActionResult> GetUserDetailAsync(string userId)
+    {
+        var result = await Mediator.Send(new GetUserDetailByAdminQuery(userId));
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet]
+    public async Task<IActionResult> GetUserByCriteriaAsync([AsParameters] SearchCriteriaRequest parameters)
+    {
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword);
+        var sorts = QueryConverter.ToSorts(parameters.Sorts);
+        var query = new GetUserCriteriaByAdminQuery(
+            filters,
+            sorts,
+            parameters.PageNumber,
+            parameters.PageSize);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("kycs")]
+    public async Task<IActionResult> GetUserKycByCriteriaAsync([AsParameters] GetKycsRequest parameters)
+    {
+        var paramExtends = new Dictionary<string, string>();
+        if (parameters.Statuses.IsNotNullOrEmpty())
+            paramExtends.Add("statuses", parameters.Statuses);
+
+        var filters = QueryConverter.ToFilters(parameters.Filters, parameters.Keyword, paramExtends);
+        var sorts = QueryConverter.ToSorts(parameters.Sorts);
+        var query = new GetKycByCriteriaQuery(
+            filters,
+            sorts,
+            parameters.PageNumber,
+            parameters.PageSize);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("kycs/{userId}")]
+    public async Task<IActionResult> GetUserKycDetailAsync(string userId)
+    {
+        var query = new GetKycProfileQuery(userId);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("bank-accounts")]
+    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync([AsParameters] GetBankAccountListRequest parameters)
+    {
+        var filterExtends = new Dictionary<string, string>();
+        if (parameters.CurrencyCode.IsNotNullOrEmpty())
+            filterExtends.Add("currencies", parameters.CurrencyCode);
+        if (parameters.Statuses.IsNotNullOrEmpty())
+            filterExtends.Add("statuses", parameters.Statuses);
+
+        var filters = QueryConverter.ToFilters(
+            parameters.Filters,
+            parameters.Keyword,
+            @params: filterExtends);
+        var sorts = QueryConverter.ToSorts(parameters.Sorts);
+        var query = new GetBankAccountByCriteriaQuery(
+            filters,
+            sorts,
+            parameters.PageNumber,
+            parameters.PageSize);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("bank-accounts/{bankAccountId:guid}")]
+    public async Task<IActionResult> GetUserBankAccountByCriteriaAsync(Guid bankAccountId)
+    {
+        var query = new GetBankAccountDetailQuery(bankAccountId);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpGet("{userId}/tokens")]
+    public async Task<IActionResult> GetActiveTokensAsync(string userId)
+    {
+        var query = new GetUserActiveTokensByAdminQuery(userId);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpDelete("{userId}/tokens/{tokenId}")]
+    public async Task<IActionResult> RevokeTokenAsync(string userId, Guid tokenId)
+    {
+        var command = new RevokeTokenCommand(userId, tokenId);
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+}

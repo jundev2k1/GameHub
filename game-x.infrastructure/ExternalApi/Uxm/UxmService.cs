@@ -1,191 +1,147 @@
-﻿using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 using game_x.application.Contract.Infrastructure.Logger;
+using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Exceptions;
+using game_x.share.ExternalApi.Base;
 using game_x.share.ExternalApi.Uxm.Dtos;
+using game_x.share.ExternalApi.Uxm.Dtos.ApiRequests.Deposit;
+using game_x.share.ExternalApi.Uxm.Dtos.ApiRequests.Withdrawal;
+using game_x.share.ExternalApi.Uxm.Enums;
+using game_x.share.Helper;
+using Refit;
 
 namespace game_x.infrastructure.ExternalApi.Uxm;
 
-public sealed class UxmService(IAppLogger<UxmService> logger, IUxmApi uxmApi) : IUxmService
+public sealed class UxmService(
+    IAppLogger<UxmService> logger,
+    IUxmApi uxmApi,
+    IAsymmetricKeyCacheService asymmetricKeyCache,
+    IAppSettingCacheService appSettingCache,
+    IAsymmetricCryptoService asymmetricCrypto) : IUxmService
 {
-    public async Task<SecureResponse<CreateOrderBuyResponseData>> CreateProxyBuyOrderAsync(
-        SecureRequest<CreateOrderBuyRequestData> data)
+    private static readonly int[] InsufficientErrorCodes =
+    [
+        (int)UxmErrorCode.InsufficientMerchantBalance,
+        (int)UxmErrorCode.InsufficientWalletBalance
+    ];
+
+    public async Task<UxmWithdrawalResponse> WithdrawalAsync(
+        decimal amount,
+        string orderNumber,
+        string to,
+        string? remark)
     {
+        var payload = new UxmWithdrawalRequest(
+            appSettingCache.UxmMerchantNumber,
+            amount,
+            orderNumber,
+            to,
+            remark);
+        logger.LogInformation($@"
+            Send withdrawal request to UXM:
+            MerchantNumber={payload.MerchantNumber},
+            To = {payload.To},
+            Amount = {payload.Amount},
+            OrderNumber = {payload.OrderNumber}");
+
         try
         {
-            logger.LogInformation(
-                $"Create order request: MerchantOrderId={data.Data.MerchantOrderId}, Amount={data.Data.FiatAmount}");
-
-            var response = await uxmApi.CreateProxyBuyOrderAsync(data);
-            if (!response.IsSuccessStatusCode || response.Content == null)
+            var request = new SecureRequest<UxmWithdrawalRequest>
             {
-                logger.LogError($"Response failed: Status={response.StatusCode}");
-                throw new ExternalServiceException();
-            }
-
-            logger.LogInformation($"Order created successfully: OrderUid={response.Content.Data.OrderUid}");
-            return response.Content;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex.Message);
-            throw;
-        }
-    }
-
-    public async Task<SecureResponse<CreateOrderSellResponseData>> CreateProxySellOrderAsync(
-        SecureRequest<CreateOrderSellRequestData> data)
-    {
-        try
-        {
-            logger.LogInformation(
-                $"Create order request: MerchantOrderId={data.Data.MerchantOrderId}, Amount={data.Data.FiatAmount}");
-
-            var response = await uxmApi.CreateProxySellOrderAsync(data);
-            if (!response.IsSuccessStatusCode || response.Content == null)
-            {
-                logger.LogError($"Response failed: Status={response.StatusCode}");
-                throw new ExternalServiceException();
-            }
-
-            logger.LogInformation($"Order created successfully: OrderUid={response.Content.Data.OrderUid}");
-            return response.Content;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex.Message);
-            throw;
-        }
-    }
-
-    public async Task<CreateBuyOrderV2Response> CreateProxyBuyOrderV2Async(CreateBuyOrderV2Request data)
-    {
-        try
-        {
-            logger.LogInformation(
-                $"Create order request: MerchantOrderId={data.Data.MerchantOrderId}, Amount={data.Data.Amount}");
-
-            var response = await uxmApi.CreateProxyBuyOrderV2Async(data.Signature, data.Data);
-
-            if (!response.IsSuccessStatusCode || response.Content == null)
-            {
-                logger.LogError($"Response failed: Status={response.StatusCode}, Error={response.Error}");
-                throw new ExternalServiceException();
-            }
-
-            var signature = response.Headers.GetValues("signature").FirstOrDefault();
-            if (string.IsNullOrEmpty(signature))
-                throw new ExternalServiceException();
-
-            logger.LogInformation($"Order created successfully: OrderUid={response.Content.OrderUid}");
-
-            return new CreateBuyOrderV2Response
-            {
-                Data = response.Content,
-                Signature = signature
+                Data = payload,
+                Signature = asymmetricCrypto.Sign(asymmetricKeyCache.GameXPrivateKey, payload)
             };
+
+            var response = await uxmApi.WithdrawalAsync(request);
+            var content = ValidateApiResponse(response);
+
+            // Verify UXM signature
+            var isValid = asymmetricCrypto.VerifySignature(asymmetricKeyCache.UxmPublicKey, content.Data, content.Signature);
+            if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
+
+            logger.LogInformation("Withdrawal request successful，OrderUid: {OrderUid}", content.Data.OrderUid);
+            return content.Data;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message);
-            throw;
-        }
-    }
-    
-    public async Task<SecureResponse<CreateSellOrderV2Response>> CreateProxySellOrderV2Async(
-        SecureRequest<CreateSellOrderV2Request> data)
-    {
-        try
-        {
-            logger.LogInformation(
-                $"Create order request: MerchantOrderId={data.Data.MerchantOrderId}, Amount={data.Data.Amount}");
-    
-            var response = await uxmApi.CreateProxySellOrderV2Async(data.Signature, data.Data);
-            if (!response.IsSuccessStatusCode || response.Content == null)
-            {
-                logger.LogError($"Response failed: Status={response.StatusCode}");
-                throw new ExternalServiceException();
-            }
-            
-            var signature = response.Headers.GetValues("signature").FirstOrDefault();
-            if (string.IsNullOrEmpty(signature))
-                throw new ExternalServiceException();
-    
-            logger.LogInformation($"Order created successfully: OrderUid={response.Content.OrderUid}");
-    
-            return new SecureResponse<CreateSellOrderV2Response>(response.Content, signature);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex.Message);
-            throw;
-        }
-    }
-    
-    public async Task<SecureResponse<UxmOrderDetailInfoResponse>> GetOrderDetailInfoAsync(
-        SecureRequest<GetUxmOrderDetailInfoRequest> data)
-    {
-        try
-        {
-            logger.LogInformation(
-                $"Get order request: UxmOrderId={data.Data.TradeNo}, Merchant={data.Data.MerchantNumber}");
-    
-            var response = await uxmApi.GetOrderDetailInfoAsync(
-                tradeNo: data.Data.TradeNo, 
-                merchantNumber: data.Data.MerchantNumber, 
-                timestamp: data.Data.Timestamp,
-                signature: data.Signature);
-            
-            if (!response.IsSuccessStatusCode || response.Content == null)
-            {
-                logger.LogError($"Response failed: Status={response.StatusCode}");
-                throw new ExternalServiceException();
-            }
-            
-            var signature = response.Headers.GetValues("signature").FirstOrDefault();
-            if (string.IsNullOrEmpty(signature))
-                throw new ExternalServiceException();
-    
-            logger.LogInformation($"Get order's information successfully: OrderUid={data.Data.TradeNo}");
-    
-            return new SecureResponse<UxmOrderDetailInfoResponse>(response.Content, signature);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex.Message);
+            logger.LogError("Failed to send withdrawal request to UXM: {Ex}", ex);
             throw;
         }
     }
 
-    public async Task<SecureResponse<EstimateQuoteResponse>> GetEstimateQuoteAsync(
-        SecureRequest<EstimateQuoteRequest> data)
+    public async Task<UxmDepositResponse> DepositAsync(
+        decimal amount,
+        string orderNumber,
+        string userId,
+        string remark)
     {
+        var payload = new UxmDepositRequest(
+            appSettingCache.UxmMerchantNumber,
+            amount,
+            orderNumber,
+            userId,
+            remark);
+        logger.LogInformation($@"
+            Send deposit request to UXM:
+            MerchantNumber={payload.MerchantNumber},
+            UserId={payload.UserId},
+            Amount = {payload.Amount},
+            OrderNumber = {payload.OrderNumber}");
+
         try
         {
-            logger.LogInformation(
-                $"Get estimate quote request: Merchant={data.Data.MerchantNumber}");
-    
-            var response = await uxmApi.GetEstimateQuoteAsync(
-                data: data.Data,
-                signature: data.Signature);
-            
-            if (!response.IsSuccessStatusCode || response.Content == null)
+            var request = new SecureRequest<UxmDepositRequest>
             {
-                logger.LogError($"Response failed: Status={response.StatusCode}");
-                throw new ExternalServiceException();
-            }
-            
-            var signature = response.Headers.GetValues("signature").FirstOrDefault();
-            if (string.IsNullOrEmpty(signature))
-                throw new ExternalServiceException();
-    
-            logger.LogInformation($"Get estimate quote successfully");
-    
-            return new SecureResponse<EstimateQuoteResponse>(response.Content, signature);
+                Data = payload,
+                Signature = asymmetricCrypto.Sign(asymmetricKeyCache.GameXPrivateKey, payload)
+            };
+            var response = await uxmApi.DepositAsync(request);
+            var content = ValidateApiResponse(response);
+
+            // Verify UXM signature
+            var isValid = asymmetricCrypto.VerifySignature(asymmetricKeyCache.UxmPublicKey, content.Data, content.Signature);
+            if (!isValid) throw new BadRequestException(MessageCode.System.TokenGenerationFailed, "Invalid signature.");
+
+            logger.LogInformation("Deposit request successful，OrderUid: {OrderUid}", content.Data.OrderUid);
+            return content.Data;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message);
-            throw new ExternalServiceException();
+            logger.LogError("Failed to send deposit request to UXM: {Ex}", ex);
+            throw;
         }
+    }
+
+    private SecureResponse<T> ValidateApiResponse<T>(ApiResponse<SecureResponse<T>> response)
+    {
+        // Check if the request was successful
+        if (response.IsSuccessStatusCode && response.Content != null)
+            return response.Content;
+
+        // Handle logging and throwing error
+        var apiEx = response.Error;
+        logger.LogError(
+            apiEx ?? new ExternalServiceException("UXM failed") as Exception,
+            "UXM failed. Status={Status}, Reason={Reason}, ErrorMessage={ErrorMessage}, ErrorContent={ErrorContent}",
+            response.StatusCode,
+            apiEx?.ReasonPhrase ?? response.ReasonPhrase ?? string.Empty,
+            apiEx?.Message ?? string.Empty,
+            apiEx?.Content ?? string.Empty);
+
+        // Wrapping and throwing UXM exception
+        throw GetUxmErrors(response);
+    }
+
+    private static Exception GetUxmErrors<T>(ApiResponse<SecureResponse<T>> response)
+    {
+        var errorContent = JsonHelper.ConvertJson<UxmErrorResponse>(response.Error?.Content ?? "{}");
+
+        // Check if this is an insufficient balance error
+        if (InsufficientErrorCodes.Contains(errorContent.ErrorCode))
+            return new BadRequestException(MessageCode.Accounting.InsufficientBalance, new { message = response.Error?.Content });
+
+        // Fallback
+        return new ExternalServiceException("UXM failed");
     }
 }

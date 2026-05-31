@@ -4,12 +4,36 @@ namespace game_x.application.Common.Files;
 
 public sealed class FileUpload
 {
-    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] AllowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
-    private const int MaxFileSize = 10 * 1024 * 1024; // 10 MB
+    /// <summary>Supported file extensions for image uploads.</summary>
+    public static readonly string[] ImageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+
+    /// <summary>Supported MIME types for image uploads.</summary>
+    public static readonly string[] ImageMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+    /// <summary>Supported file extensions for video uploads.</summary>
+    public static readonly string[] VideoExtensions = [".mp4", ".mkv", ".avi", ".mov"];
+
+    /// <summary>Supported MIME types for video uploads.</summary>
+    public static readonly string[] VideoMimeTypes = ["video/mp4", "video/x-matroska", "video/x-msvideo", "video/quicktime"];
+
+    /// <summary>Maximum allowed size for image uploads in bytes (10 MB).</summary>
+    public const int ImageMaxSize = 10 * 1024 * 1024;
+
+    /// <summary>Maximum allowed size for video uploads in bytes (100 MB).</summary>
+    public const int VideoMaxSize = 100 * 1024 * 1024;
+
+    /// <summary>Combined list of all allowed file extensions for both images and videos.</summary>
+    private static readonly string[] AllowedExtensions = [.. ImageExtensions, .. VideoExtensions];
+
+    /// <summary>Combined list of all allowed MIME types for both images and videos.</summary>
+    private static readonly string[] AllowedMimeTypes = [.. ImageMimeTypes, .. VideoMimeTypes];
+
+    /// <summary>Absolute maximum allowed file size in bytes for any single upload (100 MB).</summary>
+    private const int MaxFileSize = 100 * 1024 * 1024;
 
     public Stream Content { get; init; } = default!;
     public string FileName { get; init; } = default!;
+    public string Extension { get; init; } = default!;
     public string ContentType { get; init; } = default!;
     public long Length { get; init; }
 
@@ -25,25 +49,30 @@ public sealed class FileUpload
         {
             Content = file.OpenReadStream(),
             FileName = file.FileName,
+            Extension = Path.GetExtension(file.FileName),
             ContentType = file.ContentType,
             Length = file.Length
         };
     }
 
-    public static FileUpload FromStream(Stream stream, string fileName, string contentType)
+    public static FileUpload FromStream(Stream stream, string fileName, string contentType, long contentLength)
     {
-        if (stream == null || stream.Length == 0)
+        if (stream == null)
             throw new ArgumentException("Stream is empty.");
 
+        if (contentLength <= 0)
+            throw new ArgumentException("Content length must be greater than zero.");
+
         // Validate file properties
-        ValidateFile(fileName, contentType, stream.Length);
+        ValidateFile(fileName, contentType, contentLength);
 
         return new FileUpload
         {
             Content = stream,
             FileName = fileName,
+            Extension = Path.GetExtension(fileName),
             ContentType = contentType,
-            Length = stream.Length
+            Length = contentLength
         };
     }
 

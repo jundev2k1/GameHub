@@ -8,7 +8,7 @@ public class LoggerAdapter<T> : IAppLogger<T>
     private readonly ILogger<T> _logger;
     private string TypeName { get; set; }
 
-    private const string ServicePrefix = "<galaxy.api> →";
+    private const string ServicePrefix = "<game-x.api> →";
 
     public LoggerAdapter(ILoggerFactory loggerFactory)
     {
@@ -32,5 +32,10 @@ public class LoggerAdapter<T> : IAppLogger<T>
     {
         //_logger.LogError($"[{TypeName}] {message}", args);
         _logger.LogError($"{ServicePrefix} [{TypeName}] {message}", args);
+    }
+    
+    public void LogError(Exception exception, string message, params object[] args)
+    {
+        _logger.LogError(exception, $"{ServicePrefix} [{TypeName}] {message}", args);
     }
 }

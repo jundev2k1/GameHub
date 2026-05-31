@@ -1,15 +1,23 @@
-﻿namespace game_x.application.Extensions;
+﻿using game_x.application.Features.S2s.Commands.CreateCredentitalSetting;
+
+namespace game_x.application.Extensions;
 
 public static class CommonValidatorExtensions
 {
-    public static IRuleBuilderOptions<T, string> IsPassword<T>(this IRuleBuilder<T, string> ruleBuilder, string fieldName = "Password")
+    public static IRuleBuilderOptions<T, string> IsPassword<T>(
+        this IRuleBuilder<T, string> ruleBuilder,
+        string fieldName = "Password",
+        bool hasSpecialCharacter = false)
     {
-        return ruleBuilder
+        var passwordRule = ruleBuilder
             .MinimumLength(8).WithMessage($"{fieldName} must be at least 8 characters")
             .Matches("[A-Z]").WithMessage($"{fieldName} must contain at least one uppercase letter")
             .Matches("[a-z]").WithMessage($"{fieldName} must contain at least one lowercase letter")
-            .Matches("[0-9]").WithMessage($"{fieldName} must contain at least one number")
-            .Matches(@"[\!\@\#\$\%\^\&\*\(\)\-\+]").WithMessage($"{fieldName} must contain at least one special character");
+            .Matches("[0-9]").WithMessage($"{fieldName} must contain at least one number");
+        if (hasSpecialCharacter)
+            passwordRule = passwordRule.Matches(@"[\!\@\#\$\%\^\&\*\(\)\-\+]").WithMessage($"{fieldName} must contain at least one special character");
+
+        return passwordRule;
     }
 
     public static IRuleBuilderOptions<T, string> IsEmail<T>(this IRuleBuilder<T, string> ruleBuilder, string fieldName = "Email")

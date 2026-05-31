@@ -1,0 +1,187 @@
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
+using System.Text.RegularExpressions;
+using game_x.domain.Entities.Rewards;
+
+namespace game_x.domain.Entities;
+
+public class User : IdentityUser, IEntity, IAuditable
+{
+    #region Indetities
+    public int? AvatarId { get; set; }
+
+    #endregion
+
+    #region Properties
+    public string MemberNumber { get; private set; } = null!;
+    
+    public string Nickname { get; set; } = string.Empty;
+    
+    public string? CountryCode { get; set; }
+    
+    public UserStatus Status { get; set; } = UserStatus.Active;
+    
+    public bool IsDeleted { get; set; }
+    
+    public DateTime CreatedAt { get; set; }
+    
+    public DateTime UpdatedAt { get; set; }
+    
+    [MaxLength(4096)]
+    public string Notes { get; private set; } = string.Empty;
+    #endregion
+
+    #region Relationships
+    public MediaFile? Avatar { get; set; }
+    
+    public ICollection<Transaction> Transactions { get; set; } = [];
+
+    /// <summary>The user's balance in all currencies in the system.</summary>
+    public ICollection<UserBalance> UserBalances { get; set; } = [];
+    
+    public UserExtend? UserExtend { get; set; }
+    
+    public UserKyc? UserKyc { get; set; }
+    
+    public TalentWallet? TalentWallet { get; set; }
+    
+    public ICollection<UserRole> UserRoles { get; set; } = [];
+    
+    public ICollection<UserBankAccount> UserBankAccounts { get; set; } = [];
+    
+    public ICollection<SocialLink> RequestedLinks { get; set; } = [];
+    
+    public ICollection<SocialLink> ReceivedRequests { get; set; } = [];
+    
+    public ICollection<SocialLink> BlocksByMe { get; set; } = [];
+    
+    public ICollection<SocialLink> BlocksToMe { get; set; } = [];
+    
+    public IReadOnlyCollection<UserEvent> UserEvents { get; private set; } = new List<UserEvent>();
+    
+    public IReadOnlyCollection<UserMission> UserMissions { get; private set; } = new List<UserMission>();
+    
+    public IReadOnlyCollection<UserInventory> Inventories { get; private set; } = new List<UserInventory>();
+    
+    public IReadOnlyCollection<ShareLink> ShareLinks { get; private set; } = new List<ShareLink>();
+    
+    public IReadOnlyCollection<UserReward> UserRewards { get; private set; } = new List<UserReward>();
+    
+    public IReadOnlyCollection<Execution> Executions { get; private set; } = new List<Execution>();
+    
+    public IReadOnlyCollection<UserMissionClaim> UserMissionClaims { get; private set; } = new List<UserMissionClaim>();
+    #endregion
+
+    #region Intitializations
+    public static User Create(
+        string userName,
+        string email,
+        string nickName = "",
+        string phoneNumber = "",
+        string countryCode = "",
+        string notes = "",
+        UserStatus status = UserStatus.Active,
+        List<UserRole>? userRoles = null)
+    {
+        if (!email.IsNullOrWhiteSpace() && !IsEmail(email))
+            throw new ArgumentException("Email ({email}) wrong format.", email);
+
+        if (!phoneNumber.IsNullOrWhiteSpace() && !IsPhoneNumber(phoneNumber))
+            throw new ArgumentException("Phone number ({phoneNumber}) wrong format.", phoneNumber);
+
+        return new User()
+        {
+            UserName = userName,
+            Email = email,
+            Nickname = nickName,
+            PhoneNumber = phoneNumber,
+            CountryCode = countryCode,
+            Status = status,
+            UserRoles = userRoles ?? [],
+            Notes = notes,
+        };
+    }
+    #endregion
+    
+    #region Behaviors
+    public static bool IsEmail(string email)
+    {
+        if (email.IsNullOrWhiteSpace())
+            return false;
+
+        var pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+        return Regex.IsMatch(email, pattern, RegexOptions.IgnoreCase);
+    }
+
+    public static bool IsPhoneNumber(string phone)
+    {
+        if (phone.IsNullOrWhiteSpace())
+            return false;
+
+        var pattern = @"^\+?[0-9\s\-\(\)]+$";
+        if (!Regex.IsMatch(phone, pattern))
+            return false;
+
+        int digitCount = phone.Count(char.IsDigit);
+
+        return digitCount >= 7 && digitCount <= 15;
+    }
+
+    public void UpdateStatus(UserStatus status)
+    {
+        Status = status;
+    }
+
+    public void ConfirmEmail()
+    {
+        EmailConfirmed = true;
+    }
+
+    public void ConfirmPhoneNumber()
+    {
+        PhoneNumberConfirmed = true;
+    }
+
+    public (bool Result, System.Enum? ErrorCode) CheckValidUser()
+    {
+        if (Status == UserStatus.Inactive)
+            return (false, MessageCode.User.UserInvalid);
+        if (IsDeleted)
+            return (false, MessageCode.User.UserDisabled);
+
+        return (true, null);
+    }
+
+    private bool Has(string roleName)
+        => UserRoles.Any(r => r.Role.Name == roleName);
+
+    public bool IsRoot => Has(AppRoles.Root);
+    public bool IsAdmin => Has(AppRoles.Admin);
+    public bool IsCs => Has(AppRoles.Cs);
+    public bool IsTalent => Has(AppRoles.Talent);
+    public bool IsUser => Has(AppRoles.User);
+
+    public void AddUserExtend(UserExtend userExtend)
+    {
+        UserExtend = userExtend;
+    }
+
+    public void AddUserKyc(UserKyc kycProfile)
+    {
+        UserKyc = kycProfile;
+    }
+
+    public void AddUserBankAccount(UserBankAccount bankAccount)
+    {
+        if (UserBankAccounts.Any(uba => uba.CurrencyId.Equals(bankAccount.CurrencyId)))
+            throw new ArgumentException("User already has a bank account for this currency.", nameof(bankAccount));
+
+        UserBankAccounts.Add(bankAccount);
+    }
+
+    public void AddTalentWallet(TalentWallet wallet)
+    {
+        TalentWallet = wallet;
+    }
+    #endregion
+}

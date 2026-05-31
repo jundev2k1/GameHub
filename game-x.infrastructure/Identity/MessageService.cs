@@ -1,0 +1,115 @@
+using game_x.application.Common.Abstractions;
+using game_x.application.Common.Abstractions.Pagination;
+using game_x.application.Common.Files;
+using game_x.application.Common.Filters;
+using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.Dto;
+using game_x.application.Contract.Infrastructure.FileStorage;
+using game_x.application.Contract.Persistence.Identity;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Features.Chat.Dtos;
+using game_x.infrastructure.Extensions;
+using game_x.share.Extensions;
+using game_x.share.Helper;
+
+namespace game_x.infrastructure.Identity;
+
+public sealed class MessageService(
+    IMessageRepo messageRepo,
+    IMessageAttachmentRepo messageAttachmentRepo,
+    IFileStorageService fileStorage,
+    IFileManagerCacheService fileCache
+    ): IMessageService, IServices
+{
+    public async Task<CursorResult<ListedMessageDto>> GetByCursorAsync(Guid convId, int limit, string? cursor, CancellationToken ct)
+    {
+        var query = await messageRepo.GetByCursorAsync(convId, limit, cursor, ct);
+        var fp = CursorHelper.ComputeFp($"conv:{convId}");
+
+        var entityResult = await SeekCursorBuilder<MessageDto>
+            .For(query)
+            .Keys(m => m.SentAt, m => m.Id)
+            .Sort(desc1: true, desc2: false)
+            .FromCursor(cursor, fp)
+            .Limit(limit)
+            .ExecuteAsync(m => m, ct);
+
+        var dtoItems = await Task.WhenAll(
+            entityResult.Items.Select(m => GetMessageDtoAsync(m, ct))
+        );
+
+        return entityResult.Transform(dtoItems.Reverse());
+    }
+    
+    public async Task<ListedMessageDto> GetMessageDtoAsync(MessageDto msg, CancellationToken ct)
+    {
+        var attachmentTasks = msg.Attachments
+            .Select(async item =>
+            {
+                MediaFileInfo? file = null;
+                if (item.Attachment is not null)
+                {
+                    file = await fileCache.GetFileInfo(item.Attachment, ct);
+                }
+                
+                return new ListedMessageAttachmentDto
+                (
+                    SortOrder: item.SortOrder,
+                    BindingStatus: item.BindingStatus.ToCamelCase(),
+                    FileName: file?.FileName,
+                    Url: file?.Url
+                );
+            });
+        
+        var attachmentsDto = await Task.WhenAll(attachmentTasks);
+        var avatarUrl = msg.SenderUser?.Avatar != null ? await fileCache.GetFileUrl(msg.SenderUser.Avatar, ct) : null;
+        
+        return msg.Adapt<ListedMessageDto>() with { Attachments = attachmentsDto, SenderUserAvatarUrl = avatarUrl};
+    }
+    
+    public async Task CreateMessageAttachmentsAsync(
+        Message msg,
+        IReadOnlyList<FileUpload>? attachments, 
+        CancellationToken ct)
+    {
+        if (attachments is not { Count: > 0 }) return;
+
+        var mediaFiles = await UploadFiles(msg.SenderActorId, attachments, ct);
+        foreach (var (file, index) in mediaFiles.Select((a, i) => (a, i)))
+        {
+            var msgAttachment = MessageAttachment.Create(
+                msg: msg,
+                sortOrder: index,
+                mediaFile: file,
+                addedByUserId: msg.SenderUserId,
+                addedByActorId: msg.SenderActorId,
+                bindingStatus: AttachmentBindingStatus.Linked);
+
+            await messageAttachmentRepo.AddAsync(msgAttachment, ct);
+        }
+    }
+
+    private async Task<IList<MediaFile>> UploadFiles(string userId, IReadOnlyList<FileUpload> files, CancellationToken ct)
+    {
+        IList<MediaFile> mediaFiles = [];
+        foreach (var file in files)
+        {
+            var newFileName = Guid.NewGuid() + file.Extension;
+            var objectName = ObjectName.Attachment(userId, newFileName);
+            await fileStorage.UploadFileAsync(file.Content, BucketName.User, objectName, MimeType.Of(file.ContentType), ct);
+            mediaFiles.Add(CreateMediaFile(file, objectName));
+        }
+
+        return mediaFiles;
+    }
+    
+    private static MediaFile CreateMediaFile(FileUpload file, ObjectName objectName)
+    {
+        return MediaFile.Create(
+            bucketName: BucketName.User,
+            objectName: objectName,
+            fileName: file.FileName,
+            mimeType: MimeType.Of(file.ContentType),
+            sizeBytes: Convert.ToInt32(file.Length));
+    }
+}

@@ -5,8 +5,14 @@ namespace game_x.application.Contract.Infrastructure.Email;
 public interface IEmailService
 {
     Task SendAsync(string to, string subject, string htmlBody);
+
     Task SendVerificationEmailAsync(string to, string code);
+
     Task SendResetPasswordEmailAsync(string to, string code);
+
+    Task SendLiveStreamRemainderEmailAsync(string to, LivestreamSchedule schedule);
+
+    Task SendLiveStreamCancellationEmailAsync(string to, LivestreamSchedule schedule);
 }
 
 public class EngageLabEmailRequest

@@ -1,6 +1,12 @@
 ﻿using game_x.application.Contract.Infrastructure.Security;
 using game_x.application.Contract.Infrastructure.SignalR.Dtos;
-using game_x.application.Features.Notification.Shared.Commands.MarkAsRead;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
+using game_x.application.Features.BankAccountVerifications.Dtos;
+using game_x.application.Features.Kyc.Dtos;
+using game_x.application.Features.Notifications.Shared.Commands.MarkAllAsRead;
+using game_x.application.Features.Notifications.Shared.Commands.MarkAsRead;
+using game_x.infrastructure.SignalR.Groups;
 using game_x.share.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -16,8 +22,13 @@ public interface IAdminHub
     /// <summary>
     ///     Notify that an order has been updated.
     /// </summary>
-    /// <param name="orderInfo">The order information that was updated.</param>
-    Task OrderUpdated(AdminOrderStatusDto orderInfo);
+    /// <param name="transaction">The transaction information that was updated.</param>
+    Task TransactionUpdated(AdminTransactionDto transaction);
+    Task KycCreated(UserKycListItemDto verify);
+    Task BankAccountCreated(BankAccountListItemDto verify);
+    Task TransactionReviewed(AdminOrderReviewedDto order);
+    Task KycReviewed(AdminOrderReviewedDto order);
+    Task BankAccountReviewed(AdminOrderReviewedDto order);
 }
 
 [Authorize(Roles = AppRoles.Admin)]
@@ -34,7 +45,8 @@ public sealed class AdminHub(
         if (userId.IsNotNullOrEmpty())
             logger.LogInformation($"Admin User connected ({nameof(AdminHub)}): {userId}");
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"admin-{userId}");
+        await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Admin(userId!));
+        await Groups.AddToGroupAsync(Context.ConnectionId, ActorGroups.Broadcast(AppRoles.Admin));
         await base.OnConnectedAsync();
     }
 
@@ -48,6 +60,13 @@ public sealed class AdminHub(
     {
         var adminUserId = userAccessor.GetUserId();
         var command = new MarkAsReadCommand(notificationId, adminUserId);
+        await sender.Send(command);
+    }
+    
+    public async Task MarkAllNotificationsAsRead()
+    {
+        var adminUserId = Context.UserIdentifier!;
+        var command = new MarkAllAsReadCommand(adminUserId);
         await sender.Send(command);
     }
 }

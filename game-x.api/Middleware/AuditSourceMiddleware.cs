@@ -3,7 +3,7 @@ using game_x.share.Context;
 
 namespace game_x.api.Middleware;
 
-public class AuditSourceMiddleware(RequestDelegate next)
+public sealed class AuditSourceMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context)
     {

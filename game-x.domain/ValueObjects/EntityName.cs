@@ -1,17 +1,13 @@
-﻿namespace game_x.domain.ValueObjects;
+﻿using game_x.domain.Entities;
+using game_x.domain.Entities.Rewards;
+
+namespace game_x.domain.ValueObjects;
 
 public sealed class EntityName
 {
     public string Value { get; }
 
     private EntityName(string value) => Value = value;
-
-    public static EntityName User => Of(nameof(AppUser));
-    public static EntityName Order => Of(nameof(Entities.Order));
-    public static EntityName BankAccount => Of(nameof(Entities.BankAccount));
-    public static EntityName Counter => Of(nameof(Entities.Counter));
-    public static EntityName MediaFile => Of(nameof(Entities.MediaFile));
-    public static EntityName Passport => Of(nameof(UserPassport));
 
     public static EntityName Of(string value)
     {
@@ -24,12 +20,53 @@ public sealed class EntityName
     }
 
     private static readonly string[] ValidValues = [
-        nameof(AppUser),
-        nameof(Entities.Order),
-        nameof(Entities.BankAccount),
-        nameof(Entities.Counter),
-        nameof(Entities.MediaFile),
-        nameof(UserPassport)];
+        nameof(AppSetting),
+        nameof(User),
+        nameof(MediaFile),
+        nameof(UserKyc),
+        nameof(SystemWallet),
+        nameof(TalentWallet),
+        nameof(Transaction),
+        nameof(GamePlatform),
+        nameof(GamePlatformTranslation),
+        nameof(Game),
+        nameof(GameTranslation),
+        nameof(GameType),
+        nameof(GameTypeTranslation),
+        nameof(GameCategory),
+        nameof(GameCategoryTranslation),
+        nameof(GameTag),
+        nameof(GameTagTranslation),
+        nameof(GameRecommend),
+        nameof(GameRecommendItem),
+        nameof(UserBalance),
+        nameof(FiatCurrency),
+        nameof(UserBankAccount),
+        nameof(Conversation),
+        nameof(ConversationMember),
+        nameof(Message),
+        nameof(MessageAttachment),
+        nameof(LivestreamSchedule),
+        nameof(LiveStreamCategory),
+        nameof(LiveStreamCategoryMapping),
+        nameof(LiveStreamGift),
+        nameof(LiveStreamGiftPrice),
+        nameof(SocialLink),
+        nameof(InteractionCharacter),
+        nameof(InteractionCharacterPose),
+        nameof(InteractionRule),
+        nameof(InteractionRuleMessage),
+        nameof(CatalogItem),
+        nameof(Mission),
+        nameof(RewardPoolItem),
+        nameof(RewardPool),
+        nameof(UserReward),
+        nameof(RewardDefinition),
+        nameof(MissionReward),
+        nameof(UserMissionClaim),
+        nameof(NavigationItem),
+        nameof(NavigationItemTranslation)
+    ];
 
     public override bool Equals(object? obj) =>
         (obj != null) && (obj is EntityName type) && (Value == type.Value);

@@ -1,5 +1,4 @@
 ﻿using game_x.application.Contract.Infrastructure.Caching;
-using game_x.domain.Enum;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -14,7 +13,7 @@ public sealed class UserCacheService(IMemoryCache cache, GameXContext context)
     public async Task RefreshInactiveUser(CancellationToken ct = default)
     {
         var inActiveUsers = await context.Users
-            .Where(u => u.IsDeleted || u.Status == AppUserStatus.Inactive)
+            .Where(u => u.IsDeleted || u.Status == UserStatus.Inactive)
             .Select(u => u.Id)
             .ToArrayAsync(ct);
         Set(InactiveUserIdsCacheKey, inActiveUsers);

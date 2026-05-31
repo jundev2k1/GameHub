@@ -1,25 +1,59 @@
-﻿using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+﻿using game_x.application.Common.Abstractions;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Transactions;
 using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Features.BankAccountVerifications.Dtos;
+using game_x.application.Features.Kyc.Dtos;
+using game_x.infrastructure.SignalR.Facade;
 using game_x.infrastructure.SignalR.Hubs;
-using Microsoft.AspNetCore.SignalR;
 
 namespace game_x.infrastructure.SignalR.Services;
 
-public sealed class AdminHubService(IHubContext<AdminHub, IAdminHub> hubContext)
-    : IAdminHubService
+public sealed class AdminHubService(ActorHubFacade<AdminHub, IAdminHub> actorHub) : IAdminHubService, IHubServices
 {
-    public async Task SendNotificationToAdminAsync(string adminId, NotificationDto message)
+    public async Task SendNotificationAsync(string adminId, NotificationDto message)
     {
-        await hubContext.Clients.Group($"admin-{adminId}").ReceiveNotification(message);
+        await actorHub.Admin(adminId).ReceiveNotification(message);
     }
 
     public async Task SendNotificationToAllAsync(NotificationDto message)
     {
-        await hubContext.Clients.All.ReceiveNotification(message);
+        await actorHub.All().ReceiveNotification(message);
     }
 
-    public async Task SendOrderStatusToAdminAsync(string adminId, AdminOrderStatusDto orderInfo)
+    public async Task SendTransactionToAllAdminAsync(AdminTransactionDto transaction)
     {
-        await hubContext.Clients.Group($"admin-{adminId}").OrderUpdated(orderInfo);
+        await actorHub.AdminAll().TransactionUpdated(transaction);
+    }
+
+    public async Task SendTransactionToAdminAsync(string adminId, AdminTransactionDto transaction)
+    {
+        await actorHub.Admin(adminId).TransactionUpdated(transaction);
+    }
+
+    public async Task SendVerificationToAdminAsync(string adminId, UserKycListItemDto verification)
+    {
+        await actorHub.Admin(adminId).KycCreated(verification);
+    }
+
+    public async Task SendVerificationToAdminAsync(string adminId, BankAccountListItemDto verification)
+    {
+        await actorHub.Admin(adminId).BankAccountCreated(verification);
+    }
+
+    public async Task NotifyOrderTxReviewedToAdminAsync(AdminOrderReviewedDto order)
+    {
+        await actorHub.AdminAll().TransactionReviewed(order);
+    }
+
+    public async Task NotifyOrderKycReviewedToAdminAsync(AdminOrderReviewedDto order)
+    {
+        await actorHub.AdminAll().KycReviewed(order);
+    }
+
+    public async Task NotifyOrderBankAccountReviewedToAdminAsync(AdminOrderReviewedDto order)
+    {
+        await actorHub.AdminAll().BankAccountReviewed(order);
     }
 }

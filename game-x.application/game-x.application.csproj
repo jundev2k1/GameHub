@@ -1,10 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>galaxy_pay.application</RootNamespace>
+    <RootNamespace>game_x.application</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Features\Accounts\Cs\**" />
+    <Compile Remove="Services\UserUsdtLedger\**" />
+    <EmbeddedResource Remove="Features\Accounts\Cs\**" />
+    <EmbeddedResource Remove="Services\UserUsdtLedger\**" />
+    <None Remove="Features\Accounts\Cs\**" />
+    <None Remove="Services\UserUsdtLedger\**" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Remove="Features\UserManagement\User\Commands\CreateUserCommand.cs" />
   </ItemGroup>
@@ -14,6 +22,7 @@
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
     <PackageReference Include="MediatR" Version="12.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.5" />
@@ -25,15 +34,13 @@
     <ProjectReference Include="..\game-x.share\game-x.share.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Features\AccountManagement\Root\Commands\" />
-    <Folder Include="Features\AccountManagement\Root\Queries\" />
-    <Folder Include="Features\BankAccountManagement\Staff\Queries\" />
-    <Folder Include="Features\CounterManagement\Admin\" />
-    <Folder Include="Features\CounterManagement\Staff\" />
-    <Folder Include="Features\Dashboard\Admin\" />
-    <Folder Include="Features\HeartBeat\Staff\" />
-    <Folder Include="Features\Notification\Dtos\" />
-    <Folder Include="Features\Notification\Shared\" />
-    <Folder Include="Features\OrderManagement\Shared\Commands\" />
+    <Folder Include="Events\Friendship\" />
+    <Folder Include="Events\Game\" />
+    <Folder Include="Events\LiveStream\" />
+    <Folder Include="Events\System\" />
+    <Folder Include="Features\Auth\Admin\Commands\" />
+    <Folder Include="Features\Auth\Guest\Commands\" />
+    <Folder Include="Features\Auth\Root\Commands\" />
+    <Folder Include="Features\Rewards\Commands\RewardDefinitions\" />
   </ItemGroup>
 </Project>

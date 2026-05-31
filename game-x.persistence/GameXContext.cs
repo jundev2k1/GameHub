@@ -1,4 +1,6 @@
-﻿using game_x.persistence.Interceptors;
+﻿using game_x.domain.Entities.Rewards;
+using game_x.persistence.Extensions;
+using game_x.persistence.Interceptors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
@@ -8,49 +10,89 @@ public sealed class GameXContext(
     DbContextOptions<GameXContext> options,
     IEnumerable<ISaveChangesInterceptor> interceptors)
     : IdentityDbContext<
-        AppUser,
-        IdentityRole,
+        User,
+        Role,
         string,
         IdentityUserClaim<string>,
-        AppUserRole,
+        UserRole,
         IdentityUserLogin<string>,
         IdentityRoleClaim<string>,
         IdentityUserToken<string>>(options)
 {
-    public DbSet<AppUser> AppUser { get; set; }
-    public DbSet<AppUserRole> AppUserRole { get; set; }
-    public DbSet<UserPassport> UserPassport { get; set; }
-    public DbSet<AsymmetricKey> AsymmetricKey { get; set; }
-    public DbSet<Order> Orders { get; set; }
-    public DbSet<Counter> Counters { get; set; }
-    public DbSet<CounterToken> CounterTokens { get; set; }
-    public DbSet<StaffCounter> StaffCounters { get; set; }
-    public DbSet<StaffUser> StaffUsers { get; set; }
-    public DbSet<StaffExtension> StaffExtension { get; set; }
-    public DbSet<BankAccount> BankAccounts { get; set; }
+    public DbSet<AppSetting> AppSettings { get; set; }
+    public DbSet<S2SClient> S2sClients { get; set; }
+    public DbSet<S2SClientSetting> S2sClientSettings { get; set; }
+    public DbSet<S2SCredential> S2sCredentials { get; set; }
+    public DbSet<S2SCredentialMaterial> S2sCredentialMaterials { get; set; }
+    public DbSet<User> AppUsers { get; set; }
+    public DbSet<UserExtend> UserExtends { get; set; }
+    public DbSet<UserRole> AppUserRoles { get; set; }
+    public DbSet<UserKyc> UserKycs { get; set; }
+    public DbSet<UserBalance> UserBalances { get; set; }
+    public DbSet<SystemWallet> SystemWallets { get; set; }
+    public DbSet<SystemWalletTransaction> SystemWalletTransactions { get; set; }
+    public DbSet<TalentWallet> TalentWallets { get; set; }
+    public DbSet<TalentWalletTransaction> TalentWalletTransactions { get; set; }
+    public DbSet<AsymmetricKey> AsymmetricKeys { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<MediaFile> MediaFiles { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
+    public DbSet<CryptoToken> CryptoTokens { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<GamePlatform> GamePlatforms { get; set; }
+    public DbSet<GamePlatformBalance> GamePlatformBalances { get; set; }
+    public DbSet<GameCategory> GameCategories { get; set; }
+    public DbSet<GameCategoryMapping> GameCategoryMappings { get; set; }
+    public DbSet<GameType> GameTypes { get; set; }
+    public DbSet<GameTypeMapping> GameTypeMappings { get; set; }
+    public DbSet<GameTag> GameTags { get; set; }
+    public DbSet<GameTagMapping> GameTagMappings { get; set; }
+    public DbSet<Game> Games { get; set; }
+    public DbSet<GameMedia> GameMedias { get; set; }
+    public DbSet<GameRecommend> GameRecommends { get; set; }
+    public DbSet<GameRecommendItem> GameRecommendItems { get; set; }
+    public DbSet<FiatCurrency> FiatCurrencies { get; set; }
+    public DbSet<UserBankAccount> UserBankAccounts { get; set; }
+    public DbSet<Conversation> Conversations { get; set; }
+    public DbSet<ConversationMember> ConversationMembers { get; set; }
+    public DbSet<Message> Messages { get; set; }
+    public DbSet<MessageAttachment> MessageAttachments { get; set; }
+    public DbSet<MessageMention> MessageMentions { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<LivestreamSchedule> LiveStreamSchedules { get; set; }
+    public DbSet<LiveStreamCategory> LiveStreamCategories { get; set; }
+    public DbSet<LiveStreamReminder> LiveStreamReminders { get; set; }
+    public DbSet<SocialLink> SocialLinks { get; set; }
+    public DbSet<LiveStreamGift> LiveStreamGifts { get; set; }
+    public DbSet<LiveStreamDonation> LiveStreamDonations { get; set; }
+    public DbSet<LiveStreamChatMessage> LiveStreamChatMessages { get; set; }
+    public DbSet<InteractionCharacter> InteractionCharacters { get; set; }
+    public DbSet<InteractionCharacterPose> InteractionCharacterPoses { get; set; }
+    public DbSet<UserGameSession> UserGameSessions { get; set; }
+    public DbSet<UserGameSessionConnection> UserGameSessionConnections { get; set; }
+    public DbSet<CatalogItem> CatalogItems { get; set; }
+    public DbSet<RewardDefinition> RewardDefinitions { get; set; }
+    public DbSet<RewardPool> RewardPools { get; set; }
+    public DbSet<RewardPoolItem> RewardPoolItems { get; set; }
+    public DbSet<Mission> Missions { get; set; }
+    public DbSet<MissionReward> MissionRewards { get; set; }
+    public DbSet<UserMission> UserMissions { get; set; }
+    public DbSet<UserMissionClaim> UserMissionClaims { get; set; }
+    public DbSet<UserReward> UserRewards { get; set; }
+    public DbSet<UserInventory> UserInventories { get; set; }
+    public DbSet<Execution> Executions { get; set; }
+    public DbSet<IdempotencyKey> IdempotencyKeys { get; set; }
+    public DbSet<ShareLink> ShareLinks { get; set; }
+    public DbSet<UserEvent> UserEvents { get; set; }
+    public DbSet<NavigationItem> NavigationItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        builder.ApplyConfigurationsFromAssembly(typeof(GameXContext).Assembly);
         base.OnModelCreating(builder);
-
-        builder.Entity<AppUserRole>(ur =>
-        {
-            ur.HasKey(k => new { k.UserId, k.RoleId });
-
-            ur.HasOne(r => r.Role)
-              .WithMany()
-              .HasForeignKey(r => r.RoleId)
-              .IsRequired();
-
-            ur.HasOne(r => r.User)
-              .WithMany(u => u.UserRoles)
-              .HasForeignKey(r => r.UserId)
-              .IsRequired();
-        });
+        builder.ApplyConfigurationsFromAssembly(typeof(GameXContext).Assembly);
+        builder.ApplyAuditColumnsConfiguration();
+        builder.IgnoreRemovedRecords();
+        builder.UseSnakeCaseIdentityTableNames();
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -73,5 +115,6 @@ public sealed class GameXContext(
         return result;
     }
 
-    public bool IsAuditSaveInProgress { get; set; } = false;
+    public bool IsAuditSaveInProgress { get; set; }
+    public bool IsDisableTimestamps { get; set; }
 }

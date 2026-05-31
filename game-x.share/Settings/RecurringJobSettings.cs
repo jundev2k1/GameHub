@@ -2,6 +2,9 @@
 
 public sealed class RecurringJobSettings : BaseSettings
 {
-    public string DashboardStatisticJob { get; set; } = string.Empty;
-    public string SessionCleanUpJob { get; set; } = string.Empty;
+    public string SyncRefreshTokenJob { get; set; } = string.Empty;
+    public string ExpiredTokenCleanupJob { get; set; } = string.Empty;
+    public string StreamTimeoutCheckerJob { get; set; } = string.Empty;
+    public string GameSessionTimeoutCheckerJob { get; set; } = string.Empty;
+    public string ExpiredTransactionJob { get; set; } = string.Empty;
 }

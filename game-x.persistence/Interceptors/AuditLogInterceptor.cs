@@ -1,5 +1,4 @@
-﻿using game_x.domain.Enum;
-using game_x.persistence.Extensions;
+﻿using game_x.persistence.Extensions;
 using game_x.share.Context;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.ChangeTracking;

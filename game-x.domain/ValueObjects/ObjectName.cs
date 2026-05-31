@@ -12,9 +12,35 @@ public sealed class ObjectName
     public string Extension => Path.GetExtension(Value);
 
     // Factories
-    public static ObjectName Passport(string userId, string fileName)
-        => Of($"user-passport/{userId:N}/{fileName}");
+    public static ObjectName Avatar(string userId, string fileName)
+        => Of($"avatar/{userId:N}/{fileName}");
+    public static ObjectName Attachment(string userId, string fileName)
+        => Of($"attachment/{userId:N}/{fileName}");
+    public static ObjectName KycProfile(string userId, string fileName)
+        => Of($"user-kyc/{userId:N}/{fileName}");
+    public static ObjectName BankAccountProfile(string userId, string fileName)
+        => Of($"user-bank-account/{userId:N}/{fileName}");
+    public static ObjectName GameResource(Guid gameId, string fileName)
+        => Of($"games/{gameId:N}/thumbnail/{fileName}");
+    public static ObjectName GameMedia(Guid gameId, Guid id, string fileName)
+        => Of($"games/{gameId:N}/media/{id:N}/{fileName}");
+    public static ObjectName LiveStreamThumbnail(Guid scheduleId, string fileName)
+        => Of($"schedules/{scheduleId:N}/thumbnail/{fileName}");
 
+    public static ObjectName LiveStreamGiftIcon(Guid giftId, string fileName)
+        => Of($"gifts/{giftId:N}/icon/{fileName}");
+    public static ObjectName LiveStreamGiftAnimation(Guid giftId, string fileName)
+        => Of($"gifts/{giftId:N}/animation/{fileName}");
+
+    public static ObjectName InteractionCharacter(Guid characterId, string fileName)
+        => Of($"characters/{characterId:N}/poses/{fileName}");
+
+    public static ObjectName CatalogItem(Guid catalogItemId, string fileName)
+        => Of($"catalog_items/{catalogItemId:N}/icons/{fileName}");
+
+    public static ObjectName NavigationItem(Guid id, string fileName)
+        => Of($"navigations/{id:N}/icons/{fileName}");
+    
     public static ObjectName Of(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -29,8 +55,18 @@ public sealed class ObjectName
     }
 
     // Constants
-    private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] ValidPrefixValues = ["user-passport"];
+    private static readonly string[] ValidExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".mp4", ".mkv", ".avi", ".mov"];
+    private static readonly string[] ValidPrefixValues = [
+        "user-kyc",
+        "user-bank-account",
+        "attachment",
+        "games",
+        "avatar",
+        "schedules",
+        "gifts",
+        "characters",
+        "catalog_items",
+        "navigations"];
 
     // Value object overrides
     public override bool Equals(object? obj) =>

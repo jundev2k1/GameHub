@@ -4,14 +4,24 @@ public sealed class TimestampInterceptor : ISaveChangesInterceptor
 {
     public Task OnBeforeSaveAsync(GameXContext context, CancellationToken cancellationToken = default)
     {
-        var entities = context.ChangeTracker.Entries<IBaseEntity>()
+        if (context.IsDisableTimestamps)
+            return Task.CompletedTask;
+
+        var entities = context.ChangeTracker.Entries<IEntity>()
             .Where(q => q.State == EntityState.Added || q.State == EntityState.Modified);
         foreach (var entry in entities)
         {
-            entry.Entity.UpdatedAt = DateTime.UtcNow;
+            if(entry.State == EntityState.Modified)
+                entry.Entity.UpdatedAt = DateTime.UtcNow;
 
             if (entry.State == EntityState.Added)
-                entry.Entity.CreatedAt = DateTime.UtcNow;
+            {
+                if(entry.Entity.UpdatedAt == default)
+                    entry.Entity.UpdatedAt = DateTime.UtcNow;
+                
+                if(entry.Entity.CreatedAt == default)
+                    entry.Entity.CreatedAt = DateTime.UtcNow;
+            }
         }
         return Task.CompletedTask;
     }

@@ -1,0 +1,114 @@
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace game_x.persistence.Config;
+
+public sealed class TransactionConfig : IEntityTypeConfiguration<Transaction>
+{
+    public void Configure(EntityTypeBuilder<Transaction> builder)
+    {
+        builder.ToTable("transactions");
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(gc => gc.Id)
+            .IsRequired()
+            .ValueGeneratedOnAdd();
+
+        builder.HasIndex(x => x.PublicId).IsUnique();
+
+        builder.Property(x => x.PublicId)
+            .HasColumnName("public_id")
+            .IsRequired()
+            .HasDefaultValueSql("gen_random_uuid()");
+
+        builder.Property(x => x.UserId)
+            .HasColumnName("user_id")
+            .IsRequired();
+
+        builder.Property(x => x.Amount)
+            .HasColumnName("amount")
+            .IsRequired();
+
+        builder.Property(x => x.Fee)
+            .HasColumnName("fee")
+            .IsRequired(false);
+
+        builder.Property(x => x.CryptoTokenId)
+            .HasColumnName("crypto_token_id")
+            .IsRequired();
+
+        builder.Property(x => x.Type)
+            .HasColumnName("type")
+            .IsRequired()
+            .HasDefaultValue(TransactionType.Init);
+
+        builder.Property(x => x.Status)
+            .HasColumnName("status")
+            .IsRequired()
+            .HasDefaultValue(TransactionStatus.Pending);
+
+        builder.Property(x => x.BalanceAfter)
+            .HasColumnName("balance_after")
+            .IsRequired(false);
+
+        builder.Property(x => x.GameBalanceAfter)
+            .HasColumnName("game_balance_after")
+            .IsRequired(false);
+
+        builder.Property(x => x.Meta)
+            .HasColumnName("meta")
+            .HasColumnType("jsonb")
+            .IsRequired()
+            .HasDefaultValue("{}");
+
+        builder.Property(x => x.Note)
+            .HasColumnName("note")
+            .IsRequired(false);
+
+        builder.Property(rt => rt.CompletedAt)
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
+
+        builder.Property(x => x.ReviewedById)
+            .IsRequired(false);
+
+        builder.Property(rt => rt.DateReviewed)
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
+
+        builder.Property(rt => rt.ExpiredAt)
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
+        
+        builder.Property(rt => rt.RefundTransactionId)
+            .IsRequired(false);
+        
+        builder.HasOne(x => x.CryptoToken)
+            .WithMany()
+            .HasForeignKey(x => x.CryptoTokenId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.User)
+            .WithMany(u => u.Transactions)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(x => x.ReviewedBy)
+            .WithMany()
+            .HasForeignKey(x => x.ReviewedById)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(x => x.TransactionInternal)
+            .WithOne(x => x.Transaction)
+            .HasForeignKey<TransactionInternal>(x => x.Id)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.TransactionExternal)
+            .WithOne(x => x.Transaction)
+            .HasForeignKey<TransactionExternal>(x => x.Id)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(tx => tx.Type);
+        builder.HasIndex(tx => tx.Status);
+    }
+}

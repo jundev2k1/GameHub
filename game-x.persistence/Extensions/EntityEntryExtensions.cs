@@ -1,5 +1,4 @@
-﻿using game_x.domain.Enum;
-using game_x.share.Extensions;
+﻿using game_x.share.Extensions;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Text.Json;
 
@@ -8,9 +7,9 @@ namespace game_x.persistence.Extensions;
 public static class EntityEntryExtensions
 {
     private static readonly string[] _ignoreFields = [
-        nameof(AppUser.ConcurrencyStamp),
-        nameof(AppUser.SecurityStamp),
-        nameof(AppUser.LockoutEnd),
+        nameof(User.ConcurrencyStamp),
+        nameof(User.SecurityStamp),
+        nameof(User.LockoutEnd),
         nameof(BaseEntity<object>.CreatedAt),
         nameof(BaseEntity<object>.UpdatedAt)];
 
@@ -20,7 +19,7 @@ public static class EntityEntryExtensions
             .Where(p => p.Metadata.IsPrimaryKey())
             .OrderBy(p => p.Metadata.Name)
             .ToList();
-        if (!keyProps.Any()) return null;
+        if (keyProps.Count == 0) return null;
 
         var result = keyProps
             .Select(p => $"{p.Metadata.Name}:{p.CurrentValue}")
@@ -28,13 +27,16 @@ public static class EntityEntryExtensions
         return result;
     }
 
-    public static AuditAction ToAuditAction(this EntityEntry entry) => entry.State switch
+    public static AuditAction ToAuditAction(this EntityEntry entry)
     {
-        EntityState.Added => AuditAction.Created,
-        EntityState.Modified => AuditAction.Updated,
-        EntityState.Deleted => AuditAction.Deleted,
-        _ => throw new ArgumentOutOfRangeException(nameof(entry.State), "Unsupported entity state for audit action.")
-    };
+        return entry.State switch
+        {
+            EntityState.Added => AuditAction.Created,
+            EntityState.Modified => AuditAction.Updated,
+            EntityState.Deleted => AuditAction.Deleted,
+            _ => throw new ArgumentOutOfRangeException(nameof(entry.State), "Unsupported entity state for audit action.")
+        };
+    }
 
     public static string? SerializeChanges(this EntityEntry entry)
     {

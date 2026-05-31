@@ -1,0 +1,71 @@
+﻿using game_x.api.Dtos;
+using game_x.application.Common.Files;
+using game_x.application.Contract.Infrastructure.Security;
+using game_x.application.Features.Kyc.Commands._1_SubmitKyc;
+using game_x.application.Features.Kyc.Commands._2_DecisionKyc;
+using game_x.application.Features.Kyc.Commands._3_ResubmitKyc;
+using game_x.application.Features.Kyc.Queries.GetKycProfile;
+using game_x.application.Features.Kyc.Queries.GetKycStatus;
+
+namespace game_x.api.Controllers.Kyc;
+
+[Route("api/kyc")]
+public sealed class KycController(IUserAccessor userAccessor) : BaseApiController
+{
+    [Authorize(Roles = AppRoles.User)]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetKycProfileAsync()
+    {
+        var userId = userAccessor.GetUserId();
+        var query = new GetKycProfileQuery(userId);
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.User)]
+    [HttpGet("me/status")]
+    public async Task<IActionResult> GetKycStatusAsync()
+    {
+        var query = new GetKycStatusQuery();
+        var result = await Mediator.Send(query);
+        return ApiResponseFactory.Ok(result);
+    }
+
+    [Authorize(Roles = AppRoles.User)]
+    [HttpPost("me/submit")]
+    public async Task<IActionResult> SubmitKycAsync([FromForm] SubmitKycRequest formData)
+    {
+        var command = formData.Adapt<SubmitKycCommand>() with
+        {
+            FrontImage = FileUpload.FromFormFile(formData.FrontImage),
+            BackImage = FileUpload.FromFormFile(formData.BackImage),
+        };
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
+    [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Cs}")]
+    [HttpPost("decision")]
+    public async Task<IActionResult> DecideAsync(DecisionKycCommand command)
+    {
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+
+    [Authorize(Roles = AppRoles.User)]
+    [HttpPatch("me/resubmit")]
+    public async Task<IActionResult> ResubmitAsync([FromForm] ReSubmitKycRequest formData)
+    {
+        var command = formData.Adapt<ResubmitKycCommand>() with
+        {
+            FrontImage = formData.FrontImage != null
+                ? FileUpload.FromFormFile(formData.FrontImage)
+                : null,
+            BackImage = formData.BackImage!= null
+                ? FileUpload.FromFormFile(formData.BackImage)
+                : null
+        };
+        await Mediator.Send(command);
+        return ApiResponseFactory.NoContent();
+    }
+}

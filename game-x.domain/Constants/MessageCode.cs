@@ -79,6 +79,17 @@ public static class MessageCode
         /// <summary>A resource with the same value already exists.</summary>
         [EnumMetadata("A resource with the same value already exists.")]
         DuplicateValue = 10023,
+        /// <summary>The provided token is invalid or missing.</summary>
+        [EnumMetadata("The token is invalid or does not exist.")]
+        InvalidOrMissingToken = 10024,
+        /// <summary>The current status of the entity is invalid.</summary>
+        [EnumMetadata("The current status of the entity is invalid.")]
+        InvalidCurrentStatus = 10025,
+        /// <summary>The specified time range overlaps with an existing item.</summary>
+        [EnumMetadata("The selected time period overlaps with an existing item. Please choose a different time range.")]
+        TimeOverlap = 10026,
+        [EnumMetadata("The item cannot be deleted because it is currently being used by other records.")]
+        EntityInUse = 10027,
         #endregion
 
         #region ■ Message group: Success
@@ -115,17 +126,20 @@ public static class MessageCode
         /// <summary>Indicates that the email has been sent successfully. Typically used after triggering a mail-sending operation to an external SMTP or provider.</summary>
         [EnumMetadata("Email sent successfully.")]
         EmailSendSuccess = 10060,
-        /// <summary>Indicates that the image was uploaded successfully.Typically used after uploading avatars, product images, or other media files.</summary>
+        /// <summary>
+        ///     Indicates that the image was uploaded successfully.
+        ///     Typically used after uploading avatars, product images, or other media files.
+        /// </summary>
         [EnumMetadata("Image uploaded successfully.")]
         ImageUploadSuccess = 10061,
-        #endregion
+        #endregion 
     }
 
     public enum User
     {
         #region ■ Message group: Error
         /// <summary>The account has been locked, possibly due to multiple failed login attempts or other security reasons.</summary>
-        [EnumMetadata("The account is locked.")]
+        [EnumMetadata("Your account has been locked. Please try again later.")]
         UserLocked = 10100,
         /// <summary>The account is not allowed to sign in, possibly due to being unverified or other restrictions.</summary>
         [EnumMetadata("This account is not allowed to sign in.")]
@@ -134,7 +148,7 @@ public static class MessageCode
         [EnumMetadata("Two-factor authentication is required.")]
         UserRequiresTwoFactor = 10102,
         /// <summary>Invalid username or password. Typically used for login failures.</summary>
-        [EnumMetadata("Invalid credentials.")]
+        [EnumMetadata("Incorrect email or password.")]
         UserInvalidCredentials = 10103,
         /// <summary>The Email has not been confirmed. Usually used in post-registration verification processes.</summary>
         [EnumMetadata("The email address is not confirmed.")]
@@ -163,72 +177,263 @@ public static class MessageCode
         /// <summary>The phone number is existed.</summary>
         [EnumMetadata("The phone number is already in use.")]
         PhoneAlreadyExists = 10112,
+        /// <summary>The nickname is existed.</summary>
+        [EnumMetadata("The nickname is already in use.")]
+        NicknameAlreadyExists = 10113,
+        /// <summary>Too many failed attempts. The verification process is temporarily locked.</summary>
+        [EnumMetadata("Too many failed attempts. Please try again later.")]
+        VerifyTooManyFailedAttempts = 10114,
+        /// <summary>You must wait before requesting a new verification code.</summary>
+        [EnumMetadata("Please wait before requesting a new verification code.")]
+        VerifyResendCooldown = 10115,
+        /// <summary>The current KYC status does not allow this action.</summary>
+        [EnumMetadata("KYC status is invalid for this action.")]
+        KycInvalidStatus = 10116,
+        /// <summary>Password reset failed. Typically used when the reset token is invalid, expired, or the reset process could not be completed.</summary>
+        [EnumMetadata("Password reset failed.")]
+        UserResetPasswordFailed = 10117,
+        /// <summary>User has not verified KYC.</summary>
+        [EnumMetadata("User has not verified KYC.")]
+        KycInvalid = 10118,
+        /// <summary>Bank account already exists.</summary>
+        [EnumMetadata("Bank account already exists.")]
+        BankAccountAlreadyExists = 10119,
+        /// <summary>Invalid bank account.</summary>
+        [EnumMetadata("Invalid bank account.")]
+        BankAccountInvalid = 10120,
+        /// <summary>Bank account is not verified.</summary>
+        [EnumMetadata("Bank account is not verified.")]
+        BankAccountNotVerified = 10121,
+        /// <summary>Invalid bank account status.</summary>
+        [EnumMetadata("Invalid bank account status.")]
+        BankAccountStatusInvalid = 10122,
+        /// <summary>Invalid bank account status.</summary>
+        [EnumMetadata("User extend not found.")]
+        UserExtendNotFound = 10123,
         #endregion
 
         #region ■ Message group: Success
+        /// <summary>User registration completed successfully. Typically used after the user has registered and any post-registration actions (such as sending verification email) have been triggered.</summary>
+        [EnumMetadata("User registered successfully.")]
+        UserRegisterSuccess = 10150,
         /// <summary>The user's password has been changed successfully. Typically used after completing a password update or reset process.</summary>
         [EnumMetadata("Password changed successfully.")]
-        UserChangePasswordSuccess = 10150
+        UserChangePasswordSuccess = 10151,
+        /// <summary>The user's email has been verified successfully. Typically used after completing an email verify process.</summary>
+        [EnumMetadata("Email verified successfully.")]
+        EmailVerifySuccess = 10152,
+        /// <summary>Password reset completed successfully. Typically used after a user has reset their password via the forgot password flow.</summary>
+        [EnumMetadata("Password reset successfully.")]
+        UserResetPasswordSuccess = 10153,
         #endregion
     }
 
-    public enum Order
-    {
-        #region ■ Message group: Success
-        /// <summary>The order has been created successfully.</summary>
-        [EnumMetadata("Order created successfully.")]
-        OrderCreated = 10250,
-        /// <summary>The order has been updated successfully.</summary>
-        [EnumMetadata("Order updated successfully.")]
-        OrderUpdated = 10251,
-        /// <summary>The order status has been changed successfully.</summary>
-        [EnumMetadata("Order status updated successfully.")]
-        OrderStatusUpdated = 10252, 
-        #endregion
-    }
-
-    public enum Staff
+    public enum Transaction
     {
         #region ■ Message group: Error
-        /// <summary>The session key does not exist.</summary>
-        [EnumMetadata("The session key does not exist.")]
-        SessionKeyNotExist = 10300,
-        /// <summary>The User has already logged in from another counter or session.</summary>
-        [EnumMetadata("You have been logged out because your account was signed in from another counter.")]
-        SessionConflict = 10301,
+        /// <summary>Transaction order not found.</summary>
+        [EnumMetadata("Transaction order not found.")]
+        TradeNotFound = 10200,
+        /// <summary>The current status of the order does not allow this operation.</summary>
+        [EnumMetadata("The current status of the order does not allow this operation.")]
+        InvalidTradeStatus = 10201,
+        /// <summary>The transaction does not belong to the currently logged-in user.</summary>
+        [EnumMetadata("The transaction does not belong to the currently logged-in user.")]
+        TradeOwnershipInvalid = 10202,
+        /// <summary>The order has expired.</summary>
+        [EnumMetadata("The order has expired.")]
+        TradeExpired = 10203,
+        /// <summary>The order has been accepted but is missing a bank account.</summary>
+        [EnumMetadata("The order has been accepted but is missing a bank account.")]
+        TradeMissingBankAccountAfterAccept = 10204,
+        /// <summary>Error occurred while generating the order number.</summary>
+        [EnumMetadata("Error occurred while generating the order number.")]
+        TradeGenerationFailed = 10205,
+        /// <summary>The order has been accepted but is missing a bank account.</summary>
+        [EnumMetadata("Payment proof has not been uploaded.")]
+        TradePaymentProofNotUploaded = 10206,
+        /// <summary>Invalid transaction type.</summary>
+        [EnumMetadata("Invalid transaction type.")]
+        InvalidTradeType = 10207,
+        /// <summary>The order is not linked to an EntryCode.</summary>
+        [EnumMetadata("The order is not linked to an EntryCode.")]
+        TradeMissingEntryCode = 10208,
+        /// <summary>The EntryCode has not been used or has not expired, no revival needed.</summary>
+        [EnumMetadata("The EntryCode has not been used or has not expired, no revival needed.")]
+        EntryCodeNotEligibleForRevive = 10209,
+        /// <summary>Transaction order not found.</summary>
+        [EnumMetadata("Chain transaction not found.")]
+        ChainTransactionNotFound = 10210,
+        /// <summary>The Transaction address is invalid.</summary>
+        [EnumMetadata("Transaction address is invalid.")]
+        InvalidTransactionAddress = 10211,
         #endregion
     }
 
-    public enum BankAccount
+    public enum Accounting
     {
         #region ■ Message group: Error
-        /// <summary>Cannot use the same currency multiple times within a single bank account.</summary>
-        [EnumMetadata("Each currency can only be associated once per bank account.")]
-        DuplicateCurrencyInBankAccount = 10400,
+        /// <summary>Insufficient balance.</summary>
+        [EnumMetadata("Insufficient balance.")]
+        InsufficientBalance = 10300,
+        /// <summary>Insufficient frozen balance.</summary>
+        [EnumMetadata("Insufficient frozen balance.")]
+        InsufficientFrozenBalance = 10301,
+        /// <summary>Bank account does not belong to the currently logged-in user.</summary>
+        [EnumMetadata("Bank account does not belong to the currently logged-in user.")]
+        BankAccountOwnershipInvalid = 10302,
+        /// <summary>No available bank account (e.g., none created or no default account set).</summary>
+        [EnumMetadata("No available bank account (e.g., none created or no default account set).")]
+        NoAvailableBankAccount = 10303,
+        /// <summary>Balance data not found.</summary>
+        [EnumMetadata("Balance data not found.")]
+        BalanceNotFound = 10304,
+        /// <summary>Invalid balance state (e.g., balance becomes negative after deduction).</summary>
+        [EnumMetadata("Invalid balance state (e.g., balance becomes negative after deduction).")]
+        BalanceCorrupted = 10305,
+        /// <summary>Specified wallet does not exist (e.g., no wallet found for the user or merchant).</summary>
+        [EnumMetadata("Specified wallet does not exist (e.g., no wallet found for the user or merchant).")]
+        WalletNotFound = 10306,
+        /// <summary>Failed to withdraw into the provider's wallet.</summary>
+        [EnumMetadata("Failed to withdraw into the provider's wallet.")]
+        WithdrawalToProviderWalletFailed = 10307,
+        /// <summary>The amount must be at least 10 USDT.</summary>
+        [EnumMetadata("Invalid amount.")]
+        InvalidAmount = 10308,
+        /// <summary>Failed to deposit into the provider's wallet.</summary>
+        [EnumMetadata("Failed to deposit into the provider's wallet.")]
+        DepositToProviderWalletFailed = 10309,
+        /// <summary>The platform does not exist.</summary>
+        [EnumMetadata("The platform does not exist.")]
+        PlatformNotExist = 10310,
+        /// <summary>The platform is invalid.</summary>
+        [EnumMetadata("The platform is invalid.")]
+        InvalidPlatform = 10311,
+        #endregion
+    }
+
+    public enum Crypto
+    {
+        #region ■ Message group: Error
+        /// <summary>CryptoToken configuration not found.</summary>
+        [EnumMetadata("CryptoToken configuration not found.")]
+        CryptoTokenNotFound = 10400,
+        /// <summary>CryptoToken configuration not found.</summary>
+        [EnumMetadata("CryptoToken is unsupported.")]
+        CryptoTokenUnsupported = 10401,
         #endregion
     }
     
-    public enum Passport
+    public enum Chatting
     {
         #region ■ Message group: Error
-        /// <summary>The passport number is already in use.</summary>
-        [EnumMetadata("The passport number is already in use.")]
-        PassportNumberAlreadyExists = 10500,
+        /// <summary>CryptoToken configuration not found.</summary>
+        [EnumMetadata("Conversation not found.")]
+        ConversationNotFound = 10500,
+        /// <summary>Conversation was already claimed.</summary>
+        [EnumMetadata("Conversation was already claimed.")]
+        ConversationAlreadyClaimed = 10501,
+        /// <summary>Conversation has not been claimed.</summary>
+        [EnumMetadata("Conversation has not been claimed.")]
+        ConversationNotClaimed = 10502,
+        /// <summary>The conversation was closed.</summary>
+        [EnumMetadata("The conversation was closed.")]
+        ConversationClosed = 10503,
+        /// <summary>CryptoToken configuration not found.</summary>
+        [EnumMetadata("Conversation member not found.")]
+        ConversationMemberNotFound = 10504,
+        /// <summary>Message not found.</summary>
+        [EnumMetadata("Message not found.")]
+        MessageNotFound = 10505,
+        /// <summary>Message not found.</summary>
+        [EnumMetadata("Fail to send the message.")]
+        FailToSendMessage = 10506,
+        /// <summary>The message is already read.</summary>
+        [EnumMetadata("The message is already read.")]
+        MessageAlreadyRead = 10507,
+        /// <summary>Fail to target myself.</summary>
+        [EnumMetadata("Fail to target myself.")]
+        FailToTargetMyself = 10508,
+        /// <summary>The request is pending acceptance.</summary>
+        [EnumMetadata("The request is pending acceptance.")]
+        WaitToAccept = 10509,
+        /// <summary>Already friends.</summary>
+        [EnumMetadata("Already friends.")]
+        AlreadyFriend = 10510,
+        /// <summary>Social link not found.</summary>
+        [EnumMetadata("Social link not found.")]
+        SocialLinkNotFound = 10511,
+        /// <summary>Request already responded.</summary>
+        [EnumMetadata("Request already responded.")]
+        FriendRequestAlreadyRespond = 10512,
+        /// <summary>Not the addressee.</summary>
+        [EnumMetadata("Not the addressee.")]
+        NotAddressee = 10513,
+        /// <summary>The user is still not a friend.</summary>
+        [EnumMetadata("The user is still not a friend.")]
+        StillNotFriend = 10514,
+        /// <summary>The user is still not a friend.</summary>
+        [EnumMetadata("Social link is blocked.")]
+        SocialLinkBlocked = 10515,
+        /// <summary>The user is not a member.</summary>
+        [EnumMetadata("The user is not a member.")]
+        IsNotMember = 10516,
         #endregion
     }
     
-    public enum Counter
+    public enum Reward
     {
         #region ■ Message group: Error
-        /// <summary>The counter is invalid, possibly due to incomplete or malformed data.</summary>
-        [EnumMetadata("The counter is invalid.")]
-        CounterInvalid = 10600,
-        /// <summary>The counter is invalid, possibly due to incomplete or malformed data.</summary>
-        [EnumMetadata("The counter not found.")]
-        CounterNotFound = 10601,
-        /// <summary>The counter is currently active and being used by another staff member.</summary>
-        [EnumMetadata("This counter is currently in use by another staff member.")]
-        CounterInUse = 10602,
+        [EnumMetadata("Mission not found.")]
+        MissionNotFound = 10600,
+        [EnumMetadata("Code is already existed.")]
+        CodeIsAlreadyExisted = 10601,
+        [EnumMetadata("Catalog item not found.")]
+        CatalogNotFound = 10602,
+        [EnumMetadata("Reward Pool not found.")]
+        RewardPoolNotFound = 10603,
+        [EnumMetadata("Reward pool is inactive.")]
+        RewardPoolInactive = 10604,
+        [EnumMetadata("Reward Pool Item not found.")]
+        RewardPoolItemNotFound = 10605,
+        [EnumMetadata("Reward Pool Item not found.")]
+        RewardPoolItemInactive = 10606,
+        [EnumMetadata("Reward Definition not found.")]
+        RewardDefinitionNotFound = 10607,
+        [EnumMetadata("Catalog Item Type is required in the Reward Pool.")]
+        ItemRequiredInPool = 10608,
+        [EnumMetadata("Item is insufficient.")]
+        ItemInsufficient = 10609,
+        [EnumMetadata("Catalog Item not found.")]
+        CatalogItemInactive = 10610,
+        [EnumMetadata("Reward Definition not found.")]
+        RewardDefinitionInactive = 10611,
+        [EnumMetadata("Reward Definition not found.")]
+        MissionInactive = 10612,
+        [EnumMetadata("User Event not found.")]
+        UserEventNotFound = 10613,
+        [EnumMetadata("Reward Pool Item is invalid.")]
+        RewardPoolItemInvalid = 10614,
+        [EnumMetadata("Mission Reward not found.")]
+        MissionRewardNotFound = 10615,
+        [EnumMetadata("Mission Reward is invalid.")]
+        MissionRewardInvalid = 10616,
+        [EnumMetadata("Mission claim not found.")]
+        MissionClaimNotFound = 10617,
+        [EnumMetadata("Mission claim is invalid.")]
+        MissionClaimInvalid = 10618,
+        [EnumMetadata("Mission claim unavailable.")]
+        MissionClaimUnavailable = 10618,
+        [EnumMetadata("Unsupported reward definition type.")]
+        RewardDefinitionUnsupportedType = 10619,
+        [EnumMetadata("User mission not found.")]
+        UserMissionNotFound = 10620,
+        [EnumMetadata("Reward definition amount is invalid.")]
+        RewardDefinitionAmountInvalid = 10621,
+        [EnumMetadata("Execute already in progress.")]
+        ExecuteInProcess = 10622,
+        [EnumMetadata("Mission type is invalid.")]
+        MissionTypeInvalid = 10623,
         #endregion
     }
 }

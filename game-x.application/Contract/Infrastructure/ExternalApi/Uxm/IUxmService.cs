@@ -1,23 +1,20 @@
-﻿using game_x.share.ExternalApi.Uxm.Dtos;
+﻿using game_x.share.ExternalApi.Base;
+using game_x.share.ExternalApi.Uxm.Dtos.ApiRequests.Deposit;
+using game_x.share.ExternalApi.Uxm.Dtos.ApiRequests.Withdrawal;
 
 namespace game_x.application.Contract.Infrastructure.ExternalApi.Uxm;
 
 public interface IUxmService
 {
-    Task<SecureResponse<CreateOrderBuyResponseData>> CreateProxyBuyOrderAsync(
-        SecureRequest<CreateOrderBuyRequestData> data);
+    Task<UxmDepositResponse> DepositAsync(
+        decimal amount,
+        string orderNumber,
+        string userId,
+        string remark);
 
-    Task<SecureResponse<CreateOrderSellResponseData>> CreateProxySellOrderAsync(
-        SecureRequest<CreateOrderSellRequestData> data);
-
-    Task<CreateBuyOrderV2Response> CreateProxyBuyOrderV2Async(CreateBuyOrderV2Request data);
-    
-    Task<SecureResponse<CreateSellOrderV2Response>> CreateProxySellOrderV2Async(
-        SecureRequest<CreateSellOrderV2Request> data);
-    
-    Task<SecureResponse<UxmOrderDetailInfoResponse>> GetOrderDetailInfoAsync(
-        SecureRequest<GetUxmOrderDetailInfoRequest> data);
-    
-    Task<SecureResponse<EstimateQuoteResponse>> GetEstimateQuoteAsync(
-        SecureRequest<EstimateQuoteRequest> data);
+    Task<UxmWithdrawalResponse> WithdrawalAsync(
+        decimal amount,
+        string orderNumber,
+        string to,
+        string? remark);
 }

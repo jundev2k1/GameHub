@@ -1,0 +1,254 @@
+﻿using game_x.application.Contract.Infrastructure.Caching;
+using game_x.application.Contract.Infrastructure.SignalR.Dtos.Notification;
+using game_x.application.Contract.Infrastructure.SignalR.Services;
+using game_x.application.Contract.Persistence.Repo;
+using game_x.application.Events.Account.OnUserBalanceUpdated;
+using game_x.application.Features.LiveStreams.Streaming.Dtos;
+using game_x.application.Utils;
+using System.Text.Json;
+
+namespace game_x.application.Events.LiveStream.OnLiveStreamDonated;
+
+public sealed class OnLiveStreamDonatedHandler(
+    IUnitOfWork unitOfWork,
+    IUserRepo userRepo,
+    IUserBalanceRepo userBalanceRepo,
+    ITalentWalletRepo talentWalletRepo,
+    ISystemWalletRepo systemWalletRepo,
+    ITransactionRepo transactionRepo,
+    INotificationRepo notificationRepo,
+    ILiveStreamChatRepo liveStreamChatRepo,
+    ILiveStreamDonationRepo liveStreamDonationRepo,
+    ILiveStreamManagerCacheService liveStreamManager,
+    IClientHubService clientHub,
+    ILiveStreamHubService liveStreamHub,
+    IAppSettingCacheService appSettingCache,
+    IFileManagerCacheService fileManagerCache,
+    IApplicationEventDispatcher eventDispatcher) : IApplicationEventHandler<OnLiveStreamDonatedEvent>
+{
+    public async Task Handle(OnLiveStreamDonatedEvent @event, CancellationToken ct = default)
+    {
+        var donorInfo = await userRepo.GetUserByIdAsync(@event.UserId, ct);
+
+        await unitOfWork.WithTransactionAsync(async () =>
+        {
+            await CreateTransactionAsync(@event.Amount, @event.UserId, feeAmount: 0, @event.CryptoId, ct);
+            await CreateDonationAsync(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
+            await CreateStreamMessage(@event.StreamInfo, @event.Amount, donorInfo, @event.Message, @event.Gift, ct);
+            await CreateNotificationForDonorAsync(@event.UserId, this.StreamDonation!, ct);
+            await CreateNotificationForStreamerAsync(@event.StreamInfo.AssignedTo!.Id, this.StreamDonation!, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+
+            // Decrease user balance
+            await userBalanceRepo.UpdateAsync(@event.UserBalanceId, ub =>
+            {
+                ub.AdjustAmount(@event.Amount, false);
+            }, ct);
+
+            // Increase talent balance
+            decimal commissionRate = appSettingCache.TalentCommissionRate;
+            decimal talentAmount = (@event.Amount / 100) * commissionRate;
+            await talentWalletRepo.UpdateAsync(@event.StreamInfo.AssignedTo!.Id, talentWallet =>
+            {
+                var balanceAfter = talentWallet.Balance + talentAmount;
+                talentWallet.AdjustBalance(balanceAfter);
+
+                var tx = TalentWalletTransaction.Create(
+                    @event.StreamInfo.AssignedTo!.Id,
+                    TalentTransactionType.Commission,
+                    talentAmount,
+                    balanceAfter,
+                    this.StreamDonation!.Id);
+                talentWallet.AddTransaction(tx);
+            }, ct);
+
+            // Increase system balance
+            decimal systemAmount = (@event.Amount / 100) * (100 - commissionRate);
+            await systemWalletRepo.UpdateAsync(SystemWalletType.LiveStreamDonation, wallet =>
+            {
+                var newBalance = wallet.Balance + systemAmount;
+                wallet.AdjustBalance(newBalance);
+
+                var tx = SystemWalletTransaction.Create(
+                    wallet.Id,
+                    systemAmount,
+                    newBalance,
+                    this.StreamDonation!.Id);
+                wallet.AddTransaction(tx);
+            }, ct);
+        }, ct);
+
+        // Notify donor
+        if (this.DonorNotification != null)
+            await clientHub.SendNotificationToMemberAsync(@event.UserId, this.DonorNotification);
+
+        // Notify talent
+        if (this.TalentNotification != null)
+            await clientHub.SendNotificationToMemberAsync(@event.StreamInfo.AssignedTo!.Id, this.TalentNotification);
+
+        // Notify stream
+        if (this.StreamDonation != null)
+        {
+            liveStreamManager.AddDonationToStream(@event.StreamInfo.StreamKey, this.StreamDonation);
+            await liveStreamHub.NotifyDonationCompleted(@event.StreamInfo.StreamKey, this.StreamDonation);
+        }
+
+        // Notify chat message for stream
+        if (this.ChatMessage != null)
+        {
+            liveStreamManager.AddMessageToStream(@event.StreamInfo.StreamKey, this.ChatMessage);
+            await liveStreamHub.SendChatMessage(@event.StreamInfo.StreamKey, this.ChatMessage);
+        }
+
+        // Refresh balance for talent and donor
+        if (@event.StreamInfo.AssignedTo!.Id != @event.UserId)
+        {
+            var talentBalanceChangeEvent = new OnUserBalanceUpdatedEvent(@event.StreamInfo.AssignedTo.Id);
+            await eventDispatcher.Publish(talentBalanceChangeEvent, ct);
+            var donorBalanceChangeEvent = new OnUserBalanceUpdatedEvent(@event.UserId);
+            await eventDispatcher.Publish(donorBalanceChangeEvent, ct);
+        }
+    }
+
+    private async Task CreateTransactionAsync(
+        decimal amount,
+        string userId,
+        decimal feeAmount,
+        int tokenId,
+        CancellationToken ct = default)
+    {
+        var transaction = Transaction.Create(
+            type: TransactionType.TransferSent,
+            userId: userId,
+            amount: amount,
+            fee: feeAmount,
+            cryptoTokenId: tokenId,
+            note: "Livestream donations.");
+
+        var orderNumber = OrderNoGenerator.Otc();
+        var lastedBalanceAfter = await transactionRepo.GetLatestBalanceAfterAsync(transaction.UserId, ct);
+        var transactionInternal = TransactionInternal.Create(
+            orderNumber: orderNumber,
+            fromAddress: string.Empty,
+            toAddress: string.Empty,
+            sourceType: TransactionSourceType.Donate);
+        transaction.AddTxInternal(transactionInternal);
+
+        var balanceAfter = lastedBalanceAfter - amount;
+        transaction.Confirm(amount, balanceAfter);
+
+        await transactionRepo.AddAsync(transaction, ct);
+    }
+
+    private async Task CreateDonationAsync(
+        LiveStreamStatusDto streamInfo,
+        decimal amount,
+        User donor,
+        string message = "",
+        LiveStreamGift? gift = null,
+        CancellationToken ct = default)
+    {
+        var donation = LiveStreamDonation.Create(
+            streamInfo.LocalId,
+            donor.Id,
+            message,
+            amount);
+
+        // Map animation image if set
+        var donationDto = donation.Adapt<LiveStreamDonationDto>();
+        if (gift != null)
+        {
+            donation.SetGift(gift.Id);
+            donationDto.AnimationUrl = await fileManagerCache.GetFileUrl(gift.Animation, ct);
+            donationDto.AnimationDuration = gift.AnimationDuration;
+        }
+
+        await liveStreamDonationRepo.CreateAsync(donation, ct);
+        this.StreamDonation = donationDto;
+        this.StreamDonation.DonorName = donor.Nickname;
+        this.StreamDonation.LivestreamScheduleId = streamInfo.Id;
+        this.StreamDonation.GiftId = gift?.PublicId;
+    }
+
+    private async Task CreateStreamMessage(
+        LiveStreamStatusDto streamInfo,
+        decimal amount,
+        User donor,
+        string message,
+        LiveStreamGift? gift = null,
+        CancellationToken ct = default)
+    {
+        string? giftSnapshot = null;
+        if (gift != null)
+        {
+            var giftInfo = new Dictionary<string, string>()
+            {
+                { "giftName", gift.Name }
+            };
+            giftSnapshot = JsonSerializer.Serialize(giftInfo);
+        }
+
+        var chatMessage = LiveStreamChatMessage.Create(
+            Guid.CreateVersion7(),
+            streamInfo.LocalId,
+            donor.Id,
+            message.Trim(),
+            LiveStreamChatMessageType.Donation,
+            amount,
+            giftSnapshot);
+        await liveStreamChatRepo.CreateAsync(chatMessage, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+
+        this.ChatMessage = new LiveStreamChatMessageDto()
+        {
+            Id = chatMessage.PublicId,
+            StreamId = streamInfo.Id,
+            Nickname = donor.Nickname,
+            DonationAmount = amount,
+            IsHost = donor.Id == streamInfo.AssignedTo?.Id,
+            Message = chatMessage.Message,
+            MessageType = chatMessage.MessageType,
+            SenderId = chatMessage.SenderId,
+            DeleteReason = chatMessage.DeleteReason,
+            IsDeleted = chatMessage.IsDeleted,
+            SentAt = chatMessage.SentAt,
+            Metadata = giftSnapshot
+        };
+    }
+
+    private async Task CreateNotificationForDonorAsync(
+        string userId,
+        LiveStreamDonationDto donationDto,
+        CancellationToken ct = default)
+    {
+        var notification = Notification.Create(
+            NotificationMessageKey.LiveStream_DonationSuccessful,
+            userId,
+            NotificationType.LiveStream,
+            NotificationSeverity.Info,
+            JsonSerializer.Serialize(donationDto));
+        await notificationRepo.AddNotificationAsync(notification, ct);
+        this.DonorNotification = notification.Adapt<NotificationDto>();
+    }
+
+    private async Task CreateNotificationForStreamerAsync(
+        string streamerId,
+        LiveStreamDonationDto donationDto,
+        CancellationToken ct = default)
+    {
+        var notification = Notification.Create(
+            NotificationMessageKey.LiveStream_DonationReceived,
+            streamerId,
+            NotificationType.LiveStream,
+            NotificationSeverity.Info,
+            JsonSerializer.Serialize(donationDto));
+        await notificationRepo.AddNotificationAsync(notification, ct);
+
+        this.TalentNotification = notification.Adapt<NotificationDto>();
+    }
+
+    private NotificationDto? DonorNotification { get; set; }
+    private NotificationDto? TalentNotification { get; set; }
+    private LiveStreamDonationDto? StreamDonation { get; set; }
+    private LiveStreamChatMessageDto? ChatMessage { get; set; }
+}

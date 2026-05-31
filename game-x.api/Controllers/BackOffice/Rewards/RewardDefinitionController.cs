@@ -1,0 +1,39 @@
+﻿using game_x.application.Contract.Infrastructure.Caching.Rewards;
+using game_x.application.Features.Rewards.Commands.RewardDefinitions.Create;
+using game_x.application.Features.Rewards.Commands.RewardDefinitions.Remove;
+using game_x.application.Features.Rewards.Commands.RewardDefinitions.Update;
+
+namespace game_x.api.Controllers.BackOffice.Rewards;
+
+[Authorize(Roles = AppRoles.Admin)]
+[Route("/api/back-office/reward-definitions")]
+public sealed class RewardDefinitionController(IRewardDefinitionCacheService service) : BaseApiController
+{
+    [HttpGet]
+    public async Task<IActionResult> GetListAsync(CancellationToken ct = default)
+    {
+        var result = await service.GetAll(ct);
+        return ApiResponseFactory.Ok(result ?? []);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateAsync(CreateRewardDefinitionCommand cmd, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(cmd, ct);
+        return ApiResponseFactory.Created(result);
+    }
+    
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> RemoveAsync(Guid id, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(new RemoveRewardDefinitionCommand(id), ct);
+        return ApiResponseFactory.Created(result);
+    }
+    
+    [HttpPatch("{id:guid}")]
+    public async Task<IActionResult> UpdateAsync(Guid id, UpdateRewardDefinitionCommand cmd, CancellationToken ct = default)
+    {
+        var result = await Mediator.Send(cmd with {Id = id}, ct);
+        return ApiResponseFactory.Created(result);
+    }
+}

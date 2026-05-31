@@ -1,0 +1,26 @@
+namespace game_x.application.Contract.Infrastructure.SignalR.Dtos.Chat;
+    
+public sealed record ConversationSignalDto(
+    Guid ConversationId,
+    string? GuestId,
+    ConversationStatus Status,
+    ConversationType Type,
+    RoleInConversation? LastSenderRole = null,
+    string? CustomerId = null,
+    string? CustomerDisplayName = null,
+    string? CustomerAvatarUrl = null,
+    string? LastUserId = null,
+    string? LastUserName = null,
+    string? LastUserAvatarUrl = null,
+    DateTime? LastResolvedAt = null,
+    int? LastResolvedMessageId = null,
+    DateTime? LastGuestReadAt = null,
+    int? LastGuestReadMessageId = null,
+    DateTime? LastUserReadAt = null,
+    int? LastUserReadMessageId = null,
+    DateTime? LastMessageAt = null,
+    Guid? LastMessageId = null,
+    string? LastMessageText = null,
+    MessageKind? LastMessageKind = null,
+    int? BackOfficeUnreadCount = null,
+    int? ClientUnreadCount = null);
